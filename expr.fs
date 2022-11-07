@@ -632,7 +632,7 @@ namespace Aqualis
                     //両者の中身を評価
                     let (_,u1,c1) = v1.code.str
                     let (_,u2,c2) = v2.code.str
-                    ///記号で減算
+                    //記号で減算
                     Code(t,u1+"/"+u2,c2@c1)
                   |Idx1(t,v,i1) ->
                     //両者の中身を評価
@@ -800,7 +800,7 @@ namespace Aqualis
                     //両者の中身を評価
                     let (_,u1,c1) = v1.code.str
                     let (_,u2,c2) = v2.code.str
-                    ///記号で減算
+                    //記号で減算
                     Code(t,u1+"/"+u2,c2@c1)
                   |Idx1(t,v,i1) ->
                     //両者の中身を評価
@@ -1071,7 +1071,7 @@ namespace Aqualis
                     //両者の中身を評価
                     let (_,u1,c1) = v1.code.str
                     let (_,u2,c2) = v2.code.str
-                    ///記号で除算
+                    //記号で除算
                     Code(t,u1+"/"+u2,c2@c1)
                   |Pow(t,v1,v2) ->
                     //引数を評価
@@ -1218,7 +1218,7 @@ namespace Aqualis
                     //両者の中身を評価
                     let (_,u1,c1) = v1.code.str
                     let (_,u2,c2) = v2.code.str
-                    ///記号で減算
+                    //記号で減算
                     Code(t,"<mstyle displaystyle=\"true\"><mfrac><mrow>"+u1+"</mrow><mrow>"+u2+"</mrow></mfrac></mstyle>",c2@c1)
                   |Idx1(t,v,i1) ->
                     //両者の中身を評価

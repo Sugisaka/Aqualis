@@ -18,6 +18,8 @@
     <Compile Include="num0_cpx.fs" />
     <Compile Include="br.fs" />
     <Compile Include="iter1.fs" />
+    <Compile Include="openmp.fs" />
+    <Compile Include="openacc.fs" />
     <Compile Include="print1.fs" />
     <Compile Include="array1.fs" />
     <Compile Include="array2.fs" />

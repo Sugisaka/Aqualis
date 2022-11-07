@@ -385,6 +385,7 @@ namespace Aqualis
                     q.clear()
                     //メインコード生成
                     code()
+                    q.pclose()
                     q.cclose()
                     q.declareall()
                     q.vclose()
@@ -402,7 +403,7 @@ namespace Aqualis
                     List.iter (fun (s:string) -> q.hwrite("use "+s+"\n")) <| q.modl
                     q.hwrite("implicit none"+"\n")
                     //ヘッダファイルのインクルード
-                    List.iter (fun (s:string) -> q.hwrite("include "+s+"\n")) <| q.header
+                    List.iter (fun (s:string) -> q.hwrite("include '"+s+"'\n")) <| q.header
                     //構造体の定義
                     str.Def_Structure()
                     //グローバル変数の定義
@@ -419,19 +420,29 @@ namespace Aqualis
                     q.hclose()
                     //beeファイル削除
                     File.Delete(dir+"\\"+projectname+"_code.bee")
+                    File.Delete(dir+"\\"+projectname+"_par.bee")
                     File.Delete(dir+"\\"+projectname+"_var"+".bee")
                     if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
                     
                     //コンパイル・実行用スクリプト生成
                     let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+".sh")
-                    wr.Write("#!/bin/bash"+"\n")
-                    wr.Write("\n")
-                    wr.Write("FC='/usr/bin/gfortran'"+"\n")
-                    wr.Write("\n")
-                    let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
-                    let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
-                    wr.Write("$FC"+source+" "+projectname+".f90"+option+" -o "+projectname+".exe"+"\n")
-                    wr.Write("./"+projectname+".exe"+"\n")
+                    if p.param.isOaccUsed then
+                        wr.Write("#!/bin/bash"+"\n")
+                        wr.Write("\n")
+                        let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
+                        let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
+                        wr.Write("pgfortran -acc -Minfo=accel"+source+" "+projectname+".f90"+option+" -o "+projectname+".exe"+"\n")
+                        wr.Write("./"+projectname+".exe"+"\n")
+                        wr.Close()
+                    else
+                        wr.Write("#!/bin/bash"+"\n")
+                        wr.Write("\n")
+                        wr.Write("FC='/usr/bin/gfortran'"+"\n")
+                        wr.Write("\n")
+                        let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
+                        let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
+                        wr.Write("$FC"+source+" "+projectname+".f90"+option+" -o "+projectname+".exe"+"\n")
+                        wr.Write("./"+projectname+".exe"+"\n")
                     wr.Close()
                     //必要となる他のソースファイルをコピー
                     q.slist |> List.iter (fun s -> 
@@ -453,6 +464,7 @@ namespace Aqualis
                     //メインコード生成
                     p.param.option_("-lm")
                     code()
+                    q.pclose()
                     q.cclose()
                     q.declareall()
                     q.vclose()
@@ -470,7 +482,7 @@ namespace Aqualis
                     q.hwrite("#include <math.h>"+"\n")
                     q.hwrite("#include <f2c.h>"+"\n")
                     //ヘッダファイルのインクルード
-                    List.iter (fun (s:string) -> q.hwrite("#include "+s+"\n")) <| q.header
+                    List.iter (fun (s:string) -> q.hwrite("#include \""+s+"\"\n")) <| q.header
                     //構造体の定義
                     str.Def_Structure()
                     //extern指定子
@@ -492,12 +504,13 @@ namespace Aqualis
                     q.hclose()
                     //beeファイル削除
                     File.Delete(dir+"\\"+projectname+"_C89"+"_code.bee")
+                    File.Delete(dir+"\\"+projectname+"_C89"+"_par.bee")
                     File.Delete(dir+"\\"+projectname+"_C89"+"_var"+".bee")
                     if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
                     //コンパイル・実行用スクリプト生成
                     //q.source_("f2c.h")
                     let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+"_C89.sh")
-                    wr.Write("#!bin/sh"+"\n")
+                    wr.Write("#!/bin/sh"+"\n")
                     wr.Write("\n")
                     let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
                     let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
@@ -524,6 +537,7 @@ namespace Aqualis
                     //メインコード生成
                     p.param.option_("-lm")
                     code()
+                    q.pclose()
                     q.cclose()
                     q.declareall()
                     q.vclose()
@@ -541,7 +555,7 @@ namespace Aqualis
                     q.hwrite("#include <complex.h>"+"\n")
                     q.hwrite("#include <math.h>"+"\n")
                     //ヘッダファイルのインクルード
-                    List.iter (fun (s:string) -> q.hwrite("#include "+s+"\n")) <| q.header
+                    List.iter (fun (s:string) -> q.hwrite("#include \""+s+"\"\n")) <| q.header
                     q.hwrite("#undef I"+"\n")
                     q.hwrite("#define uj _Complex_I"+"\n")
                     //構造体の定義
@@ -570,12 +584,21 @@ namespace Aqualis
                     
                     //コンパイル・実行用スクリプト生成
                     let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+"_C99.sh")
-                    wr.Write("#!bin/sh"+"\n")
-                    wr.Write("\n")
-                    let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
-                    let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
-                    wr.Write("gcc"+source+" "+projectname+"_C99.c"+option+" -o "+projectname+".exe"+"\n")
-                    wr.Write("./"+projectname+".exe"+"\n")
+                    if p.param.isOaccUsed then
+                        wr.Write("#!/bin/sh"+"\n")
+                        wr.Write("\n")
+                        let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
+                        let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
+                        wr.Write("gcc"+" -fopenmp "+source+" "+projectname+"_C99.c"+option+" -o "+projectname+".exe"+"\n")
+                        wr.Write("./"+projectname+".exe"+"\n")
+                        wr.Close()
+                    else
+                        wr.Write("#!/bin/sh"+"\n")
+                        wr.Write("\n")
+                        let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
+                        let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
+                        wr.Write("gcc"+source+" "+projectname+"_C99.c"+option+" -o "+projectname+".exe"+"\n")
+                        wr.Write("./"+projectname+".exe"+"\n")
                     wr.Close()
                     //必要となる他のソースファイルをコピー
                     q.slist |> List.iter (fun s -> 
@@ -596,6 +619,7 @@ namespace Aqualis
                     q.clear()
                     //メインコード生成
                     code()
+                    q.pclose()
                     q.cclose()
                     q.declareall()
                     q.vclose()
@@ -635,6 +659,7 @@ namespace Aqualis
                     q.hclose()
                     //beeファイル削除
                     File.Delete(dir+"\\"+projectname+"_code.bee")
+                    File.Delete(dir+"\\"+projectname+"_par.bee")
                     File.Delete(dir+"\\"+projectname+"_var"+".bee")
                     if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
                     //古いソースファイルを削除
@@ -650,6 +675,7 @@ namespace Aqualis
                     q.clear()
                     //メインコード生成
                     code()
+                    q.pclose()
                     q.cclose()
                     q.declareall()
                     q.vclose()
@@ -814,6 +840,7 @@ namespace Aqualis
                     q.hclose()
                     //beeファイル削除
                     File.Delete(dir+"\\"+projectname+"_code.bee")
+                    File.Delete(dir+"\\"+projectname+"_par.bee")
                     File.Delete(dir+"\\"+projectname+"_var"+".bee")
                     if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
                     //古いソースファイルを削除

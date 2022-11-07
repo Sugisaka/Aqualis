@@ -81,6 +81,12 @@ namespace Aqualis
         let mutable funlist_: string list = []
         ///<summary>変数リスト</summary>
         let mutable vlist_:(Etype*VarType*string*string) list = []
+        ///<summary>プライベート変数リスト</summary>
+        let mutable pvlist_:string list = []
+        ///<summary>ホストからGPUへ転送する変数リスト</summary>
+        let mutable copy_in_vlist_:string list = []
+        ///<summary>GPUからホストへ転送する変数リスト</summary>
+        let mutable copy_out_vlist_:string list = []
         ///<summary>この関数の引数リスト： 関数呼び出しに与えられた変数名,(関数内での変数情報)</summary>
         let mutable arglist_ : (string*(Etype*VarType*string*string*string)) list = []
         ///<summary>エラーid</summary>
@@ -95,12 +101,22 @@ namespace Aqualis
         let vfile = outputdir+"\\"+proj+"_var.bee"
         ///<summary>構造体・関数宣言書き込み先一時ファイル</summary>
         let hfile = outputdir+"\\"+proj+".bee"
+        ///<summary>並列ループ処理書き込み先一時ファイル</summary>
+        let pfile = outputdir+"\\"+proj+"_par.bee"
         ///<summary>コード書き込み先一時ファイルストリーム</summary>
         let mutable cwriter:StreamWriter = new StreamWriter(cfile,false)
         ///<summary>変数宣言書き込み先一時ファイルストリーム</summary>
         let mutable vwriter:StreamWriter = new StreamWriter(vfile,false)
         ///<summary>構造体・関数宣言書き込み先一時ファイルストリーム</summary>
         let mutable hwriter:StreamWriter = new StreamWriter(hfile,false)
+        ///<summary>並列ループ処理書き込み先一時ファイルストリーム</summary>
+        let mutable pwriter:StreamWriter = new StreamWriter(pfile,false)
+        ///<summary>trueのとき並列処理を書き込む</summary>
+        let mutable par_mode = false
+        ///<summary>trueのときOpenMPが使用中</summary>
+        let mutable is_omp_used = false
+        ///<summary>trueのときOpenACCが使用中</summary>
+        let mutable is_oacc_used = false
         
         ///<summary>ソースファイル出力先ディレクトリ</summary>
         member __.dir with get() = outputdir
@@ -142,6 +158,28 @@ namespace Aqualis
         ///<summary>変数リスト</summary>
         member __.vlist with get() = vlist_
         
+        ///<summary>プライベート変数リスト</summary>
+        member __.pvlist with get() = pvlist_
+
+        ///<summary>ホストからGPUに転送する変数リスト</summary>
+        member __.copy_in_vlist with get() = copy_in_vlist_
+
+        ///<summary>GPUからホストに転送する変数リスト</summary>
+        member __.copy_out_vlist with get() = copy_out_vlist_
+
+        ///<summary>並列処理書き込みモード</summary>
+        member __.parmode with get() = par_mode
+
+        ///<summary>trueのときOpenMPが使用中</summary>
+        member __.isOmpUsed
+            with get () = is_omp_used
+            and set (value) = is_omp_used <- value
+            
+        ///<summary>trueのときOpenACCが使用中</summary>
+        member __.isOaccUsed
+            with get () = is_oacc_used
+            and set (value) = is_oacc_used <- value
+            
         ///<summary>整数型を文字列に変換するときの桁数</summary>
         member __.int_string_format with get() = int_string_format_
         
@@ -184,6 +222,9 @@ namespace Aqualis
         ///<summary>変数を追加</summary>
         member __.vlist_add(x) = vlist_ <- vlist_@[x]
         
+        ///<summary>変数を追加</summary>
+        member __.pvlist_add(x) = pvlist_ <- pvlist_@[x]
+
         ///<summary>ヘッダファイルのインクルード</summary>
         member __.include_(s) = 
             match List.exists (fun hd -> hd=s) header_ with
@@ -256,6 +297,7 @@ namespace Aqualis
             d3_cache_var.clear()
             z3_cache_var.clear()
             vlist_ <- []
+            pvlist_ <- []
             header_ <- []
             modl_ <- []
             extn_ <- []
@@ -466,6 +508,61 @@ namespace Aqualis
         ///<summary>構造体・関数宣言の一時ファイルを閉じる</summary>
         member __.hclose() = 
             hwriter.Close()
+
+        ///<summary>並列処理の一時ファイルに書き込み</summary>
+        member __.pwrite(code:string) =
+            pwriter.Write(code)
+
+        ///<summary>並列処理の一時ファイルを開く</summary>
+        member __.popen() =
+            pwriter <- new StreamWriter(pfile,true)
+
+        ///<summary>並列処理の一時ファイルを閉じる</summary>
+        member __.pclose() = 
+            pwriter.Close()
+
+        ///<summary>並列処理の一時ファイルの内容</summary>
+        member __.readpartext() = File.ReadAllText(pfile)
+
+        ///<summary>コードの一時ファイルの並列部分を消去</summary>
+        member this.rewritecfile () =
+            let list = File.ReadAllText(cfile).Split('\n') //コードを改行文字で分割
+            File.Delete(cfile)
+            this.copen()
+            //"parallel block"を発見するまでcstrにコードを追加
+            let rec findparallelblock (i:int) =
+                if i<list.Length then
+                    match list[i] with
+                      |"parallel block" ->
+                        ()
+                      |_ ->
+                        this.cwrite(list[i]+"\n")
+                        findparallelblock (i+1)
+            findparallelblock 0
+
+        ///<summary>並列処理のコードを一時ファイルに記述</summary>
+        member this.writepcode() =
+            File.Delete(pfile)
+            this.popen()
+            let list = File.ReadAllText(cfile).Split('\n') //コードを改行文字で分割
+            //"end parallel block"が出るまで文字列を一時ファイルに書き込む
+            let rec findendblock (j:int) =
+                if j<list.Length then
+                    match list[j] with
+                      |"end parallel block" ->
+                        ()
+                      |_ ->
+                        this.pwrite(list[j]+"\n")
+                        findendblock (j+1)
+            //"parallel block"を発見したらfindendblockを実行
+            let rec findstblock (i:int) =
+                if i<list.Length then
+                    match list[i] with
+                      |"parallel block" ->
+                        findendblock (i+1)
+                      |_ ->
+                        findstblock (i+1)
+            findstblock 0
             
         ///<summary>変数のリストに変数情報を登録</summary>
         member this.vreg(typ,vtp,name,p) =
@@ -569,6 +666,29 @@ namespace Aqualis
                 //  |_ -> ()
               |NL ->
                 ()
+                
+        ///<summary>プライベート変数リストに変数名を登録</summary>
+        member _.pvreg name = pvlist_<-pvlist_@[name]
+
+        ///<summary>プライベート変数リストを初期化</summary>
+        member _.clearpv() = pvlist_<-[]
+
+        ///<summary>並列処理書き込みモードの切り替え</summary>
+        member _.switch_parmode (tf:bool) = par_mode<-tf
+
+        ///<summary>GPUに転送する変数のリストに変数名を追加</summary>
+        member _.civreg name = copy_in_vlist_<-copy_in_vlist_@[name]
+
+        ///<summary>GPUに転送する変数リストから変数を削除</summary>
+        member _.rmciv (var:string) =
+            copy_in_vlist_<-List.filter(fun s -> s<>var) copy_in_vlist_
+
+        ///<summary>ホストに転送する変数のリストに変数名を追加</summary>
+        member _.covreg name = copy_out_vlist_<-copy_out_vlist_@[name]
+
+        ///<summary>ホストに転送する変数リストから変数を削除</summary>
+        member _.rmcov (var:string) =
+            copy_out_vlist_<-List.filter(fun s -> s<>var) copy_out_vlist_
                 
         ///<summary>ファイルポインタcache変数を生成し、code内の処理を実行</summary>
         member this.fcache code = 

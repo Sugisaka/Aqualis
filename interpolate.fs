@@ -130,17 +130,17 @@ namespace Aqualis
             /// <param name="filename"></param>
             member __.save(filename:string) =
                 io.fileOutput [!.filename;!."_x.dat"] <| fun wr ->
-                    wr[x.size1]
+                    wr [x.size1]
                     iter.num x.size1 <| fun i ->
-                        wr[x.[i]]
+                        wr [x.[i]]
                 io.fileOutput [!.filename;!."_y.dat"] <| fun wr ->
-                    wr[y.size1]
+                    wr [y.size1]
                     iter.num y.size1 <| fun i ->
                         wr[y.[i]]
                 io.fileOutput [!.filename;!."_g.dat"] <| fun wr ->
-                    wr[g.size1]
+                    wr [g.size1]
                     iter.num g.size1 <| fun i ->
-                        wr[g.[i]]
+                        wr [g.[i]]
                         
             /// <summary>
             /// 保存した補間データを読み込み
@@ -150,46 +150,46 @@ namespace Aqualis
                 if iscpx then
                     io.fileInput [!.filename;!."_x.dat"] <| fun wr ->
                         ch.id <| fun (n,t) ->
-                            wr[n]
+                            wr [n]
                             x.allocate(n)
                             iter.num x.size1 <| fun i ->
-                                wr[t]
+                                wr [t]
                                 x.[i] <== t
                     io.fileInput [!.filename;!."_y.dat"] <| fun wr ->
                         ch.idd <| fun (n,s,t) ->
-                            wr[n]
+                            wr [n]
                             y.allocate(n)
                             iter.num y.size1 <| fun i ->
-                                wr[s;t]
+                                wr [s;t]
                                 y.[i] <== s+asm.uj*t
                     io.fileInput [!.filename;!."_g.dat"] <| fun wr ->
                         ch.idd <| fun (n,s,t) ->
-                            wr[n]
+                            wr [n]
                             g.allocate(n)
                             iter.num g.size1 <| fun i ->
-                                wr[s;t]
+                                wr [s;t]
                                 g.[i] <== s+asm.uj*t
                 else
                     io.fileInput [!.filename;!."_x.dat"] <| fun wr ->
                         ch.id <| fun (n,t) ->
-                            wr[n]
+                            wr [n]
                             x.allocate(n)
                             iter.num x.size1 <| fun i ->
-                                wr[t]
+                                wr [t]
                                 x.[i] <== t
                     io.fileInput [!.filename;!."_y.dat"] <| fun wr ->
                         ch.id <| fun (n,t) ->
-                            wr[n]
+                            wr [n]
                             y.allocate(n)
                             iter.num y.size1 <| fun i ->
-                                wr[t]
+                                wr [t]
                                 y.[i] <== t
                     io.fileInput [!.filename;!."_g.dat"] <| fun wr ->
                         ch.id <| fun (n,t) ->
-                            wr[n]
+                            wr [n]
                             g.allocate(n)
                             iter.num g.size1 <| fun i ->
-                                wr[t]
+                                wr [t]
                                 g.[i] <== t
                                 
             /// <summary>

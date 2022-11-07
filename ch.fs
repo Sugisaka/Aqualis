@@ -631,6 +631,1047 @@ namespace Aqualis
                 counter <== I 1
                 code(counter)
                 
+        ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_i1 (size1:num0) = fun code ->
+            match p.lang with
+              |F ->
+                ch.i1 size1 <| fun i ->
+                    p.param.civreg (i.name+"(1:"+size1.name+")")
+                    code i
+                    p.param.rmciv (i.name+"(1:"+size1.name+")")
+              |C99 ->
+                ch.i1 size1 <| fun i ->
+                    p.param.civreg (i.name+"[0:"+size1.name+"]")
+                    code i
+                    p.param.rmciv (i.name+"[0:"+size1.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_i1 (size1:int) = fun code ->
+            ch.copyin_i1 (I size1) code
+
+        ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_d1 (size1:num0) = fun code ->
+            match p.lang with
+              |F ->
+                ch.d1 size1 <| fun d ->
+                    p.param.civreg (d.name+"(1:"+size1.name+")")
+                    code d
+                    p.param.rmciv (d.name+"(1:"+size1.name+")")
+              |C99 ->
+                ch.d1 size1 <| fun d ->
+                    p.param.civreg (d.name+"[0:"+size1.name+"]")
+                    code d
+                    p.param.rmciv (d.name+"[0:"+size1.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_d1 (size1:int) = fun code ->
+            ch.copyin_d1 (I size1) code
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_z1 (size1:num0) = fun code ->
+            match p.lang with
+              |F ->
+                ch.z1 size1 <| fun z ->
+                    p.param.civreg (z.name+"(1:"+size1.name+")")
+                    code z
+                    p.param.rmciv (z.name+"(1:"+size1.name+")")
+              |C99 ->
+                ch.z1 size1 <| fun z ->
+                    p.param.civreg (z.name+"[0:"+size1.name+"]")
+                    code z
+                    p.param.rmciv (z.name+"[0:"+size1.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_z1 (size1:int) = fun code ->
+            ch.copyin_z1 (I size1) code
+
+        ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_i2 (size1:num0) = fun (size2:num0) code ->
+            match p.lang with
+              |F ->
+                ch.i2 size1 size2 <| fun i ->
+                    p.param.civreg (i.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    code i
+                    p.param.rmciv (i.name+"(1:"+size1.name+",1:"+size2.name+")")
+              |C99 ->
+                ch.i2 size1 size2 <| fun i ->
+                    p.param.civreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    code i
+                    p.param.rmciv (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_i2 (size1:int) = fun (size2:int) code ->
+            ch.copyin_i2 (I size1) (I size2) code
+
+        ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_d2 (size1:num0) = fun (size2:num0) code ->
+            match p.lang with
+              |F ->
+                ch.d2 size1 size2 <| fun d ->
+                    p.param.civreg (d.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    code d
+                    p.param.rmciv (d.name+"(1:"+size1.name+",1:"+size2.name+")")
+              |C99 ->
+                ch.d2 size1 size2 <| fun d ->
+                    p.param.civreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    code d
+                    p.param.rmciv (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_d2 (size1:int) = fun (size2:int) code ->
+            ch.copyin_d2 (I size1) (I size2) code
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_z2 (size1:num0) = fun (size2:num0) code ->
+            match p.lang with
+              |F ->
+                ch.z2 size1 size2 <| fun z ->
+                    p.param.civreg (z.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    code z
+                    p.param.rmciv (z.name+"(1:"+size1.name+",1:"+size2.name+")")
+              |C99 ->
+                ch.z2 size1 size2 <| fun z ->
+                    p.param.civreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    code z
+                    p.param.rmciv (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_z2 (size1:int) = fun (size2:int) code ->
+            ch.copyin_z2 (I size1) (I size2) code
+
+        ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+            match p.lang with
+              |F ->
+                ch.i3 size1 size2 size3 <| fun i ->
+                    p.param.civreg (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    code i
+                    p.param.rmciv (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+              |C99 ->
+                ch.i3 size1 size2 size3 <| fun i ->
+                    p.param.civreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    code i
+                    p.param.rmciv (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_i3 (size1:int) = fun (size2:int) (size3:int) code ->
+            ch.copyin_i3 (I size1) (I size2) (I size3) code
+
+        ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+            match p.lang with
+              |F ->
+                ch.d3 size1 size2 size3 <| fun d ->
+                    p.param.civreg (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    code d
+                    p.param.rmciv (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+              |C99 ->
+                ch.d3 size1 size2 size3 <| fun d ->
+                    p.param.civreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    code d
+                    p.param.rmciv (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_d3 (size1:int) = fun (size2:int) (size3:int) code ->
+            ch.copyin_d3 (I size1) (I size2) (I size3) code
+
+        ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+            match p.lang with
+              |F ->
+                ch.z3 size1 size2 size3 <| fun z ->
+                    p.param.civreg (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    code z
+                    p.param.rmciv (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+              |C99 ->
+                ch.z3 size1 size2 size3 <| fun z ->
+                    p.param.civreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    code z
+                    p.param.rmciv (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
+        static member copyin_z3 (size1:int) = fun (size2:int) (size3:int) code ->
+            ch.copyin_z3 (I size1) (I size2) (I size3) code
+
+        ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_i1 (size1:num0) = fun code ->
+            match p.lang with
+              |F ->
+                ch.i1 size1 <| fun i ->
+                    p.param.covreg (i.name+"(1:"+size1.name+")")
+                    code i
+                    p.param.rmcov (i.name+"(1:"+size1.name+")")
+              |C99 ->
+                ch.i1 size1 <| fun i ->
+                    p.param.covreg (i.name+"[0:"+size1.name+"]")
+                    code i
+                    p.param.rmcov (i.name+"[0:"+size1.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_i1 (size1:int) = fun code ->
+            ch.copyout_i1 (I size1) code
+
+        ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_d1 (size1:num0) = fun code ->
+            match p.lang with
+              |F ->
+                ch.d1 size1 <| fun d ->
+                    p.param.covreg (d.name+"(1:"+size1.name+")")
+                    code d
+                    p.param.rmcov (d.name+"(1:"+size1.name+")")
+              |C99 ->
+                ch.d1 size1 <| fun d ->
+                    p.param.covreg (d.name+"[0:"+size1.name+"]")
+                    code d
+                    p.param.rmcov (d.name+"[0:"+size1.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_d1 (size1:int) = fun code ->
+            ch.copyout_d1 (I size1) code
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_z1 (size1:num0) = fun code ->
+            match p.lang with
+              |F ->
+                ch.z1 size1 <| fun z ->
+                    p.param.covreg (z.name+"(1:"+size1.name+")")
+                    code z
+                    p.param.rmcov (z.name+"(1:"+size1.name+")")
+              |C99 ->
+                ch.z1 size1 <| fun z ->
+                    p.param.covreg (z.name+"[0:"+size1.name+"]")
+                    code z
+                    p.param.rmcov (z.name+"[0:"+size1.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_z1 (size1:int) = fun code ->
+            ch.copyout_z1 (I size1) code
+
+        ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_i2 (size1:num0) = fun (size2:num0) code ->
+            match p.lang with
+              |F ->
+                ch.i2 size1 size2 <| fun i ->
+                    p.param.covreg (i.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    code i
+                    p.param.rmcov (i.name+"(1:"+size1.name+",1:"+size2.name+")")
+              |C99 ->
+                ch.i2 size1 size2 <| fun i ->
+                    p.param.covreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    code i
+                    p.param.rmcov (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_i2 (size1:int) = fun (size2:int) code ->
+            ch.copyout_i2 (I size1) (I size2) code
+
+        ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_d2 (size1:num0) = fun (size2:num0) code ->
+            match p.lang with
+              |F ->
+                ch.d2 size1 size2 <| fun d ->
+                    p.param.covreg (d.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    code d
+                    p.param.rmcov (d.name+"(1:"+size1.name+",1:"+size2.name+")")
+              |C99 ->
+                ch.d2 size1 size2 <| fun d ->
+                    p.param.covreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    code d
+                    p.param.rmcov (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_d2 (size1:int) = fun (size2:int) code ->
+            ch.copyout_d2 (I size1) (I size2) code
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_z2 (size1:num0) = fun (size2:num0) code ->
+            match p.lang with
+              |F ->
+                ch.z2 size1 size2 <| fun z ->
+                    p.param.covreg (z.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    code z
+                    p.param.rmcov (z.name+"(1:"+size1.name+",1:"+size2.name+")")
+              |C99 ->
+                ch.z2 size1 size2 <| fun z ->
+                    p.param.covreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    code z
+                    p.param.rmcov (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_z2 (size1:int) = fun (size2:int) code ->
+            ch.copyout_z2 (I size1) (I size2) code
+
+        ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+            match p.lang with
+              |F ->
+                ch.i3 size1 size2 size3 <| fun i ->
+                    p.param.covreg (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    code i
+                    p.param.rmcov (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+              |C99 ->
+                ch.i3 size1 size2 size3 <| fun i ->
+                    p.param.covreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    code i
+                    p.param.rmcov (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_i3 (size1:int) = fun (size2:int) (size3:int) code ->
+            ch.copyout_i3 (I size1) (I size2) (I size3) code
+
+        ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+            match p.lang with
+              |F ->
+                ch.d3 size1 size2 size3 <| fun d ->
+                    p.param.covreg (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    code d
+                    p.param.rmcov (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+              |C99 ->
+                ch.d3 size1 size2 size3 <| fun d ->
+                    p.param.covreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    code d
+                    p.param.rmcov (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_d3 (size1:int) = fun (size2:int) (size3:int) code ->
+            ch.copyout_d3 (I size1) (I size2) (I size3) code
+
+        ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+            match p.lang with
+              |F ->
+                ch.z3 size1 size2 size3 <| fun z ->
+                    p.param.covreg (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    code z
+                    p.param.rmcov (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+              |C99 ->
+                ch.z3 size1 size2 size3 <| fun z ->
+                    p.param.covreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    code z
+                    p.param.rmcov (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+              |_ ->
+                ()
+
+        ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
+        static member copyout_z3 (size1:int) = fun (size2:int) (size3:int) code ->
+            ch.copyout_z3 (I size1) (I size2) (I size3) code
+
+        ///<summary>整数型一時変数(GPUに転送する変数)の生成</summary>
+        static member copyin_i code =
+            ch.i <| fun i1 ->
+                p.param.civreg i1.name
+                code(i1)
+                p.param.rmciv i1.name
+
+        ///<summary>倍精度浮動小数点型一時変数(GPUに転送する変数)の生成</summary>
+        static member copyin_d code =
+            ch.d <| fun d1 ->
+                p.param.civreg d1.name
+                code(d1)
+                p.param.rmciv d1.name
+
+        ///<summary>複素数型一時変数(GPUに転送する変数)の生成</summary>
+        static member copyin_z code =
+            ch.z <| fun z1 ->
+                p.param.civreg z1.name
+                code(z1)
+                p.param.rmciv z1.name
+
+        ///<summary>整数型一時変数(ホストに転送する変数)の生成</summary>
+        static member copyout_i code =
+            ch.i <| fun i1 ->
+                p.param.covreg i1.name
+                code(i1)
+                p.param.rmcov i1.name
+
+        ///<summary>倍精度浮動小数点型一時変数(ホストに転送する変数)の生成</summary>
+        static member copyout_d code =
+            ch.d <| fun d1 ->
+                p.param.covreg d1.name
+                code(d1)
+                p.param.rmcov d1.name
+
+        ///<summary>複素数型一時変数(ホストに転送する変数)の生成</summary>
+        static member copyout_z code =
+            ch.z <| fun z1 ->
+                p.param.covreg z1.name
+                code(z1)
+                p.param.covreg z1.name
+            
+        ///<summary>整数型一時変数(プライベート変数)の生成</summary>
+        static member private_i code =
+            ch.i <| fun i1 ->
+                p.param.pvreg i1.name
+                code(i1)
+
+        ///<summary>倍精度浮動小数点型一時変数(プライベート変数)の生成</summary>
+        static member private_d code =
+            ch.d <| fun d1 ->
+                p.param.pvreg d1.name
+                code(d1)
+
+        ///<summary>複素数型一時変数(プライベート変数)の生成</summary>
+        static member private_z code =
+            ch.z <| fun z1 ->
+                p.param.pvreg z1.name
+                code(z1)
+
+        ///<summary>スレッド番号の取得</summary>
+        static member thread_num code =
+            match p.lang with
+              |F ->
+                let p = p.param
+                if p.parmode then
+                    ch.private_i <| fun th ->
+                        p.codewrite(th.name+" = omp_get_thread_num()\n")
+                        code(th)
+                else
+                    Console.WriteLine("Error : 並列ブロック外でスレッド番号が使われています")
+              |C99 ->
+                let p = p.param
+                if p.parmode then
+                    ch.private_i <| fun th ->
+                        p.codewrite(th.name+" = omp_get_thread_num();\n")
+                        code(th)
+                else
+                    Console.WriteLine("Error : 並列ブロック外でスレッド番号が使われています")
+              |_ ->
+                Console.WriteLine("Error : この言語ではスレッド番号の取得はできません")
+
+        ///<summary>最大スレッド数の取得</summary>
+        static member max_threads code =
+            match p.lang with
+              |F ->
+                let p = p.param
+                if p.parmode then
+                    ch.private_i <| fun th ->
+                        p.codewrite(th.name+" = omp_get_max_threads()\n")
+                        code(th)
+                else
+                    Console.WriteLine("並列ブロック外で最大スレッド数が使われています")
+              |_ ->
+                Console.WriteLine("この言語ではスレッド番号の取得はできません")
+
+        static member copyin_ii code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    code(i1,i2)
+                        
+        static member copyin_id code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    code(i1,d2)
+                    
+        static member copyin_iz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    code(i1,z2)
+                    
+        static member copyin_dd code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    code(d1,d2)
+                    
+        static member copyin_dz code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    code(d1,z2)
+                    
+        static member copyin_zz code = 
+            ch.copyin_z <| fun z1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    code(z1,z2)
+                    
+        static member copyin_iii code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_i <| fun i3 -> 
+                        code(i1,i2,i3)
+                        
+        static member copyin_iid code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        code(i1,i2,d3)
+                        
+        static member copyin_iiz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        code(i1,i2,z3)
+                        
+        static member copyin_idd code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        code(i1,d2,d3)
+                        
+        static member copyin_idz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        code(i1,d2,z3)
+                        
+        static member copyin_izz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        code(i1,z2,z3)
+                        
+        static member copyin_ddd code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        code(d1,d2,d3)
+                        
+        static member copyin_ddz code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        code(d1,d2,z3)
+                        
+        static member copyin_dzz code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        code(d1,z2,z3)
+                        
+        static member copyin_zzz code = 
+            ch.copyin_z <| fun z1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        code(z1,z2,z3)
+                        
+        static member copyin_iiii code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_i <| fun i3 -> 
+                        ch.copyin_i <| fun i4 -> 
+                            code(i1,i2,i3,i4)
+                            
+        static member copyin_iiid code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_i <| fun i3 -> 
+                        ch.copyin_d <| fun d4 -> 
+                            code(i1,i2,i3,d4)
+                            
+        static member copyin_iiiz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_i <| fun i3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(i1,i2,i3,z4)
+                            
+        static member copyin_iidd code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        ch.copyin_d <| fun d4 -> 
+                            code(i1,i2,d3,d4)
+                            
+        static member copyin_iidz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(i1,i2,d3,z4)
+                            
+        static member copyin_iizz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_i <| fun i2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(i1,i2,z3,z4)
+                            
+        static member copyin_iddd code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        ch.copyin_d <| fun d4 -> 
+                            code(i1,d2,d3,d4)
+                            
+        static member copyin_iddz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(i1,d2,d3,z4)
+                            
+        static member copyin_idzz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(i1,d2,z3,z4)
+                            
+        static member copyin_izzz code = 
+            ch.copyin_i <| fun i1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(i1,z2,z3,z4)
+                            
+        static member copyin_dddd code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        ch.copyin_d <| fun d4 -> 
+                            code(d1,d2,d3,d4)
+                            
+        static member copyin_dddz code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_d <| fun d3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(d1,d2,d3,z4)
+                            
+        static member copyin_ddzz code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_d <| fun d2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(d1,d2,z3,z4)
+                            
+        static member copyin_dzzz code = 
+            ch.copyin_d <| fun d1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(d1,z2,z3,z4)
+                            
+        static member copyin_zzzz code = 
+            ch.copyin_z <| fun z1 -> 
+                ch.copyin_z <| fun z2 -> 
+                    ch.copyin_z <| fun z3 -> 
+                        ch.copyin_z <| fun z4 -> 
+                            code(z1,z2,z3,z4)
+
+        static member copyout_ii code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    code(i1,i2)
+                        
+        static member copyout_id code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    code(i1,d2)
+                    
+        static member copyout_iz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    code(i1,z2)
+                    
+        static member copyout_dd code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    code(d1,d2)
+                    
+        static member copyout_dz code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    code(d1,z2)
+                    
+        static member copyout_zz code = 
+            ch.copyout_z <| fun z1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    code(z1,z2)
+                    
+        static member copyout_iii code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_i <| fun i3 -> 
+                        code(i1,i2,i3)
+                        
+        static member copyout_iid code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        code(i1,i2,d3)
+                        
+        static member copyout_iiz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        code(i1,i2,z3)
+                        
+        static member copyout_idd code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        code(i1,d2,d3)
+                        
+        static member copyout_idz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        code(i1,d2,z3)
+                        
+        static member copyout_izz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        code(i1,z2,z3)
+                        
+        static member copyout_ddd code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        code(d1,d2,d3)
+                        
+        static member copyout_ddz code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        code(d1,d2,z3)
+                        
+        static member copyout_dzz code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        code(d1,z2,z3)
+                        
+        static member copyout_zzz code = 
+            ch.copyout_z <| fun z1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        code(z1,z2,z3)
+                        
+        static member copyout_iiii code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_i <| fun i3 -> 
+                        ch.copyout_i <| fun i4 -> 
+                            code(i1,i2,i3,i4)
+                            
+        static member copyout_iiid code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_i <| fun i3 -> 
+                        ch.copyout_d <| fun d4 -> 
+                            code(i1,i2,i3,d4)
+                            
+        static member copyout_iiiz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_i <| fun i3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(i1,i2,i3,z4)
+                            
+        static member copyout_iidd code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        ch.copyout_d <| fun d4 -> 
+                            code(i1,i2,d3,d4)
+                            
+        static member copyout_iidz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(i1,i2,d3,z4)
+                            
+        static member copyout_iizz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_i <| fun i2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(i1,i2,z3,z4)
+                            
+        static member copyout_iddd code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        ch.copyout_d <| fun d4 -> 
+                            code(i1,d2,d3,d4)
+                            
+        static member copyout_iddz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(i1,d2,d3,z4)
+                            
+        static member copyout_idzz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(i1,d2,z3,z4)
+                            
+        static member copyout_izzz code = 
+            ch.copyout_i <| fun i1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(i1,z2,z3,z4)
+                            
+        static member copyout_dddd code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        ch.copyout_d <| fun d4 -> 
+                            code(d1,d2,d3,d4)
+                            
+        static member copyout_dddz code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_d <| fun d3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(d1,d2,d3,z4)
+                            
+        static member copyout_ddzz code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_d <| fun d2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(d1,d2,z3,z4)
+                            
+        static member copyout_dzzz code = 
+            ch.copyout_d <| fun d1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(d1,z2,z3,z4)
+                            
+        static member copyout_zzzz code = 
+            ch.copyout_z <| fun z1 -> 
+                ch.copyout_z <| fun z2 -> 
+                    ch.copyout_z <| fun z3 -> 
+                        ch.copyout_z <| fun z4 -> 
+                            code(z1,z2,z3,z4)
+
+        static member private_ii code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    code(i1,i2)
+                        
+        static member private_id code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_d <| fun d2 -> 
+                    code(i1,d2)
+                    
+        static member private_iz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_z <| fun z2 -> 
+                    code(i1,z2)
+                    
+        static member private_dd code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_d <| fun d2 -> 
+                    code(d1,d2)
+                    
+        static member private_dz code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_z <| fun z2 -> 
+                    code(d1,z2)
+                    
+        static member private_zz code = 
+            ch.private_z <| fun z1 -> 
+                ch.private_z <| fun z2 -> 
+                    code(z1,z2)
+                    
+        static member private_iii code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_i <| fun i3 -> 
+                        code(i1,i2,i3)
+                        
+        static member private_iid code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_d <| fun d3 -> 
+                        code(i1,i2,d3)
+                        
+        static member private_iiz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_z <| fun z3 -> 
+                        code(i1,i2,z3)
+                        
+        static member private_idd code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_d <| fun d3 -> 
+                        code(i1,d2,d3)
+                        
+        static member private_idz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_z <| fun z3 -> 
+                        code(i1,d2,z3)
+                        
+        static member private_izz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_z <| fun z2 -> 
+                    ch.private_z <| fun z3 -> 
+                        code(i1,z2,z3)
+                        
+        static member private_ddd code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_d <| fun d3 -> 
+                        code(d1,d2,d3)
+                        
+        static member private_ddz code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_z <| fun z3 -> 
+                        code(d1,d2,z3)
+                        
+        static member private_dzz code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_z <| fun z2 -> 
+                    ch.private_z <| fun z3 -> 
+                        code(d1,z2,z3)
+                        
+        static member private_zzz code = 
+            ch.private_z <| fun z1 -> 
+                ch.private_z <| fun z2 -> 
+                    ch.private_z <| fun z3 -> 
+                        code(z1,z2,z3)
+                        
+        static member private_iiii code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_i <| fun i3 -> 
+                        ch.private_i <| fun i4 -> 
+                            code(i1,i2,i3,i4)
+                            
+        static member private_iiid code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_i <| fun i3 -> 
+                        ch.private_d <| fun d4 -> 
+                            code(i1,i2,i3,d4)
+                            
+        static member private_iiiz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_i <| fun i3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(i1,i2,i3,z4)
+                            
+        static member private_iidd code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_d <| fun d3 -> 
+                        ch.private_d <| fun d4 -> 
+                            code(i1,i2,d3,d4)
+                            
+        static member private_iidz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_d <| fun d3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(i1,i2,d3,z4)
+                            
+        static member private_iizz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_i <| fun i2 -> 
+                    ch.private_z <| fun z3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(i1,i2,z3,z4)
+                            
+        static member private_iddd code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_d <| fun d3 -> 
+                        ch.private_d <| fun d4 -> 
+                            code(i1,d2,d3,d4)
+                            
+        static member private_iddz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_d <| fun d3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(i1,d2,d3,z4)
+                            
+        static member private_idzz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_z <| fun z3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(i1,d2,z3,z4)
+                            
+        static member private_izzz code = 
+            ch.private_i <| fun i1 -> 
+                ch.private_z <| fun z2 -> 
+                    ch.private_z <| fun z3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(i1,z2,z3,z4)
+                            
+        static member private_dddd code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_d <| fun d3 -> 
+                        ch.private_d <| fun d4 -> 
+                            code(d1,d2,d3,d4)
+                            
+        static member private_dddz code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_d <| fun d3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(d1,d2,d3,z4)
+                            
+        static member private_ddzz code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_d <| fun d2 -> 
+                    ch.private_z <| fun z3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(d1,d2,z3,z4)
+                            
+        static member private_dzzz code = 
+            ch.private_d <| fun d1 -> 
+                ch.private_z <| fun z2 -> 
+                    ch.private_z <| fun z3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(d1,z2,z3,z4)
+                            
+        static member private_zzzz code = 
+            ch.private_z <| fun z1 -> 
+                ch.private_z <| fun z2 -> 
+                    ch.private_z <| fun z3 -> 
+                        ch.private_z <| fun z4 -> 
+                            code(z1,z2,z3,z4)
+                            
     ///<summary>一時変数の生成と使用（処理スキップ）</summary>
     type dummy_ch () =
         
