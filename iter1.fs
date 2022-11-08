@@ -137,6 +137,8 @@ namespace Aqualis
                     p.comment ""
                   |_ ->
                     p.getloopvar <| fun (t,counter,k) ->
+                        if p.parmode then
+                            p.pvreg counter
                         p.codewrite("do "+counter+"="+i1.name+","+i2.name+"\n")
                         p.indentposition_inc()
                         code(Var(t,counter,k))
@@ -166,6 +168,8 @@ namespace Aqualis
                     p.comment ""
                   |_ ->
                     p.getloopvar <| fun (t,counter,k) ->
+                        if p.parmode then
+                            p.pvreg counter
                         p.codewrite("for("+counter+"="+i1.name+"; "+counter+"<="+i2.name+"; "+counter+"++)"+"\n")
                         p.codewrite("{"+"\n")
                         p.indentposition_inc()
