@@ -136,7 +136,7 @@ namespace Aqualis
                 io.fileOutput [!.filename;!."_y.dat"] <| fun wr ->
                     wr [y.size1]
                     iter.num y.size1 <| fun i ->
-                        wr[y.[i]]
+                        wr [y.[i]]
                 io.fileOutput [!.filename;!."_g.dat"] <| fun wr ->
                     wr [g.size1]
                     iter.num g.size1 <| fun i ->

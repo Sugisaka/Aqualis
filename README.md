@@ -10,8 +10,11 @@ This library generates C/FORTRAN source codes for numerical simulation. You can 
 1. Copy setting.fsx to C:\Aqualis\lib
 
 ## How to use
+
+See also document file ([English](document_en.md)) or ([Japanese](document_ja.md))
+
 1. Edit the F# script file "template.fsx"
-1. Running the script file will generate source files in the output directory.
+1. Run the script file to generate source files in the output directory.
 
 ## License
 [MIT License](license)
