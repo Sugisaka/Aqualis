@@ -434,6 +434,15 @@ namespace Aqualis
                         wr.Write("pgfortran -acc -Minfo=accel"+source+" "+projectname+".f90"+option+" -o "+projectname+".exe"+"\n")
                         wr.Write("./"+projectname+".exe"+"\n")
                         wr.Close()
+                    else if p.param.isOmpUsed then
+                        wr.Write("#!/bin/bash"+"\n")
+                        wr.Write("\n")
+                        wr.Write("FC='/usr/bin/gfortran'"+"\n")
+                        wr.Write("\n")
+                        let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
+                        let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
+                        wr.Write("$FC"+" -fopenmp"+source+" "+projectname+".f90"+option+" -o "+projectname+".exe"+"\n")
+                        wr.Write("./"+projectname+".exe"+"\n")
                     else
                         wr.Write("#!/bin/bash"+"\n")
                         wr.Write("\n")
@@ -579,17 +588,25 @@ namespace Aqualis
                     q.hclose()
                     //beeファイル削除
                     File.Delete(dir+"\\"+projectname+"_C99"+"_code.bee")
+                    File.Delete(dir+"\\"+projectname+"_C99"+"_par.bee")
                     File.Delete(dir+"\\"+projectname+"_C99"+"_var"+".bee")
                     if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
                     
                     //コンパイル・実行用スクリプト生成
                     let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+"_C99.sh")
-                    if p.param.isOaccUsed then
+                    if p.param.isOmpUsed then
                         wr.Write("#!/bin/sh"+"\n")
                         wr.Write("\n")
                         let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
                         let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
                         wr.Write("gcc"+" -fopenmp "+source+" "+projectname+"_C99.c"+option+" -o "+projectname+".exe"+"\n")
+                        wr.Write("./"+projectname+".exe"+"\n")
+                    else if p.param.isOaccUsed then
+                        wr.Write("#!/bin/sh"+"\n")
+                        wr.Write("\n")
+                        let source = List.fold (fun acc ss -> acc+" "+ss) "" <| q.slist
+                        let option = List.fold (fun acc op -> acc+" "+op) "" <| q.olist
+                        wr.Write("pgcc -acc -Minfo=accel"+source+" "+projectname+"_C99.c"+option+" -o "+projectname+".exe"+"\n")
                         wr.Write("./"+projectname+".exe"+"\n")
                         wr.Close()
                     else
