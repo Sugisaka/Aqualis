@@ -56,13 +56,11 @@ namespace Aqualis
                 p.rewritecfile()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
-                    p.codewrite("#pragma omp parallel do private("+s+")\n")
+                    p.codewrite("#pragma omp parallel for private("+s+")\n")
                 else
-                    p.codewrite("#pragma omp parallel do\n")
+                    p.codewrite("#pragma omp parallel for\n")
                 //一時ファイルの内容を書き込み
-                p.codewrite("{\n")
                 p.cwrite(p.readpartext())
-                p.codewrite("}\n")
                 p.clearpv()
                 p.switch_parmode(false)
               |_ ->
@@ -96,6 +94,28 @@ namespace Aqualis
                 p.codewrite("!$omp end parallel do\n")
                 p.clearpv()
                 p.switch_parmode(false)
+              |C99 ->
+                let p = p.param
+                p.isOmpUsed <- true
+                p.switch_parmode(true)
+                p.cwrite("parallel block\n")
+                code()
+                p.cwrite("end parallel block\n")
+                p.pclose()
+                p.cclose()
+                //並列化するループ処理を一時ファイルに書き込み
+                p.writepcode()
+                p.pclose()
+                p.rewritecfile()
+                if p.pvlist.Length>0 then
+                    let s = String.Join(",", p.pvlist)
+                    p.codewrite("#pragma omp parallel for private("+s+") num_threads("+(string th)+")\n")
+                else
+                    p.codewrite("#pragma omp parallel for num_threads("+(string th)+")\n")
+                //一時ファイルの内容を書き込み
+                p.cwrite(p.readpartext())
+                p.clearpv()
+                p.switch_parmode(false)
               |_ ->
                 let p = p.param
                 Console.WriteLine("Error : この言語では並列化を実行できません")
@@ -106,6 +126,7 @@ namespace Aqualis
             match p.lang with
               |F ->
                 let p = p.param
+                p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cwrite("parallel block\n")
                 code()
@@ -135,6 +156,7 @@ namespace Aqualis
                 p.switch_parmode(false)
               |C99 ->
                 let p = p.param
+                p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cwrite("parallel block\n")
                 p.indentposition_inc()
@@ -151,18 +173,16 @@ namespace Aqualis
                     let s = String.Join(",", p.pvlist)
                     match ope with
                       |"+" |"-" |"*" ->
-                        p.codewrite("#pragma omp parallel do private("+s+") reduction("+ope+":"+var.name+")\n")
+                        p.codewrite("#pragma omp parallel for private("+s+") reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
                 else
                     match ope with
                       |"+" |"-" |"*" ->
-                        p.codewrite("#pragma omp parallel do reduction("+ope+":"+var.name+")\n")
+                        p.codewrite("#pragma omp parallel for reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
-                p.codewrite("{\n")
                 p.cwrite(p.readpartext())
-                p.codewrite("}\n")
                 p.clearpv()
                 p.switch_parmode(false)
               |_ ->
@@ -175,6 +195,7 @@ namespace Aqualis
             match p.lang with
               |F ->
                 let p = p.param
+                p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cwrite("parallel block\n")
                 code()
@@ -204,6 +225,7 @@ namespace Aqualis
                 p.switch_parmode(false)
               |C99 ->
                 let p = p.param
+                p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cwrite("parallel block\n")
                 p.indentposition_inc()
@@ -220,18 +242,16 @@ namespace Aqualis
                     let s = String.Join(",", p.pvlist)
                     match ope with
                       |"+" |"-" |"*" ->
-                        p.codewrite("#pragma omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
+                        p.codewrite("#pragma omp parallel for private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
                 else
                     match ope with
                       |"+" |"-" |"*" ->
-                        p.codewrite("#pragma omp parallel do num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
+                        p.codewrite("#pragma omp parallel for num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
-                p.codewrite("{\n")
                 p.cwrite(p.readpartext())
-                p.codewrite("}\n")
                 p.clearpv()
                 p.switch_parmode(false)
               |_ ->
