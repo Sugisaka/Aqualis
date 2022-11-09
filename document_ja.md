@@ -842,7 +842,7 @@ solve_simuleqs(A,b)
 
 とすると、`b`に連立方程式の解$A^{-1}\boldsymbol{x}_1, A^{-1}\boldsymbol{x}_2, \cdots, A^{-1}\boldsymbol{x}_N$が代入された状態になる。
 
-# 並列プログラミング(実装予定)
+# 並列プログラミング
 
 ## OpenMP
 ### 基本
