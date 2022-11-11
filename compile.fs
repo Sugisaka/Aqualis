@@ -401,6 +401,8 @@ namespace Aqualis
                     q.hwrite("program "+projectname+"\n")
                     //モジュールファイルのインクルード
                     List.iter (fun (s:string) -> q.hwrite("use "+s+"\n")) <| q.modl
+                    if p.param.isOmpUsed then
+                        q.hwrite("use omp_lib"+"\n")
                     q.hwrite("implicit none"+"\n")
                     //ヘッダファイルのインクルード
                     List.iter (fun (s:string) -> q.hwrite("include '"+s+"'\n")) <| q.header
@@ -565,6 +567,8 @@ namespace Aqualis
                     q.hwrite("#include <math.h>"+"\n")
                     //ヘッダファイルのインクルード
                     List.iter (fun (s:string) -> q.hwrite("#include \""+s+"\"\n")) <| q.header
+                    if p.param.isOmpUsed then
+                        q.hwrite("#include <omp.h>"+"\n")
                     q.hwrite("#undef I"+"\n")
                     q.hwrite("#define uj _Complex_I"+"\n")
                     //構造体の定義

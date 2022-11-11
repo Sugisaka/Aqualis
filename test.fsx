@@ -13,15 +13,11 @@ let fullversion = ("180.0.0.0",version)
 
 open Aqualis
 
-Compile [F] outputdir projectname fullversion <| fun () ->
-    ch.private_i <| fun a ->
-        omp.sections 3 <| fun () ->
-            omp.section <| fun () ->
-                a <== 1
-                print.c a
-            omp.section <| fun () ->
-                a <== 2
-                print.c a
-            omp.section <| fun () ->
-                a <== 3
-                print.c a
+Compile [C99] outputdir projectname fullversion <| fun () ->
+    omp.sections 3 <| fun () ->
+        omp.section <| fun () ->
+            print.c omp.thread_num
+        omp.section <| fun () ->
+            print.c omp.thread_num
+        omp.section <| fun () ->
+            print.c omp.thread_num

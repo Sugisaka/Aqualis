@@ -336,3 +336,21 @@ namespace Aqualis
                 p.codewrite("}"+"\n")
               |_ ->
                 ()
+
+        ///<summary>スレッド番号の取得</summary>
+        static member thread_num with get() =
+            match p.lang with
+              |F |C99 ->
+                Var(It 4,"omp_get_thread_num()",[])
+              |_ ->
+                Console.WriteLine("Error : この言語ではスレッド番号の取得はできません")
+                NaN
+
+        ///<summary>最大スレッド数の取得</summary>
+        static member max_threads with get() =
+            match p.lang with
+              |F |C99 ->
+                Var(It 4,"omp_get_max_threads()",[])
+              |_ ->
+                Console.WriteLine("この言語ではスレッド番号の取得はできません")
+                NaN
