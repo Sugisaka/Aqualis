@@ -258,4 +258,81 @@ namespace Aqualis
                 let p = p.param
                 Console.WriteLine("Error : この言語では並列化を実行できません")
                 p.codewrite("Error : この言語では並列化を実行できません")
-                
+
+        ///<summary>それぞれ別スレッドで実行</summary>
+        static member sections (th:int) = fun code ->
+            match p.lang with
+              |F ->
+                let p = p.param
+                p.isOmpUsed <- true
+                p.cwrite("parallel block\n")
+                p.indentposition_inc()
+                code()
+                p.indentposition_dec()
+                p.cwrite("end parallel block\n")
+                p.pclose()
+                p.cclose()
+                //並列化するループ処理を一時ファイルに書き込み
+                p.writepcode()
+                p.pclose()
+                p.rewritecfile()
+                if p.pvlist.Length>0 then
+                    let s = String.Join(",", p.pvlist)
+                    p.codewrite("!$omp parallel private("+s+") num_threads("+(string th)+")\n")
+                else
+                    p.codewrite("!$omp parallel num_threads("+(string th)+")\n")
+                p.indentposition_inc()
+                p.codewrite("!$omp sections"+"\n")
+                p.cwrite(p.readpartext())
+                p.codewrite("!$omp end sections"+"\n")
+                p.indentposition_dec()
+                p.codewrite("!$omp end parallel"+"\n")
+                p.clearpv()
+              |C99 ->
+                let p = p.param
+                p.isOmpUsed <- true
+                p.cwrite("parallel block\n")
+                p.indentposition_inc()
+                code()
+                p.indentposition_dec()
+                p.cwrite("end parallel block\n")
+                p.pclose()
+                p.cclose()
+                //並列化するループ処理を一時ファイルに書き込み
+                p.writepcode()
+                p.pclose()
+                p.rewritecfile()
+                if p.pvlist.Length>0 then
+                    let s = String.Join(",", p.pvlist)
+                    p.codewrite("#pragma omp parallel private("+s+") num_threads("+(string th)+")\n")
+                else
+                    p.codewrite("#pragma omp parallel num_threads("+(string th)+")\n")
+                p.codewrite("{"+"\n")
+                p.indentposition_inc()
+                p.codewrite("#pragma omp sections"+"\n")
+                p.codewrite("{"+"\n")
+                p.indentposition_inc()
+                p.cwrite(p.readpartext())
+                p.indentposition_dec()
+                p.codewrite("}"+"\n")
+                p.indentposition_dec()
+                p.codewrite("}"+"\n")
+                p.clearpv()
+              |_ ->
+                ()
+
+        ///<summary>別スレッドで実行</summary>
+        static member section code =
+            match p.lang with
+              |F ->
+                let p = p.param
+                p.codewrite("!$omp section"+"\n")
+                code()
+              |C99 ->
+                let p = p.param
+                p.codewrite("#pragma omp section"+"\n")
+                p.codewrite("{"+"\n")
+                code()
+                p.codewrite("}"+"\n")
+              |_ ->
+                ()
