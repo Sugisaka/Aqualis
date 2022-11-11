@@ -1051,42 +1051,6 @@ namespace Aqualis
                 p.param.pvreg z1.name
                 code(z1)
 
-        ///<summary>スレッド番号の取得</summary>
-        static member thread_num code =
-            match p.lang with
-              |F ->
-                let p = p.param
-                if p.parmode then
-                    ch.private_i <| fun th ->
-                        p.codewrite(th.name+" = omp_get_thread_num()\n")
-                        code(th)
-                else
-                    Console.WriteLine("Error : 並列ブロック外でスレッド番号が使われています")
-              |C99 ->
-                let p = p.param
-                if p.parmode then
-                    ch.private_i <| fun th ->
-                        p.codewrite(th.name+" = omp_get_thread_num();\n")
-                        code(th)
-                else
-                    Console.WriteLine("Error : 並列ブロック外でスレッド番号が使われています")
-              |_ ->
-                Console.WriteLine("Error : この言語ではスレッド番号の取得はできません")
-
-        ///<summary>最大スレッド数の取得</summary>
-        static member max_threads code =
-            match p.lang with
-              |F ->
-                let p = p.param
-                if p.parmode then
-                    ch.private_i <| fun th ->
-                        p.codewrite(th.name+" = omp_get_max_threads()\n")
-                        code(th)
-                else
-                    Console.WriteLine("並列ブロック外で最大スレッド数が使われています")
-              |_ ->
-                Console.WriteLine("この言語ではスレッド番号の取得はできません")
-
         static member copyin_ii code = 
             ch.copyin_i <| fun i1 -> 
                 ch.copyin_i <| fun i2 -> 
