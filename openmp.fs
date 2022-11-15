@@ -40,6 +40,7 @@ namespace Aqualis
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cclose()
+                p.popen()
                 code()
                 p.pclose()
                 p.switch_parmode(false)
@@ -65,6 +66,7 @@ namespace Aqualis
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cclose()
+                p.popen()
                 code()
                 p.pclose()
                 p.switch_parmode(false)
@@ -83,6 +85,7 @@ namespace Aqualis
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cclose()
+                p.popen()
                 code()
                 p.pclose()
                 p.switch_parmode(false)
@@ -108,6 +111,7 @@ namespace Aqualis
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cclose()
+                p.popen()
                 code()
                 p.pclose()
                 p.switch_parmode(false)
@@ -134,6 +138,7 @@ namespace Aqualis
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cclose()
+                p.popen()
                 code()
                 p.pclose()
                 p.switch_parmode(false)
@@ -167,6 +172,7 @@ namespace Aqualis
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cclose()
+                p.popen()
                 code()
                 p.pclose()
                 p.switch_parmode(false)
@@ -193,6 +199,7 @@ namespace Aqualis
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
                 p.cclose()
+                p.popen()
                 code()
                 p.pclose()
                 p.switch_parmode(false)
