@@ -474,8 +474,11 @@ namespace Aqualis
             funlist_ <- x::funlist_
         
         ///<summary>コードを一時ファイルに書き込み</summary>
-        member __.cwrite(code:string) =
-            cwriter.Write(code)
+        member this.cwrite(code:string) =
+            if this.isOmpUsed && this.parmode then
+                pwriter.Write(code)
+            else
+                cwriter.Write(code)
             
         ///<summary>コードの一時ファイルを開く</summary>
         member __.copen() = 
@@ -514,7 +517,10 @@ namespace Aqualis
             pwriter.Write(code)
 
         ///<summary>並列処理の一時ファイルを開く</summary>
-        member __.popen() =
+        member this.popen() =
+            if File.Exists(pfile) then
+                this.pclose()
+                File.Delete(pfile)
             pwriter <- new StreamWriter(pfile,true)
 
         ///<summary>並列処理の一時ファイルを閉じる</summary>
@@ -523,46 +529,6 @@ namespace Aqualis
 
         ///<summary>並列処理の一時ファイルの内容</summary>
         member __.readpartext() = File.ReadAllText(pfile)
-
-        ///<summary>コードの一時ファイルの並列部分を消去</summary>
-        member this.rewritecfile () =
-            let list = File.ReadAllText(cfile).Split('\n') //コードを改行文字で分割
-            File.Delete(cfile)
-            this.copen()
-            //"parallel block"を発見するまでcstrにコードを追加
-            let rec findparallelblock (i:int) =
-                if i<list.Length then
-                    match list[i] with
-                      |"parallel block" ->
-                        ()
-                      |_ ->
-                        this.cwrite(list[i]+"\n")
-                        findparallelblock (i+1)
-            findparallelblock 0
-
-        ///<summary>並列処理のコードを一時ファイルに記述</summary>
-        member this.writepcode() =
-            File.Delete(pfile)
-            this.popen()
-            let list = File.ReadAllText(cfile).Split('\n') //コードを改行文字で分割
-            //"end parallel block"が出るまで文字列を一時ファイルに書き込む
-            let rec findendblock (j:int) =
-                if j<list.Length then
-                    match list[j] with
-                      |"end parallel block" ->
-                        ()
-                      |_ ->
-                        this.pwrite(list[j]+"\n")
-                        findendblock (j+1)
-            //"parallel block"を発見したらfindendblockを実行
-            let rec findstblock (i:int) =
-                if i<list.Length then
-                    match list[i] with
-                      |"parallel block" ->
-                        findendblock (i+1)
-                      |_ ->
-                        findstblock (i+1)
-            findstblock 0
             
         ///<summary>変数のリストに変数情報を登録</summary>
         member this.vreg(typ,vtp,name,p) =
