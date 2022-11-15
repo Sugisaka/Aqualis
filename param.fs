@@ -517,7 +517,10 @@ namespace Aqualis
             pwriter.Write(code)
 
         ///<summary>並列処理の一時ファイルを開く</summary>
-        member __.popen() =
+        member this.popen() =
+            if File.Exists(pfile) then
+                this.pclose()
+                File.Delete(pfile)
             pwriter <- new StreamWriter(pfile,true)
 
         ///<summary>並列処理の一時ファイルを閉じる</summary>
