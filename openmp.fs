@@ -20,15 +20,11 @@ namespace Aqualis
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                code()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     p.codewrite("!$omp parallel do private("+s+")\n")
@@ -38,22 +34,15 @@ namespace Aqualis
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
                 p.clearpv()
-                p.switch_parmode(false)
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                p.indentposition_inc()
-                code()
-                p.indentposition_dec()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     p.codewrite("#pragma omp parallel for private("+s+")\n")
@@ -62,7 +51,6 @@ namespace Aqualis
                 //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.clearpv()
-                p.switch_parmode(false)
               |_ ->
                 let p = p.param
                 Console.WriteLine("Error : この言語では並列化を実行できません")
@@ -75,15 +63,11 @@ namespace Aqualis
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                code()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     p.codewrite("!$omp parallel do private("+s+") num_threads("+(string th)+")\n")
@@ -93,20 +77,15 @@ namespace Aqualis
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
                 p.clearpv()
-                p.switch_parmode(false)
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                code()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     p.codewrite("#pragma omp parallel for private("+s+") num_threads("+(string th)+")\n")
@@ -115,7 +94,6 @@ namespace Aqualis
                 //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.clearpv()
-                p.switch_parmode(false)
               |_ ->
                 let p = p.param
                 Console.WriteLine("Error : この言語では並列化を実行できません")
@@ -128,15 +106,11 @@ namespace Aqualis
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                code()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     match ope with
@@ -150,25 +124,19 @@ namespace Aqualis
                         p.codewrite("!$omp parallel do reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
+                //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
                 p.clearpv()
-                p.switch_parmode(false)
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                p.indentposition_inc()
-                code()
-                p.indentposition_dec()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     match ope with
@@ -182,9 +150,9 @@ namespace Aqualis
                         p.codewrite("#pragma omp parallel for reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
+                //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.clearpv()
-                p.switch_parmode(false)
               |_ ->
                 let p = p.param
                 Console.WriteLine("Error : この言語では並列化を実行できません")
@@ -197,15 +165,11 @@ namespace Aqualis
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                code()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     match ope with
@@ -219,25 +183,19 @@ namespace Aqualis
                         p.codewrite("!$omp parallel do num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
+                //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
                 p.clearpv()
-                p.switch_parmode(false)
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
                 p.switch_parmode(true)
-                p.cwrite("parallel block\n")
-                p.indentposition_inc()
-                code()
-                p.indentposition_dec()
-                p.cwrite("end parallel block\n")
-                p.pclose()
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     match ope with
@@ -251,9 +209,9 @@ namespace Aqualis
                         p.codewrite("#pragma omp parallel for num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
                       |_ ->
                         ()
+                //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.clearpv()
-                p.switch_parmode(false)
               |_ ->
                 let p = p.param
                 Console.WriteLine("Error : この言語では並列化を実行できません")
@@ -265,17 +223,12 @@ namespace Aqualis
               |F ->
                 let p = p.param
                 p.isOmpUsed <- true
-                p.cwrite("parallel block\n")
-                p.indentposition_inc()
-                code()
-                p.indentposition_dec()
-                p.cwrite("end parallel block\n")
-                p.pclose()
+                p.switch_parmode(true)
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     p.codewrite("!$omp parallel private("+s+") num_threads("+(string th)+")\n")
@@ -283,25 +236,22 @@ namespace Aqualis
                     p.codewrite("!$omp parallel num_threads("+(string th)+")\n")
                 p.indentposition_inc()
                 p.codewrite("!$omp sections"+"\n")
+                p.indentposition_inc()
                 p.cwrite(p.readpartext())
+                p.indentposition_dec()
                 p.codewrite("!$omp end sections"+"\n")
                 p.indentposition_dec()
-                p.codewrite("!$omp end parallel"+"\n")
+                p.codewrite("!$omp end parallel do\n")
                 p.clearpv()
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
-                p.cwrite("parallel block\n")
-                p.indentposition_inc()
-                code()
-                p.indentposition_dec()
-                p.cwrite("end parallel block\n")
-                p.pclose()
+                p.switch_parmode(true)
                 p.cclose()
-                //並列化するループ処理を一時ファイルに書き込み
-                p.writepcode()
+                code()
                 p.pclose()
-                p.rewritecfile()
+                p.switch_parmode(false)
+                p.copen()
                 if p.pvlist.Length>0 then
                     let s = String.Join(",", p.pvlist)
                     p.codewrite("#pragma omp parallel private("+s+") num_threads("+(string th)+")\n")
