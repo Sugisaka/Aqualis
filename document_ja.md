@@ -489,6 +489,18 @@ iter.whiledo (条件) <| fun ex ->
     (コード)
 ```
 
+リストの各要素に対し処理を行う場合は`iter.list`を使用する。
+```fsharp
+iter.list [x;y;z] <| fun v ->
+    print.c v
+```
+これは以下と同じ動作になる
+```fsharp
+print.c x
+print.c y
+print.c z
+```
+
 ## let束縛
 
 let式で定数や式、関数など様々なものを定義できる。
@@ -747,6 +759,10 @@ ch.id <| fun (x,y) ->
     io.fileInput [!."test.dat"] <| fun rd ->
         rd [x; y]
 ```
+
+## コメントアウト
+
+`ch`、`iter`、`br`、`io`の前に`dummy_`をつけて`dummy_ch`、`dummy_iter`、`dummy_br`、`dummy_io`とすると、その処理はスキップされる。
 
 ## ハンケル関数
 

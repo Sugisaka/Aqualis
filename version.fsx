@@ -9,8 +9,8 @@
 open System
 open System.IO
 
-let version = "180.0.0.0"
-    
+let version = "180.0.1.0"
+
 let backup outputdir sourceDir sourceFile projectname (version:string) = 
     let rec d lst =
         match lst with

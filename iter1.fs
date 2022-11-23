@@ -587,7 +587,12 @@ namespace Aqualis
         ///<summary>1から指定した回数ループ(途中脱出可)</summary>
         static member num_exit (n1:num0) = fun code -> 
             iter.range_exit _1 n1 code 
-            
+
+        ///<summary>lstの各要素に対しcodeを実行</summary>
+        static member list (lst:seq<'a>) (code:'a->unit) =
+            for a in lst do
+                code a
+                
     ///<summary>反復処理（処理スキップ）</summary>
     type dummy_iter () =
         
@@ -657,3 +662,6 @@ namespace Aqualis
         ///<summary>1から指定した回数ループ(途中脱出可)</summary>
         static member num_exit (n1:num0) = fun code -> ()
         
+        ///<summary>lstの各要素に対しcodeを実行</summary>
+        static member list (lst:seq<'a>) (code:'a->unit) =
+            ()
