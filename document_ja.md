@@ -20,45 +20,37 @@ fsxファイルの冒頭部分は毎回以下のように書く
 let projectname = "template"
 let version = "1.0.0"
 //#############################################################################
-
-//Output directory
+ 
 let outputdir = @"C:\cygwin64\home\work"
 
-//Location of Aqualis.dll and version.fsx
-#I "C:\\Aqualis\\lib\\179_0_0_0"
+#I "C:\\Aqualis\\lib\\180_0_0_0"
 #r "Aqualis.dll"
 #load "version.fsx"
 
 let fullversion = preprocess.backup outputdir __SOURCE_DIRECTORY__ __SOURCE_FILE__ projectname version
-
+ 
 open Aqualis
-
-//List the languages of the output source files:
-//F(FORTRAN), C89, C99, H(HTML), T(TeX)
-let lang = [F; C99; C89]
-
-Compile lang outputdir projectname fullversion <| fun () ->
-    print.t "Hello World!"
-
+ 
+Compile [F] outputdir projectname fullversion <| fun () ->
+    (コード本体)
 ```
 
 - 2行目：このプログラムの説明を書く。複数行になっても良いが、各行の先頭に半角「`//`」を記入
 - 3行目：プロジェクト名を「`""`」の間に書く。半角のアルファベットと数字、アンダースコアが使用可能
 - 4行目：バージョン番号。左からメジャー、マイナー、リビルド。リビジョン番号はこのソースファイルの実行時に自動的にナンバリングされる
-- 8行目：ソースファイルの出力先フォルダ。
-- 11行目：Aqualis.dllがあるディレクトリを指定する。
-- 12行目：Aqualis.dllを読み込む
-- 13行目：fsxファイルのバックアップを行う処理が書かれたプログラムを読み込む
-- 15行目：このソースファイルのバックアップ処理を行い、リビジョン番号を決定したバージョン番号(`fullversion`)を決定する
-- 17行目：Aqualisを使用可能にする
-- 21行目：出力ソースファイルの言語を`[]`の中に指定。セミコロン`;`で区切って複数指定することもできる
+- 7行目：ソースファイルの出力先フォルダ。
+- 9行目：Aqualis.dllがあるディレクトリを指定する。
+- 10行目：Aqualis.dllを読み込む
+- 11行目：fsxファイルのバックアップを行う処理が書かれたプログラムを読み込む
+- 13行目：このソースファイルのバックアップ処理を行い、リビジョン番号を決定したバージョン番号(`fullversion`)を決定する
+- 15行目：Aqualisを使用可能にする
+- 17行目：出力ソースファイルの言語を`[]`の中に指定。セミコロン`;`で区切って複数指定することもできる
   - `F`：Fortran
   - `C89`：C89
   - `C99`：C99
   - `T`：LaTeX
   - `H`：HTML
   - Aqualis.dllに記述してあるAqualisの設定を読み込む
-- 23行目：この行以降のインデントされている範囲のコードを、指定した言語のソースファイルに変換する
 
 以下のコードでは、「`print.c !."aaa"`」と「`print.c !."bbb"`」がFortranのコードに変換される。「`print.c !."ccc"`」はインデントが戻っているので出力の対象外となる。
 ```fsharp
@@ -805,22 +797,20 @@ $$
 を解く。$A$は2次元配列、$\boldsymbol{b}$は1次元配列。例えば、
 
 $$
+A=
 \begin{bmatrix}
 1 & 2 \\
 3 & 4 
 \end{bmatrix}
-\begin{bmatrix}
-x_1 \\
-x_2 
-\end{bmatrix}
-=
+,
+\boldsymbol{b}=
 \begin{bmatrix}
 5 \\
 6 
 \end{bmatrix}
 $$
 
-を解く場合は、`A`と`b`を
+のとき、`A`と`b`を
 
 ```fsharp
 A[1,1] <== 1.0
