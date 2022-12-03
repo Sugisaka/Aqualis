@@ -83,7 +83,7 @@ type optimization() =
             xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])
             
     /// <summary>
-    /// 勾配降下法
+    /// 最急降下法
     /// </summary>
     /// <param name="n">反復数</param>
     /// <param name="m">直線探索の反復数：探索間隔dd0*2^(-m)になるまで計算</param>
@@ -91,9 +91,13 @@ type optimization() =
     /// <param name="dd0">探索間隔</param>
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
-    static member findmin_GradientDescent (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) =
+    /// <param name="stepProc">各ステップの暫定解に対して行う処理</param>
+    static member findmin_GradientDescent (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:(num1->unit)option) =
         ch.d <| fun dd0_ ->
             ch.d1 x0.size1 <| fun y ->
+                ch.d <| fun u ->
+                    f u x0
+                    print.cc _0 u
                 iter.num_exit (I n) <| fun (ext,i) ->
                     dd0_ <== dd0
                     ch.d1 x0.size1 <| fun (df0:num1) ->
@@ -106,6 +110,11 @@ type optimization() =
                                 ext()
                         //勾配方向に最小値を探す
                         optimization.findmin m (x0,y) dd0_ f x0
+                    match stepProc with
+                      |Some(pu) ->
+                            pu x0
+                      |None ->
+                        ()
                         
     /// <summary>
     /// ヘッセ行列を用いた共役勾配法
@@ -117,7 +126,7 @@ type optimization() =
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
     /// <param name="fH">目的関数のヘッセ行列</param>
-    static member findmin_ConjugateGradient1 (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (fH:num2->num1->unit) =
+    static member findmin_ConjugateGradient1 (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (fH:num2->num1->unit) (stepProc:(num1->unit)option) =
         ch.d <| fun a ->
         ch.d <| fun dd0_ ->
             ch.d1 x0.size1 <| fun b ->
@@ -146,6 +155,11 @@ type optimization() =
                             br.if1 (nr.=0.0) <| fun () -> ext()
                         //勾配方向に最小値を探す
                         optimization.findmin m (x0,y) dd0_ f x0
+                        match stepProc with
+                          |Some(pu) ->
+                                pu x0
+                          |None ->
+                            ()
                         y.foreach <| fun i ->
                             b.[i] <== y.[i]
                                 
@@ -158,7 +172,7 @@ type optimization() =
     /// <param name="dd0">探索間隔</param>
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
-    static member findmin_ConjugateGradient2 (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) =
+    static member findmin_ConjugateGradient2 (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:(num1->unit)option) =
         ch.d <| fun a ->
         ch.d <| fun dd0_ ->
             ch.d1 x0.size1 <| fun b ->
@@ -191,6 +205,11 @@ type optimization() =
                         ch.d1 x0.size1 <| fun x ->
                             optimization.findmin m (x0,y) dd0_ f x
                             x0 <== x
+                            match stepProc with
+                              |Some(pu) ->
+                                    pu x0
+                              |None ->
+                                ()
                             y.foreach <| fun i ->
                                 b.[i] <== y.[i]
                         df1.foreach <| fun i ->
@@ -206,7 +225,7 @@ type optimization() =
     /// <param name="f"></param>
     /// <param name="df"></param>
     /// <param name="fH"></param>
-    static member findmin_Newton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (fH:num2->num1->unit) =
+    static member findmin_Newton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (fH:num2->num1->unit) (stepProc:(num1->unit)option) =
         ch.d <| fun dd0_ ->
             iter.num_exit (I n) <| fun (ext,_) ->
                 dd0_ <== dd0
@@ -222,6 +241,11 @@ type optimization() =
                             a.foreach <| fun i ->
                                 a.[i] <== -a.[i]
                             optimization.findmin m (x0,a) dd0_ f x0
+                            match stepProc with
+                              |Some(pu) ->
+                                    pu x0
+                              |None ->
+                                ()
                             
     /// <summary>
     /// 準ニュートン法
@@ -232,7 +256,7 @@ type optimization() =
     /// <param name="dd0"></param>
     /// <param name="f"></param>
     /// <param name="df"></param>
-    static member findmin_quasiNewton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) =
+    static member findmin_quasiNewton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:(num1->unit)option) =
         ch.d <| fun dd0_ ->
         ch.d1 x0.size1 <| fun df1 ->
         ch.d1 x0.size1 <| fun y ->
@@ -267,4 +291,9 @@ type optimization() =
                             s.foreach <| fun j -> s.[j] <== xx.[j] - x0.[j]
                             df1 <== df0
                             x0.foreach <| fun i -> x0.[i] <== xx.[i]
-                            
+                            match stepProc with
+                              |Some(pu) ->
+                                    pu x0
+                              |None ->
+                                ()
+                                
