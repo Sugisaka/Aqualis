@@ -100,9 +100,6 @@ type optimization() =
             ()
         ch.d <| fun dd0_ ->
             ch.d1 x0.size1 <| fun y ->
-                ch.d <| fun u ->
-                    f u x0
-                    print.cc _0 u
                 iter.num_exit (I n) <| fun (ext,i) ->
                     dd0_ <== dd0
                     ch.d1 x0.size1 <| fun (df0:num1) ->
