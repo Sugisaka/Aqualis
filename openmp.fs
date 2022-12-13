@@ -26,11 +26,24 @@ namespace Aqualis
                 p.pclose()
                 p.switch_parmode(false)
                 p.copen()
-                if p.pvlist.Length>0 then
-                    let s = String.Join(",", p.pvlist)
-                    p.codewrite("!$omp parallel do private("+s+")\n")
-                else
-                    p.codewrite("!$omp parallel do\n")
+                let rec printplist list n counter (s:string) =
+                    match (list,counter) with
+                      |[],_ ->
+                        if (counter>0) && n=0 then
+                            p.codewrite("!$omp parallel do private("+s+")"+"\n")
+                        elif (counter>0) then
+                            p.codewrite("!$omp private("+s+")"+"\n")
+                        else
+                            ()
+                      |pp::lst,7 ->
+                        if n=0 then
+                            p.codewrite("!$omp parallel do private("+s+") &"+"\n")
+                        else
+                            p.codewrite("!$omp private("+s+") &"+"\n")
+                        printplist lst 1 1 pp
+                      |p::lst,_ ->
+                        printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
+                printplist p.pvlist 0 0 ""
                 //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
@@ -54,9 +67,7 @@ namespace Aqualis
                 p.cwrite(p.readpartext())
                 p.clearpv()
               |_ ->
-                let p = p.param
-                Console.WriteLine("Error : この言語では並列化を実行できません")
-                p.codewrite("Error : この言語では並列化を実行できません")
+                ()
 
         ///<summary>ループを並列化</summary>
         static member parallelize_th (th:int) = fun code ->
@@ -71,11 +82,24 @@ namespace Aqualis
                 p.pclose()
                 p.switch_parmode(false)
                 p.copen()
-                if p.pvlist.Length>0 then
-                    let s = String.Join(",", p.pvlist)
-                    p.codewrite("!$omp parallel do private("+s+") num_threads("+(string th)+")\n")
-                else
-                    p.codewrite("!$omp parallel do num_threads("+(string th)+")\n")
+                let rec printplist list n counter (s:string) =
+                    match (list,counter) with
+                      |[],_ ->
+                        if (counter>0) && n=0 then
+                            p.codewrite("!$omp parallel do private("+s+") num_threads("+(string th)+")"+"\n")
+                        elif (counter>0) then
+                            p.codewrite("!$omp private("+s+")"+"\n")
+                        else
+                            ()
+                      |pp::lst,7 ->
+                        if n=0 then
+                            p.codewrite("!$omp parallel do private("+s+") num_threads("+(string th)+") &"+"\n")
+                        else
+                            p.codewrite("!$omp private("+s+") &"+"\n")
+                        printplist lst 1 1 pp
+                      |p::lst,_ ->
+                        printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
+                printplist p.pvlist 0 0 ""
                 //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
@@ -99,9 +123,7 @@ namespace Aqualis
                 p.cwrite(p.readpartext())
                 p.clearpv()
               |_ ->
-                let p = p.param
-                Console.WriteLine("Error : この言語では並列化を実行できません")
-                p.codewrite("Error : この言語では並列化を実行できません")
+                ()
 
         ///<summary>ループを並列化</summary>
         static member reduction (var:num0) (ope:string) = fun code ->
@@ -116,19 +138,24 @@ namespace Aqualis
                 p.pclose()
                 p.switch_parmode(false)
                 p.copen()
-                if p.pvlist.Length>0 then
-                    let s = String.Join(",", p.pvlist)
-                    match ope with
-                      |"+" |"-" |"*" ->
-                        p.codewrite("!$omp parallel do private("+s+") reduction("+ope+":"+var.name+")\n")
-                      |_ ->
-                        ()
-                else
-                    match ope with
-                      |"+" |"-" |"*" ->
-                        p.codewrite("!$omp parallel do reduction("+ope+":"+var.name+")\n")
-                      |_ ->
-                        ()
+                let rec printplist list n counter (s:string) =
+                    match (list,counter) with
+                      |[],_ ->
+                        if (counter>0) && n=0 then
+                            p.codewrite("!$omp parallel do private("+s+") reduction("+ope+":"+var.name+")"+"\n")
+                        elif (counter>0) then
+                            p.codewrite("!$omp private("+s+")"+"\n")
+                        else
+                            ()
+                      |pp::lst,7 ->
+                        if n=0 then
+                            p.codewrite("!$omp parallel do private("+s+") reduction("+ope+":"+var.name+") &"+"\n")
+                        else
+                            p.codewrite("!$omp private("+s+") &"+"\n")
+                        printplist lst 1 1 pp
+                      |p::lst,_ ->
+                        printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
+                printplist p.pvlist 0 0 ""
                 //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
@@ -160,9 +187,7 @@ namespace Aqualis
                 p.cwrite(p.readpartext())
                 p.clearpv()
               |_ ->
-                let p = p.param
-                Console.WriteLine("Error : この言語では並列化を実行できません")
-                p.codewrite("Error : この言語では並列化を実行できません")
+                ()
 
         ///<summary>ループを並列化</summary>
         static member reduction_th (th:int) (var:num0) (ope:string) = fun code ->
@@ -177,19 +202,24 @@ namespace Aqualis
                 p.pclose()
                 p.switch_parmode(false)
                 p.copen()
-                if p.pvlist.Length>0 then
-                    let s = String.Join(",", p.pvlist)
-                    match ope with
-                      |"+" |"-" |"*" ->
-                        p.codewrite("!$omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
-                      |_ ->
-                        ()
-                else
-                    match ope with
-                      |"+" |"-" |"*" ->
-                        p.codewrite("!$omp parallel do num_threads("+(string th)+") reduction("+ope+":"+var.name+")\n")
-                      |_ ->
-                        ()
+                let rec printplist list n counter (s:string) =
+                    match (list,counter) with
+                      |[],_ ->
+                        if (counter>0) && n=0 then
+                            p.codewrite("!$omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.name+")"+"\n")
+                        elif (counter>0) then
+                            p.codewrite("!$omp private("+s+")"+"\n")
+                        else
+                            ()
+                      |pp::lst,7 ->
+                        if n=0 then
+                            p.codewrite("!$omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.name+") &"+"\n")
+                        else
+                            p.codewrite("!$omp private("+s+") &"+"\n")
+                        printplist lst 1 1 pp
+                      |p::lst,_ ->
+                        printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
+                printplist p.pvlist 0 0 ""
                 //一時ファイルの内容を書き込み
                 p.cwrite(p.readpartext())
                 p.codewrite("!$omp end parallel do\n")
@@ -221,9 +251,7 @@ namespace Aqualis
                 p.cwrite(p.readpartext())
                 p.clearpv()
               |_ ->
-                let p = p.param
-                Console.WriteLine("Error : この言語では並列化を実行できません")
-                p.codewrite("Error : この言語では並列化を実行できません")
+                ()
 
         ///<summary>それぞれ別スレッドで実行</summary>
         static member sections (th:int) = fun code ->
