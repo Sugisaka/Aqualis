@@ -634,7 +634,17 @@ namespace Aqualis
                 ()
                 
         ///<summary>プライベート変数リストに変数名を登録</summary>
-        member _.pvreg name = pvlist_<-pvlist_@[name]
+        member _.pvreg name =
+            let rec findname i =
+                if pvlist_.Item(i)<>name then
+                    if (i+1)<pvlist_.Length then
+                        findname (i+1)
+                    else
+                        pvlist_<-pvlist_@[name]
+            if pvlist_.IsEmpty then
+                pvlist_<-pvlist_@[name]
+            else
+                findname 0
 
         ///<summary>プライベート変数リストを初期化</summary>
         member _.clearpv() = pvlist_<-[]
@@ -643,14 +653,34 @@ namespace Aqualis
         member _.switch_parmode (tf:bool) = par_mode<-tf
 
         ///<summary>GPUに転送する変数のリストに変数名を追加</summary>
-        member _.civreg name = copy_in_vlist_<-copy_in_vlist_@[name]
+        member _.civreg name =
+            let rec findname i =
+                if copy_in_vlist_.Item(i)<>name then
+                    if (i+1)<copy_in_vlist_.Length then
+                        findname (i+1)
+                    else
+                        copy_in_vlist_<-copy_in_vlist_@[name]
+            if copy_in_vlist_.IsEmpty then
+                copy_in_vlist_<-copy_in_vlist_@[name]
+            else
+                findname 0
 
         ///<summary>GPUに転送する変数リストから変数を削除</summary>
         member _.rmciv (var:string) =
             copy_in_vlist_<-List.filter(fun s -> s<>var) copy_in_vlist_
 
         ///<summary>ホストに転送する変数のリストに変数名を追加</summary>
-        member _.covreg name = copy_out_vlist_<-copy_out_vlist_@[name]
+        member _.covreg name =
+            let rec findname i =
+                if copy_out_vlist_.Item(i)<>name then
+                    if (i+1)<copy_out_vlist_.Length then
+                        findname (i+1)
+                    else
+                        copy_out_vlist_<-copy_out_vlist_@[name]
+            if copy_out_vlist_.IsEmpty then
+                copy_out_vlist_<-copy_out_vlist_@[name]
+            else
+                findname 0
 
         ///<summary>ホストに転送する変数リストから変数を削除</summary>
         member _.rmcov (var:string) =
