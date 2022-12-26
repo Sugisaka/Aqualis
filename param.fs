@@ -763,7 +763,8 @@ namespace Aqualis
               |T ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
-                    Array.iter (fun code -> this.cwrite((this.indent+code+"\n").Replace("_","\\_"))) slist
+                    //Array.iter (fun code -> this.cwrite((this.indent+code+"\n").Replace("_","\\_"))) slist
+                    Array.iter (fun code -> this.cwrite(this.indent+code+"\n")) slist
               |H ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割

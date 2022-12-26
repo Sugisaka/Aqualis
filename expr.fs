@@ -17,7 +17,7 @@ namespace Aqualis
         |Dbl_e of double
         |Str_e of string
         |Var of Etype*string*(num0 list)
-        |Par of Etype*num0
+        |Par of Etype*string*string*num0
         |Inv of Etype*num0
         |Re  of num0
         |Im  of num0
@@ -58,7 +58,7 @@ namespace Aqualis
                 |Dbl_e _ -> Dt
                 |Str_e _ -> Structure("string")
                 |Var(t,_,_) -> t
-                |Par(t,_) -> t
+                |Par(t,_,_,_) -> t
                 |Inv(t,_) -> t
                 |Re _ -> Dt
                 |Im _ -> Dt
@@ -157,7 +157,7 @@ namespace Aqualis
               |Int_e v when v<0   -> (Int_e -v)
               |Dbl_e v when v<0.0 -> (Dbl_e -v)
               |Inv(_,v) -> v
-              |Add(_,_) -> -Par(x.etype,x)
+              |Add(_,_) -> -Par(x.etype,"(",")",x)
               |Sub(t,v1,v2) -> Sub(t,v2,v1)
               |_ -> Inv(x.etype,x)
     
@@ -319,9 +319,9 @@ namespace Aqualis
               (* [小数定数]*[小数定数] *)
               |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1*v2)
               (* x*(y1+y2+…) or x*(y1-y2) *)
-              |_,_,(Add(t,_)|Sub(t,_,_)) -> x*Par(t,y)
+              |_,_,(Add(t,_)|Sub(t,_,_)) -> x*Par(t,"(",")",y)
               (* (x1+x2+…)*y or (x1-x2)*y *)
-              |_,(Add(t,_)|Sub(t,_,_)),_ -> Par(t,x)*y
+              |_,(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)*y
               (* x*y *)
               |_ -> Mul(num0.ptype(x.etype,y.etype),x,y)
               
@@ -449,9 +449,9 @@ namespace Aqualis
                   (* (-x)/y *)
                   |_,Inv(_,v1),_ -> -(v1/y)
                   (* x/(y1+y2+…) or x/(y1-y2) or x/(y1*y2) or x/(y1/y2) *)
-                  |(F|C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x/Par(t,y)
+                  |(F|C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x/Par(t,"(",")",y)
                   (* (x1+x2+…)/y or (x1-x2)/y *)
-                  |(F|C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Par(t,x)/y
+                  |(F|C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)/y
                   (* x/y *)
                   |_ -> Div(num0.ptype(x.etype,y.etype),x,y)
               
@@ -470,8 +470,8 @@ namespace Aqualis
                   |Inv(_,v1),Inv(_,v2) -> (v1/v2)
                   |_,Inv(_,v2) -> -(x/v2)
                   |Inv(_,v1),_ -> -(v1/y)
-                  |_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x./Par(t,y)
-                  |(Add(t,_)|Sub(t,_,_)),_ -> Par(t,x)./y
+                  |_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x./Par(t,"(",")",y)
+                  |(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)./y
                   |_ -> Div(num0.ptype(x.etype,y.etype),x,y)
               |_ ->
                 Console.WriteLine("Error: 非整数型変数に対し整数型除算「./」が適用されました")
@@ -533,8 +533,8 @@ namespace Aqualis
                   |_,Int_e v1,_ when v1<0   -> -((-v1)%y)
                   |_,_,Int_e v2 when v2<0   -> (x%(-v2))
                   |_,Int_e v1,Int_e v2 -> Int_e(v1%v2)
-                  |(C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> Mod(x,Par(t,y))
-                  |(C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Mod(Par(t,x),y)
+                  |(C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> Mod(x,Par(t,"(",")",y))
+                  |(C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Mod(Par(t,"(",")",x),y)
                   |_ -> Mod(x,y)
               |_ ->
                 NaN
@@ -568,7 +568,7 @@ namespace Aqualis
             let dts = p.param.DtoS
             let (<--) (x:num0) (y:num0) = num0.subst false x y
             match p.lang with
-              |F |T ->
+              |F ->
                 match this with
                   |Int_e(n) -> Code(It 4,its n,[])
                   |Dbl_e(n) -> Code(Dt,dts n,[])
@@ -590,7 +590,7 @@ namespace Aqualis
                     let (_,u,c) = v.code.str
                     //aimag関数で表現
                     Code(Dt,"aimag("+u+")",c)
-                  |Par(t,v) ->
+                  |Par(t,_,_,v) ->
                     //先に中身を評価
                     let vv = v.code
                     match vv with
@@ -758,7 +758,7 @@ namespace Aqualis
                     let (_,u,c) = v.code.str
                     //aimag関数で表現
                     Code(Dt,"cimag("+u+")",c)
-                  |Par(t,v) ->
+                  |Par(t,_,_,v) ->
                     //先に中身を評価
                     let vv = v.code
                     match vv with
@@ -965,7 +965,7 @@ namespace Aqualis
                     let (_,u,c) = a.code.str
                     //メンバ変数iで表現
                     Code(Dt,u+".i",a::c)
-                  |Par(t,v) ->
+                  |Par(t,_,_,v) ->
                     //先に中身を評価
                     let vv = v.code
                     match vv with
@@ -1156,6 +1156,254 @@ namespace Aqualis
                     //変更不要
                     Code(a,b,c)
                   |x -> x
+              |T ->
+                match this with
+                  |Int_e(n) -> Code(It 4,its n,[])
+                  |Dbl_e(n) -> Code(Dt,dts n,[])
+                  |Str_e(s) -> Code(Structure("string"),"\""+s.Replace("\"","\"\"")+"\"",[])
+                  |Var(t,n,k) ->
+                    //変数名をそのままコードに変換
+                    Code(t,n,k)
+                  |Inv(t,v) ->
+                    //先に中身を評価
+                    let (_,u,c) = v.code.str
+                    Code(t,"-"+u,c)
+                  |Re(v) ->
+                    //先に中身を評価
+                    let (_,u,c) = v.code.str
+                    //real関数で表現
+                    Code(Dt,"real("+u+")",c)
+                  |Im(v) ->
+                    //先に中身を評価
+                    let (_,u,c) = v.code.str
+                    //aimag関数で表現
+                    Code(Dt,"aimag("+u+")",c)
+                  |Par(t,op,cl,v) ->
+                    //先に中身を評価
+                    let vv = v.code
+                    match vv with
+                      |Var _ ->
+                        //計算結果が変数に代入されているので括弧は不要
+                        vv
+                      |_ ->
+                        let (t,u,c) = vv.str
+                        //括弧を追加
+                        Code(t,op+u+cl,c)
+                  |Add(t,v1) ->
+                    //両者の中身を評価
+                    let (u1,c1) = 
+                        [0..v1.Length-1]
+                        |> List.fold (fun (u0,c0) i -> 
+                                       match v1.[i] with
+                                         |Inv(_,v) ->
+                                           let (_,u,c) = v.code.str
+                                           u0+(if i=0 then "" else "-")+u,c0@c
+                                         |v ->
+                                           let (_,u,c) = v.code.str
+                                           u0+(if i=0 then "" else "+")+u,c0@c
+                                      ) ("",[])
+                    //+記号で加算
+                    Code(t,u1,c1)
+                  |Sub(t,v1,v2) ->
+                    //両者の中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //-記号で減算
+                    Code(t,u1+"-"+u2,c2@c1)
+                  |Mul(t,v1,v2) ->
+                    //両者の中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //*記号で加算
+                    Code(t,u1+" "+u2,c2@c1)
+                  |Div(t,v1,v2) ->
+                    //両者の中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //記号で減算
+                    Code(t,"\\frac{"+u1+"}{"+u2+"}",c2@c1)
+                  |Idx1(t,v,i1) ->
+                    //両者の中身を評価
+                    let (_,u,c) = v.code.str
+                    let (_,u1,c1) = i1.code.str
+                    Code(t,u+"\\left("+u1+"\\right)",c@c1)
+                  |Idx2(t,v,i1,i2) ->
+                    //両者の中身を評価
+                    let (_,u,c) = v.code.str
+                    let (_,u1,c1) = i1.code.str
+                    let (_,u2,c2) = i2.code.str
+                    Code(t,u+"\\left("+u1+","+u2+"\\right)",c@c2@c1)
+                  |Idx3(t,v,i1,i2,i3) ->
+                    //両者の中身を評価
+                    let (_,u,c) = v.code.str
+                    let (_,u1,c1) = i1.code.str
+                    let (_,u2,c2) = i2.code.str
+                    let (_,u3,c3) = i3.code.str
+                    Code(t,u+"\\left("+u1+","+u2+","+u3+"\\right)",c@c2@c1@c3)
+                  |Pow(t,v1,v2) ->
+                    //引数を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    Code(t,u1+"^{"+u2+"}",c2@c1)
+                  |Mod(v1,v2) ->
+                    //引数を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    Code(It 4,"mod"+"\\left("+u1+","+u2+"\\right)",c2@c1)
+                  |Exp(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\exp"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\exp"+"\\left("+u+"\\right)",c)
+                  |Sin(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\sin"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\sin"+"\\left("+u+"\\right)",c)
+                  |Cos(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\cos"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\cos"+"\\left("+u+"\\right)",c)
+                  |Tan(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\tan"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\tan"+"\\left("+u+"\\right)",c)
+                  |Asin(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\arcsin"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\arcsin"+"\\left("+u+"\\right)",c)
+                  |Acos(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\arccos"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\arccos"+"\\left("+u+"\\right)",c)
+                  |Atan(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\arctan"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\arctan"+"\\left("+u+"\\right)",c)
+                  |Atan2(t,v1,v2) ->
+                    //引数を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    Code(t,"\\arctan"+"\\left("+u1+","+u2+"\\right)",c2@c1)
+                  |Abs(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\left|"+u+"\\right|",c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\left|"+u+"\\right|",c)
+                  |Log(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\log"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\log"+"\\left("+u+"\\right)",c)
+                  |Log10(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\log10"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\log10"+"\\left("+u+"\\right)",c)
+                  |Sqrt(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\sqrt{"+u+"}",c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\sqrt{"+u+"}",c)
+                  |Floor(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\lfloor"+u+"\\rfloor",c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\lfloor"+u+"\\rfloor",c)
+                  |Ceiling(t,v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\lceil"+u+"\\rceil",c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(t,"\\ceil"+u+"\\rceil",c)
+                  |ToInt(v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(It 4,"\\mathrm{int}"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(It 4,"\\mathrm{int}"+"\\left("+u+"\\right)",c)
+                  |ToDbl(v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(Dt,"\\mathrm{double}"+u,c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(Dt,"\\mathrm{double}"+"\\left("+u+"\\right)",c)
+                  |Conj(v) ->
+                    //引数を評価
+                    match v with
+                      |Par(_)|Var(_) ->
+                        let (_,u,c) = v.code.str
+                        Code(Zt,u+"^*",c)
+                      |_ ->
+                        let (_,u,c) = v.code.str
+                        Code(Zt,"\\left("+u+"\\right)^*",c)
+                  |Code(a,b,c) ->
+                    //変更不要
+                    Code(a,b,c)
+                  |_ ->
+                    NaN
               |H ->
                 match this with
                   |Int_e(n) -> Code(It 4,its n,[])
@@ -1176,7 +1424,7 @@ namespace Aqualis
                     let (_,u,c) = v.code.str
                     //aimag関数で表現
                     Code(Dt,"<mi>Im</mi><mo>&af;</mo><mrow><mo>(</mo>"+u+"<mo>)</mo></mrow>",c)
-                  |Par(t,v) ->
+                  |Par(t,_,_,v) ->
                     //先に中身を評価
                     let vv = v.code
                     match vv with
@@ -1628,7 +1876,99 @@ namespace Aqualis
                           |None ->
                             Int_e 0
                   |Null -> NaN
-              |F |T ->
+              |T ->
+                match this with
+                  |And [Less(v1,v2);Less(v2B,v3)] when v2.name=v2B.name ->
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    let (_,u3,c3) = v3.code.str
+                    Code(It 4,u1+" < "+u2+" < "+u3,c3@c2@c1)
+                  |And [LessEq(v1,v2);Less(v2B,v3)] when v2.name=v2B.name ->
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    let (_,u3,c3) = v3.code.str
+                    Code(It 4,u1+" \\leq "+u2+" < "+u3,c3@c2@c1)
+                  |And [Less(v1,v2);LessEq(v2B,v3)] when v2.name=v2B.name ->
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    let (_,u3,c3) = v3.code.str
+                    Code(It 4,u1+" < "+u2+" \\leq "+u3,c3@c2@c1)
+                  |And [LessEq(v1,v2);LessEq(v2B,v3)] when v2.name=v2B.name ->
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    let (_,u3,c3) = v3.code.str
+                    Code(It 4,u1+" \\leq "+u2+" \\leq "+u3,c3@c2@c1)
+                  |Eq(v1,v2) ->
+                    //先に中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //real関数で表現
+                    Code(It 4,u1+"=="+u2,c2@c1)
+                  |NEq(v1,v2) ->
+                    //先に中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //real関数で表現
+                    Code(It 4,u1+"/="+u2,c2@c1)
+                  |Greater(v1,v2) ->
+                    //先に中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //real関数で表現
+                    Code(It 4,u1+">"+u2,c2@c1)
+                  |GreaterEq(v1,v2) ->
+                    //先に中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //real関数で表現
+                    Code(It 4,u1+">="+u2,c2@c1)
+                  |Less(v1,v2) ->
+                    //先に中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //real関数で表現
+                    Code(It 4,u1+"<"+u2,c2@c1)
+                  |LessEq(v1,v2) ->
+                    //先に中身を評価
+                    let (_,u1,c1) = v1.code.str
+                    let (_,u2,c2) = v2.code.str
+                    //real関数で表現
+                    Code(It 4,u1+"<="+u2,c2@c1)
+                  |And(v) ->
+                    //先に中身を評価
+                    let uc = v |> List.map (fun q ->
+                                   let (_,u1,c1) = q.code.str
+                                   (u1,c1))
+                    let code = List.fold (fun acc i -> 
+                                  let (u,_)=uc.[i]
+                                  if i=0 then
+                                      acc + "(" + u + ")"
+                                  else
+                                      acc + " .and. " + "(" + u + ")" ) "" [0..uc.Length-1]
+                    let clst = List.fold (fun acc i -> 
+                                  let (_,c)=uc.[i]
+                                  acc@c) [] [0..uc.Length-1]
+                    //コード生成
+                    Code(It 4,code,clst)
+                  |Or(v) ->
+                    //先に中身を評価
+                    let uc = v |> List.map (fun q ->
+                                   let (_,u1,c1) = q.code.str
+                                   (u1,c1))
+                    let code = List.fold (fun acc i -> 
+                                  let (u,_)=uc.[i]
+                                  if i=0 then
+                                      acc + "(" + u + ")"
+                                  else
+                                      acc + " .or. " + "(" + u + ")" ) "" [0..uc.Length-1]
+                    let clst = List.fold (fun acc i -> 
+                                  let (_,c)=uc.[i]
+                                  acc@c) [] [0..uc.Length-1]
+                    //コード生成
+                    Code(It 4,code,clst)
+                  |_ ->
+                    NaN
+              |F ->
                 match this with
                   |Eq(v1,v2) ->
                     //先に中身を評価

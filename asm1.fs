@@ -24,8 +24,8 @@ namespace Aqualis
                 //#defineで定義済み
                 Var(Zt,"uj",[])
               |T   ->
-                p.param.vreg(Zt,A0,"uj","(0d0,1d0)")
-                Var(Zt,"uj",[])
+                p.param.vreg(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                Var(Zt,"\\mathrm{j}",[])
               |H   ->
                 p.param.vreg(Zt,A0,"&ImaginaryI;","(0d0,1d0)")
                 Var(Zt,"<mi>&ImaginaryI;</mi>",[])
@@ -44,8 +44,8 @@ namespace Aqualis
                 p.param.vreg(Dt,A0,"pi","3.14159265358979")
                 Var(Dt,"pi",[])
               |T   ->
-                p.param.vreg(Dt,A0,"pi","3.14159265358979")
-                Var(Dt,"pi",[])
+                p.param.vreg(Dt,A0,"\\pi","3.14159265358979")
+                Var(Dt,"\\pi",[])
               |H   ->
                 p.param.vreg(Dt,A0,"&pi;","3.14159265358979")
                 Var(Dt,"<mi>&pi;</mi>",[])
@@ -89,20 +89,23 @@ namespace Aqualis
                   (* [小数定数]^[小数定数] *)
                   |(F|C89|C99),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1**v2)
                   (* [負の整数定数]^y *)
-                  |_,Int_e v1,_ when v1<0   -> asm.pow(Par(x.etype,x),y)
+                  |_,Int_e v1,_ when v1<0   -> asm.pow(Par(x.etype,"(",")",x),y)
                   (* [負の小数定数]^y *)
-                  |_,Dbl_e v1,_ when v1<0.0 -> asm.pow(Par(x.etype,x),y)
+                  |_,Dbl_e v1,_ when v1<0.0 -> asm.pow(Par(x.etype,"(",")",x),y)
                   (* x^[負の整数定数] *)
-                  |_,_,Int_e v2 when v2<0   -> asm.pow(x,Par(y.etype,y))
+                  |T,_,Int_e v2 when v2<0   -> asm.pow(x,y)
+                  |_,_,Int_e v2 when v2<0   -> asm.pow(x,Par(y.etype,"(",")",y))
                   (* x^[負の小数定数] *)
-                  |_,_,Dbl_e v2 when v2<0.0 -> asm.pow(x,Par(y.etype,y))
+                  |T,_,Dbl_e v2 when v2<0.0 -> asm.pow(x,y)
+                  |_,_,Dbl_e v2 when v2<0.0 -> asm.pow(x,Par(y.etype,"(",")",y))
                   (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) 
                      y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-                  |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> asm.pow(Par(x.etype,x),Par(y.etype,y))
+                  |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> asm.pow(Par(x.etype,"(",")",x),y)
+                  |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> asm.pow(Par(x.etype,"(",")",x),Par(y.etype,"(",")",y))
                   (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) *)
-                  |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> asm.pow(Par(x.etype,x),y)
+                  |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> asm.pow(Par(x.etype,"(",")",x),y)
                   (* y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-                  |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> asm.pow(x,Par(y.etype,y))
+                  |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> asm.pow(x,Par(y.etype,"(",")",y))
                   (* [複素数]^y or x^[複素数] *)
                   |_,Var(Zt,_,_),_|_,_,Var(Zt,_,_) -> Pow(Zt,x,y)
                   (* [小数]^y or x^[小数] *)
@@ -444,14 +447,14 @@ namespace Aqualis
         static member toint (v:num0) = 
             match v with
               |Add _|Sub _|Mul _|Div _ -> 
-                Par(It 4,ToInt(v))
+                Par(It 4,"(",")",ToInt(v))
               |_ -> 
                 ToInt(v)
         ///<summary>倍精度浮動小数点型に変換</summary>
         static member todouble (v:num0) = 
             match v with
               |Add _|Sub _|Mul _|Div _ -> 
-                Par(Dt,ToDbl(v))
+                Par(Dt,"(",")",ToDbl(v))
               |_ -> 
                 ToDbl(v)
         ///<summary>共役複素数</summary>
@@ -468,4 +471,10 @@ namespace Aqualis
                 Var(Zt,z.name,[z]@c)
               |_ ->
                 Conj(v)
-                
+        ///<summary>括弧「()」</summary>
+        static member par1 (v:num0) = Par(v.etype,"\\left(","\\right)",v)
+        ///<summary>括弧「[]」</summary>
+        static member par2 (v:num0) = Par(v.etype,"\\left[","\\right]",v)
+        ///<summary>括弧「{}」</summary>
+        static member par3 (v:num0) = Par(v.etype,"\\left\\{","\\right\\}",v)
+        
