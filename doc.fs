@@ -112,7 +112,7 @@ namespace Aqualis
                 num0.NaN
                 
         ///<summary>積分</summary>
-        static member integral (a:num0) (b:num0) (eq:num0) (x:num0) =
+        static member integral (a:num0,b:num0) = fun (eq:num0) (x:num0) ->
             match p.lang with
               |T ->
                 let (_,ta,_) = a.code.str
@@ -123,6 +123,18 @@ namespace Aqualis
               |_ ->
                 num0.NaN
                 
+        ///<summary>積分</summary>
+        static member integral (a:int,b:num0) = fun (eq:num0) (x:num0) ->
+            doc.integral (I a,b) eq x
+
+        ///<summary>積分</summary>
+        static member integral (a:num0,b:int) = fun (eq:num0) (x:num0) ->
+            doc.integral (a,I b) eq x
+            
+        ///<summary>積分</summary>
+        static member integral (a:int,b:int) = fun (eq:num0) (x:num0) ->
+            doc.integral (I a, I b) eq x
+            
         ///<summary>微分</summary>
         static member diff (f:num0) (x:num0) =
             match p.lang with

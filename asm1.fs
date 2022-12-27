@@ -475,6 +475,20 @@ namespace Aqualis
         static member par1 (v:num0) = Par(v.etype,"\\left(","\\right)",v)
         ///<summary>括弧「[]」</summary>
         static member par2 (v:num0) = Par(v.etype,"\\left[","\\right]",v)
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:num0,b:num0) = 
+            let (_,ta,_) = a.code.str
+            let (_,tb,_) = b.code.str
+            Par(v.etype,"\\left[","\\right]_{"+ta+"}^{"+tb+"}",v)
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:int,b:num0) = 
+            asm.par2 (v,I a,b)
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:num0,b:int) = 
+            asm.par2 (v,a,I b)
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:int,b:int) = 
+            asm.par2 (v,I a,I b)
         ///<summary>括弧「{}」</summary>
         static member par3 (v:num0) = Par(v.etype,"\\left\\{","\\right\\}",v)
         
