@@ -117,6 +117,8 @@ namespace Aqualis
         let mutable is_omp_used = false
         ///<summary>trueのときOpenACCが使用中</summary>
         let mutable is_oacc_used = false
+        ///<summary>trueのとき数式を最適化</summary>
+        let mutable eq_simplify = true
         
         ///<summary>ソースファイル出力先ディレクトリ</summary>
         member __.dir with get() = outputdir
@@ -204,6 +206,11 @@ namespace Aqualis
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
         member __.extn with get() = extn_
         
+        ///<summary>trueのとき数式を最適化</summary>
+        member __.isEqSimplify
+            with get () = eq_simplify
+            and set (value) = eq_simplify <- value
+
         ///<summary>Aqualisバージョン番号</summary>
         member __.ver = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location)
         

@@ -66,9 +66,11 @@ namespace Aqualis
             let q = p.param
             match p.lang with
               |T ->
+                AqualisCompiler.set_EquationSimplify OFF
                 q.codewrite("\\begin{align*}")
                 code()
                 q.codewrite("\\end{align*}")
+                AqualisCompiler.set_EquationSimplify ON
               |_ ->
                 code()
                 
@@ -77,10 +79,12 @@ namespace Aqualis
             let q = p.param
             match p.lang with
               |T ->
+                AqualisCompiler.set_EquationSimplify OFF
                 q.codewrite("\\begin{align}")
                 code()
                 if not (label="") then q.codewrite("\\label{"+label+"}")
                 q.codewrite("\\end{align}")
+                AqualisCompiler.set_EquationSimplify ON
               |_ ->
                 code()
                 

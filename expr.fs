@@ -163,47 +163,50 @@ namespace Aqualis
     
         ///<summary>加算</summary>
         static member (+) (x:num0,y:num0) : num0 =
-            match p.lang,x,y with
-              (* x+0 *)
-              |_,_,Int_e 0|_,_,Dbl_e 0.0 -> x
-              (* 0+y *)
-              |_,Int_e 0,_|_,Dbl_e 0.0,_ -> y
-              (* (-x)+(-y) *)
-              |_,Inv(_,v1),Inv(_,v2) -> -(v1+v2)
-              (* x+(-y) *)
-              |_,_,Inv(_,v2) -> x-v2
-              (* (-x)+y *)
-              |_,Inv(_,v1),_ -> y-v1
-              (* x+[整数定数] *)
-              |_,_,Int_e v2 when v2<0   -> x-Int_e(-v2)
-              (* x+[小数定数] *)
-              |_,_,Dbl_e v2 when v2<0.0 -> x-Dbl_e(-v2)
-              (* [整数定数]+[整数定数] *)
-              |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1+v2)
-              (* [整数定数]+[小数定数] *)
-              |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)+v2)
-              (* [小数定数]+[整数定数] *)
-              |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1+(double v2))
-              (* [小数定数]+[小数定数] *)
-              |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1+v2)
-              (* (x1+x2+…)+(y1+y2+…) *)
-              |_,Add(_,v1),Add(_,v2) -> Add(num0.ptype(x.etype,y.etype),v1@v2)
-              (* (x1-x2)+(y1+y2+…) *)
-              |_,Sub(_,u1,u2),Add(t,v2) -> Add(t,[u1;-u2;]@v2)
-              (* (x1+x2+…)+(y1-y2) *)
-              |_,Add(t,v1),Sub(_,u1,u2) -> Add(t,v1@[u1;-u2])
-              (* x+(y1+y2+…) *)
-              |_,_,Add(t,v2) -> Add(t,x::v2)
-              (* (x1+x2+…)+y *)
-              |_,Add(t,v1),_ -> Add(t,v1@[y])
-              (* (x1-x2)+(y1-y2) *)
-              |_,Sub(t1,v1,v2),Sub(t2,u1,u2) -> Add(num0.ptype(t1,t2),[v1;-v2;u1;-u2])
-              (* x+(y1+y2+…) *)
-              |_,_,Sub(_,v1,v2) -> Add(num0.ptype(x.etype,y.etype),[x;v1;-v2])
-              (* (x1-x2)+y *)
-              |_,Sub(_,v1,v2),_ -> Add(num0.ptype(x.etype,y.etype),[v1;-v2;y])
-              (* x+y *)
-              |_ -> Add(num0.ptype(x.etype,y.etype),[x;y])
+            if p.param.isEqSimplify then
+              match p.lang,x,y with
+                (* x+0 *)
+                |_,_,Int_e 0|_,_,Dbl_e 0.0 -> x
+                (* 0+y *)
+                |_,Int_e 0,_|_,Dbl_e 0.0,_ -> y
+                (* (-x)+(-y) *)
+                |_,Inv(_,v1),Inv(_,v2) -> -(v1+v2)
+                (* x+(-y) *)
+                |_,_,Inv(_,v2) -> x-v2
+                (* (-x)+y *)
+                |_,Inv(_,v1),_ -> y-v1
+                (* x+[整数定数] *)
+                |_,_,Int_e v2 when v2<0   -> x-Int_e(-v2)
+                (* x+[小数定数] *)
+                |_,_,Dbl_e v2 when v2<0.0 -> x-Dbl_e(-v2)
+                (* [整数定数]+[整数定数] *)
+                |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1+v2)
+                (* [整数定数]+[小数定数] *)
+                |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)+v2)
+                (* [小数定数]+[整数定数] *)
+                |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1+(double v2))
+                (* [小数定数]+[小数定数] *)
+                |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1+v2)
+                (* (x1+x2+…)+(y1+y2+…) *)
+                |_,Add(_,v1),Add(_,v2) -> Add(num0.ptype(x.etype,y.etype),v1@v2)
+                (* (x1-x2)+(y1+y2+…) *)
+                |_,Sub(_,u1,u2),Add(t,v2) -> Add(t,[u1;-u2;]@v2)
+                (* (x1+x2+…)+(y1-y2) *)
+                |_,Add(t,v1),Sub(_,u1,u2) -> Add(t,v1@[u1;-u2])
+                (* x+(y1+y2+…) *)
+                |_,_,Add(t,v2) -> Add(t,x::v2)
+                (* (x1+x2+…)+y *)
+                |_,Add(t,v1),_ -> Add(t,v1@[y])
+                (* (x1-x2)+(y1-y2) *)
+                |_,Sub(t1,v1,v2),Sub(t2,u1,u2) -> Add(num0.ptype(t1,t2),[v1;-v2;u1;-u2])
+                (* x+(y1+y2+…) *)
+                |_,_,Sub(_,v1,v2) -> Add(num0.ptype(x.etype,y.etype),[x;v1;-v2])
+                (* (x1-x2)+y *)
+                |_,Sub(_,v1,v2),_ -> Add(num0.ptype(x.etype,y.etype),[v1;-v2;y])
+                (* x+y *)
+                |_ -> Add(num0.ptype(x.etype,y.etype),[x;y])
+            else
+              Add(num0.ptype(x.etype,y.etype),[x;y])
               
         ///<summary>加算</summary>
         static member (+) (x:num0,y:int) = x+(Int_e y)
@@ -227,48 +230,51 @@ namespace Aqualis
         
         ///<summary>減算</summary>
         static member (-) (x:num0,y:num0) : num0 =
-            match p.lang,x,y with
-              (* x-0 *)
-              |_,_,Int_e 0|_,_,Dbl_e 0.0 -> x
-              (* 0-y *)
-              |_,Int_e 0,_|_,Dbl_e 0.0,_ -> -y //Inv(y.etype,y)
-              (* (-x)-(-y) *)
-              |_,Inv(_,v1),Inv(_,v2) -> v2-v1
-              (* x-(-y) *)
-              |_,_,Inv(_,v2) -> x+v2
-              (* (-x)-y *)
-              |_,Inv(_,v1),_ -> -(y+v1)
-              (* x-[整数定数] *)
-              |_,_,Int_e v2 when v2<0   -> x+Int_e(-v2)
-              (* x-[小数定数] *)
-              |_,_,Dbl_e v2 when v2<0.0 -> x+Dbl_e(-v2)
-              (* [整数定数]-[整数定数] *)
-              |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1-v2)
-              (* [整数定数]-[小数定数] *)
-              |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)-v2)
-              (* [小数定数]-[整数定数] *)
-              |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1-(double v2))
-              (* [小数定数]-[小数定数] *)
-              |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1-v2)
-              (* (x1+x2+…)-(y1+y2+…) *)
-              |_,Add(_,v1),Add(_,v2) -> Add(num0.ptype(x.etype,y.etype),v1@(v2|>List.map(fun v -> -v)))
-              (* (x1-x2)-(y1+y2+…) *)
-              |_,Sub(_,u1,u2),Add(t,v2) -> Add(t,[u1;-u2;]@(v2|>List.map(fun v -> -v)))
-              (* (x1+x2+…)-(y1-y2) *)
-              |_,Add(t,v1),Sub(_,u1,u2) -> Add(t,v1@[-u1;u2])
-              (* x-(y1+y2+…) *)
-              |_,_,Add(t,v2) -> Add(t,x::(v2|>List.map(fun v -> -v)))
-              (* (x1+x2+…)-y *)
-              |_,Add(t,v1),_ -> Add(t,v1@[-y])
-              (* (x1-x2)-(y1-y2) *)
-              |_,Sub(t1,v1,v2),Sub(t2,u1,u2) -> Add(num0.ptype(t1,t2),[v1;-v2;-u1;u2])
-              (* x-(y1-y2) *)
-              |_,_,Sub(_,v1,v2) -> Add(num0.ptype(x,y),[x;-v1;v2])
-              (* (x1-x2)-y *)
-              |_,Sub(_,v1,v2),_ -> Add(num0.ptype(x,y),[v1;-v2;-y])
-              (* x-y *)
-              |_ -> Sub(num0.ptype(x.etype,y.etype),x,y)
-    
+            if p.param.isEqSimplify then
+              match p.lang,x,y with
+                (* x-0 *)
+                |_,_,Int_e 0|_,_,Dbl_e 0.0 -> x
+                (* 0-y *)
+                |_,Int_e 0,_|_,Dbl_e 0.0,_ -> -y //Inv(y.etype,y)
+                (* (-x)-(-y) *)
+                |_,Inv(_,v1),Inv(_,v2) -> v2-v1
+                (* x-(-y) *)
+                |_,_,Inv(_,v2) -> x+v2
+                (* (-x)-y *)
+                |_,Inv(_,v1),_ -> -(y+v1)
+                (* x-[整数定数] *)
+                |_,_,Int_e v2 when v2<0   -> x+Int_e(-v2)
+                (* x-[小数定数] *)
+                |_,_,Dbl_e v2 when v2<0.0 -> x+Dbl_e(-v2)
+                (* [整数定数]-[整数定数] *)
+                |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1-v2)
+                (* [整数定数]-[小数定数] *)
+                |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)-v2)
+                (* [小数定数]-[整数定数] *)
+                |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1-(double v2))
+                (* [小数定数]-[小数定数] *)
+                |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1-v2)
+                (* (x1+x2+…)-(y1+y2+…) *)
+                |_,Add(_,v1),Add(_,v2) -> Add(num0.ptype(x.etype,y.etype),v1@(v2|>List.map(fun v -> -v)))
+                (* (x1-x2)-(y1+y2+…) *)
+                |_,Sub(_,u1,u2),Add(t,v2) -> Add(t,[u1;-u2;]@(v2|>List.map(fun v -> -v)))
+                (* (x1+x2+…)-(y1-y2) *)
+                |_,Add(t,v1),Sub(_,u1,u2) -> Add(t,v1@[-u1;u2])
+                (* x-(y1+y2+…) *)
+                |_,_,Add(t,v2) -> Add(t,x::(v2|>List.map(fun v -> -v)))
+                (* (x1+x2+…)-y *)
+                |_,Add(t,v1),_ -> Add(t,v1@[-y])
+                (* (x1-x2)-(y1-y2) *)
+                |_,Sub(t1,v1,v2),Sub(t2,u1,u2) -> Add(num0.ptype(t1,t2),[v1;-v2;-u1;u2])
+                (* x-(y1-y2) *)
+                |_,_,Sub(_,v1,v2) -> Add(num0.ptype(x,y),[x;-v1;v2])
+                (* (x1-x2)-y *)
+                |_,Sub(_,v1,v2),_ -> Add(num0.ptype(x,y),[v1;-v2;-y])
+                (* x-y *)
+                |_ -> Sub(num0.ptype(x.etype,y.etype),x,y)
+            else
+              Sub(num0.ptype(x.etype,y.etype),x,y)
+              
         ///<summary>減算</summary>
         static member (-) (x:num0,y:int) = x-(Int_e y)
         
@@ -291,39 +297,42 @@ namespace Aqualis
         
         ///<summary>乗算</summary>
         static member (*) (x:num0,y:num0) : num0 =
-            match p.lang,x,y with
-              (* x*0 *)
-              |_,Int_e 0,_|_,Dbl_e 0.0,_|_,_,Int_e 0|_,_,Dbl_e 0.0 -> Int_e 0
-              (* 1*y *)
-              |_,Int_e 1,_|_,Dbl_e 1.0,_ -> y
-              (* x*1 *)
-              |_,_,Int_e 1|_,_,Dbl_e 1.0 -> x
-              (* [負の整数定数]*y *)
-              |_,Int_e v1,_ when v1<0   -> -((-v1)*y)
-              (* [負の小数定数]*y *)
-              |_,Dbl_e v1,_ when v1<0.0 -> -((-v1)*y)
-              (* x*[負の整数定数] *)
-              |_,_,Int_e v2 when v2<0   -> -(x*(-v2))
-              (* x*[負の小数定数] *)
-              |_,_,Dbl_e v2 when v2<0.0 -> -(x*(-v2))
-              (* x*(-y) *)
-              |_,_,Inv(_,v2) -> -(x*v2)
-              (* (-x)*y *)
-              |_,Inv(_,v1),_ -> -(v1*y)
-              (* [整数定数]*[整数定数] *)
-              |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1*v2)
-              (* [整数定数]*[小数定数] *)
-              |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)*v2)
-              (* [小数定数]*[整数定数] *)
-              |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1*(double v2))
-              (* [小数定数]*[小数定数] *)
-              |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1*v2)
-              (* x*(y1+y2+…) or x*(y1-y2) *)
-              |_,_,(Add(t,_)|Sub(t,_,_)) -> x*Par(t,"(",")",y)
-              (* (x1+x2+…)*y or (x1-x2)*y *)
-              |_,(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)*y
-              (* x*y *)
-              |_ -> Mul(num0.ptype(x.etype,y.etype),x,y)
+            if p.param.isEqSimplify then
+              match p.lang,x,y with
+                (* x*0 *)
+                |_,Int_e 0,_|_,Dbl_e 0.0,_|_,_,Int_e 0|_,_,Dbl_e 0.0 -> Int_e 0
+                (* 1*y *)
+                |_,Int_e 1,_|_,Dbl_e 1.0,_ -> y
+                (* x*1 *)
+                |_,_,Int_e 1|_,_,Dbl_e 1.0 -> x
+                (* [負の整数定数]*y *)
+                |_,Int_e v1,_ when v1<0   -> -((-v1)*y)
+                (* [負の小数定数]*y *)
+                |_,Dbl_e v1,_ when v1<0.0 -> -((-v1)*y)
+                (* x*[負の整数定数] *)
+                |_,_,Int_e v2 when v2<0   -> -(x*(-v2))
+                (* x*[負の小数定数] *)
+                |_,_,Dbl_e v2 when v2<0.0 -> -(x*(-v2))
+                (* x*(-y) *)
+                |_,_,Inv(_,v2) -> -(x*v2)
+                (* (-x)*y *)
+                |_,Inv(_,v1),_ -> -(v1*y)
+                (* [整数定数]*[整数定数] *)
+                |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1*v2)
+                (* [整数定数]*[小数定数] *)
+                |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)*v2)
+                (* [小数定数]*[整数定数] *)
+                |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1*(double v2))
+                (* [小数定数]*[小数定数] *)
+                |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1*v2)
+                (* x*(y1+y2+…) or x*(y1-y2) *)
+                |_,_,(Add(t,_)|Sub(t,_,_)) -> x*Par(t,"(",")",y)
+                (* (x1+x2+…)*y or (x1-x2)*y *)
+                |_,(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)*y
+                (* x*y *)
+                |_ -> Mul(num0.ptype(x.etype,y.etype),x,y)
+            else
+              Mul(num0.ptype(x.etype,y.etype),x,y)
               
         ///<summary>乗算</summary>
         static member (*) (x:num0,y:int) = x*(Int_e y)
@@ -365,119 +374,125 @@ namespace Aqualis
                 
         ///<summary>除算</summary>
         static member (/) (x:num0,y:num0) : num0 =
-            match x.etype,y.etype with
-              |It _,It _ ->
-                match (x,y) with
-                  (* x/0 *)
-                  |_,Int_e 0 ->
-                    Console.WriteLine("Error: ゼロ割りを検出しました")
-                    Console.Read() |> ignore
-                    NaN
-                  (* 0/y *)
-                  |Int_e 0,_ -> Int_e 0
-                  (* x/1 *)
-                  |_,Int_e 1 -> x
-                  (* [負の整数定数]/[負の整数定数] *)
-                  |Int_e v1,Int_e v2 when v1<0 && v2<0 -> Dbl_e((double -v1)/(double -v2))
-                  (* [負の整数定数]/[整数定数] *)
-                  |Int_e v1,Int_e v2 when v1<0 -> -Dbl_e((double -v1)/(double  v2))
-                  (* [整数定数]/[負の整数定数] *)
-                  |Int_e v1,Int_e v2 when v2<0 -> -Dbl_e((double  v1)/(double -v2))
-                  (* [整数定数]/[整数定数] *)
-                  |Int_e v1,Int_e v2 -> Dbl_e((double v1)/(double v2))
-                  (* [負の整数定数]/y *)
-                  |Int_e v1,_ when v1<0   -> -((-v1)/y)
-                  (* x/[負の整数定数] *)
-                  |_,Int_e v2 when v2<0   -> -(x/(-v2))
-                  (* x/[整数定数] *)
-                  |_,Int_e v2             -> x/(double v2)
-                  (* (-x)/(-y) *)
-                  |Inv(_,v1),Inv(_,v2) -> v1/v2
-                  (* x/(-y) *)
-                  |_,Inv(_,v2) -> -(x/v2)
-                  (* (-x)/y *)
-                  |Inv(_,v1),_ -> -(v1/y)
-                  (* x/y *)
-                  |_ -> x/ToDbl(y)
-              |_ ->
-                match p.lang,x,y with
-                  (* x/0 *)
-                  |_,_,Int_e 0 |_,_,Dbl_e 0.0 ->
-                    Console.WriteLine("Error: ゼロ割りを検出しました")
-                    Console.Read() |> ignore
-                    NaN
-                  (* 0/y *)
-                  |_,Int_e 0,_ -> Int_e 0
-                  |_,Dbl_e 0.0,_ -> Dbl_e 0.0
-                  |_,_,Dbl_e 1.0 -> x
-                  (* [負の整数定数]/[負の整数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when v1<0.0 && v2<0 ->  Dbl_e(( v1)/(double -v2))
-                  (* [負の整数定数]/[整数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when v1<0.0         -> -Dbl_e((-v1)/(double v2))
-                  (* [整数定数]/[負の整数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when           v2<0 -> -Dbl_e(( v1)/(-(double v2)))
-                  (* [整数定数]/[整数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Int_e v2                     ->  Dbl_e(v1/(double v2))
-                  (* [負の整数定数]/[負の小数定数] *)
-                  |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when v1<0 && v2<0.0   ->  Dbl_e((double  v1)/(-v2))
-                  (* [負の整数定数]/[小数定数] *)
-                  |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when v1<0             -> -Dbl_e((double -v1)/( v2))
-                  (* [整数定数]/[負の小数定数] *)
-                  |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when         v2<0.0   -> -Dbl_e((double  v1)/(-v2))
-                  (* [整数定数]/[小数定数] *)
-                  |(F|C89|C99|NL),Int_e v1,Dbl_e v2                       ->  Dbl_e((double v1)/v2)
-                  (* [負の小数定数]/[負の小数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v1<0.0 && v2<0.0 ->  Dbl_e((-v1)/(-v2))
-                  (* [負の小数定数]/[小数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v1<0.0           -> -Dbl_e((-v1)/( v2))
-                  (* [小数定数]/[負の小数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v2<0.0           -> -Dbl_e(( v1)/(-v2))
-                  (* [小数定数]/[小数定数] *)
-                  |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2                       ->  Dbl_e(v1/v2)
-                  (* (-x)/[小数定数] *)
-                  |_,Dbl_e v1,_ when v1<0.0 -> -((-v1)/y)
-                  (* x/[負の小数定数] *)
-                  |_,_,Dbl_e v2 when v2<0.0 -> -(x/(-v2))
-                  (* (-x)/[整数定数] *)
-                  |_,Int_e v1,_ when v1<0   -> -((-v1)/y)
-                  (* x/[負の整数定数] *)
-                  |_,_,Int_e v2 when v2<0   -> -(x/(-v2))
-                  (* (-x)/(-y) *)
-                  |_,Inv(_,v1),Inv(_,v2) -> v1/v2
-                  (* x/(-y) *)
-                  |_,_,Inv(_,v2) -> -(x/v2)
-                  (* (-x)/y *)
-                  |_,Inv(_,v1),_ -> -(v1/y)
-                  (* x/(y1+y2+…) or x/(y1-y2) or x/(y1*y2) or x/(y1/y2) *)
-                  |(F|C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x/Par(t,"(",")",y)
-                  (* (x1+x2+…)/y or (x1-x2)/y *)
-                  |(F|C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)/y
-                  (* x/y *)
-                  |_ -> Div(num0.ptype(x.etype,y.etype),x,y)
+            if p.param.isEqSimplify then
+              match x.etype,y.etype with
+                |It _,It _ ->
+                  match (x,y) with
+                    (* x/0 *)
+                    |_,Int_e 0 ->
+                      Console.WriteLine("Error: ゼロ割りを検出しました")
+                      Console.Read() |> ignore
+                      NaN
+                    (* 0/y *)
+                    |Int_e 0,_ -> Int_e 0
+                    (* x/1 *)
+                    |_,Int_e 1 -> x
+                    (* [負の整数定数]/[負の整数定数] *)
+                    |Int_e v1,Int_e v2 when v1<0 && v2<0 -> Dbl_e((double -v1)/(double -v2))
+                    (* [負の整数定数]/[整数定数] *)
+                    |Int_e v1,Int_e v2 when v1<0 -> -Dbl_e((double -v1)/(double  v2))
+                    (* [整数定数]/[負の整数定数] *)
+                    |Int_e v1,Int_e v2 when v2<0 -> -Dbl_e((double  v1)/(double -v2))
+                    (* [整数定数]/[整数定数] *)
+                    |Int_e v1,Int_e v2 -> Dbl_e((double v1)/(double v2))
+                    (* [負の整数定数]/y *)
+                    |Int_e v1,_ when v1<0   -> -((-v1)/y)
+                    (* x/[負の整数定数] *)
+                    |_,Int_e v2 when v2<0   -> -(x/(-v2))
+                    (* x/[整数定数] *)
+                    |_,Int_e v2             -> x/(double v2)
+                    (* (-x)/(-y) *)
+                    |Inv(_,v1),Inv(_,v2) -> v1/v2
+                    (* x/(-y) *)
+                    |_,Inv(_,v2) -> -(x/v2)
+                    (* (-x)/y *)
+                    |Inv(_,v1),_ -> -(v1/y)
+                    (* x/y *)
+                    |_ -> x/ToDbl(y)
+                |_ ->
+                  match p.lang,x,y with
+                    (* x/0 *)
+                    |_,_,Int_e 0 |_,_,Dbl_e 0.0 ->
+                      Console.WriteLine("Error: ゼロ割りを検出しました")
+                      Console.Read() |> ignore
+                      NaN
+                    (* 0/y *)
+                    |_,Int_e 0,_ -> Int_e 0
+                    |_,Dbl_e 0.0,_ -> Dbl_e 0.0
+                    |_,_,Dbl_e 1.0 -> x
+                    (* [負の整数定数]/[負の整数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when v1<0.0 && v2<0 ->  Dbl_e(( v1)/(double -v2))
+                    (* [負の整数定数]/[整数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when v1<0.0         -> -Dbl_e((-v1)/(double v2))
+                    (* [整数定数]/[負の整数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when           v2<0 -> -Dbl_e(( v1)/(-(double v2)))
+                    (* [整数定数]/[整数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2                     ->  Dbl_e(v1/(double v2))
+                    (* [負の整数定数]/[負の小数定数] *)
+                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when v1<0 && v2<0.0   ->  Dbl_e((double  v1)/(-v2))
+                    (* [負の整数定数]/[小数定数] *)
+                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when v1<0             -> -Dbl_e((double -v1)/( v2))
+                    (* [整数定数]/[負の小数定数] *)
+                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when         v2<0.0   -> -Dbl_e((double  v1)/(-v2))
+                    (* [整数定数]/[小数定数] *)
+                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2                       ->  Dbl_e((double v1)/v2)
+                    (* [負の小数定数]/[負の小数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v1<0.0 && v2<0.0 ->  Dbl_e((-v1)/(-v2))
+                    (* [負の小数定数]/[小数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v1<0.0           -> -Dbl_e((-v1)/( v2))
+                    (* [小数定数]/[負の小数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v2<0.0           -> -Dbl_e(( v1)/(-v2))
+                    (* [小数定数]/[小数定数] *)
+                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2                       ->  Dbl_e(v1/v2)
+                    (* (-x)/[小数定数] *)
+                    |_,Dbl_e v1,_ when v1<0.0 -> -((-v1)/y)
+                    (* x/[負の小数定数] *)
+                    |_,_,Dbl_e v2 when v2<0.0 -> -(x/(-v2))
+                    (* (-x)/[整数定数] *)
+                    |_,Int_e v1,_ when v1<0   -> -((-v1)/y)
+                    (* x/[負の整数定数] *)
+                    |_,_,Int_e v2 when v2<0   -> -(x/(-v2))
+                    (* (-x)/(-y) *)
+                    |_,Inv(_,v1),Inv(_,v2) -> v1/v2
+                    (* x/(-y) *)
+                    |_,_,Inv(_,v2) -> -(x/v2)
+                    (* (-x)/y *)
+                    |_,Inv(_,v1),_ -> -(v1/y)
+                    (* x/(y1+y2+…) or x/(y1-y2) or x/(y1*y2) or x/(y1/y2) *)
+                    |(F|C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x/Par(t,"(",")",y)
+                    (* (x1+x2+…)/y or (x1-x2)/y *)
+                    |(F|C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)/y
+                    (* x/y *)
+                    |_ -> Div(num0.ptype(x.etype,y.etype),x,y)
+            else
+              Div(num0.ptype(x.etype,y.etype),x,y)
               
         ///<summary>整数同士の除算(剰余無視)</summary>
         static member (./) (x:num0,y:num0) : num0 =
-            match x.etype,y.etype with
-              |It _,It _ ->
-                match (x,y) with
-                  |_,Int_e 0 -> NaN
-                  |Int_e 0,_ -> Int_e 0
-                  |_,Int_e 1 -> x
-                  |Int_e v1,Int_e v2 when v1<0 && v2<0  -> Int_e((-v1)/(-v2))
-                  |Int_e v1,_ when v1<0   -> -((-v1)/y)
-                  |_,Int_e v2 when v2<0   -> -(x/(-v2))
-                  |Int_e v1,Int_e v2 -> Int_e(v1/v2)
-                  |Inv(_,v1),Inv(_,v2) -> (v1/v2)
-                  |_,Inv(_,v2) -> -(x/v2)
-                  |Inv(_,v1),_ -> -(v1/y)
-                  |_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x./Par(t,"(",")",y)
-                  |(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)./y
-                  |_ -> Div(num0.ptype(x.etype,y.etype),x,y)
-              |_ ->
-                Console.WriteLine("Error: 非整数型変数に対し整数型除算「./」が適用されました")
-                Console.Read() |> ignore
-                NaN
-                
+            if p.param.isEqSimplify then
+              match x.etype,y.etype with
+                |It _,It _ ->
+                  match (x,y) with
+                    |_,Int_e 0 -> NaN
+                    |Int_e 0,_ -> Int_e 0
+                    |_,Int_e 1 -> x
+                    |Int_e v1,Int_e v2 when v1<0 && v2<0  -> Int_e((-v1)/(-v2))
+                    |Int_e v1,_ when v1<0   -> -((-v1)/y)
+                    |_,Int_e v2 when v2<0   -> -(x/(-v2))
+                    |Int_e v1,Int_e v2 -> Int_e(v1/v2)
+                    |Inv(_,v1),Inv(_,v2) -> (v1/v2)
+                    |_,Inv(_,v2) -> -(x/v2)
+                    |Inv(_,v1),_ -> -(v1/y)
+                    |_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x./Par(t,"(",")",y)
+                    |(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)./y
+                    |_ -> Div(num0.ptype(x.etype,y.etype),x,y)
+                |_ ->
+                  Console.WriteLine("Error: 非整数型変数に対し整数型除算「./」が適用されました")
+                  Console.Read() |> ignore
+                  NaN
+            else
+              Div(num0.ptype(x.etype,y.etype),x,y)
+              
         ///<summary>除算</summary>
         static member (/) (x:num0,y:int) = x/(Int_e y)
         
@@ -524,21 +539,24 @@ namespace Aqualis
 
         ///<summary>剰余</summary>
         static member (%) (x:num0,y:num0) : num0 =
-            match x.etype,y.etype with
-              |It _,It _ ->
-                match (p.lang,x,y) with
-                  |_,_,Int_e 0 -> NaN
-                  |_,Int_e 0,_ -> Int_e 0
-                  |_,_,Int_e 1 -> Int_e 0
-                  |_,Int_e v1,_ when v1<0   -> -((-v1)%y)
-                  |_,_,Int_e v2 when v2<0   -> (x%(-v2))
-                  |_,Int_e v1,Int_e v2 -> Int_e(v1%v2)
-                  |(C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> Mod(x,Par(t,"(",")",y))
-                  |(C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Mod(Par(t,"(",")",x),y)
-                  |_ -> Mod(x,y)
-              |_ ->
-                NaN
-                
+            if p.param.isEqSimplify then
+              match x.etype,y.etype with
+                |It _,It _ ->
+                  match (p.lang,x,y) with
+                    |_,_,Int_e 0 -> NaN
+                    |_,Int_e 0,_ -> Int_e 0
+                    |_,_,Int_e 1 -> Int_e 0
+                    |_,Int_e v1,_ when v1<0   -> -((-v1)%y)
+                    |_,_,Int_e v2 when v2<0   -> (x%(-v2))
+                    |_,Int_e v1,Int_e v2 -> Int_e(v1%v2)
+                    |(C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> Mod(x,Par(t,"(",")",y))
+                    |(C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Mod(Par(t,"(",")",x),y)
+                    |_ -> Mod(x,y)
+                |_ ->
+                  NaN
+            else
+              Mod(x,y)
+              
         ///<summary>剰余</summary>
         static member (%) (x:num0,y:int) = x%(Int_e y)
         
