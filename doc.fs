@@ -74,19 +74,32 @@ namespace Aqualis
               |_ ->
                 code()
                 
-        ///<summary>ラベル付き数式</summary>
-        static member eqlb (label:string) = fun code ->
+        ///<summary>改行</summary>
+        static member eqReturn() =
             let q = p.param
             match p.lang with
               |T ->
-                AqualisCompiler.set_EquationSimplify OFF
-                q.codewrite("\\begin{align}")
-                code()
-                if not (label="") then q.codewrite("\\label{"+label+"}")
-                q.codewrite("\\end{align}")
-                AqualisCompiler.set_EquationSimplify ON
+                q.codewrite("\\\\")
               |_ ->
-                code()
+                ()
+                
+        ///<summary>数式番号なし</summary>
+        static member eqNonumber() =
+            let q = p.param
+            match p.lang with
+              |T ->
+                q.codewrite("\\nonumber")
+              |_ ->
+                ()
+                
+        ///<summary>改行</summary>
+        static member eqLabel(lb:string) =
+            let q = p.param
+            match p.lang with
+              |T ->
+                q.codewrite("\\label{"+lb+"}")
+              |_ ->
+                ()
                 
         ///<summary>総和</summary>
         static member sum (a:num0,i:num0) = fun (b:num0) (c:num0) ->

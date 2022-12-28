@@ -47,8 +47,8 @@ namespace Aqualis
         ///<summary>数式の最適化設定</summary>
         static member set_EquationSimplify (x:Switch) =
             match x with
-              |ON  -> p.param.isEqSimplify <- true
-              |OFF -> p.param.isEqSimplify <- false
+              |ON  -> isEqSimplify <- true
+              |OFF -> isEqSimplify <- false
               
         ///<summary>codeをデバッグモードで実行</summary>
         static member debug code =

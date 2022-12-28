@@ -61,5 +61,8 @@ namespace Aqualis
               
     module Aqualis_base =
         
+        ///<summary>trueのとき数式を最適化</summary>
+        let mutable isEqSimplify = true
+        
         let p = program()
         

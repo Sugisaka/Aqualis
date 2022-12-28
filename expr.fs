@@ -163,7 +163,9 @@ namespace Aqualis
     
         ///<summary>加算</summary>
         static member (+) (x:num0,y:num0) : num0 =
-            if p.param.isEqSimplify then
+            printfn "lang: %s" <| match p.lang with |F -> "F" |T -> "T" |_ -> "?"
+            printfn "operation add: %s" <| isEqSimplify.ToString()
+            if isEqSimplify then
               match p.lang,x,y with
                 (* x+0 *)
                 |_,_,Int_e 0|_,_,Dbl_e 0.0 -> x
@@ -180,13 +182,13 @@ namespace Aqualis
                 (* x+[小数定数] *)
                 |_,_,Dbl_e v2 when v2<0.0 -> x-Dbl_e(-v2)
                 (* [整数定数]+[整数定数] *)
-                |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1+v2)
+                |_,Int_e v1,Int_e v2 -> Int_e(v1+v2)
                 (* [整数定数]+[小数定数] *)
-                |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)+v2)
+                |_,Int_e v1,Dbl_e v2 -> Dbl_e((double v1)+v2)
                 (* [小数定数]+[整数定数] *)
-                |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1+(double v2))
+                |_,Dbl_e v1,Int_e v2 -> Dbl_e(v1+(double v2))
                 (* [小数定数]+[小数定数] *)
-                |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1+v2)
+                |_,Dbl_e v1,Dbl_e v2 -> Dbl_e(v1+v2)
                 (* (x1+x2+…)+(y1+y2+…) *)
                 |_,Add(_,v1),Add(_,v2) -> Add(num0.ptype(x.etype,y.etype),v1@v2)
                 (* (x1-x2)+(y1+y2+…) *)
@@ -230,7 +232,7 @@ namespace Aqualis
         
         ///<summary>減算</summary>
         static member (-) (x:num0,y:num0) : num0 =
-            if p.param.isEqSimplify then
+            if isEqSimplify then
               match p.lang,x,y with
                 (* x-0 *)
                 |_,_,Int_e 0|_,_,Dbl_e 0.0 -> x
@@ -247,13 +249,13 @@ namespace Aqualis
                 (* x-[小数定数] *)
                 |_,_,Dbl_e v2 when v2<0.0 -> x+Dbl_e(-v2)
                 (* [整数定数]-[整数定数] *)
-                |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1-v2)
+                |_,Int_e v1,Int_e v2 -> Int_e(v1-v2)
                 (* [整数定数]-[小数定数] *)
-                |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)-v2)
+                |_,Int_e v1,Dbl_e v2 -> Dbl_e((double v1)-v2)
                 (* [小数定数]-[整数定数] *)
-                |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1-(double v2))
+                |_,Dbl_e v1,Int_e v2 -> Dbl_e(v1-(double v2))
                 (* [小数定数]-[小数定数] *)
-                |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1-v2)
+                |_,Dbl_e v1,Dbl_e v2 -> Dbl_e(v1-v2)
                 (* (x1+x2+…)-(y1+y2+…) *)
                 |_,Add(_,v1),Add(_,v2) -> Add(num0.ptype(x.etype,y.etype),v1@(v2|>List.map(fun v -> -v)))
                 (* (x1-x2)-(y1+y2+…) *)
@@ -297,7 +299,7 @@ namespace Aqualis
         
         ///<summary>乗算</summary>
         static member (*) (x:num0,y:num0) : num0 =
-            if p.param.isEqSimplify then
+            if isEqSimplify then
               match p.lang,x,y with
                 (* x*0 *)
                 |_,Int_e 0,_|_,Dbl_e 0.0,_|_,_,Int_e 0|_,_,Dbl_e 0.0 -> Int_e 0
@@ -318,13 +320,13 @@ namespace Aqualis
                 (* (-x)*y *)
                 |_,Inv(_,v1),_ -> -(v1*y)
                 (* [整数定数]*[整数定数] *)
-                |(F|C89|C99|NL),Int_e v1,Int_e v2 -> Int_e(v1*v2)
+                |_,Int_e v1,Int_e v2 -> Int_e(v1*v2)
                 (* [整数定数]*[小数定数] *)
-                |(F|C89|C99|NL),Int_e v1,Dbl_e v2 -> Dbl_e((double v1)*v2)
+                |_,Int_e v1,Dbl_e v2 -> Dbl_e((double v1)*v2)
                 (* [小数定数]*[整数定数] *)
-                |(F|C89|C99|NL),Dbl_e v1,Int_e v2 -> Dbl_e(v1*(double v2))
+                |_,Dbl_e v1,Int_e v2 -> Dbl_e(v1*(double v2))
                 (* [小数定数]*[小数定数] *)
-                |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 -> Dbl_e(v1*v2)
+                |_,Dbl_e v1,Dbl_e v2 -> Dbl_e(v1*v2)
                 (* x*(y1+y2+…) or x*(y1-y2) *)
                 |_,_,(Add(t,_)|Sub(t,_,_)) -> x*Par(t,"(",")",y)
                 (* (x1+x2+…)*y or (x1-x2)*y *)
@@ -374,7 +376,7 @@ namespace Aqualis
                 
         ///<summary>除算</summary>
         static member (/) (x:num0,y:num0) : num0 =
-            if p.param.isEqSimplify then
+            if isEqSimplify then
               match x.etype,y.etype with
                 |It _,It _ ->
                   match (x,y) with
@@ -421,29 +423,29 @@ namespace Aqualis
                     |_,Dbl_e 0.0,_ -> Dbl_e 0.0
                     |_,_,Dbl_e 1.0 -> x
                     (* [負の整数定数]/[負の整数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when v1<0.0 && v2<0 ->  Dbl_e(( v1)/(double -v2))
+                    |_,Dbl_e v1,Int_e v2 when v1<0.0 && v2<0 ->  Dbl_e(( v1)/(double -v2))
                     (* [負の整数定数]/[整数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when v1<0.0         -> -Dbl_e((-v1)/(double v2))
+                    |_,Dbl_e v1,Int_e v2 when v1<0.0         -> -Dbl_e((-v1)/(double v2))
                     (* [整数定数]/[負の整数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2 when           v2<0 -> -Dbl_e(( v1)/(-(double v2)))
+                    |_,Dbl_e v1,Int_e v2 when           v2<0 -> -Dbl_e(( v1)/(-(double v2)))
                     (* [整数定数]/[整数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Int_e v2                     ->  Dbl_e(v1/(double v2))
+                    |_,Dbl_e v1,Int_e v2                     ->  Dbl_e(v1/(double v2))
                     (* [負の整数定数]/[負の小数定数] *)
-                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when v1<0 && v2<0.0   ->  Dbl_e((double  v1)/(-v2))
+                    |_,Int_e v1,Dbl_e v2 when v1<0 && v2<0.0   ->  Dbl_e((double  v1)/(-v2))
                     (* [負の整数定数]/[小数定数] *)
-                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when v1<0             -> -Dbl_e((double -v1)/( v2))
+                    |_,Int_e v1,Dbl_e v2 when v1<0             -> -Dbl_e((double -v1)/( v2))
                     (* [整数定数]/[負の小数定数] *)
-                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2 when         v2<0.0   -> -Dbl_e((double  v1)/(-v2))
+                    |_,Int_e v1,Dbl_e v2 when         v2<0.0   -> -Dbl_e((double  v1)/(-v2))
                     (* [整数定数]/[小数定数] *)
-                    |(F|C89|C99|NL),Int_e v1,Dbl_e v2                       ->  Dbl_e((double v1)/v2)
+                    |_,Int_e v1,Dbl_e v2                       ->  Dbl_e((double v1)/v2)
                     (* [負の小数定数]/[負の小数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v1<0.0 && v2<0.0 ->  Dbl_e((-v1)/(-v2))
+                    |_,Dbl_e v1,Dbl_e v2 when v1<0.0 && v2<0.0 ->  Dbl_e((-v1)/(-v2))
                     (* [負の小数定数]/[小数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v1<0.0           -> -Dbl_e((-v1)/( v2))
+                    |_,Dbl_e v1,Dbl_e v2 when v1<0.0           -> -Dbl_e((-v1)/( v2))
                     (* [小数定数]/[負の小数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2 when v2<0.0           -> -Dbl_e(( v1)/(-v2))
+                    |_,Dbl_e v1,Dbl_e v2 when v2<0.0           -> -Dbl_e(( v1)/(-v2))
                     (* [小数定数]/[小数定数] *)
-                    |(F|C89|C99|NL),Dbl_e v1,Dbl_e v2                       ->  Dbl_e(v1/v2)
+                    |_,Dbl_e v1,Dbl_e v2                       ->  Dbl_e(v1/v2)
                     (* (-x)/[小数定数] *)
                     |_,Dbl_e v1,_ when v1<0.0 -> -((-v1)/y)
                     (* x/[負の小数定数] *)
@@ -459,9 +461,9 @@ namespace Aqualis
                     (* (-x)/y *)
                     |_,Inv(_,v1),_ -> -(v1/y)
                     (* x/(y1+y2+…) or x/(y1-y2) or x/(y1*y2) or x/(y1/y2) *)
-                    |(F|C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x/Par(t,"(",")",y)
+                    |_,_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> x/Par(t,"(",")",y)
                     (* (x1+x2+…)/y or (x1-x2)/y *)
-                    |(F|C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)/y
+                    |_,(Add(t,_)|Sub(t,_,_)),_ -> Par(t,"(",")",x)/y
                     (* x/y *)
                     |_ -> Div(num0.ptype(x.etype,y.etype),x,y)
             else
@@ -469,7 +471,7 @@ namespace Aqualis
               
         ///<summary>整数同士の除算(剰余無視)</summary>
         static member (./) (x:num0,y:num0) : num0 =
-            if p.param.isEqSimplify then
+            if isEqSimplify then
               match x.etype,y.etype with
                 |It _,It _ ->
                   match (x,y) with
@@ -539,7 +541,7 @@ namespace Aqualis
 
         ///<summary>剰余</summary>
         static member (%) (x:num0,y:num0) : num0 =
-            if p.param.isEqSimplify then
+            if isEqSimplify then
               match x.etype,y.etype with
                 |It _,It _ ->
                   match (p.lang,x,y) with
@@ -549,8 +551,8 @@ namespace Aqualis
                     |_,Int_e v1,_ when v1<0   -> -((-v1)%y)
                     |_,_,Int_e v2 when v2<0   -> (x%(-v2))
                     |_,Int_e v1,Int_e v2 -> Int_e(v1%v2)
-                    |(C89|C99),_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> Mod(x,Par(t,"(",")",y))
-                    |(C89|C99),(Add(t,_)|Sub(t,_,_)),_ -> Mod(Par(t,"(",")",x),y)
+                    |_,_,(Add(t,_)|Sub(t,_,_)|Mul(t,_,_)|Div(t,_,_)) -> Mod(x,Par(t,"(",")",y))
+                    |_,(Add(t,_)|Sub(t,_,_)),_ -> Mod(Par(t,"(",")",x),y)
                     |_ -> Mod(x,y)
                 |_ ->
                   NaN
@@ -845,9 +847,15 @@ namespace Aqualis
                     Code(t,"pow("+u1+","+u2+")",c2@c1)
                   |Mod(v1,v2) ->
                     //引数を評価
-                    let (_,u1,c1) = v1.code.str
-                    let (_,u2,c2) = v2.code.str
-                    Code(It 4,u1+"%"+u2,c2@c1)
+                    match v2 with
+                      |Int_e _ |Dbl_e _ |Var _ |Par _ ->
+                        let (_,u1,c1) = v1.code.str
+                        let (_,u2,c2) = v2.code.str
+                        Code(It 4,u1+"%"+u2,c2@c1)
+                      |_ ->
+                        let (_,u1,c1) = v1.code.str
+                        let (_,u2,c2) = v2.code.str
+                        Code(It 4,u1+"%("+u2+")",c2@c1)
                   |Exp(t,v) ->
                     //引数を評価
                     let (et,u,c) = v.code.str
@@ -1098,9 +1106,15 @@ namespace Aqualis
                     Code(t,"pow"+"("+u1+","+u2+")",c2@c1)
                   |Mod(v1,v2) ->
                     //引数を評価
-                    let (_,u1,c1) = v1.code.str
-                    let (_,u2,c2) = v2.code.str
-                    Code(It 4,u1+"%"+u2,c2@c1)
+                    match v2 with
+                      |Int_e _ |Dbl_e _ |Var _ |Par _ ->
+                        let (_,u1,c1) = v1.code.str
+                        let (_,u2,c2) = v2.code.str
+                        Code(It 4,u1+"%"+u2,c2@c1)
+                      |_ ->
+                        let (_,u1,c1) = v1.code.str
+                        let (_,u2,c2) = v2.code.str
+                        Code(It 4,u1+"%("+u2+")",c2@c1)
                   |Exp(t,v) ->
                     //引数を評価
                     let (_,u,c) = v.code.str
