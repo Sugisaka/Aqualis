@@ -34,32 +34,32 @@ namespace Aqualis
                 ! s
                 
         ///<summary>番号付き箇条書き</summary>
-        static member enumerate (slst:string list) =
+        static member enumerate (slst:(unit->unit)list) =
             let q = p.param
             match p.lang with
               |T ->
                 q.codewrite("\\begin{enumerate}")
                 for s in slst do
                     q.codewrite("\\item")
-                    q.codewrite(s)
+                    s()
                 q.codewrite("\\end{enumerate}")
               |_ ->
                 for s in slst do
-                    ! s
+                    s()
                     
         ///<summary>番号なし箇条書き</summary>
-        static member itemize (slst:string list) =
+        static member itemize (slst:(unit->unit)list) =
             let q = p.param
             match p.lang with
               |T ->
                 q.codewrite("\\begin{itemize}")
                 for s in slst do
                     q.codewrite("\\item")
-                    q.codewrite(s)
+                    s()
                 q.codewrite("\\end{itemize}")
               |_ ->
                 for s in slst do
-                    ! s
+                    s()
                     
         ///<summary>数式</summary>
         static member eq code =
@@ -101,6 +101,30 @@ namespace Aqualis
               |_ ->
                 ()
                 
+        ///<summary>変数（変数リストに追加しない）</summary>
+        static member var (tp,name:string) =
+            Var(tp,name,[])
+
+        ///<summary>単独の数式</summary>
+        static member f (a:num0) =
+            let (et,ta,_) = a.code.str
+            ta
+            
+        ///<summary>単独の数式</summary>
+        static member f (a:bool0) =
+            let (et,ta,_) = a.code.str
+            ta
+            
+        ///<summary>単独の数式(インライン)</summary>
+        static member fi (a:num0) =
+            let (et,ta,_) = a.code.str
+            "$"+ta+"$"
+            
+        ///<summary>単独の数式(インライン)</summary>
+        static member fi (a:bool0) =
+            let (et,ta,_) = a.code.str
+            "$"+ta+"$"
+            
         ///<summary>総和</summary>
         static member sum (a:num0,i:num0) = fun (b:num0) (c:num0) ->
             match p.lang with
@@ -171,7 +195,23 @@ namespace Aqualis
                 num0.Code(t,"\\frac{\\partial "+tf+"}^{\\partial "+tx+"}",[])
               |_ ->
                 num0.NaN
-
+                
+        ///<summary>場合分け</summary>
+        static member cases (lst:(num0*string)list) =
+            let q = p.param
+            match p.lang with
+              |T ->
+                let (et,c) = 
+                    [0..lst.Length-1]
+                    |> List.fold (fun (t,acc) i ->
+                        let (f,x) = lst[i]
+                        let (s,tf,_) = f.code.str
+                        let et = match (s,t) with |Zt,_|_,Zt -> Zt |Dt,_|_,Dt -> Dt |_ -> It 4
+                        et,(acc+tf+" & \\left("+x+"\\right)"+(if i=lst.Length-1 then "" else "\\\\")+"\n")) (It 4,"")
+                num0.Code(et,"\\begin{dcases}"+"\n"+c+"\\end{dcases}",[])
+              |_ ->
+                num0.NaN
+                
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*num0)list) =
             let q = p.param
