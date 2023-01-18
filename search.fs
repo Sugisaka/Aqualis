@@ -10,7 +10,7 @@ namespace Aqualis
     
     type search() =
         ///<summary>条件式に従い配列の最大値を検索</summary>
-        static member max (zA:num1,max:num0,imax:num0 option) = fun (ff:num0->num0) ->
+        static member private max1 (zA:num1,max:num0,imax:num0 option) = fun (ff:num0->num0) ->
             match imax with |Some(imax) -> imax <== 1 |_ -> ()
             max <== (ff _1)
             iter.num zA.size1 <| fun i ->
@@ -18,8 +18,16 @@ namespace Aqualis
                     match imax with |Some(imax) -> imax <== i |_ -> ()
                     max <== (ff i)
                     
+        ///<summary>条件式に従い配列の最大値を検索</summary>
+        static member max (zA:num1,max:num0) =
+            search.max1 (zA,max,None)
+            
+        ///<summary>条件式に従い配列の最大値を検索</summary>
+        static member max (zA:num1,max:num0,imax:num0) =
+            search.max1 (zA,max,Some(imax))
+            
         ///<summary>条件式に従い配列の最小値を検索</summary>
-        static member min (zA:num1,min:num0,imin:num0 option) = fun (ff:num0->num0) ->
+        static member private min1 (zA:num1,min:num0,imin:num0 option) = fun (ff:num0->num0) ->
             match imin with |Some(imin) -> imin <== 1 |_ -> ()
             min <== (ff _1)
             iter.num zA.size1 <| fun i ->
@@ -27,6 +35,14 @@ namespace Aqualis
                     match imin with |Some(imin) -> imin <== i |_ -> ()
                     min <== (ff i)
                     
+        ///<summary>条件式に従い配列の最大値を検索</summary>
+        static member min (zA:num1,min:num0) =
+            search.min1 (zA,min,None)
+            
+        ///<summary>条件式に従い配列の最大値を検索</summary>
+        static member min (zA:num1,min:num0,imin:num0) =
+            search.min1 (zA,min,Some(imin))
+            
         ///<summary>条件式に従い配列の最大値を検索</summary>
         static member private max2 (zA:num2,(c1:num0 option,c2:num0 option),max:num0,imax:(num0*num0)option) =
             fun (ff:num0->num0->num0) ->
