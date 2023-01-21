@@ -62,6 +62,48 @@ namespace Aqualis
               |T  -> ()
               |NL -> ()
               
+        static member subsection (s:string) (code:unit->unit) = 
+            let (!===) (s:string) = 
+              match p.lang with
+              |T ->
+                let p = p.param
+                p.codewrite("\\subsection{"+s+"}")
+              |H -> 
+                let p = p.param
+                p.codewrite("<details open>")
+                p.codewrite("<summary><span class=\"op-section\">section</span>"+(if s.Contains("<mi>") then "<math>"+s+"</math>" else s)+"</summary>")
+                p.codewrite("<div class=\"insidecode-section\">")
+              |NL ->
+                ()
+              |_ ->
+                let p = p.param
+                p.comment ("---"+(s.PadRight(76,'-')))
+            (!===)s
+            match p.lang with
+              |NL ->
+                ()
+              |_ ->
+                let p = p.param
+                p.indentposition_inc()
+            code()
+            match p.lang with
+              |NL ->
+                ()
+              |_ ->
+                let p = p.param
+                p.indentposition_dec()
+            match p.lang with 
+              |F |C89 |C99 -> 
+                let p = p.param
+                (!===)("end "+s) 
+                p.codewrite(p.indent+"\n")
+              |H   ->
+                let p = p.param
+                p.codewrite("</div>")
+                p.codewrite("</details>")
+              |T  -> ()
+              |NL -> ()
+              
         static member private header (c:char) (s:string) = 
             match p.lang with
               |F   ->
