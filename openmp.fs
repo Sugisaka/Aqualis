@@ -280,7 +280,7 @@ namespace Aqualis
                 p.indentposition_dec()
                 p.codewrite("!$omp end sections"+"\n")
                 p.indentposition_dec()
-                p.codewrite("!$omp end parallel do\n")
+                p.codewrite("!$omp end parallel\n")
                 p.clearpv()
               |C99 ->
                 let p = p.param
