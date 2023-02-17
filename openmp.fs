@@ -19,6 +19,7 @@ namespace Aqualis
               |F ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.module_("omp_lib")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -51,6 +52,7 @@ namespace Aqualis
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.include_("<omp.h>")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -75,6 +77,7 @@ namespace Aqualis
               |F ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.module_("omp_lib")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -107,6 +110,7 @@ namespace Aqualis
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.include_("<omp.h>")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -131,6 +135,7 @@ namespace Aqualis
               |F ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.module_("omp_lib")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -163,6 +168,7 @@ namespace Aqualis
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.include_("<omp.h>")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -195,6 +201,7 @@ namespace Aqualis
               |F ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.module_("omp_lib")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -227,6 +234,7 @@ namespace Aqualis
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.include_("<omp.h>")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -259,6 +267,7 @@ namespace Aqualis
               |F ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.module_("omp_lib")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
@@ -285,6 +294,7 @@ namespace Aqualis
               |C99 ->
                 let p = p.param
                 p.isOmpUsed <- true
+                p.include_("<omp.h>")
                 p.switch_parmode(true)
                 p.cclose()
                 p.popen()
