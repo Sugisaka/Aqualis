@@ -935,3 +935,48 @@ ch.copyin_i1 1024 <| fun a ->
 何も設定しなくても、自動的にコンパイラが必要なものを選んで転送してくれるのだが、
 余計な変数が転送されて、プログラムの実行速度が遅くなることもあるため、自分で設定することが好ましい。
 
+## クラス
+
+以下のコードでクラス「classAAA」を定義可能。Fortran、C言語ではフィールドを構造体、メソッドをインライン展開して実装される
+
+```fsharp
+    /// <summary>
+    /// クラスの定義
+    /// </summary>
+    type BoundaryElementI(sname_,name) =
+        static member sname = "classAAA"
+        new(name) =
+            str.reg(BoundaryElementI.sname,name)
+            BoundaryElementI(BoundaryElementI.sname,name)
+        /// <summary>int型フィールド「a」</summary>
+        member public __.a = 
+            str.i0(sname_,name,"a")
+        /// <summary>double型フィールド「x」</summary>
+        member public __.x = 
+            str.d0(sname_,name,"x")
+        /// <summary>double型フィールド「w」</summary>
+        member public __.w = 
+            str.z0(sname_,name,"w")
+        /// <summary>このクラスのインスタンスを非インライン関数の引数にする場合は、このメソッドを必ず実装)</summary>
+        member __.farg cm code =
+            fn.addarg (Structure(BoundaryElementI.sname),A0,name,cm) <| fun (t,v,n) -> code(BoundaryElementI(BoundaryElementI.sname,n))
+            
+    /// <summary>
+    /// classAAAの1次元配列を実装
+    /// </summary>
+    type BoundaryElementI_1(sname_,name,size1) =
+        inherit base1(Structure(sname_),size1,name)
+        new(name,size1) =
+            str.reg(BoundaryElementI.sname,name,size1)
+            BoundaryElementI_1(BoundaryElementI.sname,name,A1(size1))
+        new(name) = BoundaryElementI_1(name,0)
+        member this.Item with get(i:num0) = 
+            BoundaryElementI(sname_,this.Idx1(i))
+        member this.Item with get(i:int ) = BoundaryElementI(sname_,this.Idx1(i))
+        static member str_mem(psname, vname, name, size1) =
+            str.addmember(psname,(Structure(BoundaryElementI.sname),size1,name))
+            BoundaryElementI_1(BoundaryElementI.sname,structure.mem(vname,name), size1)
+        /// <summary>このクラスのインスタンスを非インライン関数の引数にする場合は、このメソッドを必ず実装)</summary>
+        member __.farg cm = fun code -> 
+            fn.addarg (BoundaryElementI.sname,size1,name,cm) <| fun (t,v,n) -> code(BoundaryElementI_1(BoundaryElementI.sname,n,v))
+```

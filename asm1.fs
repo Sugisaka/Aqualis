@@ -111,7 +111,7 @@ namespace Aqualis
                   (* [小数]^y or x^[小数] *)
                   |_,Var(Dt,_,_),_|_,_,Var(Dt,_,_) -> Pow(Dt,x,y)
                   (* [整数]^[整数] *)
-                  |_,Var(_ ,_,_),_|_,_,Var(_ ,_,_) -> Pow(It 4,x,y)
+                  |_,Var(_ ,_,_),_|_,_,Var(_ ,_,_) -> Pow(Dt,x,y)
                   (* x^y *)
                   |_ -> Pow (num0.ptype(x,y),x,y)
         ///<summary>累乗</summary>
