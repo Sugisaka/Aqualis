@@ -947,7 +947,7 @@ ch.copyin_i1 1024 <| fun a ->
         static member sname = "classAAA"
         new(name) =
             str.reg(classAAA.sname,name)
-            BoundaryElementI(classAAA.sname,name)
+            classAAA(classAAA.sname,name)
         /// <summary>int型フィールド「a」</summary>
         member public __.a = 
             str.i0(sname_,name,"a")
