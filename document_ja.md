@@ -758,6 +758,12 @@ ch.id <| fun (x,y) ->
 
 ## ハンケル関数
 
+モジュールの読み込みが必要
+
+```fsharp
+open Aqualis.bessel
+```
+
 ### 第2種0次ハンケル関数
 
 $H^{(2)}_0(x)$を計算。関数の値は`h`に保存されている
@@ -943,11 +949,11 @@ ch.copyin_i1 1024 <| fun a ->
     /// <summary>
     /// クラスの定義
     /// </summary>
-    type BoundaryElementI(sname_,name) =
+    type classAAA(sname_,name) =
         static member sname = "classAAA"
         new(name) =
-            str.reg(BoundaryElementI.sname,name)
-            BoundaryElementI(BoundaryElementI.sname,name)
+            str.reg(classAAA.sname,name)
+            classAAA(classAAA.sname,name)
         /// <summary>int型フィールド「a」</summary>
         member public __.a = 
             str.i0(sname_,name,"a")
@@ -957,26 +963,36 @@ ch.copyin_i1 1024 <| fun a ->
         /// <summary>double型フィールド「w」</summary>
         member public __.w = 
             str.z0(sname_,name,"w")
-        /// <summary>このクラスのインスタンスを非インライン関数の引数にする場合は、このメソッドを必ず実装)</summary>
+        /// <summary>メソッド</summary>
+        static member this.add(n:int) =
+            this.a <== this.a + n
+        /// <summary>このクラスのインスタンスを別クラスのフィールドとする場合は必ず実装</summary>
+        static member str_mem(psname, vname, name, size1) =
+            str.addmember(psname,(Structure(classAAA.sname),size1,name))
+            classAAA_1(classAAA.sname,structure.mem(vname,name), size1)
+        /// <summary>このクラスのインスタンスを非インライン関数の引数にする場合は、このメソッドを必ず実装</summary>
         member __.farg cm code =
-            fn.addarg (Structure(BoundaryElementI.sname),A0,name,cm) <| fun (t,v,n) -> code(BoundaryElementI(BoundaryElementI.sname,n))
+            fn.addarg (Structure(classAAA.sname),A0,name,cm) <| fun (t,v,n) -> code(classAAA(classAAA.sname,n))
             
     /// <summary>
     /// classAAAの1次元配列を実装
     /// </summary>
-    type BoundaryElementI_1(sname_,name,size1) =
+    type classAAA_1(sname_,name,size1) =
         inherit base1(Structure(sname_),size1,name)
         new(name,size1) =
-            str.reg(BoundaryElementI.sname,name,size1)
-            BoundaryElementI_1(BoundaryElementI.sname,name,A1(size1))
-        new(name) = BoundaryElementI_1(name,0)
+            str.reg(classAAA.sname,name,size1)
+            classAAA_1(classAAA.sname,name,A1(size1))
+        new(name) = classAAA_1(name,0)
+        /// <summary>配列のインデクサ</summary>
         member this.Item with get(i:num0) = 
-            BoundaryElementI(sname_,this.Idx1(i))
-        member this.Item with get(i:int ) = BoundaryElementI(sname_,this.Idx1(i))
+            classAAA(sname_,this.Idx1(i))
+        /// <summary>配列のインデクサ</summary>
+        member this.Item with get(i:int ) = classAAA(sname_,this.Idx1(i))
+        /// <summary>このクラスのインスタンスを別クラスのフィールドとする場合は必ず実装</summary>
         static member str_mem(psname, vname, name, size1) =
-            str.addmember(psname,(Structure(BoundaryElementI.sname),size1,name))
-            BoundaryElementI_1(BoundaryElementI.sname,structure.mem(vname,name), size1)
+            str.addmember(psname,(Structure(classAAA.sname),size1,name))
+            classAAA_1(classAAA.sname,structure.mem(vname,name), size1)
         /// <summary>このクラスのインスタンスを非インライン関数の引数にする場合は、このメソッドを必ず実装)</summary>
         member __.farg cm = fun code -> 
-            fn.addarg (BoundaryElementI.sname,size1,name,cm) <| fun (t,v,n) -> code(BoundaryElementI_1(BoundaryElementI.sname,n,v))
+            fn.addarg (classAAA.sname,size1,name,cm) <| fun (t,v,n) -> code(classAAA_1(classAAA.sname,n,v))
 ```
