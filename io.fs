@@ -654,6 +654,30 @@ namespace Aqualis
                     iter.array f <| fun i -> 
                         w [i;f.[i]]
 
+        ///<summary>数値をファイルに保存</summary>
+        static member save (f:num0) =
+            fun filename ->
+                io.binfileOutput filename <| fun w ->
+                    //データフォーマット
+                    w _1
+                    //データ型
+                    match f.etype with
+                      |Etype.It(4) -> w <| I 1004
+                      |Etype.Dt    -> w <| I 2000
+                      |Etype.Zt    -> w <| I 3000
+                      |_           -> w <| I 0
+                    //データ次元
+                    w _0
+                    //データサイズ
+                    w _1
+                    //データ本体
+                    match f.etype with
+                      |Zt ->
+                        w f.re
+                        w f.im
+                      |_ ->
+                        w f
+                        
         ///<summary>1次元データをファイルに保存</summary>
         static member save (f:ax1) =
             fun filename ->
@@ -750,6 +774,51 @@ namespace Aqualis
             fun filename ->
                 io.save (ax3(f.size1,f.size2,f.size3,fun (i,j,k) -> f[i,j,k])) filename
                 
+        ///<summary>数値をファイルから読み込み</summary>
+        static member load (f:num0) =
+            fun filename ->
+                let reader (r:num0->unit) (nt:int,t:Etype) =
+                    ch.i <| fun n ->
+                        //データ型
+                        r n
+                        br.if2 (n.=nt)
+                            <| fun () ->
+                                //データ次元
+                                r n
+                                br.if2 (n.=0)
+                                    <| fun () ->
+                                        ch.i <| fun n1 ->
+                                            //データサイズ
+                                            r n1
+                                            //データ本体
+                                            match t with
+                                              |Zt ->
+                                                ch.dd <| fun (re,im) ->
+                                                    r re
+                                                    r im
+                                                    f <== re + asm.uj*im
+                                              |_ ->
+                                                r f
+                                    <| fun () ->
+                                        print.t "Invalid data dimension"
+                            <| fun () ->
+                                print.s <| filename@[!.": invalid data type"]
+                io.binfileInput filename <| fun r ->
+                ch.i <| fun n ->
+                    //データフォーマット
+                    r n
+                    br.branch <| fun b ->
+                        b.IF (n.=1) <| fun () ->
+                            match f.etype with
+                              |Etype.It(4) ->
+                                reader r (1004,f.etype)
+                              |Etype.Dt    -> 
+                                reader r (2000,f.etype)
+                              |Etype.Zt    -> 
+                                reader r (3000,f.etype)
+                              |_ -> 
+                                  print.t "invalid data type"
+                                  
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:num1) =
             fun filename ->
