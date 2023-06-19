@@ -344,6 +344,7 @@ namespace Aqualis
         member _.size1 = n
         member _.Item with get(i:num0) = f(i)
         member _.Item with get(i:int) = f(I i)
+        member _.etype with get() = (f _1).etype
         static member (+) (x:ax1,y:ax1) =
             let p = p.param
             if p.debugmode then
@@ -668,7 +669,7 @@ namespace Aqualis
             static member i(eq:num1) = fun code ->
                 match eq.etype with
                   |It _ -> code()
-                  |_ -> ()
+                  |_ -> ()                  
             /// <summary>
             /// 指定された式または変数eqが実数型の場合のみcodeを実行
             /// </summary>
@@ -682,6 +683,30 @@ namespace Aqualis
             /// </summary>
             /// <param name="eq"></param>
             static member z(eq:num1) = fun code ->
+                match eq.etype with
+                  |Zt -> code()
+                  |_ -> ()
+            /// <summary>
+            /// 指定された式または変数eqが整数型の場合のみcodeを実行
+            /// </summary>
+            /// <param name="eq"></param>
+            static member i(eq:ax1) = fun code ->
+                match eq.etype with
+                  |It _ -> code()
+                  |_ -> ()                  
+            /// <summary>
+            /// 指定された式または変数eqが実数型の場合のみcodeを実行
+            /// </summary>
+            /// <param name="eq"></param>
+            static member d(eq:ax1) = fun code ->
+                match eq.etype with
+                  |Dt -> code()
+                  |_ -> ()
+            /// <summary>
+            /// 指定された式または変数eqが複素数型の場合のみcodeを実行
+            /// </summary>
+            /// <param name="eq"></param>
+            static member z(eq:ax1) = fun code ->
                 match eq.etype with
                   |Zt -> code()
                   |_ -> ()

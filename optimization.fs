@@ -301,8 +301,8 @@ type optimization() =
                                 iter.num x0.size1 <| fun j -> t.[j,j] <== 1.0
                                 t.foreach <| fun (j1,j2) -> t.[j1,j2] <== t.[j1,j2] - y.[j1] * s.[j2] / p
                                 ch.d2 x0.size1 x0.size1 <| fun u ->
-                                    La.matmul u (t,B)
-                                    La.matmul B (u,t)
+                                    La.matmul (u,t,B)
+                                    La.matmul (B,u,t)
                                     t.foreach <| fun (j1,j2) -> 
                                         B.[j1,j2] <== B.[j1,j2] + s.[j1] * s.[j2] / p
                     La.matmul (B,df0) <| fun a ->

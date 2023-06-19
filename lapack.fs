@@ -11,11 +11,14 @@ namespace Aqualis
     module lapack = 
 
         type La() =
+            
             /// <summary>
             /// 行列×ベクトルの計算
             /// </summary>
-            /// <param name="x">計算結果</param>
-            static member matmul (x:num1) = fun (a:num2,b:num1) ->
+            /// <param name="x">a×b</param>
+            /// <param name="a">a</param>
+            /// <param name="b">b</param>
+            static member matmul (x:num1,a:ax2,b:ax1) =
                 x.clear()
                 iter.num a.size1 <| fun i ->
                     iter.num a.size2 <| fun j ->
@@ -24,18 +27,77 @@ namespace Aqualis
             /// <summary>
             /// 行列×ベクトルの計算
             /// </summary>
+            /// <param name="x">a×b</param>
+            /// <param name="a">a</param>
+            /// <param name="b">b</param>
+            static member matmul (x:num1,a:num2,b:ax1) =
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                La.matmul (x,a,b)
+                        
+            /// <summary>
+            /// 行列×ベクトルの計算
+            /// </summary>
+            /// <param name="x">a×b</param>
+            /// <param name="a">a</param>
+            /// <param name="b">b</param>
+            static member matmul (x:num1,a:ax2,b:num1) =
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.matmul (x,a,b)
+
+            /// <summary>
+            /// 行列×ベクトルの計算
+            /// </summary>
+            /// <param name="x">a×b</param>
+            /// <param name="a">a</param>
+            /// <param name="b">b</param>
+            static member matmul (x:num1,a:num2,b:num1) =
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.matmul (x,a,b)                        
+                        
+            /// <summary>
+            /// 行列×ベクトルの計算
+            /// </summary>
+            /// <param name="a">行列</param>
+            /// <param name="b">ベクトル</param>
+            static member matmul (a:ax2,b:ax1) = fun code ->
+                ch.n1 (a,a.size1) <| fun x ->
+                    La.matmul (x,a,b)
+                    code x
+                    
+            /// <summary>
+            /// 行列×ベクトルの計算
+            /// </summary>
+            /// <param name="a">行列</param>
+            /// <param name="b">ベクトル</param>
+            static member matmul (a:ax2,b:num1) = fun code ->
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.matmul (a,b) code
+                
+            /// <summary>
+            /// 行列×ベクトルの計算
+            /// </summary>
+            /// <param name="a">行列</param>
+            /// <param name="b">ベクトル</param>
+            static member matmul (a:num2,b:ax1) = fun code ->
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                La.matmul (a,b) code
+
+            /// <summary>
+            /// 行列×ベクトルの計算
+            /// </summary>
             /// <param name="a">行列</param>
             /// <param name="b">ベクトル</param>
             static member matmul (a:num2,b:num1) = fun code ->
-                ch.n1 (a,a.size1) <| fun x ->
-                    La.matmul x (a,b)
-                    code x
-                    
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.matmul (a,b) code
+                
             /// <summary>
             /// 行列×行列の計算
             /// </summary>
             /// <param name="u">計算結果</param>
-            static member matmul (u:num2) = fun (a:num2,b:num2) ->
+            static member matmul (u:num2,a:ax2,b:ax2) =
                     u.clear()
                     iter.num a.size1 <| fun i ->
                         iter.num b.size2 <| fun j ->
@@ -43,21 +105,74 @@ namespace Aqualis
                                 u.[i,j] <== u.[i,j] + a.[i,k] * b.[k,j]
                                 
             /// <summary>
+            /// 行列×行列の計算
+            /// </summary>
+            /// <param name="u">計算結果</param>
+            static member matmul (u:num2,a:ax2,b:num2) =
+                let b = ax2(b.size1, b.size2, fun (i,j) -> b.[i,j])
+                La.matmul (u,a,b)
+                
+            /// <summary>
+            /// 行列×行列の計算
+            /// </summary>
+            /// <param name="u">計算結果</param>
+            static member matmul (u:num2,a:num2,b:ax2) =
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                La.matmul (u,a,b)
+
+            /// <summary>
+            /// 行列×行列の計算
+            /// </summary>
+            /// <param name="u">計算結果</param>
+            static member matmul (u:num2,a:num2,b:num2) =
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                let b = ax2(b.size1, b.size2, fun (i,j) -> b.[i,j])
+                La.matmul (u,a,b)
+
+            /// <summary>
+            /// 行列a×行列bの計算
+            /// </summary>
+            /// <param name="a"></param>
+            /// <param name="b"></param>
+            static member matmul (a:ax2,b:ax2) = fun code ->
+                ch.n2 (a,a.size1,b.size2) <| fun u ->
+                    La.matmul (u,a,b)
+                    code u
+                    
+            /// <summary>
+            /// 行列a×行列bの計算
+            /// </summary>
+            /// <param name="a"></param>
+            /// <param name="b"></param>
+            static member matmul (a:ax2,b:num2) = fun code ->
+                let b = ax2(b.size1, b.size2, fun (i,j) -> b.[i,j])
+                La.matmul (a,b) code
+                
+            /// <summary>
+            /// 行列a×行列bの計算
+            /// </summary>
+            /// <param name="a"></param>
+            /// <param name="b"></param>
+            static member matmul (a:num2,b:ax2) = fun code ->
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                La.matmul (a,b) code
+                
+            /// <summary>
             /// 行列a×行列bの計算
             /// </summary>
             /// <param name="a"></param>
             /// <param name="b"></param>
             static member matmul (a:num2,b:num2) = fun code ->
-                ch.n2 (a,a.size1,b.size2) <| fun u ->
-                    La.matmul u (a,b)
-                    code u
-                    
+                let a = ax2(a.size1, a.size2, fun (i,j) -> a.[i,j])
+                let b = ax2(b.size1, b.size2, fun (i,j) -> b.[i,j])
+                La.matmul (a,b) code
+                
             /// <summary>
             /// ベクトルの内積計算
             /// </summary>
             /// <param name="a"></param>
             /// <param name="b"></param>
-            static member dot (x:num0) = fun (a:num1,b:num1) ->
+            static member dot (x:num0,a:ax1,b:ax1) =
                 tbinder.d a <| fun () ->
                     x.clear()
                     iter.num a.size1 <| fun j ->
@@ -67,23 +182,73 @@ namespace Aqualis
                     iter.num a.size1 <| fun j ->
                         x <== x + asm.conj(a.[j]) * b.[j]
                         
+            static member dot (x:num0,a:num1,b:num1) =
+                let a = ax1(a.size1, fun i -> a.[i])
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.dot (x,a,b)
+                
+            static member dot (x:num0,a:ax1,b:num1) =
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.dot (x,a,b)
+                
+            static member dot (x:num0,a:num1,b:ax1) =
+                let a = ax1(a.size1, fun i -> a.[i])
+                La.dot (x,a,b)
+                
+            /// <summary>
+            /// ベクトルの内積計算
+            /// </summary>
+            /// <param name="a"></param>
+            /// <param name="b"></param>
+            static member dot (a:ax1,b:ax1) = fun code ->
+                ch.n a <| fun x ->
+                    La.dot (x,a,b)
+                    code x
+                    
+            /// <summary>
+            /// ベクトルの内積計算
+            /// </summary>
+            /// <param name="a"></param>
+            /// <param name="b"></param>
+            static member dot (a:ax1,b:num1) = fun code ->
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.dot (a,b) code
+                
+            /// <summary>
+            /// ベクトルの内積計算
+            /// </summary>
+            /// <param name="a"></param>
+            /// <param name="b"></param>
+            static member dot (a:num1,b:ax1) = fun code ->
+                let a = ax1(a.size1, fun i -> a.[i])
+                La.dot (a,b) code
+
             /// <summary>
             /// ベクトルの内積計算
             /// </summary>
             /// <param name="a"></param>
             /// <param name="b"></param>
             static member dot (a:num1,b:num1) = fun code ->
-                ch.n a <| fun x ->
-                    La.dot x (a,b)
-                    code x
-                    
+                let a = ax1(a.size1, fun i -> a.[i])
+                let b = ax1(b.size1, fun i -> b.[i])
+                La.dot (a,b) code
+                
             /// <summary>
             /// ベクトルのノルム計算
             /// </summary>
             /// <param name="a"></param>
             /// <param name="code"></param>
-            static member norm (a:num1) code =
+            static member norm (a:ax1) = fun code ->
                 La.dot (a,a) code
+                
+            /// <summary>
+            /// ベクトルのノルム計算
+            /// </summary>
+            /// <param name="a"></param>
+            /// <param name="code"></param>
+            static member norm (a:num1) = fun code ->
+                let a = ax1(a.size1, fun i -> a.[i])
+                La.norm a code
                 
             /// <summary>
             /// ベクトルの規格化

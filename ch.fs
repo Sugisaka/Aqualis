@@ -113,6 +113,9 @@ namespace Aqualis
         static member n (v:num1) = fun (code:num0->unit) -> ch.n v.etype code
         static member n (v:num2) = fun (code:num0->unit) -> ch.n v.etype code
         static member n (v:num3) = fun (code:num0->unit) -> ch.n v.etype code
+        static member n (v:ax1) = fun (code:num0->unit) -> ch.n v.etype code
+        static member n (v:ax2) = fun (code:num0->unit) -> ch.n v.etype code
+        static member n (v:ax3) = fun (code:num0->unit) -> ch.n v.etype code
         
         static member f = 
             fun (code:string->unit) ->
@@ -151,8 +154,15 @@ namespace Aqualis
         static member n1 (v:num2,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
         static member n1 (v:num2,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
         static member n1 (v:num3,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype,size1) code
-        static member n1 (v:num3,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype,I size1) code
-        
+        static member n1 (v:num3,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype,I size1) code        
+        static member n1 (v:ax1) = fun (code:num1->unit) -> ch.n1 (v.etype, v.size1) code
+        static member n1 (v:ax1,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
+        static member n1 (v:ax1,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
+        static member n1 (v:ax2,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
+        static member n1 (v:ax2,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
+        static member n1 (v:ax3,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype,size1) code
+        static member n1 (v:ax3,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype,I size1) code
+
         ///<summary>vと同じ型の一時変数を生成</summary>
         static member n2 (v:Etype,n1:num0,n2:num0) = 
             fun (code:num2->unit) ->
@@ -180,7 +190,16 @@ namespace Aqualis
         static member n2 (v:num2,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
         static member n2 (v:num2,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
         static member n2 (v:num2,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
-        
+        static member n2 (v:ax1,size1:num0,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, size2) code
+        static member n2 (v:ax1,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
+        static member n2 (v:ax1,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
+        static member n2 (v:ax1,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
+        static member n2 (v:ax2) = fun (code:num2->unit) -> ch.n2 (v.etype, v.size1, v.size2) code
+        static member n2 (v:ax2,size1:num0,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, size2) code
+        static member n2 (v:ax2,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
+        static member n2 (v:ax2,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
+        static member n2 (v:ax2,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
+
         ///<summary>vと同じ型の一時変数を生成</summary>
         static member n3 (v:Etype,size1:num0,size2:num0,size3:num0) = 
             fun (code:num3->unit) ->
