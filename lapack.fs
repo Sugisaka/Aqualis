@@ -57,36 +57,41 @@ namespace Aqualis
             /// </summary>
             /// <param name="a"></param>
             /// <param name="b"></param>
-            static member dot (a:num1,b:num1) = fun code ->
-                ch.n a <| fun x ->
+            static member dot (x:num0) = fun (a:num1,b:num1) ->
+                tbinder.d a <| fun () ->
                     x.clear()
                     iter.num a.size1 <| fun j ->
                         x <== x + a.[j] * b.[j]
-                    code x
-                    
+                tbinder.z a <| fun () ->
+                    x.clear()
+                    iter.num a.size1 <| fun j ->
+                        x <== x + asm.conj(a.[j]) * b.[j]
+                        
             /// <summary>
-            /// 複素ベクトルの内積計算(片方を複素共役)
+            /// ベクトルの内積計算
             /// </summary>
             /// <param name="a"></param>
             /// <param name="b"></param>
-            static member zdot (a:num1,b:num1) = fun code ->
-                tbinder.z "calc dot" a.[1] <| fun () ->
-                    ch.d <| fun x ->
-                        x.clear()
-                        iter.num a.size1 <| fun j ->
-                            x <== x + a.[j] * asm.conj(b.[j])
-                        code x
-                        
+            static member dot (a:num1,b:num1) = fun code ->
+                ch.n a <| fun x ->
+                    La.dot x (a,b)
+                    code x
+                    
             /// <summary>
             /// ベクトルのノルム計算
             /// </summary>
             /// <param name="a"></param>
             /// <param name="code"></param>
             static member norm (a:num1) code =
-                tbinder.z a <| fun () ->
-                    La.zdot (a,a) code
-                tbinder.d a <| fun () ->
-                    La.dot (a,a) code
+                La.dot (a,a) code
+                
+            /// <summary>
+            /// ベクトルの規格化
+            /// </summary>
+            /// <param name="a"></param>
+            static member normalize (a:num1) =
+                La.dot (a,a) <| fun c ->
+                    a <== a/asm.sqrt(c)
                     
         ///<summary>連立方程式の求解</summary>
         ///<param name="matrix">係数行列</param>
