@@ -1070,7 +1070,7 @@ namespace Aqualis
                 p.comment("****************************************************")
             iter.num x.size1 <| fun i ->
                 iter.num x.size2 <| fun j ->
-                    iter.num x.size2 <| fun k ->
+                    iter.num x.size3 <| fun k ->
                         x.[i,j,k] <== y.[i,j,k]
         static member (<==) (x:ax3,y:num3) =
             let p = p.param
@@ -1089,7 +1089,7 @@ namespace Aqualis
                 p.comment("****************************************************")
             iter.num x.size1 <| fun i ->
                 iter.num x.size2 <| fun j ->
-                    iter.num x.size2 <| fun k ->
+                    iter.num x.size3 <| fun k ->
                         x.[i,j,k] <== y.[i,j,k]
         static member (<==) (x:ax3,y:ax3) =
             let p = p.param
@@ -1108,7 +1108,7 @@ namespace Aqualis
                 p.comment("****************************************************")
             iter.num x.size1 <| fun i ->
                 iter.num x.size2 <| fun j ->
-                    iter.num x.size2 <| fun k ->
+                    iter.num x.size3 <| fun k ->
                         x.[i,j,k] <== y.[i,j,k]
         member this.abs
             with get() =
