@@ -11,7 +11,7 @@ This library generates C/FORTRAN source codes for numerical simulation. You can 
 
 ## How to use
 
-See also document file ([English](document_en.md)) or ([Japanese](document_ja.md))
+See also document file ([English](doc_en/index.md)) or ([Japanese](doc_jp/index.md))
 
 1. Edit the F# script file "template.fsx"
 1. Run the script file to generate source files in the output directory.
@@ -19,4 +19,4 @@ See also document file ([English](document_en.md)) or ([Japanese](document_ja.md
 ## License
 [MIT License](license)
 
-Copyright (c) 2022 Jun-ichiro Sugisaka
+Copyright (c) 2023 Jun-ichiro Sugisaka
