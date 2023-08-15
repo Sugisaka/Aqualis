@@ -1609,19 +1609,15 @@ namespace Aqualis
               |It _,Dt ->
                 p.param.codewrite("Warning: double型変数をint型に代入しました")
                 Console.WriteLine("Warning: double型変数をint型に代入しました")
-                Console.Read() |> ignore
               |It _,Zt ->
                 p.param.codewrite("Warning: complex型変数をint型に代入しました")
                 Console.WriteLine("Warning: complex型変数をint型に代入しました")
-                Console.Read() |> ignore
               |Dt,Zt ->
                 p.param.codewrite("Warning: complex型変数をdouble型に代入しました")
                 Console.WriteLine("Warning: complex型変数をdouble型に代入しました")
-                Console.Read() |> ignore
               |_ -> 
                 p.param.codewrite("Warning: 不明な型の代入です")
                 Console.WriteLine("Warning: 不明な型の代入です")
-                Console.Read() |> ignore
 
         ///<summary>代入</summary>
         static member internal subst (dp:bool) (x:num0) (y:num0) =
