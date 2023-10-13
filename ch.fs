@@ -6,9 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
     open Aqualis_base
 
     ///<summary>一時変数の生成と使用</summary>
@@ -17,472 +14,238 @@ namespace Aqualis
         ///<summary>整数型一時変数の生成</summary>
         static member i code = 
             let p = p.param
-            let x = p.cachevar (It 4) 0
-            code <| Var(It 4,x,[])
-            p.dispose (It 4,A0,x)
+            let x = p.i_cache_var.getAutoVar()
+            code <| int0(Var x)
+            p.i_cache_var.setVar(It 4,A0,x,"")
             
         ///<summary>倍精度浮動小数点型一時変数の生成</summary>
         static member d code = 
             let p = p.param
-            let x = p.cachevar Dt 0
-            code <| Var(Dt,x,[])
-            p.dispose (Dt,A0,x)
+            let x = p.d_cache_var.getAutoVar()
+            code <| float0(Var x)
+            p.d_cache_var.setVar(Dt,A0,x,"")
             
         ///<summary>複素数型一時変数の生成</summary>
         static member z code = 
             let p = p.param
-            let x = p.cachevar Zt 0
-            code <| Var(Zt,x,[])
-            p.dispose (Zt,A0,x)
+            let x = p.z_cache_var.getAutoVar()
+            code <| complex0(Var x)
+            p.z_cache_var.setVar(Zt,A0,x,"")
             
         ///<summary>整数型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member si (value:num0) =
-            let p = p.param
-            fun code ->
-                let x = p.cachevar (It 4) 0
-                let xx = Var(It 4,x,[])
-                xx <== value
-                code xx
-                p.dispose(It 4,A0,x)
+        static member si (value:int0) = fun code ->
+            ch.i <| fun v ->
+                v <== value
+                code v
                 
         ///<summary>整数型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member si (value:int) =
-            let p = p.param
-            fun code ->
-                let x = p.cachevar (It 4) 0
-                let xx = Var(It 4,x,[])
-                xx <== value
-                code xx
-                p.dispose(It 4,A0,x)
-                
-        ///<summary>倍精度浮動小数点型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member sd (value:num0) =
-            let p = p.param
-            fun code -> 
-                let x = p.cachevar Dt 0
-                let xx = Var(Dt,x,[])
-                xx <== value
-                code xx
-                p.dispose(Dt,A0,x)
-                
-        ///<summary>倍精度浮動小数点型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member sd (value:double) =
-            let p = p.param
-            fun code -> 
-                let x = p.cachevar Dt 0
-                let xx = Var(Dt,x,[])
-                xx <== value
-                code xx
-                p.dispose(Dt,A0,x)
-                
-        ///<summary>複素数型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member sz (value:num0) =
-            let p = p.param
-            fun code -> 
-                let x = p.cachevar Zt 0
-                let xx = Var(Zt,x,[])
-                xx <== value
-                code xx
-                p.dispose(Zt,A0,x)
-                
-        ///<summary>複素数型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member sz (re:double,im:double) =
-            let p = p.param
-            fun code -> 
-                let x = p.cachevar Zt 0
-                let xx = Var(Zt,x,[])
-                xx <== (re,im)
-                code xx
-                p.dispose(Zt,A0,x)
-                
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n (v:Etype) = 
-            fun (code:num0->unit) ->
-                match v with
-                  |Zt ->
-                    ch.z code
-                  |Dt ->
-                    ch.d code
-                  |It _ ->
-                    ch.i code
-                  |_ -> 
-                    printfn "ch.n error"
-
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n (v:num0) = fun (code:num0->unit) -> ch.n v.etype code
-        static member n (v:num1) = fun (code:num0->unit) -> ch.n v.etype code
-        static member n (v:num2) = fun (code:num0->unit) -> ch.n v.etype code
-        static member n (v:num3) = fun (code:num0->unit) -> ch.n v.etype code
-        static member n (v:ax1) = fun (code:num0->unit) -> ch.n v.etype code
-        static member n (v:ax2) = fun (code:num0->unit) -> ch.n v.etype code
-        static member n (v:ax3) = fun (code:num0->unit) -> ch.n v.etype code
+        static member si (value:int) = ch.si (value.I)
         
-        static member f = 
-            fun (code:string->unit) ->
-                let name = p.param.f_number()
-                match p.lang with
-                  |F ->
-                      ignore <| p.param.vreg(Structure("file"),A0,name,name.Substring(1))
-                  |_ ->
-                      ignore <| p.param.vreg(Structure("file"),A0,name,"")
-                code name
+        ///<summary>倍精度浮動小数点型一時変数を生成し、valueを代入してからcodeで使用</summary>
+        static member sd (value:float0) = fun code ->
+            ch.d <| fun v ->
+                v <== value
+                code v
+                
+        ///<summary>倍精度浮動小数点型一時変数を生成し、valueを代入してからcodeで使用</summary>
+        static member sd (value:double) = ch.sd (value.D)
+        
+        ///<summary>複素数型一時変数を生成し、valueを代入してからcodeで使用</summary>
+        static member sz (value:complex0) = fun code ->
+            ch.z <| fun v ->
+                v <== value
+                code v
+                
+        ///<summary>複素数型一時変数を生成し、valueを代入してからcodeで使用</summary>
+        static member sz (re:double,im:double) = ch.sz (re+asm.uj*im)
+        
+        // static member f = 
+        //     fun (code:string->unit) ->
+        //         let name = p.param.f_number()
+        //         match p.lang with
+        //         |F ->
+        //             ignore <| p.param.vreg(Structure("file"),A0,name,name.Substring(1))
+        //         |_ ->
+        //             ignore <| p.param.vreg(Structure("file"),A0,name,"")
+        //         code name
             
-        static member t = 
-            fun (code:string->unit) ->
-                let name = p.param.t_name()
-                ignore <| p.param.vreg(Structure("string"),A0,name,"")
-                code name
+        // static member t = 
+        //     fun (code:string->unit) ->
+        //         let name = p.param.t_name()
+        //         ignore <| p.param.vreg(Structure("string"),A0,name,"")
+        //         code name
                 
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n01 (v:Etype) = 
-            fun (code:num1->unit) ->
-                match v with
-                  |Zt ->
-                    ch.z01 code
-                  |Dt ->
-                    ch.d01 code
-                  |It _ ->
-                    ch.i01 code
-                  |_ -> 
-                    printfn "ch.n01 error"
-                    
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n1 (v:Etype,size:num0) = 
-            fun (code:num1->unit) ->
-                match v with
-                  |Zt ->
-                    ch.z1 size code
-                  |Dt ->
-                    ch.d1 size code
-                  |It _ ->
-                    ch.i1 size code
-                  |_ -> 
-                    printfn "ch.n1 error"
-                    
-        static member n1 (v:num0,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
-        static member n1 (v:num0,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
-        static member n1 (v:num1) = fun (code:num1->unit) -> ch.n1 (v.etype, v.size1) code
-        static member n1 (v:num1,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
-        static member n1 (v:num1,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
-        static member n1 (v:num2,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
-        static member n1 (v:num2,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
-        static member n1 (v:num3,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype,size1) code
-        static member n1 (v:num3,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype,I size1) code        
-        static member n1 (v:ax1) = fun (code:num1->unit) -> ch.n1 (v.etype, v.size1) code
-        static member n1 (v:ax1,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
-        static member n1 (v:ax1,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
-        static member n1 (v:ax2,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype, size1) code
-        static member n1 (v:ax2,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype, I size1) code
-        static member n1 (v:ax3,size1:num0) = fun (code:num1->unit) -> ch.n1 (v.etype,size1) code
-        static member n1 (v:ax3,size1:int) = fun (code:num1->unit) -> ch.n1 (v.etype,I size1) code
 
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n02 (v:Etype) = 
-            fun (code:num2->unit) ->
-                match v with
-                  |Zt ->
-                    ch.z02 code
-                  |Dt ->
-                    ch.d02 code
-                  |It _ ->
-                    ch.i02 code
-                  |_ -> 
-                    printfn "ch.n02 error"
-                    
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n2 (v:Etype,n1:num0,n2:num0) = 
-            fun (code:num2->unit) ->
-                match v with
-                  |Zt ->
-                    ch.z2 n1 n2 code
-                  |Dt ->
-                    ch.d2 n1 n2 code
-                  |It _ ->
-                    ch.i2 n1 n2 code
-                  |_ -> 
-                    printfn "ch.n2 error"
-                    
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n2 (v:num0,size1:num0,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, size2) code
-        static member n2 (v:num0,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
-        static member n2 (v:num0,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
-        static member n2 (v:num0,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
-        static member n2 (v:num1,size1:num0,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, size2) code
-        static member n2 (v:num1,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
-        static member n2 (v:num1,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
-        static member n2 (v:num1,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
-        static member n2 (v:num2) = fun (code:num2->unit) -> ch.n2 (v.etype, v.size1, v.size2) code
-        static member n2 (v:num2,size1:num0,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, size2) code
-        static member n2 (v:num2,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
-        static member n2 (v:num2,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
-        static member n2 (v:num2,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
-        static member n2 (v:ax1,size1:num0,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, size2) code
-        static member n2 (v:ax1,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
-        static member n2 (v:ax1,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
-        static member n2 (v:ax1,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
-        static member n2 (v:ax2) = fun (code:num2->unit) -> ch.n2 (v.etype, v.size1, v.size2) code
-        static member n2 (v:ax2,size1:num0,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, size2) code
-        static member n2 (v:ax2,size1:num0,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, size1, I size2) code
-        static member n2 (v:ax2,size1:int,size2:num0) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, size2) code
-        static member n2 (v:ax2,size1:int,size2:int) = fun (code:num2->unit) -> ch.n2 (v.etype, I size1, I size2) code
-
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n03 (v:Etype) = 
-            fun (code:num3->unit) ->
-                match v with
-                  |Zt ->
-                    ch.z03 code
-                  |Dt ->
-                    ch.d03 code
-                  |It _ ->
-                    ch.i03 code
-                  |_ -> 
-                    printfn "ch.n03 error"
-                    
-        ///<summary>vと同じ型の一時変数を生成</summary>
-        static member n3 (v:Etype,size1:num0,size2:num0,size3:num0) = 
-            fun (code:num3->unit) ->
-                match v with
-                  |Zt ->
-                    ch.z3 size1 size2 size3 code
-                  |Dt ->
-                    ch.d3 size1 size2 size3 code
-                  |It _ ->
-                    ch.i3 size1 size2 size3 code
-                  |_ -> 
-                    printfn "ch.n3 error"
-                    
-        static member n3 (v:num0,size1:num0,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,size3) code
-        static member n3 (v:num0,size1:num0,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,I size3) code
-        static member n3 (v:num0,size1:num0,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,size3) code
-        static member n3 (v:num0,size1:num0,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,I size3) code
-        static member n3 (v:num0,size1:int,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,size3) code
-        static member n3 (v:num0,size1:int,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,I size3) code
-        static member n3 (v:num0,size1:int,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,size3) code
-        static member n3 (v:num0,size1:int,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,I size3) code
-        static member n3 (v:num1,size1:num0,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,size3) code
-        static member n3 (v:num1,size1:num0,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,I size3) code
-        static member n3 (v:num1,size1:num0,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,size3) code
-        static member n3 (v:num1,size1:num0,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,I size3) code
-        static member n3 (v:num1,size1:int,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,size3) code
-        static member n3 (v:num1,size1:int,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,I size3) code
-        static member n3 (v:num1,size1:int,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,size3) code
-        static member n3 (v:num1,size1:int,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,I size3) code
-        static member n3 (v:num2,size1:num0,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,size3) code
-        static member n3 (v:num2,size1:num0,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,I size3) code
-        static member n3 (v:num2,size1:num0,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,size3) code
-        static member n3 (v:num2,size1:num0,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,I size3) code
-        static member n3 (v:num2,size1:int,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,size3) code
-        static member n3 (v:num2,size1:int,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,I size3) code
-        static member n3 (v:num2,size1:int,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,size3) code
-        static member n3 (v:num2,size1:int,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,I size3) code
-        static member n3 (v:num3) = fun (code:num3->unit) -> ch.n3 (v.etype,v.size1,v.size2,v.size3) code
-        static member n3 (v:num3,size1:num0,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,size3) code
-        static member n3 (v:num3,size1:num0,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,size2,I size3) code
-        static member n3 (v:num3,size1:num0,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,size3) code
-        static member n3 (v:num3,size1:num0,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,size1,I size2,I size3) code
-        static member n3 (v:num3,size1:int,size2:num0,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,size3) code
-        static member n3 (v:num3,size1:int,size2:num0,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,size2,I size3) code
-        static member n3 (v:num3,size1:int,size2:int,size3:num0) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,size3) code
-        static member n3 (v:num3,size1:int,size2:int,size3:int) = fun (code:num3->unit) -> ch.n3 (v.etype,I size1,I size2,I size3) code
-        
         ///<summary>整数型1次元配列を生成</summary>
         static member i01 code = 
             let p = p.param
-            let x = p.cachevar (It 4) 1
-            let y = num1(It 4,A1(0),x)
+            let x = p.i1_cache_var.getAutoVar()
+            let y = int1(Var1(A1(0),x))
             code y
-            p.dispose(It 4,A1(0),x)
+            p.i1_cache_var.setVar(It 4,A1(0),x,"")
             
         ///<summary>実数型1次元配列を生成</summary>
         static member d01 code = 
             let p = p.param
-            let x = p.cachevar Dt 1
-            let y = num1(Dt,A1(0),x)
+            let x = p.d1_cache_var.getAutoVar()
+            let y = float1(Var1(A1(0),x))
             code y
-            p.dispose(Dt,A1(0),x)
+            p.d1_cache_var.setVar(Dt,A1(0),x,"")
             
         ///<summary>複素数型1次元配列を生成</summary>
         static member z01 code = 
             let p = p.param
-            let x = p.cachevar Zt 1
-            let y = num1(Zt,A1(0),x)
+            let x = p.z1_cache_var.getAutoVar()
+            let y = complex1(Var1(A1(0),x))
             code y
-            p.dispose(Zt,A1(0),x)
+            p.z1_cache_var.setVar(Zt,A1(0),x,"")
             
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i1 (size1:num0) = fun code ->
-            let p = p.param
-            let x = p.cachevar (It 4) 1
-            let y = num1(It 4,A1(0),x)
-            y.allocate(size1)
-            code y
-            y.deallocate()
-            p.dispose(It 4,A1(0),x)
-            
+        static member i1 (size1:int0) = fun code ->
+            ch.i01 <| fun v ->
+                v.allocate(size1)
+                code v
+                v.deallocate()
+                
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member i1 (size1:int) = fun code ->
-            ch.i1 (I size1) code
+            ch.i1 (size1.I) code
             
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d1 (size1:num0) = fun code ->
-            let p = p.param
-            let x = p.cachevar Dt 1
-            let y = num1(Dt,A1(0),x)
-            y.allocate(size1)
-            code y
-            y.deallocate()
-            p.dispose(Dt,A1(0),x)
+        static member d1 (size1:int0) = fun code ->
+            ch.d01 <| fun v ->
+                v.allocate(size1)
+                code v
+                v.deallocate()
             
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member d1 (size1:int) = fun code ->
-            ch.d1 (I size1) code
+            ch.d1 (size1.I) code
             
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z1 (size1:num0) = fun code ->
-            let p = p.param
-            let x = p.cachevar Zt 1
-            let y = num1(Zt,A1(0),x)
-            y.allocate(size1)
-            code y
-            y.deallocate()
-            p.dispose(Zt,A1(0),x)
+        static member z1 (size1:int0) = fun code ->
+            ch.z01 <| fun v ->
+                v.allocate(size1)
+                code v
+                v.deallocate()
             
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member z1 (size1:int) = fun code ->
-            ch.z1 (I size1) code
+            ch.z1 (size1.I) code
             
         ///<summary>整数型2次元配列を生成</summary>
         static member i02 code = 
             let p = p.param
-            let x = p.cachevar (It 4) 2
-            let y = num2(It 4,A2(0,0),x)
+            let x = p.i2_cache_var.getAutoVar()
+            let y = int2(Var2(A2(0,0),x))
             code y
-            p.dispose(It 4,A2(0,0),x)
+            p.i2_cache_var.setVar(It 4,A2(0,0),x,"")
             
         ///<summary>実数型2次元配列を生成</summary>
         static member d02 code = 
             let p = p.param
-            let x = p.cachevar Dt 2
-            let y = num2(Dt,A2(0,0),x)
+            let x = p.d2_cache_var.getAutoVar()
+            let y = float2(Var2(A2(0,0),x))
             code y
-            p.dispose(Dt,A2(0,0),x)
+            p.d2_cache_var.setVar(Dt,A2(0,0),x,"")
             
         ///<summary>複素数型2次元配列を生成</summary>
         static member z02 code = 
             let p = p.param
-            let x = p.cachevar Zt 2
-            let y = num2(Zt,A2(0,0),x)
+            let x = p.z2_cache_var.getAutoVar()
+            let y = complex2(Var2(A2(0,0),x))
             code y
-            p.dispose(Zt,A2(0,0),x)
+            p.z2_cache_var.setVar(Zt,A2(0,0),x,"")
             
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i2 (size1:num0) = fun (size2:num0) code -> 
-            let p = p.param
-            let x = p.cachevar (It 4) 2
-            let y = num2(It 4,A2(0,0),x)
-            y.allocate(size1,size2)
-            code y
-            y.deallocate()
-            p.dispose(It 4,A2(0,0),x)
+        static member i2 (size1:int0) = fun (size2:int0) code -> 
+            ch.i02 <| fun v ->
+                v.allocate(size1,size2)
+                code v
+                v.deallocate()
             
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member i2 (size1:int) = fun (size2:int) code -> 
-            ch.i2 (I size1) (I size2) code
+            ch.i2 size1.I size2.I code
             
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d2 (size1:num0) = fun (size2:num0) code ->
-            let p = p.param
-            let x = p.cachevar Dt 2
-            let y = num2(Dt,A2(0,0),x)
-            y.allocate(size1,size2)
-            code y
-            y.deallocate()
-            p.dispose(Dt,A2(0,0),x)
-            
+        static member d2 (size1:int0) = fun (size2:int0) code ->
+            ch.d02 <| fun v ->
+                v.allocate(size1,size2)
+                code v
+                v.deallocate()
+                
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member d2 (size1:int) = fun (size2:int) code -> 
-            ch.d2 (I size1) (I size2) code
+            ch.d2 size1.I size2.I code
             
         ///<summary>複素数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z2 (size1:num0) = fun (size2:num0) code ->
-            let p = p.param
-            let x = p.cachevar Zt 2
-            let y = num2(Zt,A2(0,0),x)
-            y.allocate(size1,size2)
-            code y
-            y.deallocate()
-            p.dispose(Zt,A2(0,0),x)
+        static member z2 (size1:int0) = fun (size2:int0) code ->
+            ch.z02 <| fun v ->
+                v.allocate(size1,size2)
+                code v
+                v.deallocate()
             
         ///<summary>複素数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member z2 (size1:int) = fun (size2:int) code -> 
-            ch.z2 (I size1) (I size2) code
+            ch.z2 size1.I size2.I code
             
         ///<summary>整数型3次元配列を生成</summary>
         static member i03 code = 
             let p = p.param
-            let x = p.cachevar (It 4) 3
-            let y = num3(It 4,A3(0,0,0),x)
+            let x = p.i3_cache_var.getAutoVar()
+            let y = int3(Var3(A3(0,0,0),x))
             code y
-            p.dispose(It 4,A3(0,0,0),x)
+            p.i3_cache_var.setVar(It 4,A3(0,0,0),x,"")
             
         ///<summary>実数型3次元配列を生成</summary>
         static member d03 code = 
             let p = p.param
-            let x = p.cachevar Dt 3
-            let y = num3(Dt,A3(0,0,0),x)
+            let x = p.d3_cache_var.getAutoVar()
+            let y = float3(Var3(A3(0,0,0),x))
             code y
-            p.dispose(Dt,A3(0,0,0),x)
+            p.i3_cache_var.setVar(Dt,A3(0,0,0),x,"")
             
         ///<summary>複素数型3次元配列を生成</summary>
         static member z03 code = 
             let p = p.param
-            let x = p.cachevar Zt 3
-            let y = num3(Zt,A3(0,0,0),x)
+            let x = p.z3_cache_var.getAutoVar()
+            let y = complex3(Var3(A3(0,0,0),x))
             code y
-            p.dispose(Zt,A3(0,0,0),x)
+            p.z3_cache_var.setVar(Zt,A3(0,0,0),x,"")
             
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
-            let p = p.param
-            let x = p.cachevar (It 4) 3
-            let y = num3(It 4,A3(0,0,0),x)
-            y.allocate(size1,size2,size3)
-            code y
-            y.deallocate()
-            p.dispose(It 4,A3(0,0,0),x)
+        static member i3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+            ch.i03 <| fun v ->
+                v.allocate(size1,size2,size3)
+                code v
+                v.deallocate()
             
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member i3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.i3 (I size1) (I size2) (I size3) code
+            ch.i3 size1.I size2.I size3.I code
             
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
-            let p = p.param
-            let x = p.cachevar Dt 3
-            let y = num3(Dt,A3(0,0,0),x)
-            y.allocate(size1,size2,size3)
-            code y
-            y.deallocate()
-            p.dispose(Dt,A3(0,0,0),x)
-            
+        static member d3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+            ch.d03 <| fun v ->
+                v.allocate(size1,size2,size3)
+                code v
+                v.deallocate()
+                
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member d3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.d3 (I size1) (I size2) (I size3) code
+            ch.d3 size1.I size2.I size3.I code
             
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
-            let p = p.param
-            let x = p.cachevar Zt 3
-            let y = num3(Zt,A3(0,0,0),x)
-            y.allocate(size1,size2,size3)
-            code y
-            y.deallocate()
-            p.dispose(Zt,A3(0,0,0),x)
-            
+        static member z3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+            ch.z03 <| fun v ->
+                v.allocate(size1,size2,size3)
+                code v
+                v.deallocate()
+                
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
         static member z3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.z3 (I size1) (I size2) (I size3) code
+            ch.z3 size1.I size2.I size3.I code
             
         static member ii code = 
             ch.i <| fun i1 -> 
@@ -686,428 +449,428 @@ namespace Aqualis
                 
         static member count1 code =
             ch.i <| fun counter ->
-                counter <== I 1
+                counter <== _1
                 code(counter)
                 
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_i1 (size1:num0) = fun code ->
+        static member copyin_i1 (size1:int0) = fun code ->
             match p.lang with
-              |F ->
+            |F ->
                 ch.i1 size1 <| fun i ->
-                    p.param.civreg (i.name+"(1:"+size1.name+")")
+                    p.param.civar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    p.param.rmciv (i.name+"(1:"+size1.name+")")
-              |C99 ->
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
                 ch.i1 size1 <| fun i ->
-                    p.param.civreg (i.name+"[0:"+size1.name+"]")
+                    p.param.civar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    p.param.rmciv (i.name+"[0:"+size1.name+"]")
-              |_ ->
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_i1 (size1:int) = fun code ->
-            ch.copyin_i1 (I size1) code
+            ch.copyin_i1 size1.I code
 
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_d1 (size1:num0) = fun code ->
+        static member copyin_d1 (size1:int0) = fun code ->
             match p.lang with
-              |F ->
-                ch.d1 size1 <| fun d ->
-                    p.param.civreg (d.name+"(1:"+size1.name+")")
-                    code d
-                    p.param.rmciv (d.name+"(1:"+size1.name+")")
-              |C99 ->
-                ch.d1 size1 <| fun d ->
-                    p.param.civreg (d.name+"[0:"+size1.name+"]")
-                    code d
-                    p.param.rmciv (d.name+"[0:"+size1.name+"]")
-              |_ ->
+            |F ->
+                ch.d1 size1 <| fun i ->
+                    p.param.civar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.d1 size1 <| fun i ->
+                    p.param.civar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_d1 (size1:int) = fun code ->
-            ch.copyin_d1 (I size1) code
+            ch.copyin_d1 size1.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_z1 (size1:num0) = fun code ->
+        static member copyin_z1 (size1:int0) = fun code ->
             match p.lang with
-              |F ->
-                ch.z1 size1 <| fun z ->
-                    p.param.civreg (z.name+"(1:"+size1.name+")")
-                    code z
-                    p.param.rmciv (z.name+"(1:"+size1.name+")")
-              |C99 ->
-                ch.z1 size1 <| fun z ->
-                    p.param.civreg (z.name+"[0:"+size1.name+"]")
-                    code z
-                    p.param.rmciv (z.name+"[0:"+size1.name+"]")
-              |_ ->
+            |F ->
+                ch.z1 size1 <| fun i ->
+                    p.param.civar.setVar(Zt, A1(0),i.code+"(1:"+size1.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.z1 size1 <| fun i ->
+                    p.param.civar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_z1 (size1:int) = fun code ->
-            ch.copyin_z1 (I size1) code
+            ch.copyin_z1 size1.I code
 
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_i2 (size1:num0) = fun (size2:num0) code ->
+        static member copyin_i2 (size1:int0) = fun (size2:int0) code ->
             match p.lang with
-              |F ->
+            |F ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.civreg (i.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    p.param.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    p.param.rmciv (i.name+"(1:"+size1.name+",1:"+size2.name+")")
-              |C99 ->
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.civreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    p.param.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    p.param.rmciv (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-              |_ ->
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_i2 (size1:int) = fun (size2:int) code ->
-            ch.copyin_i2 (I size1) (I size2) code
+            ch.copyin_i2 size1.I size2.I code
 
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_d2 (size1:num0) = fun (size2:num0) code ->
+        static member copyin_d2 (size1:int0) = fun (size2:int0) code ->
             match p.lang with
-              |F ->
-                ch.d2 size1 size2 <| fun d ->
-                    p.param.civreg (d.name+"(1:"+size1.name+",1:"+size2.name+")")
-                    code d
-                    p.param.rmciv (d.name+"(1:"+size1.name+",1:"+size2.name+")")
-              |C99 ->
-                ch.d2 size1 size2 <| fun d ->
-                    p.param.civreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-                    code d
-                    p.param.rmciv (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-              |_ ->
+            |F ->
+                ch.d2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.d2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_d2 (size1:int) = fun (size2:int) code ->
-            ch.copyin_d2 (I size1) (I size2) code
+            ch.copyin_d2 size1.I size2.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_z2 (size1:num0) = fun (size2:num0) code ->
+        static member copyin_z2 (size1:int0) = fun (size2:int0) code ->
             match p.lang with
-              |F ->
-                ch.z2 size1 size2 <| fun z ->
-                    p.param.civreg (z.name+"(1:"+size1.name+",1:"+size2.name+")")
-                    code z
-                    p.param.rmciv (z.name+"(1:"+size1.name+",1:"+size2.name+")")
-              |C99 ->
-                ch.z2 size1 size2 <| fun z ->
-                    p.param.civreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-                    code z
-                    p.param.rmciv (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-              |_ ->
+            |F ->
+                ch.z2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.z2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_z2 (size1:int) = fun (size2:int) code ->
-            ch.copyin_z2 (I size1) (I size2) code
+            ch.copyin_z2 size1.I size2.I code
 
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+        static member copyin_i3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
             match p.lang with
-              |F ->
+            |F ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.civreg (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    p.param.civar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    p.param.rmciv (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-              |C99 ->
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.civreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    p.param.civar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    p.param.rmciv (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-              |_ ->
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_i3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.copyin_i3 (I size1) (I size2) (I size3) code
+            ch.copyin_i3 size1.I size2.I size3.I code
 
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+        static member copyin_d3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
             match p.lang with
-              |F ->
-                ch.d3 size1 size2 size3 <| fun d ->
-                    p.param.civreg (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-                    code d
-                    p.param.rmciv (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-              |C99 ->
-                ch.d3 size1 size2 size3 <| fun d ->
-                    p.param.civreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-                    code d
-                    p.param.rmciv (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-              |_ ->
+            |F ->
+                ch.d3 size1 size2 size3 <| fun i ->
+                    p.param.civar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.d3 size1 size2 size3 <| fun i ->
+                    p.param.civar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_d3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.copyin_d3 (I size1) (I size2) (I size3) code
+            ch.copyin_d3 size1.I size2.I size3.I code
 
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+        static member copyin_z3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
             match p.lang with
-              |F ->
-                ch.z3 size1 size2 size3 <| fun z ->
-                    p.param.civreg (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-                    code z
-                    p.param.rmciv (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-              |C99 ->
-                ch.z3 size1 size2 size3 <| fun z ->
-                    p.param.civreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-                    code z
-                    p.param.rmciv (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-              |_ ->
+            |F ->
+                ch.z3 size1 size2 size3 <| fun i ->
+                    p.param.civar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.z3 size1 size2 size3 <| fun i ->
+                    p.param.civar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_z3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.copyin_z3 (I size1) (I size2) (I size3) code
+            ch.copyin_z3 size1.I size2.I size3.I code
 
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_i1 (size1:num0) = fun code ->
+        static member copyout_i1 (size1:int0) = fun code ->
             match p.lang with
-              |F ->
+            |F ->
                 ch.i1 size1 <| fun i ->
-                    p.param.covreg (i.name+"(1:"+size1.name+")")
+                    p.param.covar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    p.param.rmcov (i.name+"(1:"+size1.name+")")
-              |C99 ->
+                    ignore <| p.param.covar.getAutoVar()
+            |C ->
                 ch.i1 size1 <| fun i ->
-                    p.param.covreg (i.name+"[0:"+size1.name+"]")
+                    p.param.covar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    p.param.rmcov (i.name+"[0:"+size1.name+"]")
-              |_ ->
+                    ignore <| p.param.covar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_i1 (size1:int) = fun code ->
-            ch.copyout_i1 (I size1) code
+            ch.copyout_i1 size1.I code
 
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_d1 (size1:num0) = fun code ->
+        static member copyout_d1 (size1:int0) = fun code ->
             match p.lang with
-              |F ->
-                ch.d1 size1 <| fun d ->
-                    p.param.covreg (d.name+"(1:"+size1.name+")")
-                    code d
-                    p.param.rmcov (d.name+"(1:"+size1.name+")")
-              |C99 ->
-                ch.d1 size1 <| fun d ->
-                    p.param.covreg (d.name+"[0:"+size1.name+"]")
-                    code d
-                    p.param.rmcov (d.name+"[0:"+size1.name+"]")
-              |_ ->
+            |F ->
+                ch.d1 size1 <| fun i ->
+                    p.param.covar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |C ->
+                ch.d1 size1 <| fun i ->
+                    p.param.covar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_d1 (size1:int) = fun code ->
-            ch.copyout_d1 (I size1) code
+            ch.copyout_d1 size1.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_z1 (size1:num0) = fun code ->
+        static member copyout_z1 (size1:int0) = fun code ->
             match p.lang with
-              |F ->
-                ch.z1 size1 <| fun z ->
-                    p.param.covreg (z.name+"(1:"+size1.name+")")
-                    code z
-                    p.param.rmcov (z.name+"(1:"+size1.name+")")
-              |C99 ->
-                ch.z1 size1 <| fun z ->
-                    p.param.covreg (z.name+"[0:"+size1.name+"]")
-                    code z
-                    p.param.rmcov (z.name+"[0:"+size1.name+"]")
-              |_ ->
+            |F ->
+                ch.z1 size1 <| fun i ->
+                    p.param.covar.setVar(Zt,A1(0),i.code+"(1:"+size1.code+")","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |C ->
+                ch.z1 size1 <| fun i ->
+                    p.param.covar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |_ ->
                 ()
-
+                
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_z1 (size1:int) = fun code ->
-            ch.copyout_z1 (I size1) code
+            ch.copyout_z1 size1.I code
 
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_i2 (size1:num0) = fun (size2:num0) code ->
+        static member copyout_i2 (size1:int0) = fun (size2:int0) code ->
             match p.lang with
-              |F ->
+            |F ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.covreg (i.name+"(1:"+size1.name+",1:"+size2.name+")")
+                    p.param.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    p.param.rmcov (i.name+"(1:"+size1.name+",1:"+size2.name+")")
-              |C99 ->
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.covreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
+                    p.param.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    p.param.rmcov (i.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-              |_ ->
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_i2 (size1:int) = fun (size2:int) code ->
-            ch.copyout_i2 (I size1) (I size2) code
+            ch.copyout_i2 size1.I size2.I code
 
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_d2 (size1:num0) = fun (size2:num0) code ->
+        static member copyout_d2 (size1:int0) = fun (size2:int0) code ->
             match p.lang with
-              |F ->
-                ch.d2 size1 size2 <| fun d ->
-                    p.param.covreg (d.name+"(1:"+size1.name+",1:"+size2.name+")")
-                    code d
-                    p.param.rmcov (d.name+"(1:"+size1.name+",1:"+size2.name+")")
-              |C99 ->
-                ch.d2 size1 size2 <| fun d ->
-                    p.param.covreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-                    code d
-                    p.param.rmcov (d.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-              |_ ->
+            |F ->
+                ch.d2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (Dt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.d2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (Dt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_d2 (size1:int) = fun (size2:int) code ->
-            ch.copyout_d2 (I size1) (I size2) code
+            ch.copyout_d2 size1.I size2.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_z2 (size1:num0) = fun (size2:num0) code ->
+        static member copyout_z2 (size1:int0) = fun (size2:int0) code ->
             match p.lang with
-              |F ->
-                ch.z2 size1 size2 <| fun z ->
-                    p.param.covreg (z.name+"(1:"+size1.name+",1:"+size2.name+")")
-                    code z
-                    p.param.rmcov (z.name+"(1:"+size1.name+",1:"+size2.name+")")
-              |C99 ->
-                ch.z2 size1 size2 <| fun z ->
-                    p.param.covreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-                    code z
-                    p.param.rmcov (z.name+"[0:"+size1.name+"][0:"+size2.name+"]")
-              |_ ->
+            |F ->
+                ch.z2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |C ->
+                ch.z2 size1 size2 <| fun i ->
+                    p.param.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    code i
+                    ignore <| p.param.civar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_z2 (size1:int) = fun (size2:int) code ->
-            ch.copyout_z2 (I size1) (I size2) code
+            ch.copyout_z2 size1.I size2.I code
 
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+        static member copyout_i3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
             match p.lang with
-              |F ->
+            |F ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.covreg (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
+                    p.param.covar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    p.param.rmcov (i.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-              |C99 ->
+                    ignore <| p.param.covar.getAutoVar()
+            |C ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.covreg (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
+                    p.param.covar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    p.param.rmcov (i.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-              |_ ->
+                    ignore <| p.param.covar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_i3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.copyout_i3 (I size1) (I size2) (I size3) code
+            ch.copyout_i3 size1.I size2.I size3.I code
 
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+        static member copyout_d3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
             match p.lang with
-              |F ->
-                ch.d3 size1 size2 size3 <| fun d ->
-                    p.param.covreg (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-                    code d
-                    p.param.rmcov (d.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-              |C99 ->
-                ch.d3 size1 size2 size3 <| fun d ->
-                    p.param.covreg (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-                    code d
-                    p.param.rmcov (d.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-              |_ ->
+            |F ->
+                ch.d3 size1 size2 size3 <| fun i ->
+                    p.param.covar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |C ->
+                ch.d3 size1 size2 size3 <| fun i ->
+                    p.param.covar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_d3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.copyout_d3 (I size1) (I size2) (I size3) code
+            ch.copyout_d3 size1.I size2.I size3.I code
 
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
+        static member copyout_z3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
             match p.lang with
-              |F ->
-                ch.z3 size1 size2 size3 <| fun z ->
-                    p.param.covreg (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-                    code z
-                    p.param.rmcov (z.name+"(1:"+size1.name+",1:"+size2.name+",1:"+size3.name+")")
-              |C99 ->
-                ch.z3 size1 size2 size3 <| fun z ->
-                    p.param.covreg (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-                    code z
-                    p.param.rmcov (z.name+"[0:"+size1.name+"][0:"+size2.name+"][0:"+size3.name+"]")
-              |_ ->
+            |F ->
+                ch.z3 size1 size2 size3 <| fun i ->
+                    p.param.covar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |C ->
+                ch.z3 size1 size2 size3 <| fun i ->
+                    p.param.covar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    code i
+                    ignore <| p.param.covar.getAutoVar()
+            |_ ->
                 ()
 
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_z3 (size1:int) = fun (size2:int) (size3:int) code ->
-            ch.copyout_z3 (I size1) (I size2) (I size3) code
+            ch.copyout_z3 size1.I size2.I size3.I code
 
         ///<summary>整数型一時変数(GPUに転送する変数)の生成</summary>
         static member copyin_i code =
-            ch.i <| fun i1 ->
-                p.param.civreg i1.name
-                code(i1)
-                p.param.rmciv i1.name
-
+            ch.i <| fun v ->
+                p.param.civar.setVar(It 4,A0,v.code,"")
+                code(v)
+                ignore <| p.param.civar.getAutoVar()
+                
         ///<summary>倍精度浮動小数点型一時変数(GPUに転送する変数)の生成</summary>
         static member copyin_d code =
-            ch.d <| fun d1 ->
-                p.param.civreg d1.name
-                code(d1)
-                p.param.rmciv d1.name
-
+            ch.d <| fun v ->
+                p.param.civar.setVar(Dt,A0,v.code,"")
+                code(v)
+                ignore <| p.param.civar.getAutoVar()
+                
         ///<summary>複素数型一時変数(GPUに転送する変数)の生成</summary>
         static member copyin_z code =
-            ch.z <| fun z1 ->
-                p.param.civreg z1.name
-                code(z1)
-                p.param.rmciv z1.name
-
+            ch.z <| fun v ->
+                p.param.civar.setVar(Zt,A0,v.code,"")
+                code(v)
+                ignore <| p.param.civar.getAutoVar()
+                
         ///<summary>整数型一時変数(ホストに転送する変数)の生成</summary>
         static member copyout_i code =
-            ch.i <| fun i1 ->
-                p.param.covreg i1.name
-                code(i1)
-                p.param.rmcov i1.name
-
+            ch.i <| fun v ->
+                p.param.covar.setVar(It 4,A0,v.code,"")
+                code(v)
+                ignore <| p.param.covar.getAutoVar()
+                
         ///<summary>倍精度浮動小数点型一時変数(ホストに転送する変数)の生成</summary>
         static member copyout_d code =
-            ch.d <| fun d1 ->
-                p.param.covreg d1.name
-                code(d1)
-                p.param.rmcov d1.name
-
+            ch.d <| fun v ->
+                p.param.covar.setVar(It 4,A0,v.code,"")
+                code(v)
+                ignore <| p.param.covar.getAutoVar()
+                
         ///<summary>複素数型一時変数(ホストに転送する変数)の生成</summary>
         static member copyout_z code =
-            ch.z <| fun z1 ->
-                p.param.covreg z1.name
-                code(z1)
-                p.param.covreg z1.name
-            
+            ch.z <| fun v ->
+                p.param.covar.setVar(It 4,A0,v.code,"")
+                code(v)
+                ignore <| p.param.covar.getAutoVar()
+                
         ///<summary>整数型一時変数(プライベート変数)の生成</summary>
         static member private_i code =
-            ch.i <| fun i1 ->
-                p.param.pvreg i1.name
-                code(i1)
+            ch.i <| fun v ->
+                p.param.pvar.setVar(It 4, A0, v.code,"")
+                code(v)
 
         ///<summary>倍精度浮動小数点型一時変数(プライベート変数)の生成</summary>
         static member private_d code =
-            ch.d <| fun d1 ->
-                p.param.pvreg d1.name
-                code(d1)
+            ch.d <| fun v ->
+                p.param.pvar.setVar(Dt, A0, v.code,"")
+                code(v)
 
         ///<summary>複素数型一時変数(プライベート変数)の生成</summary>
         static member private_z code =
-            ch.z <| fun z1 ->
-                p.param.pvreg z1.name
-                code(z1)
+            ch.z <| fun v ->
+                p.param.pvar.setVar(Zt, A0, v.code,"")
+                code(v)
 
         static member copyin_ii code = 
             ch.copyin_i <| fun i1 -> 
@@ -1746,13 +1509,13 @@ namespace Aqualis
         static member z01 code = ()
             
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i1 (size1:num0) code = ()
+        static member i1 (size1:int0) code = ()
             
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d1 (size1:num0) code = ()
+        static member d1 (size1:int0) code = ()
             
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z1 (size1:num0) code = ()
+        static member z1 (size1:int0) code = ()
             
         ///<summary>整数型2次元配列を生成</summary>
         static member i02 code = ()
@@ -1764,13 +1527,13 @@ namespace Aqualis
         static member z02 code = ()
             
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i2 (size1:num0) (size2:num0) code = ()
+        static member i2 (size1:int0) (size2:int0) code = ()
             
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d2 (size1:num0) (size2:num0) code = ()
+        static member d2 (size1:int0) (size2:int0) code = ()
             
         ///<summary>複素数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z2 (size1:num0) (size2:num0) code = ()
+        static member z2 (size1:int0) (size2:int0) code = ()
             
         ///<summary>整数型3次元配列を生成</summary>
         static member i03 code = ()
@@ -1782,13 +1545,13 @@ namespace Aqualis
         static member z03 code = ()
             
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i3 (size1:num0) (size2:num0) (size3:num0) code = ()
+        static member i3 (size1:int0) (size2:int0) (size3:int0) code = ()
             
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d3 (size1:num0) (size2:num0) (size3:num0) code = ()
+        static member d3 (size1:int0) (size2:int0) (size3:int0) code = ()
             
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z3 (size1:num0) (size2:num0) (size3:num0) code = ()
+        static member z3 (size1:int0) (size2:int0) (size3:int0) code = ()
     
         static member ii code = 
             ch.i <| fun i1 -> 

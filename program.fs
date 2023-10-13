@@ -33,11 +33,11 @@ namespace Aqualis
         ///<summary>現在指定されている言語</summary>
         member __.lang with get() = 
             if param_idx.Length=0 then
-              NL
+                F
             else
-              let pp = param_lst.[param_idx.[0]]
-              pp.lang
-
+                let pp = param_lst.[param_idx.[0]]
+                pp.lang
+                
         ///<summary>関数を追加</summary>
         member __.param_add(lang_,dir_,proj_) =
             //書き込み中の関数があればストリームを閉じる
@@ -52,12 +52,15 @@ namespace Aqualis
         ///<summary>呼び出し元の関数に戻る</summary>
         member __.param_back() =
             match param_idx with
-              |x::y ->
+            |x::y ->
+                param_lst.[x].cclose()
+                param_lst.[x].vclose()
+                param_lst.[x].hclose()
                 param_lst.[y.[0]].copen()
                 param_lst.[y.[0]].vopen()
                 param_lst.[y.[0]].hopen()
                 param_idx <- y
-              |_ -> ()
+            |_ -> ()
               
     module Aqualis_base =
         

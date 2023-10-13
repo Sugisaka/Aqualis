@@ -15,11 +15,11 @@ namespace Aqualis
             new(name,c) =
                 str.reg(fftw_plan1.sname,name,c)
                 fftw_plan1(name)
-            member __.name = name
+            member __.code = name
             
-        let fftshift_odd(a:ax1) =
+        let fftshift_odd(a:complex1) =
             let n1 = a.size1
-            let n2 = a.size1./2
+            let n2 = a.size1/.2
             ch.z <| fun tmp ->
                 tmp <== a[n2+1]
                 iter.num n2 <| fun i ->
@@ -27,17 +27,17 @@ namespace Aqualis
                     a[i] <== a[i+n2+1]
                 a[a.size1] <== tmp
         
-        let fftshift_even(a:ax1) =
-            let n2 = a.size1./2
+        let fftshift_even(a:complex1) =
+            let n2 = a.size1/.2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
                     tmp <== a[i+n2]
                     a[i+n2] <== a[i]
                     a[i] <== tmp
                     
-        let ifftshift_odd(a:ax1) =
+        let ifftshift_odd(a:complex1) =
             let n1 = a.size1
-            let n2 = n1./2
+            let n2 = n1/.2
             ch.z <| fun tmp ->
                 tmp <== a[n2+1]
                 iter.num n2 <| fun i ->
@@ -45,83 +45,81 @@ namespace Aqualis
                     a[n1-i+1] <== a[n1-i+1-n2-1]
                 a[1] <== tmp
         
-        let ifftshift_even(a:ax1) =
-            let n2 = a.size1./2
+        let ifftshift_even(a:complex1) =
+            let n2 = a.size1/.2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
                     tmp <== a[i+n2]
                     a[i+n2] <== a[i]
                     a[i] <== tmp
                     
-        let fftshift1(x:num1) =
-            br.if2 (x.size1%2 .= 0)
+        let fftshift1(x:complex1) =
+            br.if2 (x.size1%2 =. 0)
                 <| fun () ->
-                    fftshift_even(ax1(x.size1,fun i -> x[i]))
+                    fftshift_even(x)
                 <| fun () ->
-                    fftshift_odd(ax1(x.size1,fun i -> x[i]))
+                    fftshift_odd(x)
                         
-        let ifftshift1(x:num1) =
-            br.if2 (x.size1%2 .= 0)
+        let ifftshift1(x:complex1) =
+            br.if2 (x.size1%2 =. 0)
                 <| fun () ->
-                    ifftshift_even(ax1(x.size1,fun i -> x[i]))
+                    ifftshift_even(x)
                 <| fun () ->
-                    ifftshift_odd(ax1(x.size1,fun i -> x[i]))
-                        
-        let private fft1(planname:string,data1:num1,data2:num1,fftdir:int) =
+                    ifftshift_odd(x)
+                    
+        let private fft1(planname:string,data1:complex1,data2:complex1,fftdir:int) =
             p.param.option_("-lfftw3")
             p.param.option_("-I/usr/include")
             ch.ii <| fun (N,N2) -> 
-                N<==data1.size1
-                N2<==asm.toint(asm.floor(N/2.0))
+                N <== data1.size1
+                N2 <== asm.floor(N/2.0)
                 match p.param.lang with
                   |F ->
                     p.param.include_("'fftw3.f'")
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
-                        p.param.codewrite("call dfftw_plan_dft_1d(" + plan.name + ", " + N.name + ", " + data1.name + ", " + data2.name + ", FFTW_FORWARD, FFTW_ESTIMATE )")
+                        p.param.codewrite("call dfftw_plan_dft_1d(" + plan.code + ", " + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
                         fftshift1(data1)
                         !"FFTを実行"
-                        p.param.codewrite("call dfftw_execute(" + plan.name + ")")
+                        p.param.codewrite("call dfftw_execute(" + plan.code + ")")
                         fftshift1(data2)
-                        p.param.codewrite("call dfftw_destroy_plan(" + plan.name + ")")
+                        p.param.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
                     else
-                        p.param.codewrite("call dfftw_plan_dft_1d(" + plan.name + ", " + N.name + ", " + data1.name + ", " + data2.name + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
+                        p.param.codewrite("call dfftw_plan_dft_1d(" + plan.code + ", " + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
                         ifftshift1(data1)
                         !"FFTを実行"
-                        p.param.codewrite("call dfftw_execute(" + plan.name + ")")
+                        p.param.codewrite("call dfftw_execute(" + plan.code + ")")
                         ifftshift1(data2)
-                        p.param.codewrite("call dfftw_destroy_plan(" + plan.name + ")")
-                  |C89|C99 ->
+                        p.param.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
+                  |C ->
                     p.param.include_("\"fftw3.h\"")
                     let plan = fftw_plan1(planname)
                     if fftdir=1 then
-                        p.param.codewrite(plan.name + " = fftw_plan_dft_1d(" + N.name + ", " + data1.name + ", " + data2.name + ", FFTW_FORWARD, FFTW_ESTIMATE);")
+                        p.param.codewrite(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
                         fftshift1(data1)
                         !"FFTを実行"
-                        p.param.codewrite("dfftw_execute(" + plan.name + ")")
+                        p.param.codewrite("dfftw_execute(" + plan.code + ")")
                         fftshift1(data2)
-                        p.param.codewrite("dfftw_destroy_plan(" + plan.name + ")")
+                        p.param.codewrite("dfftw_destroy_plan(" + plan.code + ")")
                     else
-                        p.param.codewrite(plan.name + " = fftw_plan_dft_1d(" + N.name + ", " + data1.name + ", " + data2.name + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
+                        p.param.codewrite(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
                         ifftshift1(data1)
                         !"FFTを実行"
-                        p.param.codewrite("dfftw_execute(" + plan.name + ")")
+                        p.param.codewrite("dfftw_execute(" + plan.code + ")")
                         ifftshift1(data2)
-                        p.param.codewrite("dfftw_destroy_plan(" + plan.name + ")")
+                        p.param.codewrite("dfftw_destroy_plan(" + plan.code + ")")
                   |T ->
-                    p.param.codewrite(data2.name + " = \\mathcal{F}\left[" + data1.name + "\right]")
+                    p.param.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                   |H ->
-                    p.param.codewrite(data2.name + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.name + "</mfenced>")
-                  |NL ->
-                    ()
+                    p.param.codewrite(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
                 if fftdir=1 then
                     !"規格化"
                     iter.num N <| fun i ->
                         data2.[i]<==data2.[i]/N
                         
-        let fft(planname:string,data1:num1,data2:num1) =
+        let fft(planname:string,data1:complex1,data2:complex1) =
                 fft1(planname,data1,data2,1)
                 
-        let ifft(planname:string,data1:num1,data2:num1) =
+        let ifft(planname:string,data1:complex1,data2:complex1) =
                 fft1(planname,data1,data2,-1)
                 

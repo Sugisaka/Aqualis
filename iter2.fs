@@ -29,13 +29,13 @@ namespace Aqualis
                 
             ///<summary>連続する2整数を取得しながらループ</summary>
             static member array_overlap2 (ar:base1) = fun code -> 
-                iter.range _1 (ar.size1- I 1) <| fun i -> 
-                    code(i,i+I 1)
+                iter.range _1 (ar.size1 - _1) <| fun i -> 
+                    code(i,i+_1)
                     
             ///<summary>連続する3整数を取得しながらループ</summary>
             static member array_overlap3 (ar:base1) = fun code -> 
-                iter.range _2 (ar.size1-I 1) <| fun i -> 
-                    code(i-I 1,i,i+I 1)
+                iter.range _2 (ar.size1-_1) <| fun i -> 
+                    code(i-_1,i,i+_1)
                     
         ///<summary>反復処理（処理スキップ）</summary>
         type dummy_iter with
@@ -53,4 +53,4 @@ namespace Aqualis
                     
             ///<summary>連続する3整数を取得しながらループ</summary>
             static member array_overlap3 (ar:base1) = fun code -> ()
-        
+            

@@ -17,38 +17,81 @@ namespace Aqualis
         type print with
             
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:ax1) = 
+            static member c (s:int1) = 
                 iter.range _1 s.size1 <| fun i -> 
-                    print.s[i;s.[i]]
+                    print.c i
+                    print.c s[i]
+                    print.br
                     
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:ax2) = 
+            static member c (s:int2) = 
                 iter.range _1 s.size1 <| fun i -> 
                     iter.range _1 s.size2 <| fun j -> 
-                        print.s[i;j;s.[i,j]]
+                        print.c i
+                        print.c j
+                        print.c s[i,j]
+                        print.br
                         
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:ax3) = 
+            static member c (s:int3) = 
                 iter.range _1 s.size1 <| fun i -> 
                     iter.range _1 s.size2 <| fun j -> 
                         iter.range _1 s.size3 <| fun k -> 
-                            print.s[i;j;k;s.[i,j,k]]
+                            print.c i
+                            print.c j
+                            print.c k
+                            print.c s[i,j,k]
+                            print.br
                             
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:num1) = 
+            static member c (s:float1) = 
                 iter.range _1 s.size1 <| fun i -> 
-                    print.s[i;s.[i]]
+                    print.c i
+                    print.c s[i]
+                    print.br
                     
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:num2) = 
+            static member c (s:float2) = 
                 iter.range _1 s.size1 <| fun i -> 
                     iter.range _1 s.size2 <| fun j -> 
-                        print.s[i;j;s.[i,j]]
+                        print.c i 
+                        print.c j
+                        print.c s[i,j]
+                        print.br
                         
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:num3) = 
+            static member c (s:float3) = 
                 iter.range _1 s.size1 <| fun i -> 
                     iter.range _1 s.size2 <| fun j -> 
                         iter.range _1 s.size3 <| fun k -> 
-                            print.s[i;j;k;s.[i,j,k]]
+                            print.c i
+                            print.c j
+                            print.c k
+                            print.c s[i,j,k]
+                            print.br
+                            
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:complex1) = 
+                iter.range _1 s.size1 <| fun i -> 
+                    print.c i
+                    print.c s[i]
+                    print.br
+                    
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:complex2) = 
+                iter.range _1 s.size1 <| fun i -> 
+                    iter.range _1 s.size2 <| fun j -> 
+                        print.c i
+                        print.c j
+                        print.c s[i,j]
+                        
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:complex3) = 
+                iter.range _1 s.size1 <| fun i -> 
+                    iter.range _1 s.size2 <| fun j -> 
+                        iter.range _1 s.size3 <| fun k -> 
+                            print.c i
+                            print.c j
+                            print.c k
+                            print.c s[i,j,k]
                             

@@ -13,132 +13,153 @@ namespace Aqualis
 
     ///<summary>画面表示</summary>
     type print () =
-        ///<summary>変数リストを画面表示</summary>
-        static member s (lst:num0 list)  = 
+        static member br with get() =
+            let p = p.param
             match p.lang with
-              |F ->
-                let p = p.param
-                let code = 
-                    lst
-                    |> (fun b ->
-                          [for q in b do
-                              match q with
-                                |Str_e(s) ->
-                                  yield ("\""+s+"\"")
-                                |Var(Zt,_,_) ->
-                                  yield q.re.name
-                                  yield q.im.name
-                                |Var((It _|Dt),n,_) ->
-                                  yield n
-                                |_ ->
-                                  match q.code with
-                                    |Code(Structure("string"),n,_) ->
-                                      yield n
-                                    |Code((It _|Dt),n,_) ->
-                                      yield n
-                                    |Code(Zt,_,_) ->
-                                      yield q.re.name
-                                      yield q.im.name
-                                    |_ -> 
-                                      ()
-                          ])
-                    |> (fun b -> List.fold (fun acc i -> acc + (if i=0 then "" else ",") + b.[i]) "" [0..b.Length-1])
-                p.codewrite("print *, "+code+"\n")
-              |C89 ->
-                let p = p.param
+            |F -> 
+                p.codewrite("write(*,*)"+"\n")
+            |C -> 
+                p.codewrite("printf(\"\\n\");\n")
+            |_ -> ()
+            p.clear_printcounter()
+        static member c (v:string) =
+            let p = p.param
+            match p.lang with
+            |F ->
+                let tab =
+                    p.var.setUniqVar(It 4,A0,"tab",(p.ItoS 2313))
+                    int0(Var "tab")
+                let int0string_format_F = 
+                    let a=p.int_string_format
+                    "I"+a.ToString()
+                if p.printcounter<>0 then 
+                    p.codewrite("write(*,fmt='(A1)',advance='no') "+tab.code+"\n")
+                p.codewrite("write(*,fmt='(A"+v.Length.ToString()+")',advance='no') \""+v+"\"\n")
+            |C ->
                 let int0string_format_C =
                     "%"+p.int_string_format.ToString()+"d"
+                if p.printcounter<>0 then 
+                    p.codewrite("printf(\"\\t\");\n")
+                p.codewrite("printf(\""+v+"\");\n")
+            |T ->
+                p.codewrite("print "+v+"\n")
+            |H ->
+                p.codewrite("<span class=\"fio\">print</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
+            p.add_printcounter(1)
+        static member c (v:int0) =
+            let p = p.param
+            match p.lang with
+            |F ->
+                let tab =
+                    p.var.setUniqVar(It 4,A0,"tab",(p.ItoS 2313))
+                    int0(Var "tab")
+                let int0string_format_F = 
+                    let a=p.int_string_format
+                    "I"+a.ToString()
+                if p.printcounter<>0 then 
+                    p.codewrite("write(*,fmt='(A1)',advance='no') "+tab.code+"\n")
+                p.codewrite("write(*,fmt='("+int0string_format_F+")',advance='no') "+v.code+"\n")
+            |C ->
+                let int0string_format_C =
+                    "%"+p.int_string_format.ToString()+"d"
+                if p.printcounter<>0 then 
+                    p.codewrite("printf(\"\\t\");\n")
+                p.codewrite("printf(\""+int0string_format_C+"\", "+v.code+");\n")
+            |T ->
+                p.codewrite("print "+v.code+"\n")
+            |H ->
+                p.codewrite("<span class=\"fio\">print</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
+            p.add_printcounter(1)
+        static member c (v:int) = print.c (v.I)
+                    
+        static member c (v:float0) =
+            let p = p.param
+            match p.lang with
+            |F ->
+                let tab =
+                    p.var.setUniqVar(It 4,A0,"tab",(p.ItoS 2313))
+                    int0(Var "tab")
+                let double0string_format_F = 
+                    let (a,b)=p.double_string_format
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                if p.printcounter<>0 then 
+                    p.codewrite("write(*,fmt='(A1)',advance='no') "+tab.code+"\n")
+                p.codewrite("write(*,fmt='("+double0string_format_F+")',advance='no') "+v.code+"\n")
+            |C ->
                 let double0string_format_C = 
                     let (a,b)=p.double_string_format
                     "%"+a.ToString()+"."+b.ToString()+"e"
-                let format = 
-                    (List.fold (fun acc (q:num0) ->
-                                  match q with
-                                    |Str_e s -> acc+s
-                                    |_ ->
-                                      match q.etype with
-                                        |It _ -> acc+int0string_format_C
-                                        |Dt -> acc+double0string_format_C
-                                        |Zt -> acc+double0string_format_C+double0string_format_C
-                                        |_ -> acc) "" lst)+"\\n"
-                let code   = 
-                    List.fold (fun acc (q:num0) -> 
-                                 match q with
-                                   |Var((It _|Dt),_,_) -> acc+","+q.name
-                                   |Var(Zt,_,_) -> acc+","+q.re.name+","+q.im.name
-                                   |_ ->
-                                     let (et,u,_) = q.code.str
-                                     match et with
-                                       |Zt -> acc+","+u+".r,"+u+".i"
-                                       |It _|Dt -> acc+","+u
-                                       |_ -> acc) "" lst
-                p.codewrite("printf(\""+format+"\""+code+");\n")
-              |C99 ->
-                let p = p.param
-                let int0string_format_C =
-                    "%"+p.int_string_format.ToString()+"d"
-                let double0string_format_C = 
-                    let (a,b)=p.double_string_format
-                    "%"+a.ToString()+"."+b.ToString()+"e"
-                let format = 
-                    (List.fold (fun acc q ->
-                                  match q with
-                                    |Str_e s -> acc+s
-                                    |_ ->
-                                      match q.etype with
-                                        |It _ -> acc+int0string_format_C
-                                        |Dt -> acc+double0string_format_C
-                                        |Zt -> acc+double0string_format_C+double0string_format_C
-                                        |_ -> acc) "" lst)+"\\n"
-                let code   = 
-                    List.fold (fun acc (q:num0) -> 
-                                 match q with
-                                   |Var((It _|Dt),_,_) -> acc+","+q.name
-                                   |Var(Zt,_,_) -> acc+","+q.re.name+","+q.im.name
-                                   |_ ->
-                                     let (et,u,_) = q.code.str
-                                     match et with
-                                       |Zt -> acc+",creal("+u+"),cimag("+u+")"
-                                       |It _|Dt -> acc+","+u
-                                       |_ -> acc) "" lst
-                p.codewrite("printf(\""+format+"\""+code+");\n")
-              |T ->
-                let p = p.param
-                let code = 
-                  (fun (s:string) -> s.Replace("#,","")) 
-                    (List.fold (fun acc (q:num0) -> 
-                        acc+","+q.name) "#" lst)
-                p.codewrite("print, "+code+"\n")
-              |H ->
-                let p = p.param
-                let code =  
-                    (List.fold (fun acc (i:int) -> 
-                        let q = lst.[i]
-                        if i=lst.Length-1 then
-                            acc+q.name
-                        else
-                            acc+q.name+"<mo>,</mo><mspace width=\"0.5em\" />"
-                    ) "" [0..lst.Length-1])
-                p.codewrite("<math><mi>print</mi><mo>[</mo>"+code+"<mo>]</mo></math>\n")
-                p.codewrite("<br/>\n")
-              |NL ->
-                ()
-        ///<summary>文字列を画面表示</summary>
-        static member t (str:string) = print.s[!.str]
-        ///<summary>1個の項目を画面表示</summary>
-        static member c (ss:num0) = print.s[ss]
-        ///<summary>2個の項目を画面表示</summary>
-        static member cc (s1:num0) (s2:num0) = print.s[s1;s2]
-        ///<summary>3個の項目を画面表示</summary>
-        static member ccc (s1:num0) (s2:num0) (s3:num0) = print.s[s1;s2;s3]
-        ///<summary>4個の項目を画面表示</summary>
-        static member cccc (s1:num0) (s2:num0) (s3:num0) (s4:num0) = print.s[s1;s2;s3;s4]
-        ///<summary>1個の項目をラベル付きで画面表示</summary>
-        static member tag_c (tag:string) (s:num0) = print.s[!.tag;s]
-        ///<summary>2個の項目をラベル付きで画面表示</summary>
-        static member tag_cc (tag:string) (s1:num0) (s2:num0) = print.s[!.tag;s1;s2]
-        ///<summary>3個の項目をラベル付きで画面表示</summary>
-        static member tag_ccc (tag:string) (s1:num0) (s2:num0) (s3:num0) = print.s[!.tag;s1;s2;s3]
-        ///<summary>4個の項目をラベル付きで画面表示</summary>
-        static member tag_cccc (tag:string) (s1:num0) (s2:num0) (s3:num0) (s4:num0) = print.s[!.tag;s1;s2;s3;s4]
+                if p.printcounter<>0 then 
+                    p.codewrite("printf(\"\\t\");\n")
+                p.codewrite("printf(\""+double0string_format_C+"\", "+v.code+");\n")
+            |T ->
+                p.codewrite("write "+v.code+"\n")
+            |H ->
+                p.codewrite("<span class=\"fio\">print</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
+            p.add_printcounter(1)
+        static member c (v:double) = print.c (v.D)
         
+        static member c (v:complex0) =
+            let p = p.param
+            match p.lang with
+            |F ->
+                let tab =
+                    p.var.setUniqVar(It 4,A0,"tab",(p.ItoS 2313))
+                    int0(Var "tab")
+                let double0string_format_F = 
+                    let (a,b)=p.double_string_format
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                if p.printcounter<>0 then 
+                    p.codewrite("write(*,fmt='(A1)',advance='no') "+tab.code+"\n")
+                p.codewrite("write(*,fmt='("+double0string_format_F+")',advance='no') "+v.re.code+"\n")
+                p.codewrite("write(*,fmt='(A1)',advance='no') "+tab.code+"\n")
+                p.codewrite("write(*,fmt='("+double0string_format_F+")',advance='no') "+v.im.code+"\n")
+            |C ->
+                let double0string_format_C = 
+                    let (a,b)=p.double_string_format
+                    "%"+a.ToString()+"."+b.ToString()+"e"
+                if p.printcounter<>0 then 
+                    p.codewrite("printf(\"\\t\");\n")
+                p.codewrite("printf(\""+double0string_format_C+"\", "+v.re.code+");\n")
+                p.codewrite("printf(\"\\t\");\n")
+                p.codewrite("printf(\""+double0string_format_C+"\", "+v.im.code+");\n")
+            |T ->
+                p.codewrite("write "+v.code+"\n")
+            |H ->
+                p.codewrite("<span class=\"fio\">print</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
+            p.add_printcounter(2)
+            
+        static member c (v:num0) =
+            match v.etype with
+            |It _ -> print.c (int0(v.expr))
+            |Dt _ -> print.c (float0(v.expr))
+            |Zt _ -> print.c (complex0(v.expr))
+            |_ -> printfn "%s: printできない型です" <| v.etype.ToString()
+
+        static member cn (v:string) =
+            print.c v
+            print.br
+            
+        static member cn (v:int) =
+            print.c v
+            print.br
+
+        static member cn (v:double) =
+            print.c v
+            print.br
+            
+        static member cn (v:int0) =
+            print.c v
+            print.br
+            
+        static member cn (v:float0) =
+            print.c v
+            print.br
+            
+        static member cn (v:complex0) =
+            print.c v
+            print.br
+            
+        static member cn (v:num0) =
+            print.c v
+            print.br

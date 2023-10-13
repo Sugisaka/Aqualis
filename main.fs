@@ -6,38 +6,22 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
-    
     ///<summary>言語を指定</summary>
     type Language =
         ///<summary>Fortran</summary>
         |F
-        ///<summary>C89</summary>
-        |C89
-        ///<summary>C99</summary>
-        |C99
+        ///<summary>C</summary>
+        |C
         ///<summary>LaTeX</summary>
         |T
         ///<summary>HTML</summary>
         |H
-        ///<summary>未指定（コンパイル中でない）</summary>
-        |NL
         
-    ///<summary>変数の型を指定</summary>
-    type Etype =
-        ///<summary>整数型(バイト数)</summary>
-        |It of int
-        ///<summary>倍精度浮動小数点型</summary>
-        |Dt
-        ///<summary>複素数（倍精度）</summary>
-        |Zt
-        ///<summary>非数値</summary>
-        |Nt
-        ///<summary>構造体</summary>
-        |Structure of string
-        
+    ///<summary>設定のONまたはOFFを指定</summary>
+    type Switch =
+        |ON
+        |OFF
+
     ///<summary>変数、配列とその次元の指定</summary>
     type VarType =
         ///<summary>変数</summary>
@@ -49,20 +33,78 @@ namespace Aqualis
         ///<summary>3次元配列(要素数1,要素数2,要素数3)</summary>
         |A3 of int*int*int
         
-    ///<summary>条件分岐の種類を指定</summary>
-    type Branch =
-        ///<summary>if条件式</summary>
-        |IF
-        ///<summary>else if条件式</summary>
-        |ELIF
-        ///<summary>else条件式変数</summary>
-        |ELSE
+    ///<summary>変数の型を指定</summary>
+    type Etype =
+        ///<summary>整数型(バイト数)</summary>
+        |It of int
+        ///<summary>倍精度浮動小数点型</summary>
+        |Dt
+        ///<summary>複素数（倍精度）</summary>
+        |Zt
+        ///<summary>ブール型</summary>
+        |Bt
+        ///<summary>非数値</summary>
+        |Nt
+        ///<summary>文字列値</summary>
+        |St
+        ///<summary>構造体</summary>
+        |Structure of string
         
-    ///<summary>設定のONまたはOFFを指定</summary>
-    type Switch =
-        |ON
-        |OFF
-        
+        static member prior = 
+            function
+            |Zt,(Zt|Dt|It _) -> Zt
+            |(Zt|Dt|It _),Zt -> Zt
+            |Dt,(Dt|It _) -> Dt
+            |(Dt|It _),Dt -> Dt
+            |It a,It b -> It (if a>b then a else b)
+            |_ -> Nt
+            
+        ///<summary>言語設定に従って型名を生成</summary>
+        member this.tostring(lang) = 
+            match lang with
+            |F ->
+                match this with 
+                |It 1 -> "integer(1)" 
+                |It _ -> "integer" 
+                |Dt -> "double precision" 
+                |Zt -> "complex(kind(0d0))" 
+                |Structure("string") -> "character(100)" 
+                |Structure("integer(1)") -> "integer(1)" 
+                |Structure("file") -> "integer"
+                |Structure(sname) -> "type("+sname+")"
+                |_ -> ""
+            |C ->
+                match this with 
+                |It 1 -> "unsigned char" 
+                |It _ -> "int" 
+                |Dt -> "double" 
+                |Zt -> "double complex"
+                |Structure("string") -> "string" 
+                |Structure("char") -> "char" 
+                |Structure("file") -> "FILE*" 
+                |Structure(sname) -> sname 
+                |_ -> ""
+            |T ->
+                match this with 
+                |It 1 -> "byte" 
+                |It _ -> "int" 
+                |Dt -> "double" 
+                |Zt -> "complex"
+                |Structure("string") -> "char" 
+                |Structure("char") -> "char" 
+                |Structure(sname) -> sname 
+                |_ -> ""
+            |H ->
+                match this with 
+                |It 1 -> "byte" 
+                |It _ -> "int" 
+                |Dt -> "double" 
+                |Zt -> "complex"
+                |Structure("string") -> "char" 
+                |Structure("char") -> "char" 
+                |Structure(sname) -> sname 
+                |_ -> ""
+                    
     ///<summary>番号付き変数の管理</summary>
     type varlist () =
         let mutable counter_ = 0
@@ -89,11 +131,11 @@ namespace Aqualis
         ///<summary>使用可能な変数番号を取得</summary>
         member this.getvar(f:int->string) =
             match disposed_ with
-              |[] ->
+            |[] ->
                 //リストが空の場合は新規作成
                 //変数名カウンタをインクリメントして変数生成
                 f <| this.inc()
-              |x::y ->
+            |x::y ->
                 //使用可能な変数がある場合はリストから取得（リストからは外す）
                 disposed_ <- y
                 x
@@ -101,3 +143,11 @@ namespace Aqualis
         member __.dispose(n:string) =
             disposed_ <- n::disposed_
             
+    ///<summary>条件分岐の種類を指定</summary>
+    type Branch =
+        ///<summary>if条件式</summary>
+        |IF
+        ///<summary>else if条件式</summary>
+        |ELIF
+        ///<summary>else条件式変数</summary>
+        |ELSE

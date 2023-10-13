@@ -6,9 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
     open Aqualis_base
 
     ///<summary>条件分岐</summary>
@@ -19,74 +16,59 @@ namespace Aqualis
         let branch_ (el:Branch) (cond:bool0) (code:(unit->unit)) =
             let p = p.param
             match p.lang with
-              |F ->
-                  match el with
-                    |IF   ->
-                      p.codewrite("if"+"("+cond.name+") then"+"\n")
-                    |ELIF ->
-                      p.codewrite("else if"+"("+cond.name+") then"+"\n")
-                    |ELSE ->
-                      p.codewrite("else"+"\n")
-                  p.indentposition_inc()
-                  code()
-                  p.indentposition_dec()
-              |C89 ->
-                  match el with
-                    |IF   ->
-                      p.codewrite("if"+"("+cond.name+")"+"\n")
-                    |ELIF ->
-                      p.codewrite("else if"+"("+cond.name+")"+"\n")
-                    |ELSE ->
-                      p.codewrite("else"+"\n")
-                  p.codewrite("{\n")
-                  p.indentposition_inc()
-                  code()
-                  p.indentposition_dec()
-                  p.codewrite("}\n")
-              |C99 ->
-                  match el with
-                    |IF   ->
-                      p.codewrite("if"+"("+cond.name+")"+"\n")
-                    |ELIF ->
-                      p.codewrite("else if"+"("+cond.name+")"+"\n")
-                    |ELSE ->
-                      p.codewrite("else"+"\n")
-                  p.codewrite("{\n")
-                  p.indentposition_inc()
-                  code()
-                  p.indentposition_dec()
-                  p.codewrite("}\n")
-              |T ->
-                  match el with
-                    |IF   ->
-                      p.codewrite("if"+"("+cond.name+")"+"\n")
-                    |ELIF ->
-                      p.codewrite("else if"+"("+cond.name+")"+"\n")
-                    |ELSE ->
-                      p.codewrite("else"+"\n")
-                  p.indentposition_inc()
-                  code()
-                  p.indentposition_dec()
-                  p.codewrite("end\n")
-              |H ->
-                  p.codewrite("<div class=\"codeblock\">\n")
-                  p.codewrite("<details open>\n")
-                  match el with
-                    |IF   ->
-                      p.codewrite("<summary><span class=\"op-if\">if</span>"+" (<math>"+cond.name+"</math>)</summary>"+"\n")
-                    |ELIF ->
-                      p.codewrite("<summary><span class=\"op-if\">else if</span>"+" (<math>"+cond.name+"</math>)</summary>"+"\n")
-                    |ELSE ->
-                      p.codewrite("<summary><span class=\"op-if\">else</span></summary>"+"\n")
-                  p.indentposition_inc()
-                  p.codewrite("<div class=\"insidecode-if\">\n")
-                  code()
-                  p.codewrite("</div>\n")
-                  p.indentposition_dec()
-                  p.codewrite("</details>\n")
-                  p.codewrite("</div>\n")
-              |NL ->
-                ()
+            |F ->
+                match el with
+                |IF   ->
+                    p.codewrite("if"+"("+cond.code+") then"+"\n")
+                |ELIF ->
+                    p.codewrite("else if"+"("+cond.code+") then"+"\n")
+                |ELSE ->
+                    p.codewrite("else"+"\n")
+                p.indent.inc()
+                code()
+                p.indent.dec()
+            |C ->
+                match el with
+                |IF   ->
+                    p.codewrite("if"+"("+cond.code+")"+"\n")
+                |ELIF ->
+                    p.codewrite("else if"+"("+cond.code+")"+"\n")
+                |ELSE ->
+                    p.codewrite("else"+"\n")
+                p.codewrite("{\n")
+                p.indent.inc()
+                code()
+                p.indent.dec()
+                p.codewrite("}\n")
+            |T ->
+                match el with
+                |IF   ->
+                    p.codewrite("if"+"("+cond.code+")"+"\n")
+                |ELIF ->
+                    p.codewrite("else if"+"("+cond.code+")"+"\n")
+                |ELSE ->
+                    p.codewrite("else"+"\n")
+                p.indent.inc()
+                code()
+                p.indent.dec()
+                p.codewrite("end\n")
+            |H ->
+                p.codewrite("<div class=\"codeblock\">\n")
+                p.codewrite("<details open>\n")
+                match el with
+                |IF   ->
+                    p.codewrite("<summary><span class=\"op-if\">if</span>"+" (<math>"+cond.code+"</math>)</summary>"+"\n")
+                |ELIF ->
+                    p.codewrite("<summary><span class=\"op-if\">else if</span>"+" (<math>"+cond.code+"</math>)</summary>"+"\n")
+                |ELSE ->
+                    p.codewrite("<summary><span class=\"op-if\">else</span></summary>"+"\n")
+                p.indent.inc()
+                p.codewrite("<div class=\"insidecode-if\">\n")
+                code()
+                p.codewrite("</div>\n")
+                p.indent.dec()
+                p.codewrite("</details>\n")
+                p.codewrite("</div>\n")
         ///<summary>条件式(if)</summary>
         member __.IF (cond:bool0) code =
             if con=0 then
@@ -98,7 +80,7 @@ namespace Aqualis
             con <- con + 1
         ///<summary>条件式(else)</summary>
         member __.EL code =
-            branch_ ELSE Null code
+            branch_ ELSE (bool0 Null) code
             con <- 0
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
         static member branch code =
@@ -110,27 +92,14 @@ namespace Aqualis
         ///<summary>条件分岐式(if式)</summary>
         static member if1 (cond:bool0) code =
             match p.lang with
-              |NL ->
-                let c = cond.code 
-                match c with
-                  |Int_e 1 ->
-                    code()
-                  |_ -> ()
-              |_ ->
+            |_ ->
                 br.branch <| fun b ->
                     b.IF cond code
                 
         ///<summary>条件分岐式(if...else...式)</summary>
         static member if2 (cond:bool0) code1 code2 =
             match p.lang with
-              |NL ->
-                let c = cond.code 
-                match c with
-                  |Int_e 1 ->
-                    code1()
-                  |_ ->
-                    code2()
-              |_ ->
+            |_ ->
                 br.branch <| fun b ->
                     b.IF cond code1
                     b.EL code2
