@@ -13,18 +13,18 @@ namespace Aqualis
         ///<summary>変数</summary>
         |Var2 of (VarType*string)
         ///<summary>部分配列</summary>
-        |Arx2 of (int0*int0*((int0*int0)->Expr))
+        |Arx2 of (num0*num0*((num0*num0)->Expr))
         
     ///<summary>2次元配列</summary>
-    type base2 (x:Expr2) =
+    type base2 (typ:Etype,x:Expr2) =
         ///<summary>変数を作成しリストに追加</summary>
         new (typ,size,name,para) = 
             p.param.var.setVar(typ,size,name,para)
-            base2(Var2(size,name))
+            base2(typ,Var2(size,name))
         ///<summary>変数を作成しリストに追加</summary>
         new(sname,size,name) =
             p.param.var.setVar(Structure(sname),size,name,"")
-            base2(Var2(size,name))
+            base2(Structure(sname),Var2(size,name))
         member _.expr with get() = x
         member _.code with get() =
             match x with
@@ -37,9 +37,9 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F |T -> int0(Var(name+"_size(1)"))
-                |C -> int0(Var(name+"_size[0]"))
-                |H -> int0(Var("<msub><mi mathvariant=\"script\">S</mi><mn>1</mn></msub><mo>&af;</mo><mo>[</mo><mi>"+name+"</mi><mo>]</mo>"))
+                |F |T -> num0(It 4,Var(name+"_size(1)"))
+                |C -> num0(It 4,Var(name+"_size[0]"))
+                |H -> num0(It 4,Var("<msub><mi mathvariant=\"script\">S</mi><mn>1</mn></msub><mo>&af;</mo><mo>[</mo><mi>"+name+"</mi><mo>]</mo>"))
             |Arx2(s1,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2 
@@ -48,12 +48,12 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F |T -> int0(Var(name+"_size(2)"))
-                |C -> int0(Var(name+"_size[1]"))
-                |H -> int0(Var("<msub><mi mathvariant=\"script\">S</mi><mn>2</mn></msub><mo>&af;</mo><mo>[</mo><mi>"+name+"</mi><mo>]</mo>"))
+                |F |T -> num0(It 4,Var(name+"_size(2)"))
+                |C -> num0(It 4,Var(name+"_size[1]"))
+                |H -> num0(It 4,Var("<msub><mi mathvariant=\"script\">S</mi><mn>2</mn></msub><mo>&af;</mo><mo>[</mo><mi>"+name+"</mi><mo>]</mo>"))
             |Arx2(_,s2,_) -> s2
         ///<summary>インデクサ</summary>
-        member this.Idx2(i:int0,j:int0) =
+        member this.Idx2(i:num0,j:num0) =
             let p = p.param
             if p.debugmode then
                 match x with
@@ -63,21 +63,10 @@ namespace Aqualis
                     br.branch <| fun b ->
                         b.IF (OR [this.size1 =. -1; this.size2 =. -1]) <| fun () -> 
                             print.c ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is not allocated")
-                            print.br
                         b.IF (OR [(i <. _1); (this.size1 <. i)]) <| fun () ->
-                            print.c ("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ")
-                            print.c i
-                            print.c " is out of range (1:"
-                            print.c this.size1
-                            print.c ")"
-                            print.br
+                            print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
                         b.IF (OR [(j <. _1); (this.size2 <. j)]) <| fun () ->
-                            print.c ("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ")
-                            print.c j
-                            print.c " is out of range (1:"
-                            print.c this.size2
-                            print.c ")"
-                            print.br
+                            print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size2;!.")"]
                     p.comment("****************************************************")
                 |_ -> ()
             match x with
@@ -90,26 +79,26 @@ namespace Aqualis
             |Arx2(_,_,f) ->
                 f (i,j)
                 
-        member this.Idx2(i:int0,j:int) = this.Idx2(i,j.I)
-        member this.Idx2(i:int,j:int0) = this.Idx2(i.I,j)
+        member this.Idx2(i:num0,j:int) = this.Idx2(i,j.I)
+        member this.Idx2(i:int,j:num0) = this.Idx2(i.I,j)
         member this.Idx2(i:int,j:int) = this.Idx2(i.I,j.I)
-        member this.Idx2((a1:int0,b1:int0),_:unit) = Arx2(b1-a1+_1, this.size2, fun (i,j) -> this.Idx2(i+a1-1,j))
+        member this.Idx2((a1:num0,b1:num0),_:unit) = Arx2(b1-a1+_1, this.size2, fun (i,j) -> this.Idx2(i+a1-1,j))
         member this.Idx2((a1:int,b1:int),_:unit) = this.Idx2((a1.I,b1.I),())
-        member this.Idx2(_:unit,(a2:int0,b2:int0)) = Arx2(this.size1,b2-a2+_1, fun (i,j) -> this.Idx2(i,j+a2-1))
+        member this.Idx2(_:unit,(a2:num0,b2:num0)) = Arx2(this.size1,b2-a2+_1, fun (i,j) -> this.Idx2(i,j+a2-1))
         member this.Idx2(_:unit,(a2:int,b2:int)) = this.Idx2((),(a2.I,b2.I))
-        member this.Idx2((a1:int0,b1:int0),(a2:int0,b2:int0)) = Arx2(b1-a1+_1, b2-a2+_1, fun (i,j) -> this.Idx2(i+a1-1,j+a2-1))
-        member this.Idx2((a1:int0,b1:int0),(a2:int,b2:int)) = this.Idx2((a1,b1),(a2.I,b2.I))
-        member this.Idx2((a1:int,b1:int),(a2:int0,b2:int0)) = this.Idx2((a1.I,b1.I),(a2,b2))
+        member this.Idx2((a1:num0,b1:num0),(a2:num0,b2:num0)) = Arx2(b1-a1+_1, b2-a2+_1, fun (i,j) -> this.Idx2(i+a1-1,j+a2-1))
+        member this.Idx2((a1:num0,b1:num0),(a2:int,b2:int)) = this.Idx2((a1,b1),(a2.I,b2.I))
+        member this.Idx2((a1:int,b1:int),(a2:num0,b2:num0)) = this.Idx2((a1.I,b1.I),(a2,b2))
         member this.Idx2((a1:int ,b1:int),(a2:int ,b2:int)) = this.Idx2((a1.I,b1.I),(a2.I,b2.I))
-        member this.Idx2(i:int0,_:unit) = Arx1(this.size2, fun j -> this.Idx2(i,j))
-        member this.Idx2(_:unit,j:int0) = Arx1(this.size1, fun i -> this.Idx2(i,j))
-        member this.Idx2(i:int0,(a2:int0,b2:int0)) = Arx1(b2-a2+_1, fun j -> this.Idx2(i,j+a2-1))
-        member this.Idx2(i:int,(a2:int0,b2:int0)) = this.Idx2(i.I,(a2,b2))
-        member this.Idx2((a1:int0,b1:int0),j:int0) = Arx1(b1-a1+_1, fun i -> this.Idx2(i+a1-1,j))
-        member this.Idx2((a1:int0,b1:int0),j:int) = this.Idx2((a1,b1),j.I)
+        member this.Idx2(i:num0,_:unit) = Arx1(this.size2, fun j -> this.Idx2(i,j))
+        member this.Idx2(_:unit,j:num0) = Arx1(this.size1, fun i -> this.Idx2(i,j))
+        member this.Idx2(i:num0,(a2:num0,b2:num0)) = Arx1(b2-a2+_1, fun j -> this.Idx2(i,j+a2-1))
+        member this.Idx2(i:int,(a2:num0,b2:num0)) = this.Idx2(i.I,(a2,b2))
+        member this.Idx2((a1:num0,b1:num0),j:num0) = Arx1(b1-a1+_1, fun i -> this.Idx2(i+a1-1,j))
+        member this.Idx2((a1:num0,b1:num0),j:int) = this.Idx2((a1,b1),j.I)
 
         ///<summary>配列のメモリ割り当て</summary>
-        member this.allocate(typ:Etype,n1:int0,n2:int0) =
+        member this.allocate(n1:num0,n2:num0) =
                 let p = p.param
                 match x with
                 |Var2(size,name) ->
@@ -119,7 +108,6 @@ namespace Aqualis
                         br.branch <| fun b ->
                             b.IF (this.size1 =/. -1) <| fun () ->
                                 print.c ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is already allocated")
-                                print.br
                         p.comment("****************************************************")
                     match p.lang with
                     |F ->
@@ -154,6 +142,10 @@ namespace Aqualis
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                 |_ -> ()
                 
+        member this.allocate(n1:num0,n2:int) = this.allocate(n1,n2.I)
+        member this.allocate(n1:int,n2:num0) = this.allocate(n1.I,n2)
+        member this.allocate(n1:int,n2:int) = this.allocate(n1.I,n2.I)
+        
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
             let p = p.param
@@ -165,7 +157,6 @@ namespace Aqualis
                     br.branch <| fun b ->
                         b.IF (this.size1 =. -1) <| fun () ->
                             print.c ("ERROR"+p.error_code_counter.ToString()+" cannot deallocate array "+name)
-                            print.br
                     p.comment("****************************************************")
                 |_ -> ()
             match x with
@@ -226,14 +217,12 @@ namespace Aqualis
                 br.branch <| fun b ->
                     b.IF (x.size1 =/. y.size1) <| fun () -> 
                         print.c ("ERROR"+p.error_code_counter.ToString()+" array size (first index) mismatch")
-                        print.br
                 br.branch <| fun b ->
                     b.IF (x.size2 =/. y.size2) <| fun () -> 
                         print.c ("ERROR"+p.error_code_counter.ToString()+" array size (second index) mismatch")
-                        print.br
                 p.comment("****************************************************")
                 
-        static member subst (v1:Expr2,s11:int0,s12:int0,f1:int0->int0->Expr,v2:Expr2,s21:int0,s22:int0,f2:int0->int0->Expr) =
+        static member subst (v1:Expr2,s11:num0,s12:num0,f1:num0->num0->Expr,v2:Expr2,s21:num0,s22:num0,f2:num0->num0->Expr) =
             let p = p.param
             if p.debugmode then
                 p.error_code_counter_inc()
@@ -241,11 +230,9 @@ namespace Aqualis
                 br.branch <| fun b ->
                     b.IF (s11 =/. s21) <| fun () -> 
                         print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size mismatch")
-                        print.br
                 br.branch <| fun b ->
                     b.IF (s21 =/. s22) <| fun () -> 
                         print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size mismatch")
-                        print.br
                 p.comment("****************************************************")
             match v1,v2 with
             |Var2(_,x),Var2(_,y) ->
@@ -263,7 +250,7 @@ namespace Aqualis
                 match p.lang with
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
                 
-        static member subst (v1:Expr2,s11:int0,s12:int0,f1:int0->int0->Expr,v2:Expr) =
+        static member subst (v1:Expr2,s11:num0,s12:num0,f1:num0->num0->Expr,v2:Expr) =
             let p = p.param
             match v1 with
             |Var2(_,x) ->
@@ -276,429 +263,30 @@ namespace Aqualis
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
                 
     ///<summary>数値型1次元配列</summary>
-    type int2 (x:Expr2) =
-        inherit base2(x)
-        new (size,name,para) =
-            p.param.var.setVar(It 4,size,name,para)
-            int2(Var2(size,name))
-        member this.Item with get(i:int0,j:int0) = int0(this.Idx2(i,j))
-        member this.Item with get(i:int0,j:int) = int0(this.Idx2(i,j.I))
-        member this.Item with get(i:int,j:int0) = int0(this.Idx2(i.I,j))
-        member this.Item with get(i:int,j:int) = int0(this.Idx2(i.I,j.I))
-        member this.Item with get((a1:int0,b1:int0),_:unit) = int2(this.Idx2((a1,b1),()))
-        member this.Item with get((a1:int,b1:int),_:unit) = int2(this.Idx2((a1,b1),()))
-        member this.Item with get(_:unit,(a2:int0,b2:int0)) = int2(this.Idx2((),(a2,b2)))
-        member this.Item with get(_:unit,(a2:int,b2:int)) = int2(this.Idx2((),(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0)) = int2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int)) = int2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0)) = int2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int ,b1:int),(a2:int ,b2:int)) = int2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get(i:int0,_:unit) = int1(this.Idx2(i,()))
-        member this.Item with get(_:unit,j:int0) = int1(this.Idx2((),j))
-        member this.Item with get(i:int0,(a2:int0,b2:int0)) = int1(this.Idx2(i,(a2,b2)))
-        member this.Item with get(i:int,(a2:int0,b2:int0)) = int1(this.Idx2(i,(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),j:int0) = int1(this.Idx2((a1,b1),j))
-        member this.Item with get((a1:int0,b1:int0),j:int) = int1(this.Idx2((a1,b1),j))
-        
-        static member ( + ) (x:int2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:int2,y:int0) =
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y.expr))
-        static member ( + ) (x:int0,y:int2) =
-            int2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr+y[i,j].expr))
-        static member ( + ) (x:int,y:int2) = x.I + y
-        static member ( + ) (x:int2,y:int) = x + y.I
-        
-        static member ( - ) (x:int2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:int2,y:int0) =
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y.expr))
-        static member ( - ) (x:int0,y:int2) =
-            int2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr-y[i,j].expr))
-        static member ( - ) (x:int,y:int2) = x.I - y
-        static member ( - ) (x:int2,y:int) = x - y.I
-        
-        static member ( * ) (x:int2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:int2,y:int0) =
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y.expr))
-        static member ( * ) (x:int0,y:int2) =
-            int2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr*y[i,j].expr))
-        static member ( * ) (x:int,y:int2) = x.I * y
-        static member ( * ) (x:int2,y:int) = x * y.I
-        
-        static member ( / ) (x:int2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:int2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y.expr))
-        static member ( / ) (x:int0,y:int2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr/y[i,j].expr))
-        static member ( / ) (x:int,y:int2) = x.I / y
-        static member ( / ) (x:int2,y:int) = x / y.I
-        
-        static member ( /. ) (x:int2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/.y[i,j].expr))
-        static member ( /. ) (x:int2,y:int0) =
-            int2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/.y.expr))
-        static member ( /. ) (x:int0,y:int2) =
-            int2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr/.y[i,j].expr))
-        static member ( /. ) (x:int,y:int2) = x.I /. y
-        static member ( /. ) (x:int2,y:int) = x /. y.I
-        
-        member this.allocate(n1:int0,n2:int0) = this.allocate(It 4,n1,n2)
-        member this.allocate(n1:int0,n2:int) = this.allocate(It 4,n1,n2.I)
-        member this.allocate(n1:int,n2:int0) = this.allocate(It 4,n1.I,n2)
-        member this.allocate(n1:int,n2:int) = this.allocate(It 4,n1.I,n2.I)
-        
-        static member (<==) (v1:int2,v2:int2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:int2,v2:int0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (v1:int2,v2:int) =
-            v1 <== v2.I
-                
-    ///<summary>数値型1次元配列</summary>
-    and float2 (x:Expr2) =
-        inherit base2(x)
-        new (size,name,para) =
-            p.param.var.setVar(It 4,size,name,para)
-            float2(Var2(size,name))
-        member this.Item with get(i:int0,j:int0) = float0(this.Idx2(i,j))
-        member this.Item with get(i:int0,j:int) = float0(this.Idx2(i,j.I))
-        member this.Item with get(i:int,j:int0) = float0(this.Idx2(i.I,j))
-        member this.Item with get(i:int,j:int) = float0(this.Idx2(i.I,j.I))
-        member this.Item with get((a1:int0,b1:int0),_:unit) = float2(this.Idx2((a1,b1),()))
-        member this.Item with get((a1:int,b1:int),_:unit) = float2(this.Idx2((a1,b1),()))
-        member this.Item with get(_:unit,(a2:int0,b2:int0)) = float2(this.Idx2((),(a2,b2)))
-        member this.Item with get(_:unit,(a2:int,b2:int)) = float2(this.Idx2((),(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0)) = float2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int)) = float2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0)) = float2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int ,b1:int),(a2:int ,b2:int)) = float2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get(i:int0,_:unit) = float1(this.Idx2(i,()))
-        member this.Item with get(_:unit,j:int0) = float1(this.Idx2((),j))
-        member this.Item with get(i:int0,(a2:int0,b2:int0)) = float1(this.Idx2(i,(a2,b2)))
-        member this.Item with get(i:int,(a2:int0,b2:int0)) = float1(this.Idx2(i,(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),j:int0) = float1(this.Idx2((a1,b1),j))
-        member this.Item with get((a1:int0,b1:int0),j:int) = float1(this.Idx2((a1,b1),j))
-        
-        static member ( + ) (x:float2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:float2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:int2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:float2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y.expr))
-        static member ( + ) (x:float2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y.expr))
-        static member ( + ) (x:float0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr+y[i,j].expr))
-        static member ( + ) (x:int0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr+y[i,j].expr))
-        static member ( + ) (x:float2,y:double) =
-            x + y.D
-        static member ( + ) (x:float2,y:int) =
-            x + y.I
-        static member ( + ) (x:double,y:float2) =
-            x.D + y
-        static member ( + ) (x:int,y:float2) =
-            x.I + y
-            
-        static member ( - ) (x:float2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:float2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:int2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:float2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y.expr))
-        static member ( - ) (x:float2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y.expr))
-        static member ( - ) (x:float0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr-y[i,j].expr))
-        static member ( - ) (x:int0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr-y[i,j].expr))
-        static member ( - ) (x:float2,y:double) =
-            x - y.D
-        static member ( - ) (x:float2,y:int) =
-            x - y.I
-        static member ( - ) (x:double,y:float2) =
-            x.D - y
-        static member ( - ) (x:int,y:float2) =
-            x.I - y
-            
-        static member ( * ) (x:float2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:float2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:int2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:float2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y.expr))
-        static member ( * ) (x:float2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y.expr))
-        static member ( * ) (x:float0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr*y[i,j].expr))
-        static member ( * ) (x:int0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr*y[i,j].expr))
-        static member ( * ) (x:float2,y:double) =
-            x * y.D
-        static member ( * ) (x:float2,y:int) =
-            x * y.I
-        static member ( * ) (x:double,y:float2) =
-            x.D * y
-        static member ( * ) (x:int,y:float2) =
-            x.I * y
-            
-        static member ( / ) (x:float2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:float2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:int2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:float2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y.expr))
-        static member ( / ) (x:float2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y.expr))
-        static member ( / ) (x:float0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr/y[i,j].expr))
-        static member ( / ) (x:int0,y:float2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr/y[i,j].expr))
-        static member ( / ) (x:float2,y:double) =
-            x / y.D
-        static member ( / ) (x:float2,y:int) =
-            x / y.I
-        static member ( / ) (x:double,y:float2) =
-            x.D / y
-        static member ( / ) (x:int,y:float2) =
-            x.I / y
-            
-        member this.allocate(n1:int0,n2:int0) = this.allocate(Dt, n1,n2)
-        member this.allocate(n1:int0,n2:int) = this.allocate(Dt, n1,n2.I)
-        member this.allocate(n1:int,n2:int0) = this.allocate(Dt, n1.I,n2)
-        member this.allocate(n1:int,n2:int) = this.allocate(Dt, n1.I,n2.I)
-        
-        static member (<==) (v1:float2,v2:float2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:float2,v2:int2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:float2,v2:float0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (v1:float2,v2:int0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (x:float2,y:double) =
-            x <== y.D
-        static member (<==) (x:float2,y:int) =
-            x <== y.I
-                
-    ///<summary>数値型1次元配列</summary>
-    type complex2 (x:Expr2) =
-        inherit base2(x)
-        new (size,name,para) =
-            p.param.var.setVar(It 4,size,name,para)
-            complex2(Var2(size,name))
-        member this.Item with get(i:int0,j:int0) = complex0(this.Idx2(i,j))
-        member this.Item with get(i:int0,j:int) = complex0(this.Idx2(i,j.I))
-        member this.Item with get(i:int,j:int0) = complex0(this.Idx2(i.I,j))
-        member this.Item with get(i:int,j:int) = complex0(this.Idx2(i.I,j.I))
-        member this.Item with get((a1:int0,b1:int0),_:unit) = complex2(this.Idx2((a1,b1),()))
-        member this.Item with get((a1:int,b1:int),_:unit) = complex2(this.Idx2((a1,b1),()))
-        member this.Item with get(_:unit,(a2:int0,b2:int0)) = complex2(this.Idx2((),(a2,b2)))
-        member this.Item with get(_:unit,(a2:int,b2:int)) = complex2(this.Idx2((),(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0)) = complex2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int)) = complex2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0)) = complex2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get((a1:int ,b1:int),(a2:int ,b2:int)) = complex2(this.Idx2((a1,b1),(a2,b2)))
-        member this.Item with get(i:int0,_:unit) = complex1(this.Idx2(i,()))
-        member this.Item with get(_:unit,j:int0) = complex1(this.Idx2((),j))
-        member this.Item with get(i:int0,(a2:int0,b2:int0)) = complex1(this.Idx2(i,(a2,b2)))
-        member this.Item with get(i:int,(a2:int0,b2:int0)) = complex1(this.Idx2(i,(a2,b2)))
-        member this.Item with get((a1:int0,b1:int0),j:int0) = complex1(this.Idx2((a1,b1),j))
-        member this.Item with get((a1:int0,b1:int0),j:int) = complex1(this.Idx2((a1,b1),j))
-        
-        member this.abs with get() = complex2(Arx2(this.size1, this.size2, fun (i,j) -> this[i,j].abs.expr))
-        member this.pow with get() = complex2(Arx2(this.size1, this.size2, fun (i,j) -> this[i,j].pow.expr))
-        member this.pha with get() = complex2(Arx2(this.size1, this.size2, fun (i,j) -> this[i,j].pha.expr))
-        
-        static member ( + ) (x:complex2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:complex2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:complex2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:float2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:int2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
-        static member ( + ) (x:complex2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y.expr))
-        static member ( + ) (x:complex2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y.expr))
-        static member ( + ) (x:float0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr+y[i,j].expr))
-        static member ( + ) (x:int0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr+y[i,j].expr))
-        static member ( + ) (x:complex2,y:double) =
-            x + y.D
-        static member ( + ) (x:complex2,y:int) =
-            x + y.I
-        static member ( + ) (x:double,y:complex2) =
-            x.D + y
-        static member ( + ) (x:int,y:complex2) =
-            x.I + y
-            
-        static member ( - ) (x:complex2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:complex2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:complex2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:float2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:int2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
-        static member ( - ) (x:complex2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y.expr))
-        static member ( - ) (x:complex2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y.expr))
-        static member ( - ) (x:float0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr-y[i,j].expr))
-        static member ( - ) (x:int0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr-y[i,j].expr))
-        static member ( - ) (x:complex2,y:double) =
-            x - y.D
-        static member ( - ) (x:complex2,y:int) =
-            x - y.I
-        static member ( - ) (x:double,y:complex2) =
-            x.D - y
-        static member ( - ) (x:int,y:complex2) =
-            x.I - y
-            
-        static member ( * ) (x:complex2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:complex2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:complex2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:float2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:int2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
-        static member ( * ) (x:complex2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y.expr))
-        static member ( * ) (x:complex2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y.expr))
-        static member ( * ) (x:float0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr*y[i,j].expr))
-        static member ( * ) (x:int0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr*y[i,j].expr))
-        static member ( * ) (x:complex2,y:double) =
-            x * y.D
-        static member ( * ) (x:complex2,y:int) =
-            x * y.I
-        static member ( * ) (x:double,y:complex2) =
-            x.D * y
-        static member ( * ) (x:int,y:complex2) =
-            x.I * y
-            
-        static member ( / ) (x:complex2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:complex2,y:float2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:complex2,y:int2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:float2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:int2,y:complex2) =
-            base2.sizeMismatchError(x,y)
-            complex2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
-        static member ( / ) (x:complex2,y:int0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y.expr))
-        static member ( / ) (x:complex2,y:float0) =
-            float2(Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y.expr))
-        static member ( / ) (x:float0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr/y[i,j].expr))
-        static member ( / ) (x:int0,y:complex2) =
-            float2(Arx2(y.size1, y.size2, fun (i,j) -> x.expr/y[i,j].expr))
-        static member ( / ) (x:complex2,y:double) =
-            x / y.D
-        static member ( / ) (x:complex2,y:int) =
-            x / y.I
-        static member ( / ) (x:double,y:complex2) =
-            x.D / y
-        static member ( / ) (x:int,y:complex2) =
-            x.I / y
-            
-        member this.allocate(n1:int0,n2:int0) = this.allocate(Zt, n1,n2)
-        member this.allocate(n1:int0,n2:int) = this.allocate(Zt, n1,n2.I)
-        member this.allocate(n1:int,n2:int0) = this.allocate(Zt, n1.I,n2)
-        member this.allocate(n1:int,n2:int) = this.allocate(Zt, n1.I,n2.I)
-
-        static member (<==) (v1:complex2,v2:complex2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:complex2,v2:float2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:complex2,v2:int2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:complex2,v2:complex0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (v1:complex2,v2:float0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (v1:complex2,v2:int0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (v1:complex2,v2:int) =
-            v1 <== v2.I
-        static member (<==) (v1:complex2,v2:double) =
-            v1 <== v2.D
-                
-    ///<summary>数値型1次元配列</summary>
-    type num2 (e:Etype,x:Expr2) =
-        inherit base2(x)
+    type num2 (typ:Etype,x:Expr2) =
+        inherit base2(typ,x)
         new (typ,size,name,para) =
             p.param.var.setVar(typ,size,name,para)
             num2(typ,Var2(size,name))
-        member this.etype with get() = e
-        member this.Item with get(i:int0,j:int0) = num0(e,this.Idx2(i,j))
-        member this.Item with get(i:int0,j:int) = num0(e,this.Idx2(i,j.I))
-        member this.Item with get(i:int,j:int0) = num0(e,this.Idx2(i.I,j))
-        member this.Item with get(i:int,j:int) = num0(e,this.Idx2(i.I,j.I))
+        member this.etype with get() = typ
+        member this.Item with get(i:num0,j:num0) = num0(typ,this.Idx2(i,j))
+        member this.Item with get(i:num0,j:int) = num0(typ,this.Idx2(i,j.I))
+        member this.Item with get(i:int,j:num0) = num0(typ,this.Idx2(i.I,j))
+        member this.Item with get(i:int,j:int) = num0(typ,this.Idx2(i.I,j.I))
+        member this.Item with get((a1:num0,b1:num0),_:unit) = num2(typ,this.Idx2((a1,b1),()))
+        member this.Item with get((a1:int,b1:int),_:unit) = num2(typ,this.Idx2((a1,b1),()))
+        member this.Item with get(_:unit,(a2:num0,b2:num0)) = num2(typ,this.Idx2((),(a2,b2)))
+        member this.Item with get(_:unit,(a2:int,b2:int)) = num2(typ,this.Idx2((),(a2,b2)))
+        member this.Item with get((a1:num0,b1:num0),(a2:num0,b2:num0)) = num2(typ,this.Idx2((a1,b1),(a2,b2)))
+        member this.Item with get((a1:num0,b1:num0),(a2:int,b2:int)) = num2(typ,this.Idx2((a1,b1),(a2,b2)))
+        member this.Item with get((a1:int,b1:int),(a2:num0,b2:num0)) = num2(typ,this.Idx2((a1,b1),(a2,b2)))
+        member this.Item with get((a1:int ,b1:int),(a2:int ,b2:int)) = num2(typ,this.Idx2((a1 ,b1),(a2 ,b2)))
+        member this.Item with get(i:num0,_:unit) = num1(typ,this.Idx2(i,()))
+        member this.Item with get(_:unit,j:num0) = num1(typ,this.Idx2((),j))
+        member this.Item with get(i:num0,(a2:num0,b2:num0)) = num1(typ,this.Idx2(i,(a2,b2)))
+        member this.Item with get(i:int,(a2:num0,b2:num0)) = num1(typ,this.Idx2(i,(a2,b2)))
+        member this.Item with get((a1:num0,b1:num0),j:num0) = num1(typ,this.Idx2((a1,b1),j))
+        member this.Item with get((a1:num0,b1:num0),j:int) = num1(typ,this.Idx2((a1,b1),j))
         
         //<summary>値を0で初期化</summary> 
         override this.clear() = 
@@ -714,64 +302,79 @@ namespace Aqualis
                 p.error_code_counter_inc()
                 p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
                 br.if1 (x.size1 =/. y.size1) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size1 mismatch")
-                    print.br
+                    print.c ("ERROR"+p.error_code_counter.ToString()+" array size1 mismatch")
                 br.if1 (x.size2 =/. y.size2) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size2 mismatch")
-                    print.br
+                    print.c ("ERROR"+p.error_code_counter.ToString()+" array size2 mismatch")
                 p.comment("****************************************************")
                 
-        member this.allocate(n1:int0,n2:int0) = this.allocate(e,n1,n2)
-        member this.allocate(n1:int0,n2:int) = this.allocate(n1,n2.I)
-        member this.allocate(n1:int,n2:int0) = this.allocate(n1.I,n2)
-        member this.allocate(n1:int,n2:int) = this.allocate(n1.I,n2.I)
-        
         static member (+) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
-            Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr)
-        static member (+) (x:num0,y:num2) = Arx2(y.size1, y.size2, fun (i,j) -> x.expr+y[i,j].expr)
-        static member (+) (x:num2,y:num0) = Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y.expr)
+            num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y[i,j].expr))
+        static member (+) (x:num0,y:num2) = num2(Etype.prior(x.etype,y.etype),Arx2(y.size1, y.size2, fun (i,j) -> x.expr+y[i,j].expr))
+        static member (+) (x:num2,y:num0) = num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr+y.expr))
         
         static member (-) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
-            Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr)
-        static member (-) (x:num0,y:num2) = Arx2(y.size1, y.size2, fun (i,j) -> x.expr-y[i,j].expr)
-        static member (-) (x:num2,y:num0) = Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y.expr)
+            num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y[i,j].expr))
+        static member (-) (x:num0,y:num2) = num2(Etype.prior(x.etype,y.etype),Arx2(y.size1, y.size2, fun (i,j) -> x.expr-y[i,j].expr))
+        static member (-) (x:num2,y:num0) = num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr-y.expr))
         
         static member (*) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
-            Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr)
-        static member (*) (x:num0,y:num2) = Arx2(y.size1, y.size2, fun (i,j) -> x.expr*y[i,j].expr)
-        static member (*) (x:num2,y:num0) = Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y.expr)
+            num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y[i,j].expr))
+        static member (*) (x:num0,y:num2) = num2(Etype.prior(x.etype,y.etype),Arx2(y.size1, y.size2, fun (i,j) -> x.expr*y[i,j].expr))
+        static member (*) (x:num2,y:num0) = num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr*y.expr))
         
         static member (/) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
-            Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr)
-        static member (/) (x:num0,y:num2) = Arx2(y.size1, y.size2, fun (i,j) -> x.expr/y[i,j].expr)
-        static member (/) (x:num2,y:num0) = Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/.y.expr)
+            num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
+        static member (/) (x:num0,y:num2) = num2(Etype.prior(x.etype,y.etype),Arx2(y.size1, y.size2, fun (i,j) -> x.expr/y[i,j].expr))
+        static member (/) (x:num2,y:num0) = num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/.y.expr))
 
         static member (/.) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
-            Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr)
-        static member (/.) (x:num0,y:num2) = Arx2(y.size1, y.size2, fun (i,j) -> x.expr/.y[i,j].expr)
-        static member (/.) (x:num2,y:num0) = Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/.y.expr)
+            num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/y[i,j].expr))
+        static member (/.) (x:num0,y:num2) = num2(Etype.prior(x.etype,y.etype),Arx2(y.size1, y.size2, fun (i,j) -> x.expr/.y[i,j].expr))
+        static member (/.) (x:num2,y:num0) = num2(Etype.prior(x.etype,y.etype),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j].expr/.y.expr))
         
-        static member (<==) (v1:num2,v2:complex2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:num2,v2:float2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:num2,v2:int2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
         static member (<==) (v1:num2,v2:num2) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr,v2.size1,v2.size2,(fun i j -> v2[i,j].expr))
-        static member (<==) (v1:num2,v2:complex0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (v1:num2,v2:float0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
-        static member (<==) (v1:num2,v2:int0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
+            let p = p.param
+            if p.debugmode then
+                p.error_code_counter_inc()
+                p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
+                br.branch <| fun b ->
+                    b.IF (v1.size1 =/. v2.size1) <| fun () -> 
+                        print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size mismatch")
+                br.branch <| fun b ->
+                    b.IF (v1.size2 =/. v2.size2) <| fun () -> 
+                        print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size mismatch")
+                p.comment("****************************************************")
+            match v1.expr,v2.expr with
+            |Var2(_,x),Var2(_,y) ->
+                match p.lang with
+                |F|T -> p.codewrite(x + "=" + y)
+                |C -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
+                |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + y + "</math>\n<br/>\n")
+            |Var2(_,x),Arx2(_,_,f) ->
+                match p.lang with
+                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
+            |Arx2(_,_,_),Var2(_,_) ->
+                match p.lang with
+                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
+            |Arx2(_,_,_),Arx2(_,_,_) ->
+                match p.lang with
+                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
         static member (<==) (v1:num2,v2:num0) =
-            base2.subst(v1.expr,v1.size1,v1.size2,(fun i j -> v1[i,j].expr),v2.expr)
+            let p = p.param
+            match v1.expr with
+            |Var2(_,x) ->
+                match p.lang with
+                |F|T -> p.codewrite(x + "=" + v2.code)
+                |C -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
+                |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + v2.code + "</math>\n<br/>\n")
+            |Arx2(_,_,_) ->
+                match p.lang with
+                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
         static member (<==) (v1:num2,v2:int) =
             v1 <== v2.I
         static member (<==) (v1:num2,v2:double) =

@@ -115,7 +115,7 @@ namespace Aqualis
         static member fi (a:bool0) = "$"+a.code+"$"
             
         ///<summary>総和</summary>
-        static member sum (a:int0,i:int0) = fun (b:int0) (c:num0) ->
+        static member sum (a:num0,i:num0) = fun (b:num0) (c:num0) ->
             match p.lang with
               |T ->
                 let ta = a.code
@@ -127,11 +127,11 @@ namespace Aqualis
                 Expr.NaN
                 
         ///<summary>総和</summary>
-        static member sum (a:int0,i:int) = fun (b:int0) (c:num0) ->
+        static member sum (a:num0,i:int) = fun (b:num0) (c:num0) ->
             doc.sum (a,i.I) b c
             
         ///<summary>総和</summary>
-        static member sum (a:int0) = fun (b:int0) (c:num0) ->
+        static member sum (a:num0) = fun (b:num0) (c:num0) ->
             match p.lang with
               |T ->
                 let ta = a.code
@@ -155,15 +155,15 @@ namespace Aqualis
                 
         ///<summary>積分</summary>
         static member integral (a:int,b:num0) = fun (eq:num0) (x:num0) ->
-            doc.integral (a.nI,b) eq x
+            doc.integral (a.I,b) eq x
 
         ///<summary>積分</summary>
         static member integral (a:num0,b:int) = fun (eq:num0) (x:num0) ->
-            doc.integral (a,b.nI) eq x
+            doc.integral (a,b.I) eq x
             
         ///<summary>積分</summary>
         static member integral (a:int,b:int) = fun (eq:num0) (x:num0) ->
-            doc.integral (a.nI, b.nI) eq x
+            doc.integral (a.I,b.I) eq x
             
         ///<summary>微分</summary>
         static member diff (f:num0) (x:num0) =

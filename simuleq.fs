@@ -15,16 +15,16 @@ namespace Aqualis
         // <param name="max_iteration">最大反復回数</param>
         // <param name="integralequation_matmul">行列－ベクトル積実行関数</param>
         // <param name="prec">前処理行列</param>
-        let BiCGSTAB (b:complex1) (x:complex1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(complex1->complex1->unit)option) =
+        let BiCGSTAB (b:num1) (x:num1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(num1->num1->unit)option) =
             codestr.section "Bi-CGSTAB法" <| fun () ->
                 //ベクトルのノルム
-                let norm(norm_:float0,b:complex1) =
+                let norm(norm_:num0,b:num1) =
                   norm_ <== 0.0
                   iter.num b.size1 <| fun i -> norm_ <== norm_+asm.pow(asm.abs(b.[i]),2)
                   norm_ <== asm.sqrt(norm_)
                 //ベクトルの内積
-                let dot_product2(dot_product2_:complex0,a:complex1,b:complex1) =
-                  dot_product2_ <== 0.0
+                let dot_product2(dot_product2_:num0,a:num1,b:num1) =
+                  dot_product2_ <== (0.0,0.0)
                   iter.num a.size1 <| fun i -> 
                       dot_product2_ <== dot_product2_ + asm.conj(a.[i]) * b.[i]
                       
@@ -39,16 +39,14 @@ namespace Aqualis
                             ch.d <| fun norm_ ->
                                 norm(norm_,r)
                                 err <== norm_/bnrm2
-                                print.c _0
-                                print.c err
-                                print.br
+                                print.s[_0;err;]
                             br.if1 (err >. tol) <| fun () ->
                                 ch.z <| fun omega ->
-                                    omega <== 1.0
+                                    omega <== (1.0,0.0)
                                     iter.num r.size1 <| fun i -> r_tld.[i] <== r.[i]
                                     ch.zzzz <| fun (rho,rho_1,alpha,beta) ->
                                         //反復処理
-                                        iter.num_exit max_iteration.I <| fun (exit,i) ->
+                                        iter.num_exit (I max_iteration) <| fun (exit,i) ->
                                             dot_product2(rho,r_tld,r)
                                             br.if1 (asm.abs(rho) =. 0.0) <| fun () -> exit()
                                             br.if2 (i >. 1)
@@ -86,15 +84,13 @@ namespace Aqualis
                                             ch.d <| fun norm_ ->
                                                 norm(norm_,r)
                                                 err <== norm_/bnrm2
-                                            print.c i
-                                            print.c err
-                                            print.br
+                                            print.s[i;err]
                                             //収束判定
                                             br.if1 (err <=. tol) <| fun () -> 
-                                                print.cn "converged"
+                                                print.s[!."converged"]
                                                 exit()
                                             br.if1 (asm.abs(omega) =. 0.0) <| fun () -> 
-                                                print.cn "error_BiCGSTAB"
+                                                print.s[!."error_BiCGSTAB"]
                                                 exit()
                                             rho_1 <== rho
                                     

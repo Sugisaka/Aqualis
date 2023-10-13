@@ -8,50 +8,37 @@ namespace Aqualis
     
     [<AutoOpen>]
     module Aqualis_const =
-        type System.Int32 with
-            ///<summary>整数をint0型に置換</summary>
-            member this.I with get() =
-                int0(Int_c this)
-        type System.Double with
-            ///<summary>小数をdouble0型に置換</summary>
-            member this.D with get() =
-                float0(Dbl_c this)
-        type System.String with
-            ///<summary>小数をdouble0型に置換</summary>
-            member this.S with get() =
-                str(this)
-                (*
         ///<summary>文字列</summary>
-        let (!.) (x:string) = str(x)
+        let (!.) (x:string) = num0(St,Str_c x)
         ///<summary>整数をint0型に置換</summary>
-        let I(n:int) = int0(Int_c n)
+        let I(n:int) = num0(It 4, Int_c n)
         ///<summary>小数をdouble0型に置換</summary>
-        let D(x:double) = float0(Dbl_c x)
-        *)
+        let D(x:double) = num0(Dt, Dbl_c x)
+        
         ///<summary>0(num0型)</summary>
-        let _0 = int0(Int_c 0)
+        let _0 = num0(0)
         ///<summary>1(num0型)</summary>
-        let _1 = int0(Int_c 1)
+        let _1 = num0(1)
         ///<summary>2(num0型)</summary>
-        let _2 = int0(Int_c 2)
+        let _2 = num0(2)
         ///<summary>3(num0型)</summary>
-        let _3 = int0(Int_c 3)
+        let _3 = num0(3)
         ///<summary>4(num0型)</summary>
-        let _4 = int0(Int_c 4)
+        let _4 = num0(4)
         ///<summary>5(num0型)</summary>
-        let _5 = int0(Int_c 5)
+        let _5 = num0(5)
         ///<summary>6(num0型)</summary>
-        let _6 = int0(Int_c 6)
+        let _6 = num0(6)
         ///<summary>7(num0型)</summary>
-        let _7 = int0(Int_c 7)
+        let _7 = num0(7)
         ///<summary>8(num0型)</summary>
-        let _8 = int0(Int_c 8)
+        let _8 = num0(8)
         ///<summary>9(num0型)</summary>
-        let _9 = int0(Int_c 9)
+        let _9 = num0(9)
         ///<summary>10(num0型)</summary>
-        let _10 = int0(Int_c 10)
+        let _10 = num0(10)
         ///<summary>0.0(num0型)</summary>
-        let _0d = float0(Dbl_c 0.0)
+        let _0d = num0(0.0)
         ///<summary>1.0(num0型)</summary>
-        let _1d = float0(Dbl_c 1.0)
+        let _1d = num0(1.0)
         

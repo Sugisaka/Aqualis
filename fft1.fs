@@ -17,7 +17,7 @@ namespace Aqualis
                 fftw_plan1(name)
             member __.code = name
             
-        let fftshift_odd(a:complex1) =
+        let fftshift_odd(a:num1) =
             let n1 = a.size1
             let n2 = a.size1/.2
             ch.z <| fun tmp ->
@@ -27,7 +27,7 @@ namespace Aqualis
                     a[i] <== a[i+n2+1]
                 a[a.size1] <== tmp
         
-        let fftshift_even(a:complex1) =
+        let fftshift_even(a:num1) =
             let n2 = a.size1/.2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
@@ -35,7 +35,7 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
                     
-        let ifftshift_odd(a:complex1) =
+        let ifftshift_odd(a:num1) =
             let n1 = a.size1
             let n2 = n1/.2
             ch.z <| fun tmp ->
@@ -45,7 +45,7 @@ namespace Aqualis
                     a[n1-i+1] <== a[n1-i+1-n2-1]
                 a[1] <== tmp
         
-        let ifftshift_even(a:complex1) =
+        let ifftshift_even(a:num1) =
             let n2 = a.size1/.2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
@@ -53,21 +53,21 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
                     
-        let fftshift1(x:complex1) =
+        let fftshift1(x:num1) =
             br.if2 (x.size1%2 =. 0)
                 <| fun () ->
                     fftshift_even(x)
                 <| fun () ->
                     fftshift_odd(x)
                         
-        let ifftshift1(x:complex1) =
+        let ifftshift1(x:num1) =
             br.if2 (x.size1%2 =. 0)
                 <| fun () ->
                     ifftshift_even(x)
                 <| fun () ->
                     ifftshift_odd(x)
                     
-        let private fft1(planname:string,data1:complex1,data2:complex1,fftdir:int) =
+        let private fft1(planname:string,data1:num1,data2:num1,fftdir:int) =
             p.param.option_("-lfftw3")
             p.param.option_("-I/usr/include")
             ch.ii <| fun (N,N2) -> 
@@ -117,9 +117,9 @@ namespace Aqualis
                     iter.num N <| fun i ->
                         data2.[i]<==data2.[i]/N
                         
-        let fft(planname:string,data1:complex1,data2:complex1) =
+        let fft(planname:string,data1:num1,data2:num1) =
                 fft1(planname,data1,data2,1)
                 
-        let ifft(planname:string,data1:complex1,data2:complex1) =
+        let ifft(planname:string,data1:num1,data2:num1) =
                 fft1(planname,data1,data2,-1)
                 

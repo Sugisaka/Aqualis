@@ -492,35 +492,35 @@ namespace Aqualis
                 
                 for v in var_.list do this.vwrite(this.declare(v)+"\n")
                 
-                this.vwrite("\t\t\t<li>Loop counter: <math><msub><mi>n</mi><mi>m</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if loopvar.maxcounter=1 then "" else "<mo>..</mo><mn>"+loopvar.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                this.vwrite("\t\t\t<li>Loop counter: <math><msub><mi>n</mi><mi>m</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if loopvar.maxcounter=1 then "" else "<mo>.<./mo><mn>"+loopvar.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 
                 if i_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (integer): <math><msub><mi>i</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+i_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache variables (integer): <math><msub><mi>i</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+i_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if d_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (double): <math><msub><mi>d</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+d_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache variables (double): <math><msub><mi>d</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+d_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if z_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (complex): <math><msub><mi>z</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+z_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache variables (complex): <math><msub><mi>z</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+z_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                     
                 if i1_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,1d): <math><msub><mover><mi>i</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i1_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+i1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (integer,1d): <math><msub><mover><mi>i</mi><mo><./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i1_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+i1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if d1_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,1d): <math><msub><mover><mi>d</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d1_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+d1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (double,1d): <math><msub><mover><mi>d</mi><mo><./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d1_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+d1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if z1_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,1d): <math><msub><mover><mi>z</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z1_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+z1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (complex,1d): <math><msub><mover><mi>z</mi><mo><./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z1_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+z1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
 
                 if i2_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,2d): <math><msub><mover><mi>i</mi><mo>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i2_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+i2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (integer,2d): <math><msub><mover><mi>i</mi><mo>.<./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i2_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+i2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if d2_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,2d): <math><msub><mover><mi>d</mi><mo>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d2_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+d2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (double,2d): <math><msub><mover><mi>d</mi><mo>.<./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d2_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+d2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if z2_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,2d): <math><msub><mover><mi>z</mi><mo>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z2_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+z2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (complex,2d): <math><msub><mover><mi>z</mi><mo>.<./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z2_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+z2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
 
                 if i3_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,3d): <math><msub><mover><mi>i</mi><mo>...</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i3_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+i3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (integer,3d): <math><msub><mover><mi>i</mi><mo>..<./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i3_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+i3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if d3_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,3d): <math><msub><mover><mi>d</mi><mo>...</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d3_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+d3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (double,3d): <math><msub><mover><mi>d</mi><mo>..<./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d3_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+d3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 if z3_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,3d): <math><msub><mover><mi>z</mi><mo>...</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z3_cache_var_.maxcounter=1 then "" else "<mo>..</mo><mn>"+z3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (complex,3d): <math><msub><mover><mi>z</mi><mo>..<./mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z3_cache_var_.maxcounter=1 then "" else "<mo>.<./mo><mn>"+z3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 
         ///<summary>整数型を文字列に変換するときの桁数を設定</summary>
         member __.set_int_string_format(x) = int_string_format_ <- x

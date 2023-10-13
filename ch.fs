@@ -15,25 +15,25 @@ namespace Aqualis
         static member i code = 
             let p = p.param
             let x = p.i_cache_var.getAutoVar()
-            code <| int0(Var x)
+            code <| num0(It 4,Var x)
             p.i_cache_var.setVar(It 4,A0,x,"")
             
         ///<summary>倍精度浮動小数点型一時変数の生成</summary>
         static member d code = 
             let p = p.param
             let x = p.d_cache_var.getAutoVar()
-            code <| float0(Var x)
+            code <| num0(Dt,Var x)
             p.d_cache_var.setVar(Dt,A0,x,"")
             
         ///<summary>複素数型一時変数の生成</summary>
         static member z code = 
             let p = p.param
             let x = p.z_cache_var.getAutoVar()
-            code <| complex0(Var x)
+            code <| num0(Zt,Var x)
             p.z_cache_var.setVar(Zt,A0,x,"")
             
         ///<summary>整数型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member si (value:int0) = fun code ->
+        static member si (value:num0) = fun code ->
             ch.i <| fun v ->
                 v <== value
                 code v
@@ -42,7 +42,7 @@ namespace Aqualis
         static member si (value:int) = ch.si (value.I)
         
         ///<summary>倍精度浮動小数点型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member sd (value:float0) = fun code ->
+        static member sd (value:num0) = fun code ->
             ch.d <| fun v ->
                 v <== value
                 code v
@@ -51,7 +51,7 @@ namespace Aqualis
         static member sd (value:double) = ch.sd (value.D)
         
         ///<summary>複素数型一時変数を生成し、valueを代入してからcodeで使用</summary>
-        static member sz (value:complex0) = fun code ->
+        static member sz (value:num0) = fun code ->
             ch.z <| fun v ->
                 v <== value
                 code v
@@ -80,7 +80,7 @@ namespace Aqualis
         static member i01 code = 
             let p = p.param
             let x = p.i1_cache_var.getAutoVar()
-            let y = int1(Var1(A1(0),x))
+            let y = num1(It 4,Var1(A1(0),x))
             code y
             p.i1_cache_var.setVar(It 4,A1(0),x,"")
             
@@ -88,7 +88,7 @@ namespace Aqualis
         static member d01 code = 
             let p = p.param
             let x = p.d1_cache_var.getAutoVar()
-            let y = float1(Var1(A1(0),x))
+            let y = num1(Dt,Var1(A1(0),x))
             code y
             p.d1_cache_var.setVar(Dt,A1(0),x,"")
             
@@ -96,12 +96,12 @@ namespace Aqualis
         static member z01 code = 
             let p = p.param
             let x = p.z1_cache_var.getAutoVar()
-            let y = complex1(Var1(A1(0),x))
+            let y = num1(Zt,Var1(A1(0),x))
             code y
             p.z1_cache_var.setVar(Zt,A1(0),x,"")
             
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i1 (size1:int0) = fun code ->
+        static member i1 (size1:num0) = fun code ->
             ch.i01 <| fun v ->
                 v.allocate(size1)
                 code v
@@ -112,7 +112,7 @@ namespace Aqualis
             ch.i1 (size1.I) code
             
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d1 (size1:int0) = fun code ->
+        static member d1 (size1:num0) = fun code ->
             ch.d01 <| fun v ->
                 v.allocate(size1)
                 code v
@@ -123,7 +123,7 @@ namespace Aqualis
             ch.d1 (size1.I) code
             
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z1 (size1:int0) = fun code ->
+        static member z1 (size1:num0) = fun code ->
             ch.z01 <| fun v ->
                 v.allocate(size1)
                 code v
@@ -137,7 +137,7 @@ namespace Aqualis
         static member i02 code = 
             let p = p.param
             let x = p.i2_cache_var.getAutoVar()
-            let y = int2(Var2(A2(0,0),x))
+            let y = num2(It 4,Var2(A2(0,0),x))
             code y
             p.i2_cache_var.setVar(It 4,A2(0,0),x,"")
             
@@ -145,7 +145,7 @@ namespace Aqualis
         static member d02 code = 
             let p = p.param
             let x = p.d2_cache_var.getAutoVar()
-            let y = float2(Var2(A2(0,0),x))
+            let y = num2(Dt,Var2(A2(0,0),x))
             code y
             p.d2_cache_var.setVar(Dt,A2(0,0),x,"")
             
@@ -153,12 +153,12 @@ namespace Aqualis
         static member z02 code = 
             let p = p.param
             let x = p.z2_cache_var.getAutoVar()
-            let y = complex2(Var2(A2(0,0),x))
+            let y = num2(Zt,Var2(A2(0,0),x))
             code y
             p.z2_cache_var.setVar(Zt,A2(0,0),x,"")
             
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i2 (size1:int0) = fun (size2:int0) code -> 
+        static member i2 (size1:num0) = fun (size2:num0) code -> 
             ch.i02 <| fun v ->
                 v.allocate(size1,size2)
                 code v
@@ -169,7 +169,7 @@ namespace Aqualis
             ch.i2 size1.I size2.I code
             
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d2 (size1:int0) = fun (size2:int0) code ->
+        static member d2 (size1:num0) = fun (size2:num0) code ->
             ch.d02 <| fun v ->
                 v.allocate(size1,size2)
                 code v
@@ -180,7 +180,7 @@ namespace Aqualis
             ch.d2 size1.I size2.I code
             
         ///<summary>複素数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z2 (size1:int0) = fun (size2:int0) code ->
+        static member z2 (size1:num0) = fun (size2:num0) code ->
             ch.z02 <| fun v ->
                 v.allocate(size1,size2)
                 code v
@@ -194,7 +194,7 @@ namespace Aqualis
         static member i03 code = 
             let p = p.param
             let x = p.i3_cache_var.getAutoVar()
-            let y = int3(Var3(A3(0,0,0),x))
+            let y = num3(It 4,Var3(A3(0,0,0),x))
             code y
             p.i3_cache_var.setVar(It 4,A3(0,0,0),x,"")
             
@@ -202,7 +202,7 @@ namespace Aqualis
         static member d03 code = 
             let p = p.param
             let x = p.d3_cache_var.getAutoVar()
-            let y = float3(Var3(A3(0,0,0),x))
+            let y = num3(Dt,Var3(A3(0,0,0),x))
             code y
             p.i3_cache_var.setVar(Dt,A3(0,0,0),x,"")
             
@@ -210,12 +210,12 @@ namespace Aqualis
         static member z03 code = 
             let p = p.param
             let x = p.z3_cache_var.getAutoVar()
-            let y = complex3(Var3(A3(0,0,0),x))
+            let y = num3(Zt,Var3(A3(0,0,0),x))
             code y
             p.z3_cache_var.setVar(Zt,A3(0,0,0),x,"")
             
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             ch.i03 <| fun v ->
                 v.allocate(size1,size2,size3)
                 code v
@@ -226,7 +226,7 @@ namespace Aqualis
             ch.i3 size1.I size2.I size3.I code
             
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             ch.d03 <| fun v ->
                 v.allocate(size1,size2,size3)
                 code v
@@ -237,7 +237,7 @@ namespace Aqualis
             ch.d3 size1.I size2.I size3.I code
             
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             ch.z03 <| fun v ->
                 v.allocate(size1,size2,size3)
                 code v
@@ -452,8 +452,188 @@ namespace Aqualis
                 counter <== _1
                 code(counter)
                 
+        ///<summary>指定した型の一時変数を生成</summary>
+        static member n e = fun code ->
+            match e with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| e.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match e with
+                |Zt -> p.z_cache_var.getAutoVar()
+                |Dt -> p.d_cache_var.getAutoVar()
+                |_ -> p.i_cache_var.getAutoVar()
+            code <| num0(e,Var x)
+            match e with
+            |It _ -> p.i_cache_var.setVar(e,A0,x,"")
+            |Dt -> p.d_cache_var.setVar(e,A0,x,"")
+            |Zt -> p.z_cache_var.setVar(e,A0,x,"")
+            |_ -> ()
+            
+        ///<summary>指定した型の一時変数を生成</summary>
+        static member n (v:num0) = fun code ->
+            match v.etype with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match v.etype with
+                |Zt -> p.z_cache_var.getAutoVar()
+                |Dt -> p.d_cache_var.getAutoVar()
+                |_ -> p.i_cache_var.getAutoVar()
+            code <| num0(v.etype,Var x)
+            match v.etype with
+            |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
+            |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
+            |Zt -> p.z_cache_var.setVar(v.etype,A0,x,"")
+            |_ -> ()
+            
+        ///<summary>指定した型の一時変数を生成</summary>
+        static member n (v:num1) = fun code ->
+            match v.etype with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match v.etype with
+                |Zt -> p.z_cache_var.getAutoVar()
+                |Dt -> p.d_cache_var.getAutoVar()
+                |_ -> p.i_cache_var.getAutoVar()
+            code <| num0(v.etype,Var x)
+            match v.etype with
+            |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
+            |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
+            |Zt -> p.z_cache_var.setVar(v.etype,A0,x,"")
+            |_ -> ()
+            
+        ///<summary>指定した型の一時変数を生成</summary>
+        static member n (v:num2) = fun code ->
+            match v.etype with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match v.etype with
+                |Zt -> p.z_cache_var.getAutoVar()
+                |Dt -> p.d_cache_var.getAutoVar()
+                |_ -> p.i_cache_var.getAutoVar()
+            code <| num0(v.etype,Var x)
+            match v.etype with
+            |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
+            |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
+            |Zt -> p.z_cache_var.setVar(v.etype,A0,x,"")
+            |_ -> ()
+            
+        ///<summary>指定した型の一時変数を生成</summary>
+        static member n (v:num3) = fun code ->
+            match v.etype with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match v.etype with
+                |Zt -> p.z_cache_var.getAutoVar()
+                |Dt -> p.d_cache_var.getAutoVar()
+                |_ -> p.i_cache_var.getAutoVar()
+            code <| num0(v.etype,Var x)
+            match v.etype with
+            |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
+            |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
+            |Zt -> p.z_cache_var.setVar(v.etype,A0,x,"")
+            |_ -> ()
+            
+        ///<summary>num1型1次元配列を生成</summary>
+        static member n01 e code = 
+            match e with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n1)" <| e.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match e with
+                |Zt -> p.z1_cache_var.getAutoVar()
+                |Dt -> p.d1_cache_var.getAutoVar()
+                |_ -> p.i1_cache_var.getAutoVar()
+            let y = num1(e,Var1(A1(0),x))
+            code y
+            match e with
+            |It _ -> p.i1_cache_var.setVar(e,A1(0),x,"")
+            |Dt -> p.d1_cache_var.setVar(e,A1(0),x,"")
+            |Zt -> p.z1_cache_var.setVar(e,A1(0),x,"")
+            |_ -> ()
+            
+        ///<summary>num0型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+        static member n1 (e,size1:num0) = fun code ->
+            ch.n01 e <| fun v ->
+                v.allocate(size1)
+                code v
+                v.deallocate()
+                
+        ///<summary>num0型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+        static member n1 (e,size1:int) = fun code ->
+            ch.n1 (e,size1.I) code
+            
+        ///<summary>num0型2次元配列を生成</summary>
+        static member n02 e code = 
+            match e with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n2)" <| e.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match e with
+                |Zt -> p.z2_cache_var.getAutoVar()
+                |Dt -> p.d2_cache_var.getAutoVar()
+                |_ -> p.i2_cache_var.getAutoVar()
+            let y = num2(e,Var2(A2(0,0),x))
+            code y
+            match e with
+            |It _ -> p.i2_cache_var.setVar(e,A2(0,0),x,"")
+            |Dt -> p.d2_cache_var.setVar(e,A2(0,0),x,"")
+            |Zt -> p.z2_cache_var.setVar(e,A2(0,0),x,"")
+            |_ -> ()
+            
+        ///<summary>num0型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+        static member n2 (e,size1:num0,size2:num0) = fun code -> 
+            ch.n02 e <| fun v ->
+                v.allocate(size1,size2)
+                code v
+                v.deallocate()
+                
+        ///<summary>num0型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+        static member n2 (e,size1:int,size2:int) = fun code -> 
+            ch.n2 (e,size1.I,size2.I) code
+            
+        ///<summary>整数型3次元配列を生成</summary>
+        static member n03 e code = 
+            match e with 
+            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n3)" <| e.ToString()
+            |_ -> ()
+            let p = p.param
+            let x = 
+                match e with
+                |Zt -> p.z3_cache_var.getAutoVar()
+                |Dt -> p.d3_cache_var.getAutoVar()
+                |_ -> p.i3_cache_var.getAutoVar()
+            let y = num3(e,Var3(A3(0,0,0),x))
+            code y
+            match e with
+            |It _ -> p.i3_cache_var.setVar(It 4,A3(0,0,0),x,"")
+            |Dt _ -> p.d3_cache_var.setVar(Dt,A3(0,0,0),x,"")
+            |Zt _ -> p.z3_cache_var.setVar(Zt,A3(0,0,0),x,"")
+            |_ -> ()
+            
+        ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+        static member n3 (size1:num0) = fun (size2:num0) (size3:num0) e code ->
+            ch.n03 e <| fun v ->
+                v.allocate(size1,size2,size3)
+                code v
+                v.deallocate()
+                
+        ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+        static member n3 (size1:int) = fun (size2:int) (size3:int) e code ->
+            ch.n3 size1.I size2.I size3.I e code
+                
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_i1 (size1:int0) = fun code ->
+        static member copyin_i1 (size1:num0) = fun code ->
             match p.lang with
             |F ->
                 ch.i1 size1 <| fun i ->
@@ -473,7 +653,7 @@ namespace Aqualis
             ch.copyin_i1 size1.I code
 
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_d1 (size1:int0) = fun code ->
+        static member copyin_d1 (size1:num0) = fun code ->
             match p.lang with
             |F ->
                 ch.d1 size1 <| fun i ->
@@ -493,7 +673,7 @@ namespace Aqualis
             ch.copyin_d1 size1.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_z1 (size1:int0) = fun code ->
+        static member copyin_z1 (size1:num0) = fun code ->
             match p.lang with
             |F ->
                 ch.z1 size1 <| fun i ->
@@ -513,7 +693,7 @@ namespace Aqualis
             ch.copyin_z1 size1.I code
 
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_i2 (size1:int0) = fun (size2:int0) code ->
+        static member copyin_i2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
             |F ->
                 ch.i2 size1 size2 <| fun i ->
@@ -533,7 +713,7 @@ namespace Aqualis
             ch.copyin_i2 size1.I size2.I code
 
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_d2 (size1:int0) = fun (size2:int0) code ->
+        static member copyin_d2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
             |F ->
                 ch.d2 size1 size2 <| fun i ->
@@ -553,7 +733,7 @@ namespace Aqualis
             ch.copyin_d2 size1.I size2.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_z2 (size1:int0) = fun (size2:int0) code ->
+        static member copyin_z2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
             |F ->
                 ch.z2 size1 size2 <| fun i ->
@@ -573,7 +753,7 @@ namespace Aqualis
             ch.copyin_z2 size1.I size2.I code
 
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_i3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member copyin_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
             |F ->
                 ch.i3 size1 size2 size3 <| fun i ->
@@ -593,7 +773,7 @@ namespace Aqualis
             ch.copyin_i3 size1.I size2.I size3.I code
 
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_d3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member copyin_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
             |F ->
                 ch.d3 size1 size2 size3 <| fun i ->
@@ -613,7 +793,7 @@ namespace Aqualis
             ch.copyin_d3 size1.I size2.I size3.I code
 
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
-        static member copyin_z3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member copyin_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
             |F ->
                 ch.z3 size1 size2 size3 <| fun i ->
@@ -633,7 +813,7 @@ namespace Aqualis
             ch.copyin_z3 size1.I size2.I size3.I code
 
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_i1 (size1:int0) = fun code ->
+        static member copyout_i1 (size1:num0) = fun code ->
             match p.lang with
             |F ->
                 ch.i1 size1 <| fun i ->
@@ -653,7 +833,7 @@ namespace Aqualis
             ch.copyout_i1 size1.I code
 
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_d1 (size1:int0) = fun code ->
+        static member copyout_d1 (size1:num0) = fun code ->
             match p.lang with
             |F ->
                 ch.d1 size1 <| fun i ->
@@ -673,7 +853,7 @@ namespace Aqualis
             ch.copyout_d1 size1.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_z1 (size1:int0) = fun code ->
+        static member copyout_z1 (size1:num0) = fun code ->
             match p.lang with
             |F ->
                 ch.z1 size1 <| fun i ->
@@ -693,7 +873,7 @@ namespace Aqualis
             ch.copyout_z1 size1.I code
 
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_i2 (size1:int0) = fun (size2:int0) code ->
+        static member copyout_i2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
             |F ->
                 ch.i2 size1 size2 <| fun i ->
@@ -713,7 +893,7 @@ namespace Aqualis
             ch.copyout_i2 size1.I size2.I code
 
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_d2 (size1:int0) = fun (size2:int0) code ->
+        static member copyout_d2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
             |F ->
                 ch.d2 size1 size2 <| fun i ->
@@ -733,7 +913,7 @@ namespace Aqualis
             ch.copyout_d2 size1.I size2.I code
 
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_z2 (size1:int0) = fun (size2:int0) code ->
+        static member copyout_z2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
             |F ->
                 ch.z2 size1 size2 <| fun i ->
@@ -753,7 +933,7 @@ namespace Aqualis
             ch.copyout_z2 size1.I size2.I code
 
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_i3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member copyout_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
             |F ->
                 ch.i3 size1 size2 size3 <| fun i ->
@@ -773,7 +953,7 @@ namespace Aqualis
             ch.copyout_i3 size1.I size2.I size3.I code
 
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_d3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member copyout_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
             |F ->
                 ch.d3 size1 size2 size3 <| fun i ->
@@ -793,7 +973,7 @@ namespace Aqualis
             ch.copyout_d3 size1.I size2.I size3.I code
 
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
-        static member copyout_z3 (size1:int0) = fun (size2:int0) (size3:int0) code ->
+        static member copyout_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
             |F ->
                 ch.z3 size1 size2 size3 <| fun i ->
@@ -1509,13 +1689,13 @@ namespace Aqualis
         static member z01 code = ()
             
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i1 (size1:int0) code = ()
+        static member i1 (size1:num0) code = ()
             
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d1 (size1:int0) code = ()
+        static member d1 (size1:num0) code = ()
             
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z1 (size1:int0) code = ()
+        static member z1 (size1:num0) code = ()
             
         ///<summary>整数型2次元配列を生成</summary>
         static member i02 code = ()
@@ -1527,13 +1707,13 @@ namespace Aqualis
         static member z02 code = ()
             
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i2 (size1:int0) (size2:int0) code = ()
+        static member i2 (size1:num0) (size2:num0) code = ()
             
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d2 (size1:int0) (size2:int0) code = ()
+        static member d2 (size1:num0) (size2:num0) code = ()
             
         ///<summary>複素数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z2 (size1:int0) (size2:int0) code = ()
+        static member z2 (size1:num0) (size2:num0) code = ()
             
         ///<summary>整数型3次元配列を生成</summary>
         static member i03 code = ()
@@ -1545,13 +1725,13 @@ namespace Aqualis
         static member z03 code = ()
             
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member i3 (size1:int0) (size2:int0) (size3:int0) code = ()
+        static member i3 (size1:num0) (size2:num0) (size3:num0) code = ()
             
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member d3 (size1:int0) (size2:int0) (size3:int0) code = ()
+        static member d3 (size1:num0) (size2:num0) (size3:num0) code = ()
             
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
-        static member z3 (size1:int0) (size2:int0) (size3:int0) code = ()
+        static member z3 (size1:num0) (size2:num0) (size3:num0) code = ()
     
         static member ii code = 
             ch.i <| fun i1 -> 

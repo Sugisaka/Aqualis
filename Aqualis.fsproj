@@ -21,11 +21,10 @@
     <Compile Include="array1.fs" />
     <Compile Include="array2.fs" />
     <Compile Include="array3.fs" />
-    <Compile Include="num0calc.fs" />
+    <Compile Include="tbinder.fs" />
     <Compile Include="iter2.fs" />
     <Compile Include="var.fs" />
     <Compile Include="ch.fs" />
-    <Compile Include="aqnum.fs" />
     <Compile Include="random.fs" />
     <Compile Include="minmax.fs" />
     <Compile Include="print2.fs" />

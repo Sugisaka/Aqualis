@@ -10,1174 +10,1129 @@ namespace Aqualis
     open System.IO
     open System.Text
     open Aqualis_base
-    
-    type txtWriter(fp:string) =
-        let mutable colcounter = 0
-        member _.br with get() =
-            let p = p.param
-            match p.lang with
-            |F -> 
-                p.codewrite("write("+fp+",*)"+"\n")
-            |C -> 
-                p.codewrite("fprintf("+fp+",\"\\n\");\n")
-            |_ -> ()
-            colcounter <- 0
-        member _.Write (v:int0) =
-            let p = p.param
-            match p.lang with
-            |F ->
-                let tab = var.ip0_noWarning("tab",2313)
-                let int0string_format_F = 
-                    let a=p.int_string_format
-                    "I"+a.ToString()
-                if colcounter<>0 then 
-                    p.codewrite("write("+fp+",fmt='(A1)',advance='no') "+tab.code+"\n")
-                p.codewrite("write("+fp+",fmt='("+int0string_format_F+")',advance='no') "+v.code+"\n")
-            |C ->
-                let int0string_format_C =
-                    "%"+p.int_string_format.ToString()+"d"
-                if colcounter<>0 then 
-                    p.codewrite("fprintf("+fp+",\"\\t\");\n")
-                p.codewrite("fprintf("+fp+",\""+int0string_format_C+"\""+v.code+");\n")
-            |T ->
-                p.codewrite("write("+fp+") "+v.code+"\n")
-            |H ->
-                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
-            colcounter <- colcounter+1
-        member this.Write (v:int) = this.Write (v.I)
-                    
-        member _.Write (v:float0) =
-            let p = p.param
-            match p.lang with
-            |F ->
-                let tab = var.ip0_noWarning("tab",2313)
-                let double0string_format_F = 
-                    let (a,b)=p.double_string_format
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                if colcounter<>0 then 
-                    p.codewrite("write("+fp+",fmt='(A1)',advance='no') "+tab.code+"\n")
-                p.codewrite("write("+fp+",fmt='("+double0string_format_F+")',advance='no') "+v.code+"\n")
-            |C ->
-                let double0string_format_C = 
-                    let (a,b)=p.double_string_format
-                    "%"+a.ToString()+"."+b.ToString()+"e"
-                if colcounter<>0 then 
-                    p.codewrite("fprintf("+fp+",\"\\t\");\n")
-                p.codewrite("fprintf("+fp+",\""+double0string_format_C+"\""+v.code+");\n")
-            |T ->
-                p.codewrite("write("+fp+") "+v.code+"\n")
-            |H ->
-                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
-            colcounter <- colcounter+1
-        member this.Write (v:double) = this.Write (v.D)
-                
-        member _.Write (v:complex0) =
-            let p = p.param
-            match p.lang with
-            |F ->
-                let tab = var.ip0_noWarning("tab",2313)
-                let double0string_format_F = 
-                    let (a,b)=p.double_string_format
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                if colcounter<>0 then 
-                    p.codewrite("write("+fp+",fmt='(A1)',advance='no') "+tab.code+"\n")
-                p.codewrite("write("+fp+",fmt='("+double0string_format_F+")',advance='no') "+v.re.code+"\n")
-                p.codewrite("write("+fp+",fmt='(A1)',advance='no') "+tab.code+"\n")
-                p.codewrite("write("+fp+",fmt='("+double0string_format_F+")',advance='no') "+v.im.code+"\n")
-            |C ->
-                let double0string_format_C = 
-                    let (a,b)=p.double_string_format
-                    "%"+a.ToString()+"."+b.ToString()+"e"
-                if colcounter<>0 then 
-                    p.codewrite("fprintf("+fp+",\"\\t\");\n")
-                p.codewrite("fprintf("+fp+",\""+double0string_format_C+"\""+v.code+");\n")
-                p.codewrite("fprintf("+fp+",\"\\t\");\n")
-                p.codewrite("fprintf("+fp+",\""+double0string_format_C+"\""+v.code+");\n")
-            |T ->
-                p.codewrite("write("+fp+") "+v.code+"\n")
-            |H ->
-                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
-            colcounter <- colcounter+2
-            
-        member this.Write (v:num0) =
-            match v.etype with
-            |It _ -> this.Write (int0(v.expr))
-            |Dt _ -> this.Write (float0(v.expr))
-            |Zt _ -> this.Write (complex0(v.expr))
-            |_ -> printfn "%s: ファイル書き込みできない型です" <| v.etype.ToString()
-            
-    type binWriter(fp:string) =
-        member _.Write (v:int0) =
-            let p = p.param
-            match p.lang,v.expr with
-            |F,_ ->
-                p.codewrite("write("+fp+") "+v.code+"\n")
-            |C,Var _ ->
-                p.codewrite("fwrite(&"+v.code+",sizeof("+v.code+"),1,"+fp+");\n")
-            |C,_ ->
-                ch.i <| fun tmp ->
-                    tmp <== int0(v.expr)
-                    p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
-            |T,_ ->
-                p.codewrite("write("+fp+") "+v.code+"\n")
-            |H,_ ->
-                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
-        member this.Write (v:int) = this.Write (v.I)
-        member _.Write (v:float0) =
-            let p = p.param
-            match p.lang,v.expr with
-            |F,_ ->
-                p.codewrite("write("+fp+") "+v.code+"\n")
-            |C,Var _ ->
-                p.codewrite("fwrite(&"+v.code+",sizeof("+v.code+"),1,"+fp+");\n")
-            |C,_ ->
-                ch.d <| fun tmp ->
-                    tmp <== float0(v.expr)
-                    p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
-            |T,_ ->
-                p.codewrite("write("+fp+") "+v.code+"\n")
-            |H,_ ->
-                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
-        member this.Write (v:double) = this.Write (v.D)
-        member _.Write (v:complex0) =
-            let p = p.param
-            match p.lang with
-            |F ->
-                p.codewrite("write("+fp+") "+v.re.code+"\n")
-                p.codewrite("write("+fp+") "+v.im.code+"\n")
-            |C ->
-                ch.dd <| fun (re,im) ->
-                    re <== v.re
-                    im <== v.im
-                    p.codewrite("fwrite(&"+re.code+",sizeof("+re.code+"),1,"+fp+");\n")
-                    p.codewrite("fwrite(&"+im.code+",sizeof("+im.code+"),1,"+fp+");\n")
-            |_ ->
-                ()
-    type txtReader(fp:string,iostat:int0) =
-        let mutable colcounter = 0
-        member _.br with get() =
-            let p = p.param
-            match p.lang with
-            |F -> 
-                p.codewrite("read("+fp+",*)"+"\n")
-            |_ -> ()
-            colcounter <- 0
-        member _.Read (v:int0) = 
-            let p = p.param
-            let int0string_format_F = 
-                let a=p.int_string_format
-                "I"+a.ToString()
-            let int0string_format_C = "%d"
-            match p.lang with
-            |F ->
-                ch.i <| fun tmp ->
-                    if colcounter<>0 then
-                        p.codewrite("read("+fp+",fmt='(A1)',advance='no',iostat="+iostat.code+") "+tmp.code+"\n")
-                    p.codewrite("read("+fp+",fmt='("+int0string_format_F+")',advance='no',iostat="+iostat.code+") "+v.code+"\n")
-            |C ->
-                p.codewrite("fscanf("+fp+",\""+int0string_format_C+"\","+v.code+");\n")
-            |T ->
-                p.codewrite("read("+fp+") "+v.code+"\n")
-            |H ->
-                p.codewrite("<math>"+v.code+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
-            colcounter <- colcounter+1
-        member _.Read (v:float0) = 
-            let p = p.param
-            let double0string_format_F = 
-                let (a,b)=p.double_string_format
-                "E"+a.ToString()+"."+b.ToString()+"e3"
-            let double0string_format_C = "%lf"
-            match p.lang with
-            |F ->
-                ch.i <| fun tmp ->
-                    if colcounter<>0 then
-                        p.codewrite("read("+fp+",fmt='(A1)',advance='no',iostat="+iostat.code+") "+tmp.code+"\n")
-                    p.codewrite("read("+fp+",fmy='("+double0string_format_F+")',advance='no',iostat="+iostat.code+") "+v.code+"\n")
-            |C ->
-                p.codewrite("fscanf("+fp+",\""+double0string_format_C+"\","+v.code+");\n")
-            |T ->
-                p.codewrite("read("+fp+") "+v.code+"\n")
-            |H ->
-                p.codewrite("<math>"+v.code+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
-            colcounter <- colcounter+1
-        member _.Read (v:complex0) = 
-            let p = p.param
-            let tab = var.ip0_noWarning("tab",2313)
-            let double0string_format_F = 
-                let (a,b)=p.double_string_format
-                "E"+a.ToString()+"."+b.ToString()+"e3"
-            let int0string_format_F = 
-                let a=p.int_string_format
-                "I"+a.ToString()
-            let int0string_format_C = "%d"
-            let double0string_format_C = "%lf"
-            match p.lang with
-            |F ->
-                ch.i <| fun tmp ->
-                ch.dd <| fun (re,im) ->
-                    if colcounter<>0 then
-                        p.codewrite("read("+fp+",fmt='(A1)',advance='no',iostat="+iostat.code+") "+tmp.code+"\n")
-                    p.codewrite("read("+fp+",fmt='("+double0string_format_F+")',advance='no',iostat="+iostat.code+") "+re.code+"\n")
-                    p.codewrite("read("+fp+",fmt='("+double0string_format_F+")',advance='no',iostat="+iostat.code+") "+im.code+"\n")
-                    v <== re+asm.uj*im
-            |C ->
-                ch.dd <| fun (re,im) ->
-                    p.codewrite("fscanf("+fp+",\""+double0string_format_C+"\","+re.code+");\n")
-                    p.codewrite("fscanf("+fp+",\""+double0string_format_C+"\","+im.code+");\n")
-                    v <== re+asm.uj*im
-            |T ->
-                p.codewrite("read("+fp+") "+v.code+"\n")
-            |H ->
-                p.codewrite("<math>"+v.code+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
-            colcounter <- colcounter+2
-            
-    type binReader(fp:string,iostat:int0) =
-        member _.Read (v:int0) = 
-            let p = p.param
-            match p.lang with
-            |F ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |C ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |T ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |H ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("<math>"+n+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-        member _.Read (v:float0) = 
-            let p = p.param
-            match p.lang with
-            |F ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |C ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |T ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |H ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("<math>"+n+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-        member _.Read (v:complex0) = 
-            let p = p.param
-            match p.lang with
-            |F ->
-                match v.expr with 
-                |Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
-                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
-                        v <== re+asm.uj*im
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |C ->
-                match v.expr with 
-                |Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        p.codewrite("fread(&"+re.code+",sizeof("+re.code+"),1,"+fp+");"+"\n")
-                        p.codewrite("fread(&"+im.code+",sizeof("+im.code+"),1,"+fp+");"+"\n")
-                        v <== re+asm.uj*im
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |T ->
-                match v.expr with 
-                |Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
-                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
-                        v <== re+asm.uj*im
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |H ->
-                match v.expr with 
-                |Var n ->
-                    p.codewrite("<math>"+n+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
-                |_ -> 
-                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-        member _.Read_byte (e:int0) = 
-            let p = p.param
-            p.codewrite("read("+fp+", iostat="+iostat.code+") byte_tmp\n")
-            let ee =
-                match e.expr with 
-                |Var n -> n 
-                |_ -> "byte値を整数型以外の変数に格納できません"
-            p.codewrite(ee + "=" + "byte_tmp\n")
-            
+
     ///<summary>ファイル入出力</summary>
     type io () =
         
         static member private cat (con:string) (lst:string list) = [0..lst.Length-1] |> List.fold (fun acc i -> acc + (if i=0 then "" else con) + lst.[i]) ""
             
-        static member private fileAccess (fileformat:string,filename:list<int0>) readmode isbinary code =
-            let count = fileformat.Length - (fileformat.Replace("#","")).Length
-            if filename.Length <> count then
-                printfn "%s" <| "ファイル名が不正です。「"+fileformat+"」内の#の数は"+count.ToString()+"ですが、置き換える変数の数は"+filename.Length.ToString()+"です。"
-            else
-                let p = p.param
-                match p.lang with
-                |F ->
-                    p.fcache <| fun fp ->
-                        let rec divlist (slist:list<string>) (cat:string) (c:list<char>) =
-                            match c,cat with
-                            |'#'::lst,"" ->
-                                divlist (slist@["#"]) "" lst
-                            |'#'::lst,_ ->
-                                divlist (slist@[cat;"#"]) "" lst
-                            |u::lst,_ ->
-                                divlist slist (cat+u.ToString()) lst
-                            |[],"" ->
-                                slist
-                            |[],_ ->
-                                slist@[cat]
-                        let v = divlist [] "" (Array.toList(fileformat.ToCharArray()))
-                        let f = 
-                            v
-                            |> List.map (fun s -> if s="#" then "I"+p.int_string_format.ToString()+"."+p.int_string_format.ToString() else "A")
-                            |> fun p -> String.Join(",",p)
-                        let s = 
-                            v
-                            |> List.fold (fun (lst,i) s -> if s="#" then (lst@[filename[i].code],i+1) else (lst@["\""+s+"\""],i)) ([],0)
-                            |> fun (a,b) -> a
-                            |> fun p -> String.Join(",",p)
-                        p.tcache <| A0 <| fun id ->
-                            let btname = "byte_tmp"
-                            //変数byte_tmpをリストに追加（存在していない場合のみ）
-                            p.var.setVar(Structure("integer(1)"),A0,btname,"")
-                            p.codewrite("write("+id+", fmt='("+f+")') "+s+"\n")
-                            if isbinary then
-                                p.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
-                            else
-                                p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
-                            code(fp)
-                            p.codewrite("close("+fp+")"+"\n")
-                |C ->
-                    p.fcache <| fun fp ->
-                        let f = fileformat.Replace("#","\",(I"+p.int_string_format.ToString()+"),\"")
-                        let s = 
-                            [for s in filename -> s.code ]
-                            |> io.cat ","
-                        p.tcache <| A0 <| fun id ->
-                            let btname = "byte_tmp"
-                            //変数byte_tmpをリストに追加（存在していない場合のみ）
-                            p.var.setVar(Structure("char"),A0,btname,"")
-                            p.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
-                            if isbinary then
-                                p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
-                            else
-                                p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                            code(fp)
-                            p.codewrite("fclose("+fp+")"+";\n")
-                |T ->
-                    p.fcache <| fun fp ->
-                        let f = fileformat.Replace("#","\",(I"+p.int_string_format.ToString()+"),\"")
-                        let s = 
-                            filename
-                            |> List.map (fun s -> s.code)
-                            |> io.cat ","
-                        p.tcache <| A0 <| fun id ->
-                            let btname = "byte_tmp"
-                            //変数byte_tmpをリストに追加（存在していない場合のみ）
-                            p.var.setVar(Structure("char"),A0,btname,"")
-                            p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
-                            if isbinary then
-                                p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
-                            else
-                                p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                            code(fp)
-                            p.codewrite("fclose $"+fp+" "+"$\n")
-                |H ->
-                    p.fcache <| fun fp ->
-                        let s = 
-                            filename
-                            |> List.map (fun s -> s.code)
-                            |> io.cat ","
-                        p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
-                        code(fp)
-                        p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
+        static member private fileAccess (filename:num0 list) readmode isbinary code =
+            let p = p.param
+            match p.lang with
+              |F ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                       |> io.cat ","
+                     let s = 
+                       filename
+                       |> List.map (fun s -> s.code)
+                       |> io.cat ","
+                     p.tcache <| A0 <| fun id ->
+                         let btname = "byte_tmp"
+                         //変数byte_tmpをリストに追加（存在していない場合のみ）
+                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
+                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
+                         p.getloopvar <| fun counter ->
+                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
+                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
+                             p.codewrite("end do"+"\n")
+                         if isbinary then
+                             p.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
+                         else
+                             p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
+                         code(fp)
+                         p.codewrite("close("+fp+")"+"\n")
+              |C ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                       |> io.cat ""
+                     let s = 
+                       [for s in filename do
+                         match s.etype with 
+                           |Structure("string") -> ()
+                           |_ -> yield s.code ]
+                       |> io.cat ","
+                     p.tcache <| A0 <| fun id ->
+                         let btname = "byte_tmp"
+                         //変数byte_tmpをリストに追加（存在していない場合のみ）
+                         p.var.setUniqVar(Structure("char"),A0,btname,"")
+                         p.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
+                         if isbinary then
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                         else
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                         code(fp)
+                         p.codewrite("fclose("+fp+")"+";\n")
+              |T ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.etype with |Structure("string") -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                       |> io.cat ""
+                     let s = 
+                       filename
+                       |> List.map (fun s -> s.code)
+                       |> io.cat ","
+                     p.tcache <| A0 <| fun id ->
+                         let btname = "byte_tmp"
+                         //変数byte_tmpをリストに追加（存在していない場合のみ）
+                         p.var.setUniqVar(Structure("char"),A0,btname,"")
+                         p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
+                         if isbinary then
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                         else
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                         code(fp)
+                         p.codewrite("fclose $"+fp+" "+"$\n")
+              |H ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                       |> io.cat ","
+                     let s = 
+                       filename
+                       |> List.map (fun s -> s.code)
+                       |> io.cat ","
+                     p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
+                     code(fp)
+                     p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
+        static member private Write (fp:string) (lst:num0 list) =
+            let p = p.param
+            match p.lang with
+              |F ->
+                let tab = var.ip0("tab",2313)
+                let double0string_format_F = 
+                    let (a,b)=p.double_string_format
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                  lst
+                  |> (fun b ->
+                      [for n in 0..(b.Length-1) do
+                          match b.[n].etype with
+                            |It _ -> 
+                              yield "I"+p.int_string_format.ToString()
+                            |Dt ->
+                              yield double0string_format_F
+                            |Zt ->
+                              yield double0string_format_F
+                              yield double0string_format_F 
+                            |Structure("string") -> 
+                              yield "A"
+                            |_ -> ()
+                      ])
+                  |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            yield b.[n]
+                            if n<(b.Length-1) then yield "A1"
+                        ])
+                  |> io.cat ","
+                let code =
+                  lst
+                  |> (fun b ->
+                      [for n in 0..(b.Length-1) do
+                          match b.[n].etype,b.[n].expr with 
+                          |_,Int_c(v) -> yield p.ItoS(v)
+                          |_,Dbl_c(v) -> yield p.DtoS(v)
+                          |_,Str_c(v) -> yield v
+                          |Zt,Var _ ->
+                              yield (b.[n].re.code)
+                              yield (b.[n].im.code)
+                          |_,Var v ->
+                              yield v
+                          |_,Formula v ->
+                              yield v
+                          |_ -> ()
+                      ])
+                  |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            yield b.[n]
+                            if n<(b.Length-1) then yield tab.code
+                        ])
+                  |> io.cat ","
+                p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+              |C ->
+                let int0string_format_C =
+                  "%"+p.int_string_format.ToString()+"d"
+                let double0string_format_C = 
+                  let (a,b)=p.double_string_format
+                  "%"+a.ToString()+"."+b.ToString()+"e"
+                let format = 
+                  lst
+                  |> (fun b -> 
+                      [for n in 0..(b.Length-1) do
+                          match b.[n].expr,b.[n].etype with
+                            |_,It _ ->
+                                yield int0string_format_C
+                            |_,Dt ->
+                                yield double0string_format_C
+                            |_,Zt ->
+                                yield double0string_format_C
+                                yield double0string_format_C
+                            |Str_c(v),_ ->
+                                yield v.Replace("\"","\\\"")
+                            |_ -> ()
+                      ])
+                  |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            yield b.[n]
+                            if n<(b.Length-1) then yield "\\t"
+                        ])
+                  |> io.cat ""
+                let code =
+                  [for b in lst do
+                      match b.etype,b.expr with 
+                        |_,Int_c(v) -> yield p.ItoS(v)
+                        |_,Dbl_c(v) -> yield p.DtoS(v)
+                        |Zt,Var _ ->
+                          yield b.re.code
+                          yield b.im.code
+                        |_,Var n -> yield n
+                        |_,Formula n -> yield n
+                        |_ -> ()]
+                  |> io.cat ","
+                p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
+              |T ->
+                let double0string_format_F = 
+                    let (a,b)=p.double_string_format
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                  lst
+                  |> List.map (fun b -> 
+                      match b.etype with
+                        |It _ ->"I"+p.int_string_format.ToString()
+                        |Dt -> double0string_format_F
+                        |Zt -> double0string_format_F+","+double0string_format_F 
+                        |Structure("string") -> "A"
+                        |_ -> "")
+                  |> io.cat ""
+                let code =
+                  lst
+                  |> List.map (fun b ->
+                      match b.etype,b.expr with 
+                        |_,Int_c(v) -> p.ItoS(v)
+                        |_,Dbl_c(v) -> p.DtoS(v)
+                        |_,Str_c(v) -> v
+                        |Zt,Var _ -> b.re.code+","+b.im.code
+                        |_,Var n -> n
+                        |_,Formula n -> n 
+                        |_ -> "")
+                  |> io.cat ","
+                p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+              |H ->
+                let double0string_format_F = 
+                    let (a,b)=p.double_string_format
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                  lst
+                  |> List.map (fun b -> 
+                      match b.etype with
+                        |It _ ->"I"+p.int_string_format.ToString()
+                        |Dt -> double0string_format_F
+                        |Zt -> double0string_format_F+","+double0string_format_F 
+                        |Structure("string") -> "A"
+                        |_ -> "")
+                  |> io.cat ""
+                let code =
+                  lst
+                  |> List.map (fun b ->
+                      match b.etype,b.expr with 
+                        |_,Int_c(v) -> p.ItoS(v)
+                        |_,Dbl_c(v) -> p.DtoS(v)
+                        |_,Str_c(v) -> "\""+v+"\""
+                        |Zt,Var _ -> b.re.code+","+b.im.code
+                        |_,Var n -> n
+                        |_,Formula n -> n 
+                        |_ -> "")
+                  |> io.cat "<mo>,</mo>"
+                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+code+"</math>\n<br/>\n")
+                    
+        static member private Write_bin (fp:string) (v:num0) =
+            let p = p.param
+            match p.lang with
+              |F ->
+                match v.etype,v.expr with 
+                  |_,Int_c(v) ->
+                      p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
+                  |_,Dbl_c(v) ->
+                      p.codewrite("write("+fp+") "+p.DtoS(v)+"\n")
+                  |_,Str_c(v) ->
+                      p.codewrite("write("+fp+") "+v+"\n")
+                  |Zt,Var _ ->
+                      p.codewrite("write("+fp+") "+v.re.code+"\n")
+                      p.codewrite("write("+fp+") "+v.im.code+"\n")
+                  |_,Var v ->
+                      p.codewrite("write("+fp+") "+v+"\n")
+                  |_,Formula v ->
+                      p.codewrite("write("+fp+") "+v+"\n")
+                  |_ -> ()
+              |C ->
+                match v.etype,v.expr with 
+                  |_,Int_c _ ->
+                    ch.i <| fun tmp ->
+                        tmp <== v
+                        p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
+                  |_,Dbl_c _ ->
+                    ch.i <| fun tmp ->
+                        tmp <== v
+                        p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
+                  |Zt,Var _ ->
+                    ch.dd <| fun (tmp_r,tmp_i) ->
+                        tmp_r <== v.re
+                        tmp_i <== v.im
+                        p.codewrite("fwrite(&"+tmp_r.code+",sizeof("+tmp_r.code+"),1,"+fp+");\n")
+                        p.codewrite("fwrite(&"+tmp_i.code+",sizeof("+tmp_i.code+"),1,"+fp+");\n")
+                  |_,Var n ->
+                    p.codewrite("fwrite(&"+n+",sizeof("+n+"),1,"+fp+");\n")
+                  |It _, Formula _ ->
+                    ch.i <| fun tmp ->
+                        tmp <== v
+                        p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
+                  |Dt, Formula _ ->
+                    ch.d <| fun tmp ->
+                        tmp <== v
+                        p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
+                  |Zt, Formula _ ->
+                    ch.ddz <| fun (tmp_r,tmp_i,tmp) ->
+                        tmp <== v
+                        tmp_r <== tmp.re
+                        tmp_i <== tmp.im
+                        p.codewrite("fwrite(&"+tmp_r.code+",sizeof("+tmp_r.code+"),1,"+fp+");\n")
+                        p.codewrite("fwrite(&"+tmp_i.code+",sizeof("+tmp_i.code+"),1,"+fp+");\n")
+                  |_ ->
+                    ()
+              |T ->
+                match v.etype,v.expr with 
+                  |_,Int_c(v) ->
+                      p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
+                  |_,Dbl_c(v) ->
+                      p.codewrite("write("+fp+") "+p.DtoS(v)+"\n")
+                  |_,Str_c(v) ->
+                      p.codewrite("write("+fp+") "+v+"\n")
+                  |Zt,Var _ ->
+                      p.codewrite("write("+fp+") "+v.re.code+"\n")
+                      p.codewrite("write("+fp+") "+v.im.code+"\n")
+                  |_,Var v ->
+                      p.codewrite("write("+fp+") "+v+"\n")
+                  |_,Formula v ->
+                      p.codewrite("write("+fp+") "+v+"\n")
+                  |_ -> ()
+              |H ->
+                match v.etype,v.expr with 
+                  |_,Int_c(v) ->
+                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.ItoS(v)+"</math>\n<br/>\n")
+                  |_,Dbl_c(v) ->
+                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.DtoS(v)+"</math>\n<br/>\n")
+                  |_,Str_c(v) ->
+                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
+                  |Zt,Var _ ->
+                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.re.code+"</math>\n<br/>\n")
+                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.im.code+"</math>\n<br/>\n")
+                  |_,Var v ->
+                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
+                  |_,Formula v ->
+                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
+                  |_ -> ()
                 
+        static member private Read (fp:string) (iostat:num0) (lst:num0 list) = 
+            let p = p.param
+            let rec cpxvarlist list (s:num0 list) counter =
+                match s with
+                  |a::b -> 
+                    match a.etype with
+                      |Zt -> cpxvarlist <| list@[Zt,counter,a] <| b <| counter+1
+                      |t   -> cpxvarlist <| list@[t,0,a] <| b <| counter
+                  |[] -> counter,list
+            let Nz,varlist = cpxvarlist [] lst 0
+    
+            match p.lang with
+              |F ->
+                ch.d01 <| fun tmp ->
+                    if Nz>0 then tmp.allocate(2*Nz)
+                    let double0string_format_F = 
+                      let (a,b)=p.double_string_format
+                      "E"+a.ToString()+"."+b.ToString()+"e3"
+                    let format = 
+                      varlist
+                      |> (fun b -> 
+                          [for (t,_,_) in b do
+                              match t with
+                                |It _ ->
+                                  yield "I"+p.int_string_format.ToString()
+                                |Dt ->
+                                  yield double0string_format_F
+                                |Zt ->
+                                  yield double0string_format_F
+                                  yield double0string_format_F
+                                |Structure("string") ->
+                                  yield "A"
+                                |_ -> ()
+                          ])
+                      |> (fun b ->
+                            [for n in 0..(b.Length-1) do
+                                yield b.[n]
+                                if n<(b.Length-1) then yield "A1"
+                            ])
+                      |> io.cat ","
+                    ch.i1 (varlist.Length-1) <| fun tab ->
+                        let code =
+                          varlist
+                          |> (fun b ->
+                              [for (t,m,b) in b do
+                                  match t,b.expr with 
+                                    |Zt,Var _ ->
+                                      yield tmp.[2*m+1].code
+                                      yield tmp.[2*m+2].code
+                                    |_,Var n ->
+                                      yield n
+                                    |_ -> 
+                                      Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+                                      yield ""
+                              ])
+                          |> (fun b ->
+                                [for n in 0..(b.Length-1) do
+                                    yield b.[n]
+                                    if n<(b.Length-1) then yield tab.[n+1].code
+                                ])
+                          |> io.cat ","
+                        p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
+                        for (t,m,b) in varlist do
+                            match t with
+                              |Zt ->
+                                b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
+                              |_ ->
+                                ()
+                    if Nz>0 then tmp.deallocate()
+              |C ->
+                ch.d1 (I <| 2*Nz) <| fun tmp ->
+                  let format = 
+                    varlist
+                    |> (fun b -> 
+                          [for (t,_,_) in b do
+                            match t with
+                              |It _ ->
+                                yield "%d"
+                              |Dt -> 
+                                yield "%lf"
+                              |Zt -> 
+                                yield "%lf"
+                                yield "%lf"
+                              |Structure("string") ->
+                                yield "%s"
+                              |_ -> ()
+                          ])
+                    |> io.cat ""
+                  let code =
+                    varlist
+                    |> (fun b ->
+                          [for (t,m,a) in b do
+                            match t,a.expr with 
+                              |Zt,Var n ->
+                                yield "&"+tmp.[2*m+1].code
+                                yield "&"+tmp.[2*m+2].code
+                              |_,Var n ->
+                                yield "&"+n
+                              |_ ->
+                                Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+                                yield ""
+                          ])
+                    |> io.cat ","
+                  p.codewrite("fscanf("+fp+",\""+format+"\","+code+");\n")
+                  for (t,m,b) in varlist do
+                      match t with
+                        |Zt ->
+                          b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
+                        |_ ->
+                          ()
+              |T ->
+                let double0string_format_F = 
+                  let (a,b)=p.double_string_format
+                  "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                  lst
+                  |> List.map (fun b -> 
+                      match b.etype with
+                        |It _ ->"I"+p.int_string_format.ToString()
+                        |Dt -> double0string_format_F
+                        |Structure("string") -> "A"
+                        |_ -> "")
+                  |> io.cat ","
+                let code =
+                  lst
+                  |> List.map (fun b ->
+                      match b.expr with 
+                        |Var n -> n
+                        |Formula n -> n 
+                        |_ -> "")
+                  |> io.cat ","
+                p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
+              |H ->
+                let double0string_format_F = 
+                  let (a,b)=p.double_string_format
+                  "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                  lst
+                  |> List.map (fun b -> 
+                      match b.etype with
+                        |It _ ->"I"+p.int_string_format.ToString()
+                        |Dt -> double0string_format_F
+                        |Structure("string") -> "A"
+                        |_ -> "")
+                  |> io.cat ","
+                let code =
+                  lst
+                  |> List.map (fun b ->
+                      match b.expr with 
+                        |Var n -> n
+                        |Formula n -> n 
+                        |_ -> "")
+                  |> io.cat "<mo>,</mo>"
+                p.codewrite("<math>"+code+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
+                
+        static member private Read_bin (fp:string) (iostat:num0) (v:num0) = 
+            let p = p.param
+            match p.lang with
+              |F ->
+                match v.etype,v.expr with 
+                  |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
+                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
+                        v <== re+asm.uj*im
+                  |_,Var n ->
+                    p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
+                  |_ -> 
+                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+              |C->
+                match v.etype,v.expr with 
+                  |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        p.codewrite("fread(&"+re.code+",sizeof("+re.code+"),1,"+fp+");"+"\n")
+                        p.codewrite("fread(&"+im.code+",sizeof("+im.code+"),1,"+fp+");"+"\n")
+                        v <== re+asm.uj*im
+                  |_,Var n ->
+                    p.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
+                  |_ -> 
+                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+              |T ->
+                match v.etype,v.expr with 
+                  |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
+                        p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
+                        v <== re+asm.uj*im
+                  |_,Var n ->
+                    p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
+                  |_ -> 
+                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+              |H ->
+                match v.expr with 
+                  |Var n ->
+                    p.codewrite("<math>"+n+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
+                  |_ -> 
+                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+                
+        static member private Read_byte (fp:string) (iostat:num0) (e:num0) = 
+            let p = p.param
+            p.codewrite("read("+fp+", iostat="+iostat.code+") byte_tmp\n")
+            let ee =
+                match e.etype,e.expr with 
+                  |It _,Var n -> n 
+                  |_ -> "byte値を整数型以外の変数に格納できません"
+            p.codewrite(ee + "=" + "byte_tmp\n")
+            
         ///<summary>ファイル出力</summary>
-        static member fileOutput (filename:string*list<int0>) code =
+        static member fileOutput (filename:num0 list) code =
             io.fileAccess filename false false <| fun fp ->
-                let wr = txtWriter(fp)
-                code(wr)
+                code(io.Write fp)
                 
         ///<summary>ファイル出力</summary>
-        static member binfileOutput (filename:string*list<int0>) code =
+        static member binfileOutput (filename:num0 list) code =
             io.fileAccess filename false true <| fun fp ->
-                let wr = binWriter(fp)
-                code(wr)
+                code(io.Write_bin fp)
 
         ///<summary>ファイル読み込み</summary>
-        static member fileInput (filename:string*list<int0>) code =
+        static member fileInput (filename:num0 list) code =
             ch.i <| fun iostat ->
                 io.fileAccess filename true false <| fun fp ->
-                    let rd = txtReader(fp,iostat)
-                    code(rd)
-                    
+                    code(io.Read fp iostat)
+                
         ///<summary>バイナリファイルの読み込み</summary>
-        static member binfileInput (filename:string*list<int0>) code =
+        static member binfileInput (filename:num0 list) code =
             ch.i <| fun iostat ->
                 io.fileAccess filename true true <| fun fp ->
-                    let rd = binReader(fp,iostat)
-                    code(rd)
+                    code(io.Read_bin fp iostat)
                     
+        ///<summary>テキストファイルの行数をカウント</summary>
+        static member file_LineCount (counter:num0) (filename:num0 list) varlist =
+            ch.i <| fun iostat ->
+                io.fileAccess filename true false <| fun fp ->
+                    iter.loop <| fun (ext,i) ->
+                        io.Read fp iostat varlist
+                        br.branch <| fun b ->
+                            b.IF (iostat <. 0) <| fun () ->
+                                counter <== i-1
+                                ext()
+                                
+        ///<summary>ファイルの読み込み</summary>
+        static member file_Read (filename:num0 list) varlist code =
+            ch.i <| fun iostat ->
+                io.fileAccess filename true false <| fun fp ->
+                    iter.loop <| fun (ext,i) ->
+                        io.Read fp iostat varlist
+                        br.branch <| fun b ->
+                            b.IF (iostat <. 0) <| fun () ->
+                                ext()
+                            b.EL <| fun () ->
+                                code(i)
+                                
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:int3) =
+        static member save_text (f:num3) =
             fun filename ->
-                io.fileOutput filename <| fun wr -> 
+                io.fileOutput filename <| fun w -> 
                     iter.array f <| fun (i,j,k) ->
-                        wr.Write i
-                        wr.Write j
-                        wr.Write k
-                        wr.Write f[i,j,k]
-                        wr.br
+                        w [i;j;k;f.[i,j,k]]
+                        
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:int2) =
+        static member save_text (f:num2) =
             fun filename ->
-                io.fileOutput filename <| fun wr -> 
+                io.fileOutput filename <| fun w -> 
                     iter.array f <| fun (i,j) ->
-                        wr.Write i
-                        wr.Write j
-                        wr.Write f[i,j]
-                        wr.br
+                        w [i;j;f.[i,j]]
                         
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:int1) =
+        static member save_text (f:num1) =
             fun filename ->
-                io.fileOutput filename <| fun wr -> 
+                io.fileOutput filename <| fun w -> 
                     iter.array f <| fun i -> 
-                        wr.Write i
-                        wr.Write f[i]
-                        wr.br
-                        
+                        w [i;f.[i]]
+
         ///<summary>数値をファイルに保存</summary>
-        static member save_text (f:int0) =
+        static member save_text (f:num0) =
             fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    wr.Write f
-                    
-        ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:float3) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    iter.array f <| fun (i,j,k) ->
-                        wr.Write i
-                        wr.Write j
-                        wr.Write k
-                        wr.Write f[i,j,k]
-                        wr.br
-        ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:float2) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    iter.array f <| fun (i,j) ->
-                        wr.Write i
-                        wr.Write j
-                        wr.Write f[i,j]
-                        wr.br
-                        
-        ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:float1) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    iter.array f <| fun i -> 
-                        wr.Write i
-                        wr.Write f[i]
-                        wr.br
-                        
-        ///<summary>数値をファイルに保存</summary>
-        static member save_text (f:float0) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    wr.Write f
-                    
-        ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:complex3) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    iter.array f <| fun (i,j,k) ->
-                        wr.Write i
-                        wr.Write j
-                        wr.Write k
-                        wr.Write f[i,j,k]
-                        wr.br
-        ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:complex2) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    iter.array f <| fun (i,j) ->
-                        wr.Write i
-                        wr.Write j
-                        wr.Write f[i,j]
-                        wr.br
-                        
-        ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:complex1) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    iter.array f <| fun i -> 
-                        wr.Write i
-                        wr.Write f[i]
-                        wr.br
-                        
-        ///<summary>数値をファイルに保存</summary>
-        static member save_text (f:complex0) =
-            fun filename ->
-                io.fileOutput filename <| fun wr -> 
-                    wr.Write f
+                io.fileOutput filename <| fun w -> 
+                    w [f]
                     
         ///<summary>数値をファイルに保存</summary>
-        static member save (f:int0) =
+        static member save (f:num0) =
             fun filename ->
-                io.binfileOutput filename <| fun wr ->
+                io.binfileOutput filename <| fun w ->
                     //データフォーマット
-                    wr.Write 1
+                    w _1
                     //データ型
-                    wr.Write 1004
+                    match f.etype with
+                      |Etype.It(4) -> w <| I 1004
+                      |Etype.Dt    -> w <| I 2000
+                      |Etype.Zt    -> w <| I 3000
+                      |_           -> w <| I 0
                     //データ次元
-                    wr.Write 0
+                    w _0
                     //データサイズ
-                    wr.Write 1
+                    w _1
                     //データ本体
-                    wr.Write f
-                    
+                    match f.etype with
+                      |Zt ->
+                        w f.re
+                        w f.im
+                      |_ ->
+                        w f
+                        
         ///<summary>1次元データをファイルに保存</summary>
-        static member save (f:int1) =
+        static member save (f:num1) =
             fun filename ->
-                io.binfileOutput filename <| fun wr ->
+                io.binfileOutput filename <| fun w ->
                     //データフォーマット
-                    wr.Write 1
+                    w _1
                     //データ型
-                    wr.Write 1004
+                    match f.etype with
+                      |Etype.It(4) -> w <| I 1004
+                      |Etype.Dt    -> w <| I 2000
+                      |Etype.Zt    -> w <| I 3000
+                      |_           -> w <| I 0
                     //データ次元
-                    wr.Write 1
+                    w _1
                     //データサイズ
-                    wr.Write f.size1
+                    w f.size1
                     //データ本体
                     iter.num f.size1 <| fun i ->
-                        wr.Write f[i]
+                        match f[1].etype with
+                          |Zt ->
+                            w f[i].re
+                            w f[i].im
+                          |_ ->
+                            w f[i]
                             
         ///<summary>2次元データをファイルに保存</summary>
-        static member save (f:int2) =
+        static member save (f:num2) =
             fun filename ->
-                io.binfileOutput filename <| fun wr ->
+                io.binfileOutput filename <| fun w ->
                     //データフォーマット
-                    wr.Write 1
+                    w _1
                     //データ型
-                    wr.Write 1004
+                    match f.etype with
+                      |Etype.It(4) -> w <| I 1004
+                      |Etype.Dt    -> w <| I 2000
+                      |Etype.Zt    -> w <| I 3000
+                      |_           -> w <| I 0
                     //データ次元
-                    wr.Write 2
+                    w _2
                     //データサイズ
-                    wr.Write f.size1
-                    wr.Write f.size2
+                    w f.size1
+                    w f.size2
                     //データ本体
                     iter.num f.size2 <| fun j ->
                         iter.num f.size1 <| fun i ->
-                            wr.Write f[i,j]
+                            match f[1,1].etype with
+                              |Zt ->
+                                w f[i,j].re
+                                w f[i,j].im
+                              |_ ->
+                                w f[i,j]
                             
         ///<summary>3次元データをファイルに保存</summary>
-        static member save (f:int3) =
+        static member save (f:num3) =
             fun filename ->
-                io.binfileOutput filename <| fun wr ->
+                io.binfileOutput filename <| fun w ->
                     //データフォーマット
-                    wr.Write 1
+                    w _1
                     //データ型
-                    wr.Write 1004
+                    match f.etype with
+                      |Etype.It(4) -> w <| I 1004
+                      |Etype.Dt    -> w <| I 2000
+                      |Etype.Zt    -> w <| I 3000
+                      |_           -> w <| I 0
                     //データ次元
-                    wr.Write 3
+                    w _3
                     //データサイズ
-                    wr.Write f.size1
-                    wr.Write f.size2
-                    wr.Write f.size3
+                    w f.size1
+                    w f.size2
+                    w f.size3
                     //データ本体
                     iter.num f.size3 <| fun k ->
                         iter.num f.size2 <| fun j ->
                             iter.num f.size1 <| fun i ->
-                                wr.Write f[i,j,k]
-                                
-        ///<summary>数値をファイルに保存</summary>
-        static member save (f:float0) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 2000
-                    //データ次元
-                    wr.Write 0
-                    //データサイズ
-                    wr.Write 1
-                    //データ本体
-                    wr.Write f
-                    
-        ///<summary>1次元データをファイルに保存</summary>
-        static member save (f:float1) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 2000
-                    //データ次元
-                    wr.Write 1
-                    //データサイズ
-                    wr.Write f.size1
-                    //データ本体
-                    iter.num f.size1 <| fun i ->
-                        wr.Write f[i]
-                            
-        ///<summary>2次元データをファイルに保存</summary>
-        static member save (f:float2) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 2000
-                    //データ次元
-                    wr.Write 2
-                    //データサイズ
-                    wr.Write f.size1
-                    wr.Write f.size2
-                    //データ本体
-                    iter.num f.size2 <| fun j ->
-                        iter.num f.size1 <| fun i ->
-                            wr.Write f[i,j]
-                            
-        ///<summary>3次元データをファイルに保存</summary>
-        static member save (f:float3) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 2000
-                    //データ次元
-                    wr.Write 3
-                    //データサイズ
-                    wr.Write f.size1
-                    wr.Write f.size2
-                    wr.Write f.size3
-                    //データ本体
-                    iter.num f.size3 <| fun k ->
-                        iter.num f.size2 <| fun j ->
-                            iter.num f.size1 <| fun i ->
-                                wr.Write f[i,j,k]
-                                
-        ///<summary>数値をファイルに保存</summary>
-        static member save (f:complex0) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 3000
-                    //データ次元
-                    wr.Write 0
-                    //データサイズ
-                    wr.Write 1
-                    //データ本体
-                    wr.Write f
-                    
-        ///<summary>1次元データをファイルに保存</summary>
-        static member save (f:complex1) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 3000
-                    //データ次元
-                    wr.Write 1
-                    //データサイズ
-                    wr.Write f.size1
-                    //データ本体
-                    iter.num f.size1 <| fun i ->
-                        wr.Write f[i]
-                            
-        ///<summary>2次元データをファイルに保存</summary>
-        static member save (f:complex2) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 3000
-                    //データ次元
-                    wr.Write 2
-                    //データサイズ
-                    wr.Write f.size1
-                    wr.Write f.size2
-                    //データ本体
-                    iter.num f.size2 <| fun j ->
-                        iter.num f.size1 <| fun i ->
-                            wr.Write f[i,j]
-                            
-        ///<summary>3次元データをファイルに保存</summary>
-        static member save (f:complex3) =
-            fun filename ->
-                io.binfileOutput filename <| fun wr ->
-                    //データフォーマット
-                    wr.Write 1
-                    //データ型
-                    wr.Write 3000
-                    //データ次元
-                    wr.Write 3
-                    //データサイズ
-                    wr.Write f.size1
-                    wr.Write f.size2
-                    wr.Write f.size3
-                    //データ本体
-                    iter.num f.size3 <| fun k ->
-                        iter.num f.size2 <| fun j ->
-                            iter.num f.size1 <| fun i ->
-                                wr.Write f[i,j,k]
-                                
+                                match f[1,1,1].etype with
+                                  |Zt ->
+                                    w f[i,j,k].re
+                                    w f[i,j,k].im
+                                  |_ ->
+                                    w f[i,j,k]
+                                    
         ///<summary>数値をファイルから読み込み</summary>
-        static member load (f:int0) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
+        static member load (f:num0) =
+            fun filename ->
+                let reader (r:num0->unit) (nt:int,t:Etype) =
                     ch.i <| fun n ->
                         //データ型
-                        r.Read n
+                        r n
                         br.if2 (n=.nt)
                             <| fun () ->
                                 //データ次元
-                                r.Read n
+                                r n
                                 br.if2 (n=.0)
                                     <| fun () ->
                                         ch.i <| fun n1 ->
                                             //データサイズ
-                                            r.Read n1
+                                            r n1
                                             //データ本体
-                                            r.Read f
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 1004
-                                
-        ///<summary>数値をファイルから読み込み</summary>
-        static member load (f:float0) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.0)
-                                    <| fun () ->
-                                        ch.i <| fun n1 ->
-                                            //データサイズ
-                                            r.Read n1
-                                            //データ本体
-                                            r.Read f
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 2000
-                                
-        ///<summary>数値をファイルから読み込み</summary>
-        static member load (f:complex0) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.0)
-                                    <| fun () ->
-                                        ch.i <| fun n1 ->
-                                            //データサイズ
-                                            r.Read n1
-                                            //データ本体
-                                            ch.dd <| fun (re,im) ->
-                                                r.Read re
-                                                r.Read im
-                                                f <== re + asm.uj*im
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 3000
-                                
-        ///<summary>1次元データをファイルから読み込み</summary>
-        static member load (f:int1) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.1)
-                                    <| fun () ->
-                                        ch.i <| fun n1 ->
-                                            //データサイズ
-                                            r.Read n1
-                                            f.allocate n1
-                                            //データ本体
-                                            iter.num f.size1 <| fun i ->
-                                                r.Read f[i]
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 1004
-                            
-        ///<summary>1次元データをファイルから読み込み</summary>
-        static member load (f:float1) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.1)
-                                    <| fun () ->
-                                        ch.i <| fun n1 ->
-                                            //データサイズ
-                                            r.Read n1
-                                            f.allocate n1
-                                            //データ本体
-                                            iter.num f.size1 <| fun i ->
-                                                r.Read f[i]
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                                reader r 2000
-                                
-        ///<summary>1次元データをファイルから読み込み</summary>
-        static member load (f:complex1) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.1)
-                                    <| fun () ->
-                                        ch.i <| fun n1 ->
-                                            //データサイズ
-                                            r.Read n1
-                                            f.allocate n1
-                                            //データ本体
-                                            iter.num f.size1 <| fun i ->
+                                            match t with
+                                              |Zt ->
                                                 ch.dd <| fun (re,im) ->
-                                                    r.Read re
-                                                    r.Read im
-                                                    f[i] <== re + asm.uj*im
+                                                    r re
+                                                    r im
+                                                    f <== re + asm.uj*im
+                                              |_ ->
+                                                r f
                                     <| fun () ->
-                                        print.cn "Invalid data dimension"
+                                        print.c "Invalid data dimension"
                             <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
+                                print.s <| filename@[!.": invalid data type"]
+                io.binfileInput filename <| fun r ->
                 ch.i <| fun n ->
                     //データフォーマット
-                    r.Read n
+                    r n
                     br.branch <| fun b ->
                         b.IF (n=.1) <| fun () ->
-                            reader r 3000
-                            
-        ///<summary>2次元データをファイルから読み込み</summary>
-        static member load (f:int2) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
+                            match f.etype with
+                              |Etype.It(4) ->
+                                reader r (1004,f.etype)
+                              |Etype.Dt    -> 
+                                reader r (2000,f.etype)
+                              |Etype.Zt    -> 
+                                reader r (3000,f.etype)
+                              |_ -> 
+                                  print.c "invalid data type"
+                                  
+        ///<summary>1次元データをファイルから読み込み</summary>
+        static member load (f:num1) =
+            fun filename ->
+                let reader (r:num0->unit) (nt:int,t:Etype) =
                     ch.i <| fun n ->
                         //データ型
-                        r.Read n
+                        r n
                         br.if2 (n=.nt)
                             <| fun () ->
                                 //データ次元
-                                r.Read n
-                                br.if2 (n=.2)
+                                r n
+                                br.if2 (n=.1)
                                     <| fun () ->
-                                        ch.ii <| fun (n1,n2) ->
+                                        ch.i <| fun n1 ->
                                             //データサイズ
-                                            r.Read n1
-                                            r.Read n2
-                                            f.allocate(n1,n2)
+                                            r n1
+                                            f.allocate n1
                                             //データ本体
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    r.Read f[i,j]
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 1004
-                                
-        ///<summary>2次元データをファイルから読み込み</summary>
-        static member load (f:float2) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.2)
-                                    <| fun () ->
-                                        ch.ii <| fun (n1,n2) ->
-                                            //データサイズ
-                                            r.Read n1
-                                            r.Read n2
-                                            f.allocate(n1,n2)
-                                            //データ本体
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    r.Read f[i,j]
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 2000
-                                
-        ///<summary>2次元データをファイルから読み込み</summary>
-        static member load (f:complex2) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.2)
-                                    <| fun () ->
-                                        ch.ii <| fun (n1,n2) ->
-                                            //データサイズ
-                                            r.Read n1
-                                            r.Read n2
-                                            f.allocate(n1,n2)
-                                            //データ本体
-                                            iter.num f.size2 <| fun j ->
+                                            match t with
+                                              |Zt ->
                                                 iter.num f.size1 <| fun i ->
                                                     ch.dd <| fun (re,im) ->
-                                                        r.Read re
-                                                        r.Read im
-                                                        f[i,j] <== re + asm.uj*im
+                                                        r re
+                                                        r im
+                                                        f[i] <== re + asm.uj*im
+                                              |_ ->
+                                                iter.num f.size1 <| fun i ->
+                                                    r f[i]
                                     <| fun () ->
-                                        print.cn "Invalid data dimension"
+                                        print.c "Invalid data dimension"
                             <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
+                                print.s <| filename@[!.": invalid data type"]
+                io.binfileInput filename <| fun r ->
                 ch.i <| fun n ->
                     //データフォーマット
-                    r.Read n
+                    r n
                     br.branch <| fun b ->
                         b.IF (n=.1) <| fun () ->
-                            reader r 3000
-                                
-        ///<summary>3次元データをファイルから読み込み</summary>
-        static member load (f:int3) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
+                            match f[1].etype with
+                              |Etype.It(4) ->
+                                reader r (1004,f[1].etype)
+                              |Etype.Dt    -> 
+                                reader r (2000,f[1].etype)
+                              |Etype.Zt    -> 
+                                reader r (3000,f[1].etype)
+                              |_ -> 
+                                  print.c "invalid data type"
+                                  
+        ///<summary>2次元データをファイルから読み込み</summary>
+        static member load (f:num2) =
+            fun filename ->
+                let reader (r:num0->unit) (nt:int,t:Etype) =
                     ch.i <| fun n ->
                         //データ型
-                        r.Read n
+                        r n
                         br.if2 (n=.nt)
                             <| fun () ->
                                 //データ次元
-                                r.Read n
-                                br.if2 (n=.3)
+                                r n
+                                br.if2 (n=.2)
                                     <| fun () ->
-                                        ch.iii <| fun (n1,n2,n3) ->
+                                        ch.ii <| fun (n1,n2) ->
                                             //データサイズ
-                                            r.Read n1
-                                            r.Read n2
-                                            r.Read n3
-                                            f.allocate(n1,n2,n3)
+                                            r n1
+                                            r n2
+                                            f.allocate(n1,n2)
                                             //データ本体
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        r.Read f[i,j,k]
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 1004
-                                
-                                
-        ///<summary>3次元データをファイルから読み込み</summary>
-        static member load (f:float3) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.3)
-                                    <| fun () ->
-                                        ch.iii <| fun (n1,n2,n3) ->
-                                            //データサイズ
-                                            r.Read n1
-                                            r.Read n2
-                                            r.Read n3
-                                            f.allocate(n1,n2,n3)
-                                            //データ本体
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        r.Read f[i,j,k]
-                                    <| fun () ->
-                                        print.cn "Invalid data dimension"
-                            <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
-                ch.i <| fun n ->
-                    //データフォーマット
-                    r.Read n
-                    br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
-                            reader r 2000
-                                
-        ///<summary>3次元データをファイルから読み込み</summary>
-        static member load (f:complex3) =
-            fun (filename,nlist) ->
-                let reader (r:binReader) (nt:int) =
-                    ch.i <| fun n ->
-                        //データ型
-                        r.Read n
-                        br.if2 (n=.nt)
-                            <| fun () ->
-                                //データ次元
-                                r.Read n
-                                br.if2 (n=.3)
-                                    <| fun () ->
-                                        ch.iii <| fun (n1,n2,n3) ->
-                                            //データサイズ
-                                            r.Read n1
-                                            r.Read n2
-                                            r.Read n3
-                                            f.allocate(n1,n2,n3)
-                                            //データ本体
-                                            iter.num f.size3 <| fun k ->
+                                            match t with
+                                              |Zt ->
                                                 iter.num f.size2 <| fun j ->
                                                     iter.num f.size1 <| fun i ->
                                                         ch.dd <| fun (re,im) ->
-                                                            r.Read re
-                                                            r.Read im
-                                                            f[i,j,k] <== re + asm.uj*im
+                                                            r re
+                                                            r im
+                                                            f[i,j] <== re + asm.uj*im
+                                              |_ ->
+                                                iter.num f.size2 <| fun j ->
+                                                    iter.num f.size1 <| fun i ->
+                                                        r f[i,j]
                                     <| fun () ->
-                                        print.cn "Invalid data dimension"
+                                        print.c "Invalid data dimension"
                             <| fun () ->
-                                print.cn (filename+": invalid data type")
-                io.binfileInput (filename,nlist) <| fun r ->
+                                print.s <| filename@[!.": invalid data type"]
+                io.binfileInput filename <| fun r ->
                 ch.i <| fun n ->
                     //データフォーマット
-                    r.Read n
+                    r n
                     br.branch <| fun b ->
                         b.IF (n=.1) <| fun () ->
-                            reader r 3000
-                                
+                            match f[1,1].etype with
+                              |Etype.It(4) ->
+                                reader r (1004,f[1,1].etype)
+                              |Etype.Dt    -> 
+                                reader r (2000,f[1,1].etype)
+                              |Etype.Zt    -> 
+                                reader r (3000,f[1,1].etype)
+                              |_ -> 
+                                  print.c "invalid data type"
+                                  
+        ///<summary>3次元データをファイルから読み込み</summary>
+        static member load (f:num3) =
+            fun filename ->
+                let reader (r:num0->unit) (nt:int,t:Etype) =
+                    ch.i <| fun n ->
+                        //データ型
+                        r n
+                        br.if2 (n=.nt)
+                            <| fun () ->
+                                //データ次元
+                                r n
+                                br.if2 (n=.3)
+                                    <| fun () ->
+                                        ch.iii <| fun (n1,n2,n3) ->
+                                            //データサイズ
+                                            r n1
+                                            r n2
+                                            r n3
+                                            f.allocate(n1,n2,n3)
+                                            //データ本体
+                                            match t with
+                                              |Zt ->
+                                                iter.num f.size3 <| fun k ->
+                                                    iter.num f.size2 <| fun j ->
+                                                        iter.num f.size1 <| fun i ->
+                                                            ch.dd <| fun (re,im) ->
+                                                                r re
+                                                                r im
+                                                                f[i,j,k] <== re + asm.uj*im
+                                              |_ ->
+                                                iter.num f.size3 <| fun k ->
+                                                    iter.num f.size2 <| fun j ->
+                                                        iter.num f.size1 <| fun i ->
+                                                            r f[i,j,k]
+                                    <| fun () ->
+                                        print.c "Invalid data dimension"
+                            <| fun () ->
+                                print.s <| filename@[!.": invalid data type"]
+                io.binfileInput filename <| fun r ->
+                ch.i <| fun n ->
+                    //データフォーマット
+                    r n
+                    br.branch <| fun b ->
+                        b.IF (n=.1) <| fun () ->
+                            match f[1,1,1].etype with
+                              |Etype.It(4) ->
+                                reader r (1004,f[1,1,1].etype)
+                              |Etype.Dt    -> 
+                                reader r (2000,f[1,1,1].etype)
+                              |Etype.Zt    -> 
+                                reader r (3000,f[1,1,1].etype)
+                              |_ -> 
+                                  print.c "invalid data type"
+                                  
+    ///<summary>区切り文字・スペースなしでファイル出力</summary>
+    type io2 () =
+        
+        static member private cat (con:string) (lst:string list) = [0..lst.Length-1] |> List.fold (fun acc i -> acc + (if i=0 then "" else con) + lst.[i]) ""
+            
+        static member private fileAccess (filename:num0 list) readmode isbinary code =
+            let p = p.param
+            match p.lang with
+              |F ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                       |> io2.cat ","
+                     let s = 
+                       filename
+                       |> List.map (fun s -> s.code)
+                       |> io2.cat ","
+                     p.tcache <| A0 <| fun id ->
+                         let btname = "byte_tmp"
+                         //変数byte_tmpをリストに追加（存在していない場合のみ）
+                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
+                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
+                         p.getloopvar <| fun counter ->
+                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
+                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
+                             p.codewrite("end do"+"\n")
+                         if isbinary then
+                             p.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
+                         else
+                             p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
+                         code(fp)
+                         p.codewrite("close("+fp+")"+"\n")
+              |C ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                       |> io2.cat ""
+                     let s = 
+                       [for s in filename do
+                         match s.etype with
+                           |Structure("string") -> ()
+                           |_ -> yield s.code]
+                       |> io2.cat ","
+                     p.tcache <| A0 <| fun id ->
+                         let btname = "byte_tmp"
+                         //変数byte_tmpをリストに追加（存在していない場合のみ）
+                         p.var.setUniqVar(Structure("char"),A0,btname,"")
+                         p.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
+                         if isbinary then
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                         else
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                         code(fp)
+                         p.codewrite("fclose("+fp+")"+";\n")
+              |T ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.etype with |Structure("string") -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                       |> io2.cat ","
+                     let s = 
+                       filename
+                       |> List.map (fun s -> s.code)
+                       |> io2.cat ","
+                     p.tcache <| A0 <| fun id ->
+                         let btname = "byte_tmp"
+                         //変数byte_tmpをリストに追加（存在していない場合のみ）
+                         p.var.setUniqVar(Structure("char"),A0,btname,"")
+                         p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
+                         if isbinary then
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                         else
+                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                         code(fp)
+                         p.codewrite("fclose $"+fp+" "+"$\n")
+              |H ->
+                 p.fcache <| fun fp ->
+                     let f = 
+                       filename
+                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                       |> io2.cat ","
+                     let s = 
+                       filename
+                       |> List.map (fun s -> s.code)
+                       |> io2.cat ","
+                     p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
+                     code(fp)
+                     p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
+        static member private Write (fp:string) (lst:num0 list) =
+            let p = p.param
+            match p.lang with
+              |F ->
+                let format = 
+                  lst
+                  |> (fun b ->
+                      [for n in 0..(b.Length-1) do
+                          match b.[n].etype with
+                            |It _ -> 
+                              yield "I0"
+                            |Dt ->
+                              yield "F0.3"
+                            |Zt ->
+                              yield "F0.3"
+                              yield "F0.3"
+                            |Structure("string") -> 
+                              yield "A"
+                            |_ -> ()
+                      ])
+                  |> io2.cat ","
+                let code =
+                  lst
+                  |> (fun b ->
+                      [for n in 0..(b.Length-1) do
+                          match b.[n].etype,b.[n].expr with 
+                            |_,Int_c(v) -> yield p.ItoS(v)
+                            |_,Dbl_c(v) -> yield p.DtoS(v)
+                            |_,Str_c(v) -> yield v
+                            |Zt,Var _ ->
+                              yield (b.[n].re.code)
+                              yield (b.[n].im.code)
+                            |_,Var v ->
+                              yield v
+                            |_,Formula v ->
+                              yield v
+                            |_ -> ()
+                      ])
+                  |> io2.cat ","
+                p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+              |C ->
+                let int0string_format_C = "%d"
+                let double0string_format_C = "%.3f"
+                let format = 
+                  lst
+                  |> (fun b -> 
+                      [for n in 0..(b.Length-1) do
+                          match b.[n].expr,b.[n].etype with
+                            |_,It _ ->
+                                yield "%d"
+                            |_,Dt ->
+                                yield "%.3f"
+                            |_,Zt ->
+                                yield "%.3f"
+                                yield "%.3f"
+                            |Str_c(v),_ ->
+                                yield v.Replace("\"","\\\"")
+                            |_ -> ()
+                      ])
+                  |> io2.cat ""
+                let code =
+                  [for b in lst do
+                      match b.etype,b.expr with 
+                        |_,Int_c(v) -> yield p.ItoS(v)
+                        |_,Dbl_c(v) -> yield p.DtoS(v)
+                        |Zt,Var _ ->
+                          yield b.re.code
+                          yield b.im.code
+                        |_,Var n -> yield n
+                        |_,Formula n -> yield n 
+                        |_ -> ()]
+                  |> io2.cat ","
+                p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
+              |T ->
+                let code =
+                  lst
+                  |> List.map (fun b ->
+                      match b.etype,b.expr with 
+                        |_,Int_c(v) -> p.ItoS(v)
+                        |_,Dbl_c(v) -> p.DtoS(v)
+                        |_,Str_c(v) -> "\""+v+"\""
+                        |Zt,Var _ -> b.re.code+","+b.im.code
+                        |_,Var n -> n
+                        |_,Formula n -> n 
+                        |_ -> "")
+                  |> io2.cat ","
+                p.codewrite("write("+fp+") "+code+"\n")
+              |H ->
+                let code =
+                  lst
+                  |> List.map (fun b ->
+                      match b.etype,b.expr with 
+                        |_,Int_c(v) -> p.ItoS(v)
+                        |_,Dbl_c(v) -> p.DtoS(v)
+                        |_,Str_c(v) -> "\""+v+"\""
+                        |Zt,Var _ -> b.re.code+","+b.im.code
+                        |_,Var n -> n
+                        |_,Formula n -> n 
+                        |_ -> "")
+                  |> io2.cat "<mo>,</mo>"
+                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+code+"</math>\n<br/>\n")
+                
+        ///<summary>ファイル出力</summary>
+        static member fileOutput (filename:num0 list) code =
+            io2.fileAccess filename false false <| fun fp ->
+                code(io2.Write fp)
+                
     ///<summary>ファイル入出力（処理スキップ）</summary>
     type dummy_io () =
         
-        static member fileOutput (filename:string*list<int0>) code = ()
+        static member fileOutput (filename:num0 list) code = ()
         
-        static member fileInput (filename:string*list<int0>) code = ()
+        static member fileInput (filename:num0 list) code = ()
         
-        static member binfileInput (filename:string*list<int0>) code = ()
+        static member binfileInput (filename:num0 list) code = ()
         
-        static member binfileOutput (filename:string*list<int0>) code = ()
+        static member file_LineCount (counter:num0) (filename:num0 list) varlist = ()
+        
+        static member file_Read (filename:num0 list) varlist code = ()
+        
+        ///<summary>配列をファイルに保存</summary>
+        static member array (f:num2) = fun filename -> ()
+        
+        ///<summary>配列をファイルに保存</summary>
+        static member array (f:num1) = fun filename -> ()
         

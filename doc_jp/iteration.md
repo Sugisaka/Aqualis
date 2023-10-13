@@ -45,7 +45,7 @@ a.foreach <| fun (i,j) ->
 iter.loop <| fun (ex,i) ->
     print.t "aaa"
     x <== x - i*i
-    br.if1 (i.>100) <| fun () ->
+    br.if1 (i>.100) <| fun () ->
         ex() //ここでループ脱出
 ```
 条件を満たす限り反復を繰り返す。
