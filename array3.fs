@@ -72,12 +72,12 @@ namespace Aqualis
                     p.error_code_counter_inc()
                     p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
                     br.if1 (OR [this.size1 =. -1; this.size2 =. -1; this.size3 =. -1]) <| fun () -> 
-                        print.c ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is not allocated")
-                    br.if1 (OR [(i <. _1); (this.size1 <. i)]) <| fun () ->
+                        print.t ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is not allocated")
+                    br.if1 (OR [(i .< _1); (this.size1 .< i)]) <| fun () ->
                         print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
-                    br.if1 (OR [(j <. _1); (this.size2 <. j)]) <| fun () ->
+                    br.if1 (OR [(j .< _1); (this.size2 .< j)]) <| fun () ->
                         print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size3;!.")"]
-                    br.if1 (OR [(k <. _1); (this.size3 <. k)]) <| fun () ->
+                    br.if1 (OR [(k .< _1); (this.size3 .< k)]) <| fun () ->
                         print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");k;!." is out of range (1:";this.size3;!.")"]
                     p.comment("****************************************************")
                 |_ -> ()
@@ -118,8 +118,8 @@ namespace Aqualis
                         p.error_code_counter_inc()
                         p.comment("***debug array1 allocate check: "+p.error_code_counter.ToString()+"*****************************")
                         br.branch <| fun b ->
-                            b.IF (this.size1 =/. -1) <| fun () ->
-                                print.c ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is already allocated")
+                            b.IF (this.size1 .=/ -1) <| fun () ->
+                                print.t ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is already allocated")
                         p.comment("****************************************************")
                     match p.lang with
                     |F ->
@@ -137,7 +137,7 @@ namespace Aqualis
                             this.size1 <== n1
                             this.size3 <== n2
                             this.size3 <== n3
-                            p.codewrite(name+"="+"("+typ.tostring(p.lang)+" *)"+"malloc("+"sizeof("+typ.tostring(p.lang)+")*"+this.size1.code+");\n")
+                            p.codewrite(name+"="+"("+typ.tostring(p.lang)+" *)"+"malloc("+"sizeof("+typ.tostring(p.lang)+")*"+this.size1.code+"*"+this.size2.code+"*"+this.size3.code+");\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |T ->
@@ -175,7 +175,7 @@ namespace Aqualis
                     p.comment("***debug array1 deallocate check: "+p.error_code_counter.ToString()+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 =. -1) <| fun () ->
-                            print.c ("ERROR"+p.error_code_counter.ToString()+" cannot deallocate array "+name)
+                            print.t ("ERROR"+p.error_code_counter.ToString()+" cannot deallocate array "+name)
                     p.comment("****************************************************")
                 |_ -> ()
             match x with
@@ -241,12 +241,12 @@ namespace Aqualis
             if p.debugmode then
                 p.error_code_counter_inc()
                 p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
-                br.if1 (v1.size1 =/. v2.size1) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
-                br.if1 (v1.size2 =/. v2.size2) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
-                br.if1 (v1.size3 =/. v2.size3) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
+                br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
+                br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
+                br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
                 p.comment("****************************************************")
                 
         static member subst (v1:Expr3,s11:num0,s12:num0,s13:num0,f1:num0->num0->num0->Expr,v2:Expr3,s21:num0,s22:num0,s23:num0,f2:num0->num0->num0->Expr) =
@@ -254,12 +254,12 @@ namespace Aqualis
             if p.debugmode then
                 p.error_code_counter_inc()
                 p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
-                br.if1 (s11 =/. s21) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
-                br.if1 (s12 =/. s22) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
-                br.if1 (s13 =/. s23) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
+                br.if1 (s11 .=/ s21) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
+                br.if1 (s12 .=/ s22) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
+                br.if1 (s13 .=/ s23) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
                 p.comment("****************************************************")
             match v1,v2 with
             |Var3(_,x),Var3(_,y) ->
@@ -328,10 +328,10 @@ namespace Aqualis
             if p.debugmode then
                 p.error_code_counter_inc()
                 p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
-                br.if1 (x.size1 =/. y.size1) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size1 mismatch")
-                br.if1 (x.size2 =/. y.size2) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size2 mismatch")
+                br.if1 (x.size1 .=/ y.size1) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size1 mismatch")
+                br.if1 (x.size2 .=/ y.size2) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size2 mismatch")
                 p.comment("****************************************************")
                 
 
@@ -358,25 +358,25 @@ namespace Aqualis
             num3.sizeMismatchError(x,y)
             num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr/y[i,j,k].expr))
         static member (/) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr/y[i,j,k].expr))
-        static member (/) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr/.y.expr))
+        static member (/) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr./y.expr))
 
-        static member (/.) (x:num3,y:num3) =
+        static member (./) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr/y[i,j,k].expr)
-        static member (/.) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr/.y[i,j,k].expr))
-        static member (/.) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr/.y.expr))
+        static member (./) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr./y[i,j,k].expr))
+        static member (./) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr./y.expr))
         
         static member (<==) (v1:num3,v2:num3) =
             let p = p.param
             if p.debugmode then
                 p.error_code_counter_inc()
                 p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
-                br.if1 (v1.size1 =/. v2.size1) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
-                br.if1 (v1.size2 =/. v2.size2) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
-                br.if1 (v1.size3 =/. v2.size3) <| fun () -> 
-                    print.c ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
+                br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
+                br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
+                br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
+                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
                 p.comment("****************************************************")
             match v1.expr,v2.expr with
             |Var3(_,x),Var3(_,y) ->

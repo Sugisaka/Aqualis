@@ -121,55 +121,55 @@ namespace Aqualis
         static member h1 (s:string) (code:unit->unit) = 
             let p = p.param
             codestr.header '#' s
-            if p.displaysection then print.c ("### "+s+" #########################")
+            if p.displaysection then print.t ("### "+s+" #########################")
             p.indent.inc()
             code()
             p.indent.dec()
-            if p.displaysection then print.c ("### END "+s+" #####################")
+            if p.displaysection then print.t ("### END "+s+" #####################")
             codestr.footer '#' s
             codestr.blank()
               
         static member h2 (s:string) (code:unit->unit) = 
             let p = p.param
             codestr.header '%' s
-            if p.displaysection then print.c ("=== "+s+" ===================")
+            if p.displaysection then print.t ("=== "+s+" ===================")
             p.indent.inc()
             code()
             p.indent.dec()
-            if p.displaysection then print.c ("=== END "+s+" ===============")
+            if p.displaysection then print.t ("=== END "+s+" ===============")
             codestr.footer '%' s
             codestr.blank()
               
         static member h3 (s:string) (code:unit->unit) = 
             let p = p.param
             codestr.header '=' s
-            if p.displaysection then print.c ("--- "+s+" --------------")
+            if p.displaysection then print.t ("--- "+s+" --------------")
             p.indent.inc()
             code()
             p.indent.dec()
-            if p.displaysection then print.c ("--- END "+s+" ----------")
+            if p.displaysection then print.t ("--- END "+s+" ----------")
             codestr.footer '=' s
             codestr.blank()
               
         static member h4 (s:string) (code:unit->unit) = 
             let p = p.param
             codestr.header '+' s
-            if p.displaysection then print.c ("... "+s+" ...........")
+            if p.displaysection then print.t ("... "+s+" ...........")
             p.indent.inc()
             code()
             p.indent.dec()
-            if p.displaysection then print.c ("... END "+s+" .......")
+            if p.displaysection then print.t ("... END "+s+" .......")
             codestr.footer '+' s
             codestr.blank()
               
         static member h5 (s:string) (code:unit->unit) = 
             let p = p.param
             codestr.header '-' s
-            if p.displaysection then print.c s
+            if p.displaysection then print.t s
             p.indent.inc()
             code()
             p.indent.dec()
-            if p.displaysection then print.c ("END "+s)
+            if p.displaysection then print.t ("END "+s)
             codestr.footer '-' s
             codestr.blank()
               

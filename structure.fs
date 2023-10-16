@@ -132,7 +132,7 @@ namespace Aqualis
             |F   -> vname+"%"+name
             |C -> vname+"."+name
             |T   -> vname+"."+name
-            |H   -> vname+"<mo><./mo>"+name
+            |H   -> vname+"<mo>.</mo>"+name
             
         member this.i0 (sname, vname, name) =
             this.addmember(sname,(It 4,A0,name))

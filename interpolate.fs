@@ -20,7 +20,7 @@ namespace Aqualis
                 ch.i <| fun flag ->
                     flag<==0
                     iter.range _1 (X.size1-1) <| fun i ->
-                        br.if1 (X.[i]<=.x<.X.[i+1]) <| fun () ->
+                        br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             ch.d <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
@@ -39,7 +39,7 @@ namespace Aqualis
                 ch.i <| fun flag ->
                     flag<==0
                     iter.range _1 (X.size1-1) <| fun i ->
-                        br.if1 (X.[i]<=.x<.X.[i+1]) <| fun () ->
+                        br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             ch.z <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
@@ -200,7 +200,7 @@ namespace Aqualis
             member __.p (yy:num0) (xx:num0) =
                 yy.clear()
                 iter.num_exit <| x.size1-1 <| fun (ex,i) ->
-                    br.if1 (x.[i]<=.xx<.x.[i+1]) <| fun () ->
+                    br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
                         yy <== g.[a(i)]*asm.pow(xx-x.[i],3) + g.[b(i)]*asm.pow(xx-x.[i],2) + g.[c(i)]*(xx-x.[i]) + y.[i]
                         ex()
                         
@@ -212,7 +212,7 @@ namespace Aqualis
             member __.dp (yy:num0) (xx:num0) =
                 yy.clear()
                 iter.num_exit <| x.size1-1 <| fun (ex,i) ->
-                    br.if1 (x.[i]<=.xx<.x.[i+1]) <| fun () ->
+                    br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
                         yy <== 3*g.[a(i)]*asm.pow(xx-x.[i],2) + 2*g.[b(i)]*(xx-x.[i]) + g.[c(i)]
                         ex()
                         

@@ -77,7 +77,7 @@ namespace Aqualis
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         ///<param name="t">一時停止前に表示する文字列</param>
         static member stop(t:string) =
-            print.c t
+            print.t t
             let p = p.param
             match p.lang with
             |F   -> p.codewrite("read *, \n")

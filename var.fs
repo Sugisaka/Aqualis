@@ -244,7 +244,7 @@ namespace Aqualis
         ///<summary>整数型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
-        static member ip0_noWarning(name:string,v) = 
+        static member internal ip0_noWarning(name:string,v) = 
             let p = p.param
             p.var.setUniqVar(It 4,A0,name,(p.ItoS v))
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
@@ -253,7 +253,7 @@ namespace Aqualis
         ///<summary>倍精度浮動小数点型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
-        static member dp0_noWarning(name:string,v) = 
+        static member internal dp0_noWarning(name:string,v) = 
             let p = p.param
             p.var.setUniqVar(Dt,A0,name,(p.DtoS v))
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name

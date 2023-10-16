@@ -55,8 +55,8 @@ namespace Aqualis
             ch.iiii <| fun (nx,ny,nx2,ny2) -> 
                 nx <== data1.size1
                 ny <== data1.size2
-                nx2 <== data1.size1/.2
-                ny2 <== data1.size2/.2
+                nx2 <== data1.size1./2
+                ny2 <== data1.size2./2
                 match p.param.lang with
                   |F ->
                     p.param.include_("'fftw3.f'")

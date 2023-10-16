@@ -1,10 +1,10 @@
 //#############################################################################
 // project title
-let projectname = "template"
+let projectname = "test2"
 let version = "1.0.0"
 //#############################################################################
  
-let outputdir = @"C:\home\testGit\testproj"
+let outputdir = __SOURCE_DIRECTORY__
 
 #I @"C:\home\LightwaveLaboratory\Aqualis\bin\Debug\net6.0"
 #r "Aqualis.dll"
@@ -13,7 +13,7 @@ open Aqualis
 open Aqualis_base
  
 Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
-    dummy_codestr.h2 "test1" <| fun () ->
+    codestr.h2 "test1" <| fun () ->
         ch.i <| fun m ->
         ch.i <| fun n ->
         ch.d <| fun x ->
@@ -35,7 +35,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             !"008"
             x <== m/n
             !"009"
-            m <== m/.n
+            m <== m./n
             !"010"
             print.c n
             print.c n
@@ -58,7 +58,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             !"018"
             x <== -m/n
             !"019"
-            m <== -m/.n
+            m <== -m./n
             !"020"
             y <== asm.sin(-(x+y)/x)
             y <== asm.cos(x)
@@ -73,7 +73,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             y <== asm.atan2(x,y)
             y <== asm.floor(x)
             y <== asm.ceil(x)
-    dummy_codestr.h2 "test2" <| fun () ->
+    codestr.h2 "test2" <| fun () ->
         ch.d1 10 <| fun x1 ->
         ch.d1 10 <| fun y1 ->
         ch.d1 10 <| fun z1 ->
@@ -106,10 +106,10 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             !"aaa"
             x <== 4*n/2
             !"bbb"
-            m <== 4*n/.2
+            m <== 4*n./2
             !"ccc"
             //m <== 4*n/2
-    dummy_codestr.h2 "test3" <| fun () ->
+    codestr.h2 "test3" <| fun () ->
         ch.id <| fun (p,q) ->
             !"001"
             p <== p+p
@@ -118,7 +118,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             !"003"
             q <== p/p
             !"004"
-            p <== p/.p
+            p <== p./p
             !"005"
             q <== (p+q)+(p+q)
             !"006"
@@ -132,7 +132,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             !"010"
             q <== (p+p)/(p+p)
             !"011"
-            q <== (p+p)/.(p+p)
+            q <== (p+p)./(p+p)
         ch.dddd <| fun (z1,z2,x,y) ->
             printfn "%d" 4851
             !"test4851"

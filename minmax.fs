@@ -48,7 +48,7 @@ namespace Aqualis
             /// <param name="zA">検索対象</param>
             /// <param name="max">最大値</param>
             /// <param name="imax">最大値のインデックス</param>
-            static member max (zA:num1,max:num0,imax:num0 option) = asm.cp1(zA,max,imax,fun (v, i) -> v <. zA[i])
+            static member max (zA:num1,max:num0,imax:num0 option) = asm.cp1(zA,max,imax,fun (v, i) -> v .< zA[i])
             
             /// <summary>
             /// 最小値を検索
@@ -56,7 +56,7 @@ namespace Aqualis
             /// <param name="zA">検索対象</param>
             /// <param name="min">最小値</param>
             /// <param name="imin">最小値のインデックス</param>
-            static member min (zA:num1,min:num0,imin:num0 option) = asm.cp1(zA,min,imin,fun (v, i) -> v >. zA[i])
+            static member min (zA:num1,min:num0,imin:num0 option) = asm.cp1(zA,min,imin,fun (v, i) -> v .> zA[i])
             
             /// <summary>
             /// 最大値を検索
@@ -65,7 +65,7 @@ namespace Aqualis
             /// <param name="max">最大値</param>
             /// <param name="imax1">最大値のインデックス</param>
             /// <param name="imax2">最大値のインデックス</param>
-            static member max (zA:num2,max:num0,imax1:num0 option,imax2:num0 option) = asm.cp2(zA,max,imax1,imax2,fun (v, i, j) -> v <. zA[i,j])
+            static member max (zA:num2,max:num0,imax1:num0 option,imax2:num0 option) = asm.cp2(zA,max,imax1,imax2,fun (v, i, j) -> v .< zA[i,j])
             
             /// <summary>
             /// 最小値を検索
@@ -74,7 +74,7 @@ namespace Aqualis
             /// <param name="min">最小値</param>
             /// <param name="imin1">最小値のインデックス</param>
             /// <param name="imin2">最小値のインデックス</param>
-            static member min (zA:num2,min:num0,imin1:num0 option,imin2:num0 option) = asm.cp2(zA,min,imin1,imin2,fun (v, i, j) -> v >. zA[i,j])
+            static member min (zA:num2,min:num0,imin1:num0 option,imin2:num0 option) = asm.cp2(zA,min,imin1,imin2,fun (v, i, j) -> v .> zA[i,j])
             
             /// <summary>
             /// 最大値を検索
@@ -83,7 +83,7 @@ namespace Aqualis
             /// <param name="max1">最大値</param>
             /// <param name="max2">最大値</param>
             /// <param name="max3">最大値</param>
-            static member max (zA:num3,max:num0,imax1:num0 option,imax2:num0 option,imax3:num0 option) = asm.cp3(zA,max,imax1,imax2,imax3,fun (v, i, j, k) -> v <. zA[i,j,k])
+            static member max (zA:num3,max:num0,imax1:num0 option,imax2:num0 option,imax3:num0 option) = asm.cp3(zA,max,imax1,imax2,imax3,fun (v, i, j, k) -> v .< zA[i,j,k])
             
             /// <summary>
             /// 最小値を検索
@@ -93,7 +93,7 @@ namespace Aqualis
             /// <param name="imin1">最小値のインデックス</param>
             /// <param name="imin2">最小値のインデックス</param>
             /// <param name="imin3">最小値のインデックス</param>
-            static member min (zA:num3,min:num0,imin1:num0 option,imin2:num0 option,imin3:num0 option) = asm.cp3(zA,min,imin1,imin2,imin3,fun (v, i, j, k) -> v >. zA[i,j,k])
+            static member min (zA:num3,min:num0,imin1:num0 option,imin2:num0 option,imin3:num0 option) = asm.cp3(zA,min,imin1,imin2,imin3,fun (v, i, j, k) -> v .> zA[i,j,k])
             
             /// <summary>
             /// 最大値を検索

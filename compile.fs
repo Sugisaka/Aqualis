@@ -378,7 +378,7 @@ namespace Aqualis
                     if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
                     
                     //コンパイル・実行用スクリプト生成
-                    let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+".sh")
+                    let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+"_F.sh")
                     if p.param.isOaccUsed then
                         wr.Write("#!/bin/bash"+"\n")
                         wr.Write("\n")
@@ -469,7 +469,7 @@ namespace Aqualis
                     if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
                     
                     //コンパイル・実行用スクリプト生成
-                    let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+".sh")
+                    let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+"_C.sh")
                     if p.param.isOmpUsed then
                         wr.Write("#!/bin/sh"+"\n")
                         wr.Write("\n")

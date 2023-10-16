@@ -2,7 +2,7 @@ open System.IO
 
 for a,c,k in [("f90","!","!"); ("c","/*","//")] do
     let rd = new StreamReader(__SOURCE_DIRECTORY__ + @"\test1."+a)
-    let wr = new StreamWriter(__SOURCE_DIRECTORY__ + @"\test2."+a)
+    let wr = new StreamWriter(__SOURCE_DIRECTORY__ + @"\test1_2."+a)
     let rec edit (lst:list<string>) =
         match rd.ReadLine() with
         |null ->

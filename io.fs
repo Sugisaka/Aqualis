@@ -14,158 +14,153 @@ namespace Aqualis
     ///<summary>ファイル入出力</summary>
     type io () =
         
-        static member private cat (con:string) (lst:string list) = [0..lst.Length-1] |> List.fold (fun acc i -> acc + (if i=0 then "" else con) + lst.[i]) ""
-            
         static member private fileAccess (filename:num0 list) readmode isbinary code =
             let p = p.param
+            for s in filename do printfn "%s" <| s.etype.ToString()
             match p.lang with
-              |F ->
+            |F ->
+                p.fcache <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                        |> (fun s -> String.Join(",",s))
+                    let s = 
+                        filename
+                        |> List.map (fun s -> s.code)
+                        |> (fun s -> String.Join(",",s))
+                    p.tcache <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
+                        p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
+                        p.getloopvar <| fun counter ->
+                            p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
+                            p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
+                            p.codewrite("end do"+"\n")
+                        if isbinary then
+                            p.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
+                        else
+                            p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
+                        code(fp)
+                        p.codewrite("close("+fp+")"+"\n")
+            |C ->
+                p.fcache <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> (fun s -> String.Join("",s))
+                    let s = 
+                        [for s in filename do
+                          match s.etype with 
+                            |St -> ()
+                            |_ -> yield s.code ]
+                        |> (fun s -> String.Join(",",s))
+                    p.tcache <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
+                        if isbinary then
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                        else
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                        code(fp)
+                        p.codewrite("fclose("+fp+")"+";\n")
+            |T ->
+                p.fcache <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> (fun s -> String.Join("",s))
+                    let s = 
+                        filename
+                        |> List.map (fun s -> s.code)
+                        |> (fun s -> String.Join(",",s))
+                    p.tcache <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
+                        if isbinary then
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                        else
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                        code(fp)
+                        p.codewrite("fclose $"+fp+" "+"$\n")
+            |H ->
                  p.fcache <| fun fp ->
                      let f = 
                        filename
-                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
-                       |> io.cat ","
+                       |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                       |> (fun s -> String.Join(",",s))
                      let s = 
                        filename
                        |> List.map (fun s -> s.code)
-                       |> io.cat ","
-                     p.tcache <| A0 <| fun id ->
-                         let btname = "byte_tmp"
-                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
-                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
-                         p.getloopvar <| fun counter ->
-                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
-                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
-                             p.codewrite("end do"+"\n")
-                         if isbinary then
-                             p.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
-                         else
-                             p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
-                         code(fp)
-                         p.codewrite("close("+fp+")"+"\n")
-              |C ->
-                 p.fcache <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
-                       |> io.cat ""
-                     let s = 
-                       [for s in filename do
-                         match s.etype with 
-                           |Structure("string") -> ()
-                           |_ -> yield s.code ]
-                       |> io.cat ","
-                     p.tcache <| A0 <| fun id ->
-                         let btname = "byte_tmp"
-                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                         p.var.setUniqVar(Structure("char"),A0,btname,"")
-                         p.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
-                         if isbinary then
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
-                         else
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                         code(fp)
-                         p.codewrite("fclose("+fp+")"+";\n")
-              |T ->
-                 p.fcache <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.etype with |Structure("string") -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
-                       |> io.cat ""
-                     let s = 
-                       filename
-                       |> List.map (fun s -> s.code)
-                       |> io.cat ","
-                     p.tcache <| A0 <| fun id ->
-                         let btname = "byte_tmp"
-                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                         p.var.setUniqVar(Structure("char"),A0,btname,"")
-                         p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
-                         if isbinary then
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
-                         else
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                         code(fp)
-                         p.codewrite("fclose $"+fp+" "+"$\n")
-              |H ->
-                 p.fcache <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
-                       |> io.cat ","
-                     let s = 
-                       filename
-                       |> List.map (fun s -> s.code)
-                       |> io.cat ","
+                       |> (fun s -> String.Join(",",s))
                      p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
                      code(fp)
                      p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
         static member private Write (fp:string) (lst:num0 list) =
             let p = p.param
             match p.lang with
-              |F ->
-                let tab = var.ip0("tab",2313)
+            |F ->
+                let tab = var.ip0_noWarning("tab",2313)
                 let double0string_format_F = 
                     let (a,b)=p.double_string_format
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
-                  lst
-                  |> (fun b ->
-                      [for n in 0..(b.Length-1) do
-                          match b.[n].etype with
+                    lst
+                    |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            match b.[n].etype with
                             |It _ -> 
-                              yield "I"+p.int_string_format.ToString()
+                                yield "I"+p.int_string_format.ToString()
                             |Dt ->
-                              yield double0string_format_F
+                                yield double0string_format_F
                             |Zt ->
-                              yield double0string_format_F
-                              yield double0string_format_F 
-                            |Structure("string") -> 
-                              yield "A"
+                                yield double0string_format_F
+                                yield double0string_format_F 
+                            |St -> 
+                                yield "A"
                             |_ -> ()
-                      ])
-                  |> (fun b ->
-                        [for n in 0..(b.Length-1) do
-                            yield b.[n]
-                            if n<(b.Length-1) then yield "A1"
                         ])
-                  |> io.cat ","
+                    |> (fun b ->
+                          [for n in 0..(b.Length-1) do
+                              yield b.[n]
+                              if n<(b.Length-1) then yield "A1"
+                          ])
+                    |> (fun s -> String.Join(",",s))
                 let code =
-                  lst
-                  |> (fun b ->
-                      [for n in 0..(b.Length-1) do
-                          match b.[n].etype,b.[n].expr with 
-                          |_,Int_c(v) -> yield p.ItoS(v)
-                          |_,Dbl_c(v) -> yield p.DtoS(v)
-                          |_,Str_c(v) -> yield v
-                          |Zt,Var _ ->
-                              yield (b.[n].re.code)
-                              yield (b.[n].im.code)
-                          |_,Var v ->
-                              yield v
-                          |_,Formula v ->
-                              yield v
-                          |_ -> ()
-                      ])
-                  |> (fun b ->
+                    lst
+                    |> (fun b ->
                         [for n in 0..(b.Length-1) do
-                            yield b.[n]
-                            if n<(b.Length-1) then yield tab.code
-                        ])
-                  |> io.cat ","
+                            match b.[n].etype,b.[n].expr with 
+                            |_,Int_c(v) -> yield p.ItoS(v)
+                            |_,Dbl_c(v) -> yield p.DtoS(v)
+                            |_,Str_c(v) -> yield v
+                            |Zt,_ ->
+                                yield (b.[n].re.code)
+                                yield (b.[n].im.code)
+                            |(It _|Dt),_ -> yield b.[n].code
+                            |_ -> ()])
+                    |> (fun b ->
+                          [for n in 0..(b.Length-1) do
+                              yield b.[n]
+                              if n<(b.Length-1) then yield tab.code
+                          ])
+                    |> (fun s -> String.Join(",",s))
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
-              |C ->
+            |C ->
                 let int0string_format_C =
-                  "%"+p.int_string_format.ToString()+"d"
+                    "%"+p.int_string_format.ToString()+"d"
                 let double0string_format_C = 
-                  let (a,b)=p.double_string_format
-                  "%"+a.ToString()+"."+b.ToString()+"e"
+                    let (a,b)=p.double_string_format
+                    "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
-                  lst
-                  |> (fun b -> 
-                      [for n in 0..(b.Length-1) do
-                          match b.[n].expr,b.[n].etype with
+                    lst
+                    |> (fun b -> 
+                        [for n in 0..(b.Length-1) do
+                            match b.[n].expr,b.[n].etype with
                             |_,It _ ->
                                 yield int0string_format_C
                             |_,Dt ->
@@ -176,364 +171,356 @@ namespace Aqualis
                             |Str_c(v),_ ->
                                 yield v.Replace("\"","\\\"")
                             |_ -> ()
-                      ])
-                  |> (fun b ->
-                        [for n in 0..(b.Length-1) do
-                            yield b.[n]
-                            if n<(b.Length-1) then yield "\\t"
                         ])
-                  |> io.cat ""
+                    |> (fun b ->
+                          [for n in 0..(b.Length-1) do
+                              yield b.[n]
+                              if n<(b.Length-1) then yield "\\t"
+                          ])
+                    |> (fun s -> String.Join("",s))
                 let code =
-                  [for b in lst do
-                      match b.etype,b.expr with 
+                    [for b in lst do
+                        printfn "AAA %s %s" <| b.etype.ToString() <| b.expr.ToString()
+                        match b.etype,b.expr with 
                         |_,Int_c(v) -> yield p.ItoS(v)
                         |_,Dbl_c(v) -> yield p.DtoS(v)
-                        |Zt,Var _ ->
-                          yield b.re.code
-                          yield b.im.code
-                        |_,Var n -> yield n
-                        |_,Formula n -> yield n
+                        |Zt,_ ->
+                            yield b.re.code
+                            yield b.im.code
+                        |(It _|Dt),_ -> yield b.code
                         |_ -> ()]
-                  |> io.cat ","
+                    |> (fun s -> String.Join(",",s))
+                printfn "%d %s" lst.Length code
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
-              |T ->
+            |T ->
                 let double0string_format_F = 
                     let (a,b)=p.double_string_format
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
-                  lst
-                  |> List.map (fun b -> 
-                      match b.etype with
-                        |It _ ->"I"+p.int_string_format.ToString()
-                        |Dt -> double0string_format_F
-                        |Zt -> double0string_format_F+","+double0string_format_F 
-                        |Structure("string") -> "A"
-                        |_ -> "")
-                  |> io.cat ""
+                    lst
+                    |> List.map (fun b -> 
+                        match b.etype with
+                          |It _ ->"I"+p.int_string_format.ToString()
+                          |Dt -> double0string_format_F
+                          |Zt -> double0string_format_F+","+double0string_format_F 
+                          |St -> "A"
+                          |_ -> "")
+                    |> (fun s -> String.Join("",s))
                 let code =
-                  lst
-                  |> List.map (fun b ->
-                      match b.etype,b.expr with 
-                        |_,Int_c(v) -> p.ItoS(v)
-                        |_,Dbl_c(v) -> p.DtoS(v)
-                        |_,Str_c(v) -> v
-                        |Zt,Var _ -> b.re.code+","+b.im.code
-                        |_,Var n -> n
-                        |_,Formula n -> n 
-                        |_ -> "")
-                  |> io.cat ","
+                    lst
+                    |> List.map (fun b ->
+                        match b.etype,b.expr with 
+                          |_,Int_c(v) -> p.ItoS(v)
+                          |_,Dbl_c(v) -> p.DtoS(v)
+                          |_,Str_c(v) -> v
+                          |Zt,Var _ -> b.re.code+","+b.im.code
+                          |_,Var n -> n
+                          |_,Formula n -> n 
+                          |_ -> "")
+                    |> (fun s -> String.Join(",",s))
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
-              |H ->
+            |H ->
                 let double0string_format_F = 
                     let (a,b)=p.double_string_format
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
-                  lst
-                  |> List.map (fun b -> 
-                      match b.etype with
-                        |It _ ->"I"+p.int_string_format.ToString()
-                        |Dt -> double0string_format_F
-                        |Zt -> double0string_format_F+","+double0string_format_F 
-                        |Structure("string") -> "A"
-                        |_ -> "")
-                  |> io.cat ""
+                    lst
+                    |> List.map (fun b -> 
+                        match b.etype with
+                          |It _ ->"I"+p.int_string_format.ToString()
+                          |Dt -> double0string_format_F
+                          |Zt -> double0string_format_F+","+double0string_format_F 
+                          |St -> "A"
+                          |_ -> "")
+                    |> (fun s -> String.Join("",s))
                 let code =
-                  lst
-                  |> List.map (fun b ->
-                      match b.etype,b.expr with 
-                        |_,Int_c(v) -> p.ItoS(v)
-                        |_,Dbl_c(v) -> p.DtoS(v)
-                        |_,Str_c(v) -> "\""+v+"\""
-                        |Zt,Var _ -> b.re.code+","+b.im.code
-                        |_,Var n -> n
-                        |_,Formula n -> n 
-                        |_ -> "")
-                  |> io.cat "<mo>,</mo>"
+                    lst
+                    |> List.map (fun b ->
+                        match b.etype,b.expr with 
+                          |_,Int_c(v) -> p.ItoS(v)
+                          |_,Dbl_c(v) -> p.DtoS(v)
+                          |_,Str_c(v) -> "\""+v+"\""
+                          |Zt,Var _ -> b.re.code+","+b.im.code
+                          |_,Var n -> n
+                          |_,Formula n -> n 
+                          |_ -> "")
+                    |> (fun s -> String.Join("<mo>,</mo>",s))
                 p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+code+"</math>\n<br/>\n")
                     
         static member private Write_bin (fp:string) (v:num0) =
             let p = p.param
             match p.lang with
-              |F ->
+            |F ->
                 match v.etype,v.expr with 
-                  |_,Int_c(v) ->
-                      p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
-                  |_,Dbl_c(v) ->
-                      p.codewrite("write("+fp+") "+p.DtoS(v)+"\n")
-                  |_,Str_c(v) ->
-                      p.codewrite("write("+fp+") "+v+"\n")
-                  |Zt,Var _ ->
-                      p.codewrite("write("+fp+") "+v.re.code+"\n")
-                      p.codewrite("write("+fp+") "+v.im.code+"\n")
-                  |_,Var v ->
-                      p.codewrite("write("+fp+") "+v+"\n")
-                  |_,Formula v ->
-                      p.codewrite("write("+fp+") "+v+"\n")
-                  |_ -> ()
-              |C ->
+                |_,Int_c(v) ->
+                    p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
+                |_,Dbl_c(v) ->
+                    p.codewrite("write("+fp+") "+p.DtoS(v)+"\n")
+                |_,Str_c(v) ->
+                    p.codewrite("write("+fp+") "+v+"\n")
+                |Zt,_ ->
+                    p.codewrite("write("+fp+") "+v.re.code+"\n")
+                    p.codewrite("write("+fp+") "+v.im.code+"\n")
+                |It _,_ ->
+                    p.codewrite("write("+fp+") "+v.code+"\n")
+                |Dt,_ ->
+                    p.codewrite("write("+fp+") "+v.code+"\n")
+                |_ -> ()
+            |C ->
                 match v.etype,v.expr with 
-                  |_,Int_c _ ->
+                |_,Int_c _ ->
                     ch.i <| fun tmp ->
                         tmp <== v
                         p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
-                  |_,Dbl_c _ ->
+                |_,Dbl_c _ ->
                     ch.i <| fun tmp ->
                         tmp <== v
                         p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
-                  |Zt,Var _ ->
+                |Zt,_ ->
                     ch.dd <| fun (tmp_r,tmp_i) ->
                         tmp_r <== v.re
                         tmp_i <== v.im
                         p.codewrite("fwrite(&"+tmp_r.code+",sizeof("+tmp_r.code+"),1,"+fp+");\n")
                         p.codewrite("fwrite(&"+tmp_i.code+",sizeof("+tmp_i.code+"),1,"+fp+");\n")
-                  |_,Var n ->
-                    p.codewrite("fwrite(&"+n+",sizeof("+n+"),1,"+fp+");\n")
-                  |It _, Formula _ ->
+                |It _,_ ->
                     ch.i <| fun tmp ->
                         tmp <== v
                         p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
-                  |Dt, Formula _ ->
+                |Dt,_ ->
                     ch.d <| fun tmp ->
                         tmp <== v
                         p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
-                  |Zt, Formula _ ->
-                    ch.ddz <| fun (tmp_r,tmp_i,tmp) ->
-                        tmp <== v
-                        tmp_r <== tmp.re
-                        tmp_i <== tmp.im
-                        p.codewrite("fwrite(&"+tmp_r.code+",sizeof("+tmp_r.code+"),1,"+fp+");\n")
-                        p.codewrite("fwrite(&"+tmp_i.code+",sizeof("+tmp_i.code+"),1,"+fp+");\n")
-                  |_ ->
+                |_ ->
                     ()
-              |T ->
+            |T ->
                 match v.etype,v.expr with 
-                  |_,Int_c(v) ->
-                      p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
-                  |_,Dbl_c(v) ->
-                      p.codewrite("write("+fp+") "+p.DtoS(v)+"\n")
-                  |_,Str_c(v) ->
-                      p.codewrite("write("+fp+") "+v+"\n")
-                  |Zt,Var _ ->
-                      p.codewrite("write("+fp+") "+v.re.code+"\n")
-                      p.codewrite("write("+fp+") "+v.im.code+"\n")
-                  |_,Var v ->
-                      p.codewrite("write("+fp+") "+v+"\n")
-                  |_,Formula v ->
-                      p.codewrite("write("+fp+") "+v+"\n")
-                  |_ -> ()
-              |H ->
+                |_,Int_c(v) ->
+                    p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
+                |_,Dbl_c(v) ->
+                    p.codewrite("write("+fp+") "+p.DtoS(v)+"\n")
+                |_,Str_c(v) ->
+                    p.codewrite("write("+fp+") "+v+"\n")
+                |Zt,_ ->
+                    p.codewrite("write("+fp+") "+v.re.code+"\n")
+                    p.codewrite("write("+fp+") "+v.im.code+"\n")
+                |It _,_ ->
+                    p.codewrite("write("+fp+") "+v.code+"\n")
+                |Dt _,_ ->
+                    p.codewrite("write("+fp+") "+v.code+"\n")
+                |_ -> ()
+            |H ->
                 match v.etype,v.expr with 
-                  |_,Int_c(v) ->
-                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.ItoS(v)+"</math>\n<br/>\n")
-                  |_,Dbl_c(v) ->
-                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.DtoS(v)+"</math>\n<br/>\n")
-                  |_,Str_c(v) ->
-                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
-                  |Zt,Var _ ->
-                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.re.code+"</math>\n<br/>\n")
-                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.im.code+"</math>\n<br/>\n")
-                  |_,Var v ->
-                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
-                  |_,Formula v ->
-                      p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
-                  |_ -> ()
+                |_,Int_c(v) ->
+                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.ItoS(v)+"</math>\n<br/>\n")
+                |_,Dbl_c(v) ->
+                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.DtoS(v)+"</math>\n<br/>\n")
+                |_,Str_c(v) ->
+                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
+                |Zt,_ ->
+                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.re.code+"</math>\n<br/>\n")
+                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.im.code+"</math>\n<br/>\n")
+                |It _,_ ->
+                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
+                |Dt,_ ->
+                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
+                |_ -> ()
                 
         static member private Read (fp:string) (iostat:num0) (lst:num0 list) = 
             let p = p.param
             let rec cpxvarlist list (s:num0 list) counter =
                 match s with
-                  |a::b -> 
+                |a::b -> 
                     match a.etype with
-                      |Zt -> cpxvarlist <| list@[Zt,counter,a] <| b <| counter+1
-                      |t   -> cpxvarlist <| list@[t,0,a] <| b <| counter
-                  |[] -> counter,list
+                    |Zt -> cpxvarlist <| list@[Zt,counter,a] <| b <| counter+1
+                    |t   -> cpxvarlist <| list@[t,0,a] <| b <| counter
+                |[] -> counter,list
             let Nz,varlist = cpxvarlist [] lst 0
     
             match p.lang with
-              |F ->
+            |F ->
                 ch.d01 <| fun tmp ->
                     if Nz>0 then tmp.allocate(2*Nz)
                     let double0string_format_F = 
-                      let (a,b)=p.double_string_format
-                      "E"+a.ToString()+"."+b.ToString()+"e3"
+                        let (a,b)=p.double_string_format
+                        "E"+a.ToString()+"."+b.ToString()+"e3"
                     let format = 
-                      varlist
-                      |> (fun b -> 
-                          [for (t,_,_) in b do
-                              match t with
+                        varlist
+                        |> (fun b -> 
+                            [for (t,_,_) in b do
+                                match t with
                                 |It _ ->
-                                  yield "I"+p.int_string_format.ToString()
+                                    yield "I"+p.int_string_format.ToString()
                                 |Dt ->
-                                  yield double0string_format_F
+                                    yield double0string_format_F
                                 |Zt ->
-                                  yield double0string_format_F
-                                  yield double0string_format_F
-                                |Structure("string") ->
-                                  yield "A"
+                                    yield double0string_format_F
+                                    yield double0string_format_F
+                                |St ->
+                                    yield "A"
                                 |_ -> ()
-                          ])
-                      |> (fun b ->
-                            [for n in 0..(b.Length-1) do
-                                yield b.[n]
-                                if n<(b.Length-1) then yield "A1"
                             ])
-                      |> io.cat ","
+                        |> (fun b ->
+                              [for n in 0..(b.Length-1) do
+                                  yield b.[n]
+                                  if n<(b.Length-1) then yield "A1"
+                              ])
+                        |> (fun s -> String.Join(",",s))
                     ch.i1 (varlist.Length-1) <| fun tab ->
                         let code =
-                          varlist
-                          |> (fun b ->
-                              [for (t,m,b) in b do
-                                  match t,b.expr with 
+                            varlist
+                            |> (fun b ->
+                                [for (t,m,b) in b do
+                                    match t,b.expr with 
                                     |Zt,Var _ ->
-                                      yield tmp.[2*m+1].code
-                                      yield tmp.[2*m+2].code
+                                        yield tmp.[2*m+1].code
+                                        yield tmp.[2*m+2].code
                                     |_,Var n ->
-                                      yield n
+                                        yield n
                                     |_ -> 
-                                      Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-                                      yield ""
-                              ])
-                          |> (fun b ->
-                                [for n in 0..(b.Length-1) do
-                                    yield b.[n]
-                                    if n<(b.Length-1) then yield tab.[n+1].code
+                                        Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+                                        yield ""
                                 ])
-                          |> io.cat ","
+                            |> (fun b ->
+                                  [for n in 0..(b.Length-1) do
+                                      yield b.[n]
+                                      if n<(b.Length-1) then yield tab.[n+1].code
+                                  ])
+                            |> (fun s -> String.Join(",",s))
                         p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
                         for (t,m,b) in varlist do
                             match t with
-                              |Zt ->
+                            |Zt ->
                                 b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
-                              |_ ->
+                            |_ ->
                                 ()
                     if Nz>0 then tmp.deallocate()
-              |C ->
+            |C ->
                 ch.d1 (I <| 2*Nz) <| fun tmp ->
-                  let format = 
-                    varlist
-                    |> (fun b -> 
-                          [for (t,_,_) in b do
-                            match t with
-                              |It _ ->
-                                yield "%d"
-                              |Dt -> 
-                                yield "%lf"
-                              |Zt -> 
-                                yield "%lf"
-                                yield "%lf"
-                              |Structure("string") ->
-                                yield "%s"
-                              |_ -> ()
-                          ])
-                    |> io.cat ""
-                  let code =
-                    varlist
-                    |> (fun b ->
-                          [for (t,m,a) in b do
-                            match t,a.expr with 
-                              |Zt,Var n ->
-                                yield "&"+tmp.[2*m+1].code
-                                yield "&"+tmp.[2*m+2].code
-                              |_,Var n ->
-                                yield "&"+n
-                              |_ ->
-                                Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-                                yield ""
-                          ])
-                    |> io.cat ","
-                  p.codewrite("fscanf("+fp+",\""+format+"\","+code+");\n")
-                  for (t,m,b) in varlist do
-                      match t with
+                    let format = 
+                        varlist
+                        |> (fun b -> 
+                              [for (t,_,_) in b do
+                                match t with
+                                |It _ ->
+                                    yield "%d"
+                                |Dt -> 
+                                    yield "%lf"
+                                |Zt -> 
+                                    yield "%lf"
+                                    yield "%lf"
+                                |St ->
+                                    yield "%s"
+                                |_ -> ()
+                              ])
+                        |> (fun s -> String.Join("",s))
+                    let code =
+                      varlist
+                      |> (fun b ->
+                            [for (t,m,a) in b do
+                                match t,a.expr with 
+                                |Zt,Var n ->
+                                    yield "&"+tmp.[2*m+1].code
+                                    yield "&"+tmp.[2*m+2].code
+                                |_,Var n ->
+                                    yield "&"+n
+                                |_ ->
+                                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+                                    yield ""
+                            ])
+                      |> (fun s -> String.Join(",",s))
+                    p.codewrite("fscanf("+fp+",\""+format+"\","+code+");\n")
+                    for (t,m,b) in varlist do
+                        match t with
                         |Zt ->
-                          b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
+                            b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
                         |_ ->
-                          ()
-              |T ->
+                            ()
+            |T ->
                 let double0string_format_F = 
-                  let (a,b)=p.double_string_format
-                  "E"+a.ToString()+"."+b.ToString()+"e3"
+                    let (a,b)=p.double_string_format
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
-                  lst
-                  |> List.map (fun b -> 
-                      match b.etype with
-                        |It _ ->"I"+p.int_string_format.ToString()
-                        |Dt -> double0string_format_F
-                        |Structure("string") -> "A"
-                        |_ -> "")
-                  |> io.cat ","
+                    lst
+                    |> List.map (fun b -> 
+                        match b.etype with
+                          |It _ ->"I"+p.int_string_format.ToString()
+                          |Dt -> double0string_format_F
+                          |St -> "A"
+                          |_ -> "")
+                    |> (fun s -> String.Join(",",s))
                 let code =
-                  lst
-                  |> List.map (fun b ->
-                      match b.expr with 
+                    lst
+                    |> List.map (fun b ->
+                        match b.expr with 
                         |Var n -> n
                         |Formula n -> n 
                         |_ -> "")
-                  |> io.cat ","
+                    |> (fun s -> String.Join(",",s))
                 p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
-              |H ->
+            |H ->
                 let double0string_format_F = 
-                  let (a,b)=p.double_string_format
-                  "E"+a.ToString()+"."+b.ToString()+"e3"
+                    let (a,b)=p.double_string_format
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
-                  lst
-                  |> List.map (fun b -> 
-                      match b.etype with
+                    lst
+                    |> List.map (fun b -> 
+                        match b.etype with
                         |It _ ->"I"+p.int_string_format.ToString()
                         |Dt -> double0string_format_F
-                        |Structure("string") -> "A"
+                        |St -> "A"
                         |_ -> "")
-                  |> io.cat ","
+                    |> (fun s -> String.Join(",",s))
                 let code =
-                  lst
-                  |> List.map (fun b ->
-                      match b.expr with 
+                    lst
+                    |> List.map (fun b ->
+                        match b.expr with 
                         |Var n -> n
                         |Formula n -> n 
                         |_ -> "")
-                  |> io.cat "<mo>,</mo>"
+                    |> (fun s -> String.Join("<mo>,</mo>",s))
                 p.codewrite("<math>"+code+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
                 
         static member private Read_bin (fp:string) (iostat:num0) (v:num0) = 
             let p = p.param
             match p.lang with
-              |F ->
+            |F ->
                 match v.etype,v.expr with 
-                  |Zt,Var _ ->
+                |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
                         v <== re+asm.uj*im
-                  |_,Var n ->
+                |_,Var n ->
                     p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
-                  |_ -> 
+                |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-              |C->
+            |C->
                 match v.etype,v.expr with 
-                  |Zt,Var _ ->
+                |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
                         p.codewrite("fread(&"+re.code+",sizeof("+re.code+"),1,"+fp+");"+"\n")
                         p.codewrite("fread(&"+im.code+",sizeof("+im.code+"),1,"+fp+");"+"\n")
                         v <== re+asm.uj*im
-                  |_,Var n ->
+                |_,Var n ->
                     p.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
-                  |_ -> 
+                |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-              |T ->
+            |T ->
                 match v.etype,v.expr with 
-                  |Zt,Var _ ->
+                |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
                         v <== re+asm.uj*im
-                  |_,Var n ->
+                |_,Var n ->
                     p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
-                  |_ -> 
+                |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-              |H ->
+            |H ->
                 match v.expr with 
-                  |Var n ->
+                |Var n ->
                     p.codewrite("<math>"+n+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
-                  |_ -> 
+                |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
                 
         static member private Read_byte (fp:string) (iostat:num0) (e:num0) = 
@@ -541,8 +528,8 @@ namespace Aqualis
             p.codewrite("read("+fp+", iostat="+iostat.code+") byte_tmp\n")
             let ee =
                 match e.etype,e.expr with 
-                  |It _,Var n -> n 
-                  |_ -> "byte値を整数型以外の変数に格納できません"
+                |It _,Var n -> n 
+                |_ -> "byte値を整数型以外の変数に格納できません"
             p.codewrite(ee + "=" + "byte_tmp\n")
             
         ///<summary>ファイル出力</summary>
@@ -574,7 +561,7 @@ namespace Aqualis
                     iter.loop <| fun (ext,i) ->
                         io.Read fp iostat varlist
                         br.branch <| fun b ->
-                            b.IF (iostat <. 0) <| fun () ->
+                            b.IF (iostat .< 0) <| fun () ->
                                 counter <== i-1
                                 ext()
                                 
@@ -585,7 +572,7 @@ namespace Aqualis
                     iter.loop <| fun (ext,i) ->
                         io.Read fp iostat varlist
                         br.branch <| fun b ->
-                            b.IF (iostat <. 0) <| fun () ->
+                            b.IF (iostat .< 0) <| fun () ->
                                 ext()
                             b.EL <| fun () ->
                                 code(i)
@@ -625,20 +612,20 @@ namespace Aqualis
                     w _1
                     //データ型
                     match f.etype with
-                      |Etype.It(4) -> w <| I 1004
-                      |Etype.Dt    -> w <| I 2000
-                      |Etype.Zt    -> w <| I 3000
-                      |_           -> w <| I 0
+                    |Etype.It(4) -> w <| I 1004
+                    |Etype.Dt    -> w <| I 2000
+                    |Etype.Zt    -> w <| I 3000
+                    |_           -> w <| I 0
                     //データ次元
                     w _0
                     //データサイズ
                     w _1
                     //データ本体
                     match f.etype with
-                      |Zt ->
+                    |Zt ->
                         w f.re
                         w f.im
-                      |_ ->
+                    |_ ->
                         w f
                         
         ///<summary>1次元データをファイルに保存</summary>
@@ -649,10 +636,10 @@ namespace Aqualis
                     w _1
                     //データ型
                     match f.etype with
-                      |Etype.It(4) -> w <| I 1004
-                      |Etype.Dt    -> w <| I 2000
-                      |Etype.Zt    -> w <| I 3000
-                      |_           -> w <| I 0
+                    |Etype.It(4) -> w <| I 1004
+                    |Etype.Dt    -> w <| I 2000
+                    |Etype.Zt    -> w <| I 3000
+                    |_           -> w <| I 0
                     //データ次元
                     w _1
                     //データサイズ
@@ -660,10 +647,10 @@ namespace Aqualis
                     //データ本体
                     iter.num f.size1 <| fun i ->
                         match f[1].etype with
-                          |Zt ->
+                        |Zt ->
                             w f[i].re
                             w f[i].im
-                          |_ ->
+                        |_ ->
                             w f[i]
                             
         ///<summary>2次元データをファイルに保存</summary>
@@ -674,10 +661,10 @@ namespace Aqualis
                     w _1
                     //データ型
                     match f.etype with
-                      |Etype.It(4) -> w <| I 1004
-                      |Etype.Dt    -> w <| I 2000
-                      |Etype.Zt    -> w <| I 3000
-                      |_           -> w <| I 0
+                    |Etype.It(4) -> w <| I 1004
+                    |Etype.Dt    -> w <| I 2000
+                    |Etype.Zt    -> w <| I 3000
+                    |_           -> w <| I 0
                     //データ次元
                     w _2
                     //データサイズ
@@ -687,10 +674,10 @@ namespace Aqualis
                     iter.num f.size2 <| fun j ->
                         iter.num f.size1 <| fun i ->
                             match f[1,1].etype with
-                              |Zt ->
+                            |Zt ->
                                 w f[i,j].re
                                 w f[i,j].im
-                              |_ ->
+                            |_ ->
                                 w f[i,j]
                             
         ///<summary>3次元データをファイルに保存</summary>
@@ -701,10 +688,10 @@ namespace Aqualis
                     w _1
                     //データ型
                     match f.etype with
-                      |Etype.It(4) -> w <| I 1004
-                      |Etype.Dt    -> w <| I 2000
-                      |Etype.Zt    -> w <| I 3000
-                      |_           -> w <| I 0
+                    |Etype.It(4) -> w <| I 1004
+                    |Etype.Dt    -> w <| I 2000
+                    |Etype.Zt    -> w <| I 3000
+                    |_           -> w <| I 0
                     //データ次元
                     w _3
                     //データサイズ
@@ -716,10 +703,10 @@ namespace Aqualis
                         iter.num f.size2 <| fun j ->
                             iter.num f.size1 <| fun i ->
                                 match f[1,1,1].etype with
-                                  |Zt ->
+                                |Zt ->
                                     w f[i,j,k].re
                                     w f[i,j,k].im
-                                  |_ ->
+                                |_ ->
                                     w f[i,j,k]
                                     
         ///<summary>数値をファイルから読み込み</summary>
@@ -740,15 +727,15 @@ namespace Aqualis
                                             r n1
                                             //データ本体
                                             match t with
-                                              |Zt ->
+                                            |Zt ->
                                                 ch.dd <| fun (re,im) ->
                                                     r re
                                                     r im
                                                     f <== re + asm.uj*im
-                                              |_ ->
+                                            |_ ->
                                                 r f
                                     <| fun () ->
-                                        print.c "Invalid data dimension"
+                                        print.t "Invalid data dimension"
                             <| fun () ->
                                 print.s <| filename@[!.": invalid data type"]
                 io.binfileInput filename <| fun r ->
@@ -758,14 +745,14 @@ namespace Aqualis
                     br.branch <| fun b ->
                         b.IF (n=.1) <| fun () ->
                             match f.etype with
-                              |Etype.It(4) ->
+                            |Etype.It(4) ->
                                 reader r (1004,f.etype)
-                              |Etype.Dt    -> 
+                            |Etype.Dt    -> 
                                 reader r (2000,f.etype)
-                              |Etype.Zt    -> 
+                            |Etype.Zt    -> 
                                 reader r (3000,f.etype)
-                              |_ -> 
-                                  print.c "invalid data type"
+                            |_ -> 
+                                print.t "invalid data type"
                                   
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:num1) =
@@ -786,17 +773,17 @@ namespace Aqualis
                                             f.allocate n1
                                             //データ本体
                                             match t with
-                                              |Zt ->
+                                            |Zt ->
                                                 iter.num f.size1 <| fun i ->
                                                     ch.dd <| fun (re,im) ->
                                                         r re
                                                         r im
                                                         f[i] <== re + asm.uj*im
-                                              |_ ->
+                                            |_ ->
                                                 iter.num f.size1 <| fun i ->
                                                     r f[i]
                                     <| fun () ->
-                                        print.c "Invalid data dimension"
+                                        print.t "Invalid data dimension"
                             <| fun () ->
                                 print.s <| filename@[!.": invalid data type"]
                 io.binfileInput filename <| fun r ->
@@ -806,14 +793,14 @@ namespace Aqualis
                     br.branch <| fun b ->
                         b.IF (n=.1) <| fun () ->
                             match f[1].etype with
-                              |Etype.It(4) ->
+                            |Etype.It(4) ->
                                 reader r (1004,f[1].etype)
-                              |Etype.Dt    -> 
+                            |Etype.Dt    -> 
                                 reader r (2000,f[1].etype)
-                              |Etype.Zt    -> 
+                            |Etype.Zt    -> 
                                 reader r (3000,f[1].etype)
-                              |_ -> 
-                                  print.c "invalid data type"
+                            |_ -> 
+                                print.t "invalid data type"
                                   
         ///<summary>2次元データをファイルから読み込み</summary>
         static member load (f:num2) =
@@ -835,19 +822,19 @@ namespace Aqualis
                                             f.allocate(n1,n2)
                                             //データ本体
                                             match t with
-                                              |Zt ->
+                                            |Zt ->
                                                 iter.num f.size2 <| fun j ->
                                                     iter.num f.size1 <| fun i ->
                                                         ch.dd <| fun (re,im) ->
                                                             r re
                                                             r im
                                                             f[i,j] <== re + asm.uj*im
-                                              |_ ->
+                                            |_ ->
                                                 iter.num f.size2 <| fun j ->
                                                     iter.num f.size1 <| fun i ->
                                                         r f[i,j]
                                     <| fun () ->
-                                        print.c "Invalid data dimension"
+                                        print.t "Invalid data dimension"
                             <| fun () ->
                                 print.s <| filename@[!.": invalid data type"]
                 io.binfileInput filename <| fun r ->
@@ -857,14 +844,14 @@ namespace Aqualis
                     br.branch <| fun b ->
                         b.IF (n=.1) <| fun () ->
                             match f[1,1].etype with
-                              |Etype.It(4) ->
+                            |Etype.It(4) ->
                                 reader r (1004,f[1,1].etype)
-                              |Etype.Dt    -> 
+                            |Etype.Dt    -> 
                                 reader r (2000,f[1,1].etype)
-                              |Etype.Zt    -> 
+                            |Etype.Zt    -> 
                                 reader r (3000,f[1,1].etype)
-                              |_ -> 
-                                  print.c "invalid data type"
+                            |_ -> 
+                                print.t "invalid data type"
                                   
         ///<summary>3次元データをファイルから読み込み</summary>
         static member load (f:num3) =
@@ -887,7 +874,7 @@ namespace Aqualis
                                             f.allocate(n1,n2,n3)
                                             //データ本体
                                             match t with
-                                              |Zt ->
+                                            |Zt ->
                                                 iter.num f.size3 <| fun k ->
                                                     iter.num f.size2 <| fun j ->
                                                         iter.num f.size1 <| fun i ->
@@ -895,13 +882,13 @@ namespace Aqualis
                                                                 r re
                                                                 r im
                                                                 f[i,j,k] <== re + asm.uj*im
-                                              |_ ->
+                                            |_ ->
                                                 iter.num f.size3 <| fun k ->
                                                     iter.num f.size2 <| fun j ->
                                                         iter.num f.size1 <| fun i ->
                                                             r f[i,j,k]
                                     <| fun () ->
-                                        print.c "Invalid data dimension"
+                                        print.t "Invalid data dimension"
                             <| fun () ->
                                 print.s <| filename@[!.": invalid data type"]
                 io.binfileInput filename <| fun r ->
@@ -911,14 +898,14 @@ namespace Aqualis
                     br.branch <| fun b ->
                         b.IF (n=.1) <| fun () ->
                             match f[1,1,1].etype with
-                              |Etype.It(4) ->
+                            |Etype.It(4) ->
                                 reader r (1004,f[1,1,1].etype)
-                              |Etype.Dt    -> 
+                            |Etype.Dt    -> 
                                 reader r (2000,f[1,1,1].etype)
-                              |Etype.Zt    -> 
+                            |Etype.Zt    -> 
                                 reader r (3000,f[1,1,1].etype)
-                              |_ -> 
-                                  print.c "invalid data type"
+                            |_ -> 
+                                  print.t "invalid data type"
                                   
     ///<summary>区切り文字・スペースなしでファイル出力</summary>
     type io2 () =
@@ -928,136 +915,132 @@ namespace Aqualis
         static member private fileAccess (filename:num0 list) readmode isbinary code =
             let p = p.param
             match p.lang with
-              |F ->
-                 p.fcache <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
-                       |> io2.cat ","
-                     let s = 
-                       filename
-                       |> List.map (fun s -> s.code)
-                       |> io2.cat ","
-                     p.tcache <| A0 <| fun id ->
-                         let btname = "byte_tmp"
-                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
-                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
-                         p.getloopvar <| fun counter ->
-                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
-                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
-                             p.codewrite("end do"+"\n")
-                         if isbinary then
-                             p.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
-                         else
-                             p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
-                         code(fp)
-                         p.codewrite("close("+fp+")"+"\n")
-              |C ->
-                 p.fcache <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
-                       |> io2.cat ""
-                     let s = 
-                       [for s in filename do
-                         match s.etype with
-                           |Structure("string") -> ()
-                           |_ -> yield s.code]
-                       |> io2.cat ","
-                     p.tcache <| A0 <| fun id ->
-                         let btname = "byte_tmp"
-                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                         p.var.setUniqVar(Structure("char"),A0,btname,"")
-                         p.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
-                         if isbinary then
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
-                         else
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                         code(fp)
-                         p.codewrite("fclose("+fp+")"+";\n")
-              |T ->
-                 p.fcache <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.etype with |Structure("string") -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
-                       |> io2.cat ","
-                     let s = 
-                       filename
-                       |> List.map (fun s -> s.code)
-                       |> io2.cat ","
-                     p.tcache <| A0 <| fun id ->
-                         let btname = "byte_tmp"
-                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                         p.var.setUniqVar(Structure("char"),A0,btname,"")
-                         p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
-                         if isbinary then
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
-                         else
-                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                         code(fp)
-                         p.codewrite("fclose $"+fp+" "+"$\n")
-              |H ->
-                 p.fcache <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.etype with |Structure("string") -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
-                       |> io2.cat ","
-                     let s = 
-                       filename
-                       |> List.map (fun s -> s.code)
-                       |> io2.cat ","
-                     p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
-                     code(fp)
-                     p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
+            |F ->
+                p.fcache <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                        |> io2.cat ","
+                    let s = 
+                        filename
+                        |> List.map (fun s -> s.code)
+                        |> io2.cat ","
+                    p.tcache <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
+                        p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
+                        p.getloopvar <| fun counter ->
+                            p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
+                            p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
+                            p.codewrite("end do"+"\n")
+                        if isbinary then
+                            p.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
+                        else
+                            p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
+                        code(fp)
+                        p.codewrite("close("+fp+")"+"\n")
+            |C ->
+                p.fcache <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> io2.cat ""
+                    let s = 
+                        [for s in filename do
+                            match s.etype with
+                            |St -> ()
+                            |_ -> yield s.code]
+                        |> io2.cat ","
+                    p.tcache <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
+                        if isbinary then
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                        else
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                        code(fp)
+                        p.codewrite("fclose("+fp+")"+";\n")
+            |T ->
+                p.fcache <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> io2.cat ","
+                    let s = 
+                        filename
+                        |> List.map (fun s -> s.code)
+                        |> io2.cat ","
+                    p.tcache <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
+                        if isbinary then
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                        else
+                            p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                        code(fp)
+                        p.codewrite("fclose $"+fp+" "+"$\n")
+            |H ->
+                p.fcache <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                        |> io2.cat ","
+                    let s = 
+                        filename
+                        |> List.map (fun s -> s.code)
+                        |> io2.cat ","
+                    p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
+                    code(fp)
+                    p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
         static member private Write (fp:string) (lst:num0 list) =
             let p = p.param
             match p.lang with
-              |F ->
+            |F ->
                 let format = 
-                  lst
-                  |> (fun b ->
-                      [for n in 0..(b.Length-1) do
-                          match b.[n].etype with
+                    lst
+                    |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            match b.[n].etype with
                             |It _ -> 
-                              yield "I0"
+                                yield "I0"
                             |Dt ->
-                              yield "F0.3"
+                                yield "F0.3"
                             |Zt ->
-                              yield "F0.3"
-                              yield "F0.3"
-                            |Structure("string") -> 
-                              yield "A"
+                                yield "F0.3"
+                                yield "F0.3"
+                            |St -> 
+                                yield "A"
                             |_ -> ()
-                      ])
-                  |> io2.cat ","
+                        ])
+                    |> io2.cat ","
                 let code =
-                  lst
-                  |> (fun b ->
-                      [for n in 0..(b.Length-1) do
-                          match b.[n].etype,b.[n].expr with 
+                    lst
+                    |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            match b.[n].etype,b.[n].expr with 
                             |_,Int_c(v) -> yield p.ItoS(v)
                             |_,Dbl_c(v) -> yield p.DtoS(v)
                             |_,Str_c(v) -> yield v
                             |Zt,Var _ ->
-                              yield (b.[n].re.code)
-                              yield (b.[n].im.code)
-                            |_,Var v ->
-                              yield v
-                            |_,Formula v ->
-                              yield v
-                            |_ -> ()
-                      ])
-                  |> io2.cat ","
+                                yield (b.[n].re.code)
+                                yield (b.[n].im.code)
+                            |(It _|Dt),_ -> yield b[n].code
+                            |_ -> () ])
+                    |> io2.cat ","
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
-              |C ->
+            |C ->
                 let int0string_format_C = "%d"
                 let double0string_format_C = "%.3f"
                 let format = 
-                  lst
-                  |> (fun b -> 
-                      [for n in 0..(b.Length-1) do
-                          match b.[n].expr,b.[n].etype with
+                    lst
+                    |> (fun b -> 
+                        [for n in 0..(b.Length-1) do
+                            match b.[n].expr,b.[n].etype with
                             |_,It _ ->
                                 yield "%d"
                             |_,Dt ->
@@ -1068,26 +1051,25 @@ namespace Aqualis
                             |Str_c(v),_ ->
                                 yield v.Replace("\"","\\\"")
                             |_ -> ()
-                      ])
-                  |> io2.cat ""
+                        ])
+                    |> io2.cat ""
                 let code =
-                  [for b in lst do
-                      match b.etype,b.expr with 
+                    [for b in lst do
+                        match b.etype,b.expr with 
                         |_,Int_c(v) -> yield p.ItoS(v)
                         |_,Dbl_c(v) -> yield p.DtoS(v)
                         |Zt,Var _ ->
-                          yield b.re.code
-                          yield b.im.code
-                        |_,Var n -> yield n
-                        |_,Formula n -> yield n 
+                            yield b.re.code
+                            yield b.im.code
+                        |(It _|Dt),Var n -> yield b.code
                         |_ -> ()]
-                  |> io2.cat ","
+                    |> io2.cat ","
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
-              |T ->
+            |T ->
                 let code =
-                  lst
-                  |> List.map (fun b ->
-                      match b.etype,b.expr with 
+                    lst
+                    |> List.map (fun b ->
+                        match b.etype,b.expr with 
                         |_,Int_c(v) -> p.ItoS(v)
                         |_,Dbl_c(v) -> p.DtoS(v)
                         |_,Str_c(v) -> "\""+v+"\""
@@ -1095,13 +1077,13 @@ namespace Aqualis
                         |_,Var n -> n
                         |_,Formula n -> n 
                         |_ -> "")
-                  |> io2.cat ","
+                    |> io2.cat ","
                 p.codewrite("write("+fp+") "+code+"\n")
-              |H ->
+            |H ->
                 let code =
-                  lst
-                  |> List.map (fun b ->
-                      match b.etype,b.expr with 
+                    lst
+                    |> List.map (fun b ->
+                        match b.etype,b.expr with 
                         |_,Int_c(v) -> p.ItoS(v)
                         |_,Dbl_c(v) -> p.DtoS(v)
                         |_,Str_c(v) -> "\""+v+"\""
@@ -1109,7 +1091,7 @@ namespace Aqualis
                         |_,Var n -> n
                         |_,Formula n -> n 
                         |_ -> "")
-                  |> io2.cat "<mo>,</mo>"
+                    |> io2.cat "<mo>,</mo>"
                 p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+code+"</math>\n<br/>\n")
                 
         ///<summary>ファイル出力</summary>

@@ -19,7 +19,7 @@ namespace Aqualis
             
         let fftshift_odd(a:num1) =
             let n1 = a.size1
-            let n2 = a.size1/.2
+            let n2 = a.size1./2
             ch.z <| fun tmp ->
                 tmp <== a[n2+1]
                 iter.num n2 <| fun i ->
@@ -28,7 +28,7 @@ namespace Aqualis
                 a[a.size1] <== tmp
         
         let fftshift_even(a:num1) =
-            let n2 = a.size1/.2
+            let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
                     tmp <== a[i+n2]
@@ -37,7 +37,7 @@ namespace Aqualis
                     
         let ifftshift_odd(a:num1) =
             let n1 = a.size1
-            let n2 = n1/.2
+            let n2 = n1./2
             ch.z <| fun tmp ->
                 tmp <== a[n2+1]
                 iter.num n2 <| fun i ->
@@ -46,7 +46,7 @@ namespace Aqualis
                 a[1] <== tmp
         
         let ifftshift_even(a:num1) =
-            let n2 = a.size1/.2
+            let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
                     tmp <== a[i+n2]

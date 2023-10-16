@@ -43,9 +43,9 @@ type optimization() =
             f f2 x2
             counter.clear()
             fa_ <== fa
-            iter.whiledo (counter<.m) <| fun _ ->
+            iter.whiledo (counter.<m) <| fun _ ->
                 br.branch <| fun b ->
-                    b.IF (fa>.f1>.f2>.fb) <| fun () ->
+                    b.IF (fa.>f1.>f2.>fb) <| fun () ->
                         counter.dec
                         //xa: そのまま
                         x1 <== x2
@@ -56,7 +56,7 @@ type optimization() =
                         xb.foreach <| fun i -> xb.[i] <== xa.[i] + (x1.[i]-xa.[i])*(1.0+r)
                         f fb xb
                         //print.s [!."A"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
-                    b.IF (AND[f1>.f2; fa>.f2;]) <| fun () ->
+                    b.IF (AND[f1.>f2; fa.>f2;]) <| fun () ->
                         counter.inc
                         xa <== x1
                         fa <== f1
@@ -67,7 +67,7 @@ type optimization() =
                         x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
                         f f2 x2
                         //print.s [!."B"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
-                    b.IF (OR [AND [f1>.f2; fa<.f2;]; f1<=.f2;]) <| fun () ->
+                    b.IF (OR [AND [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
                         counter.inc
                         //xa: そのまま
                         xb <== x2
@@ -79,7 +79,7 @@ type optimization() =
                         f f1 x1
                         //print.s [!."C"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
                     b.EL <| fun () ->
-                        print.c "error: findmin"
+                        print.t "error: findmin"
             xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])
             
     /// <summary>
@@ -291,7 +291,7 @@ type optimization() =
                 dd0_ <== dd0
                 ch.d1 x0.size1 <| fun df0 ->
                     df df0 x0
-                    br.if1 (i>.1) <| fun () ->
+                    br.if1 (i.>1) <| fun () ->
                         y.foreach <| fun j -> y.[j] <== df0.[j] - df1.[j]
                         ch.d <| fun p ->
                             p.clear()

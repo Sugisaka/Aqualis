@@ -199,7 +199,7 @@ namespace Aqualis
                                 p.param.codewrite("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
                               |H -> 
                                 p.param.codewrite("<math>"+mat2.code+"<mo>&larr;</mo>"+"<msup>"+mat1.code+"<mn>-1</mn></msup>"+"</math>"+"\n<br/>\n")
-                        br.if1 (info =/. 0) <| fun () -> print.s[!.("InvMatrix Info: ");info]
+                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("InvMatrix Info: ");info]
                         
         ///<summary>行列の階数</summary>
         let rank (rank:num0) (mat:num2) (cond:num0) =
@@ -237,10 +237,10 @@ namespace Aqualis
                                 p.param.codewrite("call dgesdd('N', " + npre.code + "," + " " + npre.code + ","  + mat.code+", "  + npre.code + ", "  + s.code + ","   + u.code + ", "  + npre.code + ","   + vt.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ","   + rwork.code + ","   + iwork.code + ", "  + info.code + ")")
                               |H -> 
                                 p.param.codewrite("<math>"+rank.code+"<mo>&larr;</mo>"+"<mi>rank</mi><mo>[</mo>"+mat.code+"<mo>]</mo></math>"+"\n<br/>\n")
-                        br.if1 (info =/. 0) <| fun () -> print.s[!.("rank Info: ");info]
+                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("rank Info: ");info]
                         rank.clear()
                         iter.array s <| fun i -> 
-                            br.if1 (s.[i] >. cond) <| fun () -> rank.inc
+                            br.if1 (s.[i] .> cond) <| fun () -> rank.inc
         
         let inverse_matrix2 (mat2:num2) (mat:num2) (cond:num0) =
             p.param.option_("-llapack")
@@ -275,11 +275,11 @@ namespace Aqualis
                                 p.param.codewrite("call dgesdd('A', " + npre.code + "," + " " + npre.code + ","  + mat.code+", "  + npre.code + ", "  + s.code + ","   + u.code + ", "  + npre.code + ","   + vt.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ","   + rwork.code + ","   + iwork.code + ", "  + info.code + ")")
                               |H -> 
                                 p.param.codewrite("<math>"+mat2.code+"<mo>&larr;</mo>"+"<msup>"+mat.code+"<mn>-1</mn></msup>"+"</math>"+"\n<br/>\n")
-                        br.if1 (info =/. 0) <| fun () -> print.s[!.("rank Info: ");info]
+                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("rank Info: ");info]
                         //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
                         iter.array s <| fun i -> 
                             iter.array s <| fun j -> 
-                                br.if2 (s.[i] >. cond)
+                                br.if2 (s.[i] .> cond)
                                   (fun () ->
                                     u2.[i,j]<==(asm.conj(u.[j,i])/s.[i]))
                                   (fun () ->
@@ -322,7 +322,7 @@ namespace Aqualis
                                                 p.param.codewrite("call zgeev('No left vectors', 'Vectors (right)', "    + npre.code + ", "   + mat1.code + ", "  + npre.code + ", "  + eigenvalues.code + ","   + dummy.code + ",  " + ldvldummy.code + ", "  + eigenvectors.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ", "  + rwork.code + ", "  + info.code + ")")
                                               |H -> 
                                                 p.param.codewrite("<math><mi>solve</mi><mspace width=\"0.5em\" />"+mat1.code+eigenvectors.code+"<mo>=</mo>"+eigenvalues.code+eigenvectors.code+"</math>"+"\n<br/>\n")
-                                            br.if1 (info =/. 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                            br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
             tbinder.d mat1 <| fun () ->
                 codestr.section "非対称実行列の固有値" <| fun () ->
                     eigenvectors.clear()
@@ -346,7 +346,7 @@ namespace Aqualis
                                                 p.param.codewrite("call dgeev('No left vectors', 'Vectors (right)', "    + npre.code + ", "   + mat1.code + ", "  + npre.code + ", "  + eigenvalues.code + ","   + dummy.code + ",  " + ldvldummy.code + ", "  + eigenvectors.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ", "  + info.code + ")")
                                               |H -> 
                                                 p.param.codewrite("<math><mi>solve</mi><mspace width=\"0.5em\" />"+mat1.code+eigenvectors.code+"<mo>=</mo>"+eigenvalues.code+eigenvectors.code+"</math>"+"\n<br/>\n")
-                                            br.if1 (info =/. 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                            br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
                             eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
         /// <summary>
         /// Ax=λBxの固有値λと固有ベクトルxを計算
@@ -434,7 +434,7 @@ namespace Aqualis
                                           |H -> 
                                             p.param.codewrite("<math><mi>solve</mi><mspace width=\"0.5em\" />"+mat1.code+"<mi>&chi;</mi>"+"<mo>=</mo>"+"<mi>&lambda;</mi>"+mat2.code+"<mi>&chi;</mi></math>"+"\n<br/>\n")
                                             p.param.codewrite("<math><mi>&lambda;</mi><mo>=</mo>"+"<mfrac><mrow>"+eigenvalues1.code+"</mrow><mrow>"+eigenvalues2.code+"</mrow></mfrac></math>"+"\n<br/>\n")
-                                        br.if1 (info =/. 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
             tbinder.d mat1 <| fun () ->
                 codestr.section "非対称複素行列の一般化固有値" <| fun () ->
                     p.param.option_("-llapack")
@@ -514,7 +514,7 @@ namespace Aqualis
                                           |H -> 
                                             p.param.codewrite("<math><mi>solve</mi><mspace width=\"0.5em\" />"+mat1.code+"<mi>&chi;</mi>"+"<mo>=</mo>"+"<mi>&lambda;</mi>"+mat2.code+"<mi>&chi;</mi></math>"+"\n<br/>\n")
                                             p.param.codewrite("<math><mi>&lambda;</mi><mo>=</mo>"+"<mfrac><mrow>"+eigenvalues1re.code+"<mo>+</mo></mi>j<mi>"+eigenvalues1im.code+"</mrow><mrow>"+eigenvalues2.code+"</mrow></mfrac></math>"+"\n<br/>\n")
-                                        br.if1 (info =/. 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
                         iter.num eigenvalues1.size1 <| fun i ->
                             eigenvalues1.[i] <== eigenvalues1re.[i] + asm.uj + eigenvalues1im.[i]
                                         
@@ -870,6 +870,6 @@ namespace Aqualis
             ch.z2 mat.size1 mat.size2 <| fun vt ->
                 svd mat (u,s,vt)
                 !"0に近いほど正確な解"
-                print.tag_c "solve_homogeneq" s.[mat.size1]
+                print.tc "solve_homogeneq" s.[mat.size1]
                 iter.range _1 mat.size1 <| fun i ->
                     f.[i] <== asm.conj(vt.[mat.size1,i])

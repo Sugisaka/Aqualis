@@ -1,10 +1,10 @@
 //#############################################################################
 // project title
-let projectname = "test3"
+let projectname = "test3_1"
 let version = "1.0.0"
 //#############################################################################
  
-let outputdir = @"C:\home\testGit\testproj"
+let outputdir = __SOURCE_DIRECTORY__
 
 #I @"C:\home\LightwaveLaboratory\Aqualis\bin\Debug\net6.0"
 #r "Aqualis.dll"

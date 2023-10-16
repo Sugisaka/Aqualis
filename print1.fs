@@ -54,6 +54,7 @@ namespace Aqualis
                 let code   = 
                     List.fold (fun acc (q:num0) -> 
                                  match q.etype with
+                                 |St -> ""
                                  |Zt -> acc+","+q.re.code+","+q.im.code
                                  |_  -> acc+","+q.code) "" lst
                 p.codewrite("printf(\""+format+"\""+code+");\n")
@@ -77,11 +78,9 @@ namespace Aqualis
                 p.codewrite("<math><mi>print</mi><mo>[</mo>"+code+"<mo>]</mo></math>\n")
                 p.codewrite("<br/>\n")
         ///<summary>文字列を画面表示</summary>
-        static member c (str:string) = print.s[!.str]
+        static member t (str:string) = print.s[!.str]
         ///<summary>1個の項目を画面表示</summary>
         static member c (ss:num0) = print.s[ss]
-        static member c (ss:int) = print.s[ss.I]
-        static member c (ss:double) = print.s[ss.D]
         ///<summary>2個の項目を画面表示</summary>
         static member cc (s1:num0) (s2:num0) = print.s[s1;s2]
         ///<summary>3個の項目を画面表示</summary>
@@ -89,11 +88,11 @@ namespace Aqualis
         ///<summary>4個の項目を画面表示</summary>
         static member cccc (s1:num0) (s2:num0) (s3:num0) (s4:num0) = print.s[s1;s2;s3;s4]
         ///<summary>1個の項目をラベル付きで画面表示</summary>
-        static member tag_c (tag:string) (s:num0) = print.s[!.tag;s]
+        static member tc (tag:string) (s:num0) = print.s[!.tag;s]
         ///<summary>2個の項目をラベル付きで画面表示</summary>
-        static member tag_cc (tag:string) (s1:num0) (s2:num0) = print.s[!.tag;s1;s2]
+        static member tcc (tag:string) (s1:num0) (s2:num0) = print.s[!.tag;s1;s2]
         ///<summary>3個の項目をラベル付きで画面表示</summary>
-        static member tag_ccc (tag:string) (s1:num0) (s2:num0) (s3:num0) = print.s[!.tag;s1;s2;s3]
+        static member tccc (tag:string) (s1:num0) (s2:num0) (s3:num0) = print.s[!.tag;s1;s2;s3]
         ///<summary>4個の項目をラベル付きで画面表示</summary>
-        static member tag_cccc (tag:string) (s1:num0) (s2:num0) (s3:num0) (s4:num0) = print.s[!.tag;s1;s2;s3;s4]
+        static member tcccc (tag:string) (s1:num0) (s2:num0) (s3:num0) (s4:num0) = print.s[!.tag;s1;s2;s3;s4]
         

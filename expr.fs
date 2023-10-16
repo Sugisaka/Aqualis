@@ -38,8 +38,9 @@ namespace Aqualis
             |T ->
                 match this with
                 |Var x -> x
-                |Int_c x -> x.ToString()
-                |Dbl_c x -> x.ToString()
+                |Int_c x -> p.param.ItoS(x)
+                |Dbl_c x -> p.param.DtoS(x)
+                |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code
                 |Add (x,y) -> x.code+"+"+y.code
@@ -95,8 +96,9 @@ namespace Aqualis
             |F ->
                 match this with
                 |Var x -> x
-                |Int_c x -> x.ToString()
-                |Dbl_c x -> x.ToString()
+                |Int_c x -> p.param.ItoS(x)
+                |Dbl_c x -> p.param.DtoS(x)
+                |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code
                 |Add (x,y) -> x.code+"+"+y.code
@@ -152,8 +154,9 @@ namespace Aqualis
             |C ->
                 match this with
                 |Var x -> x
-                |Int_c x -> x.ToString()
-                |Dbl_c x -> x.ToString()
+                |Int_c x -> p.param.ItoS(x)
+                |Dbl_c x -> p.param.DtoS(x)
+                |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code
                 |Add (x,y) -> x.code+"+"+y.code
@@ -207,8 +210,9 @@ namespace Aqualis
             |H ->
                 match this with
                 |Var x -> x
-                |Int_c x -> x.ToString()
-                |Dbl_c x -> x.ToString()
+                |Int_c x -> p.param.ItoS(x)
+                |Dbl_c x -> p.param.DtoS(x)
+                |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code
                 |Add (x,y) -> x.code+"+"+y.code
@@ -725,7 +729,7 @@ namespace Aqualis
                 Div(x,y)
                 
         ///<summary>整数同士の除算(剰余無視)</summary>
-        static member ( /. ) (x:Expr,y:Expr) : Expr =
+        static member ( ./ ) (x:Expr,y:Expr) : Expr =
             if isEqSimplify then
                 match (x,y) with
                 |_,Int_c 0 -> NaN
@@ -741,8 +745,8 @@ namespace Aqualis
                 |Inv(v1),_ -> -(v1/y)
                 |Mul(Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))*u2
                 |Mul(v2,Int_c u2),Int_c v1 when u2%v1=0 -> v2*(Int_c (u2/v1))
-                |_,(Add _|Sub _|Mul _|Div _) -> x/.Par(y)
-                |(Add _|Sub _),_ -> Par(x)/.y
+                |_,(Add _|Sub _|Mul _|Div _) -> x./Par(y)
+                |(Add _|Sub _),_ -> Par(x)./y
                 |_ -> Div(x,y)
             else
               Div(x,y)
@@ -803,7 +807,7 @@ namespace Aqualis
             (* x^y *)
             |_ -> 
                 match p.lang with
-                |F -> Formula <| x.code+"**"+y.code+")"
+                |F -> Formula <| x.code+"**"+y.code
                 |C -> Formula <| "pow("+x.code+","+y.code+")"
                 |H -> Formula <| "pow("+x.code+","+y.code+")"
                 |T -> Formula <| "pow("+x.code+","+y.code+")"
@@ -811,25 +815,25 @@ namespace Aqualis
         ///<summary>等号</summary>
         static member (=.) (v1:Expr,v2:Expr) = Eq(v1,v2)
         ///<summary>不等号</summary>
-        static member (=/.) (v1:Expr,v2:Expr) = NEq(v1,v2)        
+        static member (.=/) (v1:Expr,v2:Expr) = NEq(v1,v2)        
         ///<summary>比較（より小）</summary>
-        static member (<.) (v1:Expr,v2:Expr) = 
+        static member (.<) (v1:Expr,v2:Expr) = 
             match v1 with
             |Less(u1,u2) ->
-                let x1 = u1<.u2
-                let x2 = u2<.v2
+                let x1 = u1.<u2
+                let x2 = u2.<v2
                 And([x1;x2])
             |LessEq(u1,u2) ->
-                let x1 = u1<=.u2
-                let x2 = u2<.v2
+                let x1 = u1.<=u2
+                let x2 = u2.<v2
                 And([x1;x2])
             |Greater(u1,u2) ->
-                let x1 = u1>.u2
-                let x2 = u2<.v2
+                let x1 = u1.>u2
+                let x2 = u2.<v2
                 And([x1;x2])
             |GreaterEq(u1,u2) ->
-                let x1 = u1>=.u2
-                let x2 = u2<.v2
+                let x1 = u1.>=u2
+                let x2 = u2.<v2
                 And([x1;x2])
             |And(lst) ->
                 let u1 =
@@ -842,28 +846,28 @@ namespace Aqualis
                       |Greater(_,u2) -> u2
                       |GreaterEq(_,u2) -> u2
                       |_ -> NaN
-                let x2 = u1<.v2
+                let x2 = u1.<v2
                 And(lst@[x2])
             |_ ->
                 Less(v1,v2)
         ///<summary>比較（以下）</summary>
-        static member (<=.) (v1:Expr,v2:Expr) = 
+        static member (.<=) (v1:Expr,v2:Expr) = 
             match v1 with
             |Less(u1,u2) ->
-                let x1 = u1<.u2
-                let x2 = u2<=.v2
+                let x1 = u1.<u2
+                let x2 = u2.<=v2
                 And([x1;x2])
             |LessEq(u1,u2) ->
-                let x1 = u1<=.u2
-                let x2 = u2<=.v2
+                let x1 = u1.<=u2
+                let x2 = u2.<=v2
                 And([x1;x2])
             |Greater(u1,u2) ->
-                let x1 = u1>.u2
-                let x2 = u2<=.v2
+                let x1 = u1.>u2
+                let x2 = u2.<=v2
                 And([x1;x2])
             |GreaterEq(u1,u2) ->
-                let x1 = u1>=.u2
-                let x2 = u2<=.v2
+                let x1 = u1.>=u2
+                let x2 = u2.<=v2
                 And([x1;x2])
             |And(lst) ->
                 let u1 =
@@ -876,28 +880,28 @@ namespace Aqualis
                         |Greater(_,u2) -> u2
                         |GreaterEq(_,u2) -> u2
                         |_ -> NaN
-                let x2 = (u1<=.v2)
+                let x2 = (u1.<=v2)
                 And(lst@[x2])
             |_ ->
                 LessEq(v1,v2)
         ///<summary>比較（より大）</summary>
-        static member (>.) (v1:Expr,v2:Expr) = 
+        static member (.>) (v1:Expr,v2:Expr) = 
             match v1 with
             |Less(u1,u2) ->
-                let x1 = u1<.u2
-                let x2 = u2>.v2
+                let x1 = u1.<u2
+                let x2 = u2.>v2
                 And[x1;x2]
             |LessEq(u1,u2) ->
-                let x1 = u1<=.u2
-                let x2 = u2>.v2
+                let x1 = u1.<=u2
+                let x2 = u2.>v2
                 And[x1;x2]
             |Greater(u1,u2) ->
-                let x1 = u1>.u2
-                let x2 = u2>.v2
+                let x1 = u1.>u2
+                let x2 = u2.>v2
                 And[x1;x2]
             |GreaterEq(u1,u2) ->
-                let x1 = u1>=.u2
-                let x2 = u2>.v2
+                let x1 = u1.>=u2
+                let x2 = u2.>v2
                 And[x1;x2]
             |And(lst) ->
                 let u1 =
@@ -910,28 +914,28 @@ namespace Aqualis
                         |Greater(_,u2) -> u2
                         |GreaterEq(_,u2) -> u2
                         |_ -> NaN
-                let x2 = u1>.v2
+                let x2 = u1.>v2
                 And(lst@[x2])
             |_ ->
                 Greater(v1,v2)
         ///<summary>比較（以上）</summary>
-        static member (>=.) (v1:Expr,v2:Expr) = 
+        static member (.>=) (v1:Expr,v2:Expr) = 
             match v1 with
             |Less(u1,u2) ->
-                let x1 = u1<.u2
-                let x2 = u2>=.v2
+                let x1 = u1.<u2
+                let x2 = u2.>=v2
                 And[x1;x2]
             |LessEq(u1,u2) ->
-                let x1 = u1<=.u2
-                let x2 = u2>=.v2
+                let x1 = u1.<=u2
+                let x2 = u2.>=v2
                 And[x1;x2]
             |Greater(u1,u2) ->
-                let x1 = u1>.u2
-                let x2 = u2>=.v2
+                let x1 = u1.>u2
+                let x2 = u2.>=v2
                 And[x1;x2]
             |GreaterEq(u1,u2) ->
-                let x1 = u1>=.u2
-                let x2 = u2>=.v2
+                let x1 = u1.>=u2
+                let x2 = u2.>=v2
                 And[x1;x2]
             |And(lst) ->
                 let u1 =
@@ -944,7 +948,7 @@ namespace Aqualis
                         |Greater(_,u2) -> u2
                         |GreaterEq(_,u2) -> u2
                         |_ -> NaN
-                let x2 = u1>=.v2
+                let x2 = u1.>=v2
                 And(lst@[x2])
             |_ ->
                 GreaterEq(v1,v2)

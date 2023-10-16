@@ -167,10 +167,10 @@ namespace Aqualis
         let aplgndr (pl:num0) (l:num0, m:num0, x:num0) =
             ch.dd <| fun (fact,pll) ->
             ch.ddd <| fun (pmm,pmmp1,somx2) ->
-                br.if1 (OR [m <. 0; m >. l; asm.abs(x) >. 1.0]) <| fun () ->
-                    print.c "Bad arguments in routine plgndr"
+                br.if1 (OR [m .< 0; m .> l; asm.abs(x) .> 1.0]) <| fun () ->
+                    print.t "Bad arguments in routine plgndr"
                 pmm <== 1.0
-                br.if1 (m >. 0) <| fun () ->
+                br.if1 (m .> 0) <| fun () ->
                     somx2 <== asm.sqrt((1.0-x)*(1.0+x))
                     fact <== 1.0
                     iter.num m <| fun i ->

@@ -40,7 +40,7 @@ namespace Aqualis
                                 norm(norm_,r)
                                 err <== norm_/bnrm2
                                 print.s[_0;err;]
-                            br.if1 (err >. tol) <| fun () ->
+                            br.if1 (err .> tol) <| fun () ->
                                 ch.z <| fun omega ->
                                     omega <== (1.0,0.0)
                                     iter.num r.size1 <| fun i -> r_tld.[i] <== r.[i]
@@ -49,7 +49,7 @@ namespace Aqualis
                                         iter.num_exit (I max_iteration) <| fun (exit,i) ->
                                             dot_product2(rho,r_tld,r)
                                             br.if1 (asm.abs(rho) =. 0.0) <| fun () -> exit()
-                                            br.if2 (i >. 1)
+                                            br.if2 (i .> 1)
                                               (fun () ->
                                                 beta <== ( rho/rho_1 )*( alpha/omega )
                                                 iter.num r.size1 <| fun j -> p.[j] <== r.[j] + beta*( p.[j] - omega*v.[j]))
@@ -86,7 +86,7 @@ namespace Aqualis
                                                 err <== norm_/bnrm2
                                             print.s[i;err]
                                             //収束判定
-                                            br.if1 (err <=. tol) <| fun () -> 
+                                            br.if1 (err .<= tol) <| fun () -> 
                                                 print.s[!."converged"]
                                                 exit()
                                             br.if1 (asm.abs(omega) =. 0.0) <| fun () -> 

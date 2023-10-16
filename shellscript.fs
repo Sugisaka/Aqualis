@@ -28,15 +28,15 @@ namespace Aqualis
             ///</summary>
             member this.AddProcess() =
                     match AqualisCompiler.lang with 
-                      |F -> 
-                        w.[id].Write("sh proc_"+AqualisCompiler.projname+".sh"+"\n")
+                    |F -> 
+                        w.[id].Write("sh proc_"+AqualisCompiler.projname+"_F.sh"+"\n")
                         this.nextid()
-                      |C -> 
+                    |C -> 
                         w.[id].Write("sh proc_"+AqualisCompiler.projname+"_C.sh"+"\n")
                         this.nextid()
-                      |T -> 
+                    |T -> 
                         ()
-                      |H -> 
+                    |H -> 
                         ()
                     
             ///<summary>
@@ -47,17 +47,17 @@ namespace Aqualis
             ///<param name="address">メールアドレス</param>
             member __.AddProcess (address:string) =
                 match AqualisCompiler.lang with
-                  |F   ->
+                |F   ->
                     w.[id].Write("echo project "+AqualisCompiler.projname+" started | mail -s ProcessNotification "+address+"\n")
                     w.[id].Write("(time " + "sh proc_"+AqualisCompiler.projname+".sh" + ") > "+AqualisCompiler.projname+".log "+"&"+"> "+AqualisCompiler.projname+"_time.log\n") 
                     w.[id].Write("(echo project "+AqualisCompiler.projname+" finished | cat - "+AqualisCompiler.projname+"_time.log) | mail -s ProcessNotification "+address+"\n")
-                  |C ->
+                |C ->
                     w.[id].Write("echo project "+AqualisCompiler.projname+" started | mail -s ProcessNotification "+address+"\n")
                     w.[id].Write("(time " + "sh proc_"+AqualisCompiler.projname+"_C.sh" + ") > "+AqualisCompiler.projname+".log "+"&"+"> "+AqualisCompiler.projname+"_time.log\n") 
                     w.[id].Write("(echo project "+AqualisCompiler.projname+" finished | cat - "+AqualisCompiler.projname+"_time.log) | mail -s ProcessNotification "+address+"\n")
-                  |T   ->
+                |T   ->
                     ()
-                  |H   ->
+                |H   ->
                     ()
                     
             member __.Close() =
