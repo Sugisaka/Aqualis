@@ -168,31 +168,31 @@ namespace Aqualis
         static member uj with get() =
             match p.lang with
             |F   -> 
-                p.param.var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
+                p.var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
                 num0(Zt, Var "uj")
             |C -> 
                 //#defineで定義済み
                 num0(Zt, Var "uj")
             |T   ->
-                p.param.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                p.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 num0(Zt, Var "\\mathrm{j}")
             |H   ->
-                p.param.var.setUniqVar(Zt,A0,"&ImaginaryI;","(0d0,1d0)")
+                p.var.setUniqVar(Zt,A0,"&ImaginaryI;","(0d0,1d0)")
                 num0(Zt, Var "<mi>&ImaginaryI;</mi>")
         ///<summary>円周率</summary>
         static member pi with get() = 
             match p.lang with
             |F   ->
-                p.param.var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
+                p.var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
                 num0(Dt, Var "pi")
             |C ->
-                p.param.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                p.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                 num0(Dt, Var "pi")
             |T   ->
-                p.param.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                p.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                 num0(Dt, Var "\\pi")
             |H   ->
-                p.param.var.setUniqVar(Dt,A0,"&pi;","3.14159265358979")
+                p.var.setUniqVar(Dt,A0,"&pi;","3.14159265358979")
                 num0(Dt, Var "<mi>&pi;</mi>")
         ///<summary>2πj</summary>
         static member j2p with get() = 2*asm.pi*asm.uj

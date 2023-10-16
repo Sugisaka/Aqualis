@@ -13,6 +13,7 @@ open Aqualis
 open Aqualis_base
  
 Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
+    AqualisCompiler.set_DebugMode ON
     codestr.h2 "test1" <| fun () ->
         ch.i <| fun m ->
         ch.i <| fun n ->
@@ -145,7 +146,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             let a = 8.4
             let b = 1/(x/5.3)
             printfn "%s" b.expr.code
-            print.c 4851
+            print.c (I 4851)
             print.c z1
             print.c z2
             print.c (asm.abs(z1-z2))

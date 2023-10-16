@@ -17,13 +17,12 @@ namespace Aqualis
         static member parallelize code =
             match p.lang with
             |F ->
-                let p = p.param
-                p.isOaccUsed <- true
-                p.switch_parmode(true)
-                if p.civar.list.Length>0 then
-                    let instr  = String.Join(",", p.civar)
-                    if p.covar.list.Length>0 then
-                        let outstr = String.Join(",", p.covar)
+                p.param.isOaccUsed <- true
+                p.param.switch_parmode(true)
+                if p.param.civar.list.Length>0 then
+                    let instr  = String.Join(",", p.param.civar)
+                    if p.param.covar.list.Length>0 then
+                        let outstr = String.Join(",", p.param.covar)
                         p.codewrite("!$acc data copyin("+instr+") copyout("+outstr+")\n")
                         p.codewrite("!$acc kernels"+"\n")
                         code()
@@ -35,8 +34,8 @@ namespace Aqualis
                         code()
                         p.codewrite("!$acc end kernels"+"\n")
                         p.codewrite("!$acc end data"+"\n")
-                elif p.covar.list.Length>0 then
-                    let outstr = String.Join(",", p.covar)
+                elif p.param.covar.list.Length>0 then
+                    let outstr = String.Join(",", p.param.covar)
                     p.codewrite("!$acc data copyout("+outstr+")\n")
                     p.codewrite("!$acc kernels"+"\n")
                     code()
@@ -46,15 +45,14 @@ namespace Aqualis
                     p.codewrite("!$acc kernels"+"\n")
                     code()
                     p.codewrite("!$acc end kernels\n")
-                p.switch_parmode(false)
+                p.param.switch_parmode(false)
             |C ->
-                let p = p.param
-                p.isOaccUsed <- true
-                p.switch_parmode(true)
-                if p.civar.list.Length>0 then
-                    let instr  = String.Join(",", p.civar)
-                    if p.covar.list.Length>0 then
-                        let outstr = String.Join(",", p.covar)
+                p.param.isOaccUsed <- true
+                p.param.switch_parmode(true)
+                if p.param.civar.list.Length>0 then
+                    let instr  = String.Join(",", p.param.civar)
+                    if p.param.covar.list.Length>0 then
+                        let outstr = String.Join(",", p.param.covar)
                         p.codewrite("#pragma acc data copyin("+instr+") copyout("+outstr+")\n")
                         p.codewrite("{"+"\n")
                         p.codewrite("#pragma acc kernels"+"\n")
@@ -70,8 +68,8 @@ namespace Aqualis
                         code()
                         p.codewrite("}"+"\n")
                         p.codewrite("}"+"\n")
-                elif p.covar.list.Length>0 then
-                    let outstr = String.Join(",", p.covar)
+                elif p.param.covar.list.Length>0 then
+                    let outstr = String.Join(",", p.param.covar)
                     p.codewrite("#pragma acc data copyout("+outstr+")\n")
                     p.codewrite("{"+"\n")
                     p.codewrite("#pragma acc kernels"+"\n")
@@ -84,9 +82,8 @@ namespace Aqualis
                     p.codewrite("{"+"\n")
                     code()
                     p.codewrite("}"+"\n")
-                p.switch_parmode(false)
+                p.param.switch_parmode(false)
             |_ ->
-                let p = p.param
                 Console.WriteLine("Error : この言語では並列化を実行できません")
                 p.codewrite("Error : この言語では並列化を実行できません")
                 

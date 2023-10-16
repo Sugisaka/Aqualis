@@ -62,6 +62,33 @@ namespace Aqualis
                 param_idx <- y
             |_ -> ()
               
+        member __.codewrite(s) = param_lst.[param_idx.[0]].codewrite(s)
+        member __.errorID with get() = param_lst.[param_idx.[0]].error_code_counter
+        member __.errorIDinc() = param_lst.[param_idx.[0]].error_code_counter_inc()
+        member __.debugMode with get() = param_lst.[param_idx.[0]].debugmode
+        member __.comment(s) = param_lst.[param_idx.[0]].comment(s)
+        member __.indentInc() = param_lst.[param_idx.[0]].indent.inc()
+        member __.indentDec() = param_lst.[param_idx.[0]].indent.dec()
+        member __.indentSpace = param_lst.[param_idx.[0]].indent.space
+        member __.displaySection = param_lst.[param_idx.[0]].displaysection
+        member __.i_cache_var = param_lst.[param_idx.[0]].i_cache_var
+        member __.d_cache_var = param_lst.[param_idx.[0]].d_cache_var
+        member __.z_cache_var = param_lst.[param_idx.[0]].z_cache_var
+        member __.i1_cache_var = param_lst.[param_idx.[0]].i1_cache_var
+        member __.d1_cache_var = param_lst.[param_idx.[0]].d1_cache_var
+        member __.z1_cache_var = param_lst.[param_idx.[0]].z1_cache_var
+        member __.i2_cache_var = param_lst.[param_idx.[0]].i2_cache_var
+        member __.d2_cache_var = param_lst.[param_idx.[0]].d2_cache_var
+        member __.z2_cache_var = param_lst.[param_idx.[0]].z2_cache_var
+        member __.i3_cache_var = param_lst.[param_idx.[0]].i3_cache_var
+        member __.d3_cache_var = param_lst.[param_idx.[0]].d3_cache_var
+        member __.z3_cache_var = param_lst.[param_idx.[0]].z3_cache_var
+        member __.ItoS(n) = param_lst.[param_idx.[0]].ItoS(n)
+        member __.DtoS(n) = param_lst.[param_idx.[0]].DtoS(n)
+        member __.iFormat = param_lst.[param_idx.[0]].int_string_format
+        member __.dFormat = param_lst.[param_idx.[0]].double_string_format
+        member __.var = param_lst.[param_idx.[0]].var
+        
     module Aqualis_base =
         
         ///<summary>trueのとき数式を最適化</summary>

@@ -59,7 +59,7 @@ namespace Aqualis
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->
-                    v1.code+" /= "+v2.code
+                    v1.code+" \\neq "+v2.code
                 |Greater(v1,v2) ->
                     v1.code+" > "+v2.code
                 |GreaterEq(v1,v2) ->
@@ -175,7 +175,7 @@ namespace Aqualis
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->
-                    v1.code+" /= "+v2.code
+                    v1.code+" != "+v2.code
                 |Greater(v1,v2) ->
                     v1.code+" > "+v2.code
                 |GreaterEq(v1,v2) ->
@@ -957,13 +957,10 @@ namespace Aqualis
         static member (<==) (x:Expr,y:Expr) =
             match p.lang with
             |F |T ->
-                let p = p.param
                 p.codewrite(x.code + " = " + y.code)
             |C->
-                let p = p.param
                 p.codewrite(x.code + " = " + y.code + ";")
             |H ->
-                let p = p.param
                 p.codewrite("<math>\n")
                 p.codewrite(x.code + "<mo>&larr;</mo>" + y.code)
                 p.codewrite("</math>\n")

@@ -13,7 +13,6 @@ namespace Aqualis
         type asm with
             ///<summary>0～1の一様乱数を取得</summary>
             static member random (code:(((num1->unit)->unit)*(num0->unit)->unit)) =
-                let p = p.param
                 match p.lang with
                 |F ->
                     ch.i <| fun seedsize ->
@@ -35,7 +34,7 @@ namespace Aqualis
                         code(setseed,getrand)
                         seed.deallocate()
                 |C ->
-                    p.include_("<time.h>")
+                    p.param.include_("<time.h>")
                     p.codewrite("srand((unsigned) time(NULL));")
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
@@ -74,7 +73,6 @@ namespace Aqualis
                         code(setseed,getrand)
             ///<summary>0～1の一様乱数を取得</summary>
             static member random_s (seed_:int) = fun code ->
-                let p = p.param
                 match p.lang with
                 |F ->
                     ch.i <| fun seedsize ->

@@ -15,25 +15,24 @@ namespace Aqualis
     type io () =
         
         static member private fileAccess (filename:num0 list) readmode isbinary code =
-            let p = p.param
             for s in filename do printfn "%s" <| s.etype.ToString()
             match p.lang with
             |F ->
-                p.fcache <| fun fp ->
+                ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.iFormat.ToString() |_ -> "")
                         |> (fun s -> String.Join(",",s))
                     let s = 
                         filename
                         |> List.map (fun s -> s.code)
                         |> (fun s -> String.Join(",",s))
-                    p.tcache <| A0 <| fun id ->
+                    ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
-                        p.getloopvar <| fun counter ->
+                        p.param.getloopvar <| fun counter ->
                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
                             p.codewrite("end do"+"\n")
@@ -44,10 +43,10 @@ namespace Aqualis
                         code(fp)
                         p.codewrite("close("+fp+")"+"\n")
             |C ->
-                p.fcache <| fun fp ->
+                ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
                         |> (fun s -> String.Join("",s))
                     let s = 
                         [for s in filename do
@@ -55,7 +54,7 @@ namespace Aqualis
                             |St -> ()
                             |_ -> yield s.code ]
                         |> (fun s -> String.Join(",",s))
-                    p.tcache <| A0 <| fun id ->
+                    ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("char"),A0,btname,"")
@@ -67,16 +66,16 @@ namespace Aqualis
                         code(fp)
                         p.codewrite("fclose("+fp+")"+";\n")
             |T ->
-                p.fcache <| fun fp ->
+                ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
                         |> (fun s -> String.Join("",s))
                     let s = 
                         filename
                         |> List.map (fun s -> s.code)
                         |> (fun s -> String.Join(",",s))
-                    p.tcache <| A0 <| fun id ->
+                    ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("char"),A0,btname,"")
@@ -88,10 +87,10 @@ namespace Aqualis
                         code(fp)
                         p.codewrite("fclose $"+fp+" "+"$\n")
             |H ->
-                 p.fcache <| fun fp ->
+                 ch.f <| fun fp ->
                      let f = 
                        filename
-                       |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                       |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.iFormat.ToString() |_ -> "")
                        |> (fun s -> String.Join(",",s))
                      let s = 
                        filename
@@ -101,12 +100,11 @@ namespace Aqualis
                      code(fp)
                      p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
         static member private Write (fp:string) (lst:num0 list) =
-            let p = p.param
             match p.lang with
             |F ->
                 let tab = var.ip0_noWarning("tab",2313)
                 let double0string_format_F = 
-                    let (a,b)=p.double_string_format
+                    let (a,b)=p.param.double_string_format
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
@@ -114,7 +112,7 @@ namespace Aqualis
                         [for n in 0..(b.Length-1) do
                             match b.[n].etype with
                             |It _ -> 
-                                yield "I"+p.int_string_format.ToString()
+                                yield "I"+p.param.int_string_format.ToString()
                             |Dt ->
                                 yield double0string_format_F
                             |Zt ->
@@ -152,9 +150,9 @@ namespace Aqualis
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
             |C ->
                 let int0string_format_C =
-                    "%"+p.int_string_format.ToString()+"d"
+                    "%"+p.iFormat.ToString()+"d"
                 let double0string_format_C = 
-                    let (a,b)=p.double_string_format
+                    let (a,b)=p.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
                     lst
@@ -194,13 +192,13 @@ namespace Aqualis
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
             |T ->
                 let double0string_format_F = 
-                    let (a,b)=p.double_string_format
+                    let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
                     |> List.map (fun b -> 
                         match b.etype with
-                          |It _ ->"I"+p.int_string_format.ToString()
+                          |It _ ->"I"+p.iFormat.ToString()
                           |Dt -> double0string_format_F
                           |Zt -> double0string_format_F+","+double0string_format_F 
                           |St -> "A"
@@ -221,13 +219,13 @@ namespace Aqualis
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
             |H ->
                 let double0string_format_F = 
-                    let (a,b)=p.double_string_format
+                    let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
                     |> List.map (fun b -> 
                         match b.etype with
-                          |It _ ->"I"+p.int_string_format.ToString()
+                          |It _ ->"I"+p.iFormat.ToString()
                           |Dt -> double0string_format_F
                           |Zt -> double0string_format_F+","+double0string_format_F 
                           |St -> "A"
@@ -248,7 +246,6 @@ namespace Aqualis
                 p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+code+"</math>\n<br/>\n")
                     
         static member private Write_bin (fp:string) (v:num0) =
-            let p = p.param
             match p.lang with
             |F ->
                 match v.etype,v.expr with 
@@ -326,7 +323,6 @@ namespace Aqualis
                 |_ -> ()
                 
         static member private Read (fp:string) (iostat:num0) (lst:num0 list) = 
-            let p = p.param
             let rec cpxvarlist list (s:num0 list) counter =
                 match s with
                 |a::b -> 
@@ -341,7 +337,7 @@ namespace Aqualis
                 ch.d01 <| fun tmp ->
                     if Nz>0 then tmp.allocate(2*Nz)
                     let double0string_format_F = 
-                        let (a,b)=p.double_string_format
+                        let (a,b)=p.dFormat
                         "E"+a.ToString()+"."+b.ToString()+"e3"
                     let format = 
                         varlist
@@ -349,7 +345,7 @@ namespace Aqualis
                             [for (t,_,_) in b do
                                 match t with
                                 |It _ ->
-                                    yield "I"+p.int_string_format.ToString()
+                                    yield "I"+p.iFormat.ToString()
                                 |Dt ->
                                     yield double0string_format_F
                                 |Zt ->
@@ -437,13 +433,13 @@ namespace Aqualis
                             ()
             |T ->
                 let double0string_format_F = 
-                    let (a,b)=p.double_string_format
+                    let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
                     |> List.map (fun b -> 
                         match b.etype with
-                          |It _ ->"I"+p.int_string_format.ToString()
+                          |It _ ->"I"+p.iFormat.ToString()
                           |Dt -> double0string_format_F
                           |St -> "A"
                           |_ -> "")
@@ -459,13 +455,13 @@ namespace Aqualis
                 p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
             |H ->
                 let double0string_format_F = 
-                    let (a,b)=p.double_string_format
+                    let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
                     |> List.map (fun b -> 
                         match b.etype with
-                        |It _ ->"I"+p.int_string_format.ToString()
+                        |It _ ->"I"+p.iFormat.ToString()
                         |Dt -> double0string_format_F
                         |St -> "A"
                         |_ -> "")
@@ -481,7 +477,6 @@ namespace Aqualis
                 p.codewrite("<math>"+code+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
                 
         static member private Read_bin (fp:string) (iostat:num0) (v:num0) = 
-            let p = p.param
             match p.lang with
             |F ->
                 match v.etype,v.expr with 
@@ -524,7 +519,6 @@ namespace Aqualis
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
                 
         static member private Read_byte (fp:string) (iostat:num0) (e:num0) = 
-            let p = p.param
             p.codewrite("read("+fp+", iostat="+iostat.code+") byte_tmp\n")
             let ee =
                 match e.etype,e.expr with 
@@ -913,24 +907,23 @@ namespace Aqualis
         static member private cat (con:string) (lst:string list) = [0..lst.Length-1] |> List.fold (fun acc i -> acc + (if i=0 then "" else con) + lst.[i]) ""
             
         static member private fileAccess (filename:num0 list) readmode isbinary code =
-            let p = p.param
             match p.lang with
             |F ->
-                p.fcache <| fun fp ->
+                ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.iFormat.ToString() |_ -> "")
                         |> io2.cat ","
                     let s = 
                         filename
                         |> List.map (fun s -> s.code)
                         |> io2.cat ","
-                    p.tcache <| A0 <| fun id ->
+                    ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
-                        p.getloopvar <| fun counter ->
+                        p.param.getloopvar <| fun counter ->
                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
                             p.codewrite("end do"+"\n")
@@ -941,10 +934,10 @@ namespace Aqualis
                         code(fp)
                         p.codewrite("close("+fp+")"+"\n")
             |C ->
-                p.fcache <| fun fp ->
+                ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
                         |> io2.cat ""
                     let s = 
                         [for s in filename do
@@ -952,7 +945,7 @@ namespace Aqualis
                             |St -> ()
                             |_ -> yield s.code]
                         |> io2.cat ","
-                    p.tcache <| A0 <| fun id ->
+                    ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("char"),A0,btname,"")
@@ -964,16 +957,16 @@ namespace Aqualis
                         code(fp)
                         p.codewrite("fclose("+fp+")"+";\n")
             |T ->
-                p.fcache <| fun fp ->
+                ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.int_string_format.ToString("00")+"d" |_ -> "")
+                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
                         |> io2.cat ","
                     let s = 
                         filename
                         |> List.map (fun s -> s.code)
                         |> io2.cat ","
-                    p.tcache <| A0 <| fun id ->
+                    ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("char"),A0,btname,"")
@@ -985,10 +978,10 @@ namespace Aqualis
                         code(fp)
                         p.codewrite("fclose $"+fp+" "+"$\n")
             |H ->
-                p.fcache <| fun fp ->
+                ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.int_string_format.ToString() |_ -> "")
+                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.iFormat.ToString() |_ -> "")
                         |> io2.cat ","
                     let s = 
                         filename
@@ -998,7 +991,6 @@ namespace Aqualis
                     code(fp)
                     p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
         static member private Write (fp:string) (lst:num0 list) =
-            let p = p.param
             match p.lang with
             |F ->
                 let format = 

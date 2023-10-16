@@ -17,7 +17,6 @@ namespace Aqualis
         static member s (lst:num0 list)  = 
             match p.lang with
             |F ->
-                let p = p.param
                 let clist = 
                     [for q in lst do
                         match q.etype,q.expr with
@@ -31,11 +30,10 @@ namespace Aqualis
                 let code = List.fold (fun acc i -> acc + (if i=0 then "" else ",") + clist[i]) "" [0..clist.Length-1] 
                 p.codewrite("print *, "+code+"\n")
             |C ->
-                let p = p.param
                 let int0string_format_C =
-                    "%"+p.int_string_format.ToString()+"d"
+                    "%"+p.iFormat.ToString()+"d"
                 let double0string_format_C = 
-                    let (a,b)=p.double_string_format
+                    let (a,b)=p.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
                     (List.fold (fun acc (q:num0) ->
@@ -54,19 +52,17 @@ namespace Aqualis
                 let code   = 
                     List.fold (fun acc (q:num0) -> 
                                  match q.etype with
-                                 |St -> ""
+                                 |St -> acc
                                  |Zt -> acc+","+q.re.code+","+q.im.code
                                  |_  -> acc+","+q.code) "" lst
                 p.codewrite("printf(\""+format+"\""+code+");\n")
             |T ->
-                let p = p.param
                 let code = 
                   (fun (s:string) -> s.Replace("#,","")) 
                     (List.fold (fun acc (q:num0) -> 
                         acc+","+q.code) "#" lst)
                 p.codewrite("print, "+code+"\n")
             |H ->
-                let p = p.param
                 let code =  
                     (List.fold (fun acc (i:int) -> 
                         let q = lst.[i]

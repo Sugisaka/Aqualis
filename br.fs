@@ -14,7 +14,6 @@ namespace Aqualis
         let mutable con = 1
         ///<summary>条件分岐式を生成</summary>
         let branch_ (el:Branch) (cond:bool0) (code:(unit->unit)) =
-            let p = p.param
             match p.lang with
             |F ->
                 match el with
@@ -24,9 +23,9 @@ namespace Aqualis
                     p.codewrite("else if"+"("+cond.code+") then"+"\n")
                 |ELSE ->
                     p.codewrite("else"+"\n")
-                p.indent.inc()
+                p.indentInc()
                 code()
-                p.indent.dec()
+                p.indentDec()
             |C ->
                 match el with
                 |IF   ->
@@ -36,9 +35,9 @@ namespace Aqualis
                 |ELSE ->
                     p.codewrite("else"+"\n")
                 p.codewrite("{\n")
-                p.indent.inc()
+                p.indentInc()
                 code()
-                p.indent.dec()
+                p.indentDec()
                 p.codewrite("}\n")
             |T ->
                 match el with
@@ -48,9 +47,9 @@ namespace Aqualis
                     p.codewrite("else if"+"("+cond.code+")"+"\n")
                 |ELSE ->
                     p.codewrite("else"+"\n")
-                p.indent.inc()
+                p.indentInc()
                 code()
-                p.indent.dec()
+                p.indentDec()
                 p.codewrite("end\n")
             |H ->
                 p.codewrite("<div class=\"codeblock\">\n")
@@ -62,11 +61,11 @@ namespace Aqualis
                     p.codewrite("<summary><span class=\"op-if\">else if</span>"+" (<math>"+cond.code+"</math>)</summary>"+"\n")
                 |ELSE ->
                     p.codewrite("<summary><span class=\"op-if\">else</span></summary>"+"\n")
-                p.indent.inc()
+                p.indentInc()
                 p.codewrite("<div class=\"insidecode-if\">\n")
                 code()
                 p.codewrite("</div>\n")
-                p.indent.dec()
+                p.indentDec()
                 p.codewrite("</details>\n")
                 p.codewrite("</div>\n")
         ///<summary>条件式(if)</summary>
@@ -86,7 +85,6 @@ namespace Aqualis
         static member branch code =
             let ib = br()
             code(ib)
-            let p = p.param
             if p.lang=F then p.codewrite("end if\n")
             
         ///<summary>条件分岐式(if式)</summary>

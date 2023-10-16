@@ -306,6 +306,9 @@ namespace Aqualis
         member __.f_number() = 
             f_stat_var.getvar(fun i -> "f"+i.ToString("000"))
 
+        member __.fvar with get() = f_stat_var 
+        member __.tvar with get() = t_stat_var 
+        
         ///<summary>ファイルポインタcache変数を生成し、code内の処理を実行</summary>
         member this.fcache code = 
             let name = this.f_number()

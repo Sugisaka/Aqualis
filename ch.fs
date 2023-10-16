@@ -13,21 +13,18 @@ namespace Aqualis
         
         ///<summary>整数型一時変数の生成</summary>
         static member i code = 
-            let p = p.param
             let x = p.i_cache_var.getAutoVar()
             code <| num0(It 4,Var x)
             p.i_cache_var.setVar(It 4,A0,x,"")
             
         ///<summary>倍精度浮動小数点型一時変数の生成</summary>
         static member d code = 
-            let p = p.param
             let x = p.d_cache_var.getAutoVar()
             code <| num0(Dt,Var x)
             p.d_cache_var.setVar(Dt,A0,x,"")
             
         ///<summary>複素数型一時変数の生成</summary>
         static member z code = 
-            let p = p.param
             let x = p.z_cache_var.getAutoVar()
             code <| num0(Zt,Var x)
             p.z_cache_var.setVar(Zt,A0,x,"")
@@ -59,26 +56,8 @@ namespace Aqualis
         ///<summary>複素数型一時変数を生成し、valueを代入してからcodeで使用</summary>
         static member sz (re:double,im:double) = ch.sz (re+asm.uj*im)
         
-        // static member f = 
-        //     fun (code:string->unit) ->
-        //         let name = p.param.f_number()
-        //         match p.lang with
-        //         |F ->
-        //             ignore <| p.param.vreg(Structure("file"),A0,name,name.Substring(1))
-        //         |_ ->
-        //             ignore <| p.param.vreg(Structure("file"),A0,name,"")
-        //         code name
-            
-        // static member t = 
-        //     fun (code:string->unit) ->
-        //         let name = p.param.t_name()
-        //         ignore <| p.param.vreg(Structure("string"),A0,name,"")
-        //         code name
-                
-
         ///<summary>整数型1次元配列を生成</summary>
         static member i01 code = 
-            let p = p.param
             let x = p.i1_cache_var.getAutoVar()
             let y = num1(It 4,Var1(A1(0),x))
             code y
@@ -86,7 +65,6 @@ namespace Aqualis
             
         ///<summary>実数型1次元配列を生成</summary>
         static member d01 code = 
-            let p = p.param
             let x = p.d1_cache_var.getAutoVar()
             let y = num1(Dt,Var1(A1(0),x))
             code y
@@ -94,7 +72,6 @@ namespace Aqualis
             
         ///<summary>複素数型1次元配列を生成</summary>
         static member z01 code = 
-            let p = p.param
             let x = p.z1_cache_var.getAutoVar()
             let y = num1(Zt,Var1(A1(0),x))
             code y
@@ -135,7 +112,6 @@ namespace Aqualis
             
         ///<summary>整数型2次元配列を生成</summary>
         static member i02 code = 
-            let p = p.param
             let x = p.i2_cache_var.getAutoVar()
             let y = num2(It 4,Var2(A2(0,0),x))
             code y
@@ -143,7 +119,6 @@ namespace Aqualis
             
         ///<summary>実数型2次元配列を生成</summary>
         static member d02 code = 
-            let p = p.param
             let x = p.d2_cache_var.getAutoVar()
             let y = num2(Dt,Var2(A2(0,0),x))
             code y
@@ -151,7 +126,6 @@ namespace Aqualis
             
         ///<summary>複素数型2次元配列を生成</summary>
         static member z02 code = 
-            let p = p.param
             let x = p.z2_cache_var.getAutoVar()
             let y = num2(Zt,Var2(A2(0,0),x))
             code y
@@ -192,7 +166,6 @@ namespace Aqualis
             
         ///<summary>整数型3次元配列を生成</summary>
         static member i03 code = 
-            let p = p.param
             let x = p.i3_cache_var.getAutoVar()
             let y = num3(It 4,Var3(A3(0,0,0),x))
             code y
@@ -200,7 +173,6 @@ namespace Aqualis
             
         ///<summary>実数型3次元配列を生成</summary>
         static member d03 code = 
-            let p = p.param
             let x = p.d3_cache_var.getAutoVar()
             let y = num3(Dt,Var3(A3(0,0,0),x))
             code y
@@ -208,7 +180,6 @@ namespace Aqualis
             
         ///<summary>複素数型3次元配列を生成</summary>
         static member z03 code = 
-            let p = p.param
             let x = p.z3_cache_var.getAutoVar()
             let y = num3(Zt,Var3(A3(0,0,0),x))
             code y
@@ -452,12 +423,25 @@ namespace Aqualis
                 counter <== _1
                 code(counter)
                 
+        ///<summary>ファイルポインタcache変数を生成し、code内の処理を実行</summary>
+        static member f code = 
+            let name = p.param.f_number()
+            match p.lang with
+              |F -> p.var.setVar(Structure("file"),A0,name,(p.ItoS <| (p.param.fvar.counter+10)))
+              |_ -> p.var.setVar(Structure("file"),A0,name,"")
+            code name
+            
+        ///<summary>文字列cache変数を生成し、code内の処理を実行</summary>
+        static member t vt code = 
+            let name = p.param.t_name()
+            p.var.setVar(Structure("string"),vt,name,"")
+            code name
+            
         ///<summary>指定した型の一時変数を生成</summary>
         static member n e = fun code ->
             match e with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| e.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match e with
                 |Zt -> p.z_cache_var.getAutoVar()
@@ -475,7 +459,6 @@ namespace Aqualis
             match v.etype with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
@@ -493,7 +476,6 @@ namespace Aqualis
             match v.etype with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
@@ -511,7 +493,6 @@ namespace Aqualis
             match v.etype with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
@@ -529,7 +510,6 @@ namespace Aqualis
             match v.etype with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
@@ -547,7 +527,6 @@ namespace Aqualis
             match e with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n1)" <| e.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match e with
                 |Zt -> p.z1_cache_var.getAutoVar()
@@ -577,7 +556,6 @@ namespace Aqualis
             match e with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n2)" <| e.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match e with
                 |Zt -> p.z2_cache_var.getAutoVar()
@@ -607,7 +585,6 @@ namespace Aqualis
             match e with 
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n3)" <| e.ToString()
             |_ -> ()
-            let p = p.param
             let x = 
                 match e with
                 |Zt -> p.z3_cache_var.getAutoVar()

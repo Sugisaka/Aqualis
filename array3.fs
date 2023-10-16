@@ -19,11 +19,11 @@ namespace Aqualis
     type base3 (typ:Etype,x:Expr3) =
         ///<summary>変数を作成しリストに追加</summary>
         new (typ,size,name,para) = 
-            p.param.var.setVar(typ,size,name,para)
+            p.var.setVar(typ,size,name,para)
             base3(typ,Var3(size,name))
         ///<summary>変数を作成しリストに追加</summary>
         new(sname,size,name) =
-            p.param.var.setVar(Structure(sname),size,name,"")
+            p.var.setVar(Structure(sname),size,name,"")
             base3(Structure(sname),Var3(size,name))
         member _.expr with get() = x
         member _.code with get() =
@@ -33,7 +33,6 @@ namespace Aqualis
         ///<summary>変数の要素数</summary>
         member __.size1 
           with get() =
-            let p = p.param
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
@@ -44,7 +43,6 @@ namespace Aqualis
         ///<summary>変数の要素数</summary>
         member __.size2 
           with get() =
-            let p = p.param
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
@@ -55,7 +53,6 @@ namespace Aqualis
         ///<summary>変数の要素数</summary>
         member __.size3 
           with get() =
-            let p = p.param
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
@@ -65,20 +62,19 @@ namespace Aqualis
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:num0,j:num0,k:num0) =
-            let p = p.param
-            if p.debugmode then
+            if p.debugMode then
                 match x with
                 |Var3(_,name) ->
-                    p.error_code_counter_inc()
-                    p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
+                    p.errorIDinc()
+                    p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
                     br.if1 (OR [this.size1 =. -1; this.size2 =. -1; this.size3 =. -1]) <| fun () -> 
-                        print.t ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is not allocated")
+                        print.t ("ERROR"+p.errorID.ToString()+" array "+name+" is not allocated")
                     br.if1 (OR [(i .< _1); (this.size1 .< i)]) <| fun () ->
-                        print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
+                        print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
                     br.if1 (OR [(j .< _1); (this.size2 .< j)]) <| fun () ->
-                        print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size3;!.")"]
+                        print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size3;!.")"]
                     br.if1 (OR [(k .< _1); (this.size3 .< k)]) <| fun () ->
-                        print.s [!.("ERROR"+p.error_code_counter.ToString()+" array "+name+" illegal access. index ");k;!." is out of range (1:";this.size3;!.")"]
+                        print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");k;!." is out of range (1:";this.size3;!.")"]
                     p.comment("****************************************************")
                 |_ -> ()
             match x with
@@ -111,15 +107,14 @@ namespace Aqualis
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.allocate(n1:num0,n2:num0,n3:num0) =
-                let p = p.param
                 match x with
                 |Var3(size,name) ->
-                    if p.debugmode then
-                        p.error_code_counter_inc()
-                        p.comment("***debug array1 allocate check: "+p.error_code_counter.ToString()+"*****************************")
+                    if p.debugMode then
+                        p.errorIDinc()
+                        p.comment("***debug array1 allocate check: "+p.errorID.ToString()+"*****************************")
                         br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
-                                print.t ("ERROR"+p.error_code_counter.ToString()+" array "+name+" is already allocated")
+                                print.t ("ERROR"+p.errorID.ToString()+" array "+name+" is already allocated")
                         p.comment("****************************************************")
                     match p.lang with
                     |F ->
@@ -167,15 +162,14 @@ namespace Aqualis
         
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
-            let p = p.param
-            if p.debugmode then
+            if p.debugMode then
                 match x with
                 |Var3(_,name) ->
-                    p.error_code_counter_inc()
-                    p.comment("***debug array1 deallocate check: "+p.error_code_counter.ToString()+"*****************************")
+                    p.errorIDinc()
+                    p.comment("***debug array1 deallocate check: "+p.errorID.ToString()+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 =. -1) <| fun () ->
-                            print.t ("ERROR"+p.error_code_counter.ToString()+" cannot deallocate array "+name)
+                            print.t ("ERROR"+p.errorID.ToString()+" cannot deallocate array "+name)
                     p.comment("****************************************************")
                 |_ -> ()
             match x with
@@ -237,29 +231,27 @@ namespace Aqualis
                         code(ext1,ext2,ext3,i,j,k)
                         
         static member sizeMismatchError(v1:base3,v2:base3) =
-            let p = p.param
-            if p.debugmode then
-                p.error_code_counter_inc()
-                p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
+            if p.debugMode then
+                p.errorIDinc()
+                p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
                 br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size1 mismatch")
                 br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size2 mismatch")
                 br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size3 mismatch")
                 p.comment("****************************************************")
                 
         static member subst (v1:Expr3,s11:num0,s12:num0,s13:num0,f1:num0->num0->num0->Expr,v2:Expr3,s21:num0,s22:num0,s23:num0,f2:num0->num0->num0->Expr) =
-            let p = p.param
-            if p.debugmode then
-                p.error_code_counter_inc()
-                p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
+            if p.debugMode then
+                p.errorIDinc()
+                p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
                 br.if1 (s11 .=/ s21) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size1 mismatch")
                 br.if1 (s12 .=/ s22) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size2 mismatch")
                 br.if1 (s13 .=/ s23) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size3 mismatch")
                 p.comment("****************************************************")
             match v1,v2 with
             |Var3(_,x),Var3(_,y) ->
@@ -278,7 +270,6 @@ namespace Aqualis
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
                 
         static member subst (v1:Expr3,s11:num0,s12:num0,s13:num0,f1:num0->num0->num0->Expr,v2:Expr) =
-            let p = p.param
             match v1 with
             |Var3(_,x) ->
                 match p.lang with
@@ -293,7 +284,7 @@ namespace Aqualis
     type num3 (typ:Etype,x:Expr3) =
         inherit base3(typ,x)
         new (typ,size,name,para) =
-            p.param.var.setVar(typ,size,name,para)
+            p.var.setVar(typ,size,name,para)
             num3(typ,Var3(size,name))
         member this.etype with get() = typ
         member this.Item with get(i:num0,j:num0,k:num0) = num0(typ,this.Idx3(i,j,k))
@@ -324,14 +315,13 @@ namespace Aqualis
             this.size1 <== -1
             
         static member sizeMismatchError(x:num3,y:num3) =
-            let p = p.param
-            if p.debugmode then
-                p.error_code_counter_inc()
-                p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
+            if p.debugMode then
+                p.errorIDinc()
+                p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
                 br.if1 (x.size1 .=/ y.size1) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size1 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '+' array size1 mismatch")
                 br.if1 (x.size2 .=/ y.size2) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '+' array size2 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '+' array size2 mismatch")
                 p.comment("****************************************************")
                 
 
@@ -367,16 +357,15 @@ namespace Aqualis
         static member (./) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr./y.expr))
         
         static member (<==) (v1:num3,v2:num3) =
-            let p = p.param
-            if p.debugmode then
-                p.error_code_counter_inc()
-                p.comment("***debug array1 access check: "+p.error_code_counter.ToString()+"*****************************")
+            if p.debugMode then
+                p.errorIDinc()
+                p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
                 br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size1 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size1 mismatch")
                 br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size2 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size2 mismatch")
                 br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
-                    print.t ("ERROR"+p.error_code_counter.ToString()+" operator '<==' array size3 mismatch")
+                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size3 mismatch")
                 p.comment("****************************************************")
             match v1.expr,v2.expr with
             |Var3(_,x),Var3(_,y) ->
@@ -394,7 +383,6 @@ namespace Aqualis
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
         static member (<==) (v1:num3,v2:num0) =
-            let p = p.param
             match v1.expr with
             |Var3(_,x) ->
                 match p.lang with

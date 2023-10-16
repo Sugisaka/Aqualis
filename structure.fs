@@ -85,47 +85,46 @@ namespace Aqualis
             
         ///<summary>構造体定義のコードを作成</summary>
         member this.Def_Structure()=
-            let p = p.param
             match p.lang with
             |F ->
                 for s in this.sort() do
-                    p.hwrite("type "+s.sname+"\n")
-                    p.indent.inc()
+                    p.param.hwrite("type "+s.sname+"\n")
+                    p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.hwrite(p.indent.space + p.declare(typ,vtp,name,"")+"\n")
-                    p.indent.dec()
-                    p.hwrite("end type "+s.sname+"\n")
+                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                    p.indentDec()
+                    p.param.hwrite("end type "+s.sname+"\n")
             |C ->
                 for s in this.sort() do
-                    p.hwrite("typedef struct "+"_"+s.sname+"\n")
-                    p.hwrite("{"+"\n")
-                    p.indent.inc()
+                    p.param.hwrite("typedef struct "+"_"+s.sname+"\n")
+                    p.param.hwrite("{"+"\n")
+                    p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.hwrite(p.indent.space + p.declare(typ,vtp,name,"")+"\n")
-                    p.indent.dec()
-                    p.hwrite("} "+s.sname+";\n")
+                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                    p.indentDec()
+                    p.param.hwrite("} "+s.sname+";\n")
             |T ->
                 for s in this.sort() do
-                    p.hwrite("\\subsection{"+s.sname+"}")
-                    p.hwrite("\\begin{itemize}\n")
-                    p.indent.inc()
+                    p.param.hwrite("\\subsection{"+s.sname+"}")
+                    p.param.hwrite("\\begin{itemize}\n")
+                    p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.hwrite(p.indent.space + p.declare(typ,vtp,name,"")+"\n")
-                    p.indent.dec()
-                    p.hwrite("\\end{itemize}\n")
+                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                    p.indentDec()
+                    p.param.hwrite("\\end{itemize}\n")
             |H ->
                 for s in this.sort() do
-                    p.hwrite("<h3>"+s.sname+"</h3>\n")
-                    p.hwrite("<ul>\n")
-                    p.indent.inc()
+                    p.param.hwrite("<h3>"+s.sname+"</h3>\n")
+                    p.param.hwrite("<ul>\n")
+                    p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.hwrite(p.indent.space + p.declare(typ,vtp,name,"")+"\n")
-                    p.indent.dec()
-                    p.hwrite("</ul>\n")
+                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                    p.indentDec()
+                    p.param.hwrite("</ul>\n")
         ///<summary>構造体メンバへのアクセス</summary>
         static member mem(vname,name) =
             match p.lang with
@@ -245,7 +244,7 @@ namespace Aqualis
                 this.addstructure(sname)
                 //構造体変数の宣言
                 let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                p.param.var.setVar(Structure(sname),A0,name_,"")
+                p.var.setVar(Structure(sname),A0,name_,"")
             
         member this.reg(sname,name:string,size1) =
             let str_ac = match p.lang with |F -> "%" |C |T |H -> "."
@@ -255,7 +254,7 @@ namespace Aqualis
                 this.addstructure(sname)
                 //構造体変数の宣言
                 let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                p.param.var.setVar(Structure(sname),A1(size1),name_,"")
+                p.var.setVar(Structure(sname),A1(size1),name_,"")
             
         member this.reg(sname,name:string,size1,size2) =
             let str_ac = match p.lang with |F -> "%" |C |T |H -> "."
@@ -265,7 +264,7 @@ namespace Aqualis
                 this.addstructure(sname)
                 //構造体変数の宣言
                 let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                p.param.var.setVar(Structure(sname),A2(size1,size2),name_,"")
+                p.var.setVar(Structure(sname),A2(size1,size2),name_,"")
             
         member this.reg(sname,name:string,size1,size2,size3) =
             let str_ac = match p.lang with |F -> "%" |C |T |H -> "."
@@ -275,5 +274,5 @@ namespace Aqualis
                 this.addstructure(sname)
                 //構造体変数の宣言
                 let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                p.param.var.setVar(Structure(sname),A3(size1,size2,size3),name_,"")
+                p.var.setVar(Structure(sname),A3(size1,size2,size3),name_,"")
                 

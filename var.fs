@@ -16,7 +16,6 @@ namespace Aqualis
         
         ///<summary>複素数の初期値</summary>
         static member private init_z (re,im) =
-            let p = p.param
             match p.lang with
             |F ->
                 "("+(p.DtoS re)+","+(p.DtoS im)+")"
@@ -32,7 +31,6 @@ namespace Aqualis
                 
         ///<summary>整数型配列の初期値</summary>
         static member private init_i1 (v:int list) =
-            let p = p.param
             match p.lang with
             |F ->
                 "(/"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"/)"
@@ -45,7 +43,6 @@ namespace Aqualis
                 
         ///<summary>倍精度浮動小数点型配列の初期値</summary>
         static member private init_d1 (v:double list) =
-            let p = p.param
             match p.lang with
             |F ->
                 "(/"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"/)"
@@ -58,7 +55,6 @@ namespace Aqualis
                 
         ///<summary>複素数型配列の初期値</summary>
         static member private init_z1 (v:(double*double) list) =
-            let p = p.param
             match p.lang with
             |F ->
                 "(/"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"/)"
@@ -73,28 +69,28 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         static member b0 (name:string) = 
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(It 1,A0,name_,"")
+            p.var.setUniqVarWarning(It 1,A0,name_,"")
             num0(It 1,Var name_)
             
         ///<summary>整数型変数</summary>
         ///<param name="name">変数名</param>
         static member i0 (name:string) = 
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(It 4,A0,name_,"")
+            p.var.setUniqVarWarning(It 4,A0,name_,"")
             num0(It 1,Var(name_))
             
         ///<summary>倍精度浮動小数点型変数</summary>
         ///<param name="name">変数名</param>
         static member d0 (name:string) =
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(Dt,A0,name_,"")
+            p.var.setUniqVarWarning(Dt,A0,name_,"")
             num0(Dt,Var name_)
             
         ///<summary>複素数型変数</summary>
         ///<param name="name">変数名</param>
         static member z0 (name:string) = 
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(Zt,A0,name_,"")
+            p.var.setUniqVarWarning(Zt,A0,name_,"")
             num0(Zt,Var name_)
             
         ///<summary>整数型1次元配列</summary>
@@ -227,7 +223,6 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member ip0(name:string,v) = 
-            let p = p.param
             p.var.setUniqVarWarning(It 4,A0,name,(p.ItoS v))
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
             num0(It 4,Var name_)
@@ -236,7 +231,6 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp0(name:string,v) = 
-            let p = p.param
             p.var.setUniqVarWarning(Dt,A0,name,(p.DtoS v))
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
             num0(Dt,Var name_)
@@ -245,7 +239,6 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal ip0_noWarning(name:string,v) = 
-            let p = p.param
             p.var.setUniqVar(It 4,A0,name,(p.ItoS v))
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
             num0(It 4,Var name_)
@@ -254,7 +247,6 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal dp0_noWarning(name:string,v) = 
-            let p = p.param
             p.var.setUniqVar(Dt,A0,name,(p.DtoS v))
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
             num0(Dt,Var name_)
@@ -264,7 +256,7 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member zp0(name,(v:double*double)) =
             let (v_re,v_im) = v
-            p.param.var.setUniqVarWarning(Zt,A0,name,var.init_z (v_re,v_im))
+            p.var.setUniqVarWarning(Zt,A0,name,var.init_z (v_re,v_im))
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
             num0(Zt,Var name_)
             
@@ -273,7 +265,7 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member ip1(name:string,v:int list) =
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(It 4,A1(v.Length),name,var.init_i1 v)
+            p.var.setUniqVarWarning(It 4,A1(v.Length),name,var.init_i1 v)
             num1(It 4,A1(v.Length),name,var.init_i1 v)
             
         ///<summary>倍精度浮動小数点型1次元配列定数</summary>
@@ -281,7 +273,7 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member dp1(name:string,v:double list) = 
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(Zt,A1(v.Length),name,var.init_d1 v)
+            p.var.setUniqVarWarning(Zt,A1(v.Length),name,var.init_d1 v)
             num1(Dt,A1(v.Length),name_,var.init_d1 v)
             
         ///<summary>複素数型1次元配列定数</summary>
@@ -289,7 +281,7 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member zp1(name:string,v:(double*double) list) =
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(Zt,A0,name,var.init_z1 v)
+            p.var.setUniqVarWarning(Zt,A0,name,var.init_z1 v)
             num1(Zt,A1(v.Length),name_,var.init_z1 v)
             
         ///<summary>整数型変数</summary>
@@ -299,7 +291,7 @@ namespace Aqualis
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n0)" <| e.ToString()
             |_ -> ()
             let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\" class=\""+name+"\">"+name+"</mi>" |_ -> name
-            p.param.var.setUniqVarWarning(e,A0,name_,"")
+            p.var.setUniqVarWarning(e,A0,name_,"")
             num0(e,Var(name_))
             
         ///<summary>整数型1次元配列</summary>
