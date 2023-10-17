@@ -91,12 +91,6 @@ namespace Aqualis
         ///<summary>trueのとき並列処理を書き込む</summary>
         let mutable par_mode = false
         
-        ///<summary>trueのときOpenMPが使用中</summary>
-        let mutable is_omp_used = false
-        
-        ///<summary>trueのときOpenACCが使用中</summary>
-        let mutable is_oacc_used = false
-        
         ///<summary>セクションのヘッダを画面出力</summary>
         let mutable display_section = false
 
@@ -128,43 +122,43 @@ namespace Aqualis
         ///<summary>ループのカウンタに現在使用できる変数インデックス</summary>
         let loopvar = new VarController "ic"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（整数）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（整数）</summary>
         let i_cache_var_ = new VarController "i"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（小数）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（小数）</summary>
         let d_cache_var_ = new VarController "d"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（複素数）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（複素数）</summary>
         let z_cache_var_ = new VarController "z"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（ファイルポインタ）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（ファイルポインタ）</summary>
         let f_cache_var_ = new VarController "f"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（整数1次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（整数1次元配列）</summary>
         let i1_cache_var_ = new VarController "i1"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（小数1次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（小数1次元配列）</summary>
         let d1_cache_var_ = new VarController "d1"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（複素数1次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（複素数1次元配列）</summary>
         let z1_cache_var_ = new VarController "z1"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（整数2次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（整数2次元配列）</summary>
         let i2_cache_var_ = new VarController "i2"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（小数2次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（小数2次元配列）</summary>
         let d2_cache_var_ = new VarController "d2"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（複素数2次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（複素数2次元配列）</summary>
         let z2_cache_var_ = new VarController "z2"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（整数3次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（整数3次元配列）</summary>
         let i3_cache_var_ = new VarController "i3"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（小数3次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（小数3次元配列）</summary>
         let d3_cache_var_ = new VarController "d3"
         
-        ///<summary>複数の代入文で続けて使用できる一時変数（複素数3次元配列）。dispose関数によって手動での削除が必要</summary>
+        ///<summary>複数の代入文で続けて使用できる一時変数（複素数3次元配列）</summary>
         let z3_cache_var_ = new VarController "z3"
         
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（文字列）</summary>
@@ -207,27 +201,22 @@ namespace Aqualis
         let mutable mlist = new UniqueList()
         
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
-        let mutable elist = new UniqueList()
+        member val elist = new UniqueList() with get
         
         ///<summary>定義された関数のリスト</summary>
-        let mutable flist = new UniqueList()
+        member val flist = new UniqueList() with get
         
         ///<summary>コンパイル時に必要なライブラリ・オプション</summary>
-        let mutable olist = new UniqueList()
+        member val olist = new UniqueList() with get
         
         ///<summary>コンパイル時に必要な他のソースファイル</summary>
-        let mutable slist = new UniqueList()
+        member val slist = new UniqueList() with get
         
         ///<summary>コンパイル時に必要な他のソースファイル</summary>
-        let mutable plist = new UniqueList()
+        member val plist = new UniqueList() with get
         
-        let mutable pidx = 0
-        
-        ///<summary>画面表示用カウンタ（改行時に0にリセット）</summary>
-        let mutable printcounter_ = 0
-
         ///<summary>すべての状態をリセット</summary>
-        member __.clear() =
+        member this.clear() =
             debug_mode <- false
             indent_.clear()
             goto_label <- 10
@@ -249,21 +238,17 @@ namespace Aqualis
             pvar_.clear()
             hlist.clear()
             mlist.clear()
-            elist.clear()
-            slist.clear()
-            olist.clear()
+            this.elist.clear()
+            this.slist.clear()
+            this.olist.clear()
             funlist_ <- []
             arglist_ <- []
             int_string_format_ <- 8
             double_string_format_ <- (27,17)
             error_code_counter_ <- 1
             
-        member __.clear_printcounter() = printcounter_ <- 0
-        member __.add_printcounter(n) = printcounter_ <- printcounter_+ n
-        member __.printcounter with get() = printcounter_
         ///<summary>ソースファイル出力先ディレクトリ</summary>
         member __.dir with get() = outputdir
-        member __.pindex with get() = pidx
         
         ///<summary>デバッグモード</summary>
         member __.debugmode with get() = debug_mode
@@ -549,7 +534,7 @@ namespace Aqualis
         member __.goto_label_inc() = goto_label <- goto_label + 1
         
         ///<summary>並列処理書き込みモード</summary>
-        member __.parmode with get() = par_mode
+        member __.isparmode with get() = par_mode
         
         ///<summary>trueのときOpenMPが使用中</summary>
         member __.isOmpUsed
@@ -655,10 +640,7 @@ namespace Aqualis
         member __.mlist_ with get() = mlist
         
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
-        member __.elist_ with get() = elist
         member __.hlist_ with get() = hlist
-        member __.slist_ with get() = slist
-        member __.olist_ with get() = olist
 
         ///<summary>ヘッダファイルのインクルード</summary>
         member __.include_(s) = hlist.add(s)
@@ -667,13 +649,13 @@ namespace Aqualis
         member __.module_(s) = mlist.add(s)
               
         ///<summary>extern指定子の追加</summary>
-        member __.extern_(s) = elist.add(s)
+        member this.extern_(s) = this.elist.add(s)
               
         ///<summary>ソースファイルファイルのインクルード</summary>
-        member __.source_(s) = slist.add(s)
+        member this.source_(s) = this.slist.add(s)
               
         ///<summary>オプション追加</summary>
-        member __.option_(s) = olist.add(s)
+        member this.option_(s) = this.olist.add(s)
         
         ///<summary>ディスプレイモード</summary>
         member __.displaysection with get() = display_section

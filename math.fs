@@ -6,8 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open Aqualis_base
-    
     module math = 
         ///<summary>整数次第2種球ハンケル関数を計算</summary>
         ///<param name="hn">球ハンケル関数の値</param>

@@ -6,11 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
-    open Aqualis_base
-
     [<AutoOpen>]
     module iter_array =
         ///<summary>反復処理</summary>

@@ -50,52 +50,52 @@ namespace Aqualis
                         fft1.ifftshift_odd(x[(),i])
 
         let private fft2(planname:string,data1:num2,data2:num2,fftdir:int) =
-            p.param.option_("-lfftw3")
-            p.param.option_("-I/usr/include")
+            p.option("-lfftw3")
+            p.option("-I/usr/include")
             ch.iiii <| fun (nx,ny,nx2,ny2) -> 
                 nx <== data1.size1
                 ny <== data1.size2
                 nx2 <== data1.size1./2
                 ny2 <== data1.size2./2
-                match p.param.lang with
+                match p.lang with
                   |F ->
-                    p.param.include_("'fftw3.f'")
+                    p.incld("'fftw3.f'")
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
-                        p.param.codewrite("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
+                        p.codewrite("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
                         fftshift2(data1)
                         !"FFTを実行"
-                        p.param.codewrite("call dfftw_execute(" + plan.code + ")")
+                        p.codewrite("call dfftw_execute(" + plan.code + ")")
                         fftshift2(data2)
-                        p.param.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
                     else
-                        p.param.codewrite("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
+                        p.codewrite("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
                         ifftshift2(data1)
                         !"FFTを実行"
-                        p.param.codewrite("call dfftw_execute(" + plan.code + ")")
+                        p.codewrite("call dfftw_execute(" + plan.code + ")")
                         ifftshift2(data2)
-                        p.param.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
                   |C ->
-                    p.param.include_("\"fftw3.h\"")
+                    p.incld("\"fftw3.h\"")
                     let plan = fftw_plan2(planname)
                     if fftdir=1 then
-                        p.param.codewrite(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
+                        p.codewrite(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
                         fftshift2(data1)
                         !"FFTを実行"
-                        p.param.codewrite("call dfftw_execute(" + plan.code + ")")
+                        p.codewrite("call dfftw_execute(" + plan.code + ")")
                         fftshift2(data2)
-                        p.param.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
                     else
-                        p.param.codewrite(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
+                        p.codewrite(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
                         ifftshift2(data1)
                         !"FFTを実行"
-                        p.param.codewrite("dfftw_execute(" + plan.code + ")")
+                        p.codewrite("dfftw_execute(" + plan.code + ")")
                         ifftshift2(data2)
-                        p.param.codewrite("dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("dfftw_destroy_plan(" + plan.code + ")")
                   |T ->
-                    p.param.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
+                    p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                   |H ->
-                    p.param.codewrite(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
+                    p.codewrite(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
                 if fftdir=1 then
                     !"規格化"
                     iter.num nx <| fun i ->

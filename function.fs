@@ -6,9 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
     open Aqualis_base
     
     ///<summary>関数定義の引数</summary>
@@ -19,7 +16,7 @@ namespace Aqualis
         /// <param name="typ">変数の型</param>
         /// <param name="vtp">変数の次元</param>
         /// <param name="n">変数名</param>
-        static member addarg (typ:Etype,vtp:VarType,n:string) = p.param.addarg(typ,vtp,n)
+        static member addarg (typ:Etype,vtp:VarType,n:string) = p.addarg(typ,vtp,n)
         
         /// <summary>
         /// 関数定義の引数を追加
@@ -27,7 +24,7 @@ namespace Aqualis
         /// <param name="sname">構造体名</param>
         /// <param name="vtp">変数の次元</param>
         /// <param name="n">変数名</param>
-        static member addarg (sname:string,vtp:VarType,n:string) = p.param.addarg(Structure(sname),vtp,n)
+        static member addarg (sname:string,vtp:VarType,n:string) = p.addarg(Structure(sname),vtp,n)
         
     [<AutoOpen>]
     module num_farg =                    

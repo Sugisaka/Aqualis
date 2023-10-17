@@ -34,7 +34,7 @@ namespace Aqualis
                         code(setseed,getrand)
                         seed.deallocate()
                 |C ->
-                    p.param.include_("<time.h>")
+                    p.incld("<time.h>")
                     p.codewrite("srand((unsigned) time(NULL));")
                     ch.i1 _1 <| fun seed ->
                         let setseed code =

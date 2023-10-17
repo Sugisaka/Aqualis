@@ -6,9 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
     open Aqualis_base
 
     ///<summary>コード生成の設定</summary>
@@ -18,31 +15,31 @@ namespace Aqualis
         static member lang = p.lang
         
         ///<summary>プロジェクト名</summary>
-        static member projname = p.param.projectname
+        static member projname = p.projectname
         
         ///<summary>整数を文字列に変換した時の桁数</summary>
-        static member int_string_format with get() = p.param.int_string_format
+        static member int_string_format with get() = p.iFormat
 
         ///<summary>整数をn桁の文字列で変換するように設定</summary>
-        static member set_int_string_format(d) = p.param.set_int_string_format(d)
+        static member set_int_string_format(d) = p.setIFormat(d)
         
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member double_string_format with get() = p.param.double_string_format
+        static member double_string_format with get() = p.dFormat
         
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member set_double_string_format(n,d) = p.param.set_double_string_format(n,d)
+        static member set_double_string_format(n,d) = p.setDFormat(n,d)
         
         ///<summary>デバッグモードの切り替え</summary>
         static member set_DebugMode (x:Switch) =
             match x with
-            |ON  -> p.param.set_debugmode true
-            |OFF -> p.param.set_debugmode false
+            |ON  -> p.setDebugMode true
+            |OFF -> p.setDebugMode false
               
         ///<summary>デバッグモードの切り替え</summary>
         static member set_DisplaySection (x:Switch) =
             match x with
-            |ON  -> p.param.set_displaysection true
-            |OFF -> p.param.set_displaysection false
+            |ON  -> p.setDisplaySection true
+            |OFF -> p.setDisplaySection false
 
         ///<summary>数式の最適化設定</summary>
         static member set_EquationSimplify (x:Switch) =
@@ -87,4 +84,4 @@ namespace Aqualis
         /// </summary>
         /// <param name="t">オプション</param>
         static member option(t:string) =
-            p.param.option_("-"+t)
+            p.option("-"+t)

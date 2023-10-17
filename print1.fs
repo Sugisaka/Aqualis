@@ -6,9 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
     open Aqualis_base
 
     ///<summary>画面表示</summary>

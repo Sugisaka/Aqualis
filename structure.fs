@@ -6,9 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open System
-    open System.IO
-    open System.Text
     open Aqualis_base
 
     ///<summary>構造体sname_のメンバ変数を管理</summary>
@@ -88,43 +85,43 @@ namespace Aqualis
             match p.lang with
             |F ->
                 for s in this.sort() do
-                    p.param.hwrite("type "+s.sname+"\n")
+                    p.hwrite("type "+s.sname+"\n")
                     p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                        p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
-                    p.param.hwrite("end type "+s.sname+"\n")
+                    p.hwrite("end type "+s.sname+"\n")
             |C ->
                 for s in this.sort() do
-                    p.param.hwrite("typedef struct "+"_"+s.sname+"\n")
-                    p.param.hwrite("{"+"\n")
+                    p.hwrite("typedef struct "+"_"+s.sname+"\n")
+                    p.hwrite("{"+"\n")
                     p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                        p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
-                    p.param.hwrite("} "+s.sname+";\n")
+                    p.hwrite("} "+s.sname+";\n")
             |T ->
                 for s in this.sort() do
-                    p.param.hwrite("\\subsection{"+s.sname+"}")
-                    p.param.hwrite("\\begin{itemize}\n")
+                    p.hwrite("\\subsection{"+s.sname+"}")
+                    p.hwrite("\\begin{itemize}\n")
                     p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                        p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
-                    p.param.hwrite("\\end{itemize}\n")
+                    p.hwrite("\\end{itemize}\n")
             |H ->
                 for s in this.sort() do
-                    p.param.hwrite("<h3>"+s.sname+"</h3>\n")
-                    p.param.hwrite("<ul>\n")
+                    p.hwrite("<h3>"+s.sname+"</h3>\n")
+                    p.hwrite("<ul>\n")
                     p.indentInc()
                     for i in 0..s.memlist.Length-1 do
                         let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
-                        p.param.hwrite(p.indentSpace + p.param.declare(typ,vtp,name,"")+"\n")
+                        p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
-                    p.param.hwrite("</ul>\n")
+                    p.hwrite("</ul>\n")
         ///<summary>構造体メンバへのアクセス</summary>
         static member mem(vname,name) =
             match p.lang with

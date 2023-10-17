@@ -38,8 +38,8 @@ namespace Aqualis
             |T ->
                 match this with
                 |Var x -> x
-                |Int_c x -> p.param.ItoS(x)
-                |Dbl_c x -> p.param.DtoS(x)
+                |Int_c x -> p.ItoS(x)
+                |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code
@@ -96,8 +96,8 @@ namespace Aqualis
             |F ->
                 match this with
                 |Var x -> x
-                |Int_c x -> p.param.ItoS(x)
-                |Dbl_c x -> p.param.DtoS(x)
+                |Int_c x -> p.ItoS(x)
+                |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code
@@ -154,8 +154,8 @@ namespace Aqualis
             |C ->
                 match this with
                 |Var x -> x
-                |Int_c x -> p.param.ItoS(x)
-                |Dbl_c x -> p.param.DtoS(x)
+                |Int_c x -> p.ItoS(x)
+                |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code
@@ -210,8 +210,8 @@ namespace Aqualis
             |H ->
                 match this with
                 |Var x -> x
-                |Int_c x -> p.param.ItoS(x)
-                |Dbl_c x -> p.param.DtoS(x)
+                |Int_c x -> p.ItoS(x)
+                |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
                 |Par x -> "("+x.code+")"
                 |Inv x -> "-"+x.code

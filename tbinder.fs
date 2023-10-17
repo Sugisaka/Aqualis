@@ -6,8 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
     
-    open Aqualis_base
-
     ///<summary>一時変数の生成と使用</summary>
     type tbinder () =
         static member i (x:num0) = fun code ->

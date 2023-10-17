@@ -425,15 +425,15 @@ namespace Aqualis
                 
         ///<summary>ファイルポインタcache変数を生成し、code内の処理を実行</summary>
         static member f code = 
-            let name = p.param.f_number()
+            let name = p.fNumber()
             match p.lang with
-              |F -> p.var.setVar(Structure("file"),A0,name,(p.ItoS <| (p.param.fvar.counter+10)))
+              |F -> p.var.setVar(Structure("file"),A0,name,(p.ItoS <| (p.fvar.counter+10)))
               |_ -> p.var.setVar(Structure("file"),A0,name,"")
             code name
             
         ///<summary>文字列cache変数を生成し、code内の処理を実行</summary>
         static member t vt code = 
-            let name = p.param.t_name()
+            let name = p.tName()
             p.var.setVar(Structure("string"),vt,name,"")
             code name
             
@@ -614,14 +614,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.i1 size1 <| fun i ->
-                    p.param.civar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
+                    p.civar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.i1 size1 <| fun i ->
-                    p.param.civar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
+                    p.civar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
                 
@@ -634,14 +634,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.d1 size1 <| fun i ->
-                    p.param.civar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
+                    p.civar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.d1 size1 <| fun i ->
-                    p.param.civar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    p.civar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
                 
@@ -654,14 +654,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.z1 size1 <| fun i ->
-                    p.param.civar.setVar(Zt, A1(0),i.code+"(1:"+size1.code+")","")
+                    p.civar.setVar(Zt, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.z1 size1 <| fun i ->
-                    p.param.civar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    p.civar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
                 
@@ -674,14 +674,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    p.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    p.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
 
@@ -694,14 +694,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.d2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    p.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.d2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    p.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
 
@@ -714,14 +714,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.z2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    p.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.z2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    p.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
                 
@@ -734,14 +734,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.civar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    p.civar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.civar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    p.civar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
                 
@@ -754,14 +754,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.d3 size1 size2 size3 <| fun i ->
-                    p.param.civar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    p.civar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.d3 size1 size2 size3 <| fun i ->
-                    p.param.civar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    p.civar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
                 
@@ -774,14 +774,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.z3 size1 size2 size3 <| fun i ->
-                    p.param.civar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    p.civar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.z3 size1 size2 size3 <| fun i ->
-                    p.param.civar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    p.civar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
                 
@@ -794,14 +794,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.i1 size1 <| fun i ->
-                    p.param.covar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
+                    p.covar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |C ->
                 ch.i1 size1 <| fun i ->
-                    p.param.covar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
+                    p.covar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |_ ->
                 ()
 
@@ -814,14 +814,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.d1 size1 <| fun i ->
-                    p.param.covar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
+                    p.covar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |C ->
                 ch.d1 size1 <| fun i ->
-                    p.param.covar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    p.covar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |_ ->
                 ()
 
@@ -834,14 +834,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.z1 size1 <| fun i ->
-                    p.param.covar.setVar(Zt,A1(0),i.code+"(1:"+size1.code+")","")
+                    p.covar.setVar(Zt,A1(0),i.code+"(1:"+size1.code+")","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |C ->
                 ch.z1 size1 <| fun i ->
-                    p.param.covar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
+                    p.covar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |_ ->
                 ()
                 
@@ -854,14 +854,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    p.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.i2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    p.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
 
@@ -874,14 +874,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.d2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (Dt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    p.civar.setVar (Dt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.d2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (Dt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    p.civar.setVar (Dt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
 
@@ -894,14 +894,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.z2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
+                    p.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |C ->
                 ch.z2 size1 size2 <| fun i ->
-                    p.param.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
+                    p.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
-                    ignore <| p.param.civar.getAutoVar()
+                    ignore <| p.civar.getAutoVar()
             |_ ->
                 ()
 
@@ -914,14 +914,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.covar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    p.covar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |C ->
                 ch.i3 size1 size2 size3 <| fun i ->
-                    p.param.covar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    p.covar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |_ ->
                 ()
 
@@ -934,14 +934,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.d3 size1 size2 size3 <| fun i ->
-                    p.param.covar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    p.covar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |C ->
                 ch.d3 size1 size2 size3 <| fun i ->
-                    p.param.covar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    p.covar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |_ ->
                 ()
 
@@ -954,14 +954,14 @@ namespace Aqualis
             match p.lang with
             |F ->
                 ch.z3 size1 size2 size3 <| fun i ->
-                    p.param.covar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
+                    p.covar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |C ->
                 ch.z3 size1 size2 size3 <| fun i ->
-                    p.param.covar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
+                    p.covar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
-                    ignore <| p.param.covar.getAutoVar()
+                    ignore <| p.covar.getAutoVar()
             |_ ->
                 ()
 
@@ -972,61 +972,61 @@ namespace Aqualis
         ///<summary>整数型一時変数(GPUに転送する変数)の生成</summary>
         static member copyin_i code =
             ch.i <| fun v ->
-                p.param.civar.setVar(It 4,A0,v.code,"")
+                p.civar.setVar(It 4,A0,v.code,"")
                 code(v)
-                ignore <| p.param.civar.getAutoVar()
+                ignore <| p.civar.getAutoVar()
                 
         ///<summary>倍精度浮動小数点型一時変数(GPUに転送する変数)の生成</summary>
         static member copyin_d code =
             ch.d <| fun v ->
-                p.param.civar.setVar(Dt,A0,v.code,"")
+                p.civar.setVar(Dt,A0,v.code,"")
                 code(v)
-                ignore <| p.param.civar.getAutoVar()
+                ignore <| p.civar.getAutoVar()
                 
         ///<summary>複素数型一時変数(GPUに転送する変数)の生成</summary>
         static member copyin_z code =
             ch.z <| fun v ->
-                p.param.civar.setVar(Zt,A0,v.code,"")
+                p.civar.setVar(Zt,A0,v.code,"")
                 code(v)
-                ignore <| p.param.civar.getAutoVar()
+                ignore <| p.civar.getAutoVar()
                 
         ///<summary>整数型一時変数(ホストに転送する変数)の生成</summary>
         static member copyout_i code =
             ch.i <| fun v ->
-                p.param.covar.setVar(It 4,A0,v.code,"")
+                p.covar.setVar(It 4,A0,v.code,"")
                 code(v)
-                ignore <| p.param.covar.getAutoVar()
+                ignore <| p.covar.getAutoVar()
                 
         ///<summary>倍精度浮動小数点型一時変数(ホストに転送する変数)の生成</summary>
         static member copyout_d code =
             ch.d <| fun v ->
-                p.param.covar.setVar(It 4,A0,v.code,"")
+                p.covar.setVar(It 4,A0,v.code,"")
                 code(v)
-                ignore <| p.param.covar.getAutoVar()
+                ignore <| p.covar.getAutoVar()
                 
         ///<summary>複素数型一時変数(ホストに転送する変数)の生成</summary>
         static member copyout_z code =
             ch.z <| fun v ->
-                p.param.covar.setVar(It 4,A0,v.code,"")
+                p.covar.setVar(It 4,A0,v.code,"")
                 code(v)
-                ignore <| p.param.covar.getAutoVar()
+                ignore <| p.covar.getAutoVar()
                 
         ///<summary>整数型一時変数(プライベート変数)の生成</summary>
         static member private_i code =
             ch.i <| fun v ->
-                p.param.pvar.setVar(It 4, A0, v.code,"")
+                p.pvar.setVar(It 4, A0, v.code,"")
                 code(v)
 
         ///<summary>倍精度浮動小数点型一時変数(プライベート変数)の生成</summary>
         static member private_d code =
             ch.d <| fun v ->
-                p.param.pvar.setVar(Dt, A0, v.code,"")
+                p.pvar.setVar(Dt, A0, v.code,"")
                 code(v)
 
         ///<summary>複素数型一時変数(プライベート変数)の生成</summary>
         static member private_z code =
             ch.z <| fun v ->
-                p.param.pvar.setVar(Zt, A0, v.code,"")
+                p.pvar.setVar(Zt, A0, v.code,"")
                 code(v)
 
         static member copyin_ii code = 

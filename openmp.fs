@@ -7,8 +7,6 @@ http://opensource.org/licenses/mit-license.php
 namespace Aqualis
     
     open System
-    open System.IO
-    open System.Text
     open Aqualis_base
     
     ///<summary>OpenMP処理</summary>
@@ -17,15 +15,14 @@ namespace Aqualis
         static member parallelize code =
             match p.lang with
             |F ->
-                p.param.isOmpUsed <- true
-                p.param.module_("omp_lib")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
+                p.isOmpUsed <- true
+                p.modl("omp_lib")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
                 let rec printplist list n counter (s:string) =
                     match (list,counter) with
                     |[],_ ->
@@ -43,31 +40,30 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist p.param.pvar.list 0 0 ""
+                printplist p.pvar.list 0 0 ""
                 //一時ファイルの内容を書き込み
-                p.param.pclose()
-                p.param.cwrite(p.param.readpartext())
-                p.param.pdelete()
+                p.pclose()
+                p.cwrite(p.readParText())
+                p.ParDelete()
                 p.codewrite("!$omp end parallel do\n")
-                p.param.pvar.clear()
+                p.pvar.clear()
             |C ->
-                p.param.isOmpUsed <- true
-                p.param.include_("<omp.h>")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
-                if p.param.pvar.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.param.pvar.list)
+                p.isOmpUsed <- true
+                p.incld("<omp.h>")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
+                if p.pvar.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.pvar.list)
                     p.codewrite("#pragma omp parallel for private("+s+")\n")
                 else
                     p.codewrite("#pragma omp parallel for\n")
                 //一時ファイルの内容を書き込み
-                p.param.cwrite(p.param.readpartext())
-                p.param.pvar.clear()
+                p.cwrite(p.readParText())
+                p.pvar.clear()
             |_ ->
                 ()
 
@@ -75,15 +71,14 @@ namespace Aqualis
         static member parallelize_th (th:int) = fun code ->
             match p.lang with
             |F ->
-                p.param.isOmpUsed <- true
-                p.param.module_("omp_lib")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
+                p.isOmpUsed <- true
+                p.modl("omp_lib")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
                 let rec printplist list n counter (s:string) =
                     match (list,counter) with
                     |[],_ ->
@@ -101,29 +96,28 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist p.param.pvar.list 0 0 ""
+                printplist p.pvar.list 0 0 ""
                 //一時ファイルの内容を書き込み
-                p.param.cwrite(p.param.readpartext())
+                p.cwrite(p.readParText())
                 p.codewrite("!$omp end parallel do\n")
-                p.param.pvar.clear()
+                p.pvar.clear()
             |C ->
-                p.param.isOmpUsed <- true
-                p.param.include_("<omp.h>")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
-                if p.param.pvar.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.param.pvar.list)
+                p.isOmpUsed <- true
+                p.incld("<omp.h>")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
+                if p.pvar.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.pvar.list)
                     p.codewrite("#pragma omp parallel for private("+s+") num_threads("+(string th)+")\n")
                 else
                     p.codewrite("#pragma omp parallel for num_threads("+(string th)+")\n")
                 //一時ファイルの内容を書き込み
-                p.param.cwrite(p.param.readpartext())
-                p.param.pvar.clear()
+                p.cwrite(p.readParText())
+                p.pvar.clear()
             |_ ->
                 ()
 
@@ -131,15 +125,14 @@ namespace Aqualis
         static member reduction (var:num0) (ope:string) = fun code ->
             match p.lang with
             |F ->
-                p.param.isOmpUsed <- true
-                p.param.module_("omp_lib")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
+                p.isOmpUsed <- true
+                p.modl("omp_lib")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
                 let rec printplist list n counter (s:string) =
                     match (list,counter) with
                     |[],_ ->
@@ -157,23 +150,22 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist p.param.pvar.list 0 0 ""
+                printplist p.pvar.list 0 0 ""
                 //一時ファイルの内容を書き込み
-                p.param.cwrite(p.param.readpartext())
+                p.cwrite(p.readParText())
                 p.codewrite("!$omp end parallel do\n")
-                p.param.pvar.clear()
+                p.pvar.clear()
             |C ->
-                p.param.isOmpUsed <- true
-                p.param.include_("<omp.h>")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
-                if p.param.pvar.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.param.pvar.list)
+                p.isOmpUsed <- true
+                p.incld("<omp.h>")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
+                if p.pvar.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.pvar.list)
                     match ope with
                     |"+" |"-" |"*" ->
                         p.codewrite("#pragma omp parallel for private("+s+") reduction("+ope+":"+var.code+")\n")
@@ -186,8 +178,8 @@ namespace Aqualis
                     |_ ->
                         ()
                 //一時ファイルの内容を書き込み
-                p.param.cwrite(p.param.readpartext())
-                p.param.pvar.clear()
+                p.cwrite(p.readParText())
+                p.pvar.clear()
             |_ ->
                 ()
 
@@ -195,15 +187,14 @@ namespace Aqualis
         static member reduction_th (th:int) (var:num0) (ope:string) = fun code ->
             match p.lang with
             |F ->
-                p.param.isOmpUsed <- true
-                p.param.module_("omp_lib")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
+                p.isOmpUsed <- true
+                p.modl("omp_lib")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
                 let rec printplist list n counter (s:string) =
                     match (list,counter) with
                     |[],_ ->
@@ -221,23 +212,22 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist p.param.pvar.list 0 0 ""
+                printplist p.pvar.list 0 0 ""
                 //一時ファイルの内容を書き込み
-                p.param.cwrite(p.param.readpartext())
+                p.cwrite(p.readParText())
                 p.codewrite("!$omp end parallel do\n")
-                p.param.pvar.clear()
+                p.pvar.clear()
             |C ->
-                p.param.isOmpUsed <- true
-                p.param.include_("<omp.h>")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                code()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
-                if p.param.pvar.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.param.pvar.list)
+                p.isOmpUsed <- true
+                p.incld("<omp.h>")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    code()
+                    p.pclose()
+                p.copen()
+                if p.pvar.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.pvar.list)
                     match ope with
                     |"+" |"-" |"*" ->
                         p.codewrite("#pragma omp parallel for private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+")\n")
@@ -250,8 +240,8 @@ namespace Aqualis
                     |_ ->
                         ()
                 //一時ファイルの内容を書き込み
-                p.param.cwrite(p.param.readpartext())
-                p.param.pvar.clear()
+                p.cwrite(p.readParText())
+                p.pvar.clear()
             |_ ->
                 ()
 
@@ -259,45 +249,43 @@ namespace Aqualis
         static member sections (th:int) = fun code ->
             match p.lang with
             |F ->
-                p.param.isOmpUsed <- true
-                p.param.module_("omp_lib")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                p.indentInc()
-                code()
-                p.indentDec()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
-                if p.param.pvar.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.param.pvar.list)
+                p.isOmpUsed <- true
+                p.modl("omp_lib")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    p.indentInc()
+                    code()
+                    p.indentDec()
+                    p.pclose()
+                p.copen()
+                if p.pvar.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) p.pvar.list)
                     p.codewrite("!$omp parallel private("+s+") num_threads("+(string th)+")\n")
                 else
                     p.codewrite("!$omp parallel num_threads("+(string th)+")\n")
                 p.indentInc()
                 p.codewrite("!$omp sections"+"\n")
                 p.indentInc()
-                p.param.cwrite(p.param.readpartext())
+                p.cwrite(p.readParText())
                 p.indentDec()
                 p.codewrite("!$omp end sections"+"\n")
                 p.indentDec()
                 p.codewrite("!$omp end parallel\n")
-                p.param.pvar.clear()
+                p.pvar.clear()
             |C ->
-                p.param.isOmpUsed <- true
-                p.param.include_("<omp.h>")
-                p.param.switch_parmode(true)
-                p.param.cclose()
-                p.param.popen()
-                p.indentInc()
-                code()
-                p.indentDec()
-                p.param.pclose()
-                p.param.switch_parmode(false)
-                p.param.copen()
-                if p.param.pvar.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> p.param.pvar.list))
+                p.isOmpUsed <- true
+                p.incld("<omp.h>")
+                p.parmode <| fun () ->
+                    p.cclose()
+                    p.popen()
+                    p.indentInc()
+                    code()
+                    p.indentDec()
+                    p.pclose()
+                p.copen()
+                if p.pvar.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> p.pvar.list))
                     p.codewrite("#pragma omp parallel private("+s+") num_threads("+(string th)+")\n")
                 else
                     p.codewrite("#pragma omp parallel num_threads("+(string th)+")\n")
@@ -306,12 +294,12 @@ namespace Aqualis
                 p.codewrite("#pragma omp sections"+"\n")
                 p.codewrite("{"+"\n")
                 p.indentInc()
-                p.param.cwrite(p.param.readpartext())
+                p.cwrite(p.readParText())
                 p.indentDec()
                 p.codewrite("}"+"\n")
                 p.indentDec()
                 p.codewrite("}"+"\n")
-                p.param.pvar.clear()
+                p.pvar.clear()
             |_ ->
                 ()
 

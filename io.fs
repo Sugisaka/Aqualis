@@ -7,8 +7,6 @@ http://opensource.org/licenses/mit-license.php
 namespace Aqualis
     
     open System
-    open System.IO
-    open System.Text
     open Aqualis_base
 
     ///<summary>ファイル入出力</summary>
@@ -32,7 +30,7 @@ namespace Aqualis
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
-                        p.param.getloopvar <| fun counter ->
+                        p.getloopvar <| fun counter ->
                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
                             p.codewrite("end do"+"\n")
@@ -104,7 +102,7 @@ namespace Aqualis
             |F ->
                 let tab = var.ip0_noWarning("tab",2313)
                 let double0string_format_F = 
-                    let (a,b)=p.param.double_string_format
+                    let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
@@ -112,7 +110,7 @@ namespace Aqualis
                         [for n in 0..(b.Length-1) do
                             match b.[n].etype with
                             |It _ -> 
-                                yield "I"+p.param.int_string_format.ToString()
+                                yield "I"+p.iFormat.ToString()
                             |Dt ->
                                 yield double0string_format_F
                             |Zt ->
@@ -923,7 +921,7 @@ namespace Aqualis
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         p.var.setUniqVar(Structure("integer(1)"),A0,btname,"")
                         p.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
-                        p.param.getloopvar <| fun counter ->
+                        p.getloopvar <| fun counter ->
                             p.codewrite("do "+counter+" = 1, len_trim("+id+")"+"\n")
                             p.codewrite("  if ( "+id+"( "+counter+":"+counter+" ).EQ.\" \" ) "+id+"( "+counter+":"+counter+" ) = \"0\""+"\n")
                             p.codewrite("end do"+"\n")
