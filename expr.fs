@@ -106,14 +106,6 @@ namespace Aqualis
                 |Mul (x,y) -> x.code+"*"+y.code
                 |Div (x,y) -> x.code+"/"+y.code
                 |NaN -> "NaN"
-                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" < "+v2.code+" < "+v3.code
-                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" \\leq "+v2.code+" < "+v3.code
-                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" < "+v2.code+" \\leq "+v3.code
-                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" \\leq "+v2.code+" \\leq "+v3.code
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->
@@ -164,14 +156,6 @@ namespace Aqualis
                 |Mul (x,y) -> x.code+"*"+y.code
                 |Div (x,y) -> x.code+"/"+y.code
                 |NaN -> "NaN"
-                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" < "+v2.code+" < "+v3.code
-                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" \\leq "+v2.code+" < "+v3.code
-                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" < "+v2.code+" \\leq "+v3.code
-                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" \\leq "+v2.code+" \\leq "+v3.code
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->
@@ -223,11 +207,11 @@ namespace Aqualis
                 |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
                 |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" \\leq "+v2.code+" < "+v3.code
+                    v1.code+" <= "+v2.code+" < "+v3.code
                 |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" < "+v2.code+" \\leq "+v3.code
+                    v1.code+" < "+v2.code+" <= "+v3.code
                 |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" \\leq "+v2.code+" \\leq "+v3.code
+                    v1.code+" <= "+v2.code+" <= "+v3.code
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->

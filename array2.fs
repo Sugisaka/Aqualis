@@ -111,7 +111,7 @@ namespace Aqualis
                         |A2(0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
-                            p.codewrite("allocate("+name+"(1:"+this.size1.code+",2:"+this.size1.code+")"+")"+"\n")
+                            p.codewrite("allocate("+name+"(1:"+this.size1.code+",1:"+this.size2.code+")"+")"+"\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |C ->
@@ -127,7 +127,7 @@ namespace Aqualis
                         |A2(0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
-                            p.codewrite("allocate($"+name+"(1:"+this.size1.code+",2:"+this.size2.code+")"+"$)"+"\n")
+                            p.codewrite("allocate($"+name+"(1:"+this.size1.code+",1:"+this.size2.code+")"+"$)"+"\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |H ->
