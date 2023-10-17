@@ -12,6 +12,10 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
 Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
+    let x = var.d0("a")
+    let y = var.d0("a")
+    x <== asm.pi
+    y <== 1
     ch.n (It 4) <| fun n ->
     ch.n Dt <| fun x ->
         n <== 1

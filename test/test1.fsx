@@ -13,7 +13,7 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
 Compile [F;C] outputdir projectname ("aaa","aaa") <| fun () ->
-    io.fileOutput [!."result.txt"] <| fun wr ->
+    io.fileOutput [!."result.dat"] <| fun wr ->
     ch.dddd <| fun (x,y,z1,z2) ->
         let p = 1.5
         let q = 8.4

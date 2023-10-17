@@ -13,7 +13,6 @@ namespace Aqualis
     type io () =
         
         static member private fileAccess (filename:num0 list) readmode isbinary code =
-            for s in filename do printfn "%s" <| s.etype.ToString()
             match p.lang with
             |F ->
                 ch.f <| fun fp ->
@@ -176,7 +175,6 @@ namespace Aqualis
                     |> (fun s -> String.Join("",s))
                 let code =
                     [for b in lst do
-                        printfn "AAA %s %s" <| b.etype.ToString() <| b.expr.ToString()
                         match b.etype,b.expr with 
                         |_,Int_c(v) -> yield p.ItoS(v)
                         |_,Dbl_c(v) -> yield p.DtoS(v)
@@ -186,7 +184,6 @@ namespace Aqualis
                         |(It _|Dt),_ -> yield b.code
                         |_ -> ()]
                     |> (fun s -> String.Join(",",s))
-                printfn "%d %s" lst.Length code
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
             |T ->
                 let double0string_format_F = 

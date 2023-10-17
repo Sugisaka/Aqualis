@@ -120,9 +120,13 @@ namespace Aqualis
             |It 2,It 4 -> printfn "Warning: int型からbyte型への代入です：%s←%s" x.code y.code
             |_ -> ()
             x.expr <== y.expr
+        static member (<==) (x:num0,y:int) = x <== num0(y)
         static member (<==) (x:num0,y:double) = x <== num0(y)
         static member (<==) (x:num0,(re:double,im:double)) = x <== re+asm.uj*im
-        static member (<==) (x:num0,y:int) = x <== num0(y)
+        static member (<==) (x:list<num0>,y:num0) = for v in x do v <== y
+        static member (<==) (x:list<num0>,y:int) = for v in x do v <== y
+        static member (<==) (x:list<num0>,y:double) = for v in x do v <== y
+        static member (<==) (x:list<num0>,y:double*double) = for v in x do v <== y
         member this.clear() = this <== 0
         
         ///<summary>実部</summary>

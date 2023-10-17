@@ -86,119 +86,118 @@ namespace Aqualis
         let pfile = outputdir+"\\"+proj+"_par.bee"
         
         ///<summary>trueの時はデバッグ用のコードを生成する</summary>
-        let mutable debug_mode = false
+        member val debug_mode = false with get,set
 
         ///<summary>trueのとき並列処理を書き込む</summary>
-        let mutable par_mode = false
+        member val isParMode = false with get,set
         
         ///<summary>セクションのヘッダを画面出力</summary>
-        let mutable display_section = false
+        member val display_section = false with get,set
 
         ///<summary>コード書き込み先一時ファイルストリーム</summary>
-        let mutable cwriter:StreamWriter = new StreamWriter(cfile,false)
+        member val cwriter:StreamWriter = new StreamWriter(cfile,false) with get,set
         
         ///<summary>変数宣言書き込み先一時ファイルストリーム</summary>
-        let mutable vwriter:StreamWriter = new StreamWriter(vfile,false)
+        member val vwriter:StreamWriter = new StreamWriter(vfile,false) with get,set
         
         ///<summary>構造体・関数宣言書き込み先一時ファイルストリーム</summary>
-        let mutable hwriter:StreamWriter = new StreamWriter(hfile,false)
+        member val hwriter:StreamWriter = new StreamWriter(hfile,false) with get,set
         
         ///<summary>並列ループ処理書き込み先一時ファイルストリーム</summary>
-        let mutable pwriter:StreamWriter = 
-            new StreamWriter(pfile,false)
+        member val pwriter:StreamWriter = new StreamWriter(pfile,false) with get,set
 
         ///<summary>変数リスト</summary>
-        let var_ = new VarController ""
+        member val var = new VarController ""
         
         ///<summary>プライベート変数リスト</summary>
-        let mutable pvar_ = new VarController ""
+        member val pvar = new VarController ""
         
         ///<summary>ホストからGPUへ転送する変数リスト</summary>
-        let mutable civar_ = new VarController ""
+        member val civar = new VarController ""
         
         ///<summary>GPUからホストへ転送する変数リスト</summary>
-        let mutable covar_ = new VarController ""
+        member val covar = new VarController ""
 
         ///<summary>ループのカウンタに現在使用できる変数インデックス</summary>
-        let loopvar = new VarController "ic"
+        member val loopvar = new VarController "ic"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数）</summary>
-        let i_cache_var_ = new VarController "i"
+        member val i_cache_var = new VarController "i"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数）</summary>
-        let d_cache_var_ = new VarController "d"
+        member val d_cache_var = new VarController "d"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数）</summary>
-        let z_cache_var_ = new VarController "z"
+        member val z_cache_var = new VarController "z"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（ファイルポインタ）</summary>
-        let f_cache_var_ = new VarController "f"
+        member val f_cache_var = new VarController "f"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数1次元配列）</summary>
-        let i1_cache_var_ = new VarController "i1"
+        member val i1_cache_var = new VarController "i1"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数1次元配列）</summary>
-        let d1_cache_var_ = new VarController "d1"
+        member val d1_cache_var = new VarController "d1"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数1次元配列）</summary>
-        let z1_cache_var_ = new VarController "z1"
+        member val z1_cache_var = new VarController "z1"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数2次元配列）</summary>
-        let i2_cache_var_ = new VarController "i2"
+        member val i2_cache_var = new VarController "i2"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数2次元配列）</summary>
-        let d2_cache_var_ = new VarController "d2"
+        member val d2_cache_var = new VarController "d2"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数2次元配列）</summary>
-        let z2_cache_var_ = new VarController "z2"
+        member val z2_cache_var = new VarController "z2"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数3次元配列）</summary>
-        let i3_cache_var_ = new VarController "i3"
+        member val i3_cache_var = new VarController "i3"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数3次元配列）</summary>
-        let d3_cache_var_ = new VarController "d3"
+        member val d3_cache_var = new VarController "d3"
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数3次元配列）</summary>
-        let z3_cache_var_ = new VarController "z3"
+        member val z3_cache_var = new VarController "z3"
         
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（文字列）</summary>
-        let t_stat_var = new varlist()
+        member val t_stat_var = new varlist() with get
         
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（ファイルポインタ）</summary>
-        let f_stat_var = new varlist()
+        member val f_stat_var = new varlist()
         
         ///<summary>この関数の引数リスト： 関数呼び出しに与えられた変数名,(関数内での変数情報)</summary>
-        let mutable arglist_ : (string*(Etype*VarType*string)) list = []
+        member val arglist : (string*(Etype*VarType*string)) list = [] with get,set
         
         ///<summary>定義された関数のリスト</summary>
-        let mutable funlist_: string list = []
+        member val funlist: string list = [] with get,set
         
         ///<summary>ソースコードのインデント</summary>
-        let indent_ = new IndentController(2)
+        member val indent = new IndentController(2)
         
         ///<summary>gotoで使用するラベル番号</summary>
-        let mutable goto_label = 10
+        member val goto_label = 10 with get,set
         
         ///<summary>trueのときOpenMPが使用中</summary>
-        let mutable is_omp_used = false
+        member val isOmpUsed = false with get,set
         
         ///<summary>trueのときOpenACCが使用中</summary>
-        let mutable is_oacc_used = false
+        member val isOaccUsed = false with get,set
         
         ///<summary>整数型を文字列に変換するときの桁数</summary>
-        let mutable int_string_format_ = 8
+        member val int_string_format = 8 with get,set
         
         ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
-        let mutable double_string_format_ = (27,17)
+        member val double_string_format = (27,17) with get,set
         
         ///<summary>エラーid</summary>
-        let mutable error_code_counter_ = 1
+        member val error_code_counter = 1 with get,set
 
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
-        let mutable hlist = new UniqueList()
+        member val hlist = new UniqueList() with get
         
         ///<summary>ライブラリの使用時に必要なモジュールファイル</summary>
-        let mutable mlist = new UniqueList()
+        member val mlist = new UniqueList() with get
         
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
         member val elist = new UniqueList() with get
@@ -217,50 +216,38 @@ namespace Aqualis
         
         ///<summary>すべての状態をリセット</summary>
         member this.clear() =
-            debug_mode <- false
-            indent_.clear()
-            goto_label <- 10
-            loopvar.clear()
-            i_cache_var_.clear()
-            d_cache_var_.clear()
-            z_cache_var_.clear()
-            f_cache_var_.clear()
-            i1_cache_var_.clear()
-            d1_cache_var_.clear()
-            z1_cache_var_.clear()
-            i2_cache_var_.clear()
-            d2_cache_var_.clear()
-            z2_cache_var_.clear()
-            i3_cache_var_.clear()
-            d3_cache_var_.clear()
-            z3_cache_var_.clear()
-            var_.clear()
-            pvar_.clear()
-            hlist.clear()
-            mlist.clear()
+            this.debug_mode <- false
+            this.indent.clear()
+            this.goto_label <- 10
+            this.loopvar.clear()
+            this.i_cache_var.clear()
+            this.d_cache_var.clear()
+            this.z_cache_var.clear()
+            this.f_cache_var.clear()
+            this.i1_cache_var.clear()
+            this.d1_cache_var.clear()
+            this.z1_cache_var.clear()
+            this.i2_cache_var.clear()
+            this.d2_cache_var.clear()
+            this.z2_cache_var.clear()
+            this.i3_cache_var.clear()
+            this.d3_cache_var.clear()
+            this.z3_cache_var.clear()
+            this.var.clear()
+            this.pvar.clear()
+            this.hlist.clear()
+            this.mlist.clear()
             this.elist.clear()
             this.slist.clear()
             this.olist.clear()
-            funlist_ <- []
-            arglist_ <- []
-            int_string_format_ <- 8
-            double_string_format_ <- (27,17)
-            error_code_counter_ <- 1
+            this.funlist <- []
+            this.arglist <- []
+            this.int_string_format <- 8
+            this.double_string_format <- (27,17)
+            this.error_code_counter <- 1
             
         ///<summary>ソースファイル出力先ディレクトリ</summary>
         member __.dir with get() = outputdir
-        
-        ///<summary>デバッグモード</summary>
-        member __.debugmode with get() = debug_mode
-
-        ///<summary>デバッグモードを設定</summary>
-        member __.set_debugmode(x) = debug_mode <- x
-        
-        ///<summary>エラーid</summary>
-        member __.error_code_counter with get() = error_code_counter_
-        
-        ///<summary>エラーIDをインクリメント</summary>
-        member __.error_code_counter_inc() = error_code_counter_ <- error_code_counter_ + 1
         
         ///<summary>設定されたプロジェクト名</summary>
         member __.projectname with get() = proj
@@ -268,46 +255,6 @@ namespace Aqualis
         ///<summary>設定されたプログラミング言語</summary>
         member __.lang with get() = lan
         
-        ///<summary>インデント設定に合わせた半角スペース列を生成</summary>
-        member __.indent with get() = indent_
-        
-        ///<summary>変数リスト</summary>
-        member _.var with get() = var_
-        
-        ///<summary>プライベート変数リスト</summary>
-        member _.pvar with get() = pvar_
-        
-        ///<summary>ホストからGPUに転送する変数リスト</summary>
-        member __.civar with get() = civar_
-        
-        ///<summary>GPUからホストに転送する変数リスト</summary>
-        member __.covar with get() = covar_
-        
-        ///<summary>文字列型static変数名を取得</summary>
-        member __.t_name() = 
-            t_stat_var.getvar(fun i -> "t"+i.ToString("000"))
-            
-        ///<summary>ファイルポインタstatic変数名を取得</summary>
-        member __.f_number() = 
-            f_stat_var.getvar(fun i -> "f"+i.ToString("000"))
-
-        member __.fvar with get() = f_stat_var 
-        member __.tvar with get() = t_stat_var 
-        
-        ///<summary>ファイルポインタcache変数を生成し、code内の処理を実行</summary>
-        member this.fcache code = 
-            let name = this.f_number()
-            match lan with
-              |F -> this.var.setVar(Structure("file"),A0,name,(this.ItoS <| (f_stat_var.counter+10)))
-              |_ -> this.var.setVar(Structure("file"),A0,name,"")
-            code name
-            
-        ///<summary>文字列cache変数を生成し、code内の処理を実行</summary>
-        member this.tcache vt code = 
-            let name = this.t_name()
-            this.var.setVar(Structure("string"),vt,name,"")
-            code name
-            
         ///<summary>変数の型名を文字列に変換</summary>
         member __.Stype typ = 
             match lan with
@@ -399,7 +346,7 @@ namespace Aqualis
         member this.declareall() =
             match lan with
             |F |T ->
-                for (etyp,vtyp,name,p) in var_.list do
+                for (etyp,vtyp,name,p) in this.var.list do
                     this.codefold(this.declare(etyp,vtyp,name,p)+"\n","",this.vwrite,100)
                     match vtyp with
                     |A1(0) ->
@@ -416,29 +363,29 @@ namespace Aqualis
                         this.vwrite(this.declare(It 4,A1(3),name+"_size","(/ "+n1.ToString()+","+n2.ToString()+","+n3.ToString()+" /)")+"\n")
                     |_ -> ()
                     
-                for (etyp,vtyp,name,p) in loopvar.list do
+                for (etyp,vtyp,name,p) in this.loopvar.list do
                     this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                     
-                for x in [i_cache_var_;d_cache_var_;z_cache_var_] do
+                for x in [this.i_cache_var;this.d_cache_var;this.z_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         
-                for x in [i1_cache_var_;d1_cache_var_;z1_cache_var_] do
+                for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(1),name+"_size","(/ -1 /)")+"\n")
                         
-                for x in [i2_cache_var_;d2_cache_var_;z2_cache_var_] do
+                for x in [this.i2_cache_var;this.d2_cache_var;this.z2_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(2),name+"_size","(/ -1,-1 /)")+"\n")
                         
-                for x in [i3_cache_var_;d3_cache_var_;z3_cache_var_] do
+                for x in [this.i3_cache_var;this.d3_cache_var;this.z3_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(3),name+"_size","(/ -1,-1,-1 /)")+"\n")
             |C ->
-                for (etyp,vtyp,name,p) in var_.list do
+                for (etyp,vtyp,name,p) in this.var.list do
                     this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                     match vtyp with
                     |A1(0) ->
@@ -455,67 +402,61 @@ namespace Aqualis
                         this.vwrite(this.declare(It 4,A1(3),name+"_size","{ "+n1.ToString()+", "+n2.ToString()+", "+n3.ToString()+" }")+"\n")
                     |_ -> ()
                 
-                for i in 1..loopvar.maxcounter do
+                for i in 1..this.loopvar.maxcounter do
                     this.vwrite(this.declare(It 4,A0,"ic"+i.ToString("000"),"")+"\n")
                 
-                for x in [i_cache_var_;d_cache_var_;z_cache_var_] do
+                for x in [this.i_cache_var;this.d_cache_var;this.z_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         
-                for x in [i1_cache_var_;d1_cache_var_;z1_cache_var_] do
+                for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(1),name+"_size","{-1}")+"\n")
                         
-                for x in [i2_cache_var_;d2_cache_var_;z2_cache_var_] do
+                for x in [this.i2_cache_var;this.d2_cache_var;this.z2_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(2),name+"_size","{-1,-1}")+"\n")
                         
-                for x in [i3_cache_var_;d3_cache_var_;z3_cache_var_] do
+                for x in [this.i3_cache_var;this.d3_cache_var;this.z3_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(3),name+"_size","{-1,-1,-1}")+"\n")
             |H ->
                 
-                for v in var_.list do this.vwrite(this.declare(v)+"\n")
+                for v in this.var.list do this.vwrite(this.declare(v)+"\n")
                 
-                this.vwrite("\t\t\t<li>Loop counter: <math><msub><mi>n</mi><mi>m</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if loopvar.maxcounter=1 then "" else "<mo.>.</mo><mn>"+loopvar.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                this.vwrite("\t\t\t<li>Loop counter: <math><msub><mi>n</mi><mi>m</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.loopvar.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.loopvar.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                 
-                if i_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (integer): <math><msub><mi>i</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+i_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if d_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (double): <math><msub><mi>d</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+d_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if z_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (complex): <math><msub><mi>z</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+z_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.i_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache variables (integer): <math><msub><mi>i</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.d_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache variables (double): <math><msub><mi>d</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.z_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache variables (complex): <math><msub><mi>z</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
                     
-                if i1_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,1d): <math><msub><mover><mi>i</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i1_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+i1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if d1_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,1d): <math><msub><mover><mi>d</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d1_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+d1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if z1_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,1d): <math><msub><mover><mi>z</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z1_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+z1_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.i1_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (integer,1d): <math><msub><mover><mi>i</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i1_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i1_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.d1_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (double,1d): <math><msub><mover><mi>d</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d1_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d1_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.z1_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (complex,1d): <math><msub><mover><mi>z</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z1_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z1_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
 
-                if i2_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,2d): <math><msub><mover><mi>i</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i2_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+i2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if d2_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,2d): <math><msub><mover><mi>d</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d2_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+d2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if z2_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,2d): <math><msub><mover><mi>z</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z2_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+z2_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.i2_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (integer,2d): <math><msub><mover><mi>i</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i2_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i2_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.d2_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (double,2d): <math><msub><mover><mi>d</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d2_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d2_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.z2_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (complex,2d): <math><msub><mover><mi>z</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z2_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z2_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
 
-                if i3_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,3d): <math><msub><mover><mi>i</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if i3_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+i3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if d3_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,3d): <math><msub><mover><mi>d</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if d3_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+d3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                if z3_cache_var_.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,3d): <math><msub><mover><mi>z</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if z3_cache_var_.maxcounter=1 then "" else "<mo.>.</mo><mn>"+z3_cache_var_.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
-                
-        ///<summary>整数型を文字列に変換するときの桁数を設定</summary>
-        member __.set_int_string_format(x) = int_string_format_ <- x
-        
-        ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
-        member __.set_double_string_format(x) = double_string_format_ <- x
-
+                if this.i3_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (integer,3d): <math><msub><mover><mi>i</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i3_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i3_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.d3_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (double,3d): <math><msub><mover><mi>d</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d3_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d3_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                if this.z3_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache array (complex,3d): <math><msub><mover><mi>z</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z3_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z3_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    
         ///<summary>int型の数値を文字列に変換</summary>
         member __.ItoS (d:int) =
             match lan with
@@ -529,88 +470,52 @@ namespace Aqualis
             |C -> d.ToString("0.0#################E0")
             |T -> d.ToString()
             |H -> "<mn>"+d.ToString()+"</mn>"
-              
-        ///<summary>gotoラベル番号を増やす</summary>
-        member __.goto_label_inc() = goto_label <- goto_label + 1
-        
-        ///<summary>並列処理書き込みモード</summary>
-        member __.isparmode with get() = par_mode
-        
-        ///<summary>trueのときOpenMPが使用中</summary>
-        member __.isOmpUsed
-            with get () = is_omp_used
-            and set (value) = is_omp_used <- value
-        
-        ///<summary>trueのときOpenACCが使用中</summary>
-        member __.isOaccUsed
-            with get () = is_oacc_used
-            and set (value) = is_oacc_used <- value
-        
+            
         ///<summary>並列処理の一時ファイルを開く</summary>
         member this.popen() =
             if File.Exists(pfile) then
-                this.pclose()
+                this.pwriter.Close()
                 File.Delete(pfile)
-            pwriter <- new StreamWriter(pfile)
-
-        ///<summary>並列処理の一時ファイルを閉じる</summary>
-        member __.pclose() = 
-            pwriter.Close()
+            this.pwriter <- new StreamWriter(pfile)
             
         ///<summary>並列処理の一時ファイルを削除</summary>
-        member __.pdelete() = 
-            File.Delete(pfile)
+        member __.pdelete() = File.Delete(pfile)
             
         ///<summary>並列処理の一時ファイルの内容</summary>
         member __.readpartext() = File.ReadAllText(pfile)
         
         ///<summary>並列処理書き込みモードの切り替え</summary>
-        member _.switch_parmode (tf:bool) = par_mode <- tf
+        member this.switch_parmode (tf:bool) = this.isParMode <- tf
         
         ///<summary>コードを一時ファイルに書き込み</summary>
-        member this.cwrite(code:string) =
-            cwriter.Write(code)
+        member this.cwrite(code:string) = this.cwriter.Write(code)
             
         ///<summary>コードの一時ファイルを開く</summary>
-        member __.copen() = 
-            cwriter <- new StreamWriter(cfile,true)
+        member this.copen() = this.cwriter <- new StreamWriter(cfile,true)
             
         ///<summary>コードの一時ファイルを閉じる</summary>
-        member __.cclose() = 
-            cwriter.Close()
+        member this.cclose() = this.cwriter.Close()
             
         ///<summary>変数宣言の一時ファイルに書き込み</summary>
-        member __.vwrite(code:string) =
-            vwriter.Write(indent_.space+code)
+        member this.vwrite(code:string) = this.vwriter.Write(this.indent.space+code)
             
         ///<summary>変数宣言の一時ファイルを開く</summary>
-        member __.vopen() = 
-            vwriter <- new StreamWriter(vfile,true)
+        member this.vopen() = this.vwriter <- new StreamWriter(vfile,true)
             
         ///<summary>変数宣言の一時ファイルを閉じる</summary>
-        member __.vclose() = 
-            vwriter.Close()
+        member this.vclose() = this.vwriter.Close()
             
         ///<summary>構造体・関数宣言の一時ファイルに書き込み</summary>
-        member __.hwrite(code:string) =
-            hwriter.Write(code)
+        member this.hwrite(code:string) = this.hwriter.Write(code)
             
         ///<summary>構造体・関数宣言の一時ファイルを開く</summary>
-        member __.hopen() = 
-            hwriter <- new StreamWriter(hfile,true)
+        member this.hopen() = this.hwriter <- new StreamWriter(hfile,true)
             
         ///<summary>構造体・関数宣言の一時ファイルを閉じる</summary>
-        member __.hclose() = 
-            hwriter.Close()
-            
-        ///<summary>関数の引数リスト</summary>
-        member __.arglist with get() = arglist_
+        member this.hclose() = this.hwriter.Close()
         
-        ///<summary>定義された関数のリスト</summary>
-        member __.funlist with get() = funlist_
-    
         ///<summary>呼び出された関数の重複分を除いたリスト</summary>
-        member __.funlist_nonoverlap with get() =
+        member this.funlist_nonoverlap with get() =
             let rec reduce lst1 lst2 =
                 match lst1 with
                 |x::y ->
@@ -620,48 +525,10 @@ namespace Aqualis
                     |_ ->
                         reduce y lst2
                 |[] -> lst2
-            reduce funlist_ []
-            
-        ///<summary>関数を追加</summary>
-        member __.funlist_add(x) = 
-            funlist_ <- x::funlist_
+            reduce this.funlist []
             
         ///<summary>関数の引数を追加</summary>
-        member __.arglist_add(x) =
-            arglist_ <- arglist_@[x]
-                    
-        ///<summary>整数型を文字列に変換するときの桁数</summary>
-        member __.int_string_format with get() = int_string_format_
-        
-        ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
-        member __.double_string_format with get() = double_string_format_
-        
-        ///<summary>ライブラリの使用時に必要なモジュールファイル</summary>
-        member __.mlist_ with get() = mlist
-        
-        ///<summary>ライブラリの使用時に必要なextern指定子</summary>
-        member __.hlist_ with get() = hlist
-
-        ///<summary>ヘッダファイルのインクルード</summary>
-        member __.include_(s) = hlist.add(s)
-              
-        ///<summary>モジュールファイルのインクルード</summary>
-        member __.module_(s) = mlist.add(s)
-              
-        ///<summary>extern指定子の追加</summary>
-        member this.extern_(s) = this.elist.add(s)
-              
-        ///<summary>ソースファイルファイルのインクルード</summary>
-        member this.source_(s) = this.slist.add(s)
-              
-        ///<summary>オプション追加</summary>
-        member this.option_(s) = this.olist.add(s)
-        
-        ///<summary>ディスプレイモード</summary>
-        member __.displaysection with get() = display_section
-
-        ///<summary>ディスプレイモードを設定</summary>
-        member __.set_displaysection(x) = display_section <- x
+        member this.arglist_add(x) = this.arglist <- this.arglist@[x]
         
         /// <summary>
         /// 関数定義の引数を追加
@@ -677,9 +544,9 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(arglist_.Length+1).ToString("00")
+                            "arg"+(this.arglist.Length+1).ToString("00")
                         |_ -> 
-                            "arg"+(arglist_.Length+1).ToString("00")
+                            "arg"+(this.arglist.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
                         this.arglist_add(n,(typ,vtp,name))
@@ -702,9 +569,9 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(arglist_.Length+1).ToString("00")
+                            "arg"+(this.arglist.Length+1).ToString("00")
                         |_ -> 
-                            "arg"+(arglist_.Length+1).ToString("00")
+                            "arg"+(this.arglist.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
                         this.arglist_add(n,(typ,vtp,name))
@@ -727,9 +594,9 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "<mi>arg"+(arglist_.Length+1).ToString("00")+"</mi>"
+                            "<mi>arg"+(this.arglist.Length+1).ToString("00")+"</mi>"
                         |_ -> 
-                            "<mi>arg"+(arglist_.Length+1).ToString("00")+"</mi>"
+                            "<mi>arg"+(this.arglist.Length+1).ToString("00")+"</mi>"
                     match vtp with
                     |A0 ->
                         this.arglist_add(n,(typ,vtp,name))
@@ -805,7 +672,6 @@ namespace Aqualis
             |T ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
-                    //Array.iter (fun code -> this.cwrite((this.indent+code+"\n").Replace("_","\\_"))) slist
                     Array.iter (fun code -> this.cwrite(this.indent.space+code+"\n")) slist
             |H ->
                 if ss<>"" then 
@@ -853,52 +719,39 @@ namespace Aqualis
                 arrange s
                 
         ///<summary>ループカウンタ変数を作成し、code内の処理を実行</summary>
-        member __.getloopvar code =
-            let counter = loopvar.getAutoVar()
+        member this.getloopvar code =
+            let counter = this.loopvar.getAutoVar()
             code(counter)
-            loopvar.setVar(It 4,A0,counter,"")
+            this.loopvar.setVar(It 4,A0,counter,"")
             
         ///<summary>ループカウンタ変数とループ脱出先gotoラベルを作成し、code内の処理を実行</summary>
         member this.getloopvar_exit code =
             match lan with
             |F ->
-                let goto = goto_label.ToString()
-                this.goto_label_inc()
+                let goto = this.goto_label.ToString()
+                this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("goto "+goto+"\n")
-                let counter = loopvar.getAutoVar()
+                let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
-                loopvar.setVar(It 4,A0,counter,"")
+                this.loopvar.setVar(It 4,A0,counter,"")
             |C ->
-                let goto = "_"+goto_label.ToString()
-                this.goto_label_inc()
+                let goto = "_"+this.goto_label.ToString()
+                this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("goto "+goto+";\n")
-                let counter = loopvar.getAutoVar()
+                let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
-                loopvar.setVar(It 4,A0,counter,"")
+                this.loopvar.setVar(It 4,A0,counter,"")
             |T ->
-                let goto = "_"+goto_label.ToString()
-                this.goto_label_inc()
+                let goto = "_"+this.goto_label.ToString()
+                this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("goto "+goto+"\n")
-                let counter = loopvar.getAutoVar()
+                let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
-                loopvar.setVar(It 4,A0,counter,"")
+                this.loopvar.setVar(It 4,A0,counter,"")
             |H ->
-                let goto = goto_label.ToString()
-                this.goto_label_inc()
+                let goto = this.goto_label.ToString()
+                this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("<a href=\"#"+goto+"\">goto "+goto+"</a>\n<br/>\n")
-                let counter = loopvar.getAutoVar()
+                let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
-                loopvar.setVar(It 4,A0,counter,"")
-
-        member _.i_cache_var with get() = i_cache_var_
-        member _.d_cache_var with get() = d_cache_var_
-        member _.z_cache_var with get() = z_cache_var_
-        member _.i1_cache_var with get() = i1_cache_var_
-        member _.d1_cache_var with get() = d1_cache_var_
-        member _.z1_cache_var with get() = z1_cache_var_
-        member _.i2_cache_var with get() = i2_cache_var_
-        member _.d2_cache_var with get() = d2_cache_var_
-        member _.z2_cache_var with get() = z2_cache_var_
-        member _.i3_cache_var with get() = i3_cache_var_
-        member _.d3_cache_var with get() = d3_cache_var_
-        member _.z3_cache_var with get() = z3_cache_var_
+                this.loopvar.setVar(It 4,A0,counter,"")

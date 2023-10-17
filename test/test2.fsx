@@ -96,9 +96,6 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
         !"027"
         ch.ii <| fun (n,m) ->
             n <== 1
-            io.fileOutput [!."test";n;!.".dat"] <| fun wr ->
-                wr [n; (n+1); (n+2);]
-                wr [(n+3); (n+4); (n+5)]
         !"028"
         ch.iidd <| fun (n,m,x,y) ->
             n <== 1
@@ -134,22 +131,6 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             q <== (p+p)/(p+p)
             !"011"
             q <== (p+p)./(p+p)
-        ch.dddd <| fun (z1,z2,x,y) ->
-            printfn "%d" 4851
-            !"test4851"
-            let p = 1.5
-            let q = 8.4
-            x <== p
-            y <== q
-            z1 <== (8.4/(p/p/(p/5.3)))
-            z2 <== (8.4/(x/x/(x/5.3)))
-            let a = 8.4
-            let b = 1/(x/5.3)
-            printfn "%s" b.expr.code
-            print.c (I 4851)
-            print.c z1
-            print.c z2
-            print.c (asm.abs(z1-z2))
     codestr.h2 "test4" <| fun () ->
         ch.id <| fun (x,y) ->
             !"001"

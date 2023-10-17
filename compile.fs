@@ -59,7 +59,7 @@ namespace Aqualis
                     |A3(_,_,_) -> typ.tostring(p.lang)+" :: "+name+"(:,:,:)"
             match p.lang with
             |F ->
-                p.param_main.funlist_add(projectname)
+                p.param_main.funlist <- projectname::p.param_main.funlist
                 p.param_add(F, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
@@ -118,7 +118,7 @@ namespace Aqualis
                 p.param_back()
                 p.codewrite("call" + " " + projectname + "(" + args + ")\n")
             |C ->
-                p.param_main.funlist_add(projectname)
+                p.param_main.funlist <- projectname::p.param_main.funlist
                 p.param_add(C, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
@@ -178,7 +178,7 @@ namespace Aqualis
                 p.param_back()
                 p.codewrite(projectname + "(" + args + ");\n")
             |T ->
-                p.param_main.funlist_add(projectname)
+                p.param_main.funlist <- projectname::p.param_main.funlist
                 p.param_add(T, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
@@ -237,7 +237,7 @@ namespace Aqualis
                 p.param_back()
                 p.codewrite("call" + " " + projectname + "(" + args + ")\n")
             |H ->
-                p.param_main.funlist_add(projectname)
+                p.param_main.funlist <- projectname::p.param_main.funlist
                 p.param_add(H, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
