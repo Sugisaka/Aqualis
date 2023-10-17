@@ -705,11 +705,11 @@ namespace Aqualis
                     ch.i <| fun n ->
                         //データ型
                         r n
-                        br.if2 (n=.nt)
+                        br.if2 (n.=nt)
                             <| fun () ->
                                 //データ次元
                                 r n
-                                br.if2 (n=.0)
+                                br.if2 (n.=0)
                                     <| fun () ->
                                         ch.i <| fun n1 ->
                                             //データサイズ
@@ -732,7 +732,7 @@ namespace Aqualis
                     //データフォーマット
                     r n
                     br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
+                        b.IF (n.=1) <| fun () ->
                             match f.etype with
                             |Etype.It(4) ->
                                 reader r (1004,f.etype)
@@ -750,11 +750,11 @@ namespace Aqualis
                     ch.i <| fun n ->
                         //データ型
                         r n
-                        br.if2 (n=.nt)
+                        br.if2 (n.=nt)
                             <| fun () ->
                                 //データ次元
                                 r n
-                                br.if2 (n=.1)
+                                br.if2 (n.=1)
                                     <| fun () ->
                                         ch.i <| fun n1 ->
                                             //データサイズ
@@ -780,7 +780,7 @@ namespace Aqualis
                     //データフォーマット
                     r n
                     br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
+                        b.IF (n.=1) <| fun () ->
                             match f[1].etype with
                             |Etype.It(4) ->
                                 reader r (1004,f[1].etype)
@@ -798,11 +798,11 @@ namespace Aqualis
                     ch.i <| fun n ->
                         //データ型
                         r n
-                        br.if2 (n=.nt)
+                        br.if2 (n.=nt)
                             <| fun () ->
                                 //データ次元
                                 r n
-                                br.if2 (n=.2)
+                                br.if2 (n.=2)
                                     <| fun () ->
                                         ch.ii <| fun (n1,n2) ->
                                             //データサイズ
@@ -831,7 +831,7 @@ namespace Aqualis
                     //データフォーマット
                     r n
                     br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
+                        b.IF (n.=1) <| fun () ->
                             match f[1,1].etype with
                             |Etype.It(4) ->
                                 reader r (1004,f[1,1].etype)
@@ -849,11 +849,11 @@ namespace Aqualis
                     ch.i <| fun n ->
                         //データ型
                         r n
-                        br.if2 (n=.nt)
+                        br.if2 (n.=nt)
                             <| fun () ->
                                 //データ次元
                                 r n
-                                br.if2 (n=.3)
+                                br.if2 (n.=3)
                                     <| fun () ->
                                         ch.iii <| fun (n1,n2,n3) ->
                                             //データサイズ
@@ -885,7 +885,7 @@ namespace Aqualis
                     //データフォーマット
                     r n
                     br.branch <| fun b ->
-                        b.IF (n=.1) <| fun () ->
+                        b.IF (n.=1) <| fun () ->
                             match f[1,1,1].etype with
                             |Etype.It(4) ->
                                 reader r (1004,f[1,1,1].etype)

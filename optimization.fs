@@ -56,7 +56,7 @@ type optimization() =
                         xb.foreach <| fun i -> xb.[i] <== xa.[i] + (x1.[i]-xa.[i])*(1.0+r)
                         f fb xb
                         //print.s [!."A"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
-                    b.IF (AND[f1.>f2; fa.>f2;]) <| fun () ->
+                    b.IF (And[f1.>f2; fa.>f2;]) <| fun () ->
                         counter.inc
                         xa <== x1
                         fa <== f1
@@ -67,7 +67,7 @@ type optimization() =
                         x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
                         f f2 x2
                         //print.s [!."B"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
-                    b.IF (OR [AND [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
+                    b.IF (Or [And [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
                         counter.inc
                         //xa: そのまま
                         xb <== x2
@@ -108,7 +108,7 @@ type optimization() =
                         y.foreach <| fun i ->
                             y.[i] <== -df0.[i]
                         La.norm y <| fun nr ->
-                            br.if1 (nr=.0.0) <| fun () -> 
+                            br.if1 (nr.=0.0) <| fun () -> 
                                 ext()
                         //勾配方向に最小値を探す
                         optimization.findmin m (x0,y) dd0_ f x0
@@ -144,7 +144,7 @@ type optimization() =
                     ch.d1 x0.size1 <| fun df0 -> 
                         df df0 x0
                         br.branch <| fun r ->
-                            r.IF (i=.1) <| fun () ->
+                            r.IF (i.=1) <| fun () ->
                                 a <== 0
                             r.EL <| fun () ->
                                 ch.d2 x0.size1 x0.size1 <| fun h ->
@@ -153,13 +153,13 @@ type optimization() =
                                         La.matmul (h,b) <| fun p2 ->
                                             La.dot (b,p1) <| fun c1 ->
                                                 La.dot (b,p2) <| fun c2 ->
-                                                    br.if1 (c2=.0.0) <| fun () -> ext()
+                                                    br.if1 (c2.=0.0) <| fun () -> ext()
                                                     a <== c1/c2
                         //勾配を計算
                         y.foreach <| fun i ->
                             y.[i] <== -df0.[i] + a * b.[i]
                         La.norm y <| fun nr ->
-                            br.if1 (nr=.0.0) <| fun () -> ext()
+                            br.if1 (nr.=0.0) <| fun () -> ext()
                         //勾配方向に最小値を探す
                         optimization.findmin m (x0,y) dd0_ f x0
                         match stepProc with
@@ -197,21 +197,21 @@ type optimization() =
                     ch.d1 x0.size1 <| fun (df0:num1) ->
                         df df0 x0
                         br.branch <| fun r ->
-                            r.IF (i=.1) <| fun () ->
+                            r.IF (i.=1) <| fun () ->
                                 a <== 0
                             r.EL <| fun () ->
                                 p1.foreach <| fun j ->
                                     p1.[j] <== df0.[j] - df1.[j]
                                 La.dot (df0,p1) <| fun c1 ->
                                     La.dot (b,p1) <| fun c2 ->
-                                        br.if1 (c2=.0.0) <| fun () ->
+                                        br.if1 (c2.=0.0) <| fun () ->
                                             ext()
                                         a <== c1/c2
                         //勾配を計算
                         y.foreach <| fun i ->
                             y.[i] <== -df0.[i] + a * b.[i]
                         La.norm y <| fun nr ->
-                            br.if1 (nr=.0.0) <| fun () -> 
+                            br.if1 (nr.=0.0) <| fun () -> 
                                 ext()
                         //勾配方向に最小値を探す
                         ch.d1 x0.size1 <| fun x ->
@@ -254,7 +254,7 @@ type optimization() =
                         df df0 x0
                         La.matmul (ih,df0) <| fun a ->
                             La.norm a <| fun nr ->
-                                br.if1 (nr=.0.0) <| fun () -> ext()
+                                br.if1 (nr.=0.0) <| fun () -> ext()
                             a.foreach <| fun j ->
                                 a.[j] <== -a.[j]
                             optimization.findmin m (x0,a) dd0_ f x0
@@ -306,7 +306,7 @@ type optimization() =
                                     t.foreach <| fun (j1,j2) -> 
                                         B.[j1,j2] <== B.[j1,j2] + s.[j1] * s.[j2] / p
                     La.matmul (B,df0) <| fun a ->
-                        La.norm a <| fun nr -> br.if1 (nr=.0.0) <| fun () -> ext()
+                        La.norm a <| fun nr -> br.if1 (nr.=0.0) <| fun () -> ext()
                         a.foreach <| fun i -> a.[i] <== -a.[i]
                         ch.d1 x0.size1 <| fun xx ->
                             optimization.findmin m (x0,a) dd0_ f xx

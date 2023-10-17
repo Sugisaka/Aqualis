@@ -77,11 +77,11 @@ namespace Aqualis
         static member ( % ) (x:double,y:num0) = num0(x)%y
         static member ( % ) (x:int,y:num0) = num0(x)%y
 
-        static member (=.) (x:num0,y:num0) = bool0(x.expr =. y.expr)
-        static member (=.) (x:int,y:num0) = bool0((Int_c x) =. y.expr)
-        static member (=.) (x:double,y:num0) = bool0((Dbl_c x) =. y.expr)
-        static member (=.) (x:num0,y:int) = bool0(x.expr =. (Int_c y))
-        static member (=.) (x:num0,y:double) = bool0(x.expr =. (Dbl_c y))
+        static member (.=) (x:num0,y:num0) = bool0(x.expr .= y.expr)
+        static member (.=) (x:int,y:num0) = bool0((Int_c x) .= y.expr)
+        static member (.=) (x:double,y:num0) = bool0((Dbl_c x) .= y.expr)
+        static member (.=) (x:num0,y:int) = bool0(x.expr .= (Int_c y))
+        static member (.=) (x:num0,y:double) = bool0(x.expr .= (Dbl_c y))
         
         static member (.=/) (x:num0,y:num0) = bool0(x.expr .=/ y.expr)
         static member (.=/) (x:int,y:num0) = bool0((Int_c x) .=/ y.expr)
@@ -146,9 +146,9 @@ namespace Aqualis
         
     and bool0(x:Expr) =
         inherit aqvar(x)
-        static member (=.) (x:bool0,y:num0) = bool0(x.expr =. y.expr)
-        static member (=.) (x:bool0,y:int) = bool0(x.expr =. (Int_c y))
-        static member (=.) (x:bool0,y:double) = bool0(x.expr =. (Dbl_c y))
+        static member (.=) (x:bool0,y:num0) = bool0(x.expr .= y.expr)
+        static member (.=) (x:bool0,y:int) = bool0(x.expr .= (Int_c y))
+        static member (.=) (x:bool0,y:double) = bool0(x.expr .= (Dbl_c y))
         
         static member (.<) (x:bool0,y:num0) = bool0(x.expr .< y.expr)
         static member (.<) (x:bool0,y:int) = bool0(x.expr .< (Int_c y))
@@ -291,8 +291,8 @@ namespace Aqualis
         
     [<AutoOpen>]
     module noperator =
-        let AND (lst:list<bool0>) = bool0(And <| List.map (fun (x:bool0) -> x.expr) lst)
-        let OR (lst:list<bool0>) = bool0(Or <| List.map (fun (x:bool0) -> x.expr) lst)
+        let And (lst:list<bool0>) = bool0(AND <| List.map (fun (x:bool0) -> x.expr) lst)
+        let Or (lst:list<bool0>) = bool0(OR <| List.map (fun (x:bool0) -> x.expr) lst)
         
         type System.Int32 with
             ///<summary>整数をint0型に置換</summary>

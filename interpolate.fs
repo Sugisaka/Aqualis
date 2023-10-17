@@ -25,10 +25,10 @@ namespace Aqualis
                             ch.d <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
                                 code(z)
-                    br.if1 (x=.X.[X.size1]) <| fun () ->
+                    br.if1 (x.=X.[X.size1]) <| fun () ->
                         flag<==1
                         code(Y.[X.size1])
-                    br.if1(flag=.0) <| fun () -> print.s[x;!."is out of range:";X.[1];X.[X.size1];]
+                    br.if1(flag.=0) <| fun () -> print.s[x;!."is out of range:";X.[1];X.[X.size1];]
                     
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
         type LinearInterpolate1z(id:string,data_x,data_y) =
@@ -44,10 +44,10 @@ namespace Aqualis
                             ch.z <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
                                 code(z)
-                    br.if1 (x=.X.[X.size1]) <| fun () ->
+                    br.if1 (x.=X.[X.size1]) <| fun () ->
                         flag<==1
                         code(Y.[X.size1])
-                    br.if1(flag=.0) <| fun () -> print.s[x;!."is out of range:";X.[1];X.[X.size1];]
+                    br.if1(flag.=0) <| fun () -> print.s[x;!."is out of range:";X.[1];X.[X.size1];]
                     
         type splineInterpolate(iscpx:bool) =
             

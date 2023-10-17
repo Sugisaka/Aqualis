@@ -48,9 +48,9 @@ namespace Aqualis
                     p.errorIDinc()
                     p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
                     br.branch <| fun b ->
-                        b.IF (this.size1 =. -1) <| fun () -> 
+                        b.IF (this.size1 .= -1) <| fun () -> 
                             print.t ("ERROR"+p.errorID.ToString()+" array "+name+" is not allocated")
-                        b.IF (OR [(i .< _1); (this.size1 .< i)]) <| fun () ->
+                        b.IF (Or [(i .< _1); (this.size1 .< i)]) <| fun () ->
                             print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
                     p.comment("****************************************************")
                 |_ -> ()
@@ -119,7 +119,7 @@ namespace Aqualis
                     p.errorIDinc()
                     p.comment("***debug array1 deallocate check: "+p.errorID.ToString()+"*****************************")
                     br.branch <| fun b ->
-                        b.IF (this.size1 =. -1) <| fun () ->
+                        b.IF (this.size1 .= -1) <| fun () ->
                             print.t ("ERROR"+p.errorID.ToString()+" cannot deallocate array "+name)
                     p.comment("****************************************************")
                 |_ -> ()

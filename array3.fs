@@ -67,13 +67,13 @@ namespace Aqualis
                 |Var3(_,name) ->
                     p.errorIDinc()
                     p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
-                    br.if1 (OR [this.size1 =. -1; this.size2 =. -1; this.size3 =. -1]) <| fun () -> 
+                    br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () -> 
                         print.t ("ERROR"+p.errorID.ToString()+" array "+name+" is not allocated")
-                    br.if1 (OR [(i .< _1); (this.size1 .< i)]) <| fun () ->
+                    br.if1 (Or [(i .< _1); (this.size1 .< i)]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
-                    br.if1 (OR [(j .< _1); (this.size2 .< j)]) <| fun () ->
+                    br.if1 (Or [(j .< _1); (this.size2 .< j)]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size3;!.")"]
-                    br.if1 (OR [(k .< _1); (this.size3 .< k)]) <| fun () ->
+                    br.if1 (Or [(k .< _1); (this.size3 .< k)]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");k;!." is out of range (1:";this.size3;!.")"]
                     p.comment("****************************************************")
                 |_ -> ()
@@ -168,7 +168,7 @@ namespace Aqualis
                     p.errorIDinc()
                     p.comment("***debug array1 deallocate check: "+p.errorID.ToString()+"*****************************")
                     br.branch <| fun b ->
-                        b.IF (this.size1 =. -1) <| fun () ->
+                        b.IF (this.size1 .= -1) <| fun () ->
                             print.t ("ERROR"+p.errorID.ToString()+" cannot deallocate array "+name)
                     p.comment("****************************************************")
                 |_ -> ()

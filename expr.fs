@@ -28,8 +28,8 @@ namespace Aqualis
         |GreaterEq of Expr*Expr
         |Less of Expr*Expr
         |LessEq of Expr*Expr
-        |And of Expr list
-        |Or of Expr list
+        |AND of Expr list
+        |OR of Expr list
         |Null
         |NaN
         
@@ -48,13 +48,13 @@ namespace Aqualis
                 |Mul (x,y) -> x.code+"*"+y.code
                 |Div (x,y) -> x.code+"/"+y.code
                 |NaN -> "NaN"
-                |And [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
-                |And [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" < "+v3.code
-                |And [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" \\leq "+v3.code
-                |And [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" \\leq "+v3.code
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
@@ -68,7 +68,7 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" <= "+v2.code
-                |And(v) ->
+                |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -79,7 +79,7 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Or(v) ->
+                |OR(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -106,13 +106,13 @@ namespace Aqualis
                 |Mul (x,y) -> x.code+"*"+y.code
                 |Div (x,y) -> x.code+"/"+y.code
                 |NaN -> "NaN"
-                |And [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
-                |And [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" < "+v3.code
-                |And [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" \\leq "+v3.code
-                |And [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" \\leq "+v3.code
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
@@ -126,7 +126,7 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" <= "+v2.code
-                |And(v) ->
+                |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -137,7 +137,7 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Or(v) ->
+                |OR(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -164,13 +164,13 @@ namespace Aqualis
                 |Mul (x,y) -> x.code+"*"+y.code
                 |Div (x,y) -> x.code+"/"+y.code
                 |NaN -> "NaN"
-                |And [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
-                |And [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" < "+v3.code
-                |And [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" \\leq "+v3.code
-                |And [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" \\leq "+v3.code
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
@@ -184,7 +184,7 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" <= "+v2.code
-                |And(v) ->
+                |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -194,7 +194,7 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Or(v) ->
+                |OR(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -220,13 +220,13 @@ namespace Aqualis
                 |Mul (x,y) -> x.code+"*"+y.code
                 |Div (x,y) -> x.code+"/"+y.code
                 |NaN -> "NaN"
-                |And [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
-                |And [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" < "+v3.code
-                |And [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" \\leq "+v3.code
-                |And [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" \\leq "+v2.code+" \\leq "+v3.code
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
@@ -240,7 +240,7 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" <= "+v2.code
-                |And(v) ->
+                |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -251,7 +251,7 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Or(v) ->
+                |OR(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
                     let cat acc i =
@@ -813,7 +813,7 @@ namespace Aqualis
                 |T -> Formula <| "pow("+x.code+","+y.code+")"
             
         ///<summary>等号</summary>
-        static member (=.) (v1:Expr,v2:Expr) = Eq(v1,v2)
+        static member (.=) (v1:Expr,v2:Expr) = Eq(v1,v2)
         ///<summary>不等号</summary>
         static member (.=/) (v1:Expr,v2:Expr) = NEq(v1,v2)        
         ///<summary>比較（より小）</summary>
@@ -822,20 +822,20 @@ namespace Aqualis
             |Less(u1,u2) ->
                 let x1 = u1.<u2
                 let x2 = u2.<v2
-                And([x1;x2])
+                AND([x1;x2])
             |LessEq(u1,u2) ->
                 let x1 = u1.<=u2
                 let x2 = u2.<v2
-                And([x1;x2])
+                AND([x1;x2])
             |Greater(u1,u2) ->
                 let x1 = u1.>u2
                 let x2 = u2.<v2
-                And([x1;x2])
+                AND([x1;x2])
             |GreaterEq(u1,u2) ->
                 let x1 = u1.>=u2
                 let x2 = u2.<v2
-                And([x1;x2])
-            |And(lst) ->
+                AND([x1;x2])
+            |AND(lst) ->
                 let u1 =
                     match lst with
                     |[] -> NaN
@@ -847,7 +847,7 @@ namespace Aqualis
                       |GreaterEq(_,u2) -> u2
                       |_ -> NaN
                 let x2 = u1.<v2
-                And(lst@[x2])
+                AND(lst@[x2])
             |_ ->
                 Less(v1,v2)
         ///<summary>比較（以下）</summary>
@@ -856,20 +856,20 @@ namespace Aqualis
             |Less(u1,u2) ->
                 let x1 = u1.<u2
                 let x2 = u2.<=v2
-                And([x1;x2])
+                AND([x1;x2])
             |LessEq(u1,u2) ->
                 let x1 = u1.<=u2
                 let x2 = u2.<=v2
-                And([x1;x2])
+                AND([x1;x2])
             |Greater(u1,u2) ->
                 let x1 = u1.>u2
                 let x2 = u2.<=v2
-                And([x1;x2])
+                AND([x1;x2])
             |GreaterEq(u1,u2) ->
                 let x1 = u1.>=u2
                 let x2 = u2.<=v2
-                And([x1;x2])
-            |And(lst) ->
+                AND([x1;x2])
+            |AND(lst) ->
                 let u1 =
                     match lst with
                     |[] -> NaN
@@ -881,7 +881,7 @@ namespace Aqualis
                         |GreaterEq(_,u2) -> u2
                         |_ -> NaN
                 let x2 = (u1.<=v2)
-                And(lst@[x2])
+                AND(lst@[x2])
             |_ ->
                 LessEq(v1,v2)
         ///<summary>比較（より大）</summary>
@@ -890,20 +890,20 @@ namespace Aqualis
             |Less(u1,u2) ->
                 let x1 = u1.<u2
                 let x2 = u2.>v2
-                And[x1;x2]
+                AND[x1;x2]
             |LessEq(u1,u2) ->
                 let x1 = u1.<=u2
                 let x2 = u2.>v2
-                And[x1;x2]
+                AND[x1;x2]
             |Greater(u1,u2) ->
                 let x1 = u1.>u2
                 let x2 = u2.>v2
-                And[x1;x2]
+                AND[x1;x2]
             |GreaterEq(u1,u2) ->
                 let x1 = u1.>=u2
                 let x2 = u2.>v2
-                And[x1;x2]
-            |And(lst) ->
+                AND[x1;x2]
+            |AND(lst) ->
                 let u1 =
                     match lst with
                     |[] -> NaN
@@ -915,7 +915,7 @@ namespace Aqualis
                         |GreaterEq(_,u2) -> u2
                         |_ -> NaN
                 let x2 = u1.>v2
-                And(lst@[x2])
+                AND(lst@[x2])
             |_ ->
                 Greater(v1,v2)
         ///<summary>比較（以上）</summary>
@@ -924,20 +924,20 @@ namespace Aqualis
             |Less(u1,u2) ->
                 let x1 = u1.<u2
                 let x2 = u2.>=v2
-                And[x1;x2]
+                AND[x1;x2]
             |LessEq(u1,u2) ->
                 let x1 = u1.<=u2
                 let x2 = u2.>=v2
-                And[x1;x2]
+                AND[x1;x2]
             |Greater(u1,u2) ->
                 let x1 = u1.>u2
                 let x2 = u2.>=v2
-                And[x1;x2]
+                AND[x1;x2]
             |GreaterEq(u1,u2) ->
                 let x1 = u1.>=u2
                 let x2 = u2.>=v2
-                And[x1;x2]
-            |And(lst) ->
+                AND[x1;x2]
+            |AND(lst) ->
                 let u1 =
                     match lst with
                     |[] -> NaN
@@ -949,7 +949,7 @@ namespace Aqualis
                         |GreaterEq(_,u2) -> u2
                         |_ -> NaN
                 let x2 = u1.>=v2
-                And(lst@[x2])
+                AND(lst@[x2])
             |_ ->
                 GreaterEq(v1,v2)
 

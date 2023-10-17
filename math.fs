@@ -117,12 +117,12 @@ namespace Aqualis
                 ch.d <| fun somx2 ->
                     pmm<==1.0
                     br.branch <| fun b ->
-                        b.IF (l =. 0) <| fun () -> 
+                        b.IF (l .= 0) <| fun () -> 
                             pl <== pmm
                         b.EL <| fun () -> 
                             pmmp1<==x*pmm
                             br.branch <| fun b ->
-                               b.IF (l =. 1) <| fun () ->
+                               b.IF (l .= 1) <| fun () ->
                                    pl<==pmmp1
                                b.EL <| fun () ->
                                    iter.range _2 l <| fun ll ->
@@ -143,12 +143,12 @@ namespace Aqualis
                     pmm<==1.0
                     pl[1]<==pmm
                     br.branch <| fun b ->
-                        b.IF (l =. 0) <| fun () -> 
+                        b.IF (l .= 0) <| fun () -> 
                             pl[l+1] <== pmm
                         b.EL <| fun () -> 
                             pmmp1<==x*pmm
                             br.branch <| fun b ->
-                                b.IF (l =. 1) <| fun () ->
+                                b.IF (l .= 1) <| fun () ->
                                     pl[l+1]<==pmmp1
                                 b.EL <| fun () ->
                                     pl[2]<==pmmp1
@@ -165,7 +165,7 @@ namespace Aqualis
         let aplgndr (pl:num0) (l:num0, m:num0, x:num0) =
             ch.dd <| fun (fact,pll) ->
             ch.ddd <| fun (pmm,pmmp1,somx2) ->
-                br.if1 (OR [m .< 0; m .> l; asm.abs(x) .> 1.0]) <| fun () ->
+                br.if1 (Or [m .< 0; m .> l; asm.abs(x) .> 1.0]) <| fun () ->
                     print.t "Bad arguments in routine plgndr"
                 pmm <== 1.0
                 br.if1 (m .> 0) <| fun () ->
@@ -174,12 +174,12 @@ namespace Aqualis
                     iter.num m <| fun i ->
                         pmm <== -pmm*fact*somx2
                         fact <== fact + 2.0
-                br.if2 (l =. m)
+                br.if2 (l .= m)
                     <| fun () ->
                         pl <== pmm;
                     <| fun () ->
                         pmmp1 <== x*(2*m+1)*pmm
-                        br.if2 (l =. (m+1))
+                        br.if2 (l .= (m+1))
                             <| fun () ->
                                 pl <== pmmp1;
                             <| fun () ->

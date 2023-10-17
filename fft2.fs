@@ -18,14 +18,14 @@ namespace Aqualis
             member __.code = name
             
         let fftshift2(x:num2) =
-            br.if2 (x.size2%2 =. 0)
+            br.if2 (x.size2%2 .= 0)
                 <| fun () ->
                     iter.num x.size1 <| fun i ->
                         fft1.fftshift_even(x[i,()])
                 <| fun () ->
                     iter.num x.size1 <| fun i ->
                         fft1.fftshift_odd(x[i,()])
-            br.if2 (x.size1%2 =. 0)
+            br.if2 (x.size1%2 .= 0)
                 <| fun () ->
                     iter.num x.size2 <| fun i ->
                         fft1.fftshift_even(x[(),i])
@@ -34,14 +34,14 @@ namespace Aqualis
                         fft1.fftshift_odd(x[(),i])
                         
         let ifftshift2(x:num2) =
-            br.if2 (x.size2%2 =. 0)
+            br.if2 (x.size2%2 .= 0)
                 <| fun () ->
                     iter.num x.size1 <| fun i ->
                         fft1.ifftshift_even(x[i,()])
                 <| fun () ->
                     iter.num x.size1 <| fun i ->
                         fft1.ifftshift_odd(x[i,()])
-            br.if2 (x.size1%2 =. 0)
+            br.if2 (x.size1%2 .= 0)
                 <| fun () ->
                     iter.num x.size2 <| fun i ->
                         fft1.ifftshift_even(x[(),i])

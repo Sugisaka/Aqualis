@@ -54,14 +54,14 @@ namespace Aqualis
                     a[i] <== tmp
                     
         let fftshift1(x:num1) =
-            br.if2 (x.size1%2 =. 0)
+            br.if2 (x.size1%2 .= 0)
                 <| fun () ->
                     fftshift_even(x)
                 <| fun () ->
                     fftshift_odd(x)
                         
         let ifftshift1(x:num1) =
-            br.if2 (x.size1%2 =. 0)
+            br.if2 (x.size1%2 .= 0)
                 <| fun () ->
                     ifftshift_even(x)
                 <| fun () ->

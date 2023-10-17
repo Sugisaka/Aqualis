@@ -31,7 +31,7 @@ namespace Aqualis
                 ch.z1 b.size1 <| fun r -> ch.z1 b.size1 <| fun t -> ch.z1 b.size1 <| fun p -> ch.z1 b.size1 <| fun v -> ch.z1 b.size1 <| fun s -> ch.z1 b.size1 <| fun p_hat -> ch.z1 b.size1 <| fun s_hat -> ch.z1 b.size1 <| fun r_tld ->
                     ch.d <| fun bnrm2 ->
                         norm(bnrm2,b)
-                        br.if1 (bnrm2 =. 0.0) <| fun () -> bnrm2 <== 1.0
+                        br.if1 (bnrm2 .= 0.0) <| fun () -> bnrm2 <== 1.0
                         integralequation_matmul1(t,x)
                         iter.num r.size1 <| fun i -> 
                             r.[i] <== b.[i] - t.[i]
@@ -48,7 +48,7 @@ namespace Aqualis
                                         //反復処理
                                         iter.num_exit (I max_iteration) <| fun (exit,i) ->
                                             dot_product2(rho,r_tld,r)
-                                            br.if1 (asm.abs(rho) =. 0.0) <| fun () -> exit()
+                                            br.if1 (asm.abs(rho) .= 0.0) <| fun () -> exit()
                                             br.if2 (i .> 1)
                                               (fun () ->
                                                 beta <== ( rho/rho_1 )*( alpha/omega )
@@ -89,7 +89,7 @@ namespace Aqualis
                                             br.if1 (err .<= tol) <| fun () -> 
                                                 print.s[!."converged"]
                                                 exit()
-                                            br.if1 (asm.abs(omega) =. 0.0) <| fun () -> 
+                                            br.if1 (asm.abs(omega) .= 0.0) <| fun () -> 
                                                 print.s[!."error_BiCGSTAB"]
                                                 exit()
                                             rho_1 <== rho
