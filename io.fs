@@ -826,6 +826,7 @@ namespace Aqualis
                                         print.t "Invalid data dimension"
                             <| fun () ->
                                 print.s <| filename@[!.": invalid data type"]
+                                print.cc n (I nt)
                 io.binfileInput filename <| fun r ->
                 ch.i <| fun n ->
                     //データフォーマット

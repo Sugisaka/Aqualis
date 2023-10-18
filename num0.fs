@@ -49,15 +49,11 @@ namespace Aqualis
         static member ( / ) (x:num0,y:num0) = 
             match x.etype,y.etype with
             |It _,It _ ->
-                let xx:num0 = asm.todouble(x)
-                let yy:num0 = asm.todouble(y)
-                num0(Dt, xx.expr / yy.expr)
+                asm.todouble(x) / asm.todouble(y)
             |It _,_ ->
-                let xx:num0 = asm.todouble(x)
-                num0(Dt, xx.expr / y.expr)
+                asm.todouble(x) / y
             |_,It _ ->
-                let yy:num0 = asm.todouble(y)
-                num0(Dt, x.expr / yy.expr)
+                x / asm.todouble(y)
             |_ ->
                 num0(Etype.prior(x.etype,y.etype), x.expr / y.expr)
         static member ( / ) (x:num0,y:double) = x/num0(y)
@@ -201,9 +197,30 @@ namespace Aqualis
         ///<summary>2πj</summary>
         static member j2p with get() = 2*asm.pi*asm.uj
         
-        static member todouble(x:num0) = num0(Dt, match p.lang with |F -> Formula("dble("+x.code+")") |_ -> Formula("(double)("+x.code+")"))
-        static member toint(x:num0) = num0(It 4, match p.lang with |F -> Formula("int("+x.code+")") |_ -> Formula("(int)("+x.code+")"))
-        
+        static member todouble(x:num0) = 
+            let rec dbl (e:Expr) =
+                match p.lang,e with
+                |_,Int_c x  -> Dbl_c (double x)
+                |_,Dbl_c x  -> Dbl_c x
+                |_,Add(a,b) -> (dbl a)+(dbl b)
+                |_,Sub(a,b) -> (dbl a)-(dbl b)
+                |_,Mul(a,b) -> (dbl a)*(dbl b)
+                |_,Div(a,b) -> (dbl a)/(dbl b)
+                |F,_        -> Formula("dble("+e.code+")")
+                |_,_        -> Formula("(double)("+e.code+")")
+            num0(Dt, dbl x.expr)
+        static member toint(x:num0) =
+            let rec it (e:Expr) =
+                match p.lang,e with
+                |_,Int_c x  -> Int_c x
+                |_,Dbl_c x  -> Int_c (int(floor x))
+                |_,Add(a,b) -> (it a)+(it b)
+                |_,Sub(a,b) -> (it a)-(it b)
+                |_,Mul(a,b) -> (it a)*(it b)
+                |_,Div(a,b) -> (it a)/(it b)
+                |F,_        -> Formula("int("+e.code+")")
+                |_,_        -> Formula("(int)("+e.code+")")
+            num0(It 4, it x.expr)
         ///<summary>累乗</summary>
         static member pow(x:num0, y:num0) = num0(Etype.prior(x.etype,y.etype),Expr.pow(x.expr,y.expr))
         static member pow(x:num0, y:int) = num0(Etype.prior(x.etype,It 4),Expr.pow(x.expr,Int_c y))

@@ -61,6 +61,10 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             !"019"
             m <== -m./n
             !"020"
+            x <== (4*m)/2
+            !"021"
+            m <== (4*m)./2
+            !"022"
             y <== asm.sin(-(x+y)/x)
             y <== asm.cos(x)
             y <== asm.tan(x)
