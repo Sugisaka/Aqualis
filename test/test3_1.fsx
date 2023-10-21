@@ -51,7 +51,7 @@ open Aqualis
         /// <param name="cm">コメント</param>
         member __.farg code = fn.addarg (testClass1.sname,size1,name) <| fun (v,n) -> code(testClass1_1(testClass1.sname,n,v))
         
-Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [F;C;H;T;] outputdir projectname ("aaa","aaa") <| fun () ->
     let cc = testClass1("c")
     cc.n1 <== 1
     cc.x1 <== 2.0

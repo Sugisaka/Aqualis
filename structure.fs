@@ -128,109 +128,88 @@ namespace Aqualis
             |F   -> vname+"%"+name
             |C -> vname+"."+name
             |T   -> vname+"."+name
-            |H   -> vname+"<mo>.</mo>"+name
+            |H   -> vname+"."+name
             
         member this.i0 (sname, vname, name) =
             this.addmember(sname,(It 4,A0,name))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num0(It 4,Var(structure.mem(vname,name)))
         member this.d0 (sname, vname, name) =
             this.addmember(sname,(Dt,A0,name))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num0(Dt,Var(structure.mem(vname,name)))
         member this.z0 (sname, vname, name) =
             this.addmember(sname,(Zt,A0,name))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num0(Zt,Var(structure.mem(vname,name)))
         member this.i1 (sname, vname, name, size1) =
             this.addmember(sname,(It 4,A1(size1),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num1(It 4,Var1(A1(size1),structure.mem(vname,name)))
         member this.d1 (sname, vname, name, size1) =
             this.addmember(sname,(Dt,A1(size1),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num1(Dt,Var1(A1(size1),structure.mem(vname,name)))
         member this.z1 (sname, vname, name, size1) =
             this.addmember(sname,(Zt,A1(size1),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num1(Zt,Var1(A1(size1),structure.mem(vname,name)))
         member this.i2 (sname, vname, name, size1, size2) =
             this.addmember(sname,(It 4,A2(size1,size2),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num2(It 4,Var2(A2(size1,size2),structure.mem(vname,name)))
         member this.d2 (sname, vname, name, size1, size2) =
             this.addmember(sname,(Dt,A2(size1,size2),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num2(Dt,Var2(A2(size1,size2),structure.mem(vname,name)))
         member this.z2 (sname, vname, name, size1, size2) =
             this.addmember(sname,(Zt,A2(size1,size2),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num2(Zt,Var2(A2(size1,size2),structure.mem(vname,name)))
         member this.i3 (sname, vname, name, size1, size2, size3) =
             this.addmember(sname,(It 4,A3(size1,size2,size3),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num3(It 4,Var3(A3(size1,size2,size3),structure.mem(vname,name)))
         member this.d3 (sname, vname, name, size1, size2, size3) =
             this.addmember(sname,(Dt,A3(size1,size2,size3),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num3(Dt,Var3(A3(size1,size2,size3),structure.mem(vname,name)))
         member this.z3 (sname, vname, name, size1, size2, size3) =
             this.addmember(sname,(Zt,A3(size1,size2,size3),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num3(Zt,Var3(A3(size1,size2,size3),structure.mem(vname,name)))
         member this.i1 (sname, vname, name) = 
             this.addmember(sname,(It 4,A1(0),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num1(It 4,Var1(A1(0),structure.mem(vname,name)))
         member this.d1 (sname, vname, name) = 
             this.addmember(sname,(Dt,A1(0),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num1(Dt,Var1(A1(0),structure.mem(vname,name)))
         member this.z1 (sname, vname, name) = 
             this.addmember(sname,(Zt,A1(0),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num1(Zt,Var1(A1(0),structure.mem(vname,name)))
         member this.i2 (sname, vname, name) = 
             this.addmember(sname,(It 4,A2(0,0),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num2(It 4,Var2(A2(0,0),structure.mem(vname,name)))
         member this.d2 (sname, vname, name) = 
             this.addmember(sname,(Dt,A2(0,0),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num2(Dt,Var2(A2(0,0),structure.mem(vname,name)))
         member this.z2 (sname, vname, name) = 
             this.addmember(sname,(Zt,A2(0,0),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num2(Zt,Var2(A2(0,0),structure.mem(vname,name)))
         member this.i3 (sname, vname, name) = 
             this.addmember(sname,(It 4,A3(0,0,0),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num3(It 4,Var3(A3(0,0,0),structure.mem(vname,name)))
         member this.d3 (sname, vname, name) = 
             this.addmember(sname,(Dt,A3(0,0,0),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num3(Dt,Var3(A3(0,0,0),structure.mem(vname,name)))
         member this.z3 (sname, vname, name) = 
             this.addmember(sname,(Zt,A3(0,0,0),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            let (vname,name) = match p.lang with |H -> ("<mi>"+vname+"</mi>","<mi>"+name+"</mi>") |_ -> (vname,name)
             num3(Zt,Var3(A3(0,0,0),structure.mem(vname,name)))
             
         member this.reg(sname,name:string) =

@@ -9,9 +9,9 @@
 open System
 open System.IO
 
-let version = "182.0.0.0"
+let version = "182.0.1.0"
 
-let backup outputdir sourceDir sourceFile projectname (version:string) = 
+let backup outputdir sourceDir sourceFile projectname (codever:string) = 
     let rec d lst =
         match lst with
           |c::ls when Directory.Exists c -> Some(c) 
@@ -26,7 +26,7 @@ let backup outputdir sourceDir sourceFile projectname (version:string) =
             [outputdir;dir]
     let flist =
         dlist
-        |> List.map (fun x -> System.IO.Directory.GetFiles(x,"H_"+projectname+"_ver"+version.Replace(".","_")+"*.fsx"))
+        |> List.map (fun x -> System.IO.Directory.GetFiles(x,"H_"+projectname+"_ver"+codever.Replace(".","_")+"*.fsx"))
         |> List.map (fun x -> Array.toList(x))
         |> List.fold (fun acc x -> acc@x) []
     //ビルド番号（最新版からインクリメント）
@@ -42,9 +42,9 @@ let backup outputdir sourceDir sourceFile projectname (version:string) =
         |> (fun lst -> match lst with [] -> -1 |_ -> List.max lst)
         |> fun i -> i+1
     //バックアップファイル名
-    let backupfile = "H_"+projectname+"_ver"+(version.Replace(".","_"))+"_"+buildNum.ToString()+".fsx"
+    let backupfile = "H_"+projectname+"_ver"+(codever.Replace(".","_"))+"_"+buildNum.ToString()+".fsx"
     //バックアップフォルダにスクリプトファイルとしてコピー
     for d in dlist do
         System.IO.File.Copy(sourceDir+"\\"+sourceFile, d+"\\"+backupfile, true)
-    (version,version+"."+buildNum.ToString())
+    (version,codever+"."+buildNum.ToString())
         

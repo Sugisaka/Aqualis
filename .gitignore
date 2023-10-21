@@ -3,4 +3,9 @@ bin/
 *.out
 *.dat
 *.bin
+*.pdf
+*.html
+*.gz
+*.aux
+*.log
 .fake

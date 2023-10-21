@@ -10,7 +10,7 @@ namespace Aqualis
     open System.IO
     
     ///<summary>変数管理</summary>
-    type VarController(varNameHead:string) =
+    type VarController(varNameHead:string,lang:Language) =
         let mutable counter = 0
         ///<summary>型名,変数名,定数</summary>
         let mutable vlist:list<Etype*VarType*string*string> = []
@@ -45,7 +45,9 @@ namespace Aqualis
                 name
             |[] ->
                 counter <- counter + 1
-                varNameHead + counter.ToString("000")
+                match lang with
+                |C|F -> varNameHead + counter.ToString("000")
+                |T|H -> varNameHead + "_{"+counter.ToString()+"}"
         member _.maxcounter with get() = counter
         
     ///<summary>インデントの設定</summary>
@@ -107,58 +109,58 @@ namespace Aqualis
         member val pwriter:StreamWriter = new StreamWriter(pfile,false) with get,set
 
         ///<summary>変数リスト</summary>
-        member val var = new VarController ""
+        member val var = new VarController("",lan)
         
         ///<summary>プライベート変数リスト</summary>
-        member val pvar = new VarController ""
+        member val pvar = new VarController("",lan)
         
         ///<summary>ホストからGPUへ転送する変数リスト</summary>
-        member val civar = new VarController ""
+        member val civar = new VarController("",lan)
         
         ///<summary>GPUからホストへ転送する変数リスト</summary>
-        member val covar = new VarController ""
+        member val covar = new VarController("",lan)
 
         ///<summary>ループのカウンタに現在使用できる変数インデックス</summary>
-        member val loopvar = new VarController "ic"
+        member val loopvar = new VarController((match lan with |F|C -> "ic" |T|H -> "n"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数）</summary>
-        member val i_cache_var = new VarController "i"
+        member val i_cache_var = new VarController("i",lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数）</summary>
-        member val d_cache_var = new VarController "d"
+        member val d_cache_var = new VarController("d",lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数）</summary>
-        member val z_cache_var = new VarController "z"
+        member val z_cache_var = new VarController("z",lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（ファイルポインタ）</summary>
-        member val f_cache_var = new VarController "f"
+        member val f_cache_var = new VarController("f",lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数1次元配列）</summary>
-        member val i1_cache_var = new VarController "i1"
+        member val i1_cache_var = new VarController((match lan with |F|C -> "i1" |T|H -> "\\dot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数1次元配列）</summary>
-        member val d1_cache_var = new VarController "d1"
+        member val d1_cache_var = new VarController((match lan with |F|C -> "d1" |T|H -> "\\dot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数1次元配列）</summary>
-        member val z1_cache_var = new VarController "z1"
+        member val z1_cache_var = new VarController((match lan with |F|C -> "z1" |T|H -> "\\dot{z}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数2次元配列）</summary>
-        member val i2_cache_var = new VarController "i2"
+        member val i2_cache_var = new VarController((match lan with |F|C -> "i2" |T|H -> "\\ddot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数2次元配列）</summary>
-        member val d2_cache_var = new VarController "d2"
+        member val d2_cache_var = new VarController((match lan with |F|C -> "d2" |T|H -> "\\ddot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数2次元配列）</summary>
-        member val z2_cache_var = new VarController "z2"
+        member val z2_cache_var = new VarController((match lan with |F|C -> "z2" |T|H -> "\\ddot{z}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数3次元配列）</summary>
-        member val i3_cache_var = new VarController "i3"
+        member val i3_cache_var = new VarController((match lan with |F|C -> "i3" |T|H -> "\\dddot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数3次元配列）</summary>
-        member val d3_cache_var = new VarController "d3"
+        member val d3_cache_var = new VarController((match lan with |F|C -> "d3" |T|H -> "\\dddot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数3次元配列）</summary>
-        member val z3_cache_var = new VarController "z3"
+        member val z3_cache_var = new VarController((match lan with |F|C -> "z3" |T|H -> "\\dddot{z}"),lan)
         
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（文字列）</summary>
         member val t_stat_var = new varlist() with get
@@ -334,18 +336,18 @@ namespace Aqualis
                 |A3(size1,size2,size3) -> "\\item "+(this.Stype typ)+" $"+name+"$ ("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")"+(if param<>"" then "="+param else "")
               |H ->
                 match vtp with 
-                |A0                    -> "\t\t\t<li>"+(this.Stype typ)+"<math><mspace width=\"1em\" />"+name+""+(if param<>"" then "="+param else "")+"</math></li>"
-                |A1(0)                 -> "\t\t\t<li>"+(this.Stype typ)+"<math><mspace width=\"1em\" /><mi>(allocatable)</mi>"+" "+name+" <mo>[</mo><mo>:</mo><mo>]</mo>"+(if param<>"" then "="+param else "")+"</math></li>"
-                |A2(0,0)               -> "\t\t\t<li>"+(this.Stype typ)+"<math><mspace width=\"1em\" /><mi>(allocatable)</mi>"+" "+name+" <mo>[</mo><mo>:</mo><mo>,</mo><mo>:</mo><mo>]</mo>"+(if param<>"" then "="+param else "")+"</math></li>"
-                |A3(0,0,0)             -> "\t\t\t<li>"+(this.Stype typ)+"<math><mspace width=\"1em\" /><mi>(allocatable)</mi>"+" "+name+" <mo>[</mo><mo>:</mo><mo>,</mo><mo>:</mo><mo>,</mo><mo>:</mo><mo>]</mo>"+(if param<>"" then "<mo>=</mo>"+param else "")+"</math></li>"
-                |A1(size1)             -> "\t\t\t<li>"+(this.Stype typ)+"<math><mspace width=\"1em\" />"+name+" ("+(this.ItoS size1)+")"+(if param<>"" then "="+param else "")+"</math></li>"
-                |A2(size1,size2)       -> "\t\t\t<li>"+(this.Stype typ)+"<math><mspace width=\"1em\" />"+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+")"+(if param<>"" then "="+param else "")+"</math></li>"
-                |A3(size1,size2,size3) -> "\t\t\t<li>"+(this.Stype typ)+"<math><mspace width=\"1em\" />"+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")"+(if param<>"" then "="+param else "")+"</math></li>"
-
+                |A0                    -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+""+(if param<>"" then "="+param else "")+"\\)</li>"
+                |A1(0)                 -> "\t\t\t<li>"+(this.Stype typ)+": (allocatable)\\("+" "+name+" [:]"+(if param<>"" then "="+param else "")+"\\)</li>"
+                |A2(0,0)               -> "\t\t\t<li>"+(this.Stype typ)+": (allocatable)\\("+" "+name+" [:,:]"+(if param<>"" then "="+param else "")+"\\)</li>"
+                |A3(0,0,0)             -> "\t\t\t<li>"+(this.Stype typ)+": (allocatable)\\("+" "+name+" [:,:,:]"+(if param<>"" then "="+param else "")+"\\)</li>"
+                |A1(size1)             -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
+                |A2(size1,size2)       -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
+                |A3(size1,size2,size3) -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
+                
         ///<summary>宣言されたすべての変数を一時ファイルに書き込み</summary>
         member this.declareall() =
             match lan with
-            |F |T ->
+            |F ->
                 for (etyp,vtyp,name,p) in this.var.list do
                     this.codefold(this.declare(etyp,vtyp,name,p)+"\n","",this.vwrite,100)
                     match vtyp with
@@ -423,44 +425,78 @@ namespace Aqualis
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(3),name+"_size","{-1,-1,-1}")+"\n")
+            |T ->
+                
+                for v in this.var.list do this.vwrite(this.declare(v)+"\n")
+                
+                this.vwrite("\\item Loop counter: \\(n_m (m = 1"+(if this.loopvar.maxcounter=1 then "" else " \\cdots "+this.loopvar.maxcounter.ToString())+")\\)"+"\n")
+                
+                if this.i_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache variables (integer): \\(i_m (m = 1"+(if this.i_cache_var.maxcounter=1 then "" else " \\cdots "+this.i_cache_var.maxcounter.ToString())+")\\)"+"\n")
+                if this.d_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache variables (double): \\(d_m (m = 1"+(if this.d_cache_var.maxcounter=1 then "" else " \\cdots "+this.d_cache_var.maxcounter.ToString())+")\\)"+"\n")
+                if this.z_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache variables (complex): \\(z_m (m = 1"+(if this.z_cache_var.maxcounter=1 then "" else " \\cdots "+this.z_cache_var.maxcounter.ToString())+")\\)"+"\n")
+                    
+                if this.i1_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (integer,1d): \\(\\dot{i}_m (m = 1"+(if this.i1_cache_var.maxcounter=1 then "" else " \\cdots "+this.i1_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+                if this.d1_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (double,1d): \\(\\dot{d}_m (m = 1"+(if this.d1_cache_var.maxcounter=1 then "" else " \\cdots "+this.d1_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+                if this.z1_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (complex,1d): \\(\\dot{z}_m (m = 1"+(if this.z1_cache_var.maxcounter=1 then "" else " \\cdots "+this.z1_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+
+                if this.i2_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (integer,2d): \\(\\ddot{i}_m (m = 1"+(if this.i2_cache_var.maxcounter=1 then "" else " \\cdots "+this.i2_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+                if this.d2_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (double,2d): \\(\\ddot{d}_m (m = 1"+(if this.d2_cache_var.maxcounter=1 then "" else " \\cdots "+this.d2_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+                if this.z2_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (complex,2d): \\(\\ddot{z}_m (m = 1"+(if this.z2_cache_var.maxcounter=1 then "" else " \\cdots "+this.z2_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+
+                if this.i3_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (integer,3d): \\(\\dddot{i}_m (m = 1"+(if this.i3_cache_var.maxcounter=1 then "" else " \\cdots "+this.i3_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+                if this.d3_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (double,3d): \\(\\dddot{d}_m (m = 1"+(if this.d3_cache_var.maxcounter=1 then "" else " \\cdots "+this.d3_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+                if this.z3_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache array (complex,3d): \\(\\dddot{z}_m (m = 1"+(if this.z3_cache_var.maxcounter=1 then "" else " \\cdots "+this.z3_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
+                    
             |H ->
                 
                 for v in this.var.list do this.vwrite(this.declare(v)+"\n")
                 
-                this.vwrite("\t\t\t<li>Loop counter: <math><msub><mi>n</mi><mi>m</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.loopvar.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.loopvar.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                this.vwrite("\t\t\t<li>Loop counter: \\(n_m (m = 1"+(if this.loopvar.maxcounter=1 then "" else " \\cdots "+this.loopvar.maxcounter.ToString())+")\\)</li>"+"\n")
                 
                 if this.i_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (integer): <math><msub><mi>i</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache variables (integer): \\(i_m (m = 1"+(if this.i_cache_var.maxcounter=1 then "" else " \\cdots "+this.i_cache_var.maxcounter.ToString())+")\\)</li>"+"\n")
                 if this.d_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (double): <math><msub><mi>d</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache variables (double): \\(d_m (m = 1"+(if this.d_cache_var.maxcounter=1 then "" else " \\cdots "+this.d_cache_var.maxcounter.ToString())+")\\)</li>"+"\n")
                 if this.z_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache variables (complex): <math><msub><mi>z</mi><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache variables (complex): \\(z_m (m = 1"+(if this.z_cache_var.maxcounter=1 then "" else " \\cdots "+this.z_cache_var.maxcounter.ToString())+")\\)</li>"+"\n")
                     
                 if this.i1_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,1d): <math><msub><mover><mi>i</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i1_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i1_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (integer,1d): \\(\\dot{i}_m (m = 1"+(if this.i1_cache_var.maxcounter=1 then "" else " \\cdots "+this.i1_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                 if this.d1_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,1d): <math><msub><mover><mi>d</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d1_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d1_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (double,1d): \\(\\dot{d}_m (m = 1"+(if this.d1_cache_var.maxcounter=1 then "" else " \\cdots "+this.d1_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                 if this.z1_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,1d): <math><msub><mover><mi>z</mi><mo>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z1_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z1_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (complex,1d): \\(\\dot{z}_m (m = 1"+(if this.z1_cache_var.maxcounter=1 then "" else " \\cdots "+this.z1_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
 
                 if this.i2_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,2d): <math><msub><mover><mi>i</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i2_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i2_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (integer,2d): \\(\\ddot{i}_m (m = 1"+(if this.i2_cache_var.maxcounter=1 then "" else " \\cdots "+this.i2_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                 if this.d2_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,2d): <math><msub><mover><mi>d</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d2_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d2_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (double,2d): \\(\\ddot{d}_m (m = 1"+(if this.d2_cache_var.maxcounter=1 then "" else " \\cdots "+this.d2_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                 if this.z2_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,2d): <math><msub><mover><mi>z</mi><mo.>.</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z2_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z2_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (complex,2d): \\(\\ddot{z}_m (m = 1"+(if this.z2_cache_var.maxcounter=1 then "" else " \\cdots "+this.z2_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
 
                 if this.i3_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (integer,3d): <math><msub><mover><mi>i</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.i3_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.i3_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (integer,3d): \\(\\dddot{i}_m (m = 1"+(if this.i3_cache_var.maxcounter=1 then "" else " \\cdots "+this.i3_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                 if this.d3_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (double,3d): <math><msub><mover><mi>d</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.d3_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.d3_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (double,3d): \\(\\dddot{d}_m (m = 1"+(if this.d3_cache_var.maxcounter=1 then "" else " \\cdots "+this.d3_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                 if this.z3_cache_var.maxcounter>0 then
-                    this.vwrite("\t\t\t<li>Cache array (complex,3d): <math><msub><mover><mi>z</mi><mo.>..</mo></mover><mi>cm</mi></msub><mspace width=\"1em\"/><mo>(</mo><mi>m</mi><mo>=</mo><mn>1</mn>"+(if this.z3_cache_var.maxcounter=1 then "" else "<mo.>.</mo><mn>"+this.z3_cache_var.maxcounter.ToString()+"</mn>")+"<mo>)</mo></math></li>"+"\n")
+                    this.vwrite("\t\t\t<li>Cache array (complex,3d): \\(\\dddot{z}_m (m = 1"+(if this.z3_cache_var.maxcounter=1 then "" else " \\cdots "+this.z3_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                     
         ///<summary>int型の数値を文字列に変換</summary>
         member __.ItoS (d:int) =
             match lan with
-            |H -> "<mn>"+d.ToString()+"</mn>"
+            |H -> d.ToString()
             |_ -> d.ToString()
              
         ///<summary>double型の数値を文字列に変換</summary>
@@ -469,7 +505,7 @@ namespace Aqualis
             |F -> d.ToString("0.0#################E0").Replace("E","d") 
             |C -> d.ToString("0.0#################E0")
             |T -> d.ToString()
-            |H -> "<mn>"+d.ToString()+"</mn>"
+            |H -> d.ToString()
             
         ///<summary>並列処理の一時ファイルを開く</summary>
         member this.popen() =
@@ -594,9 +630,9 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "<mi>arg"+(this.arglist.Length+1).ToString("00")+"</mi>"
+                            "arg"+(this.arglist.Length+1).ToString("00")
                         |_ -> 
-                            "<mi>arg"+(this.arglist.Length+1).ToString("00")+"</mi>"
+                            "arg"+(this.arglist.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
                         this.arglist_add(n,(typ,vtp,name))
@@ -709,7 +745,7 @@ namespace Aqualis
                         comment_line str
                 arrange s
             |H ->
-                let comment_line (str:string) = this.codewrite("<span class=\"comment\">"+(if str.Contains("<mi>") then "<math>"+str+"</math>" else str)+"</span>\n<br/>\n")
+                let comment_line (str:string) = this.codewrite("<span class=\"comment\">"+str+"</span>\n<br/>\n")
                 let rec arrange (str:string) =
                     if str.Length>80 then 
                         comment_line <| str.Substring(0,80)

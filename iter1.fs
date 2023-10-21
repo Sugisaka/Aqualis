@@ -41,12 +41,12 @@ namespace Aqualis
                 p.getloopvar_exit <| fun (goto,v,exit) ->
                     let cnt = num0(It 4,Var v)
                     cnt <== 1
-                    p.codewrite("do")
+                    p.codewrite("do\\\\")
                     p.indentInc()
                     code(exit,cnt)
                     cnt <== cnt + 1
                     p.indentDec()
-                    p.codewrite("end"+"\n")
+                    p.codewrite("end"+"\\\\\n")
                     p.codewrite(goto+" continue"+"\n")
             |H ->
                 p.getloopvar_exit <| fun (goto,v,exit) ->
@@ -81,15 +81,15 @@ namespace Aqualis
                 p.indentDec()
                 p.codewrite("}\n")
             |T ->
-                p.codewrite("while "+cond.code+"\n")
+                p.codewrite("while "+cond.code+"\\\\\n")
                 p.indentInc()
                 code()
                 p.indentDec()
-                p.codewrite("end\n")
+                p.codewrite("end\\\\\n")
             |H ->
                 p.codewrite("<div class=\"codeblock\">\n")
                 p.codewrite("<details open>\n")
-                p.codewrite("<summary><span class=\"op-loop\">while</span> <math>"+cond.code+"</math></summary>\n")
+                p.codewrite("<summary><span class=\"op-loop\">while</span> \\("+cond.code+"\\)</summary>\n")
                 p.codewrite("<div class=\"insidecode-loop\">\n")
                 p.indentInc()
                 code()
@@ -138,11 +138,11 @@ namespace Aqualis
                     p.comment ""
                 |_ ->
                     p.getloopvar <| fun counter ->
-                        p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\n")
+                        p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
                         p.indentInc()
                         code(num0(It 4,Var counter))
                         p.indentDec()
-                        p.codewrite("end"+"\n")
+                        p.codewrite("end"+"\\\\\n")
             |H ->
                 match i1.expr,i2.expr with
                 |Int_c a, Int_c b when a>b -> 
@@ -153,7 +153,7 @@ namespace Aqualis
                     p.getloopvar <| fun counter ->
                         p.codewrite("<div class=\"codeblock\">\n")
                         p.codewrite("<details open>\n")
-                        p.codewrite("<summary><span class=\"op-loop\">for</span> <math>"+counter+"<mo>=</mo>"+i1.code+"<mo>,</mo>"+i2.code+"</math></summary>\n")
+                        p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+"\\)</summary>\n")
                         p.codewrite("<div class=\"insidecode-loop\">\n")
                         p.indentInc()
                         code(num0(It 4,Var counter))
@@ -202,11 +202,11 @@ namespace Aqualis
                     p.comment ""
                 |_ ->
                     p.getloopvar_exit <| fun (goto,counter,exit) ->
-                        p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\n")
+                        p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
                         p.indentInc()
                         code(exit,num0(It 4,Var counter))
                         p.indentDec()
-                        p.codewrite("end"+"\n")
+                        p.codewrite("end"+"\\\\\n")
                         p.codewrite(goto+" continue"+"\n")
             |H ->
                 match i1.expr,i2.expr with
@@ -218,7 +218,7 @@ namespace Aqualis
                     p.getloopvar_exit <| fun (goto,counter,exit) ->
                         p.codewrite("<div class=\"codeblock\">\n")
                         p.codewrite("<details open>\n")
-                        p.codewrite("<summary><span class=\"op-loop\">for</span> <math>"+counter+"<mo>=</mo>"+i1.code+"<mo>,</mo>"+i2.code+"</math></summary>\n")
+                        p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+"\\)</summary>\n")
                         p.codewrite("<div class=\"insidecode-loop\">\n")
                         p.indentInc()
                         code(exit,num0(It 4,Var counter))
@@ -248,16 +248,16 @@ namespace Aqualis
                     p.codewrite("}"+"\n")
             |T ->
                 p.getloopvar <| fun counter ->
-                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\n")
+                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
                     code(num0(It 4,Var counter))
                     p.indentDec()
-                    p.codewrite("end"+"\n")
+                    p.codewrite("end"+"\\\\\n")
             |H ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
-                    p.codewrite("<summary><span class=\"op-loop\">for</span> <math>"+counter+"<mo>=</mo>"+i1.code+"<mo>,</mo>"+i2.code+"<mo>,</mo><mo>-</mo><mn>1<mn></math></summary>\n")
+                    p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+",-1\\)</summary>\n")
                     p.codewrite("<div class=\"insidecode-loop\">\n")
                     p.indentInc()
                     code(num0(It 4,Var counter))
@@ -288,17 +288,17 @@ namespace Aqualis
                     p.codewrite(goto+":;\n")
             |T ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
-                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\n")
+                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
                     code(exit,num0(It 4,Var counter))
                     p.indentDec()
-                    p.codewrite("end"+"\n")
+                    p.codewrite("end"+"\\\\\n")
                     p.codewrite(goto+" continue"+"\n")
             |H ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
-                    p.codewrite("<summary><span class=\"op-loop\">for</span> <math>"+counter+"<mo>=</mo>"+i1.code+"<mo>,</mo>"+i2.code+"<mo>,</mo><mo>-</mo><mn>1</mn></math></summary>\n")
+                    p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+",-1\\)</summary>\n")
                     p.codewrite("<div class=\"insidecode-loop\">\n")
                     p.indentInc()
                     code(exit,num0(It 4,Var counter))
@@ -328,16 +328,16 @@ namespace Aqualis
                     p.codewrite("}"+"\n")
             |T ->
                 p.getloopvar <| fun counter ->
-                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+"("+ii.code+")"+"\\cdots "+i2.code+"$\n")
+                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+"("+ii.code+")"+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
                     code(num0(It 4,Var counter))
                     p.indentDec()
-                    p.codewrite("end"+"\n")
+                    p.codewrite("end"+"\\\\\n")
             |H ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
-                    p.codewrite("<summary><span class=\"op-loop\">for</span> <math>"+counter+"<mo>=</mo>"+i1.code+"<mo>,</mo>"+i2.code+"<mo>,</mo>"+ii.code+"</math></summary>\n")
+                    p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+","+ii.code+"\\)</summary>\n")
                     p.codewrite("<div class=\"insidecode-loop\">\n")
                     p.indentInc()
                     code(num0(It 4,Var counter))
@@ -368,17 +368,17 @@ namespace Aqualis
                     p.codewrite(goto+":;\n")
             |T ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
-                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+"("+ii.code+")"+"\\cdots "+i2.code+"$\n")
+                    p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+"("+ii.code+")"+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
                     code(exit,num0(It 4,Var counter))
                     p.indentDec()
                     p.codewrite("end"+"\n")
-                    p.codewrite(goto+" continue"+"\n")
+                    p.codewrite(goto+" continue"+"\\\\\n")
             |H ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
-                    p.codewrite("<summary><span class=\"op-loop\">for</span> <math>"+counter+"<mo>=</mo>"+i1.code+"<mo>,</mo>"+i2.code+"<mo>,</mo>"+ii.code+"</math></summary>\n")
+                    p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+","+ii.code+"\\)</summary>\n")
                     p.codewrite("<div class=\"insidecode-loop\">\n")
                     p.indentInc()
                     code(exit,num0(It 4,Var counter))

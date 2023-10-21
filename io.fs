@@ -84,18 +84,26 @@ namespace Aqualis
                         code(fp)
                         p.codewrite("fclose $"+fp+" "+"$\n")
             |H ->
-                 ch.f <| fun fp ->
-                     let f = 
-                       filename
-                       |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.iFormat.ToString() |_ -> "")
-                       |> (fun s -> String.Join(",",s))
-                     let s = 
-                       filename
-                       |> List.map (fun s -> s.code)
-                       |> (fun s -> String.Join(",",s))
-                     p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
-                     code(fp)
-                     p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
+                ch.f <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
+                        |> (fun s -> String.Join("",s))
+                    let s = 
+                        filename
+                        |> List.map (fun s -> s.code)
+                        |> (fun s -> String.Join(",",s))
+                    ch.t <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
+                        if isbinary then
+                            p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                        else
+                            p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                        code(fp)
+                        p.codewrite("fclose \\("+fp+" "+"\\)\n")
         static member private Write (fp:string) (lst:num0 list) =
             match p.lang with
             |F ->
@@ -237,9 +245,9 @@ namespace Aqualis
                           |_,Var n -> n
                           |_,Formula n -> n 
                           |_ -> "")
-                    |> (fun s -> String.Join("<mo>,</mo>",s))
-                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+code+"</math>\n<br/>\n")
-                    
+                    |> (fun s -> String.Join(",",s))
+                p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
+                
         static member private Write_bin (fp:string) (v:num0) =
             match p.lang with
             |F ->
@@ -303,18 +311,18 @@ namespace Aqualis
             |H ->
                 match v.etype,v.expr with 
                 |_,Int_c(v) ->
-                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.ItoS(v)+"</math>\n<br/>\n")
+                    p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+p.ItoS(v)+"\\)<br/>\n")
                 |_,Dbl_c(v) ->
-                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+p.DtoS(v)+"</math>\n<br/>\n")
+                    p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+p.DtoS(v)+"\\)<br/>\n")
                 |_,Str_c(v) ->
-                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v+"</math>\n<br/>\n")
+                    p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v+"\\)<br/>\n")
                 |Zt,_ ->
-                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.re.code+"</math>\n<br/>\n")
-                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.im.code+"</math>\n<br/>\n")
+                    p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.re.code+"\\)<br/>\n")
+                    p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.im.code+"\\)<br/>\n")
                 |It _,_ ->
-                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
+                    p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.code+"\\)<br/>\n")
                 |Dt,_ ->
-                    p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+v.code+"</math>\n<br/>\n")
+                    p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.code+"\\)<br/>\n")
                 |_ -> ()
                 
         static member private Read (fp:string) (iostat:num0) (lst:num0 list) = 
@@ -469,7 +477,7 @@ namespace Aqualis
                         |Formula n -> n 
                         |_ -> "")
                     |> (fun s -> String.Join("<mo>,</mo>",s))
-                p.codewrite("<math>"+code+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
+                p.codewrite("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
                 
         static member private Read_bin (fp:string) (iostat:num0) (v:num0) = 
             match p.lang with
@@ -509,10 +517,10 @@ namespace Aqualis
             |H ->
                 match v.expr with 
                 |Var n ->
-                    p.codewrite("<math>"+n+"<mo>&larr;</mo></math><span class=\"fio\">"+fp+"</span>\n<br/>\n")
+                    p.codewrite("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-                
+                    
         static member private Read_byte (fp:string) (iostat:num0) (e:num0) = 
             p.codewrite("read("+fp+", iostat="+iostat.code+") byte_tmp\n")
             let ee =
@@ -977,15 +985,23 @@ namespace Aqualis
                 ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.etype with |St -> "A" |It _ -> "I"+p.iFormat.ToString() |_ -> "")
-                        |> io2.cat ","
+                        |> List.map (fun s -> match s.etype with |St -> "%s" |It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
+                        |> (fun s -> String.Join("",s))
                     let s = 
                         filename
                         |> List.map (fun s -> s.code)
-                        |> io2.cat ","
-                    p.codewrite("<span class=\"fio\">file open</span><span class=\"fio\">"+fp+"</span><math><mo>=</mo>"+s+"</math>"+"\n<br/>\n")
-                    code(fp)
-                    p.codewrite("<span class=\"fio\">file close</span><span class=\"fio\">"+fp+"</span><math></math>\n<br/>\n")
+                        |> (fun s -> String.Join(",",s))
+                    ch.t <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite("sprintf("+id+",\""+f+"\","+s+");\n")
+                        if isbinary then
+                            p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                        else
+                            p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                        code(fp)
+                        p.codewrite("fclose \\("+fp+" "+"\\)\n")
         static member private Write (fp:string) (lst:num0 list) =
             match p.lang with
             |F ->
@@ -1079,8 +1095,8 @@ namespace Aqualis
                         |_,Var n -> n
                         |_,Formula n -> n 
                         |_ -> "")
-                    |> io2.cat "<mo>,</mo>"
-                p.codewrite("<span class=\"fio\">"+fp+"</span><math><mo>&larr;</mo>"+code+"</math>\n<br/>\n")
+                    |> io2.cat ","
+                p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>\n")
                 
         ///<summary>ファイル出力</summary>
         static member fileOutput (filename:num0 list) code =

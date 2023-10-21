@@ -36,9 +36,10 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F |T -> num0(It 4,Var(name+"_size(1)"))
+                |F -> num0(It 4,Var(name+"_size(1)"))
                 |C -> num0(It 4,Var(name+"_size[0]"))
-                |H -> num0(It 4,Var("<msub><mi mathvariant=\"script\">S</mi><mn>1</mn></msub><mo>&af;</mo><mo>[</mo><mi>"+name+"</mi><mo>]</mo>"))
+                |T -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
+                |H -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
             |Arx2(s1,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2 
@@ -46,9 +47,10 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F |T -> num0(It 4,Var(name+"_size(2)"))
+                |F -> num0(It 4,Var(name+"_size(2)"))
                 |C -> num0(It 4,Var(name+"_size[1]"))
-                |H -> num0(It 4,Var("<msub><mi mathvariant=\"script\">S</mi><mn>2</mn></msub><mo>&af;</mo><mo>[</mo><mi>"+name+"</mi><mo>]</mo>"))
+                |T -> num0(It 4,Var("\\mathcal{S}_2["+name+"]"))
+                |H -> num0(It 4,Var("\\mathcal{S}_2["+name+"]"))
             |Arx2(_,s2,_) -> s2
         ///<summary>インデクサ</summary>
         member this.Idx2(i:num0,j:num0) =
@@ -71,8 +73,8 @@ namespace Aqualis
                 match p.lang with
                 |F   -> Var(name+"("+i.code+","+j.code+")")
                 |C -> Var(name+"["+((j-1)*this.size1+(i-1)).code+"]")
-                |T   -> Var(name+"("+i.code+","+i.code+")")
-                |H   -> Var(name+"<mo>&af;</mo><mo>[</mo>"+i.code+"<mo>]</mo>")
+                |T   -> Var(name+"("+i.code+","+j.code+")")
+                |H   -> Var(name+"["+i.code+","+j.code+"]")
             |Arx2(_,_,f) ->
                 f (i,j)
                 
@@ -125,15 +127,13 @@ namespace Aqualis
                     |T ->
                         match size with
                         |A2(0,0) ->
-                            this.size1 <== n1
-                            this.size2 <== n2
-                            p.codewrite("allocate($"+name+"(1:"+this.size1.code+",1:"+this.size2.code+")"+"$)"+"\n")
+                            p.codewrite("$"+name+"$: allocate($"+n1.code+","+n2.code+"$)\\\\\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |H ->
                         match size with
                         |A2(0,0) ->
-                            p.codewrite("<math>"+name+"<mo>:</mo><mi>allocate</mi><mo>(</mo>"+n1.code+"<mo>)</mo></math>"+"\n<br/>\n")
+                            p.codewrite("\\("+name+"\\): allocate(\\("+n1.code+","+n2.code+"\\))<br/>\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                 |_ -> ()
@@ -159,26 +159,25 @@ namespace Aqualis
                 match p.lang with
                 |F ->
                     match size with
-                    |A1(0) ->
+                    |A2(0,0) ->
                         this.size1 <== -1
                         p.codewrite("deallocate("+name+")"+"\n")
                     |_ -> ()
                 |C ->
                     match size with
-                    |A1(0) ->
+                    |A2(0,0) ->
                         this.size1 <== -1
                         p.codewrite("free("+name+");"+"\n")
                     |_ -> ()
                 |T ->
                     match size with
-                    |A1(0) ->
-                        this.size1 <== -1
-                        p.codewrite("deallocate($"+name+"$)"+"\n")
+                    |A2(0,0) ->
+                        p.codewrite("$"+name+"$: deallocate\\\\\n")
                     |_ -> ()
                 |H ->
                     match size with
-                    |A1(0) ->
-                        p.codewrite("<math>"+name+"<mo>:</mo><mi>deallocate</mi></math>"+"\n<br/>\n")
+                    |A2(0,0) ->
+                        p.codewrite("\\("+name+"\\): deallocate<br/>\n")
                     |_ -> ()
             |_ -> ()
             
@@ -230,9 +229,16 @@ namespace Aqualis
             match v1,v2 with
             |Var2(_,x),Var2(_,y) ->
                 match p.lang with
-                |F|T -> p.codewrite(x + "=" + y)
-                |C -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
-                |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + y + "</math>\n<br/>\n")
+                |F|T ->
+                    p.codewrite(x + "=" + y)
+                |C ->
+                    iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
+                |H ->
+                    p.codewrite("\\[")
+                    p.codewrite("\\begin{align}")
+                    p.codewrite(x + " \\leftarrow " + y)
+                    p.codewrite("\\end{align}")
+                    p.codewrite("\\]")
             |Var2(_,x),Arx2(_,_,f) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
@@ -247,9 +253,16 @@ namespace Aqualis
             match v1 with
             |Var2(_,x) ->
                 match p.lang with
-                |F|T -> p.codewrite(x + "=" + v2.code)
-                |C -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
-                |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + v2.code + "</math>\n<br/>\n")
+                |F|T ->
+                    p.codewrite(x + "=" + v2.code)
+                |C ->
+                    iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
+                |H ->
+                    p.codewrite("\\[")
+                    p.codewrite("\\begin{align}")
+                    p.codewrite(x + " \\leftarrow " + v2.code)
+                    p.codewrite("\\end{align}")
+                    p.codewrite("\\]")
             |Arx2(_,_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
@@ -342,9 +355,16 @@ namespace Aqualis
             match v1.expr,v2.expr with
             |Var2(_,x),Var2(_,y) ->
                 match p.lang with
-                |F|T -> p.codewrite(x + "=" + y)
-                |C -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
-                |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + y + "</math>\n<br/>\n")
+                |F|T ->
+                    p.codewrite(x + "=" + y)
+                |C ->
+                    iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
+                |H ->
+                    p.codewrite("\\[")
+                    p.codewrite("\\begin{align}")
+                    p.codewrite(x + " \\leftarrow " + y)
+                    p.codewrite("\\end{align}")
+                    p.codewrite("\\]")
             |Var2(_,x),Arx2(_,_,f) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
@@ -358,9 +378,16 @@ namespace Aqualis
             match v1.expr with
             |Var2(_,x) ->
                 match p.lang with
-                |F|T -> p.codewrite(x + "=" + v2.code)
-                |C -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
-                |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + v2.code + "</math>\n<br/>\n")
+                |F|T ->
+                    p.codewrite(x + "=" + v2.code)
+                |C ->
+                    iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
+                |H ->
+                    p.codewrite("\\[")
+                    p.codewrite("\\begin{align}")
+                    p.codewrite(x + " \\leftarrow " + v2.code)
+                    p.codewrite("\\end{align}")
+                    p.codewrite("\\]")
             |Arx2(_,_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2

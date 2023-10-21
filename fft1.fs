@@ -74,7 +74,7 @@ namespace Aqualis
                 N <== data1.size1
                 N2 <== asm.floor(N/2.0)
                 match p.lang with
-                  |F ->
+                |F ->
                     p.incld("'fftw3.f'")
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
@@ -91,7 +91,7 @@ namespace Aqualis
                         p.codewrite("call dfftw_execute(" + plan.code + ")")
                         ifftshift1(data2)
                         p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
-                  |C ->
+                |C ->
                     p.incld("\"fftw3.h\"")
                     let plan = fftw_plan1(planname)
                     if fftdir=1 then
@@ -108,10 +108,16 @@ namespace Aqualis
                         p.codewrite("dfftw_execute(" + plan.code + ")")
                         ifftshift1(data2)
                         p.codewrite("dfftw_destroy_plan(" + plan.code + ")")
-                  |T ->
+                |T ->
+                    p.codewrite("\\begin{align}")
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
-                  |H ->
-                    p.codewrite(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
+                    p.codewrite("\\end{align}")
+                |H ->
+                    p.codewrite("\\[")
+                    p.codewrite("\\begin{align}")
+                    p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
+                    p.codewrite("\\end{align}")
+                    p.codewrite("\\]")
                 if fftdir=1 then
                     !"規格化"
                     iter.num N <| fun i ->

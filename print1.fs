@@ -66,9 +66,9 @@ namespace Aqualis
                         if i=lst.Length-1 then
                             acc+q.code
                         else
-                            acc+q.code+"<mo>,</mo><mspace width=\"0.5em\" />"
+                            acc+q.code+","
                     ) "" [0..lst.Length-1])
-                p.codewrite("<math><mi>print</mi><mo>[</mo>"+code+"<mo>]</mo></math>\n")
+                p.codewrite("Print \\("+code+"\\)\n")
                 p.codewrite("<br/>\n")
         ///<summary>文字列を画面表示</summary>
         static member t (str:string) = print.s[!.str]

@@ -41,12 +41,15 @@ namespace Aqualis
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par x -> "("+x.code+")"
+                |Par x -> "\\left("+x.code+"\\right)"
                 |Inv x -> "-"+x.code
                 |Add (x,y) -> x.code+"+"+y.code
                 |Sub (x,y) -> x.code+"-"+y.code
-                |Mul (x,y) -> x.code+"*"+y.code
-                |Div (x,y) -> x.code+"/"+y.code
+                |Mul (x,y) -> x.code+" \\cdot "+y.code
+                |Div (Par x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (Par x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
                 |NaN -> "NaN"
                 |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
@@ -63,11 +66,11 @@ namespace Aqualis
                 |Greater(v1,v2) ->
                     v1.code+" > "+v2.code
                 |GreaterEq(v1,v2) ->
-                    v1.code+" >= "+v2.code
+                    v1.code+" \\geq "+v2.code
                 |Less(v1,v2) ->
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
-                    v1.code+" <= "+v2.code
+                    v1.code+" \\leq "+v2.code
                 |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
@@ -75,7 +78,7 @@ namespace Aqualis
                         if i=0 then
                             acc + "(" + uc[i] + ")"
                         else
-                            acc + " .and. " + "(" + uc[i] + ")" 
+                            acc + " \\cap " + "(" + uc[i] + ")" 
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
@@ -86,7 +89,68 @@ namespace Aqualis
                         if i=0 then
                             acc + "(" + uc[i] + ")"
                         else
-                            acc + " .or. " + "(" + uc[i] + ")"
+                            acc + " \\cup " + "(" + uc[i] + ")"
+                    let code = List.fold cat "" [0..uc.Length-1]
+                    //コード生成
+                    code
+                |Formula s -> s
+                |_ ->
+                    ""
+            |H ->
+                match this with
+                |Var x -> x
+                |Int_c x -> p.ItoS(x)
+                |Dbl_c x -> p.DtoS(x)
+                |Str_c x -> "\""+x+"\""
+                |Par x -> "\\left("+x.code+"\\right)"
+                |Inv x -> "-"+x.code
+                |Add (x,y) -> x.code+"+"+y.code
+                |Sub (x,y) -> x.code+"-"+y.code
+                |Mul (x,y) -> x.code+" \\cdot "+y.code
+                |Div (Par x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (Par x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |NaN -> "NaN"
+                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                    v1.code+" < "+v2.code+" < "+v3.code
+                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
+                    v1.code+" \\leq "+v2.code+" < "+v3.code
+                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                    v1.code+" < "+v2.code+" \\leq "+v3.code
+                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
+                    v1.code+" \\leq "+v2.code+" \\leq "+v3.code
+                |Eq(v1,v2) ->
+                    v1.code+" == "+v2.code
+                |NEq(v1,v2) ->
+                    v1.code+" \\neq "+v2.code
+                |Greater(v1,v2) ->
+                    v1.code+" > "+v2.code
+                |GreaterEq(v1,v2) ->
+                    v1.code+" \\geq "+v2.code
+                |Less(v1,v2) ->
+                    v1.code+" < "+v2.code
+                |LessEq(v1,v2) ->
+                    v1.code+" \\leq "+v2.code
+                |AND(v) ->
+                    //先に中身を評価
+                    let uc = v |> List.map (fun q -> q.code)
+                    let cat acc i =
+                        if i=0 then
+                            acc + "(" + uc[i] + ")"
+                        else
+                            acc + " \\cap " + "(" + uc[i] + ")" 
+                    let code = List.fold cat "" [0..uc.Length-1]
+                    //コード生成
+                    code
+                |OR(v) ->
+                    //先に中身を評価
+                    let uc = v |> List.map (fun q -> q.code)
+                    let cat acc i =
+                        if i=0 then
+                            acc + "(" + uc[i] + ")"
+                        else
+                            acc + " \\cup " + "(" + uc[i] + ")"
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
@@ -185,64 +249,6 @@ namespace Aqualis
                         if i<>0 then
                             acc + " || " + "(" + uc[i] + ")"
                         else acc + "(" + uc[i] + ")"
-                    let code = List.fold cat "" [0..uc.Length-1]
-                    //コード生成
-                    code
-                |Formula s -> s
-                |_ ->
-                    ""
-            |H ->
-                match this with
-                |Var x -> x
-                |Int_c x -> p.ItoS(x)
-                |Dbl_c x -> p.DtoS(x)
-                |Str_c x -> "\""+x+"\""
-                |Par x -> "("+x.code+")"
-                |Inv x -> "-"+x.code
-                |Add (x,y) -> x.code+"+"+y.code
-                |Sub (x,y) -> x.code+"-"+y.code
-                |Mul (x,y) -> x.code+"*"+y.code
-                |Div (x,y) -> x.code+"/"+y.code
-                |NaN -> "NaN"
-                |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" < "+v2.code+" < "+v3.code
-                |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" <= "+v2.code+" < "+v3.code
-                |AND [Less(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" < "+v2.code+" <= "+v3.code
-                |AND [LessEq(v1,v2);LessEq(v2B,v3)] when v2.code=v2B.code ->
-                    v1.code+" <= "+v2.code+" <= "+v3.code
-                |Eq(v1,v2) ->
-                    v1.code+" == "+v2.code
-                |NEq(v1,v2) ->
-                    v1.code+" /= "+v2.code
-                |Greater(v1,v2) ->
-                    v1.code+" > "+v2.code
-                |GreaterEq(v1,v2) ->
-                    v1.code+" >= "+v2.code
-                |Less(v1,v2) ->
-                    v1.code+" < "+v2.code
-                |LessEq(v1,v2) ->
-                    v1.code+" <= "+v2.code
-                |AND(v) ->
-                    //先に中身を評価
-                    let uc = v |> List.map (fun q -> q.code)
-                    let cat acc i =
-                        if i=0 then
-                            acc + uc[i]
-                        else
-                            acc + " <mo>and</mo> " + uc[i]
-                    let code = List.fold cat "" [0..uc.Length-1]
-                    //コード生成
-                    code
-                |OR(v) ->
-                    //先に中身を評価
-                    let uc = v |> List.map (fun q -> q.code)
-                    let cat acc i =
-                        if i=0 then
-                            acc + uc[i]
-                        else
-                            acc + " <mo>or</mo> " + uc[i]
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
@@ -750,9 +756,9 @@ namespace Aqualis
                     match p.lang with
                     |F -> Formula <| "mod("+x.code+","+y.code+")"
                     |C -> Formula <| x.code+"%"+y.code
-                    |H -> Formula <| "mod("+x.code+","+y.code+")"
-                    |T -> Formula <| "mod("+x.code+","+y.code+")"
-              
+                    |H -> Formula <| "\\mathrm{mod}("+x.code+","+y.code+")"
+                    |T -> Formula <| "\\mathrm{mod}("+x.code+","+y.code+")"
+                    
         ///<summary>累乗</summary>
         static member pow(x:Expr, y:Expr) =
             match p.lang,x,y with
@@ -793,9 +799,9 @@ namespace Aqualis
                 match p.lang with
                 |F -> Formula <| x.code+"**"+y.code
                 |C -> Formula <| "pow("+x.code+","+y.code+")"
-                |H -> Formula <| "pow("+x.code+","+y.code+")"
-                |T -> Formula <| "pow("+x.code+","+y.code+")"
-            
+                |H -> Formula <| x.code+"^{"+y.code+"}"
+                |T -> Formula <| x.code+"^{"+y.code+"}"
+                
         ///<summary>等号</summary>
         static member (.=) (v1:Expr,v2:Expr) = Eq(v1,v2)
         ///<summary>不等号</summary>
@@ -940,63 +946,17 @@ namespace Aqualis
         ///<summary>代入</summary>
         static member (<==) (x:Expr,y:Expr) =
             match p.lang with
-            |F |T ->
+            |F ->
                 p.codewrite(x.code + " = " + y.code)
             |C->
                 p.codewrite(x.code + " = " + y.code + ";")
+            |T ->
+                p.codewrite("\\begin{align}")
+                p.codewrite(x.code + " \\leftarrow " + y.code)
+                p.codewrite("\\end{align}")
             |H ->
-                p.codewrite("<math>\n")
-                p.codewrite(x.code + "<mo>&larr;</mo>" + y.code)
-                p.codewrite("</math>\n")
-                p.codewrite("<br/>\n")
-                
-        // static member toDouble (x:Expr) =
-        //     match x with
-        //     |Add(Int_c v1,v2) -> (Dbl_c (double v1))+(Expr.toDouble v2)
-        //     |Add(v1,Int_c v2) -> (Expr.toDouble v1)+(Dbl_c (double v2))
-        //     |Add(Dbl_c v1,v2) -> (Dbl_c v1)+(Expr.toDouble v2)
-        //     |Add(v1,Dbl_c v2) -> (Expr.toDouble v1)+(Dbl_c v2)
-        //     |Sub(Int_c v1,v2) -> (Dbl_c (double v1))-(Expr.toDouble v2)
-        //     |Sub(v1,Int_c v2) -> (Expr.toDouble v1)-(Dbl_c (double v2))
-        //     |Sub(Dbl_c v1,v2) -> (Dbl_c v1)-(Expr.toDouble v2)
-        //     |Sub(v1,Dbl_c v2) -> (Expr.toDouble v1)-(Dbl_c v2)
-        //     |Mul(Int_c v1,v2) -> (Dbl_c (double v1))*(Expr.toDouble v2)
-        //     |Mul(v1,Int_c v2) -> (Expr.toDouble v1)*(Dbl_c (double v2))
-        //     |Mul(Dbl_c v1,v2) -> (Dbl_c v1)*(Expr.toDouble v2)
-        //     |Mul(v1,Dbl_c v2) -> (Expr.toDouble v1)*(Dbl_c v2)
-        //     |Div(Int_c v1,v2) -> (Dbl_c (double v1))/(Expr.toDouble v2)
-        //     |Div(v1,Int_c v2) -> (Expr.toDouble v1)/(Dbl_c (double v2))
-        //     |Div(Dbl_c v1,v2) -> (Dbl_c v1)/(Expr.toDouble v2)
-        //     |Div(v1,Dbl_c v2) -> (Expr.toDouble v1)/(Dbl_c v2)
-        //     |_ -> 
-        //         match p.lang with
-        //         |F -> Formula <| "dble("+x.code+")"
-        //         |C -> Formula <| "(double)("+x.code+")"
-        //         |H -> Formula <| "(double)("+x.code+")"
-        //         |T -> Formula <| "(double)("+x.code+")"
-                
-        // static member toInt (x:Expr) =
-        //     match x with
-        //     |Add(Int_c v1,v2) -> (Int_c v1)+(Expr.toInt v2)
-        //     |Add(v1,Int_c v2) -> (Expr.toInt v1)+(Int_c v2)
-        //     |Add(Dbl_c v1,v2) -> (Int_c (int v1))+(Expr.toInt v2)
-        //     |Add(v1,Dbl_c v2) -> (Expr.toInt v1)+(Int_c (int v2))
-        //     |Sub(Int_c v1,v2) -> (Int_c v1)-(Expr.toInt v2)
-        //     |Sub(v1,Int_c v2) -> (Expr.toInt v1)-(Int_c v2)
-        //     |Sub(Dbl_c v1,v2) -> (Int_c (int v1))-(Expr.toInt v2)
-        //     |Sub(v1,Dbl_c v2) -> (Expr.toInt v1)-(Int_c (int v2))
-        //     |Mul(Int_c v1,v2) -> (Int_c v1)*(Expr.toInt v2)
-        //     |Mul(v1,Int_c v2) -> (Expr.toInt v1)*(Int_c v2)
-        //     |Mul(Dbl_c v1,v2) -> (Int_c (int v1))*(Expr.toInt v2)
-        //     |Mul(v1,Dbl_c v2) -> (Expr.toInt v1)*(Int_c (int v2))
-        //     |Div(Int_c v1,v2) -> (Int_c v1)/(Expr.toInt v2)
-        //     |Div(v1,Int_c v2) -> (Expr.toInt v1)/(Int_c v2)
-        //     |Div(Dbl_c v1,v2) -> (Int_c (int v1))/(Expr.toInt v2)
-        //     |Div(v1,Dbl_c v2) -> (Expr.toInt v1)/(Int_c (int v2))
-        //     |_ -> 
-        //         match p.lang with
-        //         |F -> Formula <| "int("+x.code+")"
-        //         |C -> Formula <| "(int)("+x.code+")"
-        //         |H -> Formula <| "(int)("+x.code+")"
-        //         |T -> Formula <| "(int)("+x.code+")"
-            
+                p.codewrite("\\[")
+                p.codewrite("\\begin{align}")
+                p.codewrite(x.code + " \\leftarrow " + y.code)
+                p.codewrite("\\end{align}")
+                p.codewrite("\\]")

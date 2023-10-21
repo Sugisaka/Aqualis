@@ -24,7 +24,7 @@ namespace Aqualis
                     p.codewrite("\\section{"+s+"}")
                 |H -> 
                     p.codewrite("<details open>")
-                    p.codewrite("<summary><span class=\"op-section\">section</span>"+(if s.Contains("<mi>") then "<math>"+s+"</math>" else s)+"</summary>")
+                    p.codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                     p.codewrite("<div class=\"insidecode-section\">")
                 |_ ->
                     p.comment ("==="+(s.PadRight(76,'=')))
@@ -40,7 +40,7 @@ namespace Aqualis
             |F |C -> 
                 (!===)("end "+s) 
                 p.codewrite(p.indentSpace+"\n")
-            |H   ->
+            |H ->
                 p.codewrite("</div>")
                 p.codewrite("</details>")
             |T  -> ()
@@ -52,7 +52,7 @@ namespace Aqualis
                     p.codewrite("\\subsection{"+s+"}")
                 |H -> 
                     p.codewrite("<details open>")
-                    p.codewrite("<summary><span class=\"op-section\">section</span>"+(if s.Contains("<mi>") then "<math>"+s+"</math>" else s)+"</summary>")
+                    p.codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                     p.codewrite("<div class=\"insidecode-section\">")
                 |_ ->
                     p.comment ("---"+(s.PadRight(76,'-')))
@@ -83,7 +83,7 @@ namespace Aqualis
                 p.codewrite("\\section{"+s+"}")
             |H   -> 
                 p.codewrite("<details open>")
-                p.codewrite("<summary><span class=\"op-section\">section</span>"+(if s.Contains("<mi>") then "<math>"+s+"</math>" else s)+"</summary>")
+                p.codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                 p.codewrite("<div class=\"insidecode-section\">")
               
         static member private footer (c:char) (s:string) = 

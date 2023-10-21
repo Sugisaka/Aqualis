@@ -66,7 +66,7 @@ open Aqualis
             testClass2_1(testClass2.sname,structure.mem(vname,name), size1)
         member __.farg code = fn.addarg (testClass2.sname,size1,name) <| fun (v,n) -> code(testClass2_1(testClass2.sname,n,v))
         
-Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [F;C;H;T;] outputdir projectname ("aaa","aaa") <| fun () ->
     let cc = testClass1("c")
     // cc.n1 <== 1
     // cc.x1 <== 2.0

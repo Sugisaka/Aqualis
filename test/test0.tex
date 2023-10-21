@@ -1,0 +1,57 @@
+\documentclass[a4paper,fleqn]{ltjsarticle}
+\usepackage{amsmath}
+\oddsidemargin=-0.4mm
+\topmargin=4.6mm
+\headheight=0mm
+\headsep=0mm
+\footskip=15mm
+\textwidth=160mm
+\textheight=237mm
+\topsep=6pt
+\parindent=0mm
+\unitlength=1.00mm
+\begin{document}
+{\Large Program: test0}
+
+\section{structures}
+\section{subroutines}
+\section{global variables}
+\begin{itemize}
+\item double $\pi$=3.14159265358979
+\item double $y$
+\item double $x$
+\item Loop counter: \(n_m (m = 1 \cdots 2)\)
+\item Cache variables (double): \(d_m (m = 1)\)
+\item Cache array (double,1d): \(\dot{d}_m (m = 1)\)
+\item Cache array (complex,2d): \(\ddot{z}_m (m = 1)\)
+\end{itemize}
+\section{main code}
+\begin{align}
+x \leftarrow \pi
+\end{align}
+\begin{align}
+y \leftarrow 1
+\end{align}
+$\dot{d}_{1}$: allocate($10$)\\
+$\ddot{z}_{1}$: allocate($10,20$)\\
+\begin{align}
+d_{1} \leftarrow \sin(x)
+\end{align}
+for $n_{1}=1\cdots \mathcal{S}_1[\dot{d}_{1}]$\\
+  \begin{align}
+  \dot{d}_{1}(n_{1}) \leftarrow \frac{\displaystyle \dot{d}_{1}(n_{1})}{\displaystyle \mathrm{double}(\mathcal{S}_1[\dot{d}_{1}])}
+  \end{align}
+end\\
+for $n_{1}=1\cdots \mathcal{S}_1[\ddot{z}_{1}]$\\
+  for $n_{2}=1\cdots \mathcal{S}_2[\ddot{z}_{1}]$\\
+    \begin{align}
+    \ddot{z}_{1}(n_{1},n_{2}) \leftarrow \frac{\displaystyle \ddot{z}_{1}(n_{1},n_{2})}{\displaystyle \mathrm{double}(\mathcal{S}_1[\ddot{z}_{1}]) \cdot \mathrm{double}(\mathcal{S}_2[\ddot{z}_{1}])}
+    \end{align}
+    \begin{align}
+    \ddot{z}_{1}(n_{1},n_{2}) \leftarrow \frac{\displaystyle \ddot{z}_{1}(n_{1},n_{2})+\frac{\displaystyle x \cdot d_{1}}{\displaystyle y}}{\displaystyle \mathrm{double}(\mathcal{S}_1[\ddot{z}_{1}]) \cdot \mathrm{double}(\mathcal{S}_2[\ddot{z}_{1}])}
+    \end{align}
+  end\\
+end\\
+$\ddot{z}_{1}$: deallocate\\
+$\dot{d}_{1}$: deallocate\\
+\end{document}

@@ -42,23 +42,23 @@ namespace Aqualis
             |T ->
                 match el with
                 |IF   ->
-                    p.codewrite("if"+"("+cond.code+")"+"\n")
+                    p.codewrite("if"+"("+cond.code+")"+"\\\\\n")
                 |ELIF ->
-                    p.codewrite("else if"+"("+cond.code+")"+"\n")
+                    p.codewrite("else if"+"("+cond.code+")"+"\\\\\n")
                 |ELSE ->
-                    p.codewrite("else"+"\n")
+                    p.codewrite("else"+"\\\\\n")
                 p.indentInc()
                 code()
                 p.indentDec()
-                p.codewrite("end\n")
+                p.codewrite("end\\\\\n")
             |H ->
                 p.codewrite("<div class=\"codeblock\">\n")
                 p.codewrite("<details open>\n")
                 match el with
                 |IF   ->
-                    p.codewrite("<summary><span class=\"op-if\">if</span>"+" (<math>"+cond.code+"</math>)</summary>"+"\n")
+                    p.codewrite("<summary><span class=\"op-if\">if</span>"+" (\\("+cond.code+"\\))</summary>"+"\n")
                 |ELIF ->
-                    p.codewrite("<summary><span class=\"op-if\">else if</span>"+" (<math>"+cond.code+"</math>)</summary>"+"\n")
+                    p.codewrite("<summary><span class=\"op-if\">else if</span>"+" (\\("+cond.code+"\\))</summary>"+"\n")
                 |ELSE ->
                     p.codewrite("<summary><span class=\"op-if\">else</span></summary>"+"\n")
                 p.indentInc()

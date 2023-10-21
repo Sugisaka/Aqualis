@@ -41,13 +41,13 @@ namespace Aqualis
                 match p.lang with
                 |H ->
                     match vtp with 
-                    |A0 -> "<math><mi>"+typ.tostring(p.lang)+"</mi> :: "+name+"</math>"
-                    |A1(0) -> "<math><mi>"+typ.tostring(p.lang)+"</mi>(allocatable,1d)"+" "+name+"</math>"
-                    |A2(0,0) -> "<math><mi>"+typ.tostring(p.lang)+"</mi>(allocatable,2d)"+" "+name+"</math>"
-                    |A3(0,0,0) -> "<math><mi>"+typ.tostring(p.lang)+"</mi>(allocatable,3d)"+" "+name+"</math>"
-                    |A1(_) -> "<math><mi>"+typ.tostring(p.lang)+"</mi>(1d) "+name+"</math>"
-                    |A2(_,_) -> "<math><mi>"+typ.tostring(p.lang)+"</mi>(2d) "+name+"</math>"
-                    |A3(_,_,_) -> "<math><mi>"+typ.tostring(p.lang)+"</mi>(3d) "+name+"</math>"
+                    |A0 -> typ.tostring(p.lang)+" :: "+name
+                    |A1(0) -> typ.tostring(p.lang)+",allocatable"+" :: "+name+"(:)"
+                    |A2(0,0) -> typ.tostring(p.lang)+",allocatable"+" :: "+name+"(:,:)"
+                    |A3(0,0,0) -> typ.tostring(p.lang)+",allocatable"+" :: "+name+"(:,:,:)"
+                    |A1(_) -> typ.tostring(p.lang)+" :: "+name+"(:)"
+                    |A2(_,_) -> typ.tostring(p.lang)+" :: "+name+"(:,:)"
+                    |A3(_,_,_) -> typ.tostring(p.lang)+" :: "+name+"(:,:,:)"
                 |_ ->
                     match vtp with 
                     |A0 -> typ.tostring(p.lang)+" :: "+name
@@ -254,7 +254,7 @@ namespace Aqualis
                 p.hwrite("<h3>"+projectname+"</h3>\n")
                 p.hwrite("<ul>"+"\n")
                 for _,(_,_,nm) in p.arglist do
-                    p.hwrite("<li><math>"+nm+"</math></li>\n")
+                    p.hwrite("<li>\\("+nm+"\\)</li>\n")
                 p.hwrite("</ul>"+"\n")
                 let argvar = 
                     let cat acc i =
@@ -265,7 +265,7 @@ namespace Aqualis
                     List.fold cat "" [0..p.arglist.Length-1]
                 p.hwrite("<div class=\"codeblock\">\n")
                 p.hwrite("<details>\n")
-                p.hwrite("<summary><span class=\"op-func\">function</span> <math><mi>"+projectname+"</mi><mo>(</mo>"+argvar+"<mo>)</mo></math></summary>"+"\n")
+                p.hwrite("<summary><span class=\"op-func\">function</span> \\("+projectname+"("+argvar+")\\)</summary>"+"\n")
                 p.hwrite("<div class=\"insidecode-func\">\n")
                 p.indentInc()
                 p.hwrite("<ul>\n")
@@ -296,7 +296,7 @@ namespace Aqualis
                     List.fold cat "" [0..p.arglist.Length-1]
                 //もとの関数に戻る
                 p.param_back()
-                p.codewrite("<math>" + "<mi>" + projectname + "</mi><mo>(</mo>" + args + "<mo>)</mo></math>\n<br/>\n")
+                p.codewrite("\\(" + projectname + "(" + args + ")\\)<br/>")
         ///<summary>コンパイル</summary>
         let Compile lglist dir projectname (aqver:string,codever:string) code =
             for lg in lglist do
@@ -480,12 +480,18 @@ namespace Aqualis
                     p.declareall()
                     p.vclose()
                     //ソースファイル出力
-                    p.hwrite("\\documentclass[a4paper]{ltjsarticle}\n")
-                    p.hwrite("\n")
-                    p.hwrite("\\usepackage{mystyle}\n")
-                    p.hwrite("\n")
-                    p.hwrite("\\geometry{margin=19mm,top=25.4mm,bottom=25.4mm}\n")
-                    p.hwrite("\n")
+                    p.hwrite("\\documentclass[a4paper,fleqn]{ltjsarticle}\n")
+                    p.hwrite("\\usepackage{amsmath}\n")
+                    p.hwrite("\\oddsidemargin=-0.4mm\n")
+                    p.hwrite("\\topmargin=4.6mm\n")
+                    p.hwrite("\\headheight=0mm\n")
+                    p.hwrite("\\headsep=0mm\n")
+                    p.hwrite("\\footskip=15mm\n")
+                    p.hwrite("\\textwidth=160mm\n")
+                    p.hwrite("\\textheight=237mm\n")
+                    p.hwrite("\\topsep=6pt\n")
+                    p.hwrite("\\parindent=0mm\n")
+                    p.hwrite("\\unitlength=1.00mm\n")
                     p.hwrite("\\begin{document}\n")
                     p.hwrite("{\\Large Program: "+projectname.Replace("_","\\_")+"}\n\n")
                     //構造体の定義
@@ -529,49 +535,56 @@ namespace Aqualis
                     p.declareall()
                     p.vclose()
                     //ソースファイル出力
-                    p.hwrite("<!DOCTYPE html>\n")
-                    p.hwrite("<html>\n")
-                    p.hwrite("\t<head>\n")
-                    p.hwrite("\t\t<meta charset=\"UTF-8\">\n")
-                    p.hwrite("\t\t<title>"+projectname+"</title>\n")
+                    p.hwrite("<!DOCTYPE html>")
+                    p.hwrite("<html lang='ja'>")
+                    p.hwrite("\t<head>")
+                    p.hwrite("\t\t<meta charset='utf-8'>")
+                    p.hwrite("\t\t<script>")
+                    p.hwrite("\t\tMathJax = {")
+                    p.hwrite("\t\t\tchtml: {")
+                    p.hwrite("\t\t\t\tdisplayAlign: \"left\",")
+                    p.hwrite("\t\t\t}")
+                    p.hwrite("\t\t};")
+                    p.hwrite("\t\t</script>")
+                    p.hwrite("\t\t<script type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"></script>")
+                    p.hwrite("\t\t<title>"+projectname+"</title>")
+                    p.hwrite("\t\t<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
+                    p.hwrite("\t\t<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">")
+                    p.hwrite("\t\t<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>")
+                    p.hwrite("\t\t<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap\" rel=\"stylesheet\">")
                     p.hwrite("\t\t<style type=\"text/css\">\n")
                     p.hwrite("\t\t<!--\n")
-                    
                     p.hwrite("\t\tbody {\n")
-                    p.hwrite("\t\t\tfont-family: \"源ノ角ゴシック Code JP\",\"原ノ味角ゴシック\",\"游ゴシック\";\n")
+                    p.hwrite("\t\t\tfont-family: 'Noto Sans JP', sans-serif;")
+                    p.hwrite("\t\t\tfont-weight: 500;")
+                    p.hwrite("\t\t\tfont-size: 16px;")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\th2 {\n")
                     p.hwrite("\t\t\tborder-bottom: 2px solid;\n")
                     p.hwrite("\t\t}\n")
-                    
                     p.hwrite("\t\ta {\n")
                     p.hwrite("\t\t\tfont-size: 11pt;\n")
                     p.hwrite("\t\t\ttext-decoration: none;\n")
                     p.hwrite("\t\t\tcolor: #8000ff;\n")
                     p.hwrite("\t\t}\n")
-                    
                     p.hwrite("\t\t.fio {")
                     p.hwrite("\t\t\tmargin-right: 10px;")
                     p.hwrite("\t\t\tfont-size: 11pt;")
                     p.hwrite("\t\t\tcolor: #ff00ff;")
                     p.hwrite("\t\t}")
-                    
                     p.hwrite("\t\t.continue {\n")
                     p.hwrite("\t\t\tfont-size: 11pt;\n")
                     p.hwrite("\t\t\tcolor: #8000ff;\n")
                     p.hwrite("\t\t}\n")
-                    
                     p.hwrite("\t\t.codeblock {\n")
                     p.hwrite("\t\t\tpadding-left: 0px;\n")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\t\n")
-                    
                     p.hwrite("\t\t.op-loop {\n")
                     p.hwrite("\t\t\tfont-size: 11pt;\n")
                     p.hwrite("\t\t\tcolor: #ff7f00;\n")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\t\n")
-                    
                     p.hwrite("\t\t.insidecode-loop {\n")
                     p.hwrite("\t\t\tmargin-left: 2px;\n")
                     p.hwrite("\t\t\tpadding-left: 30px;\n")
@@ -580,13 +593,11 @@ namespace Aqualis
                     p.hwrite("\t\t\tborder-color: #ffa347;\n")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\t\n")
-                    
                     p.hwrite("\t\t.op-if {\n")
                     p.hwrite("\t\t\tfont-size: 11pt;\n")
                     p.hwrite("\t\t\tcolor: #007fff;\n")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\t\n")
-                    
                     p.hwrite("\t\t.insidecode-if {\n")
                     p.hwrite("\t\t\tmargin-left: 2px;\n")
                     p.hwrite("\t\t\tpadding-left: 30px;\n")
@@ -594,13 +605,11 @@ namespace Aqualis
                     p.hwrite("\t\t\tborder-width: 5px;\n")
                     p.hwrite("\t\t\tborder-color: #47a3ff;\n")
                     p.hwrite("\t\t}\n")
-                    
                     p.hwrite("\t\t.op-func {\n")
                     p.hwrite("\t\t\tfont-size: 11pt;\n")
                     p.hwrite("\t\t\tcolor: #0000ff;\n")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\t\n")
-                    
                     p.hwrite("\t\t.insidecode-func {\n")
                     p.hwrite("\t\t\tmargin-left: 2px;\n")
                     p.hwrite("\t\t\tpadding-left: 30px;\n")
@@ -608,14 +617,12 @@ namespace Aqualis
                     p.hwrite("\t\t\tborder-width: 5px;\n")
                     p.hwrite("\t\t\tborder-color: #0000ff;\n")
                     p.hwrite("\t\t}\n")
-                    
                     p.hwrite("\t\t.op-section {\n")
                     p.hwrite("\t\t\tfont-size: 11pt;\n")
                     p.hwrite("\t\t\tcolor: #008000;\n")
                     p.hwrite("\t\t\tmargin-right: 5px;\n")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\t\n")
-
                     p.hwrite("\t\t.insidecode-section {\n")
                     p.hwrite("\t\t\tmargin-left: 2px;\n")
                     p.hwrite("\t\t\tpadding-left: 30px;\n")
@@ -624,12 +631,10 @@ namespace Aqualis
                     p.hwrite("\t\t\tborder-color: #32cd32;\n")
                     p.hwrite("\t\t}\n")
                     p.hwrite("\t\t\n")
-
                     p.hwrite("\t\t.comment {\n")
                     p.hwrite("\t\t\tfont-size: 11pt;\n")
                     p.hwrite("\t\t\tcolor: #008000;\n")
                     p.hwrite("\t\t}\n")
-                    
                     p.hwrite("\t\t-->\n")
                     p.hwrite("\t\t</style>\n")
                     p.hwrite("\t\t<script type=\"text/javascript\">\n")
@@ -645,8 +650,8 @@ namespace Aqualis
                     p.hwrite("\t\t\t\t}\n")
                     p.hwrite("\t\t\t}\n")
                     p.hwrite("\t\t</script>\n")
-                    p.hwrite("\t</head>\n")
-                    p.hwrite("\t<body>\n")
+                    p.hwrite("\t</head>")
+                    p.hwrite("\t<body>")
                     p.hwrite("\t\t<h1>"+projectname+"</h1>\n")
                     p.hwrite("\t\t<div id=\"codeinfo\">\n")
                     p.hwrite("\t\t\t<ul>\n")
