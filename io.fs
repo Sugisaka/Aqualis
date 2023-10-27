@@ -137,9 +137,9 @@ namespace Aqualis
                     lst
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
-                            printfn "%s %s" (b.[n].etype.ToString()) (b.[n].expr.ToString())
                             match b.[n].etype,b.[n].expr with 
-                            |_,Int_c(v) -> yield p.ItoS(v)
+                            |It _,Int_c(v) -> yield p.ItoS(v)
+                            |Dt  ,Int_c(v) -> yield p.DtoS(double v)
                             |_,Dbl_c(v) -> yield p.DtoS(v)
                             |_,Str_c(v) -> yield "\""+v.Replace("\"","\"\"")+"\""
                             |Zt,_ ->
@@ -1028,7 +1028,8 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
                             match b.[n].etype,b.[n].expr with 
-                            |_,Int_c(v) -> yield p.ItoS(v)
+                            |It _,Int_c(v) -> yield p.ItoS(v)
+                            |Dt  ,Int_c(v) -> yield p.DtoS(double v)
                             |_,Dbl_c(v) -> yield p.DtoS(v)
                             |_,Str_c(v) -> yield "\""+v.Replace("\"","\"\"")+"\""
                             |Zt,Var _ ->
