@@ -15,40 +15,42 @@ namespace Aqualis
         let mutable param_idx = []
     
         ///<summary>作成済みのすべての関数を削除</summary>
-        member __.clear() =
+        member _.clear() =
             param_lst <- []
             param_idx <- []
             
         ///<summary>メイン関数</summary>
-        member __.param_main with get() = param_lst.[0]
+        member _.param_main with get() = param_lst.[0]
         
         ///<summary>インデックスiの関数</summary>
-        member __.parami(i:int) = param_lst.[i]
+        member _.parami(i:int) = param_lst.[i]
         
         ///<summary>現在生成中の関数</summary>
-        member __.param with get() = param_lst.[param_idx.[0]]
+        member _.param with get() = param_lst.[param_idx.[0]]
         
+        member _.isEmpty with get() = param_lst.Length=0
+
         ///<summary>現在指定されている言語</summary>
-        member __.lang with get() = 
+        member this.lang with get() = 
             if param_idx.Length=0 then
                 F
             else
-                let pp = param_lst.[param_idx.[0]]
+                let pp = this.param
                 pp.lang
                 
         ///<summary>関数を追加</summary>
-        member __.param_add(lang_,dir_,proj_) =
+        member this.param_add(lang_,dir_,proj_) =
             //書き込み中の関数があればストリームを閉じる
             if param_idx.Length>0 then
-                param_lst.[param_idx.[0]].cclose()
-                param_lst.[param_idx.[0]].vclose()
-                param_lst.[param_idx.[0]].hclose()
+                this.param.cclose()
+                this.param.vclose()
+                this.param.hclose()
             let p = new param(lang_,dir_,proj_)
             param_lst <- param_lst@[p]
             param_idx <- (param_lst.Length-1)::param_idx
     
         ///<summary>呼び出し元の関数に戻る</summary>
-        member __.param_back() =
+        member _.param_back() =
             match param_idx with
             |x::y ->
                 param_lst.[x].cclose()
@@ -61,155 +63,165 @@ namespace Aqualis
             |_ -> ()
               
         ///<summary>設定されたプロジェクト名</summary>
-        member __.projectname with get() = param_lst.[param_idx.[0]].projectname
+        member this.projectname with get() = this.param.projectname
         ///<summary>ソースファイル出力先ディレクトリ</summary>
-        member __.dir with get() = param_lst.[param_idx.[0]].dir
+        member this.dir with get() = this.param.dir
         ///<summary>コードをファイルに書き込み</summary>
-        member __.codewrite(s) = param_lst.[param_idx.[0]].codewrite(s)
+        member this.codewrite(s) = this.param.codewrite(s)
         ///<summary>エラーID</summary>
-        member __.errorID with get() = param_lst.[param_idx.[0]].error_code_counter
+        member this.errorID with get() = this.param.error_code_counter
         ///<summary>エラーIDをインクリメント</summary>
-        member __.errorIDinc() = 
-            param_lst.[param_idx.[0]].error_code_counter <- param_lst.[param_idx.[0]].error_code_counter + 1
+        member this.errorIDinc() = 
+            this.param.error_code_counter <- this.param.error_code_counter + 1
         ///<summary>デバッグモード</summary>
-        member __.debugMode with get() = param_lst.[param_idx.[0]].debug_mode
+        member this.debugMode with get() = this.param.debug_mode
         ///<summary>コメント書き込み</summary>
-        member __.comment(s) = param_lst.[param_idx.[0]].comment(s)
+        member this.comment(s) = this.param.comment(s)
         ///<summary>インデントを下げる</summary>
-        member __.indentInc() = param_lst.[param_idx.[0]].indent.inc()
+        member this.indentInc() = this.param.indent.inc()
         ///<summary>インデントを上げる</summary>
-        member __.indentDec() = param_lst.[param_idx.[0]].indent.dec()
+        member this.indentDec() = this.param.indent.dec()
         ///<summary>インデント用スペース</summary>
-        member __.indentSpace with get() = param_lst.[param_idx.[0]].indent.space
+        member this.indentSpace with get() = this.param.indent.space
         ///<summary>セクションのヘッダを画面出力</summary>
-        member __.displaySection with get() = param_lst.[param_idx.[0]].display_section
+        member this.displaySection with get() = this.param.display_section
         ///<summary>一時変数(整数)</summary>
-        member __.i_cache_var with get() = param_lst.[param_idx.[0]].i_cache_var
+        member this.i_cache_var with get() = this.param.i_cache_var
         ///<summary>一時変数(小数)</summary>
-        member __.d_cache_var with get() = param_lst.[param_idx.[0]].d_cache_var
+        member this.d_cache_var with get() = this.param.d_cache_var
         ///<summary>一時変数(複素数)</summary>
-        member __.z_cache_var with get() = param_lst.[param_idx.[0]].z_cache_var
+        member this.z_cache_var with get() = this.param.z_cache_var
         ///<summary>一時変数(整数1次元配列)</summary>
-        member __.i1_cache_var with get() = param_lst.[param_idx.[0]].i1_cache_var
+        member this.i1_cache_var with get() = this.param.i1_cache_var
         ///<summary>一時変数(小数1次元配列)</summary>
-        member __.d1_cache_var with get() = param_lst.[param_idx.[0]].d1_cache_var
+        member this.d1_cache_var with get() = this.param.d1_cache_var
         ///<summary>一時変数(複素数1次元配列)</summary>
-        member __.z1_cache_var with get() = param_lst.[param_idx.[0]].z1_cache_var
+        member this.z1_cache_var with get() = this.param.z1_cache_var
         ///<summary>一時変数(整数2次元配列)</summary>
-        member __.i2_cache_var with get() = param_lst.[param_idx.[0]].i2_cache_var
+        member this.i2_cache_var with get() = this.param.i2_cache_var
         ///<summary>一時変数(小数2次元配列)</summary>
-        member __.d2_cache_var with get() = param_lst.[param_idx.[0]].d2_cache_var
+        member this.d2_cache_var with get() = this.param.d2_cache_var
         ///<summary>一時変数(複素数2次元配列)</summary>
-        member __.z2_cache_var with get() = param_lst.[param_idx.[0]].z2_cache_var
+        member this.z2_cache_var with get() = this.param.z2_cache_var
         ///<summary>一時変数(整数3次元配列)</summary>
-        member __.i3_cache_var with get() = param_lst.[param_idx.[0]].i3_cache_var
+        member this.i3_cache_var with get() = this.param.i3_cache_var
         ///<summary>一時変数(小数3次元配列)</summary>
-        member __.d3_cache_var with get() = param_lst.[param_idx.[0]].d3_cache_var
+        member this.d3_cache_var with get() = this.param.d3_cache_var
         ///<summary>一時変数(複素数3次元配列)</summary>
-        member __.z3_cache_var with get() = param_lst.[param_idx.[0]].z3_cache_var
+        member this.z3_cache_var with get() = this.param.z3_cache_var
         ///<summary>int型の数値を文字列に変換</summary>
-        member __.ItoS(n) = param_lst.[param_idx.[0]].ItoS(n)
+        member this.ItoS(n) = 
+            if this.isEmpty then
+                //Compile関数外で使用された場合
+                n.ToString()
+            else
+                this.param.ItoS(n)
         ///<summary>double型の数値を文字列に変換</summary>
-        member __.DtoS(n) = param_lst.[param_idx.[0]].DtoS(n)
+        member this.DtoS(n) =
+            if this.isEmpty then
+                //Compile関数外で使用された場合
+                n.ToString()
+            else
+                this.param.DtoS(n)
         ///<summary>整数型を文字列に変換するときの桁数</summary>
-        member __.iFormat with get() = param_lst.[param_idx.[0]].int_string_format
+        member this.iFormat with get() = this.param.int_string_format
         ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
-        member __.dFormat with get() = param_lst.[param_idx.[0]].double_string_format
+        member this.dFormat with get() = this.param.double_string_format
         ///<summary>変数リスト</summary>
-        member __.var with get() = param_lst.[param_idx.[0]].var
+        member this.var with get() = this.param.var
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（ファイルポインタ）</summary>
-        member __.fvar with get() = param_lst.[param_idx.[0]].f_stat_var
+        member this.fvar with get() = this.param.f_stat_var
         ///<summary>プライベート変数リスト</summary>
-        member __.pvar with get() = param_lst.[param_idx.[0]].pvar
+        member this.pvar with get() = this.param.pvar
         ///<summary>ホストからGPUへ転送する変数リスト</summary>
-        member __.civar with get() = param_lst.[param_idx.[0]].civar
+        member this.civar with get() = this.param.civar
         ///<summary>GPUからホストへ転送する変数リスト</summary>
-        member __.covar with get() = param_lst.[param_idx.[0]].covar
+        member this.covar with get() = this.param.covar
         ///<summary>ループカウンタ変数を作成し、code内の処理を実行</summary>
-        member __.getloopvar with get() = param_lst.[param_idx.[0]].getloopvar
+        member this.getloopvar with get() = this.param.getloopvar
         ///<summary>ループカウンタ変数とループ脱出先gotoラベルを作成し、code内の処理を実行</summary>
-        member __.getloopvar_exit with get() = param_lst.[param_idx.[0]].getloopvar_exit
+        member this.getloopvar_exit with get() = this.param.getloopvar_exit
         ///<summary>コードを一時ファイルに書き込み</summary>
-        member __.cwrite(s) = param_lst.[param_idx.[0]].cwrite(s)
+        member this.cwrite(s) = this.param.cwrite(s)
         ///<summary>構造体・関数宣言の一時ファイルに書き込み</summary>
-        member __.hwrite(s) = param_lst.[param_idx.[0]].hwrite(s)
+        member this.hwrite(s) = this.param.hwrite(s)
         ///<summary>コンパイル時に必要なライブラリ・オプション</summary>
-        member __.option(s) = param_lst.[param_idx.[0]].olist.add(s)
+        member this.option(s) = this.param.olist.add(s)
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
-        member __.extn(s) = param_lst.[param_idx.[0]].elist.add(s)
+        member this.extn(s) = this.param.elist.add(s)
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
-        member __.incld(s) = param_lst.[param_idx.[0]].hlist.add(s)
+        member this.incld(s) = this.param.hlist.add(s)
         ///<summary>ライブラリの使用時に必要なモジュールファイル</summary>
-        member __.modl(s) = param_lst.[param_idx.[0]].mlist.add(s)
+        member this.modl(s) = this.param.mlist.add(s)
         ///<summary>コードの一時ファイルを閉じる</summary>
-        member __.cclose() = param_lst.[param_idx.[0]].cclose()
+        member this.cclose() = this.param.cclose()
         ///<summary>コードの一時ファイルを開く</summary>
-        member __.copen() = param_lst.[param_idx.[0]].copen()
+        member this.copen() = this.param.copen()
         ///<summary>並列処理の一時ファイルを開く</summary>
-        member __.popen() = param_lst.[param_idx.[0]].popen()
+        member this.popen() = this.param.popen()
         ///<summary>並列ループ処理書き込み先一時ファイルストリームを閉じる</summary>
-        member __.pclose() = param_lst.[param_idx.[0]].pwriter.Close()
+        member this.pclose() = this.param.pwriter.Close()
         ///<summary>構造体・関数宣言の一時ファイルを閉じる</summary>
-        member __.hclose() = param_lst.[param_idx.[0]].hclose()
+        member this.hclose() = this.param.hclose()
         ///<summary>変数宣言の一時ファイルを閉じる</summary>
-        member __.vclose() = param_lst.[param_idx.[0]].vclose()
+        member this.vclose() = this.param.vclose()
         ///<summary>コンパイル時に必要な他のソースファイル</summary>
-        member __.slist with get() = param_lst.[param_idx.[0]].slist
+        member this.slist with get() = this.param.slist
         ///<summary>ライブラリの使用時に必要なモジュールファイル</summary>
-        member __.mlist with get() = param_lst.[param_idx.[0]].mlist
+        member this.mlist with get() = this.param.mlist
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
-        member __.hlist with get() = param_lst.[param_idx.[0]].hlist
+        member this.hlist with get() = this.param.hlist
         ///<summary>コンパイル時に必要なライブラリ・オプション</summary>
-        member __.olist with get() = param_lst.[param_idx.[0]].olist
+        member this.olist with get() = this.param.olist
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
-        member __.elist with get() = param_lst.[param_idx.[0]].elist
+        member this.elist with get() = this.param.elist
         ///<summary>この関数の引数リスト： 関数呼び出しに与えられた変数名,(関数内での変数情報)</summary>
-        member __.arglist with get() = param_lst.[param_idx.[0]].arglist
+        member this.arglist with get() = this.param.arglist
         ///<summary>trueのときOpenMPが使用中</summary>
-        member __.isOmpUsed 
-            with get()  = param_lst.[param_idx.[0]].isOmpUsed
-            and  set(v) = param_lst.[param_idx.[0]].isOmpUsed <- v
+        member this.isOmpUsed 
+            with get()  = this.param.isOmpUsed
+            and  set(v) = this.param.isOmpUsed <- v
         ///<summary>trueのときOpenACCが使用中</summary>
-        member __.isOaccUsed
-            with get()  = param_lst.[param_idx.[0]].isOaccUsed
-            and  set(v) = param_lst.[param_idx.[0]].isOaccUsed <- v
+        member this.isOaccUsed
+            with get()  = this.param.isOaccUsed
+            and  set(v) = this.param.isOaccUsed <- v
         ///<summary>変数宣言のコード生成</summary>
-        member __.declare(typ,vtp,name,param) = param_lst.[param_idx.[0]].declare(typ,vtp,name,param)
+        member this.declare(typ,vtp,name,param) = this.param.declare(typ,vtp,name,param)
         ///<summary>宣言されたすべての変数を一時ファイルに書き込み</summary>
-        member __.declareall() = param_lst.[param_idx.[0]].declareall()
+        member this.declareall() = this.param.declareall()
         ///<summary>並列処理書き込みモード</summary>
-        member __.parmode code = 
-            param_lst.[param_idx.[0]].switch_parmode(true)
+        member this.parmode code = 
+            this.param.switch_parmode(true)
             code()
-            param_lst.[param_idx.[0]].switch_parmode(false)
+            this.param.switch_parmode(false)
         ///<summary>trueのとき並列処理を書き込む</summary>
-        member __.isparmode with get() = param_lst.[param_idx.[0]].isParMode
+        member this.isparmode with get() = this.param.isParMode
         ///<summary>並列処理の一時ファイルの内容</summary>
-        member __.readParText() = param_lst.[param_idx.[0]].readpartext()
+        member this.readParText() = this.param.readpartext()
         ///<summary>並列処理の一時ファイルを削除</summary>
-        member __.ParDelete() = param_lst.[param_idx.[0]].pdelete()
+        member this.ParDelete() = this.param.pdelete()
         ///<summary>trueの時はデバッグ用のコードを生成する</summary>
-        member __.setDebugMode(s) = param_lst.[param_idx.[0]].debug_mode <- s
+        member this.setDebugMode(s) = this.param.debug_mode <- s
         ///<summary>セクションのヘッダを画面出力</summary>
-        member __.setDisplaySection(s) = param_lst.[param_idx.[0]].display_section <- s
+        member this.setDisplaySection(s) = this.param.display_section <- s
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（ファイルポインタ）</summary>
-        member __.fNumber() = param_lst.[param_idx.[0]].f_stat_var.getvar(fun i -> "f"+i.ToString("000"))
+        member this.fNumber() = this.param.f_stat_var.getvar(fun i -> "f"+i.ToString("000"))
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（文字列）</summary>
-        member __.tName() = param_lst.[param_idx.[0]].t_stat_var.getvar(fun i -> "t"+i.ToString("000"))
+        member this.tName() = this.param.t_stat_var.getvar(fun i -> "t"+i.ToString("000"))
         ///<summary>整数型を文字列に変換するときの桁数</summary>
-        member __.setIFormat(n) = param_lst.[param_idx.[0]].int_string_format <- n
+        member this.setIFormat(n) = this.param.int_string_format <- n
         ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
-        member __.setDFormat(n,m) = param_lst.[param_idx.[0]].set_double_string_format(n,m)
+        member this.setDFormat(n,m) = this.param.set_double_string_format(n,m)
         /// <summary>
         /// 関数定義の引数を追加
         /// </summary>
         /// <param name="typ">変数の型</param>
         /// <param name="vtp">変数の次元</param>
         /// <param name="n">変数名</param>
-        member __.addarg(typ,vtp,n) = param_lst.[param_idx.[0]].addarg(typ,vtp,n)
-        member __.codefold(s,cm,writer,sp) = param_lst.[param_idx.[0]].codefold(s,cm,writer,sp)
-        member __.paramClear() = param_lst.[param_idx.[0]].clear()
-        member __.plist() = param_lst.[param_idx.[0]].plist
+        member this.addarg(typ,vtp,n) = this.param.addarg(typ,vtp,n)
+        member this.codefold(s,cm,writer,sp) = this.param.codefold(s,cm,writer,sp)
+        member this.paramClear() = this.param.clear()
+        member this.plist() = this.param.plist
         
     module Aqualis_base =
         

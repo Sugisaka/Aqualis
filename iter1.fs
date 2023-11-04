@@ -100,67 +100,75 @@ namespace Aqualis
                 
         ///<summary>指定した範囲でループ</summary>
         static member range (i1:num0) = fun (i2:num0) -> fun code -> 
-            match p.lang with
-            |F ->
+            if p.isEmpty then
                 match i1.expr,i2.expr with
-                |Int_c a, Int_c b when a>b -> 
-                    p.comment ""
-                    p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
-                    p.comment ""
+                |Int_c i1,Int_c i2 ->
+                    for i in i1..i2 do
+                        code(num0(It 4,Int_c i))
                 |_ ->
-                    p.getloopvar <| fun counter ->
-                        if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
-                        p.codewrite("do "+counter+"="+i1.code+","+i2.code+"\n")
-                        p.indentInc()
-                        code(num0(It 4,Var counter))
-                        p.indentDec()
-                        p.codewrite("end do"+"\n")
-            |C ->
-                match i1.expr,i2.expr with
-                |Int_c a, Int_c b when a>b -> 
-                    p.comment ""
-                    p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar <| fun counter ->
-                        if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
-                        p.codewrite("for("+counter+"="+i1.code+"; "+counter+"<="+i2.code+"; "+counter+"++)"+"\n")
-                        p.codewrite("{"+"\n")
-                        p.indentInc()
-                        code(num0(It 4,Var counter))
-                        p.indentDec()
-                        p.codewrite("}"+"\n")
-            |T ->
-                match i1.expr,i2.expr with
-                |Int_c a, Int_c b when a>b -> 
-                    p.comment ""
-                    p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar <| fun counter ->
-                        p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
-                        p.indentInc()
-                        code(num0(It 4,Var counter))
-                        p.indentDec()
-                        p.codewrite("end"+"\\\\\n")
-            |H ->
-                match i1.expr,i2.expr with
-                |Int_c a, Int_c b when a>b -> 
-                    p.comment ""
-                    p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar <| fun counter ->
-                        p.codewrite("<div class=\"codeblock\">\n")
-                        p.codewrite("<details open>\n")
-                        p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+"\\)</summary>\n")
-                        p.codewrite("<div class=\"insidecode-loop\">\n")
-                        p.indentInc()
-                        code(num0(It 4,Var counter))
-                        p.indentDec()
-                        p.codewrite("</div>\n")
-                        p.codewrite("</details>\n")
-                        p.codewrite("</div>\n")
+                    printfn "%s" ("Error: loop range invalid. "+i1.expr.ToString()+","+i2.expr.ToString())
+            else
+                match p.lang with
+                |F ->
+                    match i1.expr,i2.expr with
+                    |Int_c a, Int_c b when a>b -> 
+                        p.comment ""
+                        p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
+                        p.comment ""
+                    |_ ->
+                        p.getloopvar <| fun counter ->
+                            if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
+                            p.codewrite("do "+counter+"="+i1.code+","+i2.code+"\n")
+                            p.indentInc()
+                            code(num0(It 4,Var counter))
+                            p.indentDec()
+                            p.codewrite("end do"+"\n")
+                |C ->
+                    match i1.expr,i2.expr with
+                    |Int_c a, Int_c b when a>b -> 
+                        p.comment ""
+                        p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
+                        p.comment ""
+                    |_ ->
+                        p.getloopvar <| fun counter ->
+                            if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
+                            p.codewrite("for("+counter+"="+i1.code+"; "+counter+"<="+i2.code+"; "+counter+"++)"+"\n")
+                            p.codewrite("{"+"\n")
+                            p.indentInc()
+                            code(num0(It 4,Var counter))
+                            p.indentDec()
+                            p.codewrite("}"+"\n")
+                |T ->
+                    match i1.expr,i2.expr with
+                    |Int_c a, Int_c b when a>b -> 
+                        p.comment ""
+                        p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
+                        p.comment ""
+                    |_ ->
+                        p.getloopvar <| fun counter ->
+                            p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
+                            p.indentInc()
+                            code(num0(It 4,Var counter))
+                            p.indentDec()
+                            p.codewrite("end"+"\\\\\n")
+                |H ->
+                    match i1.expr,i2.expr with
+                    |Int_c a, Int_c b when a>b -> 
+                        p.comment ""
+                        p.comment ("skipped loop from "+a.ToString()+" to "+b.ToString())
+                        p.comment ""
+                    |_ ->
+                        p.getloopvar <| fun counter ->
+                            p.codewrite("<div class=\"codeblock\">\n")
+                            p.codewrite("<details open>\n")
+                            p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"="+i1.code+","+i2.code+"\\)</summary>\n")
+                            p.codewrite("<div class=\"insidecode-loop\">\n")
+                            p.indentInc()
+                            code(num0(It 4,Var counter))
+                            p.indentDec()
+                            p.codewrite("</div>\n")
+                            p.codewrite("</details>\n")
+                            p.codewrite("</div>\n")
                 
         ///<summary>指定した範囲でループ(途中脱出可)</summary>
         static member range_exit (i1:num0) = fun (i2:num0) -> fun code -> 

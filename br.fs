@@ -89,18 +89,28 @@ namespace Aqualis
             
         ///<summary>条件分岐式(if式)</summary>
         static member if1 (cond:bool0) code =
-            match p.lang with
-            |_ ->
-                br.branch <| fun b ->
-                    b.IF cond code
+            if p.isEmpty then
+                if cond.eval then
+                    code()
+            else
+                match p.lang with
+                |_ ->
+                    br.branch <| fun b ->
+                        b.IF cond code
                 
         ///<summary>条件分岐式(if...else...式)</summary>
         static member if2 (cond:bool0) code1 code2 =
-            match p.lang with
-            |_ ->
-                br.branch <| fun b ->
-                    b.IF cond code1
-                    b.EL code2
+            if p.isEmpty then
+                if cond.eval then
+                    code1()
+                else
+                    code2()
+            else
+                match p.lang with
+                |_ ->
+                    br.branch <| fun b ->
+                        b.IF cond code1
+                        b.EL code2
                 
     ///<summary>条件分岐（処理スキップ）</summary>
     type dummy_br () =
