@@ -122,34 +122,34 @@ namespace Aqualis
                     match p.lang with
                     |F ->
                         match size with
-                        |A1(0) ->
+                        |A3(0,0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
                             p.codewrite("allocate("+name+"(1:"+this.size1.code+",1:"+this.size2.code+",1:"+this.size3.code+")"+")"+"\n")
                         |_ -> 
-                            p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            p.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |C ->
                         match size with
-                        |A1(0) ->
+                        |A3(0,0,0) ->
                             this.size1 <== n1
                             this.size3 <== n2
                             this.size3 <== n3
                             p.codewrite(name+"="+"("+typ.tostring(p.lang)+" *)"+"malloc("+"sizeof("+typ.tostring(p.lang)+")*"+this.size1.code+"*"+this.size2.code+"*"+this.size3.code+");\n")
                         |_ -> 
-                            p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            p.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |T ->
                         match size with
-                        |A1(0) ->
+                        |A3(0,0,0) ->
                             p.codewrite("$"+name+"$: allocate(\\("+n1.code+","+n2.code+","+n3.code+"\\))\\\\\n")
                         |_ -> 
-                            p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            p.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |H ->
                         match size with
-                        |A1(0) ->
+                        |A3(0,0,0) ->
                             p.codewrite("\\("+name+"\\): allocate(\\("+n1.code+","+n2.code+","+n3.code+"\\))<br/>\n")
                         |_ -> 
-                            p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            p.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                 |_ -> ()
                 
         member this.allocate(n1:int,n2:num0,n3:num0) = this.allocate(n1.I,n2,n3)
