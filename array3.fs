@@ -36,10 +36,10 @@ namespace Aqualis
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(name+"_size(1)"))
-                |C -> num0(It 4,Var(name+"_size[0]"))
-                |T -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
-                |H -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
+                |F -> num0(It 4,Var(It 4,name+"_size(1)"))
+                |C -> num0(It 4,Var(It 4,name+"_size[0]"))
+                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
             |Arx3(s1,_,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2 
@@ -47,10 +47,10 @@ namespace Aqualis
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(name+"_size(2)"))
-                |C -> num0(It 4,Var(name+"_size[1]"))
-                |T -> num0(It 4,Var("\\mathcal{S}_2["+name+"]"))
-                |H -> num0(It 4,Var("\\mathcal{S}_2["+name+"]"))
+                |F -> num0(It 4,Var(It 4,name+"_size(2)"))
+                |C -> num0(It 4,Var(It 4,name+"_size[1]"))
+                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
+                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
             |Arx3(_,s2,_,_) -> s2
         ///<summary>変数の要素数</summary>
         member __.size3 
@@ -58,10 +58,10 @@ namespace Aqualis
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(name+"_size(3)"))
-                |C -> num0(It 4,Var(name+"_size[2]"))
-                |T -> num0(It 4,Var("\\mathcal{S}_3["+name+"]"))
-                |H -> num0(It 4,Var("\\mathcal{S}_3["+name+"]"))
+                |F -> num0(It 4,Var(It 4,name+"_size(3)"))
+                |C -> num0(It 4,Var(It 4,name+"_size[2]"))
+                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_3["+name+"]"))
+                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_3["+name+"]"))
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:num0,j:num0,k:num0) =
@@ -83,10 +83,10 @@ namespace Aqualis
             match x with
             |Var3(_,name) ->
                 match p.lang with
-                |F -> Var(name+"("+i.code+","+j.code+","+k.code+")")
-                |C -> Var(name+"["+((k-1)*this.size1*this.size2+(j-1)*this.size1+(i-1)).code+"]")
-                |T -> Var(name+"("+i.code+","+j.code+","+k.code+")")
-                |H -> Var(name+"["+i.code+","+j.code+","+k.code+"]")
+                |F -> Var(typ,name+"("+i.code+","+j.code+","+k.code+")")
+                |C -> Var(typ,name+"["+((k-1)*this.size1*this.size2+(j-1)*this.size1+(i-1)).code+"]")
+                |T -> Var(typ,name+"("+i.code+","+j.code+","+k.code+")")
+                |H -> Var(typ,name+"["+i.code+","+j.code+","+k.code+"]")
             |Arx3(_,_,_,f) ->
                 f (i,j,k)
                 

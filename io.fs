@@ -216,8 +216,8 @@ namespace Aqualis
                           |_,Dbl_c(v) -> p.DtoS(v)
                           |_,Str_c(v) -> v
                           |Zt,Var _ -> b.re.code+","+b.im.code
-                          |_,Var n -> n
-                          |_,Formula n -> n 
+                          |_,Var(_,n) -> n
+                          |_,Formula(_,n) -> n 
                           |_ -> "")
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
@@ -243,8 +243,8 @@ namespace Aqualis
                           |_,Dbl_c(v) -> p.DtoS(v)
                           |_,Str_c(v) -> "\""+v+"\""
                           |Zt,Var _ -> b.re.code+","+b.im.code
-                          |_,Var n -> n
-                          |_,Formula n -> n 
+                          |_,Var(_,n) -> n
+                          |_,Formula(_,n) -> n 
                           |_ -> "")
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
@@ -306,7 +306,7 @@ namespace Aqualis
                     p.codewrite("write("+fp+") "+v.im.code+"\n")
                 |It _,_ ->
                     p.codewrite("write("+fp+") "+v.code+"\n")
-                |Dt _,_ ->
+                |Dt,_ ->
                     p.codewrite("write("+fp+") "+v.code+"\n")
                 |_ -> ()
             |H ->
@@ -374,7 +374,7 @@ namespace Aqualis
                                     |Zt,Var _ ->
                                         yield tmp.[2*m+1].code
                                         yield tmp.[2*m+2].code
-                                    |_,Var n ->
+                                    |_,Var(_,n) ->
                                         yield n
                                     |_ -> 
                                         Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
@@ -418,10 +418,10 @@ namespace Aqualis
                       |> (fun b ->
                             [for (t,m,a) in b do
                                 match t,a.expr with 
-                                |Zt,Var n ->
+                                |Zt,Var _ ->
                                     yield "&"+tmp.[2*m+1].code
                                     yield "&"+tmp.[2*m+2].code
-                                |_,Var n ->
+                                |_,Var(_,n) ->
                                     yield "&"+n
                                 |_ ->
                                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
@@ -452,8 +452,8 @@ namespace Aqualis
                     lst
                     |> List.map (fun b ->
                         match b.expr with 
-                        |Var n -> n
-                        |Formula n -> n 
+                        |Var(_,n) -> n
+                        |Formula(_,n) -> n 
                         |_ -> "")
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
@@ -474,8 +474,8 @@ namespace Aqualis
                     lst
                     |> List.map (fun b ->
                         match b.expr with 
-                        |Var n -> n
-                        |Formula n -> n 
+                        |Var(_,n) -> n
+                        |Formula(_,n) -> n 
                         |_ -> "")
                     |> (fun s -> String.Join("<mo>,</mo>",s))
                 p.codewrite("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
@@ -489,7 +489,7 @@ namespace Aqualis
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
                         v <== re+asm.uj*im
-                |_,Var n ->
+                |_,Var(_,n) ->
                     p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
@@ -500,7 +500,7 @@ namespace Aqualis
                         p.codewrite("fread(&"+re.code+",sizeof("+re.code+"),1,"+fp+");"+"\n")
                         p.codewrite("fread(&"+im.code+",sizeof("+im.code+"),1,"+fp+");"+"\n")
                         v <== re+asm.uj*im
-                |_,Var n ->
+                |_,Var(_,n) ->
                     p.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
@@ -511,13 +511,13 @@ namespace Aqualis
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+im.code+"\n")
                         v <== re+asm.uj*im
-                |_,Var n ->
+                |_,Var(_,n) ->
                     p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
             |H ->
                 match v.expr with 
-                |Var n ->
+                |Var(_,n) ->
                     p.codewrite("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
@@ -526,7 +526,7 @@ namespace Aqualis
             p.codewrite("read("+fp+", iostat="+iostat.code+") byte_tmp\n")
             let ee =
                 match e.etype,e.expr with 
-                |It _,Var n -> n 
+                |It _,Var(_,n) -> n 
                 |_ -> "byte値を整数型以外の変数に格納できません"
             p.codewrite(ee + "=" + "byte_tmp\n")
             
@@ -1067,7 +1067,7 @@ namespace Aqualis
                         |Zt,Var _ ->
                             yield b.re.code
                             yield b.im.code
-                        |(It _|Dt),Var n -> yield b.code
+                        |(It _|Dt),Var _ -> yield b.code
                         |_ -> ()]
                     |> io2.cat ","
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -1080,8 +1080,8 @@ namespace Aqualis
                         |_,Dbl_c(v) -> p.DtoS(v)
                         |_,Str_c(v) -> "\""+v+"\""
                         |Zt,Var _ -> b.re.code+","+b.im.code
-                        |_,Var n -> n
-                        |_,Formula n -> n 
+                        |_,Var(_,n) -> n
+                        |_,Formula(_,n) -> n 
                         |_ -> "")
                     |> io2.cat ","
                 p.codewrite("write("+fp+") "+code+"\n")
@@ -1094,8 +1094,8 @@ namespace Aqualis
                         |_,Dbl_c(v) -> p.DtoS(v)
                         |_,Str_c(v) -> "\""+v+"\""
                         |Zt,Var _ -> b.re.code+","+b.im.code
-                        |_,Var n -> n
-                        |_,Formula n -> n 
+                        |_,Var(_,n) -> n
+                        |_,Formula(_,n) -> n 
                         |_ -> "")
                     |> io2.cat ","
                 p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>\n")

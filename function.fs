@@ -34,7 +34,7 @@ namespace Aqualis
             /// </summary>
             member this.farg code =
                 fn.addarg (this.etype,A0,this.code) <| fun (v,n) -> 
-                    code(num0(this.etype,Var n))
+                    code(num0(this.etype,Var(this.etype, n)))
                     
         type num1 with
             /// <summary>

@@ -14,14 +14,27 @@ namespace Aqualis
         |Str_c of string
         |Int_c of int
         |Dbl_c of double
-        |Var of string
-        |Par of Expr
-        |Inv of Expr
-        |Add of Expr*Expr
-        |Sub of Expr*Expr
-        |Mul of Expr*Expr
-        |Div of Expr*Expr
-        |Formula of string
+        |Var of Etype*string
+        |Par of Etype*Expr
+        |Inv of Etype*Expr
+        |Add of Etype*Expr*Expr
+        |Sub of Etype*Expr*Expr
+        |Mul of Etype*Expr*Expr
+        |Div of Etype*Expr*Expr
+        |Pow of Etype*Expr*Expr
+        |Exp of Etype*Expr
+        |Sin of Etype*Expr
+        |Cos of Etype*Expr
+        |Tan of Etype*Expr
+        |Asin of Etype*Expr
+        |Acos of Etype*Expr
+        |Atan of Etype*Expr
+        |Atan2 of Expr*Expr
+        |Abs of Etype*Expr
+        |Log of Etype*Expr
+        |Log10 of Etype*Expr
+        |Sqrt of Etype*Expr
+        |Formula of Etype*string
         |Eq of Expr*Expr
         |NEq of Expr*Expr
         |Greater of Expr*Expr
@@ -32,24 +45,74 @@ namespace Aqualis
         |OR of Expr list
         |Null
         |NaN
+
+        member this.etype with get() =
+            match this with
+            |Str_c _ -> St
+            |Int_c _ -> It 4
+            |Dbl_c _ -> Dt
+            |Var (t,_) -> t
+            |Par (t,_) -> t
+            |Inv (t,_) -> t
+            |Add (t,_,_) -> t
+            |Sub (t,_,_) -> t
+            |Mul (t,_,_) -> t
+            |Div (t,_,_) -> t
+            |Pow (t,_,_) -> t
+            |Exp (t,_) -> t
+            |Sin (t,_) -> t
+            |Cos (t,_) -> t
+            |Tan (t,_) -> t
+            |Asin (t,_) -> t
+            |Acos (t,_) -> t
+            |Atan (t,_) -> t
+            |Atan2 _ -> Dt
+            |Abs (t,_) -> t
+            |Log (t,_) -> t
+            |Log10 (t,_) -> t
+            |Sqrt (t,_) -> t
+            |Formula (t,_) -> t
+            |Eq _ -> Bt
+            |NEq _ -> Bt
+            |Greater _ -> Bt
+            |GreaterEq _ -> Bt
+            |Less _ -> Bt
+            |LessEq _ -> Bt
+            |AND _ -> Bt
+            |OR _ -> Bt
+            |Null -> Nt
+            |NaN -> Nt
         
         member this.code with get() =
             match p.lang with
             |T ->
                 match this with
-                |Var x -> x
+                |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par x -> "\\left("+x.code+"\\right)"
-                |Inv x -> "-"+x.code
-                |Add (x,y) -> x.code+"+"+y.code
-                |Sub (x,y) -> x.code+"-"+y.code
-                |Mul (x,y) -> x.code+" \\cdot "+y.code
-                |Div (Par x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (Par x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Par(_,x) -> "\\left("+x.code+"\\right)"
+                |Inv(_,x) -> "-"+x.code
+                |Add(_,x,y) -> x.code+"+"+y.code
+                |Sub(_,x,y) -> x.code+"-"+y.code
+                |Mul(_,x,y) -> x.code+" \\cdot "+y.code
+                |Div(_,Par(_,x),Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,Par(_,x),y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,x,Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Pow(_,x,y) -> x.code+"^{"+y.code+"}"
+                |Exp(_,x) -> "\\exp\\left("+x.code+"\\right)"
+                |Sin(_,x) -> "\\sin\\left("+x.code+"\\right)"
+                |Cos(_,x) -> "\\cos\\left("+x.code+"\\right)"
+                |Tan(_,x) -> "\\tan\\left("+x.code+"\\right)"
+                |Asin(_,x) -> "\\asin\\left("+x.code+"\\right)"
+                |Acos(_,x) -> "\\acos\\left("+x.code+"\\right)"
+                |Atan(_,x) -> "\\atan\\left("+x.code+"\\right)"
+                |Atan2 (x,y) -> "\\atan2\\left("+x.code+","+y.code+"\\right)"
+                |Abs(_,x) -> "\\left|"+x.code+"\\right|"
+                |Log(_,x) -> "\\ln\\left("+x.code+"\\right)"
+                |Log10(_,x) -> "\\log\\left("+x.code+"\\right)"
+                |Sqrt(_,x) -> "\\sqrt{"+x.code+"}"
                 |NaN -> "NaN"
                 |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
@@ -93,24 +156,37 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Formula s -> s
+                |Formula(_,s) -> s
                 |_ ->
                     ""
             |H ->
                 match this with
-                |Var x -> x
+                |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par x -> "\\left("+x.code+"\\right)"
-                |Inv x -> "-"+x.code
-                |Add (x,y) -> x.code+"+"+y.code
-                |Sub (x,y) -> x.code+"-"+y.code
-                |Mul (x,y) -> x.code+" \\cdot "+y.code
-                |Div (Par x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (Par x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (x,Par y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Par(_,x) -> "\\left("+x.code+"\\right)"
+                |Inv(_,x) -> "-"+x.code
+                |Add (_,x,y) -> x.code+"+"+y.code
+                |Sub (_,x,y) -> x.code+"-"+y.code
+                |Mul (_,x,y) -> x.code+" \\cdot "+y.code
+                |Div (_,Par(_,x),Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (_,Par(_,x),y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (_,x,Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div (_,x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Pow (_,x,y) -> x.code+"^{"+y.code+"}"
+                |Exp(_,x) -> "\\exp\\left("+x.code+"\\right)"
+                |Sin(_,x) -> "\\sin\\left("+x.code+"\\right)"
+                |Cos(_,x) -> "\\cos\\left("+x.code+"\\right)"
+                |Tan(_,x) -> "\\tan\\left("+x.code+"\\right)"
+                |Asin(_,x) -> "\\asin\\left("+x.code+"\\right)"
+                |Acos(_,x) -> "\\acos\\left("+x.code+"\\right)"
+                |Atan(_,x) -> "\\atan\\left("+x.code+"\\right)"
+                |Atan2 (x,y) -> "\\atan2\\left("+x.code+","+y.code+"\\right)"
+                |Abs(_,x) -> "\\left|"+x.code+"\\right|"
+                |Log(_,x) -> "\\ln\\left("+x.code+"\\right)"
+                |Log10(_,x) -> "\\log\\left("+x.code+"\\right)"
+                |Sqrt(_,x) -> "\\sqrt{"+x.code+"}"
                 |NaN -> "NaN"
                 |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
@@ -154,21 +230,34 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Formula s -> s
+                |Formula(_,s) -> s
                 |_ ->
                     ""
             |F ->
                 match this with
-                |Var x -> x
+                |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par x -> "("+x.code+")"
-                |Inv x -> "-"+x.code
-                |Add (x,y) -> x.code+"+"+y.code
-                |Sub (x,y) -> x.code+"-"+y.code
-                |Mul (x,y) -> x.code+"*"+y.code
-                |Div (x,y) -> x.code+"/"+y.code
+                |Par(_,x) -> "("+x.code+")"
+                |Inv(_,x) -> "-"+x.code
+                |Add (_,x,y) -> x.code+"+"+y.code
+                |Sub (_,x,y) -> x.code+"-"+y.code
+                |Mul (_,x,y) -> x.code+"*"+y.code
+                |Div (_,x,y) -> x.code+"/"+y.code
+                |Pow (_,x,y) -> x.code+"**("+y.code+")"
+                |Exp(_,x) -> "exp("+x.code+")"
+                |Sin(_,x) -> "sin("+x.code+")"
+                |Cos(_,x) -> "cos("+x.code+")"
+                |Tan(_,x) -> "tan("+x.code+")"
+                |Asin(_,x) -> "asin("+x.code+")"
+                |Acos(_,x) -> "acos("+x.code+")"
+                |Atan(_,x) -> "atan("+x.code+")"
+                |Atan2 (x,y) -> "atan2("+x.code+","+y.code+")"
+                |Abs(_,x) -> "abs("+x.code+")"
+                |Log(_,x) -> "log("+x.code+")"
+                |Log10(_,x) -> "log10("+x.code+")"
+                |Sqrt(_,x) -> "sqrt("+x.code+")"
                 |NaN -> "NaN"
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
@@ -204,21 +293,42 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Formula s -> s
+                |Formula(_,s) -> s
                 |_ ->
                     ""
             |C ->
                 match this with
-                |Var x -> x
+                |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par x -> "("+x.code+")"
-                |Inv x -> "-"+x.code
-                |Add (x,y) -> x.code+"+"+y.code
-                |Sub (x,y) -> x.code+"-"+y.code
-                |Mul (x,y) -> x.code+"*"+y.code
-                |Div (x,y) -> x.code+"/"+y.code
+                |Par(_,x) -> "("+x.code+")"
+                |Inv(_,x) -> "-"+x.code
+                |Add (_,x,y) -> x.code+"+"+y.code
+                |Sub (_,x,y) -> x.code+"-"+y.code
+                |Mul (_,x,y) -> x.code+"*"+y.code
+                |Div (_,x,y) -> x.code+"/"+y.code
+                |Pow (Zt,x,y) -> "cpow("+x.code+","+y.code+")"
+                |Exp(Zt,x) -> "cexp("+x.code+")"
+                |Sin(Zt,x) -> "csin("+x.code+")"
+                |Cos(Zt,x) -> "ccos("+x.code+")"
+                |Tan(Zt,x) -> "ctan("+x.code+")"
+                |Asin(Zt,x) -> "casin("+x.code+")"
+                |Acos(Zt,x) -> "cacos("+x.code+")"
+                |Atan(Zt,x) -> "catan("+x.code+")"
+                |Pow (_,x,y) -> "pow("+x.code+","+y.code+")"
+                |Exp(_,x) -> "exp("+x.code+")"
+                |Sin(_,x) -> "sin("+x.code+")"
+                |Cos(_,x) -> "cos("+x.code+")"
+                |Tan(_,x) -> "tan("+x.code+")"
+                |Asin(_,x) -> "asin("+x.code+")"
+                |Acos(_,x) -> "acos("+x.code+")"
+                |Atan(_,x) -> "atan("+x.code+")"
+                |Atan2 (x,y) -> "atan2("+x.code+","+y.code+")"
+                |Abs(_,x) -> "abs("+x.code+")"
+                |Log(_,x) -> "log("+x.code+")"
+                |Log10(_,x) -> "log10("+x.code+")"
+                |Sqrt(_,x) -> "sqrt("+x.code+")"
                 |NaN -> "NaN"
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
@@ -252,21 +362,31 @@ namespace Aqualis
                     let code = List.fold cat "" [0..uc.Length-1]
                     //コード生成
                     code
-                |Formula s -> s
+                |Formula(_,s) -> s
                 |_ ->
                     ""
                     
+        ///<summary>優先度の高い型を選択</summary>
+        static member ( %% ) (x:Expr,y:Expr) = 
+            match x.etype,y.etype with
+            |Zt,(Zt|Dt|It _) -> Zt
+            |(Zt|Dt|It _),Zt -> Zt
+            |Dt,(Dt|It _) -> Dt
+            |(Dt|It _),Dt -> Dt
+            |It a,It b -> It (if a>b then a else b)
+            |_ -> Nt
+
         ///<summary>負号</summary>
         static member ( ~- ) (x:Expr) =
             match x with
             |Int_c 0|Dbl_c 0.0 -> x
             |Int_c x when x<0   -> (Int_c -x)
             |Dbl_c x when x<0.0 -> (Dbl_c -x)
-            |Inv(v) -> v
-            |Add _ -> Inv(Par x)
-            |Sub(x,y) -> y-x
-            |_ -> Inv(x)
-              
+            |Inv(_,v) -> v
+            |Add _ -> Inv(x.etype,Par(x.etype,x))
+            |Sub(_,x,y) -> y-x
+            |_ -> Inv(x.etype,x)
+            
         ///<summary>加算</summary>
         static member ( + ) (x:Expr,y:Expr) : Expr =
             if isEqSimplify then
@@ -278,19 +398,19 @@ namespace Aqualis
                 (* x+x *)
                 |v1,v2 when v1.code=v2.code -> (Int_c 2)*v1
                 (* (-x)+y *)
-                |Int_c x,_ when x<0   -> Inv(Int_c (-x)) + y
+                |Int_c x,_ when x<0   -> Inv(It 4,Int_c (-x)) + y
                 (* (-x)+y *)
-                |Dbl_c x,_ when x<0.0 -> Inv(Dbl_c (-x)) + y
+                |Dbl_c x,_ when x<0.0 -> Inv(Dt, Dbl_c (-x)) + y
                 (* x+(-y) *)
-                |_,Int_c y when y<0   -> x + Inv(Int_c (-y))
+                |_,Int_c y when y<0   -> x + Inv(It 4, Int_c (-y))
                 (* x+(-y) *)
-                |_,Dbl_c y when y<0.0 -> x + Inv(Dbl_c (-y))
+                |_,Dbl_c y when y<0.0 -> x + Inv(Dt, Dbl_c (-y))
                 (* (-x)+(-y) *)
-                |Inv(v1),Inv(v2) -> -(v1+v2)
+                |Inv(_,v1),Inv(_,v2) -> -(v1+v2)
                 (* x+(-y) *)
-                |_,Inv(v2) -> x-v2
+                |_,Inv(_,v2) -> x-v2
                 (* (-x)+y *)
-                |Inv(v1),_ -> y-v1
+                |Inv(_,v1),_ -> y-v1
                 (* x+[整数定数] *)
                 |_,Int_c v2 when v2<0   -> x-Int_c(-v2)
                 (* x+[小数定数] *)
@@ -304,77 +424,77 @@ namespace Aqualis
                 (* [小数定数]+[小数定数] *)
                 |Dbl_c v1,Dbl_c v2 -> Dbl_c(v1+v2)
                 (* [整数定数]+Add([整数定数],[]) *)
-                |Int_c v1,Add(Int_c v2,u2) -> (Int_c (v1+v2))+u2
+                |Int_c v1,Add(_,Int_c v2,u2) -> (Int_c (v1+v2))+u2
                 (* [小数定数]+Add([整数定数],[]) *)
-                |Dbl_c v1,Add(Int_c v2,u2) -> (Dbl_c (v1+double v2))+u2
+                |Dbl_c v1,Add(_,Int_c v2,u2) -> (Dbl_c (v1+double v2))+u2
                 (* [整数定数]+Add([小数定数],[]) *)
-                |Int_c v1,Add(Dbl_c v2,u2) -> (Dbl_c (double v1+v2))+u2
+                |Int_c v1,Add(_,Dbl_c v2,u2) -> (Dbl_c (double v1+v2))+u2
                 (* [小数定数]+Add([小数定数],[]) *)
-                |Dbl_c v1,Add(Dbl_c v2,u2) -> (Dbl_c (v1+v2))+u2
+                |Dbl_c v1,Add(_,Dbl_c v2,u2) -> (Dbl_c (v1+v2))+u2
                 (* [整数定数]+Add([],[整数定数]) *)
-                |Int_c v1,Add(u2,Int_c v2) -> u2+(Int_c (v1+v2))
+                |Int_c v1,Add(_,u2,Int_c v2) -> u2+(Int_c (v1+v2))
                 (* [小数定数]+Add([],[整数定数]) *)
-                |Dbl_c v1,Add(u2,Int_c v2) -> u2+(Dbl_c (v1+double v2))
+                |Dbl_c v1,Add(_,u2,Int_c v2) -> u2+(Dbl_c (v1+double v2))
                 (* [整数定数]+Add([],[小数定数]) *)
-                |Int_c v1,Add(u2,Dbl_c v2) -> u2+(Dbl_c (double v1+v2))
+                |Int_c v1,Add(_,u2,Dbl_c v2) -> u2+(Dbl_c (double v1+v2))
                 (* [小数定数]+Add([],[小数定数]) *)
-                |Dbl_c v1,Add(u2,Dbl_c v2) -> u2+(Dbl_c (v1+v2))
+                |Dbl_c v1,Add(_,u2,Dbl_c v2) -> u2+(Dbl_c (v1+v2))
                 (* Add([整数定数],[])+[整数定数] *)
-                |Add(Int_c v2,u2),Int_c v1 -> (Int_c (v1+v2))+u2
+                |Add(_,Int_c v2,u2),Int_c v1 -> (Int_c (v1+v2))+u2
                 (* Add([整数定数],[])+[小数定数] *)
-                |Add(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+double v2))+u2
+                |Add(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+double v2))+u2
                 (* Add([小数定数],[])+[整数定数] *)
-                |Add(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1+v2))+u2
+                |Add(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1+v2))+u2
                 (* Add([小数定数],[])+[小数定数] *)
-                |Add(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+v2))+u2
+                |Add(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+v2))+u2
                 (* Add([],[整数定数])+[整数定数] *)
-                |Add(u2,Int_c v2),Int_c v1 -> u2+(Int_c (v1+v2))
+                |Add(_,u2,Int_c v2),Int_c v1 -> u2+(Int_c (v1+v2))
                 (* Add([],[整数定数])+[小数定数] *)
-                |Add(u2,Int_c v2),Dbl_c v1 -> u2+(Dbl_c (v1+double v2))
+                |Add(_,u2,Int_c v2),Dbl_c v1 -> u2+(Dbl_c (v1+double v2))
                 (* Add([],[小数定数])+[整数定数] *)
-                |Add(u2,Dbl_c v2),Int_c v1 -> u2+(Dbl_c (double v1+v2))
+                |Add(_,u2,Dbl_c v2),Int_c v1 -> u2+(Dbl_c (double v1+v2))
                 (* Add([],[小数定数])+[小数定数] *)
-                |Add(u2,Dbl_c v2),Dbl_c v1 -> u2+(Dbl_c (v1+v2))
+                |Add(_,u2,Dbl_c v2),Dbl_c v1 -> u2+(Dbl_c (v1+v2))
                 (* [整数定数]+Sub([整数定数],[]) *)
-                |Int_c v1,Sub(Int_c v2,u2) -> (Int_c (v1+v2))-u2
+                |Int_c v1,Sub(_,Int_c v2,u2) -> (Int_c (v1+v2))-u2
                 (* [小数定数]+Sub([整数定数],[]) *)
-                |Dbl_c v1,Sub(Int_c v2,u2) -> (Dbl_c (v1+double v2))-u2
+                |Dbl_c v1,Sub(_,Int_c v2,u2) -> (Dbl_c (v1+double v2))-u2
                 (* [整数定数]+Sub([小数定数],[]) *)
-                |Int_c v1,Sub(Dbl_c v2,u2) -> (Dbl_c (double v1+v2))-u2
+                |Int_c v1,Sub(_,Dbl_c v2,u2) -> (Dbl_c (double v1+v2))-u2
                 (* [小数定数]+Sub([小数定数],[]) *)
-                |Dbl_c v1,Sub(Dbl_c v2,u2) -> (Dbl_c (v1+v2))-u2
+                |Dbl_c v1,Sub(_,Dbl_c v2,u2) -> (Dbl_c (v1+v2))-u2
                 (* [整数定数]+Sub([],[整数定数]) *)
-                |Int_c v1,Sub(u2,Int_c v2) -> u2+(Int_c (v1-v2))
+                |Int_c v1,Sub(_,u2,Int_c v2) -> u2+(Int_c (v1-v2))
                 (* [小数定数]+Sub([],[整数定数]) *)
-                |Dbl_c v1,Sub(u2,Int_c v2) -> u2+(Dbl_c (v1-double v2))
+                |Dbl_c v1,Sub(_,u2,Int_c v2) -> u2+(Dbl_c (v1-double v2))
                 (* [整数定数]+Sub([],[小数定数]) *)
-                |Int_c v1,Sub(u2,Dbl_c v2) -> u2+(Dbl_c (double v1-v2))
+                |Int_c v1,Sub(_,u2,Dbl_c v2) -> u2+(Dbl_c (double v1-v2))
                 (* [小数定数]+Sub([],[小数定数]) *)
-                |Dbl_c v1,Sub(u2,Dbl_c v2) -> u2+(Dbl_c (v1-v2))
+                |Dbl_c v1,Sub(_,u2,Dbl_c v2) -> u2+(Dbl_c (v1-v2))
                 (* Sub([整数定数],[])+[整数定数] *)
-                |Sub(Int_c v2,u2),Int_c v1 -> (Int_c (v1+v2))-u2
+                |Sub(_,Int_c v2,u2),Int_c v1 -> (Int_c (v1+v2))-u2
                 (* Sub([整数定数],[])+[小数定数] *)
-                |Sub(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+double v2))-u2
+                |Sub(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+double v2))-u2
                 (* Sub([小数定数],[])+[整数定数] *)
-                |Sub(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1+v2))-u2
+                |Sub(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1+v2))-u2
                 (* Sub([小数定数],[])+[小数定数] *)
-                |Sub(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+v2))-u2
+                |Sub(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1+v2))-u2
                 (* Sub([],[整数定数])+[整数定数] *)
-                |Sub(u2,Int_c v2),Int_c v1 -> u2+(Int_c (v1-v2))
+                |Sub(_,u2,Int_c v2),Int_c v1 -> u2+(Int_c (v1-v2))
                 (* Sub([],[整数定数])+[小数定数] *)
-                |Sub(u2,Int_c v2),Dbl_c v1 -> u2+(Dbl_c (v1-double v2))
+                |Sub(_,u2,Int_c v2),Dbl_c v1 -> u2+(Dbl_c (v1-double v2))
                 (* Sub([],[小数定数])+[整数定数] *)
-                |Sub(u2,Dbl_c v2),Int_c v1 -> u2+(Dbl_c (double v1-v2))
+                |Sub(_,u2,Dbl_c v2),Int_c v1 -> u2+(Dbl_c (double v1-v2))
                 (* Sub([],[小数定数])+[小数定数] *)
-                |Sub(u2,Dbl_c v2),Dbl_c v1 -> u2+(Dbl_c (v1-v2))
+                |Sub(_,u2,Dbl_c v2),Dbl_c v1 -> u2+(Dbl_c (v1-v2))
                 (* Par([])+[] *)
-                |Par(v1),v2 -> v1+v2
+                |Par(_,v1),v2 -> v1+v2
                 (* []+Par([]) *)
-                |v1,Par(v2) -> v1+v2
+                |v1,Par(_,v2) -> v1+v2
                 (* x+y *)
-                |_ -> Add(x,y)
+                |_ -> Add(x%%y,x,y)
             else
-                Add(x,y)
+                Add(x%%y,x,y)
                 
         ///<summary>減算</summary>
         static member ( - ) (x:Expr,y:Expr) : Expr =
@@ -387,13 +507,13 @@ namespace Aqualis
                 (* x-x *)
                 |v1,v2 when v1.code=v2.code -> Int_c 0
                 (* (-x)-y *)
-                |Int_c x,_ when x<0   -> Inv(Int_c (-x)) - y
+                |Int_c x,_ when x<0   -> Inv(It 4,Int_c (-x)) - y
                 (* (-x)-y *)
-                |Dbl_c x,_ when x<0.0 -> Inv(Dbl_c (-x)) - y
+                |Dbl_c x,_ when x<0.0 -> Inv(Dt,Dbl_c (-x)) - y
                 (* x-(-y) *)
-                |_,Int_c y when y<0   -> x - Inv(Int_c (-y))
+                |_,Int_c y when y<0   -> x - Inv(It 4,Int_c (-y))
                 (* x-(-y) *)
-                |_,Dbl_c y when y<0.0 -> x - Inv(Dbl_c (-y))
+                |_,Dbl_c y when y<0.0 -> x - Inv(Dt,Dbl_c (-y))
                 (* x-[整数定数] *)
                 |_,Int_c v2 when v2<0   -> x+Int_c(-v2)
                 (* x-[小数定数] *)
@@ -407,83 +527,83 @@ namespace Aqualis
                 (* [小数定数]-[小数定数] *)
                 |Dbl_c v1,Dbl_c v2 -> Dbl_c(v1-v2)
                 (* (-x)-(-y) *)
-                |Inv(x),Inv(y) -> y-x
+                |Inv(_,x),Inv(_,y) -> y-x
                 (* (-x)-y *)
-                |Inv(x),_ -> -(x+y)
+                |Inv(_,x),_ -> -(x+y)
                 (* x-(-y) *)
-                |_,Inv(y) -> x+y
+                |_,Inv(_,y) -> x+y
                 (* [整数定数]-Add([整数定数],[]) *)
-                |Int_c v1,Add(Int_c v2,u2) -> (Int_c (v1-v2))-u2
+                |Int_c v1,Add(_,Int_c v2,u2) -> (Int_c (v1-v2))-u2
                 (* [小数定数]-Add([整数定数],[]) *)
-                |Dbl_c v1,Add(Int_c v2,u2) -> (Dbl_c (v1-double v2))-u2
+                |Dbl_c v1,Add(_,Int_c v2,u2) -> (Dbl_c (v1-double v2))-u2
                 (* [整数定数]-Add([小数定数],[]) *)
-                |Int_c v1,Add(Dbl_c v2,u2) -> (Dbl_c (double v1-v2))-u2
+                |Int_c v1,Add(_,Dbl_c v2,u2) -> (Dbl_c (double v1-v2))-u2
                 (* [小数定数]-Add([小数定数],[]) *)
-                |Dbl_c v1,Add(Dbl_c v2,u2) -> (Dbl_c (v1-v2))-u2
+                |Dbl_c v1,Add(_,Dbl_c v2,u2) -> (Dbl_c (v1-v2))-u2
                 (* [整数定数]-Add([],[整数定数]) *)
-                |Int_c v1,Add(u2,Int_c v2) -> (Int_c (v1-v2))-u2
+                |Int_c v1,Add(_,u2,Int_c v2) -> (Int_c (v1-v2))-u2
                 (* [小数定数]-Add([],[整数定数]) *)
-                |Dbl_c v1,Add(u2,Int_c v2) -> (Dbl_c (v1-double v2))-u2
+                |Dbl_c v1,Add(_,u2,Int_c v2) -> (Dbl_c (v1-double v2))-u2
                 (* [整数定数]-Add([],[小数定数]) *)
-                |Int_c v1,Add(u2,Dbl_c v2) -> (Dbl_c (double v1-v2))-u2
+                |Int_c v1,Add(_,u2,Dbl_c v2) -> (Dbl_c (double v1-v2))-u2
                 (* [小数定数]-Add([],[小数定数]) *)
-                |Dbl_c v1,Add(u2,Dbl_c v2) -> (Dbl_c (v1-v2))-u2
+                |Dbl_c v1,Add(_,u2,Dbl_c v2) -> (Dbl_c (v1-v2))-u2
                 (* Add([整数定数],[])-[整数定数] *)
-                |Add(Int_c v2,u2),Int_c v1 -> (Int_c (v2-v1))+u2
+                |Add(_,Int_c v2,u2),Int_c v1 -> (Int_c (v2-v1))+u2
                 (* Add([整数定数],[])-[小数定数] *)
-                |Add(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2-v1))+u2
+                |Add(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2-v1))+u2
                 (* Add([小数定数],[])-[整数定数] *)
-                |Add(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2-double v1))+u2
+                |Add(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2-double v1))+u2
                 (* Add([小数定数],[])-[小数定数] *)
-                |Add(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2-v1))+u2
+                |Add(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2-v1))+u2
                 (* Add([],[整数定数])-[整数定数] *)
-                |Add(u2,Int_c v2),Int_c v1 -> u2+(Int_c (v2-v1))
+                |Add(_,u2,Int_c v2),Int_c v1 -> u2+(Int_c (v2-v1))
                 (* Add([],[整数定数])-[小数定数] *)
-                |Add(u2,Int_c v2),Dbl_c v1 -> u2+(Dbl_c (double v2-v1))
+                |Add(_,u2,Int_c v2),Dbl_c v1 -> u2+(Dbl_c (double v2-v1))
                 (* Add([],[小数定数])-[整数定数] *)
-                |Add(u2,Dbl_c v2),Int_c v1 -> u2+(Dbl_c (v2-double v1))
+                |Add(_,u2,Dbl_c v2),Int_c v1 -> u2+(Dbl_c (v2-double v1))
                 (* Add([],[小数定数])-[小数定数] *)
-                |Add(u2,Dbl_c v2),Dbl_c v1 -> u2+(Dbl_c (v2-v1))
+                |Add(_,u2,Dbl_c v2),Dbl_c v1 -> u2+(Dbl_c (v2-v1))
                 (* [整数定数]-Sub([整数定数],[]) *)
-                |Int_c v1,Sub(Int_c v2,u2) -> u2+(Int_c (v1-v2))
+                |Int_c v1,Sub(_,Int_c v2,u2) -> u2+(Int_c (v1-v2))
                 (* [小数定数]-Sub([整数定数],[]) *)
-                |Dbl_c v1,Sub(Int_c v2,u2) -> u2+(Dbl_c (v1-double v2))
+                |Dbl_c v1,Sub(_,Int_c v2,u2) -> u2+(Dbl_c (v1-double v2))
                 (* [整数定数]-Sub([小数定数],[]) *)
-                |Int_c v1,Sub(Dbl_c v2,u2) -> u2+(Dbl_c (double v1-v2))
+                |Int_c v1,Sub(_,Dbl_c v2,u2) -> u2+(Dbl_c (double v1-v2))
                 (* [小数定数]-Sub([小数定数],[]) *)
-                |Dbl_c v1,Sub(Dbl_c v2,u2) -> u2+(Dbl_c (v1-v2))
+                |Dbl_c v1,Sub(_,Dbl_c v2,u2) -> u2+(Dbl_c (v1-v2))
                 (* [整数定数]-Sub([],[整数定数]) *)
-                |Int_c v1,Sub(u2,Int_c v2) -> (Int_c (v1+v2))-u2
+                |Int_c v1,Sub(_,u2,Int_c v2) -> (Int_c (v1+v2))-u2
                 (* [小数定数]-Sub([],[整数定数]) *)
-                |Dbl_c v1,Sub(u2,Int_c v2) -> (Dbl_c (v1+double v2))-u2
+                |Dbl_c v1,Sub(_,u2,Int_c v2) -> (Dbl_c (v1+double v2))-u2
                 (* [整数定数]-Sub([],[小数定数]) *)
-                |Int_c v1,Sub(u2,Dbl_c v2) -> (Dbl_c (double v1+v2))-u2
+                |Int_c v1,Sub(_,u2,Dbl_c v2) -> (Dbl_c (double v1+v2))-u2
                 (* [小数定数]-Sub([],[小数定数]) *)
-                |Dbl_c v1,Sub(u2,Dbl_c v2) -> (Dbl_c (v1+v2))-u2
+                |Dbl_c v1,Sub(_,u2,Dbl_c v2) -> (Dbl_c (v1+v2))-u2
                 (* Sub([整数定数],[])-[整数定数] *)
-                |Sub(Int_c v2,u2),Int_c v1 -> (Int_c (v2-v1))-u2
+                |Sub(_,Int_c v2,u2),Int_c v1 -> (Int_c (v2-v1))-u2
                 (* Sub([整数定数],[])-[小数定数] *)
-                |Sub(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2-v1))-u2
+                |Sub(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2-v1))-u2
                 (* Sub([小数定数],[])-[整数定数] *)
-                |Sub(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2-double v1))-u2
+                |Sub(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2-double v1))-u2
                 (* Sub([小数定数],[])-[小数定数] *)
-                |Sub(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2-v1))-u2
+                |Sub(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2-v1))-u2
                 (* Sub([],[整数定数])-[整数定数] *)
-                |Sub(u2,Int_c v2),Int_c v1 -> u2-(Int_c (v1+v2))
+                |Sub(_,u2,Int_c v2),Int_c v1 -> u2-(Int_c (v1+v2))
                 (* Sub([],[整数定数])-[小数定数] *)
-                |Sub(u2,Int_c v2),Dbl_c v1 -> u2-(Dbl_c (v1+double v2))
+                |Sub(_,u2,Int_c v2),Dbl_c v1 -> u2-(Dbl_c (v1+double v2))
                 (* Sub([],[小数定数])-[整数定数] *)
-                |Sub(u2,Dbl_c v2),Int_c v1 -> u2-(Dbl_c (double v1+v2))
+                |Sub(_,u2,Dbl_c v2),Int_c v1 -> u2-(Dbl_c (double v1+v2))
                 (* Sub([],[小数定数])-[小数定数] *)
-                |Sub(u2,Dbl_c v2),Dbl_c v1 -> u2-(Dbl_c (v1+v2))
+                |Sub(_,u2,Dbl_c v2),Dbl_c v1 -> u2-(Dbl_c (v1+v2))
                 (* x-(y1+y2) *)
-                |_,Add(y1,y2) -> x-y1-y2
+                |_,Add(_,y1,y2) -> x-y1-y2
                 (* x-(y1-y2) *)
-                |_,Sub(y1,y2) -> x-y1+y2
+                |_,Sub(_,y1,y2) -> x-y1+y2
                 (* x-y *)
-                |_ -> Sub(x,y)
+                |_ -> Sub(x%%y,x,y)
             else
-                Sub(x,y)
+                Sub(x%%y,x,y)
                 
         ///<summary>乗算</summary>
         static member ( * ) (x:Expr,y:Expr) : Expr =
@@ -496,13 +616,13 @@ namespace Aqualis
                 (* x*1 *)
                 |_,Int_c 1|_,Dbl_c 1.0 -> x
                 (* (-x)*y *)
-                |Int_c x,_ when x<0   -> Inv(Int_c (-x)) * y
+                |Int_c x,_ when x<0   -> Inv(It 4,Int_c (-x)) * y
                 (* (-x)*y *)
-                |Dbl_c x,_ when x<0.0 -> Inv(Dbl_c (-x)) * y
+                |Dbl_c x,_ when x<0.0 -> Inv(Dt,Dbl_c (-x)) * y
                 (* x*(-y) *)
-                |_,Int_c y when y<0   -> x * Inv(Int_c (-y))
+                |_,Int_c y when y<0   -> x * Inv(It 4,Int_c (-y))
                 (* x*(-y) *)
-                |_,Dbl_c y when y<0.0 -> x * Inv(Dbl_c (-y))
+                |_,Dbl_c y when y<0.0 -> x * Inv(Dt,Dbl_c (-y))
                 (* [負の整数定数]*y *)
                 |Int_c x,_ when x<0   -> -(Int_c (-x)*y)
                 (* [負の小数定数]*y *)
@@ -512,11 +632,11 @@ namespace Aqualis
                 (* x*[負の小数定数] *)
                 |_,Dbl_c y when y<0.0 -> -(x*Dbl_c (-y))
                 (* (-x)*(-y) *)
-                |Inv(x),Inv(y) -> x*y
+                |Inv(_,x),Inv(_,y) -> x*y
                 (* x*(-y) *)
-                |_,Inv(y) -> -(x*y)
+                |_,Inv(_,y) -> -(x*y)
                 (* (-x)*y *)
-                |Inv(x),_ -> -(x*y)
+                |Inv(_,x),_ -> -(x*y)
                 (* [整数定数]*[整数定数] *)
                 |Int_c x,Int_c y -> Int_c(x*y)
                 (* [整数定数]*[小数定数] *)
@@ -526,45 +646,45 @@ namespace Aqualis
                 (* [小数定数]*[小数定数] *)
                 |Dbl_c x,Dbl_c y -> Dbl_c(x*y)
                 (* [整数定数]*Mul([整数定数],[]) *)
-                |Int_c v1,Mul(Int_c v2,u2) -> (Int_c (v1*v2))*u2
+                |Int_c v1,Mul(_,Int_c v2,u2) -> (Int_c (v1*v2))*u2
                 (* [整数定数]*Mul([小数定数],[]) *)
-                |Int_c v1,Mul(Dbl_c v2,u2) -> (Dbl_c (double v1*v2))*u2
+                |Int_c v1,Mul(_,Dbl_c v2,u2) -> (Dbl_c (double v1*v2))*u2
                 (* [小数定数]*Mul([整数定数],[]) *)
-                |Dbl_c v1,Mul(Int_c v2,u2) -> (Dbl_c (v1*double v2))*u2
+                |Dbl_c v1,Mul(_,Int_c v2,u2) -> (Dbl_c (v1*double v2))*u2
                 (* [小数定数]*Mul([小数定数],[]) *)
-                |Dbl_c v1,Mul(Dbl_c v2,u2) -> (Dbl_c (v1*v2))*u2
+                |Dbl_c v1,Mul(_,Dbl_c v2,u2) -> (Dbl_c (v1*v2))*u2
                 (* Mul([整数定数],[])*[整数定数] *)
-                |Mul(Int_c v2,u2),Int_c v1 -> (Int_c (v1*v2))*u2
+                |Mul(_,Int_c v2,u2),Int_c v1 -> (Int_c (v1*v2))*u2
                 (* Mul([整数定数],[])*[小数定数] *)
-                |Mul(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*double v2))*u2
+                |Mul(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*double v2))*u2
                 (* Mul([小数定数],[])*[整数定数] *)
-                |Mul(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1*v2))*u2
+                |Mul(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1*v2))*u2
                 (* Mul([小数定数],[])*[小数定数] *)
-                |Mul(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*v2))*u2
+                |Mul(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*v2))*u2
                 (* [整数定数]*Div([整数定数],[]) *)
-                |Int_c v1,Div(Int_c v2,u2) -> (Int_c (v1*v2))/u2
+                |Int_c v1,Div(_,Int_c v2,u2) -> (Int_c (v1*v2))/u2
                 (* [整数定数]*Div([小数定数],[]) *)
-                |Int_c v1,Div(Dbl_c v2,u2) -> (Dbl_c (double v1*v2))/u2
+                |Int_c v1,Div(_,Dbl_c v2,u2) -> (Dbl_c (double v1*v2))/u2
                 (* [小数定数]*Div([整数定数],[]) *)
-                |Dbl_c v1,Div(Int_c v2,u2) -> (Dbl_c (v1*double v2))/u2
+                |Dbl_c v1,Div(_,Int_c v2,u2) -> (Dbl_c (v1*double v2))/u2
                 (* [小数定数]*Div([小数定数],[]) *)
-                |Dbl_c v1,Div(Dbl_c v2,u2) -> (Dbl_c (v1*v2))/u2
+                |Dbl_c v1,Div(_,Dbl_c v2,u2) -> (Dbl_c (v1*v2))/u2
                 (* Div([整数定数],[])*[整数定数] *)
-                |Div(Int_c v2,u2),Int_c v1 -> (Int_c (v1*v2))/u2
+                |Div(_,Int_c v2,u2),Int_c v1 -> (Int_c (v1*v2))/u2
                 (* Div([整数定数],[])*[小数定数] *)
-                |Div(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*double v2))/u2
+                |Div(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*double v2))/u2
                 (* Div([小数定数],[])*[整数定数] *)
-                |Div(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1*v2))/u2
+                |Div(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (double v1*v2))/u2
                 (* Div([小数定数],[])*[小数定数] *)
-                |Div(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*v2))/u2
+                |Div(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*v2))/u2
                 (* x*(y1+y2) or x*(y1-y2) *)
-                |_,(Add _|Sub _) -> x*Par(y)
+                |_,(Add _|Sub _) -> x*Par(y.etype,y)
                 (* (x1+x2)*y or (x1-x2)*y *)
-                |(Add _|Sub _),_ -> Par(x)*y
+                |(Add _|Sub _),_ -> Par(x.etype,x)*y
                 (* x*y *)
-                |_ -> Mul(x,y)
+                |_ -> Mul(x%%y,x,y)
             else
-                Mul(x,y)
+                Mul(x%%y,x,y)
                 
         ///<summary>除算</summary>
         static member ( / ) (x:Expr,y:Expr) : Expr =
@@ -584,13 +704,13 @@ namespace Aqualis
                 (* x/x *)
                 |v1,v2 when v1.code=v2.code -> Int_c 1
                 (* (-x)/y *)
-                |Int_c x,_ when x<0   -> Inv(Int_c (-x)) / y
+                |Int_c x,_ when x<0   -> Inv(It 4,Int_c (-x)) / y
                 (* (-x)/y *)
-                |Dbl_c x,_ when x<0.0 -> Inv(Dbl_c (-x)) / y
+                |Dbl_c x,_ when x<0.0 -> Inv(Dt,Dbl_c (-x)) / y
                 (* x/(-y) *)
-                |_,Int_c y when y<0   -> x / Inv(Int_c (-y))
+                |_,Int_c y when y<0   -> x / Inv(It 4,Int_c (-y))
                 (* x/(-y) *)
-                |_,Dbl_c y when y<0.0 -> x / Inv(Dbl_c (-y))
+                |_,Dbl_c y when y<0.0 -> x / Inv(Dt,Dbl_c (-y))
                 (* [整数]/[整数] 剰余0 *)
                 |Int_c x,Int_c y when x%y=0 -> Int_c (x/y)
                 (* [整数]/[整数] *)
@@ -628,95 +748,95 @@ namespace Aqualis
                 (* x/[負の整数定数] *)
                 |_,Int_c y when y<0 -> -(x/Int_c (-y))
                 (* (-x)/(-y) *)
-                |Inv(x),Inv(y) -> x/y
+                |Inv(_,x),Inv(_,y) -> x/y
                 (* x/(-y) *)
-                |_,Inv(y) -> -(x/y)
+                |_,Inv(_,y) -> -(x/y)
                 (* (-x)/y *)
-                |Inv(x),_ -> -(x/y)
+                |Inv(_,x),_ -> -(x/y)
                 (* [整数定数]/Mul([整数定数],[]) *)
-                |Int_c v1,Mul(Int_c v2,u2) when v1%v2=0 -> (Int_c (v1/v2))/u2
+                |Int_c v1,Mul(_,Int_c v2,u2) when v1%v2=0 -> (Int_c (v1/v2))/u2
                 (* [整数定数]/Mul([],[整数定数]) *)
-                |Int_c v1,Mul(v2,Int_c u2) when v1%u2=0 -> (Int_c (v1/u2))/v2
+                |Int_c v1,Mul(_,v2,Int_c u2) when v1%u2=0 -> (Int_c (v1/u2))/v2
                 (* [整数定数]/Mul([整数定数],[]) *)
-                |Int_c v1,Mul(Int_c v2,u2) -> (Dbl_c (double v1/double v2))/u2
+                |Int_c v1,Mul(_,Int_c v2,u2) -> (Dbl_c (double v1/double v2))/u2
                 (* [整数定数]/Mul([],[整数定数]) *)
-                |Int_c v1,Mul(v2,Int_c u2) -> (Dbl_c (double v1/double u2))/v2
+                |Int_c v1,Mul(_,v2,Int_c u2) -> (Dbl_c (double v1/double u2))/v2
                 (* [整数定数]/Mul([小数定数],[]) *)
-                |Int_c v1,Mul(Dbl_c v2,u2) -> (Dbl_c (double v1/v2))/u2
+                |Int_c v1,Mul(_,Dbl_c v2,u2) -> (Dbl_c (double v1/v2))/u2
                 (* [整数定数]/Mul([],[小数定数]) *)
-                |Int_c v1,Mul(v2,Dbl_c u2) -> (Dbl_c (double v1/u2))/v2
+                |Int_c v1,Mul(_,v2,Dbl_c u2) -> (Dbl_c (double v1/u2))/v2
                 (* [小数定数]/Mul([整数定数],[]) *)
-                |Dbl_c v1,Mul(Int_c v2,u2) -> (Dbl_c (v1/double v2))/u2
+                |Dbl_c v1,Mul(_,Int_c v2,u2) -> (Dbl_c (v1/double v2))/u2
                 (* [小数定数]/Mul([],[整数定数]) *)
-                |Dbl_c v1,Mul(v2,Int_c u2) -> (Dbl_c (v1/double u2))/v2
+                |Dbl_c v1,Mul(_,v2,Int_c u2) -> (Dbl_c (v1/double u2))/v2
                 (* [小数定数]/Mul([小数定数],[]) *)
-                |Dbl_c v1,Mul(Dbl_c v2,u2) -> (Dbl_c (v1/v2))/u2
+                |Dbl_c v1,Mul(_,Dbl_c v2,u2) -> (Dbl_c (v1/v2))/u2
                 (* [小数定数]/Mul([],[小数定数]) *)
-                |Dbl_c v1,Mul(v2,Dbl_c u2) -> (Dbl_c (v1/u2))/v2
+                |Dbl_c v1,Mul(_,v2,Dbl_c u2) -> (Dbl_c (v1/u2))/v2
                 (* Mul([整数定数],[])/[整数定数] *)
-                |Mul(Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))*u2
+                |Mul(_,Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))*u2
                 (* Mul([],[整数定数])/[整数定数] *)
-                |Mul(v2,Int_c u2),Int_c v1 when u2%v1=0 -> v2*(Int_c (u2/v1))
+                |Mul(_,v2,Int_c u2),Int_c v1 when u2%v1=0 -> v2*(Int_c (u2/v1))
                 (* Mul([整数定数],[])/[整数定数] *)
-                |Mul(Int_c v2,u2),Int_c v1 -> (Dbl_c (double v2/double v1))*u2
+                |Mul(_,Int_c v2,u2),Int_c v1 -> (Dbl_c (double v2/double v1))*u2
                 (* Mul([],[整数定数])/[整数定数] *)
-                |Mul(v2,Int_c u2),Int_c v1 -> v2*(Dbl_c (double u2/double v1))
+                |Mul(_,v2,Int_c u2),Int_c v1 -> v2*(Dbl_c (double u2/double v1))
                 (* Mul([整数定数],[])/[小数定数] *)
-                |Mul(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2/v1))*u2
+                |Mul(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2/v1))*u2
                 (* Mul([],[整数定数])/[小数定数] *)
-                |Mul(v2,Int_c u2),Dbl_c v1 -> v2*(Dbl_c (double u2/v1))
+                |Mul(_,v2,Int_c u2),Dbl_c v1 -> v2*(Dbl_c (double u2/v1))
                 (* Mul([小数定数],[])/[整数定数] *)
-                |Mul(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2/double v1))*u2
+                |Mul(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2/double v1))*u2
                 (* Mul([],[小数定数])/[整数定数] *)
-                |Mul(v2,Dbl_c u2),Int_c v1 -> v2*(Dbl_c (u2/double v1))
+                |Mul(_,v2,Dbl_c u2),Int_c v1 -> v2*(Dbl_c (u2/double v1))
                 (* Mul([小数定数],[])/[小数定数] *)
-                |Mul(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2/v1))*u2
+                |Mul(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2/v1))*u2
                 (* Mul([],[小数定数])/[小数定数] *)
-                |Mul(v2,Dbl_c u2),Dbl_c v1 -> v2*(Dbl_c (u2/v1))
+                |Mul(_,v2,Dbl_c u2),Dbl_c v1 -> v2*(Dbl_c (u2/v1))
                 (* [整数定数]/Div([整数定数],[]) *)
-                |Int_c v1,Div(Int_c v2,u2) when v1%v2=0 -> (Int_c (v1/v2))*u2
+                |Int_c v1,Div(_,Int_c v2,u2) when v1%v2=0 -> (Int_c (v1/v2))*u2
                 (* [整数定数]/Div([],[整数定数]) *)
-                |Int_c v1,Div(v2,Int_c u2) -> (Int_c (v1*u2))/v2
+                |Int_c v1,Div(_,v2,Int_c u2) -> (Int_c (v1*u2))/v2
                 (* [整数定数]/Div([整数定数],[]) *)
-                |Int_c v1,Div(Int_c v2,u2) -> (Dbl_c (double v1/double v2))*u2
+                |Int_c v1,Div(_,Int_c v2,u2) -> (Dbl_c (double v1/double v2))*u2
                 (* [整数定数]/Div([小数定数],[]) *)
-                |Int_c v1,Div(Dbl_c v2,u2) -> (Dbl_c (double v1/v2))*u2
+                |Int_c v1,Div(_,Dbl_c v2,u2) -> (Dbl_c (double v1/v2))*u2
                 (* [整数定数]/Div([],[小数定数]) *)
-                |Int_c v1,Div(v2,Dbl_c u2) -> (Dbl_c (double v1*u2))/v2
+                |Int_c v1,Div(_,v2,Dbl_c u2) -> (Dbl_c (double v1*u2))/v2
                 (* [小数定数]/Div([整数定数],[]) *)
-                |Dbl_c v1,Div(Int_c v2,u2) -> (Dbl_c (v1/double v2))*u2
+                |Dbl_c v1,Div(_,Int_c v2,u2) -> (Dbl_c (v1/double v2))*u2
                 (* [小数定数]/Div([],[整数定数]) *)
-                |Dbl_c v1,Div(v2,Int_c u2) -> (Dbl_c (v1*double u2))/v2
+                |Dbl_c v1,Div(_,v2,Int_c u2) -> (Dbl_c (v1*double u2))/v2
                 (* [小数定数]/Div([小数定数],[]) *)
-                |Dbl_c v1,Div(Dbl_c v2,u2) -> (Dbl_c (v1/v2))*u2
+                |Dbl_c v1,Div(_,Dbl_c v2,u2) -> (Dbl_c (v1/v2))*u2
                 (* [小数定数]/Div([],[小数定数]) *)
-                |Dbl_c v1,Div(v2,Dbl_c u2) -> (Dbl_c (v1*u2))/v2
+                |Dbl_c v1,Div(_,v2,Dbl_c u2) -> (Dbl_c (v1*u2))/v2
                 (* Div([整数定数],[])/[整数定数] *)
-                |Div(Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))/u2
+                |Div(_,Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))/u2
                 (* Div([],[整数定数])/[整数定数] *)
-                |Div(v2,Int_c u2),Int_c v1 -> v2/(Int_c (u2*v1))
+                |Div(_,v2,Int_c u2),Int_c v1 -> v2/(Int_c (u2*v1))
                 (* Div([整数定数],[])/[整数定数] *)
-                |Div(Int_c v2,u2),Int_c v1 -> (Dbl_c (double v2/double v1))/u2
+                |Div(_,Int_c v2,u2),Int_c v1 -> (Dbl_c (double v2/double v1))/u2
                 (* Div([整数定数],[])/[小数定数] *)
-                |Div(Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2/v1))/u2
+                |Div(_,Int_c v2,u2),Dbl_c v1 -> (Dbl_c (double v2/v1))/u2
                 (* Div([],[整数定数])/[小数定数] *)
-                |Div(v2,Int_c u2),Dbl_c v1 -> v2/(Dbl_c (double u2*v1))
+                |Div(_,v2,Int_c u2),Dbl_c v1 -> v2/(Dbl_c (double u2*v1))
                 (* Div([小数定数],[])/[整数定数] *)
-                |Div(Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2/double v1))/u2
+                |Div(_,Dbl_c v2,u2),Int_c v1 -> (Dbl_c (v2/double v1))/u2
                 (* Div([],[小数定数])/[整数定数] *)
-                |Div(v2,Dbl_c u2),Int_c v1 -> v2/(Dbl_c (u2*double v1))
+                |Div(_,v2,Dbl_c u2),Int_c v1 -> v2/(Dbl_c (u2*double v1))
                 (* Div([小数定数],[])/[小数定数] *)
-                |Div(Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2/v1))/u2
+                |Div(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v2/v1))/u2
                 (* Div([],[小数定数])/[小数定数] *)
-                |Div(v2,Dbl_c u2),Dbl_c v1 -> v2/(Dbl_c (u2*v1))
+                |Div(_,v2,Dbl_c u2),Dbl_c v1 -> v2/(Dbl_c (u2*v1))
                 (* x/(y1+y2+…) or x/(y1-y2) or x/(y1*y2) or x/(y1/y2) *)
-                |_,(Add _|Sub _|Mul _|Div _) -> x/Par(y)
+                |_,(Add _|Sub _|Mul _|Div _) -> x/Par(y.etype,y)
                 (* (x1+x2+…)/y or (x1-x2)/y *)
-                |(Add _|Sub _),_ -> Par(x)/y
+                |(Add _|Sub _),_ -> Par(x.etype,x)/y
                 (* x/y *)
-                |_ -> Div(x,y)
+                |_ -> Div(x%%y,x,y)
             else
-                Div(x,y)
+                Div(x%%y,x,y)
                 
         ///<summary>整数同士の除算(剰余無視)</summary>
         static member ( ./ ) (x:Expr,y:Expr) : Expr =
@@ -730,17 +850,17 @@ namespace Aqualis
                 |Int_c v1,_ when v1<0   -> -(Int_c (-v1)/y)
                 |_,Int_c v2 when v2<0   -> -(x/Int_c (-v2))
                 |Int_c v1,Int_c v2 -> Int_c(v1/v2)
-                |Inv(v1),Inv(v2) -> (v1/v2)
-                |_,Inv(v2) -> -(x/v2)
-                |Inv(v1),_ -> -(v1/y)
-                |Mul(Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))*u2
-                |Mul(v2,Int_c u2),Int_c v1 when u2%v1=0 -> v2*(Int_c (u2/v1))
-                |_,(Add _|Sub _|Mul _|Div _) -> x./Par(y)
-                |(Add _|Sub _),_ -> Par(x)./y
-                |_ -> Div(x,y)
+                |Inv(_,v1),Inv(_,v2) -> (v1/v2)
+                |_,Inv(_,v2) -> -(x/v2)
+                |Inv(_,v1),_ -> -(v1/y)
+                |Mul(_,Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))*u2
+                |Mul(_,v2,Int_c u2),Int_c v1 when u2%v1=0 -> v2*(Int_c (u2/v1))
+                |_,(Add _|Sub _|Mul _|Div _) -> x./Par(y.etype,y)
+                |(Add _|Sub _),_ -> Par(x.etype,x)./y
+                |_ -> Div(x%%y,x,y)
             else
-              Div(x,y)
-
+              Div(x%%y,x,y)
+              
         ///<summary>剰余</summary>
         static member ( % ) (x:Expr,y:Expr) : Expr =
                 match isEqSimplify,x,y with
@@ -750,14 +870,14 @@ namespace Aqualis
                 |true,Int_c v1,_ when v1<0   -> -((Int_c (-v1))%y)
                 |true,_,Int_c v2 when v2<0   -> (x%(Int_c (-v2)))
                 |true,Int_c v1,Int_c v2 -> Int_c(v1%v2)
-                |true,_,(Add _|Sub _|Mul _|Div _) -> x%Par(y)
-                |true,(Add _|Sub _),_ -> Par(x) % y
+                |true,_,(Add _|Sub _|Mul _|Div _) -> x%Par(y.etype,y)
+                |true,(Add _|Sub _),_ -> Par(x.etype,x) % y
                 |_ ->
                     match p.lang with
-                    |F -> Formula <| "mod("+x.code+","+y.code+")"
-                    |C -> Formula <| x.code+"%"+y.code
-                    |H -> Formula <| "\\mathrm{mod}("+x.code+","+y.code+")"
-                    |T -> Formula <| "\\mathrm{mod}("+x.code+","+y.code+")"
+                    |F -> Formula (It 4, "mod("+x.code+","+y.code+")")
+                    |C -> Formula (It 4, x.code+"%"+y.code)
+                    |H -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
+                    |T -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
                     
         ///<summary>累乗</summary>
         static member pow(x:Expr, y:Expr) =
@@ -777,30 +897,30 @@ namespace Aqualis
             (* [小数定数]^[小数定数] *)
             |(F|C),Dbl_c v1,Dbl_c v2 -> Dbl_c(v1**v2)
             (* [負の整数定数]^y *)
-            |_,Int_c v1,_ when v1<0 -> Expr.pow(Par(x),y)
+            |_,Int_c v1,_ when v1<0 -> Expr.pow(Par(x.etype,x),y)
             (* [負の小数定数]^y *)
-            |_,Dbl_c v1,_ when v1<0.0 -> Expr.pow(Par(x),y)
+            |_,Dbl_c v1,_ when v1<0.0 -> Expr.pow(Par(x.etype,x),y)
             (* x^[負の整数定数] *)
             |T,_,Int_c v2 when v2<0 -> Expr.pow(x,y)
-            |_,_,Int_c v2 when v2<0 -> Expr.pow(x,Par(y))
+            |_,_,Int_c v2 when v2<0 -> Expr.pow(x,Par(y.etype,y))
             (* x^[負の小数定数] *)
             |T,_,Dbl_c v2 when v2<0.0 -> Expr.pow(x,y)
-            |_,_,Dbl_c v2 when v2<0.0 -> Expr.pow(x,Par(y))
+            |_,_,Dbl_c v2 when v2<0.0 -> Expr.pow(x,Par(y.etype,y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) 
                y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-            |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> Expr.pow(Par(x),y)
-            |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> Expr.pow(Par(x),Par(y))
+            |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> Expr.pow(Par(x.etype,x),y)
+            |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> Expr.pow(Par(x.etype,x),Par(y.etype,y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) *)
-            |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> Expr.pow(Par(x),y)
+            |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> Expr.pow(Par(x.etype,x),y)
             (* y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-            |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> Expr.pow(x,Par(y))
+            |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> Expr.pow(x,Par(y.etype,y))
             (* x^y *)
             |_ -> 
                 match p.lang with
-                |F -> Formula <| x.code+"**"+y.code
-                |C -> Formula <| "pow("+x.code+","+y.code+")"
-                |H -> Formula <| x.code+"^{"+y.code+"}"
-                |T -> Formula <| x.code+"^{"+y.code+"}"
+                |F -> Formula(x%%y, x.code+"**"+y.code)
+                |C -> Formula(x%%y, "pow("+x.code+","+y.code+")")
+                |H -> Formula(x%%y, x.code+"^{"+y.code+"}")
+                |T -> Formula(x%%y, x.code+"^{"+y.code+"}")
                 
         ///<summary>等号</summary>
         static member (.=) (v1:Expr,v2:Expr) = Eq(v1,v2)

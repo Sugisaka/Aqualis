@@ -127,9 +127,9 @@ namespace Aqualis
         member this.clear() = this <== 0
         
         ///<summary>実部</summary>
-        member x.re with get() = num0(Dt, match p.lang with |F -> Formula("real("+x.code+")") |C -> Formula("creal("+x.code+")") |_ -> Formula("Re["+x.code+"]"))
+        member x.re with get() = num0(Dt, match p.lang with |F -> Formula(Dt,"real("+x.code+")") |C -> Formula(Dt,"creal("+x.code+")") |_ -> Formula(Dt,"Re["+x.code+"]"))
         ///<summary>虚部</summary>
-        member x.im with get() = num0(Dt, match p.lang with |F -> Formula("aimag("+x.code+")") |C -> Formula("cimag("+x.code+")") |_ -> Formula("Im["+x.code+"]"))
+        member x.im with get() = num0(Dt, match p.lang with |F -> Formula(Dt,"aimag("+x.code+")") |C -> Formula(Dt,"cimag("+x.code+")") |_ -> Formula(Dt,"Im["+x.code+"]"))
         ///<summary>絶対値</summary>
         member x.abs with get() = asm.abs(x)
         ///<summary>絶対値の2乗</summary>
@@ -206,16 +206,16 @@ namespace Aqualis
             match p.lang with
             |F   -> 
                 p.var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
-                num0(Zt, Var "uj")
+                num0(Zt, Var(Zt,"uj"))
             |C -> 
                 //#defineで定義済み
-                num0(Zt, Var "uj")
+                num0(Zt, Var(Zt,"uj"))
             |T   ->
                 p.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                num0(Zt, Var "\\mathrm{j}")
+                num0(Zt, Var(Zt,"\\mathrm{j}"))
             |H   ->
                 p.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                num0(Zt, Var "\\mathrm{j}")
+                num0(Zt, Var(Zt,"\\mathrm{j}"))
         ///<summary>円周率</summary>
         static member pi with get() = 
             if p.isEmpty then
@@ -224,16 +224,16 @@ namespace Aqualis
                 match p.lang with
                 |F   ->
                     p.var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
-                    num0(Dt, Var "pi")
+                    num0(Dt, Var(Dt,"pi"))
                 |C ->
                     p.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                    num0(Dt, Var "pi")
+                    num0(Dt, Var(Dt,"pi"))
                 |T   ->
                     p.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                    num0(Dt, Var "\\pi")
+                    num0(Dt, Var(Dt,"\\pi"))
                 |H   ->
                     p.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                    num0(Dt, Var "\\pi")
+                    num0(Dt, Var(Dt,"\\pi"))
         ///<summary>2πj</summary>
         static member j2p with get() = 2*asm.pi*asm.uj
         
@@ -242,28 +242,28 @@ namespace Aqualis
                 match p.lang,e with
                 |_,Int_c x  -> Dbl_c (double x)
                 |_,Dbl_c x  -> Dbl_c x
-                |_,Add(a,b) -> (dbl a)+(dbl b)
-                |_,Sub(a,b) -> (dbl a)-(dbl b)
-                |_,Mul(a,b) -> (dbl a)*(dbl b)
-                |_,Div(a,b) -> (dbl a)/(dbl b)
-                |F,_        -> Formula("dble("+e.code+")")
-                |T,_        -> Formula("\\mathrm{double}("+e.code+")")
-                |H,_        -> Formula("\\mathrm{double}("+e.code+")")
-                |_,_        -> Formula("(double)("+e.code+")")
+                |_,Add(_,a,b) -> (dbl a)+(dbl b)
+                |_,Sub(_,a,b) -> (dbl a)-(dbl b)
+                |_,Mul(_,a,b) -> (dbl a)*(dbl b)
+                |_,Div(_,a,b) -> (dbl a)/(dbl b)
+                |F,_          -> Formula(Dt,"dble("+e.code+")")
+                |T,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |H,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |_,_          -> Formula(Dt,"(double)("+e.code+")")
             num0(Dt, dbl x.expr)
         static member toint(x:num0) =
             let rec it (e:Expr) =
                 match p.lang,e with
                 |_,Int_c x  -> Int_c x
                 |_,Dbl_c x  -> Int_c (int(floor x))
-                |_,Add(a,b) -> (it a)+(it b)
-                |_,Sub(a,b) -> (it a)-(it b)
-                |_,Mul(a,b) -> (it a)*(it b)
-                |_,Div(a,b) -> (it a)/(it b)
-                |F,_        -> Formula("int("+e.code+")")
-                |T,_        -> Formula("\\mathrm{integer}("+e.code+")")
-                |H,_        -> Formula("\\mathrm{integer}("+e.code+")")
-                |_,_        -> Formula("(int)("+e.code+")")
+                |_,Add(_,a,b) -> (it a)+(it b)
+                |_,Sub(_,a,b) -> (it a)-(it b)
+                |_,Mul(_,a,b) -> (it a)*(it b)
+                |_,Div(_,a,b) -> (it a)/(it b)
+                |F,_          -> Formula(Dt,"int("+e.code+")")
+                |T,_          -> Formula(Dt,"\\mathrm{integer}("+e.code+")")
+                |H,_          -> Formula(Dt,"\\mathrm{integer}("+e.code+")")
+                |_,_          -> Formula(Dt,"(int)("+e.code+")")
             num0(It 4, it x.expr)
         ///<summary>累乗</summary>
         static member pow(x:num0, y:num0) = 
@@ -286,7 +286,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Exp(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("cexp("+v.code+")") |T,_|H,_ -> Formula("\\exp("+v.code+")") |_ -> Formula("exp("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"cexp("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\exp("+v.code+")") |_ -> Formula(v.etype,"exp("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
         
         ///<summary>正弦関数</summary>
@@ -296,7 +296,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Sin(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("csin("+v.code+")") |T,_|H,_ -> Formula("\\sin("+v.code+")") |_ -> Formula("sin("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"csin("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\sin("+v.code+")") |_ -> Formula(v.etype,"sin("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
 
         ///<summary>余弦関数</summary>
@@ -306,7 +306,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Cos(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("ccos("+v.code+")") |T,_|H,_ -> Formula("\\cos("+v.code+")") |_ -> Formula("cos("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"ccos("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\cos("+v.code+")") |_ -> Formula(v.etype,"cos("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
         static member tan (v:num0) = 
             match v.expr with
@@ -314,7 +314,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Tan(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("ctan("+v.code+")") |T,_|H,_ -> Formula("\\tan("+v.code+")") |_ -> Formula("tan("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"ctan("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\tan("+v.code+")") |_ -> Formula(v.etype,"tan("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
 
         ///<summary>逆正弦関数</summary>
@@ -324,7 +324,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Asin(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("casin("+v.code+")") |T,_|H,_ -> Formula("\\arcsin("+v.code+")") |_ -> Formula("asin("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"casin("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\arcsin("+v.code+")") |_ -> Formula(v.etype,"asin("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
                 
         ///<summary>逆余弦関数</summary>
@@ -334,7 +334,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Acos(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("cacos("+v.code+")") |T,_|H,_ -> Formula("\\arccos("+v.code+")") |_ -> Formula("acos("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"cacos("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\arccos("+v.code+")") |_ -> Formula(v.etype,"acos("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
                 
         ///<summary>逆正接関数</summary>
@@ -344,7 +344,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Atan(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("catan("+v.code+")") |T,_|H,_ -> Formula("\\arctan("+v.code+")") |_ -> Formula("atan("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"catan("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\arctan("+v.code+")") |_ -> Formula(v.etype,"atan("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
                 
         ///<summary>逆正接関数</summary>
@@ -357,7 +357,7 @@ namespace Aqualis
             |_ ->
                 let x = match x.etype with |It _ -> asm.todouble(x) |_ -> x
                 let y = match y.etype with |It _ -> asm.todouble(y) |_ -> y
-                let e = match p.lang with |F|C -> Formula("atan2("+x.code+","+y.code+")") |T|H -> Formula("\\arctan(\\frac{"+y.code+"}{"+x.code+"})")
+                let e = match p.lang with |F|C -> Formula(Dt,"atan2("+x.code+","+y.code+")") |T|H -> Formula(Dt,"\\arctan(\\frac{"+y.code+"}{"+x.code+"})")
                 num0(Etype.prior(x.etype,y.etype), e)
         
         ///<summary>絶対値</summary>
@@ -366,7 +366,7 @@ namespace Aqualis
             |Int_c v -> num0(Dt, Dbl_c <| Math.Abs(v))
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Abs(v))
             |_ ->
-                let e = match p.lang,v.etype with |C,Zt -> Formula("cabs("+v.code+")") |C,Dt -> Formula("fabs("+v.code+")") |T,_|H,_ -> Formula("\\left|"+v.code+"\\right|") |_ -> Formula("abs("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"cabs("+v.code+")") |C,Dt -> Formula(v.etype,"fabs("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\left|"+v.code+"\\right|") |_ -> Formula(v.etype,"abs("+v.code+")")
                 num0(Dt, e)
                 
         ///<summary>自然対数</summary>
@@ -376,7 +376,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Log(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("clog("+v.code+")") |T,_|H,_ -> Formula("\\ln("+v.code+")") |_ -> Formula("log("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"clog("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\ln("+v.code+")") |_ -> Formula(v.etype,"log("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
                 
         ///<summary>常用対数</summary>
@@ -386,7 +386,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Log10(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("clog10("+v.code+")") |T,_|H,_ -> Formula("\\log_{10}("+v.code+")") |_ -> Formula("log10("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"clog10("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\log_{10}("+v.code+")") |_ -> Formula(v.etype,"log10("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
                 
         ///<summary>平方根</summary>
@@ -396,7 +396,7 @@ namespace Aqualis
             |Dbl_c v -> num0(Dt, Dbl_c <| Math.Sqrt(v))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                let e = match p.lang,v.etype with |C,Zt -> Formula("csqrt("+v.code+")") |T,_|H,_ -> Formula("\\sqrt{"+v.code+"}") |_ -> Formula("sqrt("+v.code+")")
+                let e = match p.lang,v.etype with |C,Zt -> Formula(Zt,"csqrt("+v.code+")") |T,_|H,_ -> Formula(v.etype,"\\sqrt{"+v.code+"}") |_ -> Formula(v.etype,"sqrt("+v.code+")")
                 num0(Etype.prior(Dt,v.etype), e)
                 
         ///<summary>小数点以下切り捨て</summary>
@@ -406,7 +406,7 @@ namespace Aqualis
             |Dbl_c v -> num0(It 4, Int_c <| int(floor(v)))
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
-                num0(It 4, match p.lang with |F|C -> Formula("floor("+v.code+")") |T|H -> Formula("\\mathrm{floor}("+v.code+")"))
+                num0(It 4, match p.lang with |F|C -> Formula(v.etype,"floor("+v.code+")") |T|H -> Formula(v.etype,"\\mathrm{floor}("+v.code+")"))
                 
         ///<summary>小数点以下切り上げ</summary>
         static member ceil (v:num0) = 
@@ -414,12 +414,12 @@ namespace Aqualis
             |Int_c v -> num0(It 4, Int_c v)
             |Dbl_c v -> num0(It 4, Int_c <| int(ceil(v)))
             |_ ->
-                let e = match p.lang with |F -> Formula("ceiling("+v.code+")") |C -> Formula("ceil("+v.code+")") |T|H -> Formula("\\mathrm{ceil}("+v.code+")")
+                let e = match p.lang with |F -> Formula(It 4,"ceiling("+v.code+")") |C -> Formula(It 4,"ceil("+v.code+")") |T|H -> Formula(It 4,"\\mathrm{ceil}("+v.code+")")
                 num0(It 4, e)
                 
         ///<summary>共役複素数</summary>
         static member conj (v:num0) = 
-            let e = match p.lang,v.expr with |F,_ -> Formula("conjg("+v.code+")") |C,_ -> Formula("conj("+v.code+")") |(T|H),(Var _|Int_c _|Dbl_c _) -> Formula(v.code+"^*") |(T|H),_ -> Formula("\\left["+v.code+"\\right]^*")
+            let e = match p.lang,v.expr with |F,_ -> Formula(Zt,"conjg("+v.code+")") |C,_ -> Formula(Zt,"conj("+v.code+")") |(T|H),(Var _|Int_c _|Dbl_c _) -> Formula(Zt,v.code+"^*") |(T|H),_ -> Formula(Zt,"\\left["+v.code+"\\right]^*")
             num0(Zt, e)        
             
     [<AutoOpen>]

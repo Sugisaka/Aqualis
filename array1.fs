@@ -36,10 +36,10 @@ namespace Aqualis
             match x with
             |Var1(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(name+"_size(1)"))
-                |C -> num0(It 4,Var(name+"_size[0]"))
-                |T -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
-                |H -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
+                |F -> num0(It 4,Var(It 4,name+"_size(1)"))
+                |C -> num0(It 4,Var(It 4,name+"_size[0]"))
+                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:num0) =
@@ -58,10 +58,10 @@ namespace Aqualis
             match x with
             |Var1(_,name) ->
                 match p.lang with
-                |F   -> Var(name+"("+i.code+")")
-                |C -> Var(name+"["+(i-1).code+"]")
-                |T   -> Var(name+"("+i.code+")")
-                |H   -> Var(name+"["+i.code+"]")
+                |F   -> Var(typ,name+"("+i.code+")")
+                |C -> Var(typ,name+"["+(i-1).code+"]")
+                |T   -> Var(typ,name+"("+i.code+")")
+                |H   -> Var(typ,name+"["+i.code+"]")
             |Arx1(_,f) ->
                 f i
         member this.Idx1(i:int) = this.Idx1(i.I)

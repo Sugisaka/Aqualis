@@ -45,7 +45,6 @@
     <Compile Include="optimization.fs" />
     <Compile Include="shellscript.fs" />
     <Compile Include="simuleq.fs" />
-    <Compile Include="doc.fs" />
   </ItemGroup>
 
 </Project>

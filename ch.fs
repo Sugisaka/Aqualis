@@ -14,19 +14,19 @@ namespace Aqualis
         ///<summary>整数型一時変数の生成</summary>
         static member i code = 
             let x = p.i_cache_var.getAutoVar()
-            code <| num0(It 4,Var x)
+            code <| num0(It 4,Var(It 4,x))
             p.i_cache_var.setVar(It 4,A0,x,"")
             
         ///<summary>倍精度浮動小数点型一時変数の生成</summary>
         static member d code = 
             let x = p.d_cache_var.getAutoVar()
-            code <| num0(Dt,Var x)
+            code <| num0(Dt,Var(Dt, x))
             p.d_cache_var.setVar(Dt,A0,x,"")
             
         ///<summary>複素数型一時変数の生成</summary>
         static member z code = 
             let x = p.z_cache_var.getAutoVar()
-            code <| num0(Zt,Var x)
+            code <| num0(Zt,Var(Zt, x))
             p.z_cache_var.setVar(Zt,A0,x,"")
             
         ///<summary>整数型一時変数を生成し、valueを代入してからcodeで使用</summary>
@@ -447,7 +447,7 @@ namespace Aqualis
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(e,Var x)
+            code <| num0(e,Var(e, x))
             match e with
             |It _ -> p.i_cache_var.setVar(e,A0,x,"")
             |Dt -> p.d_cache_var.setVar(e,A0,x,"")
@@ -464,7 +464,7 @@ namespace Aqualis
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(v.etype,Var x)
+            code <| num0(v.etype,Var(v.etype, x))
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -481,7 +481,7 @@ namespace Aqualis
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(v.etype,Var x)
+            code <| num0(v.etype,Var(v.etype, x))
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -498,7 +498,7 @@ namespace Aqualis
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(v.etype,Var x)
+            code <| num0(v.etype,Var(v.etype, x))
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -515,7 +515,7 @@ namespace Aqualis
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(v.etype,Var x)
+            code <| num0(v.etype,Var(v.etype, x))
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -594,8 +594,8 @@ namespace Aqualis
             code y
             match e with
             |It _ -> p.i3_cache_var.setVar(It 4,A3(0,0,0),x,"")
-            |Dt _ -> p.d3_cache_var.setVar(Dt,A3(0,0,0),x,"")
-            |Zt _ -> p.z3_cache_var.setVar(Zt,A3(0,0,0),x,"")
+            |Dt -> p.d3_cache_var.setVar(Dt,A3(0,0,0),x,"")
+            |Zt -> p.z3_cache_var.setVar(Zt,A3(0,0,0),x,"")
             |_ -> ()
             
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>

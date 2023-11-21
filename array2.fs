@@ -36,10 +36,10 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(name+"_size(1)"))
-                |C -> num0(It 4,Var(name+"_size[0]"))
-                |T -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
-                |H -> num0(It 4,Var("\\mathcal{S}_1["+name+"]"))
+                |F -> num0(It 4,Var(It 4,name+"_size(1)"))
+                |C -> num0(It 4,Var(It 4,name+"_size[0]"))
+                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
             |Arx2(s1,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2 
@@ -47,10 +47,10 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(name+"_size(2)"))
-                |C -> num0(It 4,Var(name+"_size[1]"))
-                |T -> num0(It 4,Var("\\mathcal{S}_2["+name+"]"))
-                |H -> num0(It 4,Var("\\mathcal{S}_2["+name+"]"))
+                |F -> num0(It 4,Var(It 4,name+"_size(2)"))
+                |C -> num0(It 4,Var(It 4,name+"_size[1]"))
+                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
+                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
             |Arx2(_,s2,_) -> s2
         ///<summary>インデクサ</summary>
         member this.Idx2(i:num0,j:num0) =
@@ -71,10 +71,10 @@ namespace Aqualis
             match x with
             |Var2(_,name) ->
                 match p.lang with
-                |F   -> Var(name+"("+i.code+","+j.code+")")
-                |C -> Var(name+"["+((j-1)*this.size1+(i-1)).code+"]")
-                |T   -> Var(name+"("+i.code+","+j.code+")")
-                |H   -> Var(name+"["+i.code+","+j.code+"]")
+                |F   -> Var(typ,name+"("+i.code+","+j.code+")")
+                |C -> Var(typ,name+"["+((j-1)*this.size1+(i-1)).code+"]")
+                |T   -> Var(typ,name+"("+i.code+","+j.code+")")
+                |H   -> Var(typ,name+"["+i.code+","+j.code+"]")
             |Arx2(_,_,f) ->
                 f (i,j)
                 

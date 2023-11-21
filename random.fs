@@ -27,7 +27,7 @@ namespace Aqualis
                             p.codewrite("call random_seed(put="+seed.code+"(:))")
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite("call random_number("+n+")")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
@@ -42,7 +42,7 @@ namespace Aqualis
                             p.codewrite("srand("+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite(n + " = (double)rand()/RAND_MAX;")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
@@ -54,7 +54,7 @@ namespace Aqualis
                             p.codewrite("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
@@ -66,7 +66,7 @@ namespace Aqualis
                             p.codewrite("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
@@ -87,7 +87,7 @@ namespace Aqualis
                             p.codewrite("call random_seed(put="+seed.code+"(:))")
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite("call random_number("+n+")")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
@@ -101,7 +101,7 @@ namespace Aqualis
                             p.codewrite("srand("+seed_.ToString()+");")
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite(n + " = (double)rand()/RAND_MAX;")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
@@ -113,7 +113,7 @@ namespace Aqualis
                             p.codewrite("random_seed="+seed_.ToString())
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
@@ -125,7 +125,7 @@ namespace Aqualis
                             p.codewrite("random_seed="+seed_.ToString())
                         let getrand (x:num0) =
                             match x.expr with
-                            |Var n -> 
+                            |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")

@@ -132,13 +132,13 @@ namespace Aqualis
             
         member this.i0 (sname, vname, name) =
             this.addmember(sname,(It 4,A0,name))
-            num0(It 4,Var(structure.mem(vname,name)))
+            num0(It 4,Var(It 4,structure.mem(vname,name)))
         member this.d0 (sname, vname, name) =
             this.addmember(sname,(Dt,A0,name))
-            num0(Dt,Var(structure.mem(vname,name)))
+            num0(Dt,Var(Dt,structure.mem(vname,name)))
         member this.z0 (sname, vname, name) =
             this.addmember(sname,(Zt,A0,name))
-            num0(Zt,Var(structure.mem(vname,name)))
+            num0(Zt,Var(Zt,structure.mem(vname,name)))
         member this.i1 (sname, vname, name, size1) =
             this.addmember(sname,(It 4,A1(size1),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))

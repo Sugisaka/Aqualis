@@ -321,7 +321,7 @@ namespace Aqualis
         static member thread_num with get() =
             match p.lang with
             |F |C ->
-                num0(It 4,Var "omp_get_thread_num()")
+                num0(It 4,Var(It 4,"omp_get_thread_num()"))
             |_ ->
                 Console.WriteLine("Error : この言語ではスレッド番号の取得はできません")
                 num0(Nt,NaN)
@@ -330,7 +330,7 @@ namespace Aqualis
         static member max_threads with get() =
             match p.lang with
             |F |C ->
-                num0(It 4,Var "omp_get_max_threads()")
+                num0(It 4,Var(It 4,"omp_get_max_threads()"))
             |_ ->
                 Console.WriteLine("この言語ではスレッド番号の取得はできません")
                 num0(Nt,NaN)
