@@ -66,25 +66,25 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         static member b0 (name:string) = 
             p.var.setUniqVarWarning(It 1,A0,name,"")
-            num0(It 1,Var(It 1,name))
+            num0(Var(It 1,name))
             
         ///<summary>整数型変数</summary>
         ///<param name="name">変数名</param>
         static member i0 (name:string) = 
             p.var.setUniqVarWarning(It 4,A0,name,"")
-            num0(It 1,Var(It 1,name))
+            num0(Var(It 1,name))
             
         ///<summary>倍精度浮動小数点型変数</summary>
         ///<param name="name">変数名</param>
         static member d0 (name:string) =
             p.var.setUniqVarWarning(Dt,A0,name,"")
-            num0(Dt,Var(Dt,name))
+            num0(Var(Dt,name))
             
         ///<summary>複素数型変数</summary>
         ///<param name="name">変数名</param>
         static member z0 (name:string) = 
             p.var.setUniqVarWarning(Zt,A0,name,"")
-            num0(Zt,Var(Zt,name))
+            num0(Var(Zt,name))
             
         ///<summary>整数型1次元配列</summary>
         ///<param name="name">変数名</param>
@@ -199,28 +199,28 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member ip0(name:string,v) = 
             p.var.setUniqVarWarning(It 4,A0,name,(p.ItoS v))
-            num0(It 4,Var(It 4, name))
+            num0(Var(It 4, name))
             
         ///<summary>倍精度浮動小数点型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp0(name:string,v) = 
             p.var.setUniqVarWarning(Dt,A0,name,(p.DtoS v))
-            num0(Dt,Var(Dt, name))
+            num0(Var(Dt, name))
             
         ///<summary>整数型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal ip0_noWarning(name:string,v) = 
             p.var.setUniqVar(It 4,A0,name,(p.ItoS v))
-            num0(It 4,Var(It 4, name))
+            num0(Var(It 4, name))
             
         ///<summary>倍精度浮動小数点型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal dp0_noWarning(name:string,v) = 
             p.var.setUniqVar(Dt,A0,name,(p.DtoS v))
-            num0(Dt,Var(Dt, name))
+            num0(Var(Dt, name))
             
         ///<summary>複素数型定数</summary>
         ///<param name="name">変数名</param>
@@ -228,7 +228,7 @@ namespace Aqualis
         static member zp0(name,(v:double*double)) =
             let (v_re,v_im) = v
             p.var.setUniqVarWarning(Zt,A0,name,var.init_z (v_re,v_im))
-            num0(Zt,Var(Zt, name))
+            num0(Var(Zt, name))
             
         ///<summary>整数型1次元配列定数</summary>
         ///<param name="name">変数名</param>
@@ -258,7 +258,7 @@ namespace Aqualis
             |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n0)" <| e.ToString()
             |_ -> ()
             p.var.setUniqVarWarning(e,A0,name,"")
-            num0(e,Var(e,name))
+            num0(Var(e,name))
             
         ///<summary>整数型1次元配列</summary>
         ///<param name="name">変数名</param>

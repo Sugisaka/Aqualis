@@ -36,10 +36,10 @@ namespace Aqualis
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(It 4,name+"_size(1)"))
-                |C -> num0(It 4,Var(It 4,name+"_size[0]"))
-                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
-                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |F -> num0(Var(It 4,name+"_size(1)"))
+                |C -> num0(Var(It 4,name+"_size[0]"))
+                |T -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |H -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
             |Arx3(s1,_,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2 
@@ -47,10 +47,10 @@ namespace Aqualis
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(It 4,name+"_size(2)"))
-                |C -> num0(It 4,Var(It 4,name+"_size[1]"))
-                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
-                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
+                |F -> num0(Var(It 4,name+"_size(2)"))
+                |C -> num0(Var(It 4,name+"_size[1]"))
+                |T -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]"))
+                |H -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]"))
             |Arx3(_,s2,_,_) -> s2
         ///<summary>変数の要素数</summary>
         member __.size3 
@@ -58,10 +58,10 @@ namespace Aqualis
             match x with
             |Var3(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(It 4,name+"_size(3)"))
-                |C -> num0(It 4,Var(It 4,name+"_size[2]"))
-                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_3["+name+"]"))
-                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_3["+name+"]"))
+                |F -> num0(Var(It 4,name+"_size(3)"))
+                |C -> num0(Var(It 4,name+"_size[2]"))
+                |T -> num0(Var(It 4,"\\mathcal{S}_3["+name+"]"))
+                |H -> num0(Var(It 4,"\\mathcal{S}_3["+name+"]"))
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:num0,j:num0,k:num0) =
@@ -291,14 +291,14 @@ namespace Aqualis
             p.var.setVar(typ,size,name,para)
             num3(typ,Var3(size,name))
         member this.etype with get() = typ
-        member this.Item with get(i:num0,j:num0,k:num0) = num0(typ,this.Idx3(i,j,k))
-        member this.Item with get(i:num0,j:num0,k:int) = num0(typ,this.Idx3(i,j,k.I))
-        member this.Item with get(i:num0,j:int,k:num0) = num0(typ,this.Idx3(i,j.I,k))
-        member this.Item with get(i:int,j:num0,k:num0) = num0(typ,this.Idx3(i.I,j,k))
-        member this.Item with get(i:int,j:int,k:num0) = num0(typ,this.Idx3(i.I,j.I,k))
-        member this.Item with get(i:int,j:num0,k:int) = num0(typ,this.Idx3(i.I,j,k.I))
-        member this.Item with get(i:num0,j:int,k:int) = num0(typ,this.Idx3(i,j.I,k.I))
-        member this.Item with get(i:int,j:int,k:int) = num0(typ,this.Idx3(i.I,j.I,k.I))
+        member this.Item with get(i:num0,j:num0,k:num0) = num0(this.Idx3(i,j,k))
+        member this.Item with get(i:num0,j:num0,k:int) = num0(this.Idx3(i,j,k.I))
+        member this.Item with get(i:num0,j:int,k:num0) = num0(this.Idx3(i,j.I,k))
+        member this.Item with get(i:int,j:num0,k:num0) = num0(this.Idx3(i.I,j,k))
+        member this.Item with get(i:int,j:int,k:num0) = num0(this.Idx3(i.I,j.I,k))
+        member this.Item with get(i:int,j:num0,k:int) = num0(this.Idx3(i.I,j,k.I))
+        member this.Item with get(i:num0,j:int,k:int) = num0(this.Idx3(i,j.I,k.I))
+        member this.Item with get(i:int,j:int,k:int) = num0(this.Idx3(i.I,j.I,k.I))
         member this.Item with get((a1:num0,b1:num0),(a2:num0,b2:num0),(a3:num0,b3:num0)) = num3(typ,this.Idx3((a1,b1),(a2,b2),(a3,b3)))
         member this.Item with get((a1:num0,b1:num0),(a2:num0,b2:num0),_:unit) = num3(typ,this.Idx3((a1,b1),(a2,b2),()))
         member this.Item with get((a1:num0,b1:num0),_:unit,(a3:num0,b3:num0)) = num3(typ,this.Idx3((a1,b1),(),(a3,b3)))
@@ -312,7 +312,7 @@ namespace Aqualis
 
         //<summary>値を0で初期化</summary> 
         override this.clear() = 
-            this <== num0(It 4, Int_c 0)
+            this <== num0(Int_c 0)
             
         ///<summary>配列サイズ変数をメモリ未割当て状態に初期化</summary>
         override this.sizeinit() = 

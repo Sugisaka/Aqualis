@@ -36,10 +36,10 @@ namespace Aqualis
             match x with
             |Var1(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(It 4,name+"_size(1)"))
-                |C -> num0(It 4,Var(It 4,name+"_size[0]"))
-                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
-                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |F -> num0(Var(It 4,name+"_size(1)"))
+                |C -> num0(Var(It 4,name+"_size[0]"))
+                |T -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |H -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:num0) =
@@ -234,8 +234,8 @@ namespace Aqualis
             p.var.setVar(typ,size,name,para)
             num1(typ,Var1(size,name))
         member this.etype with get() = typ
-        member this.Item with get(i:num0) = num0(typ,this.Idx1(i))
-        member this.Item with get(i:int) = num0(typ,this.Idx1(i.I))
+        member this.Item with get(i:num0) = num0(this.Idx1(i))
+        member this.Item with get(i:int) = num0(this.Idx1(i.I))
         member this.Item with get((a:num0,b:num0)) = num1(typ,this.Idx1(a,b))
         member this.Item with get((a:num0,b:int )) = num1(typ,this.Idx1(a,b) )
         member this.Item with get((a:int ,b:num0)) = num1(typ,this.Idx1(a,b))
@@ -243,7 +243,7 @@ namespace Aqualis
 
         //<summary>値を0で初期化</summary> 
         override this.clear() = 
-            this <== num0(It 4,Int_c 0)
+            this <== num0(Int_c 0)
             
         ///<summary>配列サイズ変数をメモリ未割当て状態に初期化</summary>
         override this.sizeinit() = 

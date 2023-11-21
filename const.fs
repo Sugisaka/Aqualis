@@ -9,11 +9,11 @@ namespace Aqualis
     [<AutoOpen>]
     module Aqualis_const =
         ///<summary>文字列</summary>
-        let (!.) (x:string) = num0(St,Str_c x)
+        let (!.) (x:string) = num0(Str_c x)
         ///<summary>整数をint0型に置換</summary>
-        let I(n:int) = num0(It 4, Int_c n)
+        let I(n:int) = num0(Int_c n)
         ///<summary>小数をdouble0型に置換</summary>
-        let D(x:double) = num0(Dt, Dbl_c x)
+        let D(x:double) = num0(Dbl_c x)
         
         ///<summary>0(num0型)</summary>
         let _0 = num0(0)

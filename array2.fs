@@ -36,10 +36,10 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(It 4,name+"_size(1)"))
-                |C -> num0(It 4,Var(It 4,name+"_size[0]"))
-                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
-                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |F -> num0(Var(It 4,name+"_size(1)"))
+                |C -> num0(Var(It 4,name+"_size[0]"))
+                |T -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |H -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
             |Arx2(s1,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2 
@@ -47,10 +47,10 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match p.lang with 
-                |F -> num0(It 4,Var(It 4,name+"_size(2)"))
-                |C -> num0(It 4,Var(It 4,name+"_size[1]"))
-                |T -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
-                |H -> num0(It 4,Var(It 4,"\\mathcal{S}_2["+name+"]"))
+                |F -> num0(Var(It 4,name+"_size(2)"))
+                |C -> num0(Var(It 4,name+"_size[1]"))
+                |T -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]"))
+                |H -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]"))
             |Arx2(_,s2,_) -> s2
         ///<summary>インデクサ</summary>
         member this.Idx2(i:num0,j:num0) =
@@ -274,10 +274,10 @@ namespace Aqualis
             p.var.setVar(typ,size,name,para)
             num2(typ,Var2(size,name))
         member this.etype with get() = typ
-        member this.Item with get(i:num0,j:num0) = num0(typ,this.Idx2(i,j))
-        member this.Item with get(i:num0,j:int) = num0(typ,this.Idx2(i,j.I))
-        member this.Item with get(i:int,j:num0) = num0(typ,this.Idx2(i.I,j))
-        member this.Item with get(i:int,j:int) = num0(typ,this.Idx2(i.I,j.I))
+        member this.Item with get(i:num0,j:num0) = num0(this.Idx2(i,j))
+        member this.Item with get(i:num0,j:int) = num0(this.Idx2(i,j.I))
+        member this.Item with get(i:int,j:num0) = num0(this.Idx2(i.I,j))
+        member this.Item with get(i:int,j:int) = num0(this.Idx2(i.I,j.I))
         member this.Item with get((a1:num0,b1:num0),_:unit) = num2(typ,this.Idx2((a1,b1),()))
         member this.Item with get((a1:int,b1:int),_:unit) = num2(typ,this.Idx2((a1,b1),()))
         member this.Item with get(_:unit,(a2:num0,b2:num0)) = num2(typ,this.Idx2((),(a2,b2)))
@@ -295,7 +295,7 @@ namespace Aqualis
         
         //<summary>値を0で初期化</summary> 
         override this.clear() = 
-            this <== num0(It 4, Int_c 0)
+            this <== num0(Int_c 0)
             
         ///<summary>配列サイズ変数をメモリ未割当て状態に初期化</summary>
         override this.sizeinit() = 
