@@ -325,6 +325,8 @@ namespace Aqualis
                 |Acos(_,x) -> "acos("+x.code+")"
                 |Atan(_,x) -> "atan("+x.code+")"
                 |Atan2 (x,y) -> "atan2("+x.code+","+y.code+")"
+                |Abs(Zt,x) -> "cabs("+x.code+")"
+                |Abs(Dt,x) -> "fabs("+x.code+")"
                 |Abs(_,x) -> "abs("+x.code+")"
                 |Log(_,x) -> "log("+x.code+")"
                 |Log10(_,x) -> "log10("+x.code+")"

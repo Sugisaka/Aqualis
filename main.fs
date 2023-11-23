@@ -50,8 +50,9 @@ namespace Aqualis
         ///<summary>構造体</summary>
         |Structure of string
         
-        static member prior = 
-            function
+        ///<summary>優先度の高い型を選択</summary>
+        static member ( %% ) (x:Etype,y:Etype) = 
+            match x,y with
             |Zt,(Zt|Dt|It _) -> Zt
             |(Zt|Dt|It _),Zt -> Zt
             |Dt,(Dt|It _) -> Dt

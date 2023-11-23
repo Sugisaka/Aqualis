@@ -13,7 +13,7 @@ open Aqualis
 open Aqualis_base
  
 Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
-    AqualisCompiler.set_DebugMode ON
+    AqualisCompiler.set_DebugMode OFF
     codestr.h2 "test1" <| fun () ->
         ch.i <| fun m ->
         ch.i <| fun n ->

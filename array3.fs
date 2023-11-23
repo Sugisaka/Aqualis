@@ -332,33 +332,33 @@ namespace Aqualis
 
         static member (+) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
-            num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr+y[i,j,k].expr))
-        static member (+) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr+y[i,j,k].expr))
-        static member (+) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr+y.expr))
+            num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr+y[i,j,k].expr))
+        static member (+) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr+y[i,j,k].expr))
+        static member (+) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr+y.expr))
         
         static member (-) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
-            num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr-y[i,j,k].expr))
-        static member (-) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr-y[i,j,k].expr))
-        static member (-) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr-y.expr))
+            num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr-y[i,j,k].expr))
+        static member (-) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr-y[i,j,k].expr))
+        static member (-) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr-y.expr))
         
         static member (*) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
-            num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr*y[i,j,k].expr))
-        static member (*) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr*y[i,j,k].expr))
-        static member (*) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr*y.expr))
+            num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr*y[i,j,k].expr))
+        static member (*) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr*y[i,j,k].expr))
+        static member (*) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr*y.expr))
         
         static member (/) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
-            num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr/y[i,j,k].expr))
-        static member (/) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr/y[i,j,k].expr))
-        static member (/) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr./y.expr))
+            num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr/y[i,j,k].expr))
+        static member (/) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr/y[i,j,k].expr))
+        static member (/) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr./y.expr))
 
         static member (./) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr/y[i,j,k].expr)
-        static member (./) (x:num0,y:num3) = num3(Etype.prior(x.etype,y.etype),Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr./y[i,j,k].expr))
-        static member (./) (x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr./y.expr))
+        static member (./) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x.expr./y[i,j,k].expr))
+        static member (./) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k].expr./y.expr))
         
         static member (<==) (v1:num3,v2:num3) =
             if p.debugMode then
@@ -418,7 +418,7 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_num3 =
         type asm with
-            static member pow(x:num3,y:num0) = num3(Etype.prior(x.etype,y.etype), Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.pow(x[i,j,k],y).expr))
+            static member pow(x:num3,y:num0) = num3(x.etype%%y.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.pow(x[i,j,k],y).expr))
             static member sin(x:num3) = num3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.sin(x[i,j,k]).expr))
             static member cos(x:num3) = num3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.cos(x[i,j,k]).expr))
             static member tan(x:num3) = num3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.tan(x[i,j,k]).expr))
