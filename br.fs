@@ -79,7 +79,7 @@ namespace Aqualis
             con <- con + 1
         ///<summary>条件式(else)</summary>
         member __.EL code =
-            branch_ ELSE (bool0 Null) code
+            branch_ ELSE Null code
             con <- 0
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
         static member branch code =

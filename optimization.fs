@@ -56,7 +56,7 @@ type optimization() =
                         xb.foreach <| fun i -> xb.[i] <== xa.[i] + (x1.[i]-xa.[i])*(1.0+r)
                         f fb xb
                         //print.s [!."A"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
-                    b.IF (And[f1.>f2; fa.>f2;]) <| fun () ->
+                    b.IF (And [f1.>f2; fa.>f2;]) <| fun () ->
                         counter.inc
                         xa <== x1
                         fa <== f1

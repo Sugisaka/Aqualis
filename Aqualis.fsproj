@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>Jun-ichiro Sugisaka</Authors>
   </PropertyGroup>
@@ -12,11 +12,10 @@
     <Compile Include="program.fs" />
     <Compile Include="expr.fs" />
     <Compile Include="num0.fs" />
-    <Compile Include="const.fs" />
     <Compile Include="diff.fs" />
+    <Compile Include="const.fs" />
     <Compile Include="br.fs" />
     <Compile Include="iter1.fs" />
-    <Compile Include="sum.fs" />
     <Compile Include="openmp.fs" />
     <Compile Include="openacc.fs" />
     <Compile Include="print1.fs" />

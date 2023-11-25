@@ -66,25 +66,25 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         static member b0 (name:string) = 
             p.var.setUniqVarWarning(It 1,A0,name,"")
-            num0(Var(It 1,name))
+            Var(It 1,name)
             
         ///<summary>整数型変数</summary>
         ///<param name="name">変数名</param>
         static member i0 (name:string) = 
             p.var.setUniqVarWarning(It 4,A0,name,"")
-            num0(Var(It 1,name))
+            Var(It 1,name)
             
         ///<summary>倍精度浮動小数点型変数</summary>
         ///<param name="name">変数名</param>
         static member d0 (name:string) =
             p.var.setUniqVarWarning(Dt,A0,name,"")
-            num0(Var(Dt,name))
+            Var(Dt,name)
             
         ///<summary>複素数型変数</summary>
         ///<param name="name">変数名</param>
         static member z0 (name:string) = 
             p.var.setUniqVarWarning(Zt,A0,name,"")
-            num0(Var(Zt,name))
+            Var(Zt,name)
             
         ///<summary>整数型1次元配列</summary>
         ///<param name="name">変数名</param>
@@ -199,28 +199,28 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member ip0(name:string,v) = 
             p.var.setUniqVarWarning(It 4,A0,name,(p.ItoS v))
-            num0(Var(It 4, name))
+            Var(It 4, name)
             
         ///<summary>倍精度浮動小数点型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp0(name:string,v) = 
             p.var.setUniqVarWarning(Dt,A0,name,(p.DtoS v))
-            num0(Var(Dt, name))
+            Var(Dt, name)
             
         ///<summary>整数型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal ip0_noWarning(name:string,v) = 
             p.var.setUniqVar(It 4,A0,name,(p.ItoS v))
-            num0(Var(It 4, name))
+            Var(It 4, name)
             
         ///<summary>倍精度浮動小数点型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal dp0_noWarning(name:string,v) = 
             p.var.setUniqVar(Dt,A0,name,(p.DtoS v))
-            num0(Var(Dt, name))
+            Var(Dt, name)
             
         ///<summary>複素数型定数</summary>
         ///<param name="name">変数名</param>
@@ -228,7 +228,7 @@ namespace Aqualis
         static member zp0(name,(v:double*double)) =
             let (v_re,v_im) = v
             p.var.setUniqVarWarning(Zt,A0,name,var.init_z (v_re,v_im))
-            num0(Var(Zt, name))
+            Var(Zt, name)
             
         ///<summary>整数型1次元配列定数</summary>
         ///<param name="name">変数名</param>
@@ -255,17 +255,17 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         static member n0(e:Etype,name:string) = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n0)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n0)" <| e.ToString()
             |_ -> ()
             p.var.setUniqVarWarning(e,A0,name,"")
-            num0(Var(e,name))
+            Var(e,name)
             
         ///<summary>整数型1次元配列</summary>
         ///<param name="name">変数名</param>
         ///<param name="size1">要素数</param>
         static member n1(e:Etype,name:string,size1:int) = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n1)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n1)" <| e.ToString()
             |_ -> ()
             num1(e,Var1(A1(size1),name))
             
@@ -273,7 +273,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         static member n1(e:Etype,name:string) =
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n1)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n1)" <| e.ToString()
             |_ -> ()
             num1(e,Var1(A1(0),name))
             
@@ -283,7 +283,7 @@ namespace Aqualis
         ///<param name="size2">要素数2</param>
         static member n2(e:Etype,name:string,size1:int,size2:int) = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n2)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n2)" <| e.ToString()
             |_ -> ()
             num2(e,Var2(A2(size1,size2),name))
             
@@ -291,7 +291,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         static member n2(e:Etype,name:string) = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n2)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n2)" <| e.ToString()
             |_ -> ()
             num2(e,Var2(A2(0,0),name))
             
@@ -302,7 +302,7 @@ namespace Aqualis
         ///<param name="size3">要素数3</param>
         static member n3(e:Etype,name:string,size1:int,size2:int,size3:int) = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n3)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n3)" <| e.ToString()
             |_ -> ()
             num3(e,Var3(A3(size1,size2,size3),name))
             
@@ -310,6 +310,6 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         static member n3(e:Etype,name:string) = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n3)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n3)" <| e.ToString()
             |_ -> ()
             num3(e,Var3(A3(0,0,0),name))

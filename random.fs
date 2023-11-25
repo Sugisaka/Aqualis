@@ -26,7 +26,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("call random_seed(put="+seed.code+"(:))")
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite("call random_number("+n+")")
                             |_ -> 
@@ -41,7 +41,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("srand("+seed.code+"[0])")
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite(n + " = (double)rand()/RAND_MAX;")
                             |_ -> 
@@ -53,7 +53,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 
@@ -65,7 +65,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 
@@ -86,7 +86,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("call random_seed(put="+seed.code+"(:))")
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite("call random_number("+n+")")
                             |_ -> 
@@ -100,7 +100,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("srand("+seed_.ToString()+");")
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite(n + " = (double)rand()/RAND_MAX;")
                             |_ -> 
@@ -112,7 +112,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("random_seed="+seed_.ToString())
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 
@@ -124,7 +124,7 @@ namespace Aqualis
                             code seed
                             p.codewrite("random_seed="+seed_.ToString())
                         let getrand (x:num0) =
-                            match x.expr with
+                            match x with
                             |Var(_,n) -> 
                                 p.codewrite(n + " = (random number: 0->1);")
                             |_ -> 

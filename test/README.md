@@ -39,3 +39,7 @@
    - test6tr.f90、test6tr.c：テキストファイル入力
    - test6bw.f90、test6bw.c：テキストファイル出力
    - test6br.f90、test6br.c：テキストファイル入力
+
+## Test7：微分・級数微分テスト
+
+- test7.fsx

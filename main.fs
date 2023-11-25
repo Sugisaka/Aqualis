@@ -41,8 +41,6 @@ namespace Aqualis
         |Dt
         ///<summary>複素数（倍精度）</summary>
         |Zt
-        ///<summary>ブール型</summary>
-        |Bt
         ///<summary>非数値</summary>
         |Nt
         ///<summary>文字列値</summary>

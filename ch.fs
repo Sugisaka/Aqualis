@@ -14,19 +14,19 @@ namespace Aqualis
         ///<summary>整数型一時変数の生成</summary>
         static member i code = 
             let x = p.i_cache_var.getAutoVar()
-            code <| num0(Var(It 4,x))
+            code <| Var(It 4,x)
             p.i_cache_var.setVar(It 4,A0,x,"")
             
         ///<summary>倍精度浮動小数点型一時変数の生成</summary>
         static member d code = 
             let x = p.d_cache_var.getAutoVar()
-            code <| num0(Var(Dt, x))
+            code <| Var(Dt, x)
             p.d_cache_var.setVar(Dt,A0,x,"")
             
         ///<summary>複素数型一時変数の生成</summary>
         static member z code = 
             let x = p.z_cache_var.getAutoVar()
-            code <| num0(Var(Zt, x))
+            code <| Var(Zt, x)
             p.z_cache_var.setVar(Zt,A0,x,"")
             
         ///<summary>整数型一時変数を生成し、valueを代入してからcodeで使用</summary>
@@ -440,14 +440,14 @@ namespace Aqualis
         ///<summary>指定した型の一時変数を生成</summary>
         static member n e = fun code ->
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| e.ToString()
             |_ -> ()
             let x = 
                 match e with
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(Var(e, x))
+            code <| Var(e, x)
             match e with
             |It _ -> p.i_cache_var.setVar(e,A0,x,"")
             |Dt -> p.d_cache_var.setVar(e,A0,x,"")
@@ -457,14 +457,14 @@ namespace Aqualis
         ///<summary>指定した型の一時変数を生成</summary>
         static member n (v:num0) = fun code ->
             match v.etype with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(Var(v.etype, x))
+            code <| Var(v.etype, x)
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -474,14 +474,14 @@ namespace Aqualis
         ///<summary>指定した型の一時変数を生成</summary>
         static member n (v:num1) = fun code ->
             match v.etype with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(Var(v.etype, x))
+            code <| Var(v.etype, x)
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -491,14 +491,14 @@ namespace Aqualis
         ///<summary>指定した型の一時変数を生成</summary>
         static member n (v:num2) = fun code ->
             match v.etype with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(Var(v.etype, x))
+            code <| Var(v.etype, x)
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -508,14 +508,14 @@ namespace Aqualis
         ///<summary>指定した型の一時変数を生成</summary>
         static member n (v:num3) = fun code ->
             match v.etype with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n)" <| v.etype.ToString()
             |_ -> ()
             let x = 
                 match v.etype with
                 |Zt -> p.z_cache_var.getAutoVar()
                 |Dt -> p.d_cache_var.getAutoVar()
                 |_ -> p.i_cache_var.getAutoVar()
-            code <| num0(Var(v.etype, x))
+            code <| Var(v.etype, x)
             match v.etype with
             |It _ -> p.i_cache_var.setVar(v.etype,A0,x,"")
             |Dt -> p.d_cache_var.setVar(v.etype,A0,x,"")
@@ -525,7 +525,7 @@ namespace Aqualis
         ///<summary>num1型1次元配列を生成</summary>
         static member n01 e code = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n1)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n1)" <| e.ToString()
             |_ -> ()
             let x = 
                 match e with
@@ -554,7 +554,7 @@ namespace Aqualis
         ///<summary>num0型2次元配列を生成</summary>
         static member n02 e code = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n2)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n2)" <| e.ToString()
             |_ -> ()
             let x = 
                 match e with
@@ -583,7 +583,7 @@ namespace Aqualis
         ///<summary>整数型3次元配列を生成</summary>
         static member n03 e code = 
             match e with 
-            |Bt |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n3)" <| e.ToString()
+            |Nt |St |Structure _ -> printfn "%s: 変数を生成できない型です(ch.n3)" <| e.ToString()
             |_ -> ()
             let x = 
                 match e with

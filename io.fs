@@ -43,7 +43,7 @@ namespace Aqualis
                 ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
+                        |> List.map (fun s -> match s,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
                         |> (fun s -> String.Join("",s))
                     let s = 
                         [for s in filename do
@@ -137,7 +137,7 @@ namespace Aqualis
                     lst
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
-                            match b.[n].etype,b.[n].expr with 
+                            match b.[n].etype,b.[n] with 
                             |It _,Int_c(v) -> yield p.ItoS(v)
                             |Dt  ,Int_c(v) -> yield p.DtoS(double v)
                             |_,Dbl_c(v) -> yield p.DtoS(v)
@@ -164,7 +164,7 @@ namespace Aqualis
                     lst
                     |> (fun b -> 
                         [for n in 0..(b.Length-1) do
-                            match b.[n].expr,b.[n].etype with
+                            match b.[n],b.[n].etype with
                             |_,It _ ->
                                 yield int0string_format_C
                             |_,Dt ->
@@ -184,7 +184,7 @@ namespace Aqualis
                     |> (fun s -> String.Join("",s))
                 let code =
                     [for b in lst do
-                        match b.etype,b.expr with 
+                        match b.etype,b with 
                         |_,Int_c(v) -> yield p.ItoS(v)
                         |_,Dbl_c(v) -> yield p.DtoS(v)
                         |Zt,_ ->
@@ -211,7 +211,7 @@ namespace Aqualis
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.etype,b.expr with 
+                        match b.etype,b with 
                           |_,Int_c(v) -> p.ItoS(v)
                           |_,Dbl_c(v) -> p.DtoS(v)
                           |_,Str_c(v) -> v
@@ -238,7 +238,7 @@ namespace Aqualis
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.etype,b.expr with 
+                        match b.etype,b with 
                           |_,Int_c(v) -> p.ItoS(v)
                           |_,Dbl_c(v) -> p.DtoS(v)
                           |_,Str_c(v) -> "\""+v+"\""
@@ -252,7 +252,7 @@ namespace Aqualis
         static member private Write_bin (fp:string) (v:num0) =
             match p.lang with
             |F ->
-                match v.etype,v.expr with 
+                match v.etype,v with 
                 |_,Int_c(v) ->
                     p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
                 |_,Dbl_c(v) ->
@@ -268,7 +268,7 @@ namespace Aqualis
                     p.codewrite("write("+fp+") "+v.code+"\n")
                 |_ -> ()
             |C ->
-                match v.etype,v.expr with 
+                match v.etype,v with 
                 |_,Int_c _ ->
                     ch.i <| fun tmp ->
                         tmp <== v
@@ -294,7 +294,7 @@ namespace Aqualis
                 |_ ->
                     ()
             |T ->
-                match v.etype,v.expr with 
+                match v.etype,v with 
                 |_,Int_c(v) ->
                     p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
                 |_,Dbl_c(v) ->
@@ -310,7 +310,7 @@ namespace Aqualis
                     p.codewrite("write("+fp+") "+v.code+"\n")
                 |_ -> ()
             |H ->
-                match v.etype,v.expr with 
+                match v.etype,v with 
                 |_,Int_c(v) ->
                     p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+p.ItoS(v)+"\\)<br/>\n")
                 |_,Dbl_c(v) ->
@@ -370,7 +370,7 @@ namespace Aqualis
                             varlist
                             |> (fun b ->
                                 [for (t,m,b) in b do
-                                    match t,b.expr with 
+                                    match t,b with 
                                     |Zt,Var _ ->
                                         yield tmp.[2*m+1].code
                                         yield tmp.[2*m+2].code
@@ -417,7 +417,7 @@ namespace Aqualis
                       varlist
                       |> (fun b ->
                             [for (t,m,a) in b do
-                                match t,a.expr with 
+                                match t,a with 
                                 |Zt,Var _ ->
                                     yield "&"+tmp.[2*m+1].code
                                     yield "&"+tmp.[2*m+2].code
@@ -451,7 +451,7 @@ namespace Aqualis
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.expr with 
+                        match b with 
                         |Var(_,n) -> n
                         |Formula(_,n) -> n 
                         |_ -> "")
@@ -473,7 +473,7 @@ namespace Aqualis
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.expr with 
+                        match b with 
                         |Var(_,n) -> n
                         |Formula(_,n) -> n 
                         |_ -> "")
@@ -483,7 +483,7 @@ namespace Aqualis
         static member private Read_bin (fp:string) (iostat:num0) (v:num0) = 
             match p.lang with
             |F ->
-                match v.etype,v.expr with 
+                match v.etype,v with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
@@ -494,7 +494,7 @@ namespace Aqualis
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
             |C->
-                match v.etype,v.expr with 
+                match v.etype,v with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
                         p.codewrite("fread(&"+re.code+",sizeof("+re.code+"),1,"+fp+");"+"\n")
@@ -505,7 +505,7 @@ namespace Aqualis
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
             |T ->
-                match v.etype,v.expr with 
+                match v.etype,v with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
                         p.codewrite("read("+fp+",iostat="+iostat.code+") "+re.code+"\n")
@@ -516,7 +516,7 @@ namespace Aqualis
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
             |H ->
-                match v.expr with 
+                match v with 
                 |Var(_,n) ->
                     p.codewrite("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
                 |_ -> 
@@ -525,7 +525,7 @@ namespace Aqualis
         static member private Read_byte (fp:string) (iostat:num0) (e:num0) = 
             p.codewrite("read("+fp+", iostat="+iostat.code+") byte_tmp\n")
             let ee =
-                match e.etype,e.expr with 
+                match e.etype,e with 
                 |It _,Var(_,n) -> n 
                 |_ -> "byte値を整数型以外の変数に格納できません"
             p.codewrite(ee + "=" + "byte_tmp\n")
@@ -942,7 +942,7 @@ namespace Aqualis
                 ch.f <| fun fp ->
                     let f = 
                         filename
-                        |> List.map (fun s -> match s.expr,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
+                        |> List.map (fun s -> match s,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
                         |> io2.cat ""
                     let s = 
                         [for s in filename do
@@ -1027,7 +1027,7 @@ namespace Aqualis
                     lst
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
-                            match b.[n].etype,b.[n].expr with 
+                            match b.[n].etype,b.[n] with 
                             |It _,Int_c(v) -> yield p.ItoS(v)
                             |Dt  ,Int_c(v) -> yield p.DtoS(double v)
                             |_,Dbl_c(v) -> yield p.DtoS(v)
@@ -1046,7 +1046,7 @@ namespace Aqualis
                     lst
                     |> (fun b -> 
                         [for n in 0..(b.Length-1) do
-                            match b.[n].expr,b.[n].etype with
+                            match b.[n],b.[n].etype with
                             |_,It _ ->
                                 yield "%d"
                             |_,Dt ->
@@ -1061,7 +1061,7 @@ namespace Aqualis
                     |> io2.cat ""
                 let code =
                     [for b in lst do
-                        match b.etype,b.expr with 
+                        match b.etype,b with 
                         |_,Int_c(v) -> yield p.ItoS(v)
                         |_,Dbl_c(v) -> yield p.DtoS(v)
                         |Zt,Var _ ->
@@ -1075,7 +1075,7 @@ namespace Aqualis
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.etype,b.expr with 
+                        match b.etype,b with 
                         |_,Int_c(v) -> p.ItoS(v)
                         |_,Dbl_c(v) -> p.DtoS(v)
                         |_,Str_c(v) -> "\""+v+"\""
@@ -1089,7 +1089,7 @@ namespace Aqualis
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.etype,b.expr with 
+                        match b.etype,b with 
                         |_,Int_c(v) -> p.ItoS(v)
                         |_,Dbl_c(v) -> p.DtoS(v)
                         |_,Str_c(v) -> "\""+v+"\""

@@ -16,7 +16,7 @@ namespace Aqualis
             |F ->
                 let clist = 
                     [for q in lst do
-                        match q.etype,q.expr with
+                        match q.etype,q with
                         |St,Str_c(s) ->
                             yield ("\""+s+"\"")
                         |Zt,_ ->
@@ -34,7 +34,7 @@ namespace Aqualis
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
                     (List.fold (fun acc (q:num0) ->
-                                  match q.expr with
+                                  match q with
                                   |Str_c s -> acc+s
                                   |_ ->
                                       match q.etype with

@@ -38,16 +38,18 @@ namespace Aqualis
             else
                 vlist <- (etyp,atyp,name,cst)::vlist
         ///<summary>ナンバリング自動変数</summary>
-        member __.getAutoVar() =
+        member __.getAutoVarName(n:int) =
+            match lang with
+            |C|F -> varNameHead + n.ToString("000")
+            |T|H -> varNameHead + "_{"+n.ToString()+"}"
+        member this.getAutoVar() =
             match vlist with
             |(_,_,name,_)::lst ->
                 vlist <- lst
                 name
             |[] ->
                 counter <- counter + 1
-                match lang with
-                |C|F -> varNameHead + counter.ToString("000")
-                |T|H -> varNameHead + "_{"+counter.ToString()+"}"
+                this.getAutoVarName counter
         member _.maxcounter with get() = counter
         
     ///<summary>インデントの設定</summary>
@@ -368,10 +370,18 @@ namespace Aqualis
                 for (etyp,vtyp,name,p) in this.loopvar.list do
                     this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                     
-                for x in [this.i_cache_var;this.d_cache_var;this.z_cache_var] do
-                    for (etyp,vtyp,name,p) in x.list do
-                        this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
-                        
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.i_cache_var.maxcounter do
+                    this.vwrite(this.declare(It 4,A0,this.i_cache_var.getAutoVarName(i),"")+"\n")
+                    
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.d_cache_var.maxcounter do
+                    this.vwrite(this.declare(Dt,A0,this.d_cache_var.getAutoVarName(i),"")+"\n")
+                    
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.z_cache_var.maxcounter do
+                    this.vwrite(this.declare(Zt,A0,this.z_cache_var.getAutoVarName(i),"")+"\n")
+                    
                 for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")

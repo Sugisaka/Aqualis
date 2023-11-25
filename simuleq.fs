@@ -24,7 +24,7 @@ namespace Aqualis
                   norm_ <== asm.sqrt(norm_)
                 //ベクトルの内積
                 let dot_product2(dot_product2_:num0,a:num1,b:num1) =
-                  dot_product2_ <== (0.0,0.0)
+                  dot_product2_ <== 0
                   iter.num a.size1 <| fun i -> 
                       dot_product2_ <== dot_product2_ + asm.conj(a.[i]) * b.[i]
                       
@@ -42,7 +42,7 @@ namespace Aqualis
                                 print.s[_0;err;]
                             br.if1 (err .> tol) <| fun () ->
                                 ch.z <| fun omega ->
-                                    omega <== (1.0,0.0)
+                                    omega <== 1
                                     iter.num r.size1 <| fun i -> r_tld.[i] <== r.[i]
                                     ch.zzzz <| fun (rho,rho_1,alpha,beta) ->
                                         //反復処理

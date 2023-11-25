@@ -13,7 +13,7 @@ namespace Aqualis
         ///<summary>変数</summary>
         |Var1 of (VarType*string)
         ///<summary>部分配列</summary>
-        |Arx1 of (num0*(num0->Expr))
+        |Arx1 of (num0*(num0->num0))
         
     ///<summary>1次元配列</summary>
     type base1 (typ:Etype,x:Expr1) =
@@ -36,10 +36,10 @@ namespace Aqualis
             match x with
             |Var1(_,name) -> 
                 match p.lang with 
-                |F -> num0(Var(It 4,name+"_size(1)"))
-                |C -> num0(Var(It 4,name+"_size[0]"))
-                |T -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
-                |H -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]"))
+                |F -> Var(It 4,name+"_size(1)")
+                |C -> Var(It 4,name+"_size[0]")
+                |T -> Var(It 4,"\\mathcal{S}_1["+name+"]")
+                |H -> Var(It 4,"\\mathcal{S}_1["+name+"]")
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:num0) =
@@ -179,7 +179,7 @@ namespace Aqualis
                         print.t ("ERROR"+p.errorID.ToString()+" array size (first index) mismatch")
                 p.comment("****************************************************")
                 
-        static member subst (v1:Expr1,s1:num0,f1:num0->Expr,v2:Expr1,s2:num0,f2:num0->Expr) =
+        static member subst (v1:Expr1,s1:num0,f1:num0->num0,v2:Expr1,s2:num0,f2:num0->num0) =
             if p.debugMode then
                 p.errorIDinc()
                 p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
@@ -209,7 +209,7 @@ namespace Aqualis
             |Arx1(_,_),Arx1(_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s1 <| fun i -> f1 i <== f2 i
-        static member subst (v1:Expr1,s1:num0,f1:num0->Expr,v2:Expr) =
+        static member subst (v1:Expr1,s1:num0,f1:num0->num0,v2:num0) =
             match v1 with
             |Var1(_,x) ->
                 match p.lang with
@@ -234,8 +234,8 @@ namespace Aqualis
             p.var.setVar(typ,size,name,para)
             num1(typ,Var1(size,name))
         member this.etype with get() = typ
-        member this.Item with get(i:num0) = num0(this.Idx1(i))
-        member this.Item with get(i:int) = num0(this.Idx1(i.I))
+        member this.Item with get(i:num0) = this.Idx1(i)
+        member this.Item with get(i:int) = this.Idx1(i.I)
         member this.Item with get((a:num0,b:num0)) = num1(typ,this.Idx1(a,b))
         member this.Item with get((a:num0,b:int )) = num1(typ,this.Idx1(a,b) )
         member this.Item with get((a:int ,b:num0)) = num1(typ,this.Idx1(a,b))
@@ -243,7 +243,7 @@ namespace Aqualis
 
         //<summary>値を0で初期化</summary> 
         override this.clear() = 
-            this <== num0(Int_c 0)
+            this <== Int_c 0
             
         ///<summary>配列サイズ変数をメモリ未割当て状態に初期化</summary>
         override this.sizeinit() = 
@@ -260,33 +260,33 @@ namespace Aqualis
                 
         static member (+) (x:num1,y:num1) =
             num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype, Arx1(x.size1, fun i -> x[i].expr+y[i].expr))
-        static member (+) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x.expr+y[i].expr))
-        static member (+) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr+y.expr))
+            num1(x.etype%%y.etype, Arx1(x.size1, fun i -> x[i]+y[i]))
+        static member (+) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x+y[i]))
+        static member (+) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]+y))
         
         static member (-) (x:num1,y:num1) =
             num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr-y[i].expr))
-        static member (-) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x.expr-y[i].expr))
-        static member (-) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr-y.expr))
+            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]-y[i]))
+        static member (-) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x-y[i]))
+        static member (-) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]-y))
         
         static member (*) (x:num1,y:num1) =
             num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr*y[i].expr))
-        static member (*) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x.expr*y[i].expr))
-        static member (*) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr*y.expr))
+            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]*y[i]))
+        static member (*) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x*y[i]))
+        static member (*) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]*y))
         
         static member (/) (x:num1,y:num1) =
             num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr/y[i].expr))
-        static member (/) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x.expr/y[i].expr))
-        static member (/) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr./y.expr))
+            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]/y[i]))
+        static member (/) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x/y[i]))
+        static member (/) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]./y))
 
         static member (./) (x:num1,y:num1) =
             num1.sizeMismatchError(x,y)
-            Arx1(x.size1, fun i -> x[i].expr/y[i].expr)
-        static member (./) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x.expr./y[i].expr))
-        static member (./) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i].expr./y.expr))
+            Arx1(x.size1, fun i -> x[i]/y[i])
+        static member (./) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x./y[i]))
+        static member (./) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]./y))
         
         static member (<==) (v1:num1,v2:num1) =
             if p.debugMode then
@@ -342,19 +342,19 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_num1 =
         type asm with
-            static member pow(x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).expr))
-            static member sin(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.sin(x[i]).expr))
-            static member cos(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.cos(x[i]).expr))
-            static member tan(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.tan(x[i]).expr))
-            static member asin(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.asin(x[i]).expr))
-            static member acos(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.acos(x[i]).expr))
-            static member atan(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.atan(x[i]).expr))
-            static member atan2(x:num1,y:num1) = num1(Dt,Arx1(x.size1,fun i -> asm.atan2(x[i],y[i]).expr))
-            static member exp(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.exp(x[i]).expr))
-            static member abs(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.abs(x[i]).expr))
-            static member log(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.log(x[i]).expr))
-            static member log10(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.log10(x[i]).expr))
-            static member sqrt(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.sqrt(x[i]).expr))
-            static member floor(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.floor(x[i]).expr))
-            static member ceil(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.ceil(x[i]).expr))
-            static member conj(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.conj(x[i]).expr))
+            static member pow(x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y)))
+            static member sin(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.sin(x[i])))
+            static member cos(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.cos(x[i])))
+            static member tan(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.tan(x[i])))
+            static member asin(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.asin(x[i])))
+            static member acos(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.acos(x[i])))
+            static member atan(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.atan(x[i])))
+            static member atan2(x:num1,y:num1) = num1(Dt,Arx1(x.size1,fun i -> asm.atan2(x[i],y[i])))
+            static member exp(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.exp(x[i])))
+            static member abs(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.abs(x[i])))
+            static member log(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.log(x[i])))
+            static member log10(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.log10(x[i])))
+            static member sqrt(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.sqrt(x[i])))
+            static member floor(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.floor(x[i])))
+            static member ceil(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.ceil(x[i])))
+            static member conj(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.conj(x[i])))
