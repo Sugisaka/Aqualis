@@ -113,10 +113,9 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             y1 <== f x
             y2 <== f (x+dd)
             print.cc dy ((y2-y1)/dd)
-    ch.dddz <| fun (y1,y2r,y2i,dy) ->
-    ch.z <| fun z ->
+    ch.dddz <| fun (y1,y2r,y2i,dy) -> ch.z <| fun z ->
         z <== -1.8+asm.uj*3.5
-        codestr.section "012" <| fun () ->
+        codestr.section "013" <| fun () ->
             let f(x:num0) = asm.pow(asm.abs(asm.sum 1 4 <| fun n -> n*x),2)
             !"代数微分"
             dy <== asm.diff (f z) z
@@ -125,3 +124,16 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
             y2r <== f (z+dd)
             y2i <== f (z+dd*asm.uj)
             print.cc dy ((y2r-y1)/dd+asm.uj*(y2i-y1)/dd)
+    ch.d1 10 <| fun ar ->
+        codestr.section "014" <| fun () ->
+            ar.foreach <| fun i -> ar[i] <== i
+            let f(a:num1) = asm.sum 1 10 <| fun n -> n*a[n]
+            ar.foreach <| fun i ->
+                !"代数微分"
+                dy <== asm.diff (f ar) ar[i]
+                !"数値微分"
+                y1 <== f ar
+                ar[i] <== ar[i] + dd
+                y2 <== f ar
+                ar[i] <== ar[i] - dd
+                print.ccc i dy ((y2-y1)/dd)

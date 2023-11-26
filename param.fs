@@ -417,9 +417,17 @@ namespace Aqualis
                 for i in 1..this.loopvar.maxcounter do
                     this.vwrite(this.declare(It 4,A0,"ic"+i.ToString("000"),"")+"\n")
                 
-                for x in [this.i_cache_var;this.d_cache_var;this.z_cache_var] do
-                    for (etyp,vtyp,name,p) in x.list do 
-                        this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.i_cache_var.maxcounter do
+                    this.vwrite(this.declare(It 4,A0,this.i_cache_var.getAutoVarName(i),"")+"\n")
+                    
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.d_cache_var.maxcounter do
+                    this.vwrite(this.declare(Dt,A0,this.d_cache_var.getAutoVarName(i),"")+"\n")
+                    
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.z_cache_var.maxcounter do
+                    this.vwrite(this.declare(Zt,A0,this.z_cache_var.getAutoVarName(i),"")+"\n")
                         
                 for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 

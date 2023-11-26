@@ -81,14 +81,8 @@ namespace Aqualis
                     p.comment("****************************************************")
                 |_ -> ()
             match x with
-            |Var3(_,name) ->
-                match p.lang with
-                |F -> Var(typ,name+"("+i.code+","+j.code+","+k.code+")")
-                |C -> Var(typ,name+"["+((k-1)*this.size1*this.size2+(j-1)*this.size1+(i-1)).code+"]")
-                |T -> Var(typ,name+"("+i.code+","+j.code+","+k.code+")")
-                |H -> Var(typ,name+"["+i.code+","+j.code+","+k.code+"]")
-            |Arx3(_,_,_,f) ->
-                f (i,j,k)
+            |Var3(_,name) -> Idx3(typ,name,i,j,k)
+            |Arx3(_,_,_,f) -> f (i,j,k)
                 
         member this.Idx3(i:num0,j:num0,k:int) = this.Idx3(i,j,k.I)
         member this.Idx3(i:num0,j:int,k:num0) = this.Idx3(i,j.I,k)

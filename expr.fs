@@ -210,6 +210,9 @@ namespace Aqualis
         |Log of Etype*num0
         |Log10 of Etype*num0
         |Sqrt of Etype*num0
+        |Idx1 of Etype*string*num0
+        |Idx2 of Etype*string*num0*num0
+        |Idx3 of Etype*string*num0*num0*num0
         |Formula of Etype*string
         |Sum of Etype*num0*num0*(num0->num0)
         |NaN
@@ -239,10 +242,13 @@ namespace Aqualis
             |Log (t,_) -> t
             |Log10 (t,_) -> t
             |Sqrt (t,_) -> t
+            |Idx1 (t,_,_) -> t
+            |Idx2 (t,_,_,_) -> t
+            |Idx3 (t,_,_,_,_) -> t
             |Formula (t,_) -> t
             |Sum (t,_,_,_) -> t
             |NaN -> Nt
-        
+            
         static member internal looprange (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
             |F ->
@@ -273,39 +279,42 @@ namespace Aqualis
             |_    -> NaN
             
         static member internal equal(x:num0,y:num0) =
-                match x,y with
-                |Var(t1,u1),Var(t2,u2) when t1=t2 && u1=u2 -> true
-                |Int_c u1,Int_c u2 when u1=u2 -> true
-                |Dbl_c u1,Dbl_c u2 when u1=u2 -> true
-                |Str_c u1,Str_c u2 when u1=u2 -> true
-                |Par(t1,u1),Par(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Inv(t1,u1),Inv(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Add(t1,u1,v1),Add(t2,u2,v2) when t1=t2 && ((num0.equal(u1,u2) && num0.equal(v1,v2))||(num0.equal(u1,v2) && num0.equal(v2,v1)))-> true
-                |Sub(t1,u1,v1),Sub(t2,u2,v2) when t1=t2 && num0.equal(u1,u2) && num0.equal(v1,v2) -> true
-                |Mul(t1,u1,v1),Mul(t2,u2,v2) when t1=t2 && ((num0.equal(u1,u2) && num0.equal(v1,v2))||(num0.equal(u1,v2) && num0.equal(v2,v1)))-> true
-                |Div(t1,u1,v1),Div(t2,u2,v2) when t1=t2 && num0.equal(u1,u2) && num0.equal(v1,v2) -> true
-                |Pow(t1,u1,v1),Pow(t2,u2,v2) when t1=t2 && num0.equal(u1,u2) && num0.equal(v1,v2) -> true
-                |Exp(t1,u1),Exp(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Sin(t1,u1),Sin(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Cos(t1,u1),Cos(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Tan(t1,u1),Tan(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Asin(t1,u1),Asin(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Acos(t1,u1),Acos(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Atan(t1,u1),Atan(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Atan2(u1,v1),Atan2(u2,v2) when num0.equal(u1,u2) && num0.equal(v1,v2) -> true
-                |Abs(t1,u1),Abs(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Log(t1,u1),Log(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Log10(t1,u1),Log10(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Sqrt(t1,u1),Sqrt(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
-                |Formula(t1,u1),Formula(t2,u2) when t1=t2 && u1=u2 -> true
-                |Sum(t1,n1a,n2a,f1),Sum(t2,n1b,n2b,f2) ->
-                    isEqSimplify <- false
-                    let u1 = f1 (Int_c 1)
-                    let u2 = f2 (Int_c 1)
-                    isEqSimplify <- true
-                    t1=t2 && num0.equal(n1a,n1b) && num0.equal(n2a,n2b) && num0.equal(u1,u2)
-                |NaN,NaN -> true
-                |_ -> false
+            match x,y with
+            |Var(t1,u1),Var(t2,u2) when t1=t2 && u1=u2 -> true
+            |Int_c u1,Int_c u2 when u1=u2 -> true
+            |Dbl_c u1,Dbl_c u2 when u1=u2 -> true
+            |Str_c u1,Str_c u2 when u1=u2 -> true
+            |Par(t1,u1),Par(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Inv(t1,u1),Inv(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Add(t1,u1,v1),Add(t2,u2,v2) when t1=t2 && ((num0.equal(u1,u2) && num0.equal(v1,v2))||(num0.equal(u1,v2) && num0.equal(v2,v1)))-> true
+            |Sub(t1,u1,v1),Sub(t2,u2,v2) when t1=t2 && num0.equal(u1,u2) && num0.equal(v1,v2) -> true
+            |Mul(t1,u1,v1),Mul(t2,u2,v2) when t1=t2 && ((num0.equal(u1,u2) && num0.equal(v1,v2))||(num0.equal(u1,v2) && num0.equal(v2,v1)))-> true
+            |Div(t1,u1,v1),Div(t2,u2,v2) when t1=t2 && num0.equal(u1,u2) && num0.equal(v1,v2) -> true
+            |Pow(t1,u1,v1),Pow(t2,u2,v2) when t1=t2 && num0.equal(u1,u2) && num0.equal(v1,v2) -> true
+            |Exp(t1,u1),Exp(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Sin(t1,u1),Sin(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Cos(t1,u1),Cos(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Tan(t1,u1),Tan(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Asin(t1,u1),Asin(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Acos(t1,u1),Acos(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Atan(t1,u1),Atan(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Atan2(u1,v1),Atan2(u2,v2) when num0.equal(u1,u2) && num0.equal(v1,v2) -> true
+            |Abs(t1,u1),Abs(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Log(t1,u1),Log(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Log10(t1,u1),Log10(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Sqrt(t1,u1),Sqrt(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Idx1(t1,u1,nA1),Idx1(t2,u2,nA2) when t1=t2 && u1=u2 && num0.equal(nA1,nA2) -> true
+            |Idx2(t1,u1,nA1,nB1),Idx2(t2,u2,nA2,nB2) when t1=t2 && u1=u2 && num0.equal(nA1,nA2) && num0.equal(nB1,nB2) -> true
+            |Idx3(t1,u1,nA1,nB1,nC1),Idx3(t2,u2,nA2,nB2,nC2) when t1=t2 && u1=u2 && num0.equal(nA1,nA2) && num0.equal(nB1,nB2) && num0.equal(nC1,nC2) -> true
+            |Formula(t1,u1),Formula(t2,u2) when t1=t2 && u1=u2 -> true
+            |Sum(t1,n1a,n2a,f1),Sum(t2,n1b,n2b,f2) ->
+                isEqSimplify <- false
+                let u1 = f1 (Int_c 1)
+                let u2 = f2 (Int_c 1)
+                isEqSimplify <- true
+                t1=t2 && num0.equal(n1a,n1b) && num0.equal(n2a,n2b) && num0.equal(u1,u2)
+            |NaN,NaN -> true
+            |_ -> false
                 
         member this.code with get() =
             match p.lang with
@@ -337,6 +346,9 @@ namespace Aqualis
                 |Log(_,x) -> "\\ln\\left("+x.code+"\\right)"
                 |Log10(_,x) -> "\\log\\left("+x.code+"\\right)"
                 |Sqrt(_,x) -> "\\sqrt{"+x.code+"}"
+                |Idx1(_,u,n1) -> u+"["+n1.code+"]"
+                |Idx2(_,u,n1,n2) -> u+"["+n1.code+","+n2.code+"]"
+                |Idx3(_,u,n1,n2,n3) -> u+"["+n1.code+","+n2.code+","+n3.code+"]"
                 |Formula(_,s) -> s
                 |Sum(t,n1,n2,f) ->
                     let mutable n = ""
@@ -372,6 +384,9 @@ namespace Aqualis
                 |Log(_,x) -> "\\ln\\left("+x.code+"\\right)"
                 |Log10(_,x) -> "\\log\\left("+x.code+"\\right)"
                 |Sqrt(_,x) -> "\\sqrt{"+x.code+"}"
+                |Idx1(_,u,n1) -> u+"["+n1.code+"]"
+                |Idx2(_,u,n1,n2) -> u+"["+n1.code+","+n2.code+"]"
+                |Idx3(_,u,n1,n2,n3) -> u+"["+n1.code+","+n2.code+","+n3.code+"]"
                 |Formula(_,s) -> s
                 |Sum(_,n1,n2,f) ->
                     let mutable n = ""
@@ -404,6 +419,9 @@ namespace Aqualis
                 |Log(_,x) -> "log("+x.code+")"
                 |Log10(_,x) -> "log10("+x.code+")"
                 |Sqrt(_,x) -> "sqrt("+x.code+")"
+                |Idx1(_,u,n1) -> u+"("+n1.code+")"
+                |Idx2(_,u,n1,n2) -> u+"("+n1.code+","+n2.code+")"
+                |Idx3(_,u,n1,n2,n3) -> u+"("+n1.code+","+n2.code+","+n3.code+")"
                 |Formula(_,s) -> s
                 |Sum(t,n1,n2,f) ->
                     let g = num0.ch t
@@ -447,6 +465,14 @@ namespace Aqualis
                 |Log(_,x) -> "log("+x.code+")"
                 |Log10(_,x) -> "log10("+x.code+")"
                 |Sqrt(_,x) -> "sqrt("+x.code+")"
+                |Idx1(_,u,n1) -> u+"["+(n1-Int_c 1).code+"]"
+                |Idx2(_,u,n1,n2) -> 
+                    let size1 = Var(It 4,u+"_size[0]")
+                    u+"["+(((n2-Int_c 1)*size1+(n1-Int_c 1))).code+"]"
+                |Idx3(_,u,n1,n2,n3) -> 
+                    let size1 = Var(It 4,u+"_size[0]")
+                    let size2 = Var(It 4,u+"_size[1]")
+                    u+"["+((n3-Int_c 1)*size1*size2+(n2-Int_c 1)*size1+(n1-Int_c 1)).code+"]"
                 |Formula(_,s) -> s
                 |Sum(t,n1,n2,f) ->
                     let g = num0.ch t
