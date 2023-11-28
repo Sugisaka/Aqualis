@@ -123,16 +123,37 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
                 y2r <== f (z+dd)
                 y2i <== f (z+dd*asm.uj)
                 print.cc dy ((y2r-y1)/dd+asm.uj*(y2i-y1)/dd)
-        codestr.section "014" <| fun () ->
+        codestr.section "014a" <| fun () ->
             ch.d1 10 <| fun ar ->
                 ar.foreach <| fun i -> ar[i] <== i
                 let f(a:num1) = (asm.sum 1 20 <| fun n -> n*n*a[n])/asm.sqrt(asm.sum 1 10 <| fun n -> n*a[n])
+                (f ar).eval()
                 ar.foreach <| fun i ->
                     !"代数微分"
                     dy <== asm.diff (f ar) ar[i]
-                    // !"数値微分"
-                    // y1 <== f ar
-                    // ar[i] <== ar[i] + dd
-                    // y2 <== f ar
-                    // ar[i] <== ar[i] - dd
-                    // print.ccc i dy ((y2-y1)/dd)
+                    !"数値微分"
+                    y1 <== f ar
+                    ar[i] <== ar[i] + dd
+                    (f ar).eval()
+                    y2 <== f ar
+                    ar[i] <== ar[i] - dd
+                    (f ar).eval()
+                    print.ccc i dy ((y2-y1)/dd)
+        codestr.section "014b" <| fun () ->
+            ch.d1 10 <| fun ar ->
+                let q1 = var.d0("tmp1")
+                let q2 = var.d0("tmp2")
+                ar.foreach <| fun i -> ar[i] <== i
+                let f(a:num1) = asm.xlet(q1,asm.sum 1 20 <| fun n -> n*n*a[n])/asm.sqrt(asm.xlet(q2,asm.sum 1 10 <| fun n -> n*a[n]))
+                (f ar).eval()
+                ar.foreach <| fun i ->
+                    !"代数微分"
+                    dy <== asm.diff (f ar) ar[i]
+                    !"数値微分"
+                    y1 <== f ar
+                    ar[i] <== ar[i] + dd
+                    (f ar).eval()
+                    y2 <== f ar
+                    ar[i] <== ar[i] - dd
+                    (f ar).eval()
+                    print.ccc i dy ((y2-y1)/dd)

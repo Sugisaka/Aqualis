@@ -215,6 +215,7 @@ namespace Aqualis
         |Idx3 of Etype*string*num0*num0*num0
         |Formula of Etype*string
         |Sum of Etype*num0*num0*(num0->num0)
+        |Let of Etype*num0*num0
         |NaN
         
         member this.etype with get() =
@@ -247,6 +248,7 @@ namespace Aqualis
             |Idx3 (t,_,_,_,_) -> t
             |Formula (t,_) -> t
             |Sum (t,_,_,_) -> t
+            |Let (t,_,_) -> t
             |NaN -> Nt
             
         static member internal looprange (i1:num0) = fun (i2:num0) -> fun code -> 
@@ -313,6 +315,7 @@ namespace Aqualis
                 let u2 = f2 (Int_c 1)
                 isEqSimplify <- true
                 t1=t2 && num0.equal(n1a,n1b) && num0.equal(n2a,n2b) && num0.equal(u1,u2)
+            |Let(t1,v1,u1),Let(t2,v2,u2) when t1=t2 && num0.equal(v1,v2) && num0.equal(u1,u2) -> true
             |NaN,NaN -> true
             |_ -> false
                 
@@ -350,11 +353,12 @@ namespace Aqualis
                 |Idx2(_,u,n1,n2) -> u+"["+n1.code+","+n2.code+"]"
                 |Idx3(_,u,n1,n2,n3) -> u+"["+n1.code+","+n2.code+","+n3.code+"]"
                 |Formula(_,s) -> s
-                |Sum(t,n1,n2,f) ->
+                |Sum(_,n1,n2,f) ->
                     let mutable n = ""
                     p.getloopvar <| fun counter ->
                         n <- counter
                     "\\sum_{"+n+"="+n1.code+"}^{"+n2.code+"}"+(f (Var(It 4,n))).code
+                |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
             |H ->
                 match this with
@@ -393,6 +397,7 @@ namespace Aqualis
                     p.getloopvar <| fun counter ->
                         n <- counter
                     "\\sum_{"+n+"="+n1.code+"}^{"+n2.code+"}"+(f (Var(It 4,n))).code
+                |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
             |F ->
                 match this with
@@ -429,6 +434,7 @@ namespace Aqualis
                     num0.looprange n1 n2 <| fun n ->
                         g <== g + (f n)
                     g.code
+                |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
             |C ->
                 match this with
@@ -480,8 +486,76 @@ namespace Aqualis
                     num0.looprange n1 n2 <| fun n ->
                         g <== g + (f n)
                     g.code
+                |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
-                    
+                
+        ///<summary>Letで事前に登録された変数に値を保存</summary>
+        member this.eval() =
+            match this with
+            |Str_c _ -> ()
+            |Int_c _ -> ()
+            |Dbl_c _ -> ()
+            |Var _ -> ()
+            |Par(_,v) -> v.eval()
+            |Inv(_,v) -> v.eval()
+            |Add(_,u,v) ->
+                u.eval()
+                v.eval()
+            |Sub(_,u,v) ->
+                u.eval()
+                v.eval()
+            |Mul(_,u,v) ->
+                u.eval()
+                v.eval()
+            |Div(_,u,v) ->
+                u.eval()
+                v.eval()
+            |Pow(_,u,v) ->
+                u.eval()
+                v.eval()
+            |Exp(_,v) ->
+                v.eval()
+            |Sin(_,v) ->
+                v.eval()
+            |Cos(_,v) ->
+                v.eval()
+            |Tan(_,v) ->
+                v.eval()
+            |Asin(_,v) ->
+                v.eval()
+            |Acos(_,v) ->
+                v.eval()
+            |Atan(_,v) ->
+                v.eval()
+            |Atan2(u,v) ->
+                u.eval()
+                v.eval()
+            |Abs(_,v) ->
+                v.eval()
+            |Log(_,v) ->
+                v.eval()
+            |Log10(_,v) ->
+                v.eval()
+            |Sqrt(_,v) ->
+                v.eval()
+            |Idx1(_,_,n1) ->
+                n1.eval()
+            |Idx2(_,_,n1,n2) ->
+                n1.eval()
+                n2.eval()
+            |Idx3(_,_,n1,n2,n3) ->
+                n1.eval()
+                n2.eval()
+                n3.eval()
+            |Formula _ -> ()
+            |Sum(_,n1,n2,f) ->
+                num0.looprange n1 n2 <| fun n ->
+                    (f n).eval()
+            |Let(_,v,u) -> 
+                u.eval()
+                v <== u
+            |NaN -> ()
+            
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:num0,y:num0) = 
             match x.etype,y.etype with

@@ -238,7 +238,10 @@ namespace Aqualis
             |_ ->
                 printfn "%s" <| v.ToString()
                 v
-            
+                
+        ///<summary>uの値を変数vに保存</summary>
+        static member xlet (v:num0,u:num0) = Let(v.etype,v,u)
+        
     [<AutoOpen>]
     module num0_op =
         ///<summary>数値型</summary>

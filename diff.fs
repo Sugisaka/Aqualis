@@ -31,6 +31,8 @@ namespace Aqualis
                         v*(asm.diff u x)+(asm.diff v x)*u
                     |Div(_,v,u),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         (asm.diff v x)/u-v/Pow(u.etype,u,Int_c 2)*(asm.diff u x)
+                    |Pow(_,v,Int_c 2),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
+                        2*v*(asm.diff v x)
                     |Pow(t,v,Int_c u),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         u*Pow(t,v,Int_c (u-1))*(asm.diff v x)
                     |Pow(t,v,Dbl_c u),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
@@ -97,6 +99,8 @@ namespace Aqualis
                         NaN
                     |Sum(t,n1,n2,f),_ ->
                         Sum(t,n1,n2,fun n -> asm.diff (f n) x)
+                    |Let(_,_,u),_ ->
+                        asm.diff u x
                     |NaN,_ ->
                         printfn "NaNを微分できません"
                         NaN
