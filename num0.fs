@@ -308,9 +308,17 @@ namespace Aqualis
                 
         [<AutoOpen>]
         module noperator =
-            let And (lst:list<bool0>) = AND <| List.map (fun (x:bool0) -> x) lst
-            let Or (lst:list<bool0>) = OR <| List.map (fun (x:bool0) -> x) lst
-            
+            let And (lst:list<bool0>) = 
+                match List.tryFind (fun x -> bool0.equal(x,False)) lst with
+                |None ->
+                    AND <| List.map (fun (x:bool0) -> x) lst
+                |Some _ -> False
+            let Or (lst:list<bool0>) = 
+                match List.tryFind (fun x -> bool0.equal(x,True)) lst with
+                |None ->
+                    OR <| List.map (fun (x:bool0) -> x) lst
+                |Some _ -> True
+                
             type System.Int32 with
                 ///<summary>整数をint0型に置換</summary>
                 member this.I with get() = Int_c this

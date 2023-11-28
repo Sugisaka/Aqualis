@@ -10,6 +10,8 @@ namespace Aqualis
     open Aqualis_base
     
     type bool0 =
+        |False
+        |True
         |Eq of num0*num0
         |NEq of num0*num0
         |Greater of num0*num0
@@ -20,10 +22,45 @@ namespace Aqualis
         |OR of bool0 list
         |Null
         
+        static member equal(x:bool0,y:bool0) =
+            match x,y with
+            |False,False -> true
+            |True,True -> true
+            |Eq(v1,u1),Eq(v2,u2) -> num0.equal(v1,v2) && num0.equal(u1,u2)
+            |NEq(v1,u1),NEq(v2,u2) -> num0.equal(v1,v2) && num0.equal(u1,u2)
+            |Greater(v1,u1),Greater(v2,u2) -> num0.equal(v1,v2) && num0.equal(u1,u2)
+            |GreaterEq(v1,u1),GreaterEq(v2,u2) -> num0.equal(v1,v2) && num0.equal(u1,u2)
+            |Less(v1,u1),Less(v2,u2) -> num0.equal(v1,v2) && num0.equal(u1,u2)
+            |LessEq(v1,u1),LessEq(v2,u2) -> num0.equal(v1,v2) && num0.equal(u1,u2)
+            |AND v1,AND u2 ->
+                if v1.Length=u2.Length then
+                    let rec cmp (v:List<bool0>,u:List<bool0>) =
+                        match v,u with
+                        |v::_,u::_ when (not <| bool0.equal(v,u)) -> false
+                        |_::v0,_::u0 -> cmp (v0,u0)
+                        |_ -> true
+                    cmp (v1,u2)
+                else
+                    false
+            |OR v1,OR u2 ->
+                if v1.Length=u2.Length then
+                    let rec cmp (v:List<bool0>,u:List<bool0>) =
+                        match v,u with
+                        |v::_,u::_ when (bool0.equal(v,u)) -> true
+                        |_::v0,_::u0 -> cmp (v0,u0)
+                        |_ -> false
+                    cmp (v1,u2)
+                else
+                    false
+            |Null,Null -> true
+            |_ -> false
+            
         member this.code with get() =
             match p.lang with
             |T ->
                 match this with
+                |True -> "true"
+                |False -> "false"
                 |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
                 |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
@@ -44,6 +81,8 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" \\leq "+v2.code
+                |AND(v) when (match List.tryFind (fun x -> bool0.equal(x,False)) v with |None -> false |Some _ -> true) -> False.code
+                |OR(v)  when (match List.tryFind (fun x -> bool0.equal(x,True )) v with |None -> false |Some _ -> true) -> True.code
                 |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
@@ -69,6 +108,8 @@ namespace Aqualis
                 |Null -> ""
             |H ->
                 match this with
+                |True -> "true"
+                |False -> "false"
                 |AND [Less(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
                     v1.code+" < "+v2.code+" < "+v3.code
                 |AND [LessEq(v1,v2);Less(v2B,v3)] when v2.code=v2B.code ->
@@ -89,6 +130,8 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" \\leq "+v2.code
+                |AND(v) when (match List.tryFind (fun x -> bool0.equal(x,False)) v with |None -> false |Some _ -> true) -> False.code
+                |OR(v)  when (match List.tryFind (fun x -> bool0.equal(x,True )) v with |None -> false |Some _ -> true) -> True.code
                 |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
@@ -114,6 +157,8 @@ namespace Aqualis
                 |Null -> ""
             |F ->
                 match this with
+                |True -> ".true."
+                |False -> ".false."
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->
@@ -126,6 +171,8 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" <= "+v2.code
+                |AND(v) when (match List.tryFind (fun x -> bool0.equal(x,False)) v with |None -> false |Some _ -> true) -> False.code
+                |OR(v)  when (match List.tryFind (fun x -> bool0.equal(x,True )) v with |None -> false |Some _ -> true) -> True.code
                 |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
@@ -151,6 +198,8 @@ namespace Aqualis
                 |Null -> ""
             |C ->
                 match this with
+                |True -> "true"
+                |False -> "false"
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->
@@ -163,6 +212,8 @@ namespace Aqualis
                     v1.code+" < "+v2.code
                 |LessEq(v1,v2) ->
                     v1.code+" <= "+v2.code
+                |AND(v) when (match List.tryFind (fun x -> bool0.equal(x,False)) v with |None -> false |Some _ -> true) -> False.code
+                |OR(v)  when (match List.tryFind (fun x -> bool0.equal(x,True )) v with |None -> false |Some _ -> true) -> True.code
                 |AND(v) ->
                     //先に中身を評価
                     let uc = v |> List.map (fun q -> q.code)
@@ -1150,19 +1201,37 @@ namespace Aqualis
             |_ -> Pow(x%%y, x,y)
             
         ///<summary>等号</summary>
-        static member (.=) (v1:num0,v2:num0) = Eq(v1,v2)
+        static member (.=) (v1:num0,v2:num0) = 
+            match v1,v2 with
+            |Int_c a,Int_c b when a=b -> True
+            |Int_c _,Int_c _ -> False
+            |Dbl_c a,Dbl_c b when a=b -> True
+            |Dbl_c _,Dbl_c _ -> False
+            |_ -> Eq(v1,v2)
         static member (.=) (x:int,y:num0) = (Int_c x) .= y
         static member (.=) (x:double,y:num0) = (Dbl_c x) .= y
         static member (.=) (x:num0,y:int) = x .= (Int_c y)
         static member (.=) (x:num0,y:double) = x .= (Dbl_c y)
         ///<summary>不等号</summary>
-        static member (.=/) (v1:num0,v2:num0) = NEq(v1,v2)        
+        static member (.=/) (v1:num0,v2:num0) = 
+            match v1,v2 with
+            |Int_c a,Int_c b when a<>b -> True
+            |Int_c _,Int_c _ -> False
+            |Dbl_c a,Dbl_c b when a<>b -> True
+            |Dbl_c _,Dbl_c _ -> False
+            |_ -> NEq(v1,v2)
         static member (.=/) (x:int,y:num0) = (Int_c x) .=/ y
         static member (.=/) (x:double,y:num0) = (Dbl_c x) .=/ y
         static member (.=/) (x:num0,y:int) = x .=/ (Int_c y)
         static member (.=/) (x:num0,y:double) = x .=/ (Dbl_c y)
         ///<summary>比較（より小）</summary>
-        static member (.<) (v1:num0,v2:num0) = Less(v1,v2)
+        static member (.<) (v1:num0,v2:num0) = 
+            match v1,v2 with
+            |Int_c a,Int_c b when a<b -> True
+            |Int_c _,Int_c _ -> False
+            |Dbl_c a,Dbl_c b when a<b -> True
+            |Dbl_c _,Dbl_c _ -> False
+            |_ -> Less(v1,v2)
         static member (.<) (x:int,y:num0) = (Int_c x) .< y
         static member (.<) (x:double,y:num0) = (Dbl_c x) .< y
         static member (.<) (x:num0,y:int) = x .< (Int_c y)
@@ -1203,7 +1272,13 @@ namespace Aqualis
         static member (.<) (x:bool0,y:int) = x .< (Int_c y)
         static member (.<) (x:bool0,y:double) = x .< (Dbl_c y)
         ///<summary>比較（以下）</summary>
-        static member (.<=) (v1:num0,v2:num0) = LessEq(v1,v2)
+        static member (.<=) (v1:num0,v2:num0) = 
+            match v1,v2 with
+            |Int_c a,Int_c b when a<=b -> True
+            |Int_c _,Int_c _ -> False
+            |Dbl_c a,Dbl_c b when a<=b -> True
+            |Dbl_c _,Dbl_c _ -> False
+            |_ -> LessEq(v1,v2)
         static member (.<=) (x:int,y:num0) = (Int_c x) .<= y
         static member (.<=) (x:double,y:num0) = (Dbl_c x) .<= y
         static member (.<=) (x:num0,y:int) = x .<= (Int_c y)
@@ -1244,7 +1319,13 @@ namespace Aqualis
         static member (.<=) (x:bool0,y:int) = x .<= (Int_c y)
         static member (.<=) (x:bool0,y:double) = x .<= (Dbl_c y)
         ///<summary>比較（より大）</summary>
-        static member (.>) (v1:num0,v2:num0) = Greater(v1,v2)        
+        static member (.>) (v1:num0,v2:num0) = 
+            match v1,v2 with
+            |Int_c a,Int_c b when a>b -> True
+            |Int_c _,Int_c _ -> False
+            |Dbl_c a,Dbl_c b when a>b -> True
+            |Dbl_c _,Dbl_c _ -> False
+            |_ -> Greater(v1,v2)        
         static member (.>) (x:int,y:num0) = (Int_c x) .> y
         static member (.>) (x:double,y:num0) = (Dbl_c x) .> y
         static member (.>) (x:num0,y:int) = x .> (Int_c y)
@@ -1285,7 +1366,13 @@ namespace Aqualis
         static member (.>) (x:bool0,y:int) = x .> (Int_c y)
         static member (.>) (x:bool0,y:double) = x .> (Dbl_c y)
         ///<summary>比較（以上）</summary>
-        static member (.>=) (v1:num0,v2:num0) = GreaterEq(v1,v2)
+        static member (.>=) (v1:num0,v2:num0) = 
+            match v1,v2 with
+            |Int_c a,Int_c b when a>=b -> True
+            |Int_c _,Int_c _ -> False
+            |Dbl_c a,Dbl_c b when a>=b -> True
+            |Dbl_c _,Dbl_c _ -> False
+            |_ -> GreaterEq(v1,v2)
         static member (.>=) (x:int,y:num0) = (Int_c x) .>= y
         static member (.>=) (x:double,y:num0) = (Dbl_c x) .>= y
         static member (.>=) (x:num0,y:int) = x .>= (Int_c y)
