@@ -542,70 +542,78 @@ namespace Aqualis
                 
         ///<summary>Letで事前に登録された変数に値を保存</summary>
         member this.eval() =
-            match this with
-            |Str_c _ -> ()
-            |Int_c _ -> ()
-            |Dbl_c _ -> ()
-            |Var _ -> ()
-            |Par(_,v) -> v.eval()
-            |Inv(_,v) -> v.eval()
-            |Add(_,u,v) ->
-                u.eval()
-                v.eval()
-            |Sub(_,u,v) ->
-                u.eval()
-                v.eval()
-            |Mul(_,u,v) ->
-                u.eval()
-                v.eval()
-            |Div(_,u,v) ->
-                u.eval()
-                v.eval()
-            |Pow(_,u,v) ->
-                u.eval()
-                v.eval()
-            |Exp(_,v) ->
-                v.eval()
-            |Sin(_,v) ->
-                v.eval()
-            |Cos(_,v) ->
-                v.eval()
-            |Tan(_,v) ->
-                v.eval()
-            |Asin(_,v) ->
-                v.eval()
-            |Acos(_,v) ->
-                v.eval()
-            |Atan(_,v) ->
-                v.eval()
-            |Atan2(u,v) ->
-                u.eval()
-                v.eval()
-            |Abs(_,v) ->
-                v.eval()
-            |Log(_,v) ->
-                v.eval()
-            |Log10(_,v) ->
-                v.eval()
-            |Sqrt(_,v) ->
-                v.eval()
-            |Idx1(_,_,n1) ->
-                n1.eval()
-            |Idx2(_,_,n1,n2) ->
-                n1.eval()
-                n2.eval()
-            |Idx3(_,_,n1,n2,n3) ->
-                n1.eval()
-                n2.eval()
-                n3.eval()
-            |Formula _ -> ()
-            |Sum(_,n1,n2,f) ->
-                num0.looprange n1 n2 <| fun n ->
-                    (f n).eval()
-            |Let(_,v,u) -> 
-                u.eval()
-                v <== u
-            |NaN -> ()
+            let mutable c:List<num0> = []
+            let rec ev (g:num0) =
+                match g with
+                |Str_c _ -> ()
+                |Int_c _ -> ()
+                |Dbl_c _ -> ()
+                |Var _ -> ()
+                |Par(_,v) -> ev v
+                |Inv(_,v) -> ev v
+                |Add(_,u,v) ->
+                    ev u
+                    ev v
+                |Sub(_,u,v) ->
+                    ev u
+                    ev v
+                |Mul(_,u,v) ->
+                    ev u
+                    ev v
+                |Div(_,u,v) ->
+                    ev u
+                    ev v
+                |Pow(_,u,v) ->
+                    ev u
+                    ev v
+                |Exp(_,v) ->
+                    ev v
+                |Sin(_,v) ->
+                    ev v
+                |Cos(_,v) ->
+                    ev v
+                |Tan(_,v) ->
+                    ev v
+                |Asin(_,v) ->
+                    ev v
+                |Acos(_,v) ->
+                    ev v
+                |Atan(_,v) ->
+                    ev v
+                |Atan2(u,v) ->
+                    ev u
+                    ev v
+                |Abs(_,v) ->
+                    ev v
+                |Log(_,v) ->
+                    ev v
+                |Log10(_,v) ->
+                    ev v
+                |Sqrt(_,v) ->
+                    ev v
+                |Idx1(_,_,n1) ->
+                    ev n1
+                |Idx2(_,_,n1,n2) ->
+                    ev n1
+                    ev n2
+                |Idx3(_,_,n1,n2,n3) ->
+                    ev n1
+                    ev n2
+                    ev n3
+                |Formula _ -> ()
+                |Sum(_,n1,n2,f) ->
+                    num0.looprange n1 n2 <| fun n ->
+                        ev (f n)
+                |Let(_,v,u) -> 
+                    ev u
+                    match List.tryFind (fun h -> num0.equal(h,g)) c with
+                    |None ->
+                        //評価済みでない式のみ処理
+                        v <== u
+                    |Some _ -> ()
+                    c <- g::c
+                |NaN -> ()
+            ev this
             
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:num0,y:num0) = 

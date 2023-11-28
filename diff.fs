@@ -66,29 +66,41 @@ namespace Aqualis
                         (Dbl_c 0.5)*(asm.diff v x)/Sqrt(t,v)
                     |Idx1(t1,u1,nA1),Idx1(t2,u2,nB1) ->
                         if t1=t2 && u1=u2 then
-                            let c = num0.ch(It 4)
-                            br.if2 (nA1.=nB1)
-                                <| fun () -> c <== 1 
-                                <| fun () -> c <== 0 
-                            c
+                            match (nA1.=nB1) with
+                            |True -> Int_c 1
+                            |False -> Int_c 0
+                            |_ ->
+                                let c = num0.ch(It 4)
+                                br.if2 (nA1.=nB1)
+                                    <| fun () -> c <== 1 
+                                    <| fun () -> c <== 0 
+                                c
                         else
                            Int_c 0
                     |Idx2(t1,u1,nA1,nA2),Idx2(t2,u2,nB1,nB2) ->
                         if t1=t2 && u1=u2 then
-                            let c = num0.ch(It 4)
-                            br.if2 (And [nA1.=nB1;nA2.=nB2;])
-                                <| fun () -> c <== 1 
-                                <| fun () -> c <== 0 
-                            c
+                            match (And [nA1.=nB1;nA2.=nB2;]) with
+                            |True -> Int_c 1
+                            |False -> Int_c 0
+                            |_ ->
+                                let c = num0.ch(It 4)
+                                br.if2 (And [nA1.=nB1;nA2.=nB2;])
+                                    <| fun () -> c <== 1 
+                                    <| fun () -> c <== 0 
+                                c
                         else
                            Int_c 0
                     |Idx3(t1,u1,nA1,nA2,nA3),Idx3(t2,u2,nB1,nB2,nB3) ->
                         if t1=t2 && u1=u2 then
-                            let c = num0.ch(It 4)
-                            br.if2 (And [nA1.=nB1;nA2.=nB2;nA3.=nB3;])
-                                <| fun () -> c <== 1 
-                                <| fun () -> c <== 0 
-                            c
+                            match (And [nA1.=nB1;nA2.=nB2;nA3.=nB3;]) with
+                            |True -> Int_c 1
+                            |False -> Int_c 0
+                            |_ ->
+                                let c = num0.ch(It 4)
+                                br.if2 (And [nA1.=nB1;nA2.=nB2;nA3.=nB3;])
+                                    <| fun () -> c <== 1 
+                                    <| fun () -> c <== 0 
+                                c
                         else
                            Int_c 0
                     |Idx1 _ ,(Idx2 _|Idx3 _) -> Int_c 0
