@@ -235,7 +235,9 @@ namespace Aqualis
                 |C,_ -> Formula(Zt,"conj("+v.code+")")
                 |(T|H),(Var _|Int_c _|Dbl_c _) -> Formula(Zt,v.code+"^*")
                 |(T|H),_ -> Formula(Zt,"\\left["+v.code+"\\right]^*")
-            |_ -> v
+            |_ ->
+                printfn "%s" <| v.ToString()
+                v
             
     [<AutoOpen>]
     module num0_op =

@@ -40,7 +40,7 @@ namespace Aqualis
         ///<summary>ナンバリング自動変数</summary>
         member __.getAutoVarName(n:int) =
             match lang with
-            |C|F -> varNameHead + n.ToString("000")
+            |C|F -> varNameHead + n.ToString("0000")
             |T|H -> varNameHead + "_{"+n.ToString()+"}"
         member this.getAutoVar() =
             match vlist with

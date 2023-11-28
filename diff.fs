@@ -30,10 +30,7 @@ namespace Aqualis
                     |Mul(_,v,u),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         v*(asm.diff u x)+(asm.diff v x)*u
                     |Div(_,v,u),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
-                        (asm.diff v x)/u-v/(u*u)*(asm.diff u x)
-                    |Pow(_,Abs(_,v),Int_c 2),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) when v.etype=Zt ->
-                        let u = asm.conj(asm.diff v x)
-                        (Int_c 2)*v*u
+                        (asm.diff v x)/u-v/Pow(u.etype,u,Int_c 2)*(asm.diff u x)
                     |Pow(t,v,Int_c u),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         u*Pow(t,v,Int_c (u-1))*(asm.diff v x)
                     |Pow(t,v,Dbl_c u),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
@@ -49,17 +46,16 @@ namespace Aqualis
                     |Tan(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         (Int_c 1)/Pow(t,Cos(t,v),Int_c 2)*(asm.diff v x)
                     |Asin(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
-                        (asm.diff v x)/Sqrt(v.etype,Int_c 1-v*v)
-                    |Acos(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
-                        -(asm.diff v x)/Sqrt(v.etype,Int_c 1-v*v)
+                        (asm.diff v x)/Sqrt(v.etype,Int_c 1-Pow(v.etype,v,Int_c 2))
+                    |Acos(_,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
+                        -(asm.diff v x)/Sqrt(v.etype,Int_c 1-Pow(v.etype,v,Int_c 2))
                     |Atan(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
-                        (asm.diff v x)/(Int_c 1+v*v)
+                        (asm.diff v x)/(Int_c 1+Pow(v.etype,v,Int_c 2))
                     |Atan2 _,_ ->
                         printfn "atan2を微分できません"
                         NaN
                     |Abs(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) -> 
-                        let u = asm.conj(asm.diff v x)
-                        v/Abs(t,v)*u
+                        v/Abs(t,v)*(asm.diff v x)
                     |Log(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         (asm.diff v x)/v
                     |Log10(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
@@ -93,6 +89,9 @@ namespace Aqualis
                             c
                         else
                            Int_c 0
+                    |Idx1 _ ,(Idx2 _|Idx3 _) -> Int_c 0
+                    |Idx2 _ ,(Idx1 _|Idx3 _) -> Int_c 0
+                    |Idx3 _ ,(Idx1 _|Idx2 _) -> Int_c 0
                     |Formula(_,r),_ ->
                         printfn "微分できない数式です: %s" <| r.ToString()
                         NaN
@@ -102,5 +101,5 @@ namespace Aqualis
                         printfn "NaNを微分できません"
                         NaN
                     |_ ->
-                        printfn "Error 変数以外のもの「%s」で微分できません" (x.ToString())
+                        printfn "Error 「%s」を変数以外のもの「%s」で微分できません" (f.ToString()) (x.ToString())
                         NaN
