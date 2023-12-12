@@ -1171,7 +1171,7 @@ namespace Aqualis
         static member ( % ) (x:int,y:num0) = (Int_c x)%y
         
         ///<summary>累乗</summary>
-        static member pow(x:num0, y:num0) =
+        static member powr(x:num0, y:num0) =
             match p.lang,x,y with
             (* 0^0 *)
             |_,(Int_c 0|Dbl_c 0.0),(Int_c 0|Dbl_c 0.0) -> num0.NaN
@@ -1188,23 +1188,23 @@ namespace Aqualis
             (* [小数定数]^[小数定数] *)
             |(F|C),Dbl_c v1,Dbl_c v2 -> Dbl_c(v1**v2)
             (* [負の整数定数]^y *)
-            |_,Int_c v1,_ when v1<0 -> num0.pow(Par(x.etype,x),y)
+            |_,Int_c v1,_ when v1<0 -> num0.powr(Par(x.etype,x),y)
             (* [負の小数定数]^y *)
-            |_,Dbl_c v1,_ when v1<0.0 -> num0.pow(Par(x.etype,x),y)
+            |_,Dbl_c v1,_ when v1<0.0 -> num0.powr(Par(x.etype,x),y)
             (* x^[負の整数定数] *)
-            |T,_,Int_c v2 when v2<0 -> num0.pow(x,y)
-            |_,_,Int_c v2 when v2<0 -> num0.pow(x,Par(y.etype,y))
+            |T,_,Int_c v2 when v2<0 -> num0.powr(x,y)
+            |_,_,Int_c v2 when v2<0 -> num0.powr(x,Par(y.etype,y))
             (* x^[負の小数定数] *)
-            |T,_,Dbl_c v2 when v2<0.0 -> num0.pow(x,y)
-            |_,_,Dbl_c v2 when v2<0.0 -> num0.pow(x,Par(y.etype,y))
+            |T,_,Dbl_c v2 when v2<0.0 -> num0.powr(x,y)
+            |_,_,Dbl_c v2 when v2<0.0 -> num0.powr(x,Par(y.etype,y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) 
                y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-            |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.pow(Par(x.etype,x),y)
-            |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.pow(Par(x.etype,x),Par(y.etype,y))
+            |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,x),y)
+            |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,x),Par(y.etype,y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) *)
-            |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> num0.pow(Par(x.etype,x),y)
+            |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> num0.powr(Par(x.etype,x),y)
             (* y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-            |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> num0.pow(x,Par(y.etype,y))
+            |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(x,Par(y.etype,y))
             (* x^y *)
             |_ -> Pow(x%%y, x,y)
             

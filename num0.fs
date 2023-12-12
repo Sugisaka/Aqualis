@@ -91,7 +91,7 @@ namespace Aqualis
             |Int_c x, Dbl_c y -> Dbl_c <| Math.Pow(x,y)
             |Dbl_c x, Int_c y -> Dbl_c <| Math.Pow(x,y)
             |Dbl_c x, Dbl_c y -> Dbl_c <| Math.Pow(x,y)
-            |_ -> num0.pow(x,y)
+            |_ -> num0.powr(x,y)
         static member pow(x:num0, y:int) = asm.pow(x,Int_c y)
         static member pow(x:num0, y:double) = asm.pow(x,Dbl_c y)
         static member pow(x:int, y:num0) = asm.pow(Int_c x,y)
