@@ -8,98 +8,99 @@ namespace Aqualis
 
     open Aqualis_base
     
-    module lapack = 
-
-        type La() =
-            
-            /// <summary>
-            /// 行列×ベクトルの計算
-            /// </summary>
-            /// <param name="x">a×b</param>
-            /// <param name="a">a</param>
-            /// <param name="b">b</param>
-            static member matmul (x:num1,a:num2,b:num1) =
-                x.clear()
-                iter.num a.size1 <| fun i ->
-                    iter.num a.size2 <| fun j ->
-                        x.[i] <== x.[i] + a.[i,j] * b.[j]                      
-                        
-            /// <summary>
-            /// 行列×ベクトルの計算
-            /// </summary>
-            /// <param name="a">行列</param>
-            /// <param name="b">ベクトル</param>
-            static member matmul (a:num2,b:num1) = fun code ->
-                ch.n1 (a.etype,a.size1) <| fun x ->
-                    La.matmul (x,a,b)
-                    code x
-                
-            /// <summary>
-            /// 行列×行列の計算
-            /// </summary>
-            /// <param name="u">計算結果</param>
-            static member matmul (u:num2,a:num2,b:num2) =
-                    u.clear()
-                    iter.num a.size1 <| fun i ->
-                        iter.num b.size2 <| fun j ->
-                            iter.num a.size2 <| fun k ->
-                                u.[i,j] <== u.[i,j] + a.[i,k] * b.[k,j]
-
-            /// <summary>
-            /// 行列a×行列bの計算
-            /// </summary>
-            /// <param name="a"></param>
-            /// <param name="b"></param>
-            static member matmul (a:num2,b:num2) = fun code ->
-                ch.n2 (a.etype,a.size1,b.size2) <| fun u ->
-                    La.matmul (u,a,b)
-                    code u
-                
-            /// <summary>
-            /// ベクトルの内積計算
-            /// </summary>
-            /// <param name="a"></param>
-            /// <param name="b"></param>
-            static member dot (x:num0,a:num1,b:num1) =
-                tbinder.d a <| fun () ->
-                    x.clear()
-                    iter.num a.size1 <| fun j ->
-                        x <== x + a.[j] * b.[j]
-                tbinder.z a <| fun () ->
-                    x.clear()
-                    iter.num a.size1 <| fun j ->
-                        x <== x + asm.conj(a.[j]) * b.[j]
-                
-            /// <summary>
-            /// ベクトルの内積計算
-            /// </summary>
-            /// <param name="a"></param>
-            /// <param name="b"></param>
-            static member dot (a:num1,b:num1) = fun code ->
-                ch.n a <| fun x ->
-                    La.dot (x,a,b)
-                    code x
-                
-            /// <summary>
-            /// ベクトルのノルム計算
-            /// </summary>
-            /// <param name="a"></param>
-            /// <param name="code"></param>
-            static member norm (a:num1) = fun code ->
-                La.dot (a,a) code
-                
-            /// <summary>
-            /// ベクトルの規格化
-            /// </summary>
-            /// <param name="a"></param>
-            static member normalize (a:num1) =
-                La.dot (a,a) <| fun c ->
-                    a <== a/asm.sqrt(c)
+    type La() =
+        
+        /// <summary>
+        /// 行列×ベクトルの計算
+        /// </summary>
+        /// <param name="x">a×b</param>
+        /// <param name="a">a</param>
+        /// <param name="b">b</param>
+        static member matmul (x:num1,a:num2,b:num1) =
+            x.clear()
+            iter.num a.size1 <| fun i ->
+                iter.num a.size2 <| fun j ->
+                    x.[i] <== x.[i] + a.[i,j] * b.[j]                      
                     
+        /// <summary>
+        /// 行列×ベクトルの計算
+        /// </summary>
+        /// <param name="a">行列</param>
+        /// <param name="b">ベクトル</param>
+        static member matmul (a:num2,b:num1) = fun code ->
+            ch.n1 (a.etype,a.size1) <| fun x ->
+                La.matmul (x,a,b)
+                code x
+            
+        /// <summary>
+        /// 行列×行列の計算
+        /// </summary>
+        /// <param name="u">計算結果</param>
+        static member matmul (u:num2,a:num2,b:num2) =
+            u.clear()
+            iter.num a.size1 <| fun i ->
+                iter.num b.size2 <| fun j ->
+                    iter.num a.size2 <| fun k ->
+                        u.[i,j] <== u.[i,j] + a.[i,k] * b.[k,j]
+
+        /// <summary>
+        /// 行列a×行列bの計算
+        /// </summary>
+        /// <param name="a">a</param>
+        /// <param name="b">b</param>
+        /// <param name="code">a×bに対する処理</param>
+        static member matmul (a:num2,b:num2) = fun code ->
+            ch.n2 (a.etype,a.size1,b.size2) <| fun u ->
+                La.matmul (u,a,b)
+                code u
+            
+        /// <summary>
+        /// ベクトルの内積計算
+        /// </summary>
+        /// <param name="x">a・b</param>
+        /// <param name="a">a</param>
+        /// <param name="b">b</param>
+        static member dot (x:num0,a:num1,b:num1) =
+            tbinder.d a <| fun () ->
+                x.clear()
+                iter.num a.size1 <| fun j ->
+                    x <== x + a.[j] * b.[j]
+            tbinder.z a <| fun () ->
+                x.clear()
+                iter.num a.size1 <| fun j ->
+                    x <== x + asm.conj(a.[j]) * b.[j]
+            
+        /// <summary>
+        /// ベクトルの内積計算
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="code">a・bに対する処理</param>
+        static member dot (a:num1,b:num1) = fun code ->
+            ch.n a <| fun x ->
+                La.dot (x,a,b)
+                code x
+            
+        /// <summary>
+        /// ベクトルのノルム(L2ノルム)計算
+        /// </summary>
+        /// <param name="a">a</param>
+        /// <param name="code">ノルムaに対する処理</param>
+        static member norm (a:num1) = fun code ->
+            La.dot (a,a) <| fun b -> code(asm.sqrt(b))
+            
+        /// <summary>
+        /// ベクトルの規格化
+        /// </summary>
+        /// <param name="a"></param>
+        static member normalize (a:num1) =
+            La.norm a <| fun c ->
+                a <== a/c
+                
         ///<summary>連立方程式の求解</summary>
         ///<param name="matrix">係数行列</param>
         ///<param name="y">定数項ベクトル→解ベクトル</param>
-        let solve_simuleq (matrix:num2,y:num1) =
+        static member solve_simuleq (matrix:num2,y:num1) =
             p.option("-llapack")
             p.option("-lblas")
             codestr.section "連立方程式の求解" <| fun () ->
@@ -133,7 +134,7 @@ namespace Aqualis
         ///<summary>連立方程式の求解</summary>
         ///<param name="matrix">係数行列</param>
         ///<param name="y">定数項ベクトルを列方向に並べた配列→解ベクトルを列方向に並べた配列</param>
-        let solve_simuleqs (matrix:num2,y:num2) =
+        static member solve_simuleqs (matrix:num2,y:num2) =
             p.option("-llapack")
             p.option("-lblas")
             codestr.section "連立方程式の求解" <| fun () ->
@@ -167,7 +168,7 @@ namespace Aqualis
         ///<summary>逆行列の計算</summary>
         ///<param name="mat1">元の行列</param>
         ///<param name="mat2">mat1の逆行列</param>
-        let inverse_matrix (mat2:num2) (mat1:num2) =
+        static member inverse_matrix (mat2:num2) (mat1:num2) =
             p.option("-llapack")
             p.option("-lblas")
             codestr.section "逆行列の計算" <| fun () ->
@@ -202,7 +203,10 @@ namespace Aqualis
                         br.if1 (info .=/ 0) <| fun () -> print.s[!.("InvMatrix Info: ");info]
                         
         ///<summary>行列の階数</summary>
-        let rank (rank:num0) (mat:num2) (cond:num0) =
+        ///<param name="rank">行列matの階数</param>
+        ///<param name="mat">行列</param>
+        ///<param name="cond">0とみなす上限値</param>
+        static member rank (rank:num0) (mat:num2) (cond:num0) =
             p.option("-llapack")
             p.option("-lblas")
             codestr.section "行列の階数" <| fun () ->
@@ -216,10 +220,38 @@ namespace Aqualis
                             //特異値分解を利用
                             match p.lang with
                             |F -> 
-                                p.codewrite("call zgesdd('N', " + npre.code + "," + " " + npre.code + ","  + mat.code+", "  + npre.code + ", "  + s.code + ","   + u.code + ", "  + npre.code + ","   + vt.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ","   + rwork.code + ","   + iwork.code + ", "  + info.code + ")")
+                                p.codewrite("call zgesdd('N', " + 
+                                    npre.code + "," + " " + 
+                                    npre.code + ","  + 
+                                    mat.code+", "  + 
+                                    npre.code + ", "  + 
+                                    s.code + ","   + 
+                                    u.code + ", "  + 
+                                    npre.code + ","   + 
+                                    vt.code + ", "  + 
+                                    npre.code + ", "  + 
+                                    work.code + ", "  + 
+                                    lwork.code + ","   + 
+                                    rwork.code + ","   + 
+                                    iwork.code + ", "  + 
+                                    info.code + ")")
                             |C -> 
-                                    p.extn("void zgesdd_(char jobz, int m, int n, double complex *a, int lda, double *s, double complex *u, int ldu, double complex *vt, int ldvt, double complex *work, int lwork, double *rwork, int *iwork, int info)")
-                                    p.codewrite("zgesdd_('N', &" +  npre.code + "," + "&" + npre.code + ", " + mat.code+", &" + npre.code + ", *" + s.code + ", *" + u.code + ", &" + npre.code + ", *" + vt.code + ", &" + npre.code + ", &" + work.code + ", &" + lwork.code + ", *" + rwork.code + ", *" + iwork.code + ", &" + info.code + ");")
+                                p.extn("void zgesdd_(char jobz, int m, int n, double complex *a, int lda, double *s, double complex *u, int ldu, double complex *vt, int ldvt, double complex *work, int lwork, double *rwork, int *iwork, int info)")
+                                p.codewrite("zgesdd_('N', &" +  
+                                    npre.code + "," + "&" + 
+                                    npre.code + ", " + 
+                                    mat.code+", &" + 
+                                    npre.code + ", *" + 
+                                    s.code + ", *" + 
+                                    u.code + ", &" + 
+                                    npre.code + ", *" + 
+                                    vt.code + ", &" + 
+                                    npre.code + ", &" + 
+                                    work.code + ", &" + 
+                                    lwork.code + ", *" + 
+                                    rwork.code + ", *" + 
+                                    iwork.code + ", &" + 
+                                    info.code + ");")
                             |T -> 
                                 p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                             |H -> 
@@ -229,10 +261,38 @@ namespace Aqualis
                             //特異値分解を利用
                             match p.lang with
                             |F -> 
-                                p.codewrite("call dgesdd('N', " + npre.code + "," + " " + npre.code + ","  + mat.code+", "  + npre.code + ", "  + s.code + ","   + u.code + ", "  + npre.code + ","   + vt.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ","   + rwork.code + ","   + iwork.code + ", "  + info.code + ")")
+                                p.codewrite("call dgesdd('N', " + 
+                                    npre.code + "," + " " + 
+                                    npre.code + ","  + 
+                                    mat.code+", "  + 
+                                    npre.code + ", "  + 
+                                    s.code + ","   + 
+                                    u.code + ", "  + 
+                                    npre.code + ","   + 
+                                    vt.code + ", "  + 
+                                    npre.code + ", "  + 
+                                    work.code + ", "  + 
+                                    lwork.code + ","   + 
+                                    rwork.code + ","   + 
+                                    iwork.code + ", "  + 
+                                    info.code + ")")
                             |C -> 
                                 p.extn("void dgesdd_(char jobz, int m, int n, double *a, int lda, double *s, double *u, int ldu, double *vt, int ldvt, double *work, int lwork, int *iwork, int info)")
-                                p.codewrite("dgesdd_('N', &" +  npre.code + "," + "&" + npre.code + ", " + mat.code+", &" + npre.code + ", *" + s.code + ", *" + u.code + ", &" + npre.code + ", *" + vt.code + ", &" + npre.code + ", &" + work.code + ", &" + lwork.code + ", *" + rwork.code + ", *" + iwork.code + ", &" + info.code + ");")
+                                p.codewrite("dgesdd_('N', &" +  
+                                    npre.code + "," + "&" + 
+                                    npre.code + ", " + 
+                                    mat.code+", &" + 
+                                    npre.code + ", *" + 
+                                    s.code + ", *" + 
+                                    u.code + ", &" + 
+                                    npre.code + ", *" + 
+                                    vt.code + ", &" + 
+                                    npre.code + ", &" + 
+                                    work.code + ", &" + 
+                                    lwork.code + ", *" + 
+                                    rwork.code + ", *" + 
+                                    iwork.code + ", &" + 
+                                    info.code + ");")
                             |T -> 
                                 p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                             |H -> 
@@ -240,49 +300,27 @@ namespace Aqualis
                         br.if1 (info .=/ 0) <| fun () -> print.s[!.("rank Info: ");info]
                         rank.clear()
                         iter.array s <| fun i -> 
-                            br.if1 (s.[i] .> cond) <| fun () -> rank.inc
-        
-        let inverse_matrix2 (mat2:num2) (mat:num2) (cond:num0) =
-            p.option("-llapack")
-            p.option("-lblas")
+                            br.if1 (s.[i] .> cond) <| fun () -> rank.inc()
+                            
+        ///<summary>疑似逆行列の計算</summary>
+        ///<param name="mat2">matの疑似逆行列</param>
+        ///<param name="mat">行列</param>
+        ///<param name="cond">0とみなす上限値</param>
+        static member inverse_matrix2 (mat2:num2) (mat:num2) (cond:num0) =
             codestr.section "疑似逆行列" <| fun () ->
                 ch.iii <| fun (npre,info,lwork) ->
                     npre<==mat.size1
                     ch.i1 npre <| fun ipiv -> ch.d1 npre <| fun s -> ch.z2 npre npre <| fun u -> ch.z2 npre npre <| fun u2 -> ch.z2 npre npre <| fun vt -> ch.d1 (npre*(5*npre+7)) <| fun rwork -> ch.i1 (8*npre) <| fun iwork -> 
                         ipiv.clear()
                         lwork <== npre*npre+2*npre+npre
-                        tbinder.z mat <| fun () ->
-                            ch.z1 lwork <| fun work ->
-                            match p.lang with
-                            |F -> 
-                                p.codewrite("call zgesdd('A', " + npre.code + "," + " " + npre.code + ","  + mat.code+", "  + npre.code + ", "  + s.code + ","   + u.code + ", "  + npre.code + ","   + vt.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ","   + rwork.code + ","   + iwork.code + ", "  + info.code + ")")
-                            |C -> 
-                                p.extn("void zgesdd_(char jobz, int m, int n, double complex *a, int lda, double *s, double complex *u, int ldu, double complex *vt, int ldvt, double complex *work, int lwork, double *rwork, int *iwork, int info)")
-                                p.codewrite("zgesdd_('A', &" +  npre.code + "," + "&" + npre.code + ", " + mat.code+", &" + npre.code + ", *" + s.code + ", *" + u.code + ", &" + npre.code + ", *" + vt.code + ", &" + npre.code + ", &" + work.code + ", &" + lwork.code + ", *" + rwork.code + ", *" + iwork.code + ", &" + info.code + ");")
-                            |T -> 
-                                p.codewrite("$"+mat2.code+" \\leftarrow "+mat.code+"^{-1}"+"$"+"<br/>\n")
-                            |H -> 
-                                p.codewrite("\\("+mat2.code+" \\leftarrow "+mat.code+"^{-1}"+"\\)"+"<br/>\n")
-                        tbinder.d mat <| fun () ->
-                            ch.d1 lwork <| fun work ->
-                            match p.lang with
-                            |F -> 
-                                p.codewrite("call dgesdd('A', " + npre.code + "," + " " + npre.code + ","  + mat.code+", "  + npre.code + ", "  + s.code + ","   + u.code + ", "  + npre.code + ","   + vt.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ","   + rwork.code + ","   + iwork.code + ", "  + info.code + ")")
-                            |C -> 
-                                p.extn("void dgesdd_(char jobz, int m, int n, double *a, int lda, double *s, double *u, int ldu, double *vt, int ldvt, double *work, int lwork, int *iwork, int info)")
-                                p.codewrite("dgesdd_('A', &" +  npre.code + "," + "&" + npre.code + ", " + mat.code+", &" + npre.code + ", *" + s.code + ", *" + u.code + ", &" + npre.code + ", *" + vt.code + ", &" + npre.code + ", &" + work.code + ", &" + lwork.code + ", *" + rwork.code + ", *" + iwork.code + ", &" + info.code + ");")
-                            |T -> 
-                                p.codewrite("$"+mat2.code+" \\leftarrow "+mat.code+"^{-1}"+"$"+"<br/>\n")
-                            |H -> 
-                                p.codewrite("\\("+mat2.code+" \\leftarrow "+mat.code+"^{-1}"+"\\)"+"<br/>\n")
-                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("rank Info: ");info]
+                        La.svd mat (u,s,vt)
                         //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
                         iter.array s <| fun i -> 
                             iter.array s <| fun j -> 
                                 br.if2 (s.[i] .> cond)
-                                  (fun () ->
+                                    (fun () ->
                                     u2.[i,j]<==(asm.conj(u.[j,i])/s.[i]))
-                                  (fun () ->
+                                    (fun () ->
                                     //condより小さい特異値は無視
                                     u2.[i,j].clear())
                         mat2.clear()
@@ -297,7 +335,7 @@ namespace Aqualis
         /// <param name="eigenvalues">固有値</param>
         /// <param name="eigenvectors">固有ベクトル</param>
         /// <param name="mat1">複素非対称行列</param>
-        let eigen_matrix (eigenvalues:num1,eigenvectors:num2) (mat1:num2) =
+        static member eigen_matrix (eigenvalues:num1,eigenvectors:num2) (mat1:num2) =
             p.option("-llapack")
             p.option("-lblas")
             tbinder.z mat1 <| fun () ->
@@ -314,10 +352,34 @@ namespace Aqualis
                                             ldvldummy <== 1
                                             match p.lang with
                                             |F -> 
-                                                p.codewrite("call zgeev('No left vectors', 'Vectors (right)', "    + npre.code + ", "   + mat1.code + ", "  + npre.code + ", "  + eigenvalues.code + ","   + dummy.code + ",  " + ldvldummy.code + ", "  + eigenvectors.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ", "  + rwork.code + ", "  + info.code + ")")
+                                                p.codewrite("call zgeev('No left vectors', 'Vectors (right)', "    + 
+                                                    npre.code + ", "   + 
+                                                    mat1.code + ", "  + 
+                                                    npre.code + ", "  + 
+                                                    eigenvalues.code + ","   + 
+                                                    dummy.code + ",  " + 
+                                                    ldvldummy.code + ", "  + 
+                                                    eigenvectors.code + ", "  + 
+                                                    npre.code + ", "  + 
+                                                    work.code + ", "  + 
+                                                    lwork.code + ", "  + 
+                                                    rwork.code + ", "  + 
+                                                    info.code + ")")
                                             |C -> 
                                                 p.extn("void zgeev_(char *, char *, int *, double complex *, int *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)")
-                                                p.codewrite("zgeev_('N', 'V', &" + npre.code + ", "  + mat1.code + ", &" + npre.code + ", " + eigenvalues.code + ", " + dummy.code + ", &" + ldvldummy.code + ", " + eigenvectors.code + ", &" + npre.code + ", " + work.code + ", &" + lwork.code + ", " + rwork.code + ", &" + info.code + ");")
+                                                p.codewrite("zgeev_('N', 'V', &" + 
+                                                    npre.code + ", "  + 
+                                                    mat1.code + ", &" + 
+                                                    npre.code + ", " + 
+                                                    eigenvalues.code + ", " + 
+                                                    dummy.code + ", &" + 
+                                                    ldvldummy.code + ", " + 
+                                                    eigenvectors.code + ", &" + 
+                                                    npre.code + ", " + 
+                                                    work.code + ", &" + 
+                                                    lwork.code + ", " + 
+                                                    rwork.code + ", &" + 
+                                                    info.code + ");")
                                             |T -> 
                                                 p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
                                             |H -> 
@@ -338,16 +400,41 @@ namespace Aqualis
                                             ldvldummy <== 1
                                             match p.lang with
                                             |F -> 
-                                                p.codewrite("call dgeev('No left vectors', 'Vectors (right)', "    + npre.code + ", "   + mat1.code + ", "  + npre.code + ", "  + eigenvalues_re.code + ", "  + eigenvalues_im.code + ","   + dummy.code + ",  " + ldvldummy.code + ", "  + eigenvectors.code + ", "  + npre.code + ", "  + work.code + ", "  + lwork.code + ", " + info.code + ")")
+                                                p.codewrite("call dgeev('No left vectors', 'Vectors (right)', "    + 
+                                                    npre.code + ", "   + 
+                                                    mat1.code + ", "  + 
+                                                    npre.code + ", "  + 
+                                                    eigenvalues_re.code + ", "  + 
+                                                    eigenvalues_im.code + ","   + 
+                                                    dummy.code + ",  " + 
+                                                    ldvldummy.code + ", "  + 
+                                                    eigenvectors.code + ", "  + 
+                                                    npre.code + ", "  + 
+                                                    work.code + ", "  + 
+                                                    lwork.code + ", " + 
+                                                    info.code + ")")
                                             |C -> 
                                                 p.extn("void dgeev_(char *, char *, int *, double *, int *, double *, double *, int *, double *, int *, double *, int *, double *, int *)")
-                                                p.codewrite("dgeev_('N', 'V', &" + npre.code + ", "  + mat1.code + ", &" + npre.code + ", " + eigenvalues_re.code + ", " + eigenvalues_im.code + ", " + dummy.code + ", &" + ldvldummy.code + ", " + eigenvectors.code + ", &" + npre.code + ", " + work.code + ", &" + lwork.code + ", &" + info.code + ");")
+                                                p.codewrite("dgeev_('N', 'V', &" + 
+                                                    npre.code + ", "  + 
+                                                    mat1.code + ", &" + 
+                                                    npre.code + ", " + 
+                                                    eigenvalues_re.code + ", " + 
+                                                    eigenvalues_im.code + ", " + 
+                                                    dummy.code + ", &" + 
+                                                    ldvldummy.code + ", " + 
+                                                    eigenvectors.code + ", &" + 
+                                                    npre.code + ", " + 
+                                                    work.code + ", &" + 
+                                                    lwork.code + ", &" + 
+                                                    info.code + ");")
                                             |T -> 
                                                 p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
                                             |H -> 
                                                 p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
                                             br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
                             eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
+                            
         /// <summary>
         /// Ax=λBxの固有値λと固有ベクトルxを計算
         /// </summary>
@@ -356,7 +443,7 @@ namespace Aqualis
         /// <param name="eigenvectors">固有ベクトルx</param>
         /// <param name="mat1">行列A</param>
         /// <param name="mat2">行列B</param>
-        let eigen_matrix2 (eigenvalues1:num1,eigenvalues2:num1,eigenvectors:num2) (mat1:num2) (mat2:num2) =
+        static member eigen_matrix2 (eigenvalues1:num1,eigenvalues2:num1,eigenvectors:num2) (mat1:num2) (mat2:num2) =
             tbinder.z mat1 <| fun () ->
                 codestr.section "非対称複素行列の一般化固有値" <| fun () ->
                     p.option("-llapack")
@@ -430,55 +517,55 @@ namespace Aqualis
                             ch.i <| fun lwork ->
                                 lwork <== npre + 64 * npre
                                 ch.d1 lwork <| fun work ->
-                                        eigenvalues1re.clear()
-                                        eigenvalues1im.clear()
-                                        eigenvalues2.clear()
-                                        ldvldummy <== 1
-                                        match p.lang with
-                                        |F -> 
-                                            p.codewrite("call dggev("+
-                                                "'N'" + ", " +
-                                                "'V'" + ", " + 
-                                                npre.code + ", " + 
-                                                mat1.code + ", " + 
-                                                npre.code + ", " + 
-                                                mat2.code + ", " + 
-                                                npre.code + ", " + 
-                                                eigenvalues1re.code + ", " + 
-                                                eigenvalues1im.code + ", " + 
-                                                eigenvalues2.code + "," + 
-                                                dummy.code + ",  " + 
-                                                ldvldummy.code + ", " +
-                                                eigenvectors.code + ", " + 
-                                                npre.code + ", "  + 
-                                                work.code + ", "  + 
-                                                lwork.code + ", "  + 
-                                                info.code + ")")
-                                        |C -> 
-                                            p.extn("void dggev_(char *, char *, int *, double complex *, int *, double complex *, int *, double complex *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)")
-                                            p.codewrite("dggev_(" +
-                                                "'N'" + ", " +
-                                                "'V'" + ", " +
-                                                "&" + npre.code + ", " +
-                                                mat1.code + ", " +
-                                                "&" + npre.code + ", " +
-                                                mat2.code + ", " +
-                                                "&" + npre.code + ", " +
-                                                eigenvalues1re.code + ", " +
-                                                eigenvalues1im.code + ", " +
-                                                eigenvalues2.code + ", " +
-                                                dummy.code + ", "+
-                                                "&" + ldvldummy.code + ", " +
-                                                eigenvectors.code + ", "+
-                                                "&" + npre.code + ", " +
-                                                work.code + ", " +
-                                                "&" + lwork.code + ", " +
-                                                "&" + info.code + ");")
-                                        |T -> 
-                                            p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
-                                        |H -> 
-                                            p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
-                                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                    eigenvalues1re.clear()
+                                    eigenvalues1im.clear()
+                                    eigenvalues2.clear()
+                                    ldvldummy <== 1
+                                    match p.lang with
+                                    |F -> 
+                                        p.codewrite("call dggev("+
+                                            "'N'" + ", " +
+                                            "'V'" + ", " + 
+                                            npre.code + ", " + 
+                                            mat1.code + ", " + 
+                                            npre.code + ", " + 
+                                            mat2.code + ", " + 
+                                            npre.code + ", " + 
+                                            eigenvalues1re.code + ", " + 
+                                            eigenvalues1im.code + ", " + 
+                                            eigenvalues2.code + "," + 
+                                            dummy.code + ",  " + 
+                                            ldvldummy.code + ", " +
+                                            eigenvectors.code + ", " + 
+                                            npre.code + ", "  + 
+                                            work.code + ", "  + 
+                                            lwork.code + ", "  + 
+                                            info.code + ")")
+                                    |C -> 
+                                        p.extn("void dggev_(char *, char *, int *, double complex *, int *, double complex *, int *, double complex *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)")
+                                        p.codewrite("dggev_(" +
+                                            "'N'" + ", " +
+                                            "'V'" + ", " +
+                                            "&" + npre.code + ", " +
+                                            mat1.code + ", " +
+                                            "&" + npre.code + ", " +
+                                            mat2.code + ", " +
+                                            "&" + npre.code + ", " +
+                                            eigenvalues1re.code + ", " +
+                                            eigenvalues1im.code + ", " +
+                                            eigenvalues2.code + ", " +
+                                            dummy.code + ", "+
+                                            "&" + ldvldummy.code + ", " +
+                                            eigenvectors.code + ", "+
+                                            "&" + npre.code + ", " +
+                                            work.code + ", " +
+                                            "&" + lwork.code + ", " +
+                                            "&" + info.code + ");")
+                                    |T -> 
+                                        p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
+                                    |H -> 
+                                        p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
+                                    br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
                         iter.num eigenvalues1.size1 <| fun i ->
                             eigenvalues1.[i] <== eigenvalues1re.[i] + asm.uj + eigenvalues1im.[i]
                                         
@@ -488,12 +575,11 @@ namespace Aqualis
         /// <param name="fu_mat">係数行列</param>
         /// <param name="fu_cst">定数項ベクトル</param>
         /// <param name="code">解に対して行う処理</param>
-        let solve_simuleq_t(fu_mat:num2,fu_cst:num1) code =
+        static member solve_simuleq_t(fu_mat:num2,fu_cst:num1) code =
             codestr.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                 ch.d2 fu_mat.size2 fu_mat.size2 <| fun FF ->
                 ch.d1 fu_mat.size2 <| fun bb ->
                     let lambda = 1E-6 //正則化パラメータ
-                    
                     FF.clear()
                     //FF = fu_mat^T * fu_mat
                     ch.d <| fun tmp ->
@@ -515,9 +601,9 @@ namespace Aqualis
                             iter.num fu_cst.size1 <| fun k ->
                                 tmp <== tmp + fu_mat.[k,i]*fu_cst.[k]
                             bb.[i] <== tmp
-                    solve_simuleq(FF,bb)
+                    La.solve_simuleq(FF,bb)
                     code(bb)
-
+                    
         /// <summary>
         /// 連立方程式の求解(Tikhonovの正則化法)
         /// </summary>
@@ -525,14 +611,13 @@ namespace Aqualis
         /// <param name="fu_cst">定数項ベクトル</param>
         /// <param name="lambda">正則化パラメータ</param>
         /// <param name="code">解に対して行う処理</param>
-        let solve_simuleq_tt(fu_mat:num2,fu_cst:num1,lambda:double) code =
+        static member solve_simuleq_tt(fu_mat:num2,fu_cst:num1,lambda:double) code =
             codestr.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                 match fu_mat.etype with
                 |Zt ->
                     ch.z2 fu_mat.size2 fu_mat.size2 <| fun FF ->
                     ch.z1 fu_mat.size2 <| fun bb ->
                         //let lambda = 1E-6 //正則化パラメータ
-                        
                         FF.clear()
                         //FF = fu_mat^T * fu_mat
                         ch.z <| fun tmp ->
@@ -542,7 +627,6 @@ namespace Aqualis
                                     iter.num fu_mat.size1 <| fun k ->
                                         tmp <== tmp + asm.conj(fu_mat.[k,i])*fu_mat.[k,j]
                                     FF.[i,j] <== tmp
-                                    
                         //FF = fu_mat^T * fu_mat + λ^2 * I
                         iter.num FF.size1 <| fun i ->
                                 FF.[i,i] <== FF.[i,i] + lambda * lambda
@@ -554,13 +638,12 @@ namespace Aqualis
                                 iter.num fu_cst.size1 <| fun k ->
                                     tmp <== tmp + asm.conj(fu_mat.[k,i])*fu_cst.[k]
                                 bb.[i] <== tmp
-                        solve_simuleq(FF,bb)
+                        La.solve_simuleq(FF,bb)
                         code(bb)
                 |_ ->
                     ch.d2 fu_mat.size2 fu_mat.size2 <| fun FF ->
                     ch.d1 fu_mat.size2 <| fun bb ->
                         //let lambda = 1E-6 //正則化パラメータ
-                        
                         FF.clear()
                         //FF = fu_mat^T * fu_mat
                         ch.d <| fun tmp ->
@@ -570,7 +653,6 @@ namespace Aqualis
                                     iter.num fu_mat.size1 <| fun k ->
                                         tmp <== tmp + fu_mat.[k,i]*fu_mat.[k,j]
                                     FF.[i,j] <== tmp
-                                    
                         //FF = fu_mat^T * fu_mat + λ^2 * I
                         iter.num FF.size1 <| fun i ->
                                 FF.[i,i] <== FF.[i,i] + lambda * lambda
@@ -582,9 +664,9 @@ namespace Aqualis
                                 iter.num fu_cst.size1 <| fun k ->
                                     tmp <== tmp + fu_mat.[k,i]*fu_cst.[k]
                                 bb.[i] <== tmp
-                        solve_simuleq(FF,bb)
+                        La.solve_simuleq(FF,bb)
                         code(bb)
-                    
+                        
         /// <summary>
         /// 連立方程式の求解(Tikhonovの正則化法)
         /// </summary>
@@ -592,7 +674,7 @@ namespace Aqualis
         /// <param name="fu_cst">定数項ベクトル(列サイズ=1)</param>
         /// <param name="lambda">正則化パラメータ</param>
         /// <param name="code">解に対して行う処理</param>
-        let solve_simuleq_tt2(fu_mat:num2,fu_cst:num2,lambda:num0) code =
+        static member solve_simuleq_tt2(fu_mat:num2,fu_cst:num2,lambda:num0) code =
             codestr.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                 ch.z2 fu_mat.size2 fu_mat.size2 <| fun FF ->
                 ch.z1 fu_mat.size2 <| fun bb ->
@@ -616,15 +698,15 @@ namespace Aqualis
                             iter.num fu_cst.size1 <| fun k ->
                                 tmp <== tmp + asm.conj(fu_mat.[k,i])*fu_cst.[k,1]
                             bb.[i] <== tmp
-                    solve_simuleq(FF,bb)
+                    La.solve_simuleq(FF,bb)
                     code(bb)
-
+                    
         /// <summary>
         /// 行列式の常用対数を計算
         /// </summary>
         /// <param name="matrix">行列</param>
         /// <param name="code">行列式の値を用いて実行するコード</param>
-        let determinant (matrix:num2) code =
+        static member determinant (matrix:num2) code =
             p.option("-llapack")
             p.option("-lblas")
             tbinder.z matrix <| fun () ->
@@ -673,7 +755,7 @@ namespace Aqualis
         /// <param name="u">複素行列u</param>
         /// <param name="s">正方行列sの対角成分</param>
         /// <param name="vt">複素行列vの転置</param>
-        let svd (mat1:num2) (u:num2,s:num1,vt:num2) =
+        static member svd (mat1:num2) (u:num2,s:num1,vt:num2) =
             p.option("-llapack")
             p.option("-lblas")
             match p.lang with
@@ -692,32 +774,80 @@ namespace Aqualis
                             n <== mat1.size2
                             ch.ii <| fun (ldu,ldvt) ->
                             ch.i <| fun lwork ->
-                                lwork <== 5*n+n
-                                ch.z1 lwork <| fun work ->
+                                ch.z01 <| fun work ->
+                                ch.z2 1 1 <| fun dummy ->
                                 ch.d1 (5*m) <| fun rwork ->
                                     lda <== m
                                     ldu <== u.size1
                                     ldvt <== vt.size2
                                     match p.lang with
                                     |F -> 
+                                        lwork <== -1
                                         p.codewrite("call zgesvd("+
-                                          "'A', "+
-                                          "'A', " + 
-                                          m.code + ", " + 
-                                          n.code + ", " +
-                                          mat1.code + ", " +
-                                          lda.code + ", " +
-                                          s.code+ ", " + 
-                                          u.code + ", "  + 
-                                          ldu.code + ", " + 
-                                          vt.code + ", "  + 
-                                          ldvt.code + ", " + 
-                                          work.code + ", " + 
-                                          lwork.code + ", " + 
-                                          rwork.code + ", " + 
-                                          info.code + ")")
+                                        "'A', "+
+                                        "'A', " + 
+                                        m.code + ", " + 
+                                        n.code + ", " +
+                                        mat1.code + ", " +
+                                        lda.code + ", " +
+                                        s.code+ ", " + 
+                                        u.code + ", "  + 
+                                        ldu.code + ", " + 
+                                        vt.code + ", "  + 
+                                        ldvt.code + ", " + 
+                                        dummy.code + ", " + 
+                                        lwork.code + ", " + 
+                                        rwork.code + ", " + 
+                                        info.code + ")")
+                                        let nb = 64
+                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                            <| fun () ->
+                                                lwork <== m+3*n+nb*(m+n)
+                                            <| fun () ->
+                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                        work.allocate(lwork)
+                                        p.codewrite("call zgesvd("+
+                                        "'A', "+
+                                        "'A', " + 
+                                        m.code + ", " + 
+                                        n.code + ", " +
+                                        mat1.code + ", " +
+                                        lda.code + ", " +
+                                        s.code+ ", " + 
+                                        u.code + ", "  + 
+                                        ldu.code + ", " + 
+                                        vt.code + ", "  + 
+                                        ldvt.code + ", " + 
+                                        work.code + ", " + 
+                                        lwork.code + ", " + 
+                                        rwork.code + ", " + 
+                                        info.code + ")")
+                                        work.deallocate()
                                     |C -> 
                                         p.extn("void zgesvd_(char *, char *, int *, int *, double complex *, int *, double *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)")
+                                        p.codewrite("zgesvd_(" + 
+                                            "'A'" + ", " + 
+                                            "'A'" + ", " + 
+                                            "&" + m.code + ", " + 
+                                            "&" + n.code + ", " +
+                                            mat1.code + ", " +
+                                            "&" + lda.code + ", " +
+                                            s.code+ ", " + 
+                                            u.code + ", "  + 
+                                            "&" + ldu.code + ", " + 
+                                            vt.code + ", "  + 
+                                            "&" + ldvt.code + ", " + 
+                                            dummy.code + ", " + 
+                                            "&" + lwork.code + ", " + 
+                                            rwork.code + ", " + 
+                                            "&" + info.code + ");")
+                                        let nb = 64
+                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                            <| fun () ->
+                                                lwork <== m+3*n+nb*(m+n)
+                                            <| fun () ->
+                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                        work.allocate(lwork)
                                         p.codewrite("zgesvd_(" + 
                                             "'A'" + ", " + 
                                             "'A'" + ", " + 
@@ -734,6 +864,7 @@ namespace Aqualis
                                             "&" + lwork.code + ", " + 
                                             rwork.code + ", " + 
                                             "&" + info.code + ");")
+                                        work.deallocate()
                                     |_ -> 
                                         ()
                 tbinder.d mat1 <| fun () ->
@@ -746,32 +877,58 @@ namespace Aqualis
                             n <== mat1.size2
                             ch.ii <| fun (ldu,ldvt) ->
                             ch.i <| fun lwork ->
-                                lwork <== 5*n+n
                                 ch.d1 lwork <| fun work ->
+                                ch.d2 1 1 <| fun dummy ->
                                 ch.d1 (5*m) <| fun rwork ->
                                     lda <== m
                                     ldu <== u.size1
                                     ldvt <== vt.size2
                                     match p.lang with
                                     |F -> 
+                                        lwork <== -1
                                         p.codewrite("call dgesvd("+
-                                          "'A', "+
-                                          "'A', " + 
-                                          m.code + ", " + 
-                                          n.code + ", " +
-                                          mat1.code + ", " +
-                                          lda.code + ", " +
-                                          s.code+ ", " + 
-                                          u.code + ", "  + 
-                                          ldu.code + ", " + 
-                                          vt.code + ", "  + 
-                                          ldvt.code + ", " + 
-                                          work.code + ", " + 
-                                          lwork.code + ", " + 
-                                          rwork.code + ", " + 
-                                          info.code + ")")
+                                        "'A', "+
+                                        "'A', " + 
+                                        m.code + ", " + 
+                                        n.code + ", " +
+                                        mat1.code + ", " +
+                                        lda.code + ", " +
+                                        s.code+ ", " + 
+                                        u.code + ", "  + 
+                                        ldu.code + ", " + 
+                                        vt.code + ", "  + 
+                                        ldvt.code + ", " + 
+                                        dummy.code + ", " + 
+                                        lwork.code + ", " + 
+                                        rwork.code + ", " + 
+                                        info.code + ")")
+                                        let nb = 64
+                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                            <| fun () ->
+                                                lwork <== m+4*n+nb*(m+n)
+                                            <| fun () ->
+                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                        work.allocate(lwork)
+                                        p.codewrite("call dgesvd("+
+                                        "'A', "+
+                                        "'A', " + 
+                                        m.code + ", " + 
+                                        n.code + ", " +
+                                        mat1.code + ", " +
+                                        lda.code + ", " +
+                                        s.code+ ", " + 
+                                        u.code + ", "  + 
+                                        ldu.code + ", " + 
+                                        vt.code + ", "  + 
+                                        ldvt.code + ", " + 
+                                        work.code + ", " + 
+                                        lwork.code + ", " + 
+                                        rwork.code + ", " + 
+                                        info.code + ")")
+                                        work.deallocate()
                                     |C -> 
                                         p.extn("void dgesvd_(char *, char *, int *, int *, double complex *, int *, double *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)")
+                                        lwork <== -1
                                         p.codewrite("dgesvd_(" + 
                                             "'A'" + ", " + 
                                             "'A'" + ", " + 
@@ -788,20 +945,44 @@ namespace Aqualis
                                             "&" + lwork.code + ", " + 
                                             rwork.code + ", " + 
                                             "&" + info.code + ");")
+                                        let nb = 64
+                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                            <| fun () ->
+                                                lwork <== m+4*n+nb*(m+n)
+                                            <| fun () ->
+                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                        work.allocate(lwork)
+                                        p.codewrite("dgesvd_(" + 
+                                            "'A'" + ", " + 
+                                            "'A'" + ", " + 
+                                            "&" + m.code + ", " + 
+                                            "&" + n.code + ", " +
+                                            mat1.code + ", " +
+                                            "&" + lda.code + ", " +
+                                            s.code+ ", " + 
+                                            u.code + ", "  + 
+                                            "&" + ldu.code + ", " + 
+                                            vt.code + ", "  + 
+                                            "&" + ldvt.code + ", " + 
+                                            work.code + ", " + 
+                                            "&" + lwork.code + ", " + 
+                                            rwork.code + ", " + 
+                                            "&" + info.code + ");")
+                                        work.deallocate()
                                     |_ -> 
                                         ()
-                                      
+                                        
         /// <summary>
         /// 連立同次方程式を求解
         /// </summary>
         /// <param name="mat">複素係数行列</param>
         /// <param name="f">連立方程式の解</param>
-        let solve_homogeneq (mat:num2) (f:num1) =
-            ch.d1 mat.size1 <| fun s ->
-            ch.z2 mat.size1 mat.size2 <| fun u ->
-            ch.z2 mat.size1 mat.size2 <| fun vt ->
-                svd mat (u,s,vt)
-                !"0に近いほど正確な解"
-                print.tc "solve_homogeneq" s.[mat.size1]
-                iter.range _1 mat.size1 <| fun i ->
-                    f.[i] <== asm.conj(vt.[mat.size1,i])
+        static member solve_homogeneq (mat:num2) (f:num1) =
+                ch.d1 mat.size1 <| fun s ->
+                ch.z2 mat.size1 mat.size2 <| fun u ->
+                ch.z2 mat.size1 mat.size2 <| fun vt ->
+                    La.svd mat (u,s,vt)
+                    !"0に近いほど正確な解"
+                    print.tc "solve_homogeneq" s.[mat.size1]
+                    iter.range _1 mat.size1 <| fun i ->
+                        f.[i] <== asm.conj(vt.[mat.size1,i])

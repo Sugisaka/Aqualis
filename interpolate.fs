@@ -9,8 +9,6 @@ namespace Aqualis
     ///<summary>データ補間</summary>
     module interpolate = 
         
-        open Aqualis.lapack
-
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
         type LinearInterpolate1d(id:string,data_x,data_y) =
             let X = var.dp1(id+"_x",data_x)
@@ -122,7 +120,7 @@ namespace Aqualis
                         
                     //io.array f [!."f.dat"]
                     //io.array g [!."g.dat"]
-                    solve_simuleq(f,g)
+                    La.solve_simuleq(f,g)
                     
             /// <summary>
             /// 補間データをファイルに保存

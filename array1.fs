@@ -234,7 +234,21 @@ namespace Aqualis
         member this.Item with get((a:num0,b:int )) = num1(typ,this.Idx1(a,b) )
         member this.Item with get((a:int ,b:num0)) = num1(typ,this.Idx1(a,b))
         member this.Item with get((a:int ,b:int )) = num1(typ,this.Idx1(a,b) )
-
+        
+        //<summary>元の配列と同じサイズの配列生成</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        member this.subarray(s1:num0,f:num0->num0) = num1(this.etype,Arx1(s1,f))
+        
+        //<summary>元の配列と同じサイズの配列生成</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        member this.subarray(s1:int,f:num0->num0) = this.subarray(I s1,f)
+        
+        //<summary>元の配列と同じサイズの配列生成</summary> 
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        member this.subarray(f:num0->num0) = this.subarray(this.size1,f)
+        
         //<summary>値を0で初期化</summary> 
         override this.clear() = 
             this <== Int_c 0

@@ -70,10 +70,10 @@ namespace Aqualis
                 |_,Sub(_,a,b) -> (it a)-(it b)
                 |_,Mul(_,a,b) -> (it a)*(it b)
                 |_,Div(_,a,b) -> (it a)/(it b)
-                |F,_          -> Formula(Dt,"int("+e.code+")")
-                |T,_          -> Formula(Dt,"\\mathrm{integer}("+e.code+")")
-                |H,_          -> Formula(Dt,"\\mathrm{integer}("+e.code+")")
-                |_,_          -> Formula(Dt,"(int)("+e.code+")")
+                |F,_          -> Formula(It 4,"int("+e.code+")")
+                |T,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
+                |H,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
+                |_,_          -> Formula(It 4,"(int)("+e.code+")")
             it x
             
         static member sum (n1:num0) = fun (n2:num0) (code:num0->num0) ->
@@ -265,9 +265,9 @@ namespace Aqualis
             ///<summary>偏角</summary>
             member x.pha with get() = asm.atan2(x.im,x.re)
             ///<summary>インクリメント</summary>
-            member x.inc with get() = x <== x + 1
+            member x.inc() = x <== x + 1
             ///<summary>デクリメント</summary>
-            member x.dec with get() = x <== x - 1
+            member x.dec() = x <== x - 1
             
         type bool0 with
             member this.eval with get() =

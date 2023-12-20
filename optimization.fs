@@ -6,8 +6,6 @@ http://opensource.org/licenses/mit-license.php
 *)
 namespace Aqualis
 
-open Aqualis.lapack
-
 type optimization() =
     
     /// <summary>
@@ -46,7 +44,7 @@ type optimization() =
             iter.whiledo (counter.<m) <| fun _ ->
                 br.branch <| fun b ->
                     b.IF (fa.>f1.>f2.>fb) <| fun () ->
-                        counter.dec
+                        counter.dec()
                         //xa: そのまま
                         x1 <== x2
                         f1 <== f2
@@ -57,7 +55,7 @@ type optimization() =
                         f fb xb
                         //print.s [!."A"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
                     b.IF (And [f1.>f2; fa.>f2;]) <| fun () ->
-                        counter.inc
+                        counter.inc()
                         xa <== x1
                         fa <== f1
                         x1 <== x2
@@ -68,7 +66,7 @@ type optimization() =
                         f f2 x2
                         //print.s [!."B"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
                     b.IF (Or [And [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
-                        counter.inc
+                        counter.inc()
                         //xa: そのまま
                         xb <== x2
                         fb <== f2
@@ -249,7 +247,7 @@ type optimization() =
                 ch.d2 x0.size1 x0.size1 <| fun ih ->
                     ch.d2 x0.size1 x0.size1 <| fun h ->
                         fH h x0
-                        inverse_matrix ih h
+                        La.inverse_matrix ih h
                     ch.d1 x0.size1 <| fun df0 ->
                         df df0 x0
                         La.matmul (ih,df0) <| fun a ->
