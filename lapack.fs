@@ -87,7 +87,10 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="code">ノルムaに対する処理</param>
         static member norm (a:num1) = fun code ->
-            La.dot (a,a) <| fun b -> code(asm.sqrt(b))
+            tbinder.d a <| fun () ->
+                La.dot (a,a) <| fun b -> code(asm.sqrt(b))
+            tbinder.z a <| fun () ->
+                La.dot (a,a) <| fun b -> code(asm.sqrt(b.re))
             
         /// <summary>
         /// ベクトルの規格化
