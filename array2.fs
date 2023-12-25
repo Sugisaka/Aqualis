@@ -287,33 +287,81 @@ namespace Aqualis
         member this.Item with get((a1:num0,b1:num0),j:num0) = num1(typ,this.Idx2((a1,b1),j))
         member this.Item with get((a1:num0,b1:num0),j:int) = num1(typ,this.Idx2((a1,b1),j))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>2次元配列生成(整数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(s1:num0,s2:num0,f:num0*num0->num0) = num2(this.etype,Arx2(s1,s2,f))
+        static member fiarray(s1:num0,s2:num0,f:num0*num0->num0) = num2(It 4,Arx2(s1,s2,f))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>2次元配列生成(倍精度浮動小数点型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(s1:int,s2:num0,f:num0*num0->num0) = this.subarray(I s1,s2,f)
+        static member fdarray(s1:num0,s2:num0,f:num0*num0->num0) = num2(Dt,Arx2(s1,s2,f))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>2次元配列生成(複素数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(s1:num0,s2:int,f:num0*num0->num0) = this.subarray(s1,I s2,f)
+        static member fzarray(s1:num0,s2:num0,f:num0*num0->num0) = num2(Zt,Arx2(s1,s2,f))
+        
+        //<summary>2次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fiarray(s1:int,s2:num0,f:num0*num0->num0) = num2.fiarray(I s1,s2,f)
+        
+        //<summary>2次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fdarray(s1:int,s2:num0,f:num0*num0->num0) = num2.fdarray(I s1,s2,f)
+        
+        //<summary>2次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fzarray(s1:int,s2:num0,f:num0*num0->num0) = num2.fzarray(I s1,s2,f)
+        
+        //<summary>2次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fiarray(s1:num0,s2:int,f:num0*num0->num0) = num2.fiarray(s1,I s2,f)
+        
+        //<summary>2次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fdarray(s1:num0,s2:int,f:num0*num0->num0) = num2.fdarray(s1,I s2,f)
+        
+        //<summary>2次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fzarray(s1:num0,s2:int,f:num0*num0->num0) = num2.fzarray(s1,I s2,f)
 
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>2次元配列生成(整数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(s1:int,s2:int,f:num0*num0->num0) = this.subarray(I s1,I s2,f)
+        static member fiarray(s1:int,s2:int,f:num0*num0->num0) = num2.fiarray(I s1,I s2,f)
+        
+        //<summary>2次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fdarray(s1:int,s2:int,f:num0*num0->num0) = num2.fdarray(I s1,I s2,f)
+        
+        //<summary>2次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fzarray(s1:int,s2:int,f:num0*num0->num0) = num2.fzarray(I s1,I s2,f)
         
         //<summary>元の配列と同じサイズの配列生成</summary> 
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(f:num0*num0->num0) = this.subarray(this.size1,this.size2,f)
+        member this.farray(f:num0*num0->num0) = num2(this.etype,Arx2(this.size1,this.size2,f))
         
         //<summary>値を0で初期化</summary> 
         override this.clear() = 

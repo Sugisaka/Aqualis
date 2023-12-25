@@ -235,19 +235,39 @@ namespace Aqualis
         member this.Item with get((a:int ,b:num0)) = num1(typ,this.Idx1(a,b))
         member this.Item with get((a:int ,b:int )) = num1(typ,this.Idx1(a,b) )
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>1次元配列生成(整数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(s1:num0,f:num0->num0) = num1(this.etype,Arx1(s1,f))
+        static member fiarray(s1:num0,f:num0->num0) = num1(It 4,Arx1(s1,f))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>1次元配列生成(倍精度浮動小数点型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(s1:int,f:num0->num0) = this.subarray(I s1,f)
+        static member fdarray(s1:num0,f:num0->num0) = num1(Dt,Arx1(s1,f))
+        
+        //<summary>1次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fzarray(s1:num0,f:num0->num0) = num1(Zt,Arx1(s1,f))
+        
+        //<summary>1次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fiarray(s1:int,f:num0->num0) = num1.fiarray(I s1,f)
+        
+        //<summary>1次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fdarray(s1:int,f:num0->num0) = num1.fdarray(I s1,f)
+        
+        //<summary>1次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="f">(i,j)要素に対する要素値</param>
+        static member fzarray(s1:int,f:num0->num0) = num1.fzarray(I s1,f)
         
         //<summary>元の配列と同じサイズの配列生成</summary> 
         ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.subarray(f:num0->num0) = this.subarray(this.size1,f)
+        member this.farray(f:num0->num0) = num1(this.etype,Arx1(this.size1,f))
         
         //<summary>値を0で初期化</summary> 
         override this.clear() = 

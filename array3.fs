@@ -304,65 +304,177 @@ namespace Aqualis
         member this.Item with get(i:num0,(a2:num0,b2:num0),k:num0) = num1(typ,this.Idx3(i,(a2,b2),k))
         member this.Item with get(i:num0,j:num0,(a3:num0,b3:num0)) = num1(typ,this.Idx3(i,j,(a3,b3)))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(整数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:num0,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3(this.etype,Arx3(s1,s2,s3,f))
+        static member fiarray(s1:num0,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3(It 4,Arx3(s1,s2,s3,f))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:int,s2:num0,s3:num0,f:num0*num0*num0->num0) = this.subarray(I s1,s2,s3,f)
+        static member fdarray(s1:num0,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3(Dt,Arx3(s1,s2,s3,f))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(複素数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:num0,s2:int,s3:num0,f:num0*num0*num0->num0) = this.subarray(s1,I s2,s3,f)
+        static member fzarray(s1:num0,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3(Zt,Arx3(s1,s2,s3,f))
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(整数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:num0,s2:num0,s3:int,f:num0*num0*num0->num0) = this.subarray(s1,s2,I s3,f)
+        static member fiarray(s1:int,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3.fiarray(I s1,s2,s3,f)
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:int,s2:int,s3:num0,f:num0*num0*num0->num0) = this.subarray(I s1,I s2,s3,f)
+        static member fdarray(s1:int,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3.fdarray(I s1,s2,s3,f)
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(複素数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:int,s2:num0,s3:int,f:num0*num0*num0->num0) = this.subarray(I s1,s2,I s3,f)
+        static member fzarray(s1:int,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3.fzarray(I s1,s2,s3,f)
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(整数型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:num0,s2:int,s3:int,f:num0*num0*num0->num0) = this.subarray(s1,I s2,I s3,f)
+        static member fiarray(s1:num0,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fiarray(s1,I s2,s3,f)
         
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(s1:int,s2:int,s3:int,f:num0*num0*num0->num0) = this.subarray(I s1,I s2,I s3,f)
+        static member fdarray(s1:num0,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fdarray(s1,I s2,s3,f)
+        
+        //<summary>3次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fzarray(s1:num0,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fzarray(s1,I s2,s3,f)
+        
+        //<summary>3次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fiarray(s1:num0,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fiarray(s1,s2,I s3,f)
+        
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fdarray(s1:num0,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fdarray(s1,s2,I s3,f)
+        
+        //<summary>3次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fzarray(s1:num0,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fzarray(s1,s2,I s3,f)
+        
+        //<summary>3次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fiarray(s1:int,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fiarray(I s1,I s2,s3,f)
+        
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fdarray(s1:int,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fdarray(I s1,I s2,s3,f)
+        
+        //<summary>3次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fzarray(s1:int,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fzarray(I s1,I s2,s3,f)
+        
+        //<summary>3次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fiarray(s1:int,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fiarray(I s1,s2,I s3,f)
+        
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fdarray(s1:int,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fdarray(I s1,s2,I s3,f)
+        
+        //<summary>3次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fzarray(s1:int,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fzarray(I s1,s2,I s3,f)
+        
+        //<summary>3次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fiarray(s1:num0,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fiarray(s1,I s2,I s3,f)
+        
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fdarray(s1:num0,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fdarray(s1,I s2,I s3,f)
+        
+        //<summary>3次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fzarray(s1:num0,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fzarray(s1,I s2,I s3,f)
+        
+        //<summary>3次元配列生成(整数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fiarray(s1:int,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fiarray(I s1,I s2,I s3,f)
+        
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fdarray(s1:int,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fdarray(I s1,I s2,I s3,f)
+        
+        //<summary>3次元配列生成(複素数型)</summary> 
+        ///<param name="s1">第1要素数</param>
+        ///<param name="s2">第2要素数</param>
+        ///<param name="s3">第3要素数</param>
+        ///<param name="f">(i,j,k)要素に対する要素値</param>
+        static member fzarray(s1:int,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fzarray(I s1,I s2,I s3,f)
         
         //<summary>元の配列と同じサイズの配列生成</summary> 
         ///<param name="f">(i,j,k)要素に対する要素値</param>
-        member this.subarray(f:num0*num0*num0->num0) = this.subarray(this.size1,this.size2,this.size3,f)
+        member this.farray(f:num0*num0*num0->num0) = num3(this.etype,Arx3(this.size1,this.size2,this.size3,f))
         
         //<summary>値を0で初期化</summary> 
         override this.clear() = 
