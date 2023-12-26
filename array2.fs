@@ -403,31 +403,49 @@ namespace Aqualis
             num2.sizeMismatchError(x,y)
             num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]+y[i,j]))
         static member (+) (x:num0,y:num2) = num2(x.etype%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x+y[i,j]))
+        static member (+) (x:int,y:num2) = num2((It 4)%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x+y[i,j]))
+        static member (+) (x:double,y:num2) = num2(Dt%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x+y[i,j]))
         static member (+) (x:num2,y:num0) = num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]+y))
+        static member (+) (x:num2,y:int) = num2(x.etype%%(It 4),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]+y))
+        static member (+) (x:num2,y:double) = num2(x.etype%%Dt,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]+y))
         
         static member (-) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
             num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]-y[i,j]))
         static member (-) (x:num0,y:num2) = num2(x.etype%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x-y[i,j]))
+        static member (-) (x:int,y:num2) = num2((It 4)%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x-y[i,j]))
+        static member (-) (x:double,y:num2) = num2(Dt%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x-y[i,j]))
         static member (-) (x:num2,y:num0) = num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]-y))
+        static member (-) (x:num2,y:int) = num2(x.etype%%(It 4),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]-y))
+        static member (-) (x:num2,y:double) = num2(x.etype%%Dt,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]-y))
         
         static member (*) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
             num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]*y[i,j]))
         static member (*) (x:num0,y:num2) = num2(x.etype%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x*y[i,j]))
+        static member (*) (x:int,y:num2) = num2((It 4)%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x*y[i,j]))
+        static member (*) (x:double,y:num2) = num2(Dt%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x*y[i,j]))
         static member (*) (x:num2,y:num0) = num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]*y))
+        static member (*) (x:num2,y:int) = num2(x.etype%%(It 4),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]*y))
+        static member (*) (x:num2,y:double) = num2(x.etype%%Dt,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]*y))
         
         static member (/) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
             num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]/y[i,j]))
         static member (/) (x:num0,y:num2) = num2(x.etype%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x/y[i,j]))
-        static member (/) (x:num2,y:num0) = num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]./y))
+        static member (/) (x:int,y:num2) = num2((It 4)%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x/y[i,j]))
+        static member (/) (x:double,y:num2) = num2(Dt%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x/y[i,j]))
+        static member (/) (x:num2,y:num0) = num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]/y))
+        static member (/) (x:num2,y:int) = num2(x.etype%%(It 4),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]/y))
+        static member (/) (x:num2,y:double) = num2(x.etype%%Dt,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]/y))
 
         static member (./) (x:num2,y:num2) =
             num2.sizeMismatchError(x,y)
             num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]/y[i,j]))
         static member (./) (x:num0,y:num2) = num2(x.etype%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x./y[i,j]))
+        static member (./) (x:int,y:num2) = num2((It 4)%%y.etype,Arx2(y.size1, y.size2, fun (i,j) -> x./y[i,j]))
         static member (./) (x:num2,y:num0) = num2(x.etype%%y.etype,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]./y))
+        static member (./) (x:num2,y:int) = num2(x.etype%%(It 4),Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]./y))
         
         static member (<==) (v1:num2,v2:num2) =
             if p.debugMode then

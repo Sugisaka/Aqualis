@@ -558,31 +558,49 @@ namespace Aqualis
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y[i,j,k]))
         static member (+) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x+y[i,j,k]))
+        static member (+) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x+y[i,j,k]))
+        static member (+) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x+y[i,j,k]))
         static member (+) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
+        static member (+) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
+        static member (+) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
         
         static member (-) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y[i,j,k]))
         static member (-) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x-y[i,j,k]))
+        static member (-) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x-y[i,j,k]))
+        static member (-) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x-y[i,j,k]))
         static member (-) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
+        static member (-) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
+        static member (-) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
         
         static member (*) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y[i,j,k]))
         static member (*) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x*y[i,j,k]))
+        static member (*) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x*y[i,j,k]))
+        static member (*) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x*y[i,j,k]))
         static member (*) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
+        static member (*) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
+        static member (*) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
         
         static member (/) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y[i,j,k]))
         static member (/) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x/y[i,j,k]))
-        static member (/) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
+        static member (/) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x/y[i,j,k]))
+        static member (/) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x/y[i,j,k]))
+        static member (/) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y))
+        static member (/) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y))
+        static member (/) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y))
 
         static member (./) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y[i,j,k])
         static member (./) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x./y[i,j,k]))
+        static member (./) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x./y[i,j,k]))
         static member (./) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
+        static member (./) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
         
         static member (<==) (v1:num3,v2:num3) =
             if p.debugMode then
