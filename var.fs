@@ -235,21 +235,21 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member ip1(name:string,v:int list) =
             p.var.setUniqVarWarning(It 4,A1(v.Length),name,var.init_i1 v)
-            num1(It 4,A1(v.Length),name,var.init_i1 v)
+            num1(It 4,Var1(A1(v.Length),name))
             
         ///<summary>倍精度浮動小数点型1次元配列定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp1(name:string,v:double list) = 
             p.var.setUniqVarWarning(Zt,A1(v.Length),name,var.init_d1 v)
-            num1(Dt,A1(v.Length),name,var.init_d1 v)
+            num1(Dt,Var1(A1(v.Length),name))
             
         ///<summary>複素数型1次元配列定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member zp1(name:string,v:(double*double) list) =
             p.var.setUniqVarWarning(Zt,A0,name,var.init_z1 v)
-            num1(Zt,A1(v.Length),name,var.init_z1 v)
+            num1(Zt,Var1(A1(v.Length),name))
             
         ///<summary>整数型変数</summary>
         ///<param name="name">変数名</param>
