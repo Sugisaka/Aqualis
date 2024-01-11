@@ -236,6 +236,150 @@ namespace Aqualis
                     code
                 |Null -> ""
                 
+        static member (.<) (v1:bool0,v2:num0) = 
+            match v1 with
+            |Less(u1,u2) ->
+                let x1 = u1.<u2
+                let x2 = u2.<v2
+                AND([x1;x2])
+            |LessEq(u1,u2) ->
+                let x1 = u1.<=u2
+                let x2 = u2.<v2
+                AND([x1;x2])
+            |Greater(u1,u2) ->
+                let x1 = u1.>u2
+                let x2 = u2.<v2
+                AND([x1;x2])
+            |GreaterEq(u1,u2) ->
+                let x1 = u1.>=u2
+                let x2 = u2.<v2
+                AND([x1;x2])
+            |AND(lst) ->
+                let u1 =
+                    match lst with
+                    |[] -> NaN
+                    |_ ->
+                      match lst[lst.Length-1] with
+                      |Less(_,u2) -> u2
+                      |LessEq(_,u2) -> u2
+                      |Greater(_,u2) -> u2
+                      |GreaterEq(_,u2) -> u2
+                      |_ -> NaN
+                let x2 = u1.<v2
+                AND(lst@[x2])
+            |_ ->
+                Null
+        static member (.<) (x:bool0,y:int) = x .< (Int_c y)
+        static member (.<) (x:bool0,y:double) = x .< (Dbl_c y)
+        
+        static member (.<=) (v1:bool0,v2:num0) = 
+            match v1 with
+            |Less(u1,u2) ->
+                let x1 = u1.<u2
+                let x2 = u2.<=v2
+                AND([x1;x2])
+            |LessEq(u1,u2) ->
+                let x1 = u1.<=u2
+                let x2 = u2.<=v2
+                AND([x1;x2])
+            |Greater(u1,u2) ->
+                let x1 = u1.>u2
+                let x2 = u2.<=v2
+                AND([x1;x2])
+            |GreaterEq(u1,u2) ->
+                let x1 = u1.>=u2
+                let x2 = u2.<=v2
+                AND([x1;x2])
+            |AND(lst) ->
+                let u1 =
+                    match lst with
+                    |[] -> NaN
+                    |_ ->
+                        match lst[lst.Length-1] with
+                        |Less(_,u2) -> u2
+                        |LessEq(_,u2) -> u2
+                        |Greater(_,u2) -> u2
+                        |GreaterEq(_,u2) -> u2
+                        |_ -> NaN
+                let x2 = (u1.<=v2)
+                AND(lst@[x2])
+            |_ ->
+                Null
+        static member (.<=) (x:bool0,y:int) = x .<= (Int_c y)
+        static member (.<=) (x:bool0,y:double) = x .<= (Dbl_c y)
+        
+        static member (.>) (v1:bool0,v2:num0) = 
+            match v1 with
+            |Less(u1,u2) ->
+                let x1 = u1.<u2
+                let x2 = u2.>v2
+                AND[x1;x2]
+            |LessEq(u1,u2) ->
+                let x1 = u1.<=u2
+                let x2 = u2.>v2
+                AND[x1;x2]
+            |Greater(u1,u2) ->
+                let x1 = u1.>u2
+                let x2 = u2.>v2
+                AND[x1;x2]
+            |GreaterEq(u1,u2) ->
+                let x1 = u1.>=u2
+                let x2 = u2.>v2
+                AND[x1;x2]
+            |AND(lst) ->
+                let u1 =
+                    match lst with
+                    |[] -> NaN
+                    |_ ->
+                        match lst[lst.Length-1] with
+                        |Less(_,u2) -> u2
+                        |LessEq(_,u2) -> u2
+                        |Greater(_,u2) -> u2
+                        |GreaterEq(_,u2) -> u2
+                        |_ -> NaN
+                let x2 = u1.>v2
+                AND(lst@[x2])
+            |_ ->
+                Null
+        static member (.>) (x:bool0,y:int) = x .> (Int_c y)
+        static member (.>) (x:bool0,y:double) = x .> (Dbl_c y)
+        
+        static member (.>=) (v1:bool0,v2:num0) = 
+            match v1 with
+            |Less(u1,u2) ->
+                let x1 = u1.<u2
+                let x2 = u2.>=v2
+                AND[x1;x2]
+            |LessEq(u1,u2) ->
+                let x1 = u1.<=u2
+                let x2 = u2.>=v2
+                AND[x1;x2]
+            |Greater(u1,u2) ->
+                let x1 = u1.>u2
+                let x2 = u2.>=v2
+                AND[x1;x2]
+            |GreaterEq(u1,u2) ->
+                let x1 = u1.>=u2
+                let x2 = u2.>=v2
+                AND[x1;x2]
+            |AND(lst) ->
+                let u1 =
+                    match lst with
+                    |[] -> NaN
+                    |_ ->
+                        match lst[lst.Length-1] with
+                        |Less(_,u2) -> u2
+                        |LessEq(_,u2) -> u2
+                        |Greater(_,u2) -> u2
+                        |GreaterEq(_,u2) -> u2
+                        |_ -> NaN
+                let x2 = u1.>=v2
+                AND(lst@[x2])
+            |_ ->
+                Null
+        static member (.>=) (x:bool0,y:int) = x .>= (Int_c y)
+        static member (.>=) (x:bool0,y:double) = x .>= (Dbl_c y)
+        
     ///<summary>変数オブジェクト</summary>
     and num0 =
         |Str_c of string
@@ -1244,41 +1388,7 @@ namespace Aqualis
         static member (.<) (x:double,y:num0) = (Dbl_c x) .< y
         static member (.<) (x:num0,y:int) = x .< (Int_c y)
         static member (.<) (x:num0,y:double) = x .< (Dbl_c y)
-        static member (.<) (v1:bool0,v2:num0) = 
-            match v1 with
-            |Less(u1,u2) ->
-                let x1 = u1.<u2
-                let x2 = u2.<v2
-                AND([x1;x2])
-            |LessEq(u1,u2) ->
-                let x1 = u1.<=u2
-                let x2 = u2.<v2
-                AND([x1;x2])
-            |Greater(u1,u2) ->
-                let x1 = u1.>u2
-                let x2 = u2.<v2
-                AND([x1;x2])
-            |GreaterEq(u1,u2) ->
-                let x1 = u1.>=u2
-                let x2 = u2.<v2
-                AND([x1;x2])
-            |AND(lst) ->
-                let u1 =
-                    match lst with
-                    |[] -> NaN
-                    |_ ->
-                      match lst[lst.Length-1] with
-                      |Less(_,u2) -> u2
-                      |LessEq(_,u2) -> u2
-                      |Greater(_,u2) -> u2
-                      |GreaterEq(_,u2) -> u2
-                      |_ -> NaN
-                let x2 = u1.<v2
-                AND(lst@[x2])
-            |_ ->
-                Null
-        static member (.<) (x:bool0,y:int) = x .< (Int_c y)
-        static member (.<) (x:bool0,y:double) = x .< (Dbl_c y)
+        
         ///<summary>比較（以下）</summary>
         static member (.<=) (v1:num0,v2:num0) = 
             match v1,v2 with
@@ -1291,41 +1401,7 @@ namespace Aqualis
         static member (.<=) (x:double,y:num0) = (Dbl_c x) .<= y
         static member (.<=) (x:num0,y:int) = x .<= (Int_c y)
         static member (.<=) (x:num0,y:double) = x .<= (Dbl_c y)
-        static member (.<=) (v1:bool0,v2:num0) = 
-            match v1 with
-            |Less(u1,u2) ->
-                let x1 = u1.<u2
-                let x2 = u2.<=v2
-                AND([x1;x2])
-            |LessEq(u1,u2) ->
-                let x1 = u1.<=u2
-                let x2 = u2.<=v2
-                AND([x1;x2])
-            |Greater(u1,u2) ->
-                let x1 = u1.>u2
-                let x2 = u2.<=v2
-                AND([x1;x2])
-            |GreaterEq(u1,u2) ->
-                let x1 = u1.>=u2
-                let x2 = u2.<=v2
-                AND([x1;x2])
-            |AND(lst) ->
-                let u1 =
-                    match lst with
-                    |[] -> NaN
-                    |_ ->
-                        match lst[lst.Length-1] with
-                        |Less(_,u2) -> u2
-                        |LessEq(_,u2) -> u2
-                        |Greater(_,u2) -> u2
-                        |GreaterEq(_,u2) -> u2
-                        |_ -> NaN
-                let x2 = (u1.<=v2)
-                AND(lst@[x2])
-            |_ ->
-                Null
-        static member (.<=) (x:bool0,y:int) = x .<= (Int_c y)
-        static member (.<=) (x:bool0,y:double) = x .<= (Dbl_c y)
+        
         ///<summary>比較（より大）</summary>
         static member (.>) (v1:num0,v2:num0) = 
             match v1,v2 with
@@ -1338,41 +1414,7 @@ namespace Aqualis
         static member (.>) (x:double,y:num0) = (Dbl_c x) .> y
         static member (.>) (x:num0,y:int) = x .> (Int_c y)
         static member (.>) (x:num0,y:double) = x .> (Dbl_c y)
-        static member (.>) (v1:bool0,v2:num0) = 
-            match v1 with
-            |Less(u1,u2) ->
-                let x1 = u1.<u2
-                let x2 = u2.>v2
-                AND[x1;x2]
-            |LessEq(u1,u2) ->
-                let x1 = u1.<=u2
-                let x2 = u2.>v2
-                AND[x1;x2]
-            |Greater(u1,u2) ->
-                let x1 = u1.>u2
-                let x2 = u2.>v2
-                AND[x1;x2]
-            |GreaterEq(u1,u2) ->
-                let x1 = u1.>=u2
-                let x2 = u2.>v2
-                AND[x1;x2]
-            |AND(lst) ->
-                let u1 =
-                    match lst with
-                    |[] -> NaN
-                    |_ ->
-                        match lst[lst.Length-1] with
-                        |Less(_,u2) -> u2
-                        |LessEq(_,u2) -> u2
-                        |Greater(_,u2) -> u2
-                        |GreaterEq(_,u2) -> u2
-                        |_ -> NaN
-                let x2 = u1.>v2
-                AND(lst@[x2])
-            |_ ->
-                Null
-        static member (.>) (x:bool0,y:int) = x .> (Int_c y)
-        static member (.>) (x:bool0,y:double) = x .> (Dbl_c y)
+        
         ///<summary>比較（以上）</summary>
         static member (.>=) (v1:num0,v2:num0) = 
             match v1,v2 with
@@ -1385,41 +1427,6 @@ namespace Aqualis
         static member (.>=) (x:double,y:num0) = (Dbl_c x) .>= y
         static member (.>=) (x:num0,y:int) = x .>= (Int_c y)
         static member (.>=) (x:num0,y:double) = x .>= (Dbl_c y)
-        static member (.>=) (v1:bool0,v2:num0) = 
-            match v1 with
-            |Less(u1,u2) ->
-                let x1 = u1.<u2
-                let x2 = u2.>=v2
-                AND[x1;x2]
-            |LessEq(u1,u2) ->
-                let x1 = u1.<=u2
-                let x2 = u2.>=v2
-                AND[x1;x2]
-            |Greater(u1,u2) ->
-                let x1 = u1.>u2
-                let x2 = u2.>=v2
-                AND[x1;x2]
-            |GreaterEq(u1,u2) ->
-                let x1 = u1.>=u2
-                let x2 = u2.>=v2
-                AND[x1;x2]
-            |AND(lst) ->
-                let u1 =
-                    match lst with
-                    |[] -> NaN
-                    |_ ->
-                        match lst[lst.Length-1] with
-                        |Less(_,u2) -> u2
-                        |LessEq(_,u2) -> u2
-                        |Greater(_,u2) -> u2
-                        |GreaterEq(_,u2) -> u2
-                        |_ -> NaN
-                let x2 = u1.>=v2
-                AND(lst@[x2])
-            |_ ->
-                Null
-        static member (.>=) (x:bool0,y:int) = x .>= (Int_c y)
-        static member (.>=) (x:bool0,y:double) = x .>= (Dbl_c y)
         
         ///<summary>代入</summary>
         static member (<==) (x:num0,y:num0) =
