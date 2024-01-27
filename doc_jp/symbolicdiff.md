@@ -1,7 +1,7 @@
 [目次へ戻る](index.md)
 ## シンボリック微分
 
-関数$f(x)$とその微分$g(x)=\mathrm{d}f(x)/\mathrm{d}x$を代数的に計算する
+関数 $f(x)$ とその微分 $g(x)=\mathrm{d}f(x)/\mathrm{d}x$ を代数的に計算する
 
 $$
 \begin{align}
@@ -101,8 +101,8 @@ f(x)
 g(x)
 &= \frac{\mathrm{d}f(x)}{\mathrm{d}x}
 \\
-&= \frac{\displaystyle 2\left[2x+\sum_{i=1}^5 (ix^2+1)\right]\left[2+\sum_{i=1}^5 (2ix)\right]}{x+1}
- - \frac{\displaystyle \left[2x+\sum_{i=1}^5 (ix^2+1)\right]^2}{(x+1)^2}
+&= \frac{\displaystyle 2 \left[ 2x+\sum_{i=1}^5 (ix^2+1) \right] \left[ 2+\sum_{i=1}^5 (2ix) \right] }{x+1}
+-\frac{\displaystyle \left[2x+\sum_{i=1}^5 (ix^2+1)\right]^2}{(x+1)^2}
 \end{align}
 $$
 
