@@ -41,3 +41,6 @@
 
 ## クラス定義
 [class.md](class.md)
+
+## シンボリック微分
+[symbolicdiff.md](symbolicdiff.md)
