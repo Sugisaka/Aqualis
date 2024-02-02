@@ -269,11 +269,7 @@ namespace Aqualis
                 |C ->
                     iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== v2
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + v2.code)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Arx3(_,_,_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== v2
@@ -621,11 +617,7 @@ namespace Aqualis
                 |C ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + y)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Var3(_,x),Arx3(_,_,_,f) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
@@ -644,11 +636,7 @@ namespace Aqualis
                 |C ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + v2.code)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Arx3(_,_,_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2

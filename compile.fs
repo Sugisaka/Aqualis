@@ -482,6 +482,7 @@ namespace Aqualis
                     //ソースファイル出力
                     p.hwrite("\\documentclass[a4paper,fleqn]{ltjsarticle}\n")
                     p.hwrite("\\usepackage{amsmath}\n")
+                    List.iter (fun (s:string) -> p.hwrite(s+"\n")) <| p.hlist.list
                     p.hwrite("\\oddsidemargin=-0.4mm\n")
                     p.hwrite("\\topmargin=4.6mm\n")
                     p.hwrite("\\headheight=0mm\n")
@@ -493,7 +494,7 @@ namespace Aqualis
                     p.hwrite("\\parindent=0mm\n")
                     p.hwrite("\\unitlength=1.00mm\n")
                     p.hwrite("\\begin{document}\n")
-                    p.hwrite("{\\Large Program: "+projectname.Replace("_","\\_")+"}\n\n")
+                    p.hwrite("{\\Large "+projectname.Replace("_","\\_")+"}\n\n")
                     //構造体の定義
                     p.hwrite("\\section{structures}\n")
                     str.Def_Structure()

@@ -188,6 +188,9 @@ namespace Aqualis
         ///<summary>trueのときOpenACCが使用中</summary>
         member val isOaccUsed = false with get,set
         
+        ///<summary>TeX、HTMLにおける分数のスタイル</summary>
+        member val frac_style = 0 with get,set
+        
         ///<summary>整数型を文字列に変換するときの桁数</summary>
         member val int_string_format = 8 with get,set
         

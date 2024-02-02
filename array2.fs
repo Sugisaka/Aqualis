@@ -228,11 +228,7 @@ namespace Aqualis
                 |C ->
                     iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + y)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Var2(_,x),Arx2(_,_,f) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
@@ -252,11 +248,7 @@ namespace Aqualis
                 |C ->
                     iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + v2.code)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Arx2(_,_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
@@ -466,11 +458,7 @@ namespace Aqualis
                 |C ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + y)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Var2(_,x),Arx2(_,_,f) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
@@ -489,11 +477,7 @@ namespace Aqualis
                 |C ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + v2.code)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Arx2(_,_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2

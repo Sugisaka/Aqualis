@@ -80,6 +80,13 @@ namespace Aqualis
             |H   -> p.codewrite("stop\n")
               
         /// <summary>
+        /// インクルードファイル追加（TeXの場合はプリアンブル部挿入コード）
+        /// </summary>
+        /// <param name="t">オプション</param>
+        static member incld(s:string) =
+            p.incld s
+            
+        /// <summary>
         /// コンパイルオプションを追加
         /// </summary>
         /// <param name="t">オプション</param>

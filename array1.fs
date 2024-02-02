@@ -189,11 +189,7 @@ namespace Aqualis
                 |C ->
                     iter.num s1 <| fun i -> f1 i <== f2 i
                 |H   ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + y)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Var1(_,x),Arx1(_,f) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s1 <| fun i -> f1 i <== f2 i
@@ -212,11 +208,7 @@ namespace Aqualis
                 |C ->
                     iter.num s1 <| fun i -> f1 i <== v2
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + v2.code)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Arx1(_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num s1 <| fun i -> f1 i <== v2
@@ -350,11 +342,7 @@ namespace Aqualis
                 |C ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + y)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Var1(_,x),Arx1(_,f) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
@@ -374,11 +362,7 @@ namespace Aqualis
                 |C ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x + " \\leftarrow " + v2.code)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
             |Arx1(_,_) ->
                 match p.lang with
                 |F|T|C|H -> iter.num v1.size1 <| fun i -> v1[i] <== v2

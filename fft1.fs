@@ -109,15 +109,9 @@ namespace Aqualis
                         ifftshift1(data2)
                         p.codewrite("dfftw_destroy_plan(" + plan.code + ")")
                 |T ->
-                    p.codewrite("\\begin{align}")
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
-                    p.codewrite("\\end{align}")
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
                 if fftdir=1 then
                     !"規格化"
                     iter.num N <| fun i ->

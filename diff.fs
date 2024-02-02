@@ -19,7 +19,7 @@ namespace Aqualis
                         Int_c 1
                     |Var(_,_),_ ->
                         Int_c 0
-                    |Par(_,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
+                    |Par(_,_,_,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         asm.diff v x
                     |Inv(_,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
                         -(asm.diff v x)

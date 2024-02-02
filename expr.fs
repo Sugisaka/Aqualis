@@ -386,7 +386,7 @@ namespace Aqualis
         |Int_c of int
         |Dbl_c of double
         |Var of Etype*string
-        |Par of Etype*num0
+        |Par of Etype*string*string*num0
         |Inv of Etype*num0
         |Add of Etype*num0*num0
         |Sub of Etype*num0*num0
@@ -419,7 +419,7 @@ namespace Aqualis
             |Int_c _ -> It 4
             |Dbl_c _ -> Dt
             |Var (t,_) -> t
-            |Par (t,_) -> t
+            |Par (t,_,_,_) -> t
             |Inv (t,_) -> t
             |Add (t,_,_) -> t
             |Sub (t,_,_) -> t
@@ -481,7 +481,7 @@ namespace Aqualis
             |Int_c u1,Int_c u2 when u1=u2 -> true
             |Dbl_c u1,Dbl_c u2 when u1=u2 -> true
             |Str_c u1,Str_c u2 when u1=u2 -> true
-            |Par(t1,u1),Par(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
+            |Par(t1,_,_,u1),Par(t2,_,_,u2) when t1=t2 && num0.equal(u1,u2) -> true
             |Inv(t1,u1),Inv(t2,u2) when t1=t2 && num0.equal(u1,u2) -> true
             |Add(t1,u1,v1),Add(t2,u2,v2) when t1=t2 && ((num0.equal(u1,u2) && num0.equal(v1,v2))||(num0.equal(u1,v2) && num0.equal(v2,v1)))-> true
             |Sub(t1,u1,v1),Sub(t2,u2,v2) when t1=t2 && num0.equal(u1,u2) && num0.equal(v1,v2) -> true
@@ -522,14 +522,19 @@ namespace Aqualis
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par(_,x) -> "\\left("+x.code+"\\right)"
+                |Par(_,"(",")",x) -> "\\left("+x.code+"\\right)"
+                |Par(_,popen,pclose,x) -> popen+x.code+pclose
                 |Inv(_,x) -> "-"+x.code
                 |Add(_,x,y) -> x.code+"+"+y.code
                 |Sub(_,x,y) -> x.code+"-"+y.code
-                |Mul(_,x,y) -> x.code+" \\cdot "+y.code
-                |Div(_,Par(_,x),Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div(_,Par(_,x),y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div(_,x,Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Mul(_,x,y) -> x.code+" "+y.code
+                |Div(_,Par(_,_,_,x),Par(_,_,_,y)) when p.param.frac_style = 1 -> "("+x.code+")/("+y.code+")"
+                |Div(_,Par(_,_,_,x),Par(_,_,_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,Par(_,_,_,x),y) when p.param.frac_style = 1 -> "("+x.code+")/"+y.code
+                |Div(_,Par(_,_,_,x),y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,x,Par(_,_,_,y)) when p.param.frac_style = 1 -> x.code+"/("+y.code+")"
+                |Div(_,x,Par(_,_,_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,x,y) when p.param.frac_style = 1 -> x.code+"/"+y.code
                 |Div(_,x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
                 |Pow(_,x,y) -> x.code+"^{"+y.code+"}"
                 |Exp(_,x) -> "\\exp\\left("+x.code+"\\right)"
@@ -561,15 +566,20 @@ namespace Aqualis
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par(_,x) -> "\\left("+x.code+"\\right)"
+                |Par(_,"(",")",x) -> "\\left("+x.code+"\\right)"
+                |Par(_,popen,pclose,x) -> popen+x.code+pclose
                 |Inv(_,x) -> "-"+x.code
                 |Add (_,x,y) -> x.code+"+"+y.code
                 |Sub (_,x,y) -> x.code+"-"+y.code
-                |Mul (_,x,y) -> x.code+" \\cdot "+y.code
-                |Div (_,Par(_,x),Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (_,Par(_,x),y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (_,x,Par(_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
-                |Div (_,x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Mul (_,x,y) -> x.code+" "+y.code
+                |Div(_,Par(_,_,_,x),Par(_,_,_,y)) when p.param.frac_style = 1 -> "("+x.code+")/("+y.code+")"
+                |Div(_,Par(_,_,_,x),Par(_,_,_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,Par(_,_,_,x),y) when p.param.frac_style = 1 -> "("+x.code+")/"+y.code
+                |Div(_,Par(_,_,_,x),y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,x,Par(_,_,_,y)) when p.param.frac_style = 1 -> x.code+"/("+y.code+")"
+                |Div(_,x,Par(_,_,_,y)) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
+                |Div(_,x,y) when p.param.frac_style = 1 -> x.code+"/"+y.code
+                |Div(_,x,y) -> "\\frac{\\displaystyle "+x.code+"}{\\displaystyle "+y.code+"}"
                 |Pow (_,x,y) -> x.code+"^{"+y.code+"}"
                 |Exp(_,x) -> "\\exp\\left("+x.code+"\\right)"
                 |Sin(_,x) -> "\\sin\\left("+x.code+"\\right)"
@@ -600,7 +610,7 @@ namespace Aqualis
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par(_,x) -> "("+x.code+")"
+                |Par(_,_,_,x) -> "("+x.code+")"
                 |Inv(_,x) -> "-"+x.code
                 |Add (_,x,y) -> x.code+"+"+y.code
                 |Sub (_,x,y) -> x.code+"-"+y.code
@@ -637,7 +647,7 @@ namespace Aqualis
                 |Int_c x -> p.ItoS(x)
                 |Dbl_c x -> p.DtoS(x)
                 |Str_c x -> "\""+x+"\""
-                |Par(_,x) -> "("+x.code+")"
+                |Par(_,_,_,x) -> "("+x.code+")"
                 |Inv(_,x) -> "-"+x.code
                 |Add (_,x,y) -> x.code+"+"+y.code
                 |Sub (_,x,y) -> x.code+"-"+y.code
@@ -693,7 +703,7 @@ namespace Aqualis
                 |Int_c _ -> ()
                 |Dbl_c _ -> ()
                 |Var _ -> ()
-                |Par(_,v) -> ev v
+                |Par(_,_,_,v) -> ev v
                 |Inv(_,v) -> ev v
                 |Add(_,u,v) ->
                     ev u
@@ -791,7 +801,7 @@ namespace Aqualis
             |Int_c x when x<0   -> (Int_c -x)
             |Dbl_c x when x<0.0 -> (Dbl_c -x)
             |Inv(_,v) -> v
-            |Add _ -> Inv(x.etype,Par(x.etype,x))
+            |Add _ -> Inv(x.etype,Par(x.etype,"(",")",x))
             |Sub(_,x,y) -> y-x
             |_ -> Inv(x.etype,x)
             
@@ -896,9 +906,9 @@ namespace Aqualis
                 (* Sub([],[小数定数])+[小数定数] *)
                 |Sub(_,u2,Dbl_c v2),Dbl_c v1 -> u2+(Dbl_c (v1-v2))
                 (* Par([])+[] *)
-                |Par(_,v1),v2 -> v1+v2
+                |Par(_,_,_,v1),v2 -> v1+v2
                 (* []+Par([]) *)
-                |v1,Par(_,v2) -> v1+v2
+                |v1,Par(_,_,_,v2) -> v1+v2
                 (* x+y *)
                 |_ -> Add(x%%y,x,y)
             else
@@ -1096,9 +1106,9 @@ namespace Aqualis
                 (* Div([小数定数],[])*[小数定数] *)
                 |Div(_,Dbl_c v2,u2),Dbl_c v1 -> (Dbl_c (v1*v2))/u2
                 (* x*(y1+y2) or x*(y1-y2) *)
-                |_,(Add _|Sub _) -> x*Par(y.etype,y)
+                |_,(Add _|Sub _) -> x*Par(y.etype,"(",")",y)
                 (* (x1+x2)*y or (x1-x2)*y *)
-                |(Add _|Sub _),_ -> Par(x.etype,x)*y
+                |(Add _|Sub _),_ -> Par(x.etype,"(",")",x)*y
                 (* x*y *)
                 |_ -> Mul(x%%y,x,y)
             else
@@ -1253,9 +1263,9 @@ namespace Aqualis
                 (* Div([],[小数定数])/[小数定数] *)
                 |Div(_,v2,Dbl_c u2),Dbl_c v1 -> v2/(Dbl_c (u2*v1))
                 (* x/(y1+y2+…) or x/(y1-y2) or x/(y1*y2) or x/(y1/y2) *)
-                |_,(Add _|Sub _|Mul _|Div _) -> x/Par(y.etype,y)
+                |_,(Add _|Sub _|Mul _|Div _) -> x/Par(y.etype,"(",")",y)
                 (* (x1+x2+…)/y or (x1-x2)/y *)
-                |(Add _|Sub _),_ -> Par(x.etype,x)/y
+                |(Add _|Sub _),_ -> Par(x.etype,"(",")",x)/y
                 |_ when x.etype=(It 4) && y.etype=(It 4) -> num0.todouble(x)/num0.todouble(y)
                 (* x/y *)
                 |_ -> Div(x%%y,x,y)
@@ -1284,8 +1294,8 @@ namespace Aqualis
                 |Inv(_,v1),_ -> -(v1/y)
                 |Mul(_,Int_c v2,u2),Int_c v1 when v2%v1=0 -> (Int_c (v2/v1))*u2
                 |Mul(_,v2,Int_c u2),Int_c v1 when u2%v1=0 -> v2*(Int_c (u2/v1))
-                |_,(Add _|Sub _|Mul _|Div _) -> x./Par(y.etype,y)
-                |(Add _|Sub _),_ -> Par(x.etype,x)./y
+                |_,(Add _|Sub _|Mul _|Div _) -> x./Par(y.etype,"(",")",y)
+                |(Add _|Sub _),_ -> Par(x.etype,"(",")",x)./y
                 |_ -> Div(x%%y,x,y)
             else
               Div(x%%y,x,y)
@@ -1302,8 +1312,8 @@ namespace Aqualis
                 |true,Int_c v1,_ when v1<0   -> -((Int_c (-v1))%y)
                 |true,_,Int_c v2 when v2<0   -> (x%(Int_c (-v2)))
                 |true,Int_c v1,Int_c v2 -> Int_c(v1%v2)
-                |true,_,(Add _|Sub _|Mul _|Div _) -> x%Par(y.etype,y)
-                |true,(Add _|Sub _),_ -> Par(x.etype,x) % y
+                |true,_,(Add _|Sub _|Mul _|Div _) -> x%Par(y.etype,"(",")",y)
+                |true,(Add _|Sub _),_ -> Par(x.etype,"(",")",x) % y
                 |_ ->
                     match p.lang with
                     |F -> Formula (It 4, "mod("+x.code+","+y.code+")")
@@ -1332,23 +1342,23 @@ namespace Aqualis
             (* [小数定数]^[小数定数] *)
             |(F|C),Dbl_c v1,Dbl_c v2 -> Dbl_c(v1**v2)
             (* [負の整数定数]^y *)
-            |_,Int_c v1,_ when v1<0 -> num0.powr(Par(x.etype,x),y)
+            |_,Int_c v1,_ when v1<0 -> num0.powr(Par(x.etype,"(",")",x),y)
             (* [負の小数定数]^y *)
-            |_,Dbl_c v1,_ when v1<0.0 -> num0.powr(Par(x.etype,x),y)
+            |_,Dbl_c v1,_ when v1<0.0 -> num0.powr(Par(x.etype,"(",")",x),y)
             (* x^[負の整数定数] *)
             |T,_,Int_c v2 when v2<0 -> num0.powr(x,y)
-            |_,_,Int_c v2 when v2<0 -> num0.powr(x,Par(y.etype,y))
+            |_,_,Int_c v2 when v2<0 -> num0.powr(x,Par(y.etype,"(",")",y))
             (* x^[負の小数定数] *)
             |T,_,Dbl_c v2 when v2<0.0 -> num0.powr(x,y)
-            |_,_,Dbl_c v2 when v2<0.0 -> num0.powr(x,Par(y.etype,y))
+            |_,_,Dbl_c v2 when v2<0.0 -> num0.powr(x,Par(y.etype,"(",")",y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) 
                y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-            |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,x),y)
-            |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,x),Par(y.etype,y))
+            |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,"(",")",x),y)
+            |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,"(",")",x),Par(y.etype,"(",")",y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) *)
-            |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> num0.powr(Par(x.etype,x),y)
+            |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> num0.powr(Par(x.etype,"(",")",x),y)
             (* y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-            |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(x,Par(y.etype,y))
+            |_,_,(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(x,Par(y.etype,"(",")",y))
             (* x^y *)
             |_ -> Pow(x%%y, x,y)
             
@@ -1441,18 +1451,51 @@ namespace Aqualis
                 |C->
                     p.codewrite(x.code + " = " + y.code + ";")
                 |T ->
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x.code + " \\leftarrow " + y.code)
-                    p.codewrite("\\end{align}")
                 |H ->
-                    p.codewrite("\\[")
-                    p.codewrite("\\begin{align}")
                     p.codewrite(x.code + " \\leftarrow " + y.code)
-                    p.codewrite("\\end{align}")
-                    p.codewrite("\\]")
+                    
         static member (<==) (x:num0,y:int) = x <== (Int_c y)
         static member (<==) (x:num0,y:double) = x <== (Dbl_c y)
         static member (<==) (x:list<num0>,y:num0) = for v in x do v <== y
         static member (<==) (x:list<num0>,y:int) = for v in x do v <== y
         static member (<==) (x:list<num0>,y:double) = for v in x do v <== y
         member this.clear() = this <== 0
+        
+        ///<summary>等式(TeX、HTMLのみ)</summary>
+        static member (===) (x:num0,y:num0) =
+            match x.etype,y.etype with
+            |Dt,Zt -> printfn "Warning: complex型からdouble型への代入です：%s←%s" x.code y.code
+            |It _,Dt -> printfn "Warning: double型からint型への代入です：%s←%s" x.code y.code
+            |It 2,It 4 -> printfn "Warning: int型からbyte型への代入です：%s←%s" x.code y.code
+            |_ ->
+                match p.lang with
+                |F ->
+                    ()
+                |C->
+                    ()
+                |T ->
+                    p.codewrite(x.code + " = " + y.code)
+                |H ->
+                    p.codewrite(x.code + " = " + y.code)
+        static member (===) (x:num0,y:int) = x === (Int_c y)
+        static member (===) (x:num0,y:double) = x === (Dbl_c y)
+        
+        ///<summary>等号揃等式(TeX、HTMLのみ)</summary>
+        static member (=|=) (x:num0,y:num0) =
+            match x.etype,y.etype with
+            |Dt,Zt -> printfn "Warning: complex型からdouble型への代入です：%s←%s" x.code y.code
+            |It _,Dt -> printfn "Warning: double型からint型への代入です：%s←%s" x.code y.code
+            |It 2,It 4 -> printfn "Warning: int型からbyte型への代入です：%s←%s" x.code y.code
+            |_ ->
+                match p.lang with
+                |F ->
+                    ()
+                |C->
+                    ()
+                |T ->
+                    p.codewrite(x.code + " =& " + y.code)
+                |H ->
+                    p.codewrite(x.code + " =& " + y.code)
+        static member (=|=) (x:num0,y:int) = x =|= (Int_c y)
+        static member (=|=) (x:num0,y:double) = x =|= (Dbl_c y)
