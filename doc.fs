@@ -41,6 +41,9 @@ namespace Aqualis
             this.eqNonumber()
             this.eqReturn()
             
+        ///<summary>空白の左辺</summary>
+        member _.nl with get() = Var(Zt,"")
+        
     ///<summary>変数宣言</summary>
     type doc () =
         
