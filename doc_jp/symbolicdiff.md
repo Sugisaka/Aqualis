@@ -135,3 +135,24 @@ $$
           (f x).eval()
           print.ccc x (g x) (2*(2*x+asm.sum 1 5 (fun i -> i*x*x+1))*(2+asm.sum 1 5 (fun i -> 2*i*x))/(x+1)-asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/asm.pow(x+1,2))
 ```
+
+配列要素による微分
+
+```fsharp
+    let N = 100
+    ch.d1 N <| fun x ->
+    ch.d1 N <| fun y ->
+        //関数f
+        let f(x:num1) = 2*asm.sum 1 N (fun i -> i*asm.pow(x[i],2)+1)
+        //関数fのx[j]微分
+        let g(x:num1,j:num0) = asm.diff (f x) x[j]
+        //xの初期化
+        iter.num N <| fun i ->
+            x[i] <== 0.1*i
+        //微分計算 y[i] = df/d(x[i])
+        iter.num N <| fun j ->
+            y[j] <== g (x,j)
+        //微分値の確認
+        iter.num N <| fun j ->
+            print.ccc j y[j] (2*j*2*x[j])
+```
