@@ -75,7 +75,7 @@ namespace Aqualis
                     br.if1 (Or [(i .< _1); (this.size1 .< i)]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
                     br.if1 (Or [(j .< _1); (this.size2 .< j)]) <| fun () ->
-                        print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size3;!.")"]
+                        print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size2;!.")"]
                     br.if1 (Or [(k .< _1); (this.size3 .< k)]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");k;!." is out of range (1:";this.size3;!.")"]
                     p.comment("****************************************************")
@@ -127,7 +127,7 @@ namespace Aqualis
                         match size with
                         |A3(0,0,0) ->
                             this.size1 <== n1
-                            this.size3 <== n2
+                            this.size2 <== n2
                             this.size3 <== n3
                             p.codewrite(name+"="+"("+typ.tostring(p.lang)+" *)"+"malloc("+"sizeof("+typ.tostring(p.lang)+")*"+this.size1.code+"*"+this.size2.code+"*"+this.size3.code+");\n")
                         |_ -> 

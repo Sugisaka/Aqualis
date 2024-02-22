@@ -198,8 +198,8 @@ namespace Aqualis
                 |Null -> ""
             |C ->
                 match this with
-                |True -> "true"
-                |False -> "false"
+                |True -> "1"
+                |False -> "0"
                 |Eq(v1,v2) ->
                     v1.code+" == "+v2.code
                 |NEq(v1,v2) ->
@@ -675,6 +675,7 @@ namespace Aqualis
                 |Abs(_,x) -> "abs("+x.code+")"
                 |Log(_,x) -> "log("+x.code+")"
                 |Log10(_,x) -> "log10("+x.code+")"
+                |Sqrt(Zt,x) -> "csqrt("+x.code+")"
                 |Sqrt(_,x) -> "sqrt("+x.code+")"
                 |Idx1(_,u,n1) -> u+"["+(n1-Int_c 1).code+"]"
                 |Idx2(_,u,n1,n2) -> 

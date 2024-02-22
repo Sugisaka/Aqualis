@@ -9,7 +9,7 @@
 open System
 open System.IO
 
-let version = "183.1.5.0"
+let version = "183.1.6.0"
 
 let backup outputdir sourceDir sourceFile projectname (codever:string) = 
     let rec d lst =

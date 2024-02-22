@@ -418,7 +418,7 @@ namespace Aqualis
                     |_ -> ()
                 
                 for i in 1..this.loopvar.maxcounter do
-                    this.vwrite(this.declare(It 4,A0,"ic"+i.ToString("000"),"")+"\n")
+                    this.vwrite(this.declare(It 4,A0,"ic"+i.ToString("0000"),"")+"\n")
                 
                 //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
                 for i in 1..this.i_cache_var.maxcounter do
