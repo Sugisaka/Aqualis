@@ -11,7 +11,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\cygwin64\home\work"
 
-#I "C:\\Aqualis\\lib\\180_0_0_0"
+#I "C:\\Aqualis\\lib\\183_1_5_0"
 #r "Aqualis.dll"
 #load "version.fsx"
 

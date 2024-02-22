@@ -1,8 +1,8 @@
 [目次へ戻る](index.md)
 ## インストール
 1. プロジェクトをビルドし、Aqualis.dllを生成する。
-2. Aqualis.dllをC:\Aqualis\lib\180_0_10_0にコピーする
-3. version.fsxをC:\Aqualis\lib\180_0_1_0にコピーする
+2. Aqualis.dllをC:\Aqualis\lib\183_1_5_0にコピーする
+3. version.fsxをC:\Aqualis\lib\183_1_5_0にコピーする
 4. setting.fsxをC:\Aqualis\libにコピーする
 
 ## ソースファイルの実行

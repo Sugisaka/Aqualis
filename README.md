@@ -5,8 +5,8 @@ This library generates C/FORTRAN source codes for numerical simulation. You can 
 
 ## Installation
 1. Build this project. Aqualis.dll is generated. 
-1. Copy Aqualis.dll to C:\Aqualis\lib\180_0_1_0
-1. Copy version.fsx to C:\Aqualis\lib\180_0_1_0
+1. Copy Aqualis.dll to C:\Aqualis\lib\183_1_5_0
+1. Copy version.fsx to C:\Aqualis\lib\183_1_5_0
 1. Copy setting.fsx to C:\Aqualis\lib
 
 ## How to use
