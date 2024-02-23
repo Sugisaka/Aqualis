@@ -56,6 +56,9 @@ namespace Aqualis
                     |Atan2 _,_ ->
                         printfn "atan2を微分できません"
                         NaN
+                    |Abs(Zt,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) -> 
+                        printfn "複素数の絶対値を微分できません"
+                        NaN
                     |Abs(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) -> 
                         v/Abs(t,v)*(asm.diff v x)
                     |Log(t,v),(Var(_,_)|Idx1(_,_,_)|Idx2(_,_,_,_)|Idx3(_,_,_,_,_)) ->
