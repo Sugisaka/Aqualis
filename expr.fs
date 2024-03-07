@@ -467,13 +467,17 @@ namespace Aqualis
                     p.codewrite("}"+"\n")
             |_ -> ()
                 
-        ///<summary>整数型一時変数の生成(再利用しない)</summary>
+        ///<summary>一時変数の生成(再利用しない)</summary>
         static member internal ch(t:Etype) =
             match t with
             |It 4 -> Var(It 4,p.i_cache_var.getAutoVar())
             |Dt   -> Var(Dt  ,p.d_cache_var.getAutoVar())
             |Zt   -> Var(Zt  ,p.z_cache_var.getAutoVar())
             |_    -> NaN
+            
+        ///<summary>整数型一時変数の生成(式の比較用。変数宣言・再利用しない)</summary>
+        static member internal chdum() =
+            Var(It 4,p.dum_cache_var.getAutoVar())
             
         static member internal equal(x:num0,y:num0) =
             match x,y with
@@ -506,8 +510,9 @@ namespace Aqualis
             |Formula(t1,u1),Formula(t2,u2) when t1=t2 && u1=u2 -> true
             |Sum(t1,n1a,n2a,f1),Sum(t2,n1b,n2b,f2) ->
                 isEqSimplify <- false
-                let u1 = f1 (Int_c 1)
-                let u2 = f2 (Int_c 1)
+                let n = num0.chdum()
+                let u1 = f1 n
+                let u2 = f2 n
                 isEqSimplify <- true
                 t1=t2 && num0.equal(n1a,n1b) && num0.equal(n2a,n2b) && num0.equal(u1,u2)
             |Let(t1,v1,u1),Let(t2,v2,u2) when t1=t2 && num0.equal(v1,v2) && num0.equal(u1,u2) -> true
@@ -761,6 +766,7 @@ namespace Aqualis
                         ev (f n)
                 |Let(_,v,u) -> 
                     ev u
+                    printfn "%s %s" (g.ToString()) g.code
                     match List.tryFind (fun h -> num0.equal(h,g)) c with
                     |None ->
                         //評価済みでない式のみ処理

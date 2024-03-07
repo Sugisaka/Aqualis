@@ -128,6 +128,9 @@ namespace Aqualis
         ///<summary>複数の代入文で続けて使用できる一時変数（整数）</summary>
         member val i_cache_var = new VarController("i",lan)
         
+        ///<summary>級数比較用ダミーインデックス</summary>
+        member val dum_cache_var = new VarController("dum",lan)
+
         ///<summary>複数の代入文で続けて使用できる一時変数（小数）</summary>
         member val d_cache_var = new VarController("d",lan)
         

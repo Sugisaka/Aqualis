@@ -85,6 +85,8 @@ namespace Aqualis
         member this.indentSpace with get() = this.param.indent.space
         ///<summary>セクションのヘッダを画面出力</summary>
         member this.displaySection with get() = this.param.display_section
+        ///<summary>級数比較用ダミーインデックス</summary>
+        member this.dum_cache_var with get() = this.param.dum_cache_var
         ///<summary>一時変数(整数)</summary>
         member this.i_cache_var with get() = this.param.i_cache_var
         ///<summary>一時変数(小数)</summary>
