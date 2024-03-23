@@ -34,7 +34,7 @@
 [fileio.md](fileio.md)
 
 ## 線形代数演算
-[linearAlgrabra.md](linearAlgrabra.md)
+[linearAlgebra.md](linearAlgebra.md)
 
 ## 並列演算
 [parallel.md](parallel.md)
