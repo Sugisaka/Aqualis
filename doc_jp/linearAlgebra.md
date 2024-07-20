@@ -17,7 +17,7 @@ $$
 A\boldsymbol{x} = \boldsymbol{b}
 $$
 
-を解く。$A$は2次元配列、$\boldsymbol{b}$は1次元配列。例えば、
+を解く。 $A$ は2次元配列、 $\boldsymbol{b}$ は1次元配列。例えば、
 
 $$
 A=
@@ -46,27 +46,29 @@ b[2] <== 6.0
 
 とする。
 
-```
+```fsharp
 solve_simuleq(A,b)
 ```
 
-とすると、`b`に連立方程式の解$A^{-1}\boldsymbol{b}$が代入された状態になる。
+とすると、`b`に連立方程式の解 $A^{-1}\boldsymbol{b}$ が代入された状態になる。
 
 ### 複数の連立方程式の解
 
 係数行列が同じ複数の連立方程式
 
 $$
-A\boldsymbol{x}_1 = \boldsymbol{b}_1 \\
-A\boldsymbol{x}_2 = \boldsymbol{b}_2 \\
-\vdots \\
-A\boldsymbol{x}_N = \boldsymbol{b}_N \\
+\begin{align}
+A\boldsymbol{x}_1 &= \boldsymbol{b}_1 \\
+A\boldsymbol{x}_2 &= \boldsymbol{b}_2 \\
+&\vdots \\
+A\boldsymbol{x}_N &= \boldsymbol{b}_N
+\end{align}
 $$
 
-を解く。$\boldsymbol{b}_1, \boldsymbol{b}_2, \cdots, \boldsymbol{b}_N$を並べた2次元配列`b`を用意し
+を解く。 $\boldsymbol{b}_1, \boldsymbol{b}_2, \cdots, \boldsymbol{b}_N$ を並べた2次元配列`b`を用意し
 
-```
+```fsharp
 solve_simuleqs(A,b)
 ```
 
-とすると、`b`に連立方程式の解$A^{-1}\boldsymbol{x}_1, A^{-1}\boldsymbol{x}_2, \cdots, A^{-1}\boldsymbol{x}_N$が代入された状態になる。
+とすると、`b`に連立方程式の解 $A^{-1}\boldsymbol{x}_1, A^{-1}\boldsymbol{x}_2, \cdots, A^{-1}\boldsymbol{x}_N$ が代入された状態になる。
