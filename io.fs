@@ -771,6 +771,16 @@ namespace Aqualis
                                             f.allocate n1
                                             //データ本体
                                             match t with
+                                            |It _ ->
+                                                iter.num f.size1 <| fun i ->
+                                                    ch.i <| fun u ->
+                                                        r u
+                                                        f[i] <== u
+                                            |Dt ->
+                                                iter.num f.size1 <| fun i ->
+                                                    ch.d <| fun u ->
+                                                        r u
+                                                        f[i] <== u
                                             |Zt ->
                                                 iter.num f.size1 <| fun i ->
                                                     ch.dd <| fun (re,im) ->
@@ -778,8 +788,7 @@ namespace Aqualis
                                                         r im
                                                         f[i] <== re + asm.uj*im
                                             |_ ->
-                                                iter.num f.size1 <| fun i ->
-                                                    r f[i]
+                                                ()
                                     <| fun () ->
                                         print.t "Invalid data dimension"
                             <| fun () ->
@@ -820,6 +829,18 @@ namespace Aqualis
                                             f.allocate(n1,n2)
                                             //データ本体
                                             match t with
+                                            |It _ ->
+                                                iter.num f.size2 <| fun j ->
+                                                    iter.num f.size1 <| fun i ->
+                                                        ch.i <| fun u ->
+                                                            r u
+                                                            f[i,j] <== u
+                                            |Dt ->
+                                                iter.num f.size2 <| fun j ->
+                                                    iter.num f.size1 <| fun i ->
+                                                        ch.d <| fun u ->
+                                                            r u
+                                                            f[i,j] <== u
                                             |Zt ->
                                                 iter.num f.size2 <| fun j ->
                                                     iter.num f.size1 <| fun i ->
@@ -828,9 +849,7 @@ namespace Aqualis
                                                             r im
                                                             f[i,j] <== re + asm.uj*im
                                             |_ ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        r f[i,j]
+                                                ()
                                     <| fun () ->
                                         print.t "Invalid data dimension"
                             <| fun () ->
@@ -873,6 +892,20 @@ namespace Aqualis
                                             f.allocate(n1,n2,n3)
                                             //データ本体
                                             match t with
+                                            |It _ ->
+                                                iter.num f.size3 <| fun k ->
+                                                    iter.num f.size2 <| fun j ->
+                                                        iter.num f.size1 <| fun i ->
+                                                            ch.i <| fun u ->
+                                                                r u
+                                                                f[i,j,k] <== u
+                                            |Dt ->
+                                                iter.num f.size3 <| fun k ->
+                                                    iter.num f.size2 <| fun j ->
+                                                        iter.num f.size1 <| fun i ->
+                                                            ch.d <| fun u ->
+                                                                r u
+                                                                f[i,j,k] <== u
                                             |Zt ->
                                                 iter.num f.size3 <| fun k ->
                                                     iter.num f.size2 <| fun j ->
@@ -882,10 +915,7 @@ namespace Aqualis
                                                                 r im
                                                                 f[i,j,k] <== re + asm.uj*im
                                             |_ ->
-                                                iter.num f.size3 <| fun k ->
-                                                    iter.num f.size2 <| fun j ->
-                                                        iter.num f.size1 <| fun i ->
-                                                            r f[i,j,k]
+                                                ()
                                     <| fun () ->
                                         print.t "Invalid data dimension"
                             <| fun () ->
