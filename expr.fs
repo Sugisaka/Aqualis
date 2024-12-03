@@ -235,6 +235,46 @@ namespace Aqualis
                     //コード生成
                     code
                 |Null -> ""
+            //　accはaccumulationの略で累積値
+            |P ->
+                match this with
+                |True -> "True"
+                |False -> "False"
+                |Eq(v1,v2) ->
+                    v1.code+" == "+v2.code
+                |NEq(v1,v2) ->
+                    v1.code+" != "+v2.code
+                |Greater(v1,v2) ->
+                    v1.code+" > "+v2.code
+                |GreaterEq(v1,v2) ->
+                    v1.code+" >= "+v2.code
+                |Less(v1,v2) ->
+                    v1.code+" < "+v2.code
+                |LessEq(v1,v2) ->
+                    v1.code+" <= "+v2.code
+                |AND(v) when (match List.tryFind (fun x -> bool0.equal(x,False)) v with |None -> false |Some _ -> true) -> False.code
+                |OR(v)  when (match List.tryFind (fun x -> bool0.equal(x,True )) v with |None -> false |Some _ -> true) -> True.code
+                |AND(v) ->
+                    //先に中身を評価
+                    let uc = v |> List.map (fun q -> q.code)
+                    let cat acc i =
+                        if i<>0 then
+                            acc + " and " + "(" + uc[i] + ")"
+                        else acc + "(" + uc[i] + ")"
+                    let code = List.fold cat "" [0..uc.Length-1]
+                    //コード生成
+                    code
+                |OR(v) ->
+                    //先に中身を評価
+                    let uc = v |> List.map (fun q -> q.code)
+                    let cat acc i =
+                        if i<>0 then
+                            acc + " or " + "(" + uc[i] + ")"
+                        else acc + "(" + uc[i] + ")"
+                    let code = List.fold cat "" [0..uc.Length-1]
+                    //コード生成
+                    code
+                |Null -> ""
                 
         static member (.<) (v1:bool0,v2:num0) = 
             match v1 with
@@ -465,6 +505,13 @@ namespace Aqualis
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("}"+"\n")
+            |P ->
+                p.getloopvar <| fun counter ->
+                    if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
+                    p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"+1, 1):"+"\n")
+                    p.indentInc()
+                    code(Var(It 4,counter))
+                    p.indentDec()
             |_ -> ()
                 
         ///<summary>一時変数の生成(再利用しない)</summary>
@@ -675,10 +722,14 @@ namespace Aqualis
                 |Acos(_,x) -> "acos("+x.code+")"
                 |Atan(_,x) -> "atan("+x.code+")"
                 |Atan2 (x,y) -> "atan2("+x.code+","+y.code+")"
-                |Abs(Zt,x) -> "cabs("+x.code+")"
-                |Abs(Dt,x) -> "fabs("+x.code+")"
-                |Abs(_,x) -> "abs("+x.code+")"
+                |Abs(_,x) -> 
+                    match x.etype with
+                    |Zt ->  "cabs("+x.code+")"
+                    |Dt ->  "fabs("+x.code+")"
+                    |_  ->  "abs("+x.code+")"
+                |Log(Zt,x) -> "clog("+x.code+")"
                 |Log(_,x) -> "log("+x.code+")"
+                |Log10(Zt,x) -> "clog10("+x.code+")"
                 |Log10(_,x) -> "log10("+x.code+")"
                 |Sqrt(Zt,x) -> "csqrt("+x.code+")"
                 |Sqrt(_,x) -> "sqrt("+x.code+")"
@@ -699,10 +750,116 @@ namespace Aqualis
                     g.code
                 |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
+            |P ->
+                match this with
+                |Var(_,x) -> x
+                |Int_c x -> p.ItoS(x)
+                |Dbl_c x -> p.DtoS(x)
+                |Str_c x -> "\""+x+"\""
+                |Par(_,_,_,x) -> "("+x.code+")"
+                |Inv(_,x) -> "-"+x.code
+                |Add (_,x,y) -> x.code+"+"+y.code
+                |Sub (_,x,y) -> x.code+"-"+y.code
+                |Mul (_,x,y) -> x.code+"*"+y.code
+                |Div (It _,x,y) -> x.code+"//"+y.code     
+                |Div (_,x,y) -> x.code+"/"+y.code
+                |Pow (_,x,y) -> "math.pow("+x.code+","+y.code+")"
+                |Exp(Zt,x) -> "cmath.exp("+x.code+")"
+                |Sin(Zt,x) -> "cmath.sin("+x.code+")"
+                |Cos(Zt,x) -> "cmath.cos("+x.code+")"
+                |Tan(Zt,x) -> "cmath.tan("+x.code+")"
+                |Asin(Zt,x) -> "cmath.asin("+x.code+")"
+                |Acos(Zt,x) -> "cmath.acos("+x.code+")"
+                |Atan(Zt,x) -> "cmath.atan("+x.code+")"
+                |Exp(_,x) -> "math.exp("+x.code+")"
+                |Sin(_,x) -> "math.sin("+x.code+")"
+                |Cos(_,x) -> "math.cos("+x.code+")"
+                |Tan(_,x) -> "math.tan("+x.code+")"
+                |Asin(_,x) -> "math.asin("+x.code+")"
+                |Acos(_,x) -> "math.acos("+x.code+")"
+                |Atan(_,x) -> "math.atan("+x.code+")"
+                |Atan2 (x,y) -> "math.atan2("+x.code+","+y.code+")"
+                |Abs(_,x) -> "abs("+x.code+")"
+                |Log(Zt,x) -> "cmath.log("+x.code+")"
+                |Log(_,x) -> "math.log("+x.code+")"
+                |Log10(Zt,x) -> "cmath.log10("+x.code+")"
+                |Log10(_,x) -> "math.log10("+x.code+")"
+                |Sqrt(Zt,x) -> "cmath.sqrt("+x.code+")"
+                |Sqrt(_,x) -> "math.sqrt("+x.code+")"
+                //↓一応いじったけど、不安が残る
+                |Idx1(_,u,n1) -> u+"["+(n1-Int_c 1).code+"]"
+                |Idx2(_,u,n1,n2) -> 
+                    u+"["+(n1-Int_c 1).code+","+(n2-Int_c 1).code+"]"
+                |Idx3(_,u,n1,n2,n3) -> 
+                    u+"["+(n1-Int_c 1).code+","+(n2-Int_c 1).code+","+(n3-Int_c 1).code+"]"
+                |Formula(_,s) -> s
+                |Sum(t,n1,n2,f) ->
+                    let g = num0.ch t
+                    g.clear()
+                    num0.looprange n1 n2 <| fun n ->
+                        g <== g + (f n)
+                    g.code
+                |Let(_,v,_) -> v.code
+                |NaN -> "NaN"
                 
         ///<summary>Letで事前に登録された変数に値を保存</summary>
         member this.eval() =
             let mutable c:List<num0> = []
+            let rec ev0 (g:num0) =
+                match g with
+                |Str_c _ -> false
+                |Int_c _ -> false
+                |Dbl_c _ -> false
+                |Var _ -> false
+                |Par(_,_,_,v) -> ev0 v
+                |Inv(_,v) -> ev0 v
+                |Add(_,u,v) ->
+                    ev0 u || ev0 v
+                |Sub(_,u,v) ->
+                    ev0 u || ev0 v
+                |Mul(_,u,v) ->
+                    ev0 u || ev0 v
+                |Div(_,u,v) ->
+                    ev0 u || ev0 v
+                |Pow(_,u,v) ->
+                    ev0 u || ev0 v
+                |Exp(_,v) ->
+                    ev0 v
+                |Sin(_,v) ->
+                    ev0 v
+                |Cos(_,v) ->
+                    ev0 v
+                |Tan(_,v) ->
+                    ev0 v
+                |Asin(_,v) ->
+                    ev0 v
+                |Acos(_,v) ->
+                    ev0 v
+                |Atan(_,v) ->
+                    ev0 v
+                |Atan2(u,v) ->
+                    ev0 u || ev0 v
+                |Abs(_,v) ->
+                    ev0 v
+                |Log(_,v) ->
+                    ev0 v
+                |Log10(_,v) ->
+                    ev0 v
+                |Sqrt(_,v) ->
+                    ev0 v
+                |Idx1(_,_,n1) ->
+                    ev0 n1
+                |Idx2(_,_,n1,n2) ->
+                    ev0 n1 || ev0 n2
+                |Idx3(_,_,n1,n2,n3) ->
+                    ev0 n1 || ev0 n2 || ev0 n3
+                |Formula _ -> false
+                |Sum(_,n1,n2,f) ->
+                    ev0 (f <| Int_c 0)
+                |Let(_,v,u) -> 
+                    true
+                |NaN -> false
+
             let rec ev (g:num0) =
                 match g with
                 |Str_c _ -> ()
@@ -762,8 +919,9 @@ namespace Aqualis
                     ev n3
                 |Formula _ -> ()
                 |Sum(_,n1,n2,f) ->
-                    num0.looprange n1 n2 <| fun n ->
-                        ev (f n)
+                    if (ev0 (f <| Int_c 0)) then
+                        num0.looprange n1 n2 <| fun n ->
+                            ev (f n)
                 |Let(_,v,u) -> 
                     ev u
                     printfn "%s %s" (g.ToString()) g.code
@@ -798,6 +956,7 @@ namespace Aqualis
                 |F,_          -> Formula(Dt,"dble("+e.code+")")
                 |T,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
                 |H,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |P,_          -> Formula(Dt,"float("+e.code+")")
                 |_,_          -> Formula(Dt,"(double)("+e.code+")")
             dbl x
             
@@ -1305,8 +1464,8 @@ namespace Aqualis
                 |(Add _|Sub _),_ -> Par(x.etype,"(",")",x)./y
                 |_ -> Div(x%%y,x,y)
             else
-              Div(x%%y,x,y)
-              
+                Div(x%%y,x,y)
+                    
         static member ( ./ ) (x:num0,y:int) = x./(Int_c y)
         static member ( ./ ) (x:int,y:num0) = (Int_c x)./y
         
@@ -1327,6 +1486,7 @@ namespace Aqualis
                     |C -> Formula (It 4, x.code+"%"+y.code)
                     |H -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
                     |T -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
+                    |P -> Formula (It 4, x.code+"%"+y.code)
                     
         static member ( % ) (x:num0,y:int) = x%(Int_c y)
         static member ( % ) (x:int,y:num0) = (Int_c x)%y
@@ -1341,13 +1501,13 @@ namespace Aqualis
             (* x^0 *)
             |_,_,(Int_c 0|Dbl_c 0.0) -> Int_c 1
             (* [整数定数]^[整数定数] *)
-            |(F|C),Int_c v1,Int_c v2 -> Dbl_c(double(v1)**double(v2))
+            |(F|C|P),Int_c v1,Int_c v2 -> Dbl_c(double(v1)**double(v2))
             (* [整数定数]^[小数定数] *)
-            |(F|C),Int_c v1,Dbl_c v2 -> Dbl_c((double v1)**v2)
+            |(F|C|P),Int_c v1,Dbl_c v2 -> Dbl_c((double v1)**v2)
             (* [小数定数]^[整数定数] *)
-            |(F|C),Dbl_c v1,Int_c v2 -> Dbl_c(v1**(double v2))
+            |(F|C|P),Dbl_c v1,Int_c v2 -> Dbl_c(v1**(double v2))
             (* [小数定数]^[小数定数] *)
-            |(F|C),Dbl_c v1,Dbl_c v2 -> Dbl_c(v1**v2)
+            |(F|C|P),Dbl_c v1,Dbl_c v2 -> Dbl_c(v1**v2)
             (* [負の整数定数]^y *)
             |_,Int_c v1,_ when v1<0 -> num0.powr(Par(x.etype,"(",")",x),y)
             (* [負の小数定数]^y *)
@@ -1461,6 +1621,8 @@ namespace Aqualis
                     p.codewrite(x.code + " \\leftarrow " + y.code)
                 |H ->
                     p.codewrite(x.code + " \\leftarrow " + y.code)
+                |P ->
+                    p.codewrite(x.code+" = "+y.code)
                     
         static member (<==) (x:num0,y:int) = x <== (Int_c y)
         static member (<==) (x:num0,y:double) = x <== (Dbl_c y)
@@ -1485,6 +1647,8 @@ namespace Aqualis
                     p.codewrite(x.code + " = " + y.code)
                 |H ->
                     p.codewrite(x.code + " = " + y.code)
+                |P->
+                    ()
         static member (===) (x:num0,y:int) = x === (Int_c y)
         static member (===) (x:num0,y:double) = x === (Dbl_c y)
         
@@ -1504,5 +1668,7 @@ namespace Aqualis
                     p.codewrite(x.code + " =& " + y.code)
                 |H ->
                     p.codewrite(x.code + " =& " + y.code)
+                |P->
+                    ()
         static member (=|=) (x:num0,y:int) = x =|= (Int_c y)
         static member (=|=) (x:num0,y:double) = x =|= (Dbl_c y)

@@ -30,14 +30,18 @@ namespace Aqualis
                     p.comment ("==="+(s.PadRight(76,'=')))
             (!===)s
             match p.lang with
+            |P ->
+                ()
             |_ ->
                 p.indentInc()
             code()
             match p.lang with
+            |P ->
+                ()
             |_ ->
                 p.indentDec()
             match p.lang with 
-            |F |C -> 
+            |F |C |P-> 
                 (!===)("end "+s) 
                 p.codewrite(p.indentSpace+"\n")
             |H ->
@@ -58,16 +62,22 @@ namespace Aqualis
                     p.comment ("---"+(s.PadRight(76,'-')))
             (!===)s
             match p.lang with
+            |P ->
+                ()
             |_ ->
                 p.indentInc()
             code()
             match p.lang with
+            |P ->
+                ()
             |_ ->
                 p.indentDec()
             match p.lang with 
             |F |C -> 
                 (!===)("end "+s) 
                 p.codewrite(p.indentSpace+"\n")
+            |P-> 
+                (!===)("end "+s) 
             |H   ->
                 p.codewrite("</div>")
                 p.codewrite("</details>")
@@ -78,6 +88,8 @@ namespace Aqualis
             |F   ->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |C ->
+                p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+            |P ->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |T   ->
                 p.codewrite("\\section{"+s+"}")
@@ -90,6 +102,7 @@ namespace Aqualis
             match p.lang with
             |F   -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |C -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |P -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |T   -> ()
             |H   ->
                 p.codewrite("</div>")
@@ -101,9 +114,13 @@ namespace Aqualis
         static member h1 (s:string) (code:unit->unit) = 
             codestr.header '#' s
             if p.displaySection then print.t ("### "+s+" #########################")
-            p.indentInc()
-            code()
-            p.indentDec()
+            match p.lang with
+            |P ->
+                code()
+            |_ ->
+                p.indentInc()
+                code()
+                p.indentDec()
             if p.displaySection then print.t ("### END "+s+" #####################")
             codestr.footer '#' s
             codestr.blank()
@@ -111,9 +128,13 @@ namespace Aqualis
         static member h2 (s:string) (code:unit->unit) = 
             codestr.header '%' s
             if p.displaySection then print.t ("=== "+s+" ===================")
-            p.indentInc()
-            code()
-            p.indentDec()
+            match p.lang with
+            |P ->
+                code()
+            |_ ->
+                p.indentInc()
+                code()
+                p.indentDec()
             if p.displaySection then print.t ("=== END "+s+" ===============")
             codestr.footer '%' s
             codestr.blank()
@@ -121,9 +142,13 @@ namespace Aqualis
         static member h3 (s:string) (code:unit->unit) = 
             codestr.header '=' s
             if p.displaySection then print.t ("--- "+s+" --------------")
-            p.indentInc()
-            code()
-            p.indentDec()
+            match p.lang with
+            |P ->
+                code()
+            |_ ->
+                p.indentInc()
+                code()
+                p.indentDec()
             if p.displaySection then print.t ("--- END "+s+" ----------")
             codestr.footer '=' s
             codestr.blank()
@@ -131,9 +156,13 @@ namespace Aqualis
         static member h4 (s:string) (code:unit->unit) = 
             codestr.header '+' s
             if p.displaySection then print.t ("... "+s+" ...........")
-            p.indentInc()
-            code()
-            p.indentDec()
+            match p.lang with
+            |P ->
+                code()
+            |_ ->
+                p.indentInc()
+                code()
+                p.indentDec()
             if p.displaySection then print.t ("... END "+s+" .......")
             codestr.footer '+' s
             codestr.blank()
@@ -141,9 +170,13 @@ namespace Aqualis
         static member h5 (s:string) (code:unit->unit) = 
             codestr.header '-' s
             if p.displaySection then print.t s
-            p.indentInc()
-            code()
-            p.indentDec()
+            match p.lang with
+            |P ->
+                code()
+            |_ ->
+                p.indentInc()
+                code()
+                p.indentDec()
             if p.displaySection then print.t ("END "+s)
             codestr.footer '-' s
             codestr.blank()

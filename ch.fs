@@ -13,14 +13,14 @@ namespace Aqualis
         
         ///<summary>整数型一時変数の生成</summary>
         static member i code = 
-            let x = p.i_cache_var.getAutoVar()
-            code <| Var(It 4,x)
-            p.i_cache_var.setVar(It 4,A0,x,"")
+            let x = p.i_cache_var.getAutoVar() //vlistの中を見て変数名が入っているなら返すし、入っていないなら自動的に変数名を作って返す
+            code <| Var(It 4,x) //整数の変数オブジェクトを作って、code(ラムダ式)の引数として渡して実行する。
+            p.i_cache_var.setVar(It 4,A0,x,"") //ｘが使い終わった後に、生成された変数をもう一度使えるようにblistに追加した。
             
         ///<summary>倍精度浮動小数点型一時変数の生成</summary>
         static member d code = 
             let x = p.d_cache_var.getAutoVar()
-            code <| Var(Dt, x)
+            code <| Var(Dt, x) 
             p.d_cache_var.setVar(Dt,A0,x,"")
             
         ///<summary>複素数型一時変数の生成</summary>

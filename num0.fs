@@ -26,6 +26,9 @@ namespace Aqualis
             |H   ->
                 p.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 Var(Zt,"\\mathrm{j}")
+            |P -> 
+                //#defineで定義済み
+                Var(Zt,"1.0j")
         ///<summary>円周率</summary>
         static member pi with get() = 
             if p.isEmpty then
@@ -44,6 +47,9 @@ namespace Aqualis
                 |H   ->
                     p.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                     Var(Dt,"\\pi")
+                |P ->
+                    p.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    Var(Dt,"pi")
         ///<summary>2πj</summary>
         static member j2p with get() = 2*asm.pi*asm.uj
         
@@ -59,6 +65,7 @@ namespace Aqualis
                 |F,_          -> Formula(Dt,"dble("+e.code+")")
                 |T,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
                 |H,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |P,_          -> Formula(Dt,"float("+e.code+")")
                 |_,_          -> Formula(Dt,"(double)("+e.code+")")
             dbl x
         static member toint(x:num0) =
@@ -73,6 +80,7 @@ namespace Aqualis
                 |F,_          -> Formula(It 4,"int("+e.code+")")
                 |T,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
                 |H,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
+                |P,_          -> Formula(It 4,"int("+e.code+")")
                 |_,_          -> Formula(It 4,"(int)("+e.code+")")
             it x
             
@@ -214,6 +222,7 @@ namespace Aqualis
                 match p.lang with
                 |F|C -> Formula(v.etype,"floor("+v.code+")")
                 |T|H -> Formula(v.etype,"\\mathrm{floor}("+v.code+")")
+                |P -> Formula(v.etype,"math.floor("+v.code+")")
                 
         ///<summary>小数点以下切り上げ</summary>
         static member ceil (v:num0) = 
@@ -225,6 +234,7 @@ namespace Aqualis
                 |F -> Formula(It 4,"ceiling("+v.code+")")
                 |C -> Formula(It 4,"ceil("+v.code+")")
                 |T|H -> Formula(It 4,"\\mathrm{ceil}("+v.code+")")
+                |P -> Formula(It 4,"math.ceil("+v.code+")")
                 
         ///<summary>共役複素数</summary>
         static member conj (v:num0) = 
@@ -235,6 +245,7 @@ namespace Aqualis
                 |C,_ -> Formula(Zt,"conj("+v.code+")")
                 |(T|H),(Var _|Int_c _|Dbl_c _) -> Formula(Zt,v.code+"^*")
                 |(T|H),_ -> Formula(Zt,"\\left["+v.code+"\\right]^*")
+                |P,_ -> Formula(Zt,"("+v.code+").conjugate()")
             |_ ->
                 printfn "%s" <| v.ToString()
                 v
@@ -251,12 +262,14 @@ namespace Aqualis
                 match p.lang with
                 |F -> Formula(Dt,"real("+x.code+")")
                 |C -> Formula(Dt,"creal("+x.code+")")
+                |P -> Formula(Dt,"("+x.code+").real")
                 |_ -> Formula(Dt,"Re["+x.code+"]")
             ///<summary>虚部</summary>
             member x.im with get() =
                 match p.lang with
                 |F -> Formula(Dt,"aimag("+x.code+")")
                 |C -> Formula(Dt,"cimag("+x.code+")")
+                |P -> Formula(Dt,"("+x.code+").imag")
                 |_ -> Formula(Dt,"Im["+x.code+"]")
             ///<summary>絶対値</summary>
             member x.abs with get() = asm.abs(x)

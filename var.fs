@@ -25,6 +25,11 @@ namespace Aqualis
                 "("+(p.DtoS re)+(if im>=0.0 then "+" else "")+(p.DtoS im)+"\\mathrm{j})"
             |H ->
                 "("+(p.DtoS re)+(if im>=0.0 then "+" else "")+(p.DtoS im)+"\\mathrm{j})"
+            |P ->
+                if im<0.0 then
+                    (p.DtoS re)+"-"+(p.DtoS (abs im))+"i"
+                else
+                    (p.DtoS re)+"+"+(p.DtoS im)+"i"
                 
         ///<summary>整数型配列の初期値</summary>
         static member private init_i1 (v:int list) =
@@ -37,6 +42,8 @@ namespace Aqualis
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"}"
             |H ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"}"
+            |P ->
+                "["+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"]"
                 
         ///<summary>倍精度浮動小数点型配列の初期値</summary>
         static member private init_d1 (v:double list) =
@@ -49,6 +56,8 @@ namespace Aqualis
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"}"
             |H ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"}"
+            |P ->
+                "["+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"]"
                 
         ///<summary>複素数型配列の初期値</summary>
         static member private init_z1 (v:(double*double) list) =
@@ -61,6 +70,8 @@ namespace Aqualis
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"}"
             |H ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"}"
+            |P ->
+                "["+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"]"
     
         ///<summary>バイト型変数</summary>
         ///<param name="name">変数名</param>

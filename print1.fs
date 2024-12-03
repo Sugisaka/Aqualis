@@ -70,6 +70,38 @@ namespace Aqualis
                     ) "" [0..lst.Length-1])
                 p.codewrite("Print \\("+code+"\\)\n")
                 p.codewrite("<br/>\n")
+            |P ->
+                let int0string_format_C =
+                    "%"+p.iFormat.ToString()+"d"
+                let double0string_format_C = 
+                    let (a,b)=p.dFormat
+                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let format = 
+                    (List.fold (fun acc (q:num0) ->
+                                  match q with
+                                  |Str_c s -> acc+s
+                                  |_ ->
+                                      match q.etype with
+                                      |It _ ->
+                                          acc+int0string_format_C
+                                      |Dt ->
+                                          acc+double0string_format_C
+                                      |Zt ->
+                                          acc+double0string_format_C+double0string_format_C
+                                      |_ ->
+                                          acc) "" lst)+""
+                let clist = 
+                    [for q in lst do
+                        match q.etype,q with
+                        |St,Str_c(s) ->
+                            ()
+                        |Zt,_ ->
+                            yield q.re.code
+                            yield q.im.code
+                        |_ ->
+                            yield q.code ]
+                let code = List.fold (fun acc i -> acc + (if i=0 then "" else ",") + clist[i]) "" [0..clist.Length-1] 
+                p.codewrite("print(\""+format+"\" %("+code+"))"+"\n")
         ///<summary>文字列を画面表示</summary>
         static member t (str:string) = print.s[!.str]
         ///<summary>1個の項目を画面表示</summary>

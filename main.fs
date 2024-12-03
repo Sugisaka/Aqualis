@@ -16,6 +16,8 @@ namespace Aqualis
         |T
         ///<summary>HTML</summary>
         |H
+        ///<summary>Python</summary>
+        |P
         
     ///<summary>設定のONまたはOFFを指定</summary>
     type Switch =
@@ -102,6 +104,17 @@ namespace Aqualis
                 |Structure("string") -> "char" 
                 |Structure("char") -> "char" 
                 |Structure(sname) -> sname 
+                |_ -> ""
+            |P ->
+                match this with 
+                |It 1 -> "int" 
+                |It _ -> "int" 
+                |Dt -> "float" 
+                |Zt -> "complex"
+                |Structure("string") -> "str" 
+                |Structure("char") -> "str" 
+                |Structure("file") -> "io.TextIOWrapper"
+                |Structure(sname) -> sname
                 |_ -> ""
                     
     ///<summary>番号付き変数の管理</summary>
