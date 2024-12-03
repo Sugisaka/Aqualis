@@ -137,7 +137,7 @@ namespace Aqualis
                 for _,(_,_,nm) in p.arglist do
                     p.hwrite("/* "+nm+" */\n")
                 p.hwrite("/*==========================================================================================*/"+"\n")
-                let argvar = 
+                let argvar = //速度を上げるために変数ポインタを渡し、「値渡し」ではなく「参照渡し」にしている
                     let cat acc i =
                         let _,(typ,vtp,n) = p.arglist.[i]
                         let cm = if (i=p.arglist.Length-1) then "" else ", "
@@ -297,6 +297,85 @@ namespace Aqualis
                 //もとの関数に戻る
                 p.param_back()
                 p.codewrite("\\(" + projectname + "(" + args + ")\\)<br/>")
+            |P ->
+                p.param_main.funlist <- projectname::p.param_main.funlist
+                p.param_add(P, dir_, projectname)
+                //ここから関数定義。p.paramは関数用のものに変わる
+                p.paramClear()
+                //メインコード生成
+                p.indentInc()
+                code()
+                p.indentDec()
+                p.cclose()
+                p.indentInc()
+                p.declareall()
+                p.indentDec()
+                p.vclose()
+                //ソースファイル(関数部分)出力
+                p.hwrite("#=========================================================================================="+"\n")
+                p.hwrite("# Subroutine name: "+projectname+"\n")
+                for _,(_,_,nm) in p.arglist do
+                    p.hwrite("# "+nm+"\n")
+                p.hwrite("#=========================================================================================="+"\n")
+                let argvar = 
+                    let cat acc i =
+                        let _,(_,vtp,n) = p.arglist.[i]
+                        let cm = if (i=p.arglist.Length-1) then "" else ", "
+                        match vtp with
+                        |A1(_)|A2(_)|A3(_) -> 
+                            acc + n + cm
+                        |_ -> 
+                            acc + n +  cm
+                    List.fold cat "" [0..p.arglist.Length-1]
+                let re_argvar = 
+                    let cat acc i =
+                        let _,(_,vtp,n) = p.arglist.[i]
+                        let cm = if (i=p.arglist.Length-1) then "" else ", "
+                        match vtp with
+                        |A1(_)|A2(_)|A3(_) -> 
+                            acc
+                        |_ -> 
+                            acc + n +  cm
+                    List.fold cat "" [0..p.arglist.Length-1]
+                //呼び出しコードを記述
+                let args = 
+                    let cat acc i =
+                        let n,(typ,vtp,_) = p.arglist.[i]
+                        let cm = if (i=p.arglist.Length-1) then "" else ", "
+                        match typ,vtp,(n.StartsWith "(*") with
+                        |(It _|Dt|Zt|Structure _),A0,false -> 
+                            acc + n + cm
+                        |(It _|Dt|Zt|Structure _),A0,true  -> 
+                            let n_ = n.Substring(2,n.Length-3) //(n.Split([|'*'|],StringSplitOptions.RemoveEmptyEntries)).[0]
+                            acc + n_ + cm
+                        |_ -> acc + n + cm
+                    List.fold cat "" [0..p.arglist.Length-1]
+                let re_args = 
+                    let cat acc i =
+                        let n,(_,vtp,_) = p.arglist.[i]
+                        let cm = if (i=p.arglist.Length-1) then "" else ", "
+                        match vtp with
+                        |A1(_)|A2(_)|A3(_) -> 
+                            acc
+                        |_ -> 
+                            acc + n +  cm
+                    List.fold cat "" [0..p.arglist.Length-1]
+                p.hwrite("def "+projectname+"("+argvar+"):"+"\n")
+                p.indentInc()
+                //グローバル変数の定義
+                p.hwrite(File.ReadAllText(dir_+"\\"+projectname+"_var"+".bee"))
+                File.Delete(dir_+"\\"+projectname+"_var"+".bee")
+                //メインコード
+                p.hwrite(File.ReadAllText(dir_+"\\"+projectname+"_code.bee"))
+                File.Delete(dir_+"\\"+projectname+"_code.bee")
+                p.pclose()
+                File.Delete(dir_+"\\"+projectname+"_par.bee")
+                p.hwrite(p.indentSpace+"return "+re_argvar+""+"\n")
+                p.indentDec()
+                p.hclose()
+                //もとの関数に戻る
+                p.param_back()
+                p.codewrite(re_args+" = "+projectname+"("+args+")\n")
         ///<summary>コンパイル</summary>
         let Compile lglist dir projectname (aqver:string,codever:string) code =
             for lg in lglist do
@@ -702,3 +781,68 @@ namespace Aqualis
                     if File.Exists(dir + "\\" + projectname+".html") then File.Delete(dir + "\\" + projectname+".html")
                     //新しいソースファイルを削除（beeファイルの拡張子を変更）
                     File.Move(dir + "\\" + projectname+".bee",dir + "\\" + projectname+".html")
+                |P ->
+                    p.clear()
+                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
+                    str.clear()
+                    p.param_add(P, dir, projectname)
+                    p.paramClear()
+                    //メインコード生成
+                    code()
+                    p.pclose()
+                    p.cclose()
+                    p.declareall()
+                    p.vclose()
+                    //ソースファイル出力
+                    p.hwrite("#============================================================================================="+"\n")
+                    p.hwrite("# Project name: "+projectname+" \n")
+                    p.hwrite("# Project version: "+codever+" */\n")
+                    p.hwrite("#---------------------------------------------------------------------------------------------"+"\n")
+                    p.hwrite("# Generated by Aqualis (algorithm and equation analyzer for lightwave simulation) #\n")
+                    p.hwrite("# Aqualis version: "+aqver+" #\n")
+                    p.hwrite("# Generated date: "+System.DateTime.Now.ToString()+" #\n")
+                    p.hwrite("#============================================================================================="+"\n")
+                    //次のコマンドを打って、NumPyとSciPyをインストール
+                    //pip install numpy scipy
+                    p.hwrite("import numpy"+"\n")
+                    p.hwrite("import math"+"\n")
+                    p.hwrite("import cmath"+"\n")
+                    p.hwrite("import copy"+"\n")
+                    p.hwrite("import struct"+"\n")
+                    p.hwrite("import re"+"\n")
+                    p.hwrite("from scipy.linalg import solve, svd, eig, lu"+"\n")
+                    p.hwrite("from scipy.special import jv, yn"+"\n")
+                    p.hwrite("import sys"+"\n")
+                    //ヘッダファイルのインクルード
+                    List.iter (fun (s:string) -> p.hwrite("import "+s+"\n")) <| p.hlist.list
+                    //構造体の定義
+                    str.Def_Structure()
+                    //グローバル変数の定義
+                    p.hwrite(File.ReadAllText(dir+"\\"+projectname+"_var"+".bee"))
+                    //関数定義
+                    for funname in p.param_main.funlist_nonoverlap do
+                        p.hwrite(File.ReadAllText(dir+"\\"+funname+".bee"))
+                        File.Delete(dir+"\\"+funname+".bee")
+                        p.hwrite("\n")
+                    //メインコード
+                    p.hwrite(File.ReadAllText(dir+"\\"+projectname+"_code.bee"))
+                    p.hclose()
+                    //beeファイル削除
+                    File.Delete(dir+"\\"+projectname+"_code.bee")
+                    File.Delete(dir+"\\"+projectname+"_par.bee")
+                    File.Delete(dir+"\\"+projectname+"_var"+".bee")
+                    if File.Exists(dir+"\\"+"structure"+".bee") then File.Delete(dir+"\\"+"structure"+".bee")
+                    
+                    //コンパイル・実行用スクリプト生成
+                    //.pyファイルをexeファイルに変換する。pyinstaller --onefile your_script.py
+                    //PyInstallerをインストールする必要がある
+                    //コマンドラインで「pip install pyinstaller」を実行
+                    let wr = new StreamWriter(dir + "\\" + "proc_"+projectname+"_P.sh")
+                    wr.Write("#!/bin/sh" + "\n")
+                    wr.Write("\n")
+                    wr.Write("python3 "+projectname+".py" + "\n")
+                    wr.Close()
+                    //古いソースファイルを削除
+                    if File.Exists(dir + "\\" + projectname+".py") then File.Delete(dir + "\\" + projectname+".py")
+                    //新しいソースファイルを削除（beeファイルの拡張子を変更）
+                    File.Move(dir + "\\" + projectname+".bee",dir + "\\" + projectname+".py")

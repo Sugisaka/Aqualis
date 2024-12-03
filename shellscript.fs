@@ -34,6 +34,9 @@ namespace Aqualis
                     |C -> 
                         w.[id].Write("sh proc_"+AqualisCompiler.projname+"_C.sh"+"\n")
                         this.nextid()
+                    |P -> 
+                        w.[id].Write("sh proc_"+AqualisCompiler.projname+"_P.sh"+"\n")
+                        this.nextid()
                     |T -> 
                         ()
                     |H -> 
@@ -54,6 +57,10 @@ namespace Aqualis
                 |C ->
                     w.[id].Write("echo project "+AqualisCompiler.projname+" started | mail -s ProcessNotification "+address+"\n")
                     w.[id].Write("(time " + "sh proc_"+AqualisCompiler.projname+"_C.sh" + ") > "+AqualisCompiler.projname+".log "+"&"+"> "+AqualisCompiler.projname+"_time.log\n") 
+                    w.[id].Write("(echo project "+AqualisCompiler.projname+" finished | cat - "+AqualisCompiler.projname+"_time.log) | mail -s ProcessNotification "+address+"\n")
+                |P   ->
+                    w.[id].Write("echo project "+AqualisCompiler.projname+" started | mail -s ProcessNotification "+address+"\n")
+                    w.[id].Write("(time " + "sh proc_"+AqualisCompiler.projname+".sh" + ") > "+AqualisCompiler.projname+".log "+"&"+"> "+AqualisCompiler.projname+"_time.log\n") 
                     w.[id].Write("(echo project "+AqualisCompiler.projname+" finished | cat - "+AqualisCompiler.projname+"_time.log) | mail -s ProcessNotification "+address+"\n")
                 |T   ->
                     ()

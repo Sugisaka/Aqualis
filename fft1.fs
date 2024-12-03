@@ -98,20 +98,41 @@ namespace Aqualis
                         p.codewrite(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
                         fftshift1(data1)
                         !"FFTを実行"
-                        p.codewrite("dfftw_execute(" + plan.code + ")")
+                        p.codewrite("dfftw_execute(" + plan.code + ");")
                         fftshift1(data2)
-                        p.codewrite("dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("dfftw_destroy_plan(" + plan.code + ");")
                     else
                         p.codewrite(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
                         ifftshift1(data1)
                         !"FFTを実行"
-                        p.codewrite("dfftw_execute(" + plan.code + ")")
+                        p.codewrite("dfftw_execute(" + plan.code + ");")
                         ifftshift1(data2)
-                        p.codewrite("dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("dfftw_destroy_plan(" + plan.code + ");")
                 |T ->
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                 |H ->
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
+                |P ->
+                    p.incld("pyfftw")
+                    let plan = var.i1(planname, 8)
+                    if fftdir=1 then
+                        p.codewrite(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
+                        p.codewrite(plan.code+" = pyfftw.builders.fft("+data1.code+"_empty)")
+                        fftshift1(data1)
+                        p.codewrite(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        !"FFTを実行"
+                        p.codewrite(data2.code+" = "+plan.code+"()")
+                        fftshift1(data2)
+                        p.codewrite("del "+plan.code+"")
+                    else
+                        p.codewrite(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
+                        p.codewrite(plan.code+" = pyfftw.builders.ifft("+data1.code+"_empty)")
+                        ifftshift1(data1)
+                        p.codewrite(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        !"FFTを実行"
+                        p.codewrite(data2.code+" = "+plan.code+"()")
+                        ifftshift1(data2)
+                        p.codewrite("del "+plan.code+"")
                 if fftdir=1 then
                     !"規格化"
                     iter.num N <| fun i ->

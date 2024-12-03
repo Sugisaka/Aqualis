@@ -68,6 +68,18 @@ namespace Aqualis
                 p.indentDec()
                 p.codewrite("</details>\n")
                 p.codewrite("</div>\n")
+            |P ->
+                match el with
+                |IF   ->
+                    p.codewrite("if"+" "+cond.code+" "+":\n")
+                |ELIF ->
+                    p.codewrite("elif"+" "+cond.code+" "+":\n")
+                |ELSE ->
+                    p.codewrite("else"+":\n")
+                p.indentInc()
+                code()
+                p.indentDec()
+                
         ///<summary>条件式(if)</summary>
         member __.IF (cond:bool0) code =
             if con=0 then

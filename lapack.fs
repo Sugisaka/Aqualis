@@ -122,6 +122,8 @@ namespace Aqualis
                             p.codewrite("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$$\\\\\n")
                         |H -> 
                             p.codewrite("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                        |P ->
+                            p.codewrite(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                     tbinder.d matrix <| fun () ->
                         match p.lang with
                         |F -> 
@@ -133,6 +135,8 @@ namespace Aqualis
                             p.codewrite("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                         |H -> 
                             p.codewrite("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                        |P ->
+                            p.codewrite(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                             
         ///<summary>連立方程式の求解</summary>
         ///<param name="matrix">係数行列</param>
@@ -156,6 +160,8 @@ namespace Aqualis
                                 p.codewrite("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                            |P ->
+                                p.codewrite(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                         tbinder.d matrix <| fun () ->
                             match p.lang with
                             |F -> 
@@ -167,6 +173,8 @@ namespace Aqualis
                                 p.codewrite("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                            |P ->
+                                p.codewrite(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                                 
         ///<summary>逆行列の計算</summary>
         ///<param name="mat1">元の行列</param>
@@ -192,6 +200,8 @@ namespace Aqualis
                                 p.codewrite("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
+                            |P ->
+                                p.codewrite(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
                         tbinder.d mat2 <| fun () ->
                             match p.lang with
                             |F -> 
@@ -203,6 +213,8 @@ namespace Aqualis
                                 p.codewrite("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
+                            |P ->
+                                p.codewrite(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
                         br.if1 (info .=/ 0) <| fun () -> print.s[!.("InvMatrix Info: ");info]
                         
         ///<summary>行列の階数</summary>
@@ -259,6 +271,13 @@ namespace Aqualis
                                 p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
+                            |P -> 
+                                //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
+                                p.codewrite(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
+                                p.codewrite("threshold = 1e-10  # ゼロの閾値\n")
+                                //行列の階級rank.codeを求める
+                                p.codewrite(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
+
                         tbinder.d mat <| fun () ->
                             ch.d1 lwork <| fun work ->
                             //特異値分解を利用
@@ -300,6 +319,13 @@ namespace Aqualis
                                 p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
+                            |P -> 
+                                //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
+                                p.codewrite(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
+                                p.codewrite("threshold = 1e-10  # ゼロの閾値\n")
+                                //行列の階級rank.codeを求める
+                                p.codewrite(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
+
                         br.if1 (info .=/ 0) <| fun () -> print.s[!.("rank Info: ");info]
                         rank.clear()
                         iter.array s <| fun i -> 
@@ -387,6 +413,8 @@ namespace Aqualis
                                                 p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
                                             |H -> 
                                                 p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
+                                            |P -> 
+                                                p.codewrite(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
                                             br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
             tbinder.d mat1 <| fun () ->
                 codestr.section "非対称実行列の固有値" <| fun () ->
@@ -435,6 +463,8 @@ namespace Aqualis
                                                 p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
                                             |H -> 
                                                 p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
+                                            |P -> 
+                                                p.codewrite(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
                                             br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
                             eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
                             
@@ -506,6 +536,15 @@ namespace Aqualis
                                             p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                                         |H -> 
                                             p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
+                                        //Pythonのscipy.linalg.eigは、一般化固有値問題を単独の出力で処理することが可能
+                                        //Pythonでは、一般化固有値の計算が単一の出力で提供されるため、ユーザーは結果を手軽に利用できる。これにより、計算過程や出力の管理がシンプルになる。
+                                        //Fortranでは、二つの固有値配列を出力することで、行列 AとB の関係性を明示的に示している。この設計は、行列間の相互作用をより詳細に理解するためのもの
+                                        //このコードでは、周囲と合わせるため、行列を入れ替えてeigenvalues2.codeを出している。
+                                        //ちなみに一般化固有ベクトルは二つも出す必要はないので、二行目で出しているeigenvectors.code_dasokuはおまけだと思っていい。理由は以下。
+                                        //一般化固有値問題 Ax=λBx の形式では、行列 B に対して左固有ベクトルが計算されることはない。したがって、一般化固有ベクトルは一意に定まることが多い。
+                                        |P -> 
+                                            p.codewrite(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
+                                            p.codewrite(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
                                         br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
             tbinder.d mat1 <| fun () ->
                 codestr.section "非対称複素行列の一般化固有値" <| fun () ->
@@ -568,6 +607,9 @@ namespace Aqualis
                                         p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                                     |H -> 
                                         p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
+                                    |P -> 
+                                            p.codewrite(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
+                                            p.codewrite(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
                                     br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
                         iter.num eigenvalues1.size1 <| fun i ->
                             eigenvalues1.[i] <== eigenvalues1re.[i] + asm.uj + eigenvalues1im.[i]
@@ -727,6 +769,17 @@ namespace Aqualis
                                 p.codewrite("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
+                            |P -> 
+                                //LU分解
+                                p.codewrite("P ,L ,U = lu("+matrix.code+")"+"\n")
+                                //上三角行列 U の対角成分の積を計算
+                                p.codewrite("det_U = numpy.prod(numpy.diag(U))"+"\n")
+                                //行列式を計算
+                                //pの行列式は、ピボット行列の行交換の回数で符号が決まる
+                                p.codewrite("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
+                                p.codewrite("det_"+matrix.code+" = sign * det_U"+"\n")
+                                //行列式の常用対数を計算
+                                p.codewrite(d.code+" = numpy.log10(np.abs(det_A))"+"\n")
                         d.clear()
                         iter.num N <| fun i ->
                             d <== d + asm.log10(asm.abs(matrix.[i,i]))
@@ -746,6 +799,17 @@ namespace Aqualis
                                 p.codewrite("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
                             |H -> 
                                 p.codewrite("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
+                            |P -> 
+                                //LU分解
+                                p.codewrite("P ,L ,U = lu("+matrix.code+")"+"\n")
+                                //上三角行列 U の対角成分の積を計算
+                                p.codewrite("det_U = numpy.prod(numpy.diag(U))"+"\n")
+                                //行列式を計算
+                                //pの行列式は、ピボット行列の行交換の回数で符号が決まる
+                                p.codewrite("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
+                                p.codewrite("det_"+matrix.code+" = sign * det_U"+"\n")
+                                //行列式の常用対数を計算
+                                p.codewrite(d.code+" = np.log10(np.abs(det_A))"+"\n")
                         d.clear()
                         iter.num N <| fun i ->
                             d <== d + asm.log10(asm.abs(matrix.[i,i]))
@@ -766,6 +830,9 @@ namespace Aqualis
                 p.codewrite("$"+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"$\\\\\n")
             |H ->
                 p.codewrite("\\("+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"\\)<br/>\n")
+            |P -> 
+                //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
+                p.codewrite(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
             |_ ->
                 tbinder.z mat1 <| fun () ->
                     codestr.section "非対称複素行列の特異値分解" <| fun () ->
@@ -972,6 +1039,9 @@ namespace Aqualis
                                             rwork.code + ", " + 
                                             "&" + info.code + ");")
                                         work.deallocate()
+                                    |P -> 
+                                        //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
+                                        p.codewrite(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
                                     |_ -> 
                                         ()
                                         

@@ -40,6 +40,7 @@ namespace Aqualis
                 |C -> Var(It 4,name+"_size[0]")
                 |T -> Var(It 4,"\\mathcal{S}_1["+name+"]")
                 |H -> Var(It 4,"\\mathcal{S}_1["+name+"]")
+                |P -> Var(It 4,name+"_size[0]")
             |Arx3(s1,_,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2 
@@ -51,6 +52,7 @@ namespace Aqualis
                 |C -> Var(It 4,name+"_size[1]")
                 |T -> Var(It 4,"\\mathcal{S}_2["+name+"]")
                 |H -> Var(It 4,"\\mathcal{S}_2["+name+"]")
+                |P -> Var(It 4,name+"_size[1]")
             |Arx3(_,s2,_,_) -> s2
         ///<summary>変数の要素数</summary>
         member __.size3 
@@ -62,6 +64,7 @@ namespace Aqualis
                 |C -> Var(It 4,name+"_size[2]")
                 |T -> Var(It 4,"\\mathcal{S}_3["+name+"]")
                 |H -> Var(It 4,"\\mathcal{S}_3["+name+"]")
+                |P -> Var(It 4,name+"_size[2]")
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:num0,j:num0,k:num0) =
@@ -468,6 +471,19 @@ namespace Aqualis
                             p.codewrite("\\("+name+"\\): allocate(\\("+n1.code+","+n2.code+","+n3.code+"\\))<br/>\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                    |P ->
+                        match size with
+                        |A3(0,0,0) ->
+                            this.size1 <== n1
+                            this.size2 <== n2
+                            this.size3 <== n3
+                            match typ with
+                            |Structure(sname)       -> p.codewrite(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.code+"))] for _ in range(int("+this.size2.code+"))] for _ in range(int("+this.size1.code+"))], dtype=object).reshape(int("+this.size1.code+"),int("+this.size2.code+"),int("+this.size3.code+"))\n")
+                            |It _ |It 1             -> p.codewrite(name+" = numpy.zeros("+this.size1.code+"*"+this.size2.code+"*"+this.size3.code+", dtype=int).reshape("+this.size1.code+","+this.size2.code+","+this.size3.code+")"+"\n")
+                            |Zt                     -> p.codewrite(name+" = numpy.zeros("+this.size1.code+"*"+this.size2.code+"*"+this.size3.code+", dtype=numpy.complex128).reshape("+this.size1.code+","+this.size2.code+","+this.size3.code+")"+"\n")
+                            |_                      -> p.codewrite(name+" = numpy.zeros("+this.size1.code+"*"+this.size2.code+"*"+this.size3.code+").reshape("+this.size1.code+","+this.size2.code+","+this.size3.code+")"+"\n")
+                        |_ -> 
+                            p.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                 |_ -> ()
                 
         member this.allocate(n1:int,n2:num0,n3:num0) = this.allocate(n1.I,n2,n3)
@@ -518,6 +534,11 @@ namespace Aqualis
                     match size with
                     |A3(0,0,0) ->
                         p.codewrite("\\("+name+"\\): deallocate<br/>\n")
+                    |_ -> ()
+                |P ->
+                    match size with
+                    |A3(0,0,0) ->
+                        p.codewrite("del "+name+""+"\n")
                     |_ -> ()
             |_ -> ()
             
@@ -574,15 +595,17 @@ namespace Aqualis
                 |F|T -> p.codewrite(x + "=" + y)
                 |C -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
                 |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + y + "</math>\n<br/>\n")
+                |P ->
+                    p.codewrite(x + " = copy.deepcopy("+y+")")
             |Var3(_,x),Arx3(_,_,_,f) ->
                 match p.lang with
-                |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
+                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
             |Arx3(_,_,_,_),Var3(_,_) ->
                 match p.lang with
-                |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
+                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
             |Arx3(_,_,_,_),Arx3(_,_,_,_) ->
                 match p.lang with
-                |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
+                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
                 
         static member subst (v1:Expr3,s11:num0,s12:num0,s13:num0,f1:num0->num0->num0->num0,v2:num0) =
             match v1 with
@@ -594,9 +617,11 @@ namespace Aqualis
                     iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== v2
                 |H ->
                     p.codewrite(x + " \\leftarrow " + v2.code)
+                |P ->
+                    p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+")" )
             |Arx3(_,_,_,_) ->
                 match p.lang with
-                |F|T|C|H -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== v2
+                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== v2
                 
     ///<summary>数値型1次元配列</summary>
     type num3 (typ:Etype,x:Expr3) =
@@ -1209,15 +1234,17 @@ namespace Aqualis
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
                 |H ->
                     p.codewrite(x + " \\leftarrow " + y)
+                |P ->
+                    p.codewrite(x + " = copy.deepcopy("+y+")")
             |Var3(_,x),Arx3(_,_,_,f) ->
                 match p.lang with
-                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
+                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
             |Arx3(_,_,_,_),Var3(_,_) ->
                 match p.lang with
-                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
+                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
             |Arx3(_,_,_,_),Arx3(_,_,_,_) ->
                 match p.lang with
-                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
+                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
         static member (<==) (v1:num3,v2:num0) =
             match v1.expr with
             |Var3(_,x) ->
@@ -1228,9 +1255,11 @@ namespace Aqualis
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |H ->
                     p.codewrite(x + " \\leftarrow " + v2.code)
+                |P ->
+                    p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+")" )
             |Arx3(_,_,_,_) ->
                 match p.lang with
-                |F|T|C|H -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
+                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
         static member (<==) (v1:num3,v2:double) =
             v1 <== v2.D
         static member (<==) (v1:num3,v2:int) =

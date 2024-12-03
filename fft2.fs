@@ -76,26 +76,47 @@ namespace Aqualis
                         ifftshift2(data2)
                         p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
                 |C ->
-                    p.incld("\"fftw3.h\"")
+                    p.incld("<fftw3.h>")
                     let plan = fftw_plan2(planname)
                     if fftdir=1 then
                         p.codewrite(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
                         fftshift2(data1)
                         !"FFTを実行"
-                        p.codewrite("call dfftw_execute(" + plan.code + ")")
+                        p.codewrite("call dfftw_execute(" + plan.code + ");")
                         fftshift2(data2)
-                        p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("call dfftw_destroy_plan(" + plan.code + ");")
                     else
                         p.codewrite(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
                         ifftshift2(data1)
                         !"FFTを実行"
-                        p.codewrite("dfftw_execute(" + plan.code + ")")
+                        p.codewrite("dfftw_execute(" + plan.code + ");")
                         ifftshift2(data2)
-                        p.codewrite("dfftw_destroy_plan(" + plan.code + ")")
+                        p.codewrite("dfftw_destroy_plan(" + plan.code + ");")
                 |T ->
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                 |H ->
                     p.codewrite(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
+                |P ->
+                    p.incld("pyfftw")
+                    let plan = var.i1(planname, 8)
+                    if fftdir=1 then
+                        p.codewrite(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
+                        p.codewrite(plan.code+" = pyfftw.builders.fft2("+data1.code+"_empty)")
+                        fftshift2(data1)
+                        p.codewrite(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        !"FFTを実行"
+                        p.codewrite(data2.code+" = "+plan.code+"()")
+                        fftshift2(data2)
+                        p.codewrite("del "+plan.code+"")
+                    else
+                        p.codewrite(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
+                        p.codewrite(plan.code+" = pyfftw.builders.ifft2("+data1.code+"_empty)")
+                        ifftshift2(data1)
+                        p.codewrite(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        !"FFTを実行"
+                        p.codewrite(data2.code+" = "+plan.code+"()")
+                        ifftshift2(data2)
+                        p.codewrite("del "+plan.code+"")
                 if fftdir=1 then
                     !"規格化"
                     iter.num nx <| fun i ->

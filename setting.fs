@@ -60,6 +60,7 @@ namespace Aqualis
             |C-> p.codewrite("return 1;") 
             |T  -> p.codewrite("stop")
             |H  -> p.codewrite("stop")
+            |P  -> p.codewrite("sys.exit(1)")
               
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         static member stop() =
@@ -68,6 +69,7 @@ namespace Aqualis
             |C -> p.codewrite("getchar();\n")
             |T   -> p.codewrite("stop\n")
             |H   -> p.codewrite("stop\n")
+            |P  -> p.codewrite("input()")
               
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         ///<param name="t">一時停止前に表示する文字列</param>
@@ -78,6 +80,7 @@ namespace Aqualis
             |C -> p.codewrite("getchar();\n")
             |T   -> p.codewrite("stop\n")
             |H   -> p.codewrite("stop\n")
+            |P  -> p.codewrite("input()")
               
         /// <summary>
         /// インクルードファイル追加（TeXの場合はプリアンブル部挿入コード）

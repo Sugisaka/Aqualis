@@ -143,6 +143,10 @@ namespace Aqualis
         member this.getloopvar with get() = this.param.getloopvar
         ///<summary>ループカウンタ変数とループ脱出先gotoラベルを作成し、code内の処理を実行</summary>
         member this.getloopvar_exit with get() = this.param.getloopvar_exit
+        ///<summary>ループ脱出先gotoラベルをひとつ前に戻す</summary>
+        member this.exit_false with get() = this.param.exit_false
+        ///<summary>ループ脱出先gotoラベルのリセット</summary>
+        member this.exit_reset with get() = this.param.exit_reset
         ///<summary>コードを一時ファイルに書き込み</summary>
         member this.cwrite(s) = this.param.cwrite(s)
         ///<summary>構造体・関数宣言の一時ファイルに書き込み</summary>

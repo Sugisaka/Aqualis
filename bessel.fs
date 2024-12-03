@@ -18,6 +18,7 @@ namespace Aqualis
                     |C -> Var(Dt,"j0("+v.code+")")
                     |T -> Var(Dt,"J_0\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"J_0\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"jv(0, "+v.code+")")
                 ch.d <| fun bes ->
                     bes <== (besselj0_(x))
                     code(bes)
@@ -28,6 +29,7 @@ namespace Aqualis
                     |C -> Var(Dt,"y0("+v.code+")")
                     |T -> Var(Dt,"Y_0\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"Y_0\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"yn(0, "+v.code+")")
                 ch.d <| fun bes ->
                     bes <== (bessely0_(x))
                     code(bes)
@@ -38,12 +40,14 @@ namespace Aqualis
                     |C -> Var(Dt,"j0("+v.code+")")
                     |T -> Var(Dt,"J_0\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"J_0\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"jv(0, "+v.code+")")
                 let bessely0_ (v:num0) = 
                     match p.lang with
                     |F -> Var(Dt,"dbesy0("+v.code+")")
                     |C -> Var(Dt,"y0("+v.code+")")
                     |T -> Var(Dt,"Y_0\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"Y_0\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"yn(0, "+v.code+")")
                 ch.z <| fun bes ->
                     bes <== (besselj0_(x))-(bessely0_(x))*asm.uj
                     code(bes)
@@ -54,6 +58,7 @@ namespace Aqualis
                     |C -> Var(Dt,"j1("+v.code+")")
                     |T -> Var(Dt,"J_1\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"J_1\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"jv(1, "+v.code+")")
                 ch.d <| fun bes ->
                     bes <== (besselj1_(x))
                     code(bes)
@@ -64,6 +69,7 @@ namespace Aqualis
                     |C -> Var(Dt,"y1("+v.code+")")
                     |T -> Var(Dt,"Y_1\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"Y_1\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"yn(1, "+v.code+")")
                 ch.d <| fun bes ->
                     bes <== (bessely1_(x))
                     code(bes)
@@ -74,12 +80,14 @@ namespace Aqualis
                     |C -> Var(Dt,"j1("+v.code+")")
                     |T -> Var(Dt,"J_1\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"J_1\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"jv(1, "+v.code+")")
                 let bessely1_ (v:num0) = 
                     match p.lang with
                     |F -> Var(Dt,"dbesy1("+v.code+")")
                     |C -> Var(Dt,"y1("+v.code+")")
                     |T -> Var(Dt,"Y_1\\left("+v.code+"\\right)")
                     |H -> Var(Dt,"Y_1\\left("+v.code+"\\right)")
+                    |P -> Var(Dt,"yn(1, "+v.code+")")
                 ch.z <| fun bes ->
                     bes <== (besselj1_(x))-(bessely1_(x))*asm.uj
                     code(bes)

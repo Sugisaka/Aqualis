@@ -30,7 +30,7 @@ namespace Aqualis
         ///<summary>同名の変数が登録済みの場合は変数を登録しない</summary>
         member this.setUniqVar(etyp,atyp,name,cst) =
             if not (this.exists(etyp,atyp,name,cst)) then
-                vlist <- (etyp,atyp,name,cst)::vlist
+                vlist <- (etyp,atyp,name,cst)::vlist //(etyp,atyp,name,cst)をvlistの先頭部分に追加する。
         ///<summary>同名の変数が登録済みの場合は変数を登録せずに警告を表示</summary>
         member this.setUniqVarWarning(etyp,atyp,name,cst) =
             if this.exists(etyp,atyp,name,cst) then
@@ -40,14 +40,14 @@ namespace Aqualis
         ///<summary>ナンバリング自動変数</summary>
         member __.getAutoVarName(n:int) =
             match lang with
-            |C|F -> varNameHead + n.ToString("0000")
+            |C|F|P -> varNameHead + n.ToString("0000") //nが四桁未満だった場合、四桁になるように0で埋める
             |T|H -> varNameHead + "_{"+n.ToString()+"}"
         member this.getAutoVar() =
-            match vlist with
-            |(_,_,name,_)::lst ->
-                vlist <- lst
+            match vlist with //　変数の型
+            |(_,_,name,_)::lst -> //戦闘要素::と残り部分lstに分かれる場合
+                vlist <- lst // vlistの先頭部分を取り外して残り部分lstを代入する
                 name
-            |[] ->
+            |[] ->  // 空のリストの場合
                 counter <- counter + 1
                 this.getAutoVarName counter
         member _.maxcounter with get() = counter
@@ -123,7 +123,7 @@ namespace Aqualis
         member val covar = new VarController("",lan)
 
         ///<summary>ループのカウンタに現在使用できる変数インデックス</summary>
-        member val loopvar = new VarController((match lan with |F|C -> "ic" |T|H -> "n"),lan)
+        member val loopvar = new VarController((match lan with |F|C|P -> "ic" |T|H -> "n"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数）</summary>
         member val i_cache_var = new VarController("i",lan)
@@ -141,31 +141,31 @@ namespace Aqualis
         member val f_cache_var = new VarController("f",lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数1次元配列）</summary>
-        member val i1_cache_var = new VarController((match lan with |F|C -> "i1" |T|H -> "\\dot{i}"),lan)
+        member val i1_cache_var = new VarController((match lan with |F|C|P -> "i1" |T|H -> "\\dot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数1次元配列）</summary>
-        member val d1_cache_var = new VarController((match lan with |F|C -> "d1" |T|H -> "\\dot{d}"),lan)
+        member val d1_cache_var = new VarController((match lan with |F|C|P -> "d1" |T|H -> "\\dot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数1次元配列）</summary>
-        member val z1_cache_var = new VarController((match lan with |F|C -> "z1" |T|H -> "\\dot{z}"),lan)
+        member val z1_cache_var = new VarController((match lan with |F|C|P -> "z1" |T|H -> "\\dot{z}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数2次元配列）</summary>
-        member val i2_cache_var = new VarController((match lan with |F|C -> "i2" |T|H -> "\\ddot{i}"),lan)
+        member val i2_cache_var = new VarController((match lan with |F|C|P -> "i2" |T|H -> "\\ddot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数2次元配列）</summary>
-        member val d2_cache_var = new VarController((match lan with |F|C -> "d2" |T|H -> "\\ddot{d}"),lan)
+        member val d2_cache_var = new VarController((match lan with |F|C|P -> "d2" |T|H -> "\\ddot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数2次元配列）</summary>
-        member val z2_cache_var = new VarController((match lan with |F|C -> "z2" |T|H -> "\\ddot{z}"),lan)
+        member val z2_cache_var = new VarController((match lan with |F|C|P -> "z2" |T|H -> "\\ddot{z}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数3次元配列）</summary>
-        member val i3_cache_var = new VarController((match lan with |F|C -> "i3" |T|H -> "\\dddot{i}"),lan)
+        member val i3_cache_var = new VarController((match lan with |F|C|P -> "i3" |T|H -> "\\dddot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数3次元配列）</summary>
-        member val d3_cache_var = new VarController((match lan with |F|C -> "d3" |T|H -> "\\dddot{d}"),lan)
+        member val d3_cache_var = new VarController((match lan with |F|C|P -> "d3" |T|H -> "\\dddot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数3次元配列）</summary>
-        member val z3_cache_var = new VarController((match lan with |F|C -> "z3" |T|H -> "\\dddot{z}"),lan)
+        member val z3_cache_var = new VarController((match lan with |F|C|P -> "z3" |T|H -> "\\dddot{z}"),lan)
         
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（文字列）</summary>
         member val t_stat_var = new varlist() with get
@@ -310,6 +310,17 @@ namespace Aqualis
                 |Structure("char") -> "char" 
                 |Structure(sname) -> sname 
                 |_ -> ""
+            |P ->
+                match typ with 
+                |It 1 -> "int" 
+                |It _ -> "int" 
+                |Dt -> "float" 
+                |Zt -> "complex"
+                |Structure("string") -> "str" 
+                |Structure("char") -> "str" 
+                |Structure("file") -> "io.TextIOWrapper"
+                |Structure(sname) -> sname
+                |_ -> ""
                   
         ///<summary>変数宣言のコード</summary>
         member this.declare (typ:Etype,vtp:VarType,name:string,param:string) =
@@ -351,6 +362,49 @@ namespace Aqualis
                 |A1(size1)             -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
                 |A2(size1,size2)       -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
                 |A3(size1,size2,size3) -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
+              |P ->
+                match vtp with 
+                |A0 ->
+                  match typ with 
+                  |Structure("string")|Structure("char")|Structure("file")
+                                          -> name+" = "+(if param<>"" then param else "0") 
+                  |Structure(sname)       -> name+" = "+(this.Stype typ)+"("+(if param<>"" then param else "")+")"
+                  |_                      -> name+" = "+(if param<>"" then param else "0")
+                |A1(0) -> 
+                  match typ with 
+                  |Structure(sname)       -> name+" = numpy.array([], dtype="+(this.Stype typ)+")"
+                  |_                      -> name+" = numpy.array([])"
+                |A2(0,0) -> 
+                  match typ with 
+                  |Structure(sname)      -> name+" = numpy.array([[]], dtype="+(this.Stype typ)+")"
+                  |It _ |It 1            -> name+" = numpy.array([[]], dtype="+(this.Stype typ)+")"
+                  |Zt                    -> name+" = numpy.array([[]], dtype=numpy.complex128)"
+                  |_                     -> name+" = numpy.array([[]])"
+                |A3(0,0,0) -> 
+                  match typ with 
+                  |Structure(sname)       -> name+" = numpy.array([[[]]], dtype="+(this.Stype typ)+")"
+                  |It _ |It 1             -> name+" = numpy.array([[[]]], dtype="+(this.Stype typ)+")"
+                  |Zt                     -> name+" = numpy.array([[[]]], dtype=numpy.complex128)"
+                  |_                      -> name+" = numpy.array([[[]]])"
+                |A1(size1) ->
+                  match typ with 
+                  |Structure(sname)       -> name+" = "+(if param<>"" then "numpy.array("+param+")" else "numpy.array(["+(this.Stype typ)+"() for _ in range("+(this.ItoS size1)+")], dtype=object)")+""
+                  |It _ |It 1             -> name+" = "+(if param<>"" then "numpy.array("+param+")" else "numpy.zeros("+(this.ItoS size1)+",dtype="+(this.Stype typ)+")")+""
+                  |Zt                     -> name+" = "+(if param<>"" then "numpy.array("+param+")" else "numpy.zeros("+(this.ItoS size1)+", dtype=numpy.complex128)")+""
+                  |_                      -> name+" = "+(if param<>"" then "numpy.array("+param+")" else "numpy.zeros("+(this.ItoS size1)+")")+""
+                |A2(size1,size2) -> 
+                  match typ with 
+                  |Structure(sname)       -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")" else "numpy.array([["+(this.Stype typ)+"() for _ in range("+(this.ItoS size2)+")] for _ in range("+(this.ItoS size1)+")], dtype=object).reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")")+""
+                  |It _ |It 1             -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")" else "numpy.zeros("+(this.ItoS size1)+"*"+(this.ItoS size2)+",dtype="+(this.Stype typ)+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")")+""
+                  |Zt                     -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")" else "numpy.zeros("+(this.ItoS size1)+"*"+(this.ItoS size2)+", dtype=numpy.complex128).reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")")+""
+                  |_                      -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")" else "numpy.zeros("+(this.ItoS size1)+"*"+(this.ItoS size2)+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+")")+""
+                |A3(size1,size2,size3) -> 
+                  match typ with 
+                  |Structure(sname)       -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")" else "numpy.array([[["+(this.Stype typ)+"() for _ in range("+(this.ItoS size3)+")] for _ in range("+(this.ItoS size2)+")] for _ in range("+(this.ItoS size1)+")], dtype=object).reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")")+""
+                  |It _ |It 1             -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")" else "numpy.zeros("+(this.ItoS size1)+"*"+(this.ItoS size2)+"*"+(this.ItoS size3)+",dtype="+(this.Stype typ)+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")")+""
+                  |Zt                     -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")" else "numpy.zeros("+(this.ItoS size1)+"*"+(this.ItoS size2)+"*"+(this.ItoS size3)+", dtype=numpy.complex128).reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")")+""
+                  |_                      -> name+" = "+(if param<>"" then "numpy.array("+param+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")" else "numpy.zeros("+(this.ItoS size1)+"*"+(this.ItoS size2)+"*"+(this.ItoS size3)+").reshape("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")")+""
+
                 
         ///<summary>宣言されたすべての変数を一時ファイルに書き込み</summary>
         member this.declareall() =
@@ -516,7 +570,55 @@ namespace Aqualis
                     this.vwrite("\t\t\t<li>Cache array (double,3d): \\(\\dddot{d}_m (m = 1"+(if this.d3_cache_var.maxcounter=1 then "" else " \\cdots "+this.d3_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
                 if this.z3_cache_var.maxcounter>0 then
                     this.vwrite("\t\t\t<li>Cache array (complex,3d): \\(\\dddot{z}_m (m = 1"+(if this.z3_cache_var.maxcounter=1 then "" else " \\cdots "+this.z3_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
+            
+            |P -> //
+                for (etyp,vtyp,name,p) in this.var.list do
+                    this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
+                    match vtyp with
+                    |A1(0) ->
+                        this.vwrite(this.declare(It 4,A1(1),name+"_size","[-1]")+"\n")
+                    |A1(n1) ->
+                        this.vwrite(this.declare(It 4,A1(1),name+"_size","["+n1.ToString()+"]")+"\n")
+                    |A2(0,0) ->
+                        this.vwrite(this.declare(It 4,A1(2),name+"_size","[-1, -1]")+"\n")
+                    |A2(n1,n2) ->
+                        this.vwrite(this.declare(It 4,A1(2),name+"_size","["+n1.ToString()+", "+n2.ToString()+"]")+"\n")
+                    |A3(0,0,0) ->
+                        this.vwrite(this.declare(It 4,A1(3),name+"_size","[-1,-1,-1]")+"\n")
+                    |A3(n1,n2,n3) ->
+                        this.vwrite(this.declare(It 4,A1(3),name+"_size","["+n1.ToString()+", "+n2.ToString()+", "+n3.ToString()+"]")+"\n")
+                    |_ -> ()
+                
+                for i in 1..this.loopvar.maxcounter do
+                    this.vwrite(this.declare(It 4,A0,"ic"+i.ToString("0000"),"")+"\n")
+                
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.i_cache_var.maxcounter do
+                    this.vwrite(this.declare(It 4,A0,this.i_cache_var.getAutoVarName(i),"")+"\n")
                     
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.d_cache_var.maxcounter do
+                    this.vwrite(this.declare(Dt,A0,this.d_cache_var.getAutoVarName(i),"")+"\n")
+                    
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.z_cache_var.maxcounter do
+                    this.vwrite(this.declare(Zt,A0,this.z_cache_var.getAutoVarName(i),"")+"\n")
+                        
+                for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
+                    for (etyp,vtyp,name,p) in x.list do 
+                        this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
+                        this.vwrite(this.declare(It 4,A1(1),name+"_size","[-1]")+"\n")
+                        
+                for x in [this.i2_cache_var;this.d2_cache_var;this.z2_cache_var] do
+                    for (etyp,vtyp,name,p) in x.list do 
+                        this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
+                        this.vwrite(this.declare(It 4,A1(2),name+"_size","[-1,-1]")+"\n")
+                        
+                for x in [this.i3_cache_var;this.d3_cache_var;this.z3_cache_var] do
+                    for (etyp,vtyp,name,p) in x.list do 
+                        this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
+                        this.vwrite(this.declare(It 4,A1(3),name+"_size","[-1,-1,-1]")+"\n")
+
         ///<summary>int型の数値を文字列に変換</summary>
         member __.ItoS (d:int) =
             match lan with
@@ -530,6 +632,7 @@ namespace Aqualis
             |C -> d.ToString("0.0#################E0")
             |T -> d.ToString()
             |H -> d.ToString()
+            |P -> d.ToString("0.0#################E0")
             
         ///<summary>並列処理の一時ファイルを開く</summary>
         member this.popen() =
@@ -674,6 +777,31 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0 -> name
                         |_ -> name
                     code(vtp,argname)
+                |P ->
+                    //関数内ではこの変数名を使用
+                    let name = 
+                        match typ,vtp with
+                        |(It _|Dt|Zt|Structure _),A0 ->
+                            "arg"+(this.arglist.Length+1).ToString("00")
+                        |_ -> 
+                            "arg"+(this.arglist.Length+1).ToString("00")
+                    match vtp with
+                    |A0 ->
+                        this.arglist_add(n,(typ,vtp,name))
+                    |A1 _ ->
+                        this.arglist_add(n,(typ,vtp,name))
+                        this.arglist_add(n+"_size",(It 4,A1(1),name+"_size"))
+                    |A2 _ ->
+                        this.arglist_add(n,(typ,vtp,name))
+                        this.arglist_add(n+"_size",(It 4,A1(2),name+"_size"))
+                    |A3 _ ->
+                        this.arglist_add(n,(typ,vtp,name))
+                        this.arglist_add(n+"_size",(It 4,A1(3),name+"_size"))
+                    let argname =
+                        match typ,vtp with
+                        |(It _|Dt|Zt|Structure _),A0 -> name
+                        |_ -> name
+                    code(vtp,argname)
                     
         member this.codefold (s:string,cm:string,writer:string->unit,sp:int) =
             //文字列に空白文字しか含まれていなければtrue
@@ -737,6 +865,10 @@ namespace Aqualis
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space+code+"\n")) slist
+            |P -> //暫定、正しいかはわからない
+                if ss<>"" then 
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
+                    Array.iter (fun code -> this.cwrite(this.indent.space+code+"\n")) slist
 
         ///<summary>コメント文</summary>
         member this.comment s = 
@@ -770,6 +902,15 @@ namespace Aqualis
                 arrange s
             |H ->
                 let comment_line (str:string) = this.codewrite("<span class=\"comment\">"+str+"</span>\n<br/>\n")
+                let rec arrange (str:string) =
+                    if str.Length>80 then 
+                        comment_line <| str.Substring(0,80)
+                        arrange (str.Substring(80,str.Length-80))
+                    else
+                        comment_line str
+                arrange s
+            |P ->
+                let comment_line str = this.codewrite("# "+str+" \n")
                 let rec arrange (str:string) =
                     if str.Length>80 then 
                         comment_line <| str.Substring(0,80)
@@ -815,3 +956,19 @@ namespace Aqualis
                 let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
                 this.loopvar.setVar(It 4,A0,counter,"")
+            |P ->
+                let goto = this.goto_label.ToString()
+                this.goto_label <- this.goto_label + 1
+                let exit() = this.codewrite("flag="+goto+"\nbreak\n")
+                let counter = this.loopvar.getAutoVar()
+                code(goto,counter,exit)
+                this.loopvar.setVar(It 4,A0,counter,"")
+            
+            ///<summary>ループ脱出先gotoラベルをひとつ前に戻す</summary>
+            member this.exit_false = 
+                this.goto_label <- this.goto_label - 1
+            
+            ///<summary>脱出しないループのとき、ループ脱出先gotoラベルを否定</summary>
+            member this.exit_reset = 
+                this.goto_label <- 10
+

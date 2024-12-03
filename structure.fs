@@ -122,6 +122,15 @@ namespace Aqualis
                         p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
                     p.hwrite("</ul>\n")
+            |P ->
+                for s in this.sort() do
+                    p.hwrite("class "+s.sname+":\n")
+                    p.indentInc()
+                    for i in 0..s.memlist.Length-1 do
+                        let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
+                        p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
+                    p.indentDec()
+
         ///<summary>構造体メンバへのアクセス</summary>
         static member mem(vname,name) =
             match p.lang with
@@ -129,6 +138,7 @@ namespace Aqualis
             |C -> vname+"."+name
             |T   -> vname+"."+name
             |H   -> vname+"."+name
+            |P -> vname+"."+name
             
         member this.i0 (sname, vname, name) =
             this.addmember(sname,(It 4,A0,name))
@@ -213,7 +223,7 @@ namespace Aqualis
             num3(Zt,Var3(A3(0,0,0),structure.mem(vname,name)))
             
         member this.reg(sname,name:string) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H -> "."
+            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
@@ -223,7 +233,7 @@ namespace Aqualis
                 p.var.setVar(Structure(sname),A0,name_,"")
             
         member this.reg(sname,name:string,size1) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H -> "."
+            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
@@ -233,7 +243,7 @@ namespace Aqualis
                 p.var.setVar(Structure(sname),A1(size1),name_,"")
             
         member this.reg(sname,name:string,size1,size2) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H -> "."
+            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
@@ -243,7 +253,7 @@ namespace Aqualis
                 p.var.setVar(Structure(sname),A2(size1,size2),name_,"")
             
         member this.reg(sname,name:string,size1,size2,size3) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H -> "."
+            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加

@@ -104,6 +104,29 @@ namespace Aqualis
                             p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose \\("+fp+" "+"\\)\n")
+            |P ->
+                ch.f <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
+                        |> (fun s -> String.Join("",s))
+                    let s = 
+                        [for s in filename do
+                          match s.etype with 
+                            |St -> ()
+                            |_ -> yield s.code ]
+                        |> (fun s -> String.Join(",",s))
+                    ch.t <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite(id+"= \""+f+"\"%("+s+")\n")
+                        if isbinary then
+                            p.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
+                        else
+                            p.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "r" else "w")+"\")"+"\n")
+                        code(fp)
+                        p.codewrite(fp+".close()"+"\n")
         static member private Write (fp:string) (lst:num0 list) =
             match p.lang with
             |F ->
@@ -248,6 +271,46 @@ namespace Aqualis
                           |_ -> "")
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
+            |P ->
+                let int0string_format_C =
+                    "%"+p.iFormat.ToString()+"d"
+                let double0string_format_C = 
+                    let (a,b)=p.dFormat
+                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let format = 
+                    lst
+                    |> (fun b -> 
+                        [for n in 0..(b.Length-1) do
+                            match b.[n],b.[n].etype with
+                            |_,It _ ->
+                                yield int0string_format_C
+                            |_,Dt ->
+                                yield double0string_format_C
+                            |_,Zt ->
+                                yield double0string_format_C
+                                yield double0string_format_C
+                            |Str_c(v),_ ->
+                                yield v.Replace("\"","\\\"")
+                            |_ -> ()
+                        ])
+                    |> (fun b ->
+                          [for n in 0..(b.Length-1) do
+                              yield b.[n]
+                              if n<(b.Length-1) then yield "\\t"
+                          ])
+                    |> (fun s -> String.Join("",s))
+                let code =
+                    [for b in lst do
+                        match b.etype,b with 
+                        |_,Int_c(v) -> yield p.ItoS(v)
+                        |_,Dbl_c(v) -> yield p.DtoS(v)
+                        |Zt,_ ->
+                            yield b.re.code
+                            yield b.im.code
+                        |(It _|Dt),_ -> yield b.code
+                        |_ -> ()]
+                    |> (fun s -> String.Join(",",s))
+                p.codewrite(fp+".write(\""+format+"\\n\" %("+code+"))\n")
                 
         static member private Write_bin (fp:string) (v:num0) =
             match p.lang with
@@ -325,6 +388,32 @@ namespace Aqualis
                 |Dt,_ ->
                     p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.code+"\\)<br/>\n")
                 |_ -> ()
+            |P ->
+                match v.etype,v with 
+                |_,Int_c _ ->
+                    ch.i <| fun tmp ->
+                        tmp <== v
+                        p.codewrite(fp+".write(struct.pack('i', "+tmp.code+"))\n")
+                |_,Dbl_c _ ->
+                    ch.i <| fun tmp ->
+                        tmp <== v
+                        p.codewrite(fp+".write(struct.pack('d', "+tmp.code+"))\n")
+                |Zt,_ ->
+                    ch.dd <| fun (tmp_r,tmp_i) ->
+                        tmp_r <== v.re
+                        tmp_i <== v.im
+                        p.codewrite(fp+".write(struct.pack('d', "+tmp_r.code+"))\n")
+                        p.codewrite(fp+".write(struct.pack('d', "+tmp_i.code+"))\n")
+                |It _,_ ->
+                    ch.i <| fun tmp ->
+                        tmp <== v
+                        p.codewrite(fp+".write(struct.pack('i', "+tmp.code+"))\n")
+                |Dt,_ ->
+                    ch.d <| fun tmp ->
+                        tmp <== v
+                        p.codewrite(fp+".write(struct.pack('d', "+tmp.code+"))\n")
+                |_ ->
+                    ()
                 
         static member private Read (fp:string) (iostat:num0) (lst:num0 list) = 
             let rec cpxvarlist list (s:num0 list) counter =
@@ -479,6 +568,58 @@ namespace Aqualis
                         |_ -> "")
                     |> (fun s -> String.Join("<mo>,</mo>",s))
                 p.codewrite("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
+            |P ->
+                ch.d1 (I <| 2*Nz) <| fun tmp ->
+                    let format = 
+                        varlist
+                        |> (fun b -> 
+                              [for (t,_,_) in b do
+                                match t with
+                                |It _ ->
+                                    yield "%d"
+                                |Dt -> 
+                                    yield "%f"
+                                |Zt -> 
+                                    yield "%f"
+                                    yield "%f"
+                                |St ->
+                                    yield "%s"
+                                |_ -> ()
+                              ])
+                        |> (fun s -> String.Join("",s))
+                    let code =
+                      varlist
+                      |> (fun b ->
+                            [for (t,m,a) in b do
+                                match t,a with 
+                                |Zt,Var _ ->
+                                    yield tmp.[2*m+1].code
+                                    yield tmp.[2*m+2].code
+                                |_,Var(_,n) ->
+                                    yield n
+                                |_ ->
+                                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+                                    yield ""
+                            ])
+                      |> (fun s -> String.Join(",",s))
+                    //書式指定をしてファイルから値を読み込み。まだ、完成してない
+                    p.codewrite("lines = "+fp+".readline()\n")
+                    p.codewrite("word_list = re.split(r\'[\\t\\n]\', lines)\n")
+
+                    let mutable cnt = 0
+                    for (t,_,a) in varlist do
+                        let cnt_string = string cnt
+                        //let a_string = string a
+                        match t with
+                        |It _ ->
+                            p.codewrite(a.code+" = int(word_list["+cnt_string+"])")
+                        |Dt -> 
+                            p.codewrite(a.code+"= float(word_list["+cnt_string+"])")
+                        |Zt -> 
+                            p.codewrite(a.code+" = complex(float(word_list["+cnt_string+"]),float(word_list["+cnt_string+"+1]))")
+                            cnt <- cnt+1
+                        |_ -> ()
+                        cnt <- cnt+1
                 
         static member private Read_bin (fp:string) (iostat:num0) (v:num0) = 
             match p.lang with
@@ -519,6 +660,19 @@ namespace Aqualis
                 match v with 
                 |Var(_,n) ->
                     p.codewrite("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
+                |_ -> 
+                    Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
+            |P->
+                match v.etype,v with 
+                |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        p.codewrite(re.code+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        p.codewrite(im.code+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        v <== re+asm.uj*im
+                |It _,Var(_,n) ->
+                    p.codewrite(n+" = struct.unpack('i', "+fp+".read(4))[0]"+"\n")
+                |Dt,Var(_,n) ->
+                    p.codewrite(n+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
                     
@@ -1033,6 +1187,29 @@ namespace Aqualis
                             p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose \\("+fp+" "+"\\)\n")
+            |P ->
+                ch.f <| fun fp ->
+                    let f = 
+                        filename
+                        |> List.map (fun s -> match s,s.etype with |Str_c(v),_ -> v |_,It _ -> "%"+p.iFormat.ToString("00")+"d" |_ -> "")
+                        |> io2.cat ""
+                    let s = 
+                        [for s in filename do
+                            match s.etype with
+                            |St -> ()
+                            |_ -> yield s.code]
+                        |> io2.cat ","
+                    ch.t <| A0 <| fun id ->
+                        let btname = "byte_tmp"
+                        //変数byte_tmpをリストに追加（存在していない場合のみ）
+                        p.var.setUniqVar(Structure("char"),A0,btname,"")
+                        p.codewrite(id+"= \""+f+"\"%("+s+")\n")
+                        if isbinary then
+                            p.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
+                        else
+                            p.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "r" else "w")+"\")"+"\n")
+                        code(fp)
+                        p.codewrite(fp+".close()"+"\n")
         static member private Write (fp:string) (lst:num0 list) =
             match p.lang with
             |F ->
@@ -1129,6 +1306,38 @@ namespace Aqualis
                         |_ -> "")
                     |> io2.cat ","
                 p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>\n")
+            |P ->
+                let int0string_format_C = "%d"
+                let double0string_format_C = "%.3f"
+                let format = 
+                    lst
+                    |> (fun b -> 
+                        [for n in 0..(b.Length-1) do
+                            match b.[n],b.[n].etype with
+                            |_,It _ ->
+                                yield "%d"
+                            |_,Dt ->
+                                yield "%.3f"
+                            |_,Zt ->
+                                yield "%.3f"
+                                yield "%.3f"
+                            |Str_c(v),_ ->
+                                yield v.Replace("\"","\\\"")
+                            |_ -> ()
+                        ])
+                    |> io2.cat ""
+                let code =
+                    [for b in lst do
+                        match b.etype,b with 
+                        |_,Int_c(v) -> yield p.ItoS(v)
+                        |_,Dbl_c(v) -> yield p.DtoS(v)
+                        |Zt,Var _ ->
+                            yield b.re.code
+                            yield b.im.code
+                        |(It _|Dt),Var _ -> yield b.code
+                        |_ -> ()]
+                    |> io2.cat ","
+                p.codewrite(fp+".write(\""+format+"\" , % ("+(if code ="" then "" else ",")+code+"))\n")
                 
         ///<summary>ファイル出力</summary>
         static member fileOutput (filename:num0 list) code =
