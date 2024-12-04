@@ -1274,7 +1274,7 @@ namespace Aqualis
                         |Zt,Var _ ->
                             yield b.re.code
                             yield b.im.code
-                        |(It _|Dt),Var _ -> yield b.code
+                        |(It _|Dt),_ -> yield b.code
                         |_ -> ()]
                     |> io2.cat ","
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -1334,7 +1334,7 @@ namespace Aqualis
                         |Zt,Var _ ->
                             yield b.re.code
                             yield b.im.code
-                        |(It _|Dt),Var _ -> yield b.code
+                        |(It _|Dt),_ -> yield b.code
                         |_ -> ()]
                     |> io2.cat ","
                 p.codewrite(fp+".write(\""+format+"\" , % ("+(if code ="" then "" else ",")+code+"))\n")
