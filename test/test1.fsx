@@ -7,12 +7,12 @@ let version = "1.0.0"
 
 let outputdir = __SOURCE_DIRECTORY__
 
-#I @"C:\home\LightwaveLaboratory\Aqualis\bin\Debug\net6.0"
+#I @"C:\home\kitahara\Aqualis\bin\Debug\net8.0"
 #r "Aqualis.dll"
 
 open Aqualis
 
-Compile [F;C] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [F;C;P] outputdir projectname ("aaa","aaa") <| fun () ->
     io.fileOutput [!."result.dat"] <| fun wr ->
     ch.dddd <| fun (x,y,z1,z2) ->
         let p = 1.5

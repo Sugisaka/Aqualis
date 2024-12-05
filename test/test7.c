@@ -14,8 +14,8 @@
 #define uj _Complex_I
 double tmp2;
 double tmp1;
-int ic001;
-int ic002;
+int ic0001;
+int ic0002;
 int i0001;
 int i0002;
 int i0003;

@@ -4,14 +4,14 @@ let projectname = "test7"
 let version = "1.0.0"
 //#############################################################################
  
-let outputdir = __SOURCE_DIRECTORY__
+let outputdir = @"C:\home\kitahara\Aqualis\test\result"
 
-#I @"C:\home\LightwaveLaboratory\Aqualis\bin\Debug\net8.0"
+#I @"C:\home\kitahara\Aqualis\bin\Debug\net8.0"
 #r "Aqualis.dll"
  
 open Aqualis
 
-Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [F;C;P] outputdir projectname ("aaa","aaa") <| fun () ->
     let dd = 1E-7
     ch.dddd <| fun (x,y1,y2,dy) ->
     ch.d <| fun c1 ->
@@ -126,7 +126,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
         codestr.section "014a" <| fun () ->
             ch.d1 10 <| fun ar ->
                 ar.foreach <| fun i -> ar[i] <== i
-                let f(a:num1) = (asm.sum 1 20 <| fun n -> n*n*a[n])/asm.sqrt(asm.sum 1 10 <| fun n -> n*a[n])
+                let f(a:num1) = (asm.sum 1 10 <| fun n -> n*n*a[n])/asm.sqrt(asm.sum 1 10 <| fun n -> n*a[n])
                 (f ar).eval()
                 ar.foreach <| fun i ->
                     !"代数微分"
@@ -144,7 +144,7 @@ Compile [F;C;] outputdir projectname ("aaa","aaa") <| fun () ->
                 let q1 = var.d0("tmp1")
                 let q2 = var.d0("tmp2")
                 ar.foreach <| fun i -> ar[i] <== i
-                let f(a:num1) = asm.xlet(q1,asm.sum 1 20 <| fun n -> n*n*a[n])/asm.sqrt(asm.xlet(q2,asm.sum 1 10 <| fun n -> n*a[n]))
+                let f(a:num1) = asm.xlet(q1,asm.sum 1 10 <| fun n -> n*n*a[n])/asm.sqrt(asm.xlet(q2,asm.sum 1 10 <| fun n -> n*a[n]))
                 (f ar).eval()
                 ar.foreach <| fun i ->
                     !"代数微分"
