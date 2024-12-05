@@ -578,50 +578,6 @@ namespace Aqualis
                     print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size3 mismatch")
                 p.comment("****************************************************")
                 
-        static member subst (v1:Expr3,s11:num0,s12:num0,s13:num0,f1:num0->num0->num0->num0,v2:Expr3,s21:num0,s22:num0,s23:num0,f2:num0->num0->num0->num0) =
-            if p.debugMode then
-                p.errorIDinc()
-                p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
-                br.if1 (s11 .=/ s21) <| fun () -> 
-                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size1 mismatch")
-                br.if1 (s12 .=/ s22) <| fun () -> 
-                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size2 mismatch")
-                br.if1 (s13 .=/ s23) <| fun () -> 
-                    print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size3 mismatch")
-                p.comment("****************************************************")
-            match v1,v2 with
-            |Var3(_,x),Var3(_,y) ->
-                match p.lang with
-                |F|T -> p.codewrite(x + "=" + y)
-                |C -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
-                |H   -> p.codewrite("<math>" + x + "<mo>&larr;</mo>" + y + "</math>\n<br/>\n")
-                |P ->
-                    p.codewrite(x + " = copy.deepcopy("+y+")")
-            |Var3(_,x),Arx3(_,_,_,f) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
-            |Arx3(_,_,_,_),Var3(_,_) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
-            |Arx3(_,_,_,_),Arx3(_,_,_,_) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== (f2 i j k)
-                
-        static member subst (v1:Expr3,s11:num0,s12:num0,s13:num0,f1:num0->num0->num0->num0,v2:num0) =
-            match v1 with
-            |Var3(_,x) ->
-                match p.lang with
-                |F|T ->
-                    p.codewrite(x + "=" + v2.code)
-                |C ->
-                    iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== v2
-                |H ->
-                    p.codewrite(x + " \\leftarrow " + v2.code)
-                |P ->
-                    p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+")" )
-            |Arx3(_,_,_,_) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> iter.num s13 <| fun k -> (f1 i j k) <== v2
                 
     ///<summary>数値型1次元配列</summary>
     type num3 (typ:Etype,x:Expr3) =
@@ -1256,7 +1212,11 @@ namespace Aqualis
                 |H ->
                     p.codewrite(x + " \\leftarrow " + v2.code)
                 |P ->
-                    p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+")" )
+                    match v1.etype with
+                    |Structure(sname) -> p.codewrite(x + " = numpy.array([[["+sname+"() for _ in range(int("+v1.size3.code+"))] for _ in range(int("+v1.size2.code+"))] for _ in range(int("+v1.size1.code+"))], dtype=object).reshape(int("+v1.size1.code+"),int("+v1.size2.code+"),int("+v1.size3.code+"))\n")
+                    |It _ |It 1       -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=int)\n")
+                    |Zt               -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=numpy.complex128)\n")
+                    |_                -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=float)\n")
             |Arx3(_,_,_,_) ->
                 match p.lang with
                 |F|T|C|H|P -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2

@@ -258,53 +258,6 @@ namespace Aqualis
                         print.t ("ERROR"+p.errorID.ToString()+" array size (second index) mismatch")
                 p.comment("****************************************************")
                 
-        static member subst (v1:Expr2,s11:num0,s12:num0,f1:num0->num0->num0,v2:Expr2,s21:num0,s22:num0,f2:num0->num0->num0) =
-            if p.debugMode then
-                p.errorIDinc()
-                p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
-                br.branch <| fun b ->
-                    b.IF (s11 .=/ s21) <| fun () -> 
-                        print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size mismatch")
-                br.branch <| fun b ->
-                    b.IF (s21 .=/ s22) <| fun () -> 
-                        print.t ("ERROR"+p.errorID.ToString()+" operator '<==' array size mismatch")
-                p.comment("****************************************************")
-            match v1,v2 with
-            |Var2(_,x),Var2(_,y) ->
-                match p.lang with
-                |F|T ->
-                    p.codewrite(x + "=" + y)
-                |C ->
-                    iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
-                |H ->
-                    p.codewrite(x + " \\leftarrow " + y)
-                |P ->
-                    p.codewrite(x + " = copy.deepcopy("+y+")")
-            |Var2(_,x),Arx2(_,_,f) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
-            |Arx2(_,_,_),Var2(_,_) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
-            |Arx2(_,_,_),Arx2(_,_,_) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== (f2 i j)
-                
-        static member subst (v1:Expr2,s11:num0,s12:num0,f1:num0->num0->num0,v2:num0) =
-            match v1 with
-            |Var2(_,x) ->
-                match p.lang with
-                |F|T ->
-                    p.codewrite(x + "=" + v2.code)
-                |C ->
-                    iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
-                |H ->
-                    p.codewrite(x + " \\leftarrow " + v2.code)
-                |P ->
-                    p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+")" )
-            |Arx2(_,_,_) ->
-                match p.lang with
-                |F|T|C|H|P -> iter.num s11 <| fun i -> iter.num s12 <| fun j -> (f1 i j) <== v2
                 
     ///<summary>数値型1次元配列</summary>
     type num2 (typ:Etype,x:Expr2) =
@@ -546,7 +499,11 @@ namespace Aqualis
                 |H ->
                     p.codewrite(x + " \\leftarrow " + v2.code)
                 |P ->
-                    p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+")" )
+                    match v1.etype with
+                    |Structure(sname) -> p.codewrite(x+" = numpy.array([["+sname+"() for _ in range(int("+v1.size2.code+"))] for _ in range(int("+v1.size1.code+"))], dtype=object).reshape(int("+v1.size1.code+"),int("+v1.size2.code+"))\n")
+                    |It _ |It 1       -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=int)\n")
+                    |Zt               -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=numpy.complex128)\n")
+                    |_                -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=float)\n")
             |Arx2(_,_,_) ->
                 match p.lang with
                 |F|T|C|H|P -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
