@@ -33,7 +33,7 @@ namespace Aqualis
         ///<summary>現在指定されている言語</summary>
         member this.lang with get() = 
             if param_idx.Length=0 then
-                F
+                Fortran
             else
                 let pp = this.param
                 pp.lang

@@ -14,7 +14,7 @@ namespace Aqualis
         ///<summary>ループを並列化</summary>
         static member parallelize code =
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.isOaccUsed <- true
                 p.parmode <| fun () ->
                     if p.civar.list.Length>0 then
@@ -43,7 +43,7 @@ namespace Aqualis
                         p.codewrite("!$acc kernels"+"\n")
                         code()
                         p.codewrite("!$acc end kernels\n")
-            |C ->
+            |C99 ->
                 p.isOaccUsed <- true
                 p.parmode <| fun () ->
                     if p.civar.list.Length>0 then

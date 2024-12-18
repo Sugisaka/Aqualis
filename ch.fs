@@ -427,7 +427,7 @@ namespace Aqualis
         static member f code = 
             let name = p.fNumber()
             match p.lang with
-              |F -> p.var.setVar(Structure("file"),A0,name,(p.ItoS <| (p.fvar.counter+10)))
+              |Fortran -> p.var.setVar(Structure("file"),A0,name,(p.ItoS <| (p.fvar.counter+10)))
               |_ -> p.var.setVar(Structure("file"),A0,name,"")
             code name
             
@@ -612,12 +612,12 @@ namespace Aqualis
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_i1 (size1:num0) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.i1 size1 <| fun i ->
                     p.civar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.i1 size1 <| fun i ->
                     p.civar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
@@ -632,12 +632,12 @@ namespace Aqualis
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_d1 (size1:num0) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.d1 size1 <| fun i ->
                     p.civar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.d1 size1 <| fun i ->
                     p.civar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
@@ -652,12 +652,12 @@ namespace Aqualis
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_z1 (size1:num0) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.z1 size1 <| fun i ->
                     p.civar.setVar(Zt, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.z1 size1 <| fun i ->
                     p.civar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
@@ -672,12 +672,12 @@ namespace Aqualis
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_i2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.i2 size1 size2 <| fun i ->
                     p.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.i2 size1 size2 <| fun i ->
                     p.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
@@ -692,12 +692,12 @@ namespace Aqualis
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_d2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.d2 size1 size2 <| fun i ->
                     p.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.d2 size1 size2 <| fun i ->
                     p.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
@@ -712,12 +712,12 @@ namespace Aqualis
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_z2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.z2 size1 size2 <| fun i ->
                     p.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.z2 size1 size2 <| fun i ->
                     p.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
@@ -732,12 +732,12 @@ namespace Aqualis
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.i3 size1 size2 size3 <| fun i ->
                     p.civar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.i3 size1 size2 size3 <| fun i ->
                     p.civar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
@@ -752,12 +752,12 @@ namespace Aqualis
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.d3 size1 size2 size3 <| fun i ->
                     p.civar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.d3 size1 size2 size3 <| fun i ->
                     p.civar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
@@ -772,12 +772,12 @@ namespace Aqualis
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、GPUに転送→code実行後にメモリ解放</summary>
         static member copyin_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.z3 size1 size2 size3 <| fun i ->
                     p.civar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.z3 size1 size2 size3 <| fun i ->
                     p.civar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
@@ -792,12 +792,12 @@ namespace Aqualis
         ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_i1 (size1:num0) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.i1 size1 <| fun i ->
                     p.covar.setVar(It 4, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
                     ignore <| p.covar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.i1 size1 <| fun i ->
                     p.covar.setVar(It 4,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
@@ -812,12 +812,12 @@ namespace Aqualis
         ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_d1 (size1:num0) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.d1 size1 <| fun i ->
                     p.covar.setVar(Dt, A1(0),i.code+"(1:"+size1.code+")","")
                     code i
                     ignore <| p.covar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.d1 size1 <| fun i ->
                     p.covar.setVar(Dt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
@@ -832,12 +832,12 @@ namespace Aqualis
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_z1 (size1:num0) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.z1 size1 <| fun i ->
                     p.covar.setVar(Zt,A1(0),i.code+"(1:"+size1.code+")","")
                     code i
                     ignore <| p.covar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.z1 size1 <| fun i ->
                     p.covar.setVar(Zt,A1(0),i.code+"[0:"+size1.code+"]","")
                     code i
@@ -852,12 +852,12 @@ namespace Aqualis
         ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_i2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.i2 size1 size2 <| fun i ->
                     p.civar.setVar (It 4, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.i2 size1 size2 <| fun i ->
                     p.civar.setVar (It 4, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
@@ -872,12 +872,12 @@ namespace Aqualis
         ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_d2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.d2 size1 size2 <| fun i ->
                     p.civar.setVar (Dt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.d2 size1 size2 <| fun i ->
                     p.civar.setVar (Dt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
@@ -892,12 +892,12 @@ namespace Aqualis
         ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_z2 (size1:num0) = fun (size2:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.z2 size1 size2 <| fun i ->
                     p.civar.setVar (Zt, A2(0,0), i.code+"(1:"+size1.code+",1:"+size2.code+")","")
                     code i
                     ignore <| p.civar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.z2 size1 size2 <| fun i ->
                     p.civar.setVar (Zt, A2(0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"]","")
                     code i
@@ -912,12 +912,12 @@ namespace Aqualis
         ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.i3 size1 size2 size3 <| fun i ->
                     p.covar.setVar (It 4, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
                     ignore <| p.covar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.i3 size1 size2 size3 <| fun i ->
                     p.covar.setVar (It 4, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
@@ -932,12 +932,12 @@ namespace Aqualis
         ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_d3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.d3 size1 size2 size3 <| fun i ->
                     p.covar.setVar (Dt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
                     ignore <| p.covar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.d3 size1 size2 size3 <| fun i ->
                     p.covar.setVar (Dt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i
@@ -952,12 +952,12 @@ namespace Aqualis
         ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て、ホストに転送→code実行後にメモリ解放</summary>
         static member copyout_z3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.z3 size1 size2 size3 <| fun i ->
                     p.covar.setVar (Zt, A3(0,0,0), i.code+"(1:"+size1.code+",1:"+size2.code+",1:"+size3.code+")","")
                     code i
                     ignore <| p.covar.getAutoVar()
-            |C ->
+            |C99 ->
                 ch.z3 size1 size2 size3 <| fun i ->
                     p.covar.setVar (Zt, A3(0,0,0), i.code+"[0:"+size1.code+"][0:"+size2.code+"][0:"+size3.code+"]","")
                     code i

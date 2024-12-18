@@ -39,7 +39,7 @@ namespace Aqualis
             let dir_ = p.dir
             let fdeclare (typ:Etype,vtp:VarType,name:string) =
                 match p.lang with
-                |H ->
+                |HTML ->
                     match vtp with 
                     |A0 -> typ.tostring(p.lang)+" :: "+name
                     |A1(0) -> typ.tostring(p.lang)+",allocatable"+" :: "+name+"(:)"
@@ -58,9 +58,9 @@ namespace Aqualis
                     |A2(_,_) -> typ.tostring(p.lang)+" :: "+name+"(:,:)"
                     |A3(_,_,_) -> typ.tostring(p.lang)+" :: "+name+"(:,:,:)"
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.param_main.funlist <- projectname::p.param_main.funlist
-                p.param_add(F, dir_, projectname)
+                p.param_add(Fortran, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
                 //メインコード生成
@@ -117,9 +117,9 @@ namespace Aqualis
                 //もとの関数に戻る
                 p.param_back()
                 p.codewrite("call" + " " + projectname + "(" + args + ")\n")
-            |C ->
+            |C99 ->
                 p.param_main.funlist <- projectname::p.param_main.funlist
-                p.param_add(C, dir_, projectname)
+                p.param_add(C99, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
                 //メインコード生成
@@ -177,9 +177,9 @@ namespace Aqualis
                 //もとの関数に戻る
                 p.param_back()
                 p.codewrite(projectname + "(" + args + ");\n")
-            |T ->
+            |LaTeX ->
                 p.param_main.funlist <- projectname::p.param_main.funlist
-                p.param_add(T, dir_, projectname)
+                p.param_add(LaTeX, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
                 //メインコード生成
@@ -236,9 +236,9 @@ namespace Aqualis
                 //もとの関数に戻る
                 p.param_back()
                 p.codewrite("call" + " " + projectname + "(" + args + ")\n")
-            |H ->
+            |HTML ->
                 p.param_main.funlist <- projectname::p.param_main.funlist
-                p.param_add(H, dir_, projectname)
+                p.param_add(HTML, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
                 //メインコード生成
@@ -297,9 +297,9 @@ namespace Aqualis
                 //もとの関数に戻る
                 p.param_back()
                 p.codewrite("\\(" + projectname + "(" + args + ")\\)<br/>")
-            |P ->
+            |Python ->
                 p.param_main.funlist <- projectname::p.param_main.funlist
-                p.param_add(P, dir_, projectname)
+                p.param_add(Python, dir_, projectname)
                 //ここから関数定義。p.paramは関数用のものに変わる
                 p.paramClear()
                 //メインコード生成
@@ -380,11 +380,11 @@ namespace Aqualis
         let Compile lglist dir projectname (aqver:string,codever:string) code =
             for lg in lglist do
                 match lg with 
-                |F -> 
+                |Fortran -> 
                     p.clear()
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
-                    p.param_add(F, dir, projectname)
+                    p.param_add(Fortran, dir, projectname)
                     p.paramClear()
                     //メインコード生成
                     code()
@@ -460,11 +460,11 @@ namespace Aqualis
                     if File.Exists(dir + "\\" + projectname+".f90") then File.Delete(dir + "\\" + projectname+".f90")
                     //新しいソースファイルを削除（beeファイルの拡張子を変更）
                     File.Move(dir + "\\" + projectname+".bee",dir + "\\" + projectname+".f90")
-                |C ->
+                |C99 ->
                     p.clear()
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
-                    p.param_add(C, dir, projectname)
+                    p.param_add(C99, dir, projectname)
                     p.paramClear()
                     //メインコード生成
                     p.option("-lm")
@@ -546,11 +546,11 @@ namespace Aqualis
                     if File.Exists(dir + "\\" + projectname+".c") then File.Delete(dir + "\\" + projectname+".c")
                     //新しいソースファイルを削除（beeファイルの拡張子を変更）
                     File.Move(dir + "\\" + projectname+".bee",dir + "\\" + projectname+".c")
-                |T ->
+                |LaTeX ->
                     p.clear()
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
-                    p.param_add(T, dir, projectname)
+                    p.param_add(LaTeX, dir, projectname)
                     p.paramClear()
                     //メインコード生成
                     code()
@@ -602,11 +602,11 @@ namespace Aqualis
                     if File.Exists(dir + "\\" + projectname+".tex") then File.Delete(dir + "\\" + projectname+".tex")
                     //新しいソースファイルを削除（beeファイルの拡張子を変更）
                     File.Move(dir + "\\" + projectname+".bee",dir + "\\" + projectname+".tex")
-                |H ->
+                |HTML ->
                     p.clear()
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
-                    p.param_add(H, dir, projectname)
+                    p.param_add(HTML, dir, projectname)
                     p.paramClear()
                     //メインコード生成
                     code()
@@ -781,11 +781,11 @@ namespace Aqualis
                     if File.Exists(dir + "\\" + projectname+".html") then File.Delete(dir + "\\" + projectname+".html")
                     //新しいソースファイルを削除（beeファイルの拡張子を変更）
                     File.Move(dir + "\\" + projectname+".bee",dir + "\\" + projectname+".html")
-                |P ->
+                |Python ->
                     p.clear()
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
-                    p.param_add(P, dir, projectname)
+                    p.param_add(Python, dir, projectname)
                     p.paramClear()
                     //メインコード生成
                     code()
