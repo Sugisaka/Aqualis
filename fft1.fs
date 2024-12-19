@@ -74,7 +74,7 @@ namespace Aqualis
                 N <== data1.size1
                 N2 <== asm.floor(N/2.0)
                 match p.lang with
-                |F ->
+                |Fortran ->
                     p.incld("'fftw3.f'")
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
@@ -91,7 +91,7 @@ namespace Aqualis
                         p.codewrite("call dfftw_execute(" + plan.code + ")")
                         ifftshift1(data2)
                         p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
-                |C ->
+                |C99 ->
                     p.incld("\"fftw3.h\"")
                     let plan = fftw_plan1(planname)
                     if fftdir=1 then
@@ -108,11 +108,11 @@ namespace Aqualis
                         p.codewrite("dfftw_execute(" + plan.code + ");")
                         ifftshift1(data2)
                         p.codewrite("dfftw_destroy_plan(" + plan.code + ");")
-                |T ->
+                |LaTeX ->
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
-                |H ->
+                |HTML ->
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
-                |P ->
+                |Python ->
                     p.incld("pyfftw")
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then

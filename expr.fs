@@ -57,7 +57,7 @@ namespace Aqualis
             
         member this.code with get() =
             match p.lang with
-            |T ->
+            |LaTeX ->
                 match this with
                 |True -> "true"
                 |False -> "false"
@@ -106,7 +106,7 @@ namespace Aqualis
                     //コード生成
                     code
                 |Null -> ""
-            |H ->
+            |HTML ->
                 match this with
                 |True -> "true"
                 |False -> "false"
@@ -155,7 +155,7 @@ namespace Aqualis
                     //コード生成
                     code
                 |Null -> ""
-            |F ->
+            |Fortran ->
                 match this with
                 |True -> ".true."
                 |False -> ".false."
@@ -196,7 +196,7 @@ namespace Aqualis
                     //コード生成
                     code
                 |Null -> ""
-            |C ->
+            |C99 ->
                 match this with
                 |True -> "1"
                 |False -> "0"
@@ -236,7 +236,7 @@ namespace Aqualis
                     code
                 |Null -> ""
             //　accはaccumulationの略で累積値
-            |P ->
+            |Python ->
                 match this with
                 |True -> "True"
                 |False -> "False"
@@ -488,7 +488,7 @@ namespace Aqualis
             
         static member internal looprange (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.getloopvar <| fun counter ->
                     if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
                     p.codewrite("do "+counter+"="+i1.code+","+i2.code+"\n")
@@ -496,7 +496,7 @@ namespace Aqualis
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("end do"+"\n")
-            |C ->
+            |C99 ->
                 p.getloopvar <| fun counter ->
                     if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
                     p.codewrite("for("+counter+"="+i1.code+"; "+counter+"<="+i2.code+"; "+counter+"++)"+"\n")
@@ -505,7 +505,7 @@ namespace Aqualis
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("}"+"\n")
-            |P ->
+            |Python ->
                 p.getloopvar <| fun counter ->
                     if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
                     p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"+1, 1):"+"\n")
@@ -568,7 +568,7 @@ namespace Aqualis
                 
         member this.code with get() =
             match p.lang with
-            |T ->
+            |LaTeX ->
                 match this with
                 |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
@@ -612,7 +612,7 @@ namespace Aqualis
                     "\\sum_{"+n+"="+n1.code+"}^{"+n2.code+"}"+(f (Var(It 4,n))).code
                 |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
-            |H ->
+            |HTML ->
                 match this with
                 |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
@@ -656,7 +656,7 @@ namespace Aqualis
                     "\\sum_{"+n+"="+n1.code+"}^{"+n2.code+"}"+(f (Var(It 4,n))).code
                 |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
-            |F ->
+            |Fortran ->
                 match this with
                 |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
@@ -693,7 +693,7 @@ namespace Aqualis
                     g.code
                 |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
-            |C ->
+            |C99 ->
                 match this with
                 |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
@@ -750,7 +750,7 @@ namespace Aqualis
                     g.code
                 |Let(_,v,_) -> v.code
                 |NaN -> "NaN"
-            |P ->
+            |Python ->
                 match this with
                 |Var(_,x) -> x
                 |Int_c x -> p.ItoS(x)
@@ -953,10 +953,10 @@ namespace Aqualis
                 |_,Sub(_,a,b) -> (dbl a)-(dbl b)
                 |_,Mul(_,a,b) -> (dbl a)*(dbl b)
                 |_,Div(_,a,b) -> (dbl a)/(dbl b)
-                |F,_          -> Formula(Dt,"dble("+e.code+")")
-                |T,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
-                |H,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
-                |P,_          -> Formula(Dt,"float("+e.code+")")
+                |Fortran,_          -> Formula(Dt,"dble("+e.code+")")
+                |LaTeX,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |HTML,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |Python,_          -> Formula(Dt,"float("+e.code+")")
                 |_,_          -> Formula(Dt,"(double)("+e.code+")")
             dbl x
             
@@ -1482,11 +1482,11 @@ namespace Aqualis
                 |true,(Add _|Sub _),_ -> Par(x.etype,"(",")",x) % y
                 |_ ->
                     match p.lang with
-                    |F -> Formula (It 4, "mod("+x.code+","+y.code+")")
-                    |C -> Formula (It 4, x.code+"%"+y.code)
-                    |H -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
-                    |T -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
-                    |P -> Formula (It 4, x.code+"%"+y.code)
+                    |Fortran -> Formula (It 4, "mod("+x.code+","+y.code+")")
+                    |C99 -> Formula (It 4, x.code+"%"+y.code)
+                    |HTML -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
+                    |LaTeX -> Formula (It 4, "\\mathrm{mod}("+x.code+","+y.code+")")
+                    |Python -> Formula (It 4, x.code+"%"+y.code)
                     
         static member ( % ) (x:num0,y:int) = x%(Int_c y)
         static member ( % ) (x:int,y:num0) = (Int_c x)%y
@@ -1501,26 +1501,26 @@ namespace Aqualis
             (* x^0 *)
             |_,_,(Int_c 0|Dbl_c 0.0) -> Int_c 1
             (* [整数定数]^[整数定数] *)
-            |(F|C|P),Int_c v1,Int_c v2 -> Dbl_c(double(v1)**double(v2))
+            |(Fortran|C99|Python),Int_c v1,Int_c v2 -> Dbl_c(double(v1)**double(v2))
             (* [整数定数]^[小数定数] *)
-            |(F|C|P),Int_c v1,Dbl_c v2 -> Dbl_c((double v1)**v2)
+            |(Fortran|C99|Python),Int_c v1,Dbl_c v2 -> Dbl_c((double v1)**v2)
             (* [小数定数]^[整数定数] *)
-            |(F|C|P),Dbl_c v1,Int_c v2 -> Dbl_c(v1**(double v2))
+            |(Fortran|C99|Python),Dbl_c v1,Int_c v2 -> Dbl_c(v1**(double v2))
             (* [小数定数]^[小数定数] *)
-            |(F|C|P),Dbl_c v1,Dbl_c v2 -> Dbl_c(v1**v2)
+            |(Fortran|C99|Python),Dbl_c v1,Dbl_c v2 -> Dbl_c(v1**v2)
             (* [負の整数定数]^y *)
             |_,Int_c v1,_ when v1 < 0 -> num0.powr(Par(x.etype,"(",")",x),y)
             (* [負の小数定数]^y *)
             |_,Dbl_c v1,_ when v1 < 0.0 -> num0.powr(Par(x.etype,"(",")",x),y)
             (* x^[負の整数定数] *)
-            |T,_,Int_c v2 when v2 < 0 -> num0.powr(x,y)
+            |LaTeX,_,Int_c v2 when v2 < 0 -> num0.powr(x,y)
             |_,_,Int_c v2 when v2 < 0 -> num0.powr(x,Par(y.etype,"(",")",y))
             (* x^[負の小数定数] *)
-            |T,_,Dbl_c v2 when v2 < 0.0 -> num0.powr(x,y)
+            |LaTeX,_,Dbl_c v2 when v2 < 0.0 -> num0.powr(x,y)
             |_,_,Dbl_c v2 when v2 < 0.0 -> num0.powr(x,Par(y.etype,"(",")",y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) 
                y = [負号付] or (y1+y2+…) or (y1-y2) or (y1*y2) or (y1/y2) *)
-            |T,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,"(",")",x),y)
+            |LaTeX,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,"(",")",x),y)
             |_,(Inv _|Add _|Sub _|Mul _|Div _),(Inv _|Add _|Sub _|Mul _|Div _) -> num0.powr(Par(x.etype,"(",")",x),Par(y.etype,"(",")",y))
             (* x = [負号付] or (x1+x2+…) or (x1-x2) or (x1*x2) or (x1/x2) *)
             |_,(Inv _|Add _|Sub _|Mul _|Div _),_ -> num0.powr(Par(x.etype,"(",")",x),y)
@@ -1613,15 +1613,15 @@ namespace Aqualis
             |It 2,It 4 -> printfn "Warning: int型からbyte型への代入です：%s←%s" x.code y.code
             |_ ->
                 match p.lang with
-                |F ->
+                |Fortran ->
                     p.codewrite(x.code + " = " + y.code)
-                |C->
+                |C99->
                     p.codewrite(x.code + " = " + y.code + ";")
-                |T ->
+                |LaTeX ->
                     p.codewrite(x.code + " \\leftarrow " + y.code)
-                |H ->
+                |HTML ->
                     p.codewrite(x.code + " \\leftarrow " + y.code)
-                |P ->
+                |Python ->
                     p.codewrite(x.code+" = "+y.code)
                     
         static member (<==) (x:num0,y:int) = x <== (Int_c y)
@@ -1639,15 +1639,15 @@ namespace Aqualis
             |It 2,It 4 -> printfn "Warning: int型からbyte型への代入です：%s←%s" x.code y.code
             |_ ->
                 match p.lang with
-                |F ->
+                |Fortran ->
                     ()
-                |C->
+                |C99->
                     ()
-                |T ->
+                |LaTeX ->
                     p.codewrite(x.code + " = " + y.code)
-                |H ->
+                |HTML ->
                     p.codewrite(x.code + " = " + y.code)
-                |P->
+                |Python->
                     ()
         static member (===) (x:num0,y:int) = x === (Int_c y)
         static member (===) (x:num0,y:double) = x === (Dbl_c y)
@@ -1660,15 +1660,15 @@ namespace Aqualis
             |It 2,It 4 -> printfn "Warning: int型からbyte型への代入です：%s←%s" x.code y.code
             |_ ->
                 match p.lang with
-                |F ->
+                |Fortran ->
                     ()
-                |C->
+                |C99->
                     ()
-                |T ->
+                |LaTeX ->
                     p.codewrite(x.code + " =& " + y.code)
-                |H ->
+                |HTML ->
                     p.codewrite(x.code + " =& " + y.code)
-                |P->
+                |Python->
                     ()
         static member (=|=) (x:num0,y:int) = x =|= (Int_c y)
         static member (=|=) (x:num0,y:double) = x =|= (Dbl_c y)

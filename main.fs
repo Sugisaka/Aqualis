@@ -9,15 +9,15 @@ namespace Aqualis
     ///<summary>言語を指定</summary>
     type Language =
         ///<summary>Fortran</summary>
-        |F
+        |Fortran
         ///<summary>C</summary>
-        |C
+        |C99
         ///<summary>LaTeX</summary>
-        |T
+        |LaTeX
         ///<summary>HTML</summary>
-        |H
+        |HTML
         ///<summary>Python</summary>
-        |P
+        |Python
         
     ///<summary>設定のONまたはOFFを指定</summary>
     type Switch =
@@ -63,7 +63,7 @@ namespace Aqualis
         ///<summary>言語設定に従って型名を生成</summary>
         member this.tostring(lang) = 
             match lang with
-            |F ->
+            |Fortran ->
                 match this with 
                 |It 1 -> "integer(1)" 
                 |It _ -> "integer" 
@@ -74,7 +74,7 @@ namespace Aqualis
                 |Structure("file") -> "integer"
                 |Structure(sname) -> "type("+sname+")"
                 |_ -> ""
-            |C ->
+            |C99 ->
                 match this with 
                 |It 1 -> "unsigned char" 
                 |It _ -> "int" 
@@ -85,7 +85,7 @@ namespace Aqualis
                 |Structure("file") -> "FILE*" 
                 |Structure(sname) -> sname 
                 |_ -> ""
-            |T ->
+            |LaTeX ->
                 match this with 
                 |It 1 -> "byte" 
                 |It _ -> "int" 
@@ -95,7 +95,7 @@ namespace Aqualis
                 |Structure("char") -> "char" 
                 |Structure(sname) -> sname 
                 |_ -> ""
-            |H ->
+            |HTML ->
                 match this with 
                 |It 1 -> "byte" 
                 |It _ -> "int" 
@@ -105,7 +105,7 @@ namespace Aqualis
                 |Structure("char") -> "char" 
                 |Structure(sname) -> sname 
                 |_ -> ""
-            |P ->
+            |Python ->
                 match this with 
                 |It 1 -> "int" 
                 |It _ -> "int" 

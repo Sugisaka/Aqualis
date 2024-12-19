@@ -40,8 +40,8 @@ namespace Aqualis
         ///<summary>ナンバリング自動変数</summary>
         member __.getAutoVarName(n:int) =
             match lang with
-            |C|F|P -> varNameHead + n.ToString("0000") //nが四桁未満だった場合、四桁になるように0で埋める
-            |T|H -> varNameHead + "_{"+n.ToString()+"}"
+            |C99|Fortran|Python -> varNameHead + n.ToString("0000") //nが四桁未満だった場合、四桁になるように0で埋める
+            |LaTeX|HTML -> varNameHead + "_{"+n.ToString()+"}"
         member this.getAutoVar() =
             match vlist with //　変数の型
             |(_,_,name,_)::lst -> //戦闘要素::と残り部分lstに分かれる場合
@@ -123,7 +123,7 @@ namespace Aqualis
         member val covar = new VarController("",lan)
 
         ///<summary>ループのカウンタに現在使用できる変数インデックス</summary>
-        member val loopvar = new VarController((match lan with |F|C|P -> "ic" |T|H -> "n"),lan)
+        member val loopvar = new VarController((match lan with |Fortran|C99|Python -> "ic" |LaTeX|HTML -> "n"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数）</summary>
         member val i_cache_var = new VarController("i",lan)
@@ -141,31 +141,31 @@ namespace Aqualis
         member val f_cache_var = new VarController("f",lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数1次元配列）</summary>
-        member val i1_cache_var = new VarController((match lan with |F|C|P -> "i1" |T|H -> "\\dot{i}"),lan)
+        member val i1_cache_var = new VarController((match lan with |Fortran|C99|Python -> "i1" |LaTeX|HTML -> "\\dot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数1次元配列）</summary>
-        member val d1_cache_var = new VarController((match lan with |F|C|P -> "d1" |T|H -> "\\dot{d}"),lan)
+        member val d1_cache_var = new VarController((match lan with |Fortran|C99|Python -> "d1" |LaTeX|HTML -> "\\dot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数1次元配列）</summary>
-        member val z1_cache_var = new VarController((match lan with |F|C|P -> "z1" |T|H -> "\\dot{z}"),lan)
+        member val z1_cache_var = new VarController((match lan with |Fortran|C99|Python -> "z1" |LaTeX|HTML -> "\\dot{z}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数2次元配列）</summary>
-        member val i2_cache_var = new VarController((match lan with |F|C|P -> "i2" |T|H -> "\\ddot{i}"),lan)
+        member val i2_cache_var = new VarController((match lan with |Fortran|C99|Python -> "i2" |LaTeX|HTML -> "\\ddot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数2次元配列）</summary>
-        member val d2_cache_var = new VarController((match lan with |F|C|P -> "d2" |T|H -> "\\ddot{d}"),lan)
+        member val d2_cache_var = new VarController((match lan with |Fortran|C99|Python -> "d2" |LaTeX|HTML -> "\\ddot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数2次元配列）</summary>
-        member val z2_cache_var = new VarController((match lan with |F|C|P -> "z2" |T|H -> "\\ddot{z}"),lan)
+        member val z2_cache_var = new VarController((match lan with |Fortran|C99|Python -> "z2" |LaTeX|HTML -> "\\ddot{z}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（整数3次元配列）</summary>
-        member val i3_cache_var = new VarController((match lan with |F|C|P -> "i3" |T|H -> "\\dddot{i}"),lan)
+        member val i3_cache_var = new VarController((match lan with |Fortran|C99|Python -> "i3" |LaTeX|HTML -> "\\dddot{i}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（小数3次元配列）</summary>
-        member val d3_cache_var = new VarController((match lan with |F|C|P -> "d3" |T|H -> "\\dddot{d}"),lan)
+        member val d3_cache_var = new VarController((match lan with |Fortran|C99|Python -> "d3" |LaTeX|HTML -> "\\dddot{d}"),lan)
         
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数3次元配列）</summary>
-        member val z3_cache_var = new VarController((match lan with |F|C|P -> "z3" |T|H -> "\\dddot{z}"),lan)
+        member val z3_cache_var = new VarController((match lan with |Fortran|C99|Python -> "z3" |LaTeX|HTML -> "\\dddot{z}"),lan)
         
         ///<summary>mainコードまたは関数内で使用される削除不可能な変数番号（文字列）</summary>
         member val t_stat_var = new varlist() with get
@@ -268,7 +268,7 @@ namespace Aqualis
         ///<summary>変数の型名を文字列に変換</summary>
         member __.Stype typ = 
             match lan with
-            |F ->
+            |Fortran ->
                 match typ with 
                 |It 1 -> "integer(1)" 
                 |It _ -> "integer" 
@@ -279,7 +279,7 @@ namespace Aqualis
                 |Structure("file") -> "integer"
                 |Structure(sname) -> "type("+sname+")"
                 |_ -> ""
-            |C ->
+            |C99 ->
                 match typ with 
                 |It 1 -> "unsigned char" 
                 |It _ -> "int" 
@@ -290,7 +290,7 @@ namespace Aqualis
                 |Structure("file") -> "FILE*" 
                 |Structure(sname) -> sname 
                 |_ -> ""
-            |T ->
+            |LaTeX ->
                 match typ with 
                 |It 1 -> "byte" 
                 |It _ -> "int" 
@@ -300,7 +300,7 @@ namespace Aqualis
                 |Structure("char") -> "char" 
                 |Structure(sname) -> sname 
                 |_ -> ""
-            |H ->
+            |HTML ->
                 match typ with 
                 |It 1 -> "byte" 
                 |It _ -> "int" 
@@ -310,7 +310,7 @@ namespace Aqualis
                 |Structure("char") -> "char" 
                 |Structure(sname) -> sname 
                 |_ -> ""
-            |P ->
+            |Python ->
                 match typ with 
                 |It 1 -> "int" 
                 |It _ -> "int" 
@@ -325,7 +325,7 @@ namespace Aqualis
         ///<summary>変数宣言のコード</summary>
         member this.declare (typ:Etype,vtp:VarType,name:string,param:string) =
             match lan with
-              |F ->
+              |Fortran ->
                 match vtp with 
                 |A0                    -> (this.Stype typ)+" :: "+name+(if param<>"" then "="+param else "")
                 |A1(0)                 -> (this.Stype typ)+",allocatable"+" :: "+name+"(:)"+(if param<>"" then "="+param else "")
@@ -334,7 +334,7 @@ namespace Aqualis
                 |A1(size1)             -> (this.Stype typ)+" :: "+name+"(1:"+(this.ItoS size1)+")"+(if param<>"" then "="+param else "")
                 |A2(size1,size2)       -> (this.Stype typ)+" :: "+name+"(1:"+(this.ItoS size1)+",1:"+(this.ItoS size2)+")"+(if param<>"" then "="+param else "")
                 |A3(size1,size2,size3) -> (this.Stype typ)+" :: "+name+"(1:"+(this.ItoS size1)+",1:"+(this.ItoS size2)+",1:"+(this.ItoS size3)+")"+(if param<>"" then "="+param else "")
-              |C ->
+              |C99 ->
                 match vtp,(this.Stype typ) with 
                 |A0,"string"              -> "char"+" "+name+"[100]" + ";"
                 |A0,st                    -> st+" "+name+(if param<>"" then "="+param else "") + ";"
@@ -344,7 +344,7 @@ namespace Aqualis
                 |A1(size1),st             -> st+" "+name+"["+(this.ItoS size1)+"]"+(if param<>"" then "="+param else "") + ";"
                 |A2(size1,size2),st       -> st+" "+name+"["+(this.ItoS (size1*size2))+"]"+(if param<>"" then "="+param else "") + ";"
                 |A3(size1,size2,size3),st -> st+" "+name+"["+(this.ItoS (size1*size2*size3))+"]"+(if param<>"" then "="+param else "") + ";"
-              |T ->
+              |LaTeX ->
                 match vtp with 
                 |A0                    -> "\\item "+(this.Stype typ)+" $"+name+"$"+(if param<>"" then "="+param else "")
                 |A1(0)                 -> "\\item "+(this.Stype typ)+" (allocatable)"+" $"+name+"$ (:)"+(if param<>"" then "="+param else "")
@@ -353,7 +353,7 @@ namespace Aqualis
                 |A1(size1)             -> "\\item "+(this.Stype typ)+" $"+name+"$ ("+(this.ItoS size1)+")"+(if param<>"" then "="+param else "")
                 |A2(size1,size2)       -> "\\item "+(this.Stype typ)+" $"+name+"$ ("+(this.ItoS size1)+","+(this.ItoS size2)+")"+(if param<>"" then "="+param else "")
                 |A3(size1,size2,size3) -> "\\item "+(this.Stype typ)+" $"+name+"$ ("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")"+(if param<>"" then "="+param else "")
-              |H ->
+              |HTML ->
                 match vtp with 
                 |A0                    -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+""+(if param<>"" then "="+param else "")+"\\)</li>"
                 |A1(0)                 -> "\t\t\t<li>"+(this.Stype typ)+": (allocatable)\\("+" "+name+" [:]"+(if param<>"" then "="+param else "")+"\\)</li>"
@@ -362,7 +362,7 @@ namespace Aqualis
                 |A1(size1)             -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
                 |A2(size1,size2)       -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
                 |A3(size1,size2,size3) -> "\t\t\t<li>"+(this.Stype typ)+": \\("+name+" ("+(this.ItoS size1)+","+(this.ItoS size2)+","+(this.ItoS size3)+")"+(if param<>"" then "="+param else "")+"\\)</li>"
-              |P ->
+              |Python ->
                 match vtp with 
                 |A0 ->
                   match typ with 
@@ -409,7 +409,7 @@ namespace Aqualis
         ///<summary>宣言されたすべての変数を一時ファイルに書き込み</summary>
         member this.declareall() =
             match lan with
-            |F ->
+            |Fortran ->
                 for (etyp,vtyp,name,p) in this.var.list do
                     this.codefold(this.declare(etyp,vtyp,name,p)+"\n","",this.vwrite,100)
                     match vtyp with
@@ -456,7 +456,7 @@ namespace Aqualis
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(3),name+"_size","(/ -1,-1,-1 /)")+"\n")
-            |C ->
+            |C99 ->
                 for (etyp,vtyp,name,p) in this.var.list do
                     this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                     match vtyp with
@@ -503,7 +503,7 @@ namespace Aqualis
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                         this.vwrite(this.declare(It 4,A1(3),name+"_size","{-1,-1,-1}")+"\n")
-            |T ->
+            |LaTeX ->
                 
                 for v in this.var.list do this.vwrite(this.declare(v)+"\n")
                 
@@ -537,7 +537,7 @@ namespace Aqualis
                 if this.z3_cache_var.maxcounter>0 then
                     this.vwrite("\\item Cache array (complex,3d): \\(\\dddot{z}_m (m = 1"+(if this.z3_cache_var.maxcounter=1 then "" else " \\cdots "+this.z3_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
                     
-            |H ->
+            |HTML ->
                 
                 for v in this.var.list do this.vwrite(this.declare(v)+"\n")
                 
@@ -571,7 +571,7 @@ namespace Aqualis
                 if this.z3_cache_var.maxcounter>0 then
                     this.vwrite("\t\t\t<li>Cache array (complex,3d): \\(\\dddot{z}_m (m = 1"+(if this.z3_cache_var.maxcounter=1 then "" else " \\cdots "+this.z3_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
             
-            |P -> //
+            |Python -> //
                 for (etyp,vtyp,name,p) in this.var.list do
                     this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
                     match vtyp with
@@ -622,17 +622,17 @@ namespace Aqualis
         ///<summary>int型の数値を文字列に変換</summary>
         member __.ItoS (d:int) =
             match lan with
-            |H -> d.ToString()
+            |HTML -> d.ToString()
             |_ -> d.ToString()
              
         ///<summary>double型の数値を文字列に変換</summary>
         member __.DtoS (d:double) = 
             match lan with
-            |F -> d.ToString("0.0#################E0").Replace("E","d") 
-            |C -> d.ToString("0.0#################E0")
-            |T -> d.ToString()
-            |H -> d.ToString()
-            |P -> d.ToString("0.0#################E0")
+            |Fortran -> d.ToString("0.0#################E0").Replace("E","d") 
+            |C99 -> d.ToString("0.0#################E0")
+            |LaTeX -> d.ToString()
+            |HTML -> d.ToString()
+            |Python -> d.ToString("0.0#################E0")
             
         ///<summary>並列処理の一時ファイルを開く</summary>
         member this.popen() =
@@ -702,7 +702,7 @@ namespace Aqualis
         member this.addarg (typ:Etype,vtp:VarType,n:string) =
             fun code ->
                 match lan with
-                |F |T ->
+                |Fortran |LaTeX ->
                     //関数内ではこの変数名を使用
                     let name = 
                         match typ,vtp with
@@ -727,7 +727,7 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0 -> name
                         |_ -> name
                     code(vtp,argname)
-                |C ->
+                |C99 ->
                     //関数内ではこの変数名を使用
                     let name = 
                         match typ,vtp with
@@ -752,7 +752,7 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0 -> "(*"+name+")"
                         |_ -> name
                     code(vtp,argname)
-                |H ->
+                |HTML ->
                     //関数内ではこの変数名を使用
                     let name = 
                         match typ,vtp with
@@ -777,7 +777,7 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0 -> name
                         |_ -> name
                     code(vtp,argname)
-                |P ->
+                |Python ->
                     //関数内ではこの変数名を使用
                     let name = 
                         match typ,vtp with
@@ -842,7 +842,7 @@ namespace Aqualis
                     
         member this.codewrite (ss:string) = 
             match lan with
-            |F ->
+            |Fortran ->
                 //コメントが含まれていれば分割
                 let (s,cm) =
                     match ss.IndexOf('!') with
@@ -853,19 +853,19 @@ namespace Aqualis
                 |"",_ -> this.cwrite(this.indent.space+cm+"\n")
                 |_ ->
                     this.codefold(s,cm,this.cwrite,100)
-            |C ->
+            |C99 ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space+code+"\n")) slist
-            |T ->
+            |LaTeX ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space+code+"\n")) slist
-            |H ->
+            |HTML ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space+code+"\n")) slist
-            |P -> //暫定、正しいかはわからない
+            |Python -> //暫定、正しいかはわからない
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space+code+"\n")) slist
@@ -873,7 +873,7 @@ namespace Aqualis
         ///<summary>コメント文</summary>
         member this.comment s = 
             match lan with
-            |F ->
+            |Fortran ->
                 let comment_line str = this.codewrite("!"+str+"\n")
                 let rec arrange (str:string) =
                   if str.Length>80 then 
@@ -882,7 +882,7 @@ namespace Aqualis
                   else
                     comment_line str
                 arrange s
-            |C ->
+            |C99 ->
                 let comment_line str = this.codewrite("/* "+str+" */\n")
                 let rec arrange (str:string) =
                     if str.Length>80 then 
@@ -891,7 +891,7 @@ namespace Aqualis
                     else
                         comment_line str
                 arrange s
-            |T ->
+            |LaTeX ->
                 let comment_line str = this.codewrite(str+"\n")
                 let rec arrange (str:string) =
                     if str.Length>80 then 
@@ -900,7 +900,7 @@ namespace Aqualis
                     else
                         comment_line str
                 arrange s
-            |H ->
+            |HTML ->
                 let comment_line (str:string) = this.codewrite("<span class=\"comment\">"+str+"</span>\n<br/>\n")
                 let rec arrange (str:string) =
                     if str.Length>80 then 
@@ -909,7 +909,7 @@ namespace Aqualis
                     else
                         comment_line str
                 arrange s
-            |P ->
+            |Python ->
                 let comment_line str = this.codewrite("# "+str+" \n")
                 let rec arrange (str:string) =
                     if str.Length>80 then 
@@ -928,35 +928,35 @@ namespace Aqualis
         ///<summary>ループカウンタ変数とループ脱出先gotoラベルを作成し、code内の処理を実行</summary>
         member this.getloopvar_exit code =
             match lan with
-            |F ->
+            |Fortran ->
                 let goto = this.goto_label.ToString()
                 this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("goto "+goto+"\n")
                 let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
                 this.loopvar.setVar(It 4,A0,counter,"")
-            |C ->
+            |C99 ->
                 let goto = "_"+this.goto_label.ToString()
                 this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("goto "+goto+";\n")
                 let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
                 this.loopvar.setVar(It 4,A0,counter,"")
-            |T ->
+            |LaTeX ->
                 let goto = "_"+this.goto_label.ToString()
                 this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("goto "+goto+"\n")
                 let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
                 this.loopvar.setVar(It 4,A0,counter,"")
-            |H ->
+            |HTML ->
                 let goto = this.goto_label.ToString()
                 this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("<a href=\"#"+goto+"\">goto "+goto+"</a>\n<br/>\n")
                 let counter = this.loopvar.getAutoVar()
                 code(goto,counter,exit)
                 this.loopvar.setVar(It 4,A0,counter,"")
-            |P ->
+            |Python ->
                 let goto = this.goto_label.ToString()
                 this.goto_label <- this.goto_label + 1
                 let exit() = this.codewrite("flag="+goto+"\nbreak\n")

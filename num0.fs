@@ -14,19 +14,19 @@ namespace Aqualis
         ///<summary>虚数単位</summary>
         static member uj with get() =
             match p.lang with
-            |F   -> 
+            |Fortran   -> 
                 p.var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
                 Var(Zt,"uj")
-            |C -> 
+            |C99 -> 
                 //#defineで定義済み
                 Var(Zt,"uj")
-            |T   ->
+            |LaTeX   ->
                 p.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 Var(Zt,"\\mathrm{j}")
-            |H   ->
+            |HTML   ->
                 p.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 Var(Zt,"\\mathrm{j}")
-            |P -> 
+            |Python -> 
                 //#defineで定義済み
                 Var(Zt,"1.0j")
         ///<summary>円周率</summary>
@@ -35,19 +35,19 @@ namespace Aqualis
                 Dbl_c Math.PI
             else
                 match p.lang with
-                |F   ->
+                |Fortran   ->
                     p.var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
                     Var(Dt,"pi")
-                |C ->
+                |C99 ->
                     p.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                     Var(Dt,"pi")
-                |T   ->
+                |LaTeX   ->
                     p.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                     Var(Dt,"\\pi")
-                |H   ->
+                |HTML   ->
                     p.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                     Var(Dt,"\\pi")
-                |P ->
+                |Python ->
                     p.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                     Var(Dt,"pi")
         ///<summary>2πj</summary>
@@ -62,10 +62,10 @@ namespace Aqualis
                 |_,Sub(_,a,b) -> (dbl a)-(dbl b)
                 |_,Mul(_,a,b) -> (dbl a)*(dbl b)
                 |_,Div(_,a,b) -> (dbl a)/(dbl b)
-                |F,_          -> Formula(Dt,"dble("+e.code+")")
-                |T,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
-                |H,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
-                |P,_          -> Formula(Dt,"float("+e.code+")")
+                |Fortran,_          -> Formula(Dt,"dble("+e.code+")")
+                |LaTeX,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |HTML,_          -> Formula(Dt,"\\mathrm{double}("+e.code+")")
+                |Python,_          -> Formula(Dt,"float("+e.code+")")
                 |_,_          -> Formula(Dt,"(double)("+e.code+")")
             dbl x
         static member toint(x:num0) =
@@ -77,10 +77,10 @@ namespace Aqualis
                 |_,Sub(_,a,b) -> (it a)-(it b)
                 |_,Mul(_,a,b) -> (it a)*(it b)
                 |_,Div(_,a,b) -> (it a)/(it b)
-                |F,_          -> Formula(It 4,"int("+e.code+")")
-                |T,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
-                |H,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
-                |P,_          -> Formula(It 4,"int("+e.code+")")
+                |Fortran,_          -> Formula(It 4,"int("+e.code+")")
+                |LaTeX,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
+                |HTML,_          -> Formula(It 4,"\\mathrm{integer}("+e.code+")")
+                |Python,_          -> Formula(It 4,"int("+e.code+")")
                 |_,_          -> Formula(It 4,"(int)("+e.code+")")
             it x
             
@@ -220,9 +220,9 @@ namespace Aqualis
             |_ ->
                 let v = match v.etype with |It _ -> asm.todouble(v) |_ -> v
                 match p.lang with
-                |F|C -> Formula(v.etype,"floor("+v.code+")")
-                |T|H -> Formula(v.etype,"\\mathrm{floor}("+v.code+")")
-                |P -> Formula(v.etype,"math.floor("+v.code+")")
+                |Fortran|C99 -> Formula(v.etype,"floor("+v.code+")")
+                |LaTeX|HTML -> Formula(v.etype,"\\mathrm{floor}("+v.code+")")
+                |Python -> Formula(v.etype,"math.floor("+v.code+")")
                 
         ///<summary>小数点以下切り上げ</summary>
         static member ceil (v:num0) = 
@@ -231,21 +231,21 @@ namespace Aqualis
             |Dbl_c v -> Int_c <| int(ceil(v))
             |_ ->
                 match p.lang with
-                |F -> Formula(It 4,"ceiling("+v.code+")")
-                |C -> Formula(It 4,"ceil("+v.code+")")
-                |T|H -> Formula(It 4,"\\mathrm{ceil}("+v.code+")")
-                |P -> Formula(It 4,"math.ceil("+v.code+")")
+                |Fortran -> Formula(It 4,"ceiling("+v.code+")")
+                |C99 -> Formula(It 4,"ceil("+v.code+")")
+                |LaTeX|HTML -> Formula(It 4,"\\mathrm{ceil}("+v.code+")")
+                |Python -> Formula(It 4,"math.ceil("+v.code+")")
                 
         ///<summary>共役複素数</summary>
         static member conj (v:num0) = 
             match v.etype with
             |Zt ->
                 match p.lang,v with
-                |F,_ -> Formula(Zt,"conjg("+v.code+")")
-                |C,_ -> Formula(Zt,"conj("+v.code+")")
-                |(T|H),(Var _|Int_c _|Dbl_c _) -> Formula(Zt,v.code+"^*")
-                |(T|H),_ -> Formula(Zt,"\\left["+v.code+"\\right]^*")
-                |P,_ -> Formula(Zt,"("+v.code+").conjugate()")
+                |Fortran,_ -> Formula(Zt,"conjg("+v.code+")")
+                |C99,_ -> Formula(Zt,"conj("+v.code+")")
+                |(LaTeX|HTML),(Var _|Int_c _|Dbl_c _) -> Formula(Zt,v.code+"^*")
+                |(LaTeX|HTML),_ -> Formula(Zt,"\\left["+v.code+"\\right]^*")
+                |Python,_ -> Formula(Zt,"("+v.code+").conjugate()")
             |_ ->
                 printfn "%s" <| v.ToString()
                 v
@@ -260,16 +260,16 @@ namespace Aqualis
             ///<summary>実部</summary>
             member x.re with get() = 
                 match p.lang with
-                |F -> Formula(Dt,"real("+x.code+")")
-                |C -> Formula(Dt,"creal("+x.code+")")
-                |P -> Formula(Dt,"("+x.code+").real")
+                |Fortran -> Formula(Dt,"real("+x.code+")")
+                |C99 -> Formula(Dt,"creal("+x.code+")")
+                |Python -> Formula(Dt,"("+x.code+").real")
                 |_ -> Formula(Dt,"Re["+x.code+"]")
             ///<summary>虚部</summary>
             member x.im with get() =
                 match p.lang with
-                |F -> Formula(Dt,"aimag("+x.code+")")
-                |C -> Formula(Dt,"cimag("+x.code+")")
-                |P -> Formula(Dt,"("+x.code+").imag")
+                |Fortran -> Formula(Dt,"aimag("+x.code+")")
+                |C99 -> Formula(Dt,"cimag("+x.code+")")
+                |Python -> Formula(Dt,"("+x.code+").imag")
                 |_ -> Formula(Dt,"Im["+x.code+"]")
             ///<summary>絶対値</summary>
             member x.abs with get() = asm.abs(x)

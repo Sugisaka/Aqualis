@@ -36,11 +36,11 @@ namespace Aqualis
             match x with
             |Var1(_,name) -> 
                 match p.lang with 
-                |F -> Var(It 4,name+"_size(1)")
-                |C -> Var(It 4,name+"_size[0]")
-                |T -> Var(It 4,"\\mathcal{S}_1["+name+"]")
-                |H -> Var(It 4,"\\mathcal{S}_1["+name+"]")
-                |P -> Var(It 4,name+"_size[0]")
+                |Fortran -> Var(It 4,name+"_size(1)")
+                |C99 -> Var(It 4,name+"_size[0]")
+                |LaTeX -> Var(It 4,"\\mathcal{S}_1["+name+"]")
+                |HTML -> Var(It 4,"\\mathcal{S}_1["+name+"]")
+                |Python -> Var(It 4,name+"_size[0]")
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:num0) =
@@ -77,33 +77,33 @@ namespace Aqualis
                                 print.t ("ERROR"+p.errorID.ToString()+" array "+name+" is already allocated")
                         p.comment("****************************************************")
                     match p.lang with
-                    |F ->
+                    |Fortran ->
                         match size1 with
                         |A1(0) ->
                             this.size1 <== n1
                             p.codewrite("allocate("+name+"(1:"+this.size1.code+")"+")"+"\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
-                    |C ->
+                    |C99 ->
                         match size1 with
                         |A1(0) ->
                             this.size1 <== n1
                             p.codewrite(name+"="+"("+typ.tostring(p.lang)+" *)"+"malloc("+"sizeof("+typ.tostring(p.lang)+")*"+this.size1.code+");\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
-                    |T ->
+                    |LaTeX ->
                         match size1 with
                         |A1(0) ->
                             p.codewrite("$"+name+"$: allocate($"+n1.code+"$)\\\\\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
-                    |H ->
+                    |HTML ->
                         match size1 with
                         |A1(0) ->
                             p.codewrite("\\("+name+"\\): allocate(\\("+n1.code+"\\))<br/>\n")
                         |_ -> 
                             p.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
-                    |P ->
+                    |Python ->
                         match size1 with
                         |A1(0) ->
                             this.size1 <== n1
@@ -132,29 +132,29 @@ namespace Aqualis
             match x with
             |Var1(size1,name) ->
                 match p.lang with
-                |F ->
+                |Fortran ->
                     match size1 with
                     |A1(0) ->
                         this.size1 <== -1
                         p.codewrite("deallocate("+name+")"+"\n")
                     |_ -> ()
-                |C ->
+                |C99 ->
                     match size1 with
                     |A1(0) ->
                         this.size1 <== -1
                         p.codewrite("free("+name+");"+"\n")
                     |_ -> ()
-                |T ->
+                |LaTeX ->
                     match size1 with
                     |A1(0) ->
                         p.codewrite("$"+name+"$: deallocate\\\\\n")
                     |_ -> ()
-                |H ->
+                |HTML ->
                     match size1 with
                     |A1(0) ->
                         p.codewrite("\\("+name+"\\): deallocate<br/>\n")
                     |_ -> ()
-                |P ->
+                |Python ->
                     match size1 with
                     |A1(0) ->
                         p.codewrite("del "+name+""+"\n")
@@ -314,35 +314,35 @@ namespace Aqualis
             match v1.expr,v2.expr with
             |Var1(_,x),Var1(_,y) ->
                 match p.lang with
-                |F|T ->
+                |Fortran|LaTeX ->
                     p.codewrite(x + "=" + y)
-                |C ->
+                |C99 ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-                |H ->
+                |HTML ->
                     p.codewrite(x + " \\leftarrow " + y)
-                |P ->
+                |Python ->
                     p.codewrite(x + " = copy.deepcopy("+y+")")
             |Var1(_,x),Arx1(_,f) ->
                 match p.lang with
-                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
+                |Fortran|LaTeX|C99|HTML|Python -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
             |Arx1(_,_),Var1(_,_) ->
                 match p.lang with
-                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
+                |Fortran|LaTeX|C99|HTML|Python -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
             |Arx1(_,_),Arx1(_,_) ->
                 match p.lang with
-                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
+                |Fortran|LaTeX|C99|HTML|Python -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
 
         static member (<==) (v1:num1,v2:num0) =
             match v1.expr with
             |Var1(_,x) ->
                 match p.lang with
-                |F|T ->
+                |Fortran|LaTeX ->
                     p.codewrite(x + "=" + v2.code)
-                |C ->
+                |C99 ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2
-                |H ->
+                |HTML ->
                     p.codewrite(x + " \\leftarrow " + v2.code)
-                |P ->
+                |Python ->
                     match v1.etype with
                     |Structure(sname)       -> p.codewrite(x+" = numpy.array(["+sname+"() for _ in range(int("+v1.size1.code+"))], dtype=object)\n")
                     |It _ |It 1             -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=int)\n")
@@ -350,7 +350,7 @@ namespace Aqualis
                     |_                      -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=float)\n")
             |Arx1(_,_) ->
                 match p.lang with
-                |F|T|C|H|P -> iter.num v1.size1 <| fun i -> v1[i] <== v2
+                |Fortran|LaTeX|C99|HTML|Python -> iter.num v1.size1 <| fun i -> v1[i] <== v2
         static member (<==) (x:num1,y:double) = x <== y.D
         static member (<==) (x:num1,y:int) = x <== y.I
         

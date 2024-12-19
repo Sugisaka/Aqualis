@@ -14,7 +14,7 @@ namespace Aqualis
         ///<summary>無限ループ</summary>
         static member loop code =
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.getloopvar_exit <| fun (goto,v,exit) ->
                     let cnt = Var(It 4,v)
                     cnt <== 1
@@ -25,7 +25,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("end do"+"\n")
                     p.codewrite(goto+" continue"+"\n")
-            |C ->
+            |C99 ->
                 p.getloopvar_exit <| fun (goto,v,exit) ->
                     let cnt = Var(It 4,v)
                     cnt <== 1
@@ -37,7 +37,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("}"+"\n")
                     p.codewrite(goto+":;\n")
-            |T ->
+            |LaTeX ->
                 p.getloopvar_exit <| fun (goto,v,exit) ->
                     let cnt = Var(It 4,v)
                     cnt <== 1
@@ -48,7 +48,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("end"+"\\\\\n")
                     p.codewrite(goto+" continue"+"\n")
-            |H ->
+            |HTML ->
                 p.getloopvar_exit <| fun (goto,v,exit) ->
                     let cnt = Var(It 4,v)
                     cnt <== 1
@@ -64,7 +64,7 @@ namespace Aqualis
                     p.codewrite("<span class=\"continue\"><span id=\""+goto+"\">"+goto+" continue</span></span>\n<br/>\n")
                     p.codewrite("</details>\n")
                     p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     let cnt = Var(It 4,counter)
                     cnt <== 1
@@ -86,25 +86,25 @@ namespace Aqualis
         ///<summary>条件を満たす間ループ</summary>
         static member whiledo (cond:bool0) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.codewrite("do while("+cond.code+")\n")
                 p.indentInc()
                 code()
                 p.indentDec()
                 p.codewrite("end do\n")
-            |C ->
+            |C99 ->
                 p.codewrite("while("+cond.code+")\n{\n")
                 p.indentInc()
                 code()
                 p.indentDec()
                 p.codewrite("}\n")
-            |T ->
+            |LaTeX ->
                 p.codewrite("while "+cond.code+"\\\\\n")
                 p.indentInc()
                 code()
                 p.indentDec()
                 p.codewrite("end\\\\\n")
-            |H ->
+            |HTML ->
                 p.codewrite("<div class=\"codeblock\">\n")
                 p.codewrite("<details open>\n")
                 p.codewrite("<summary><span class=\"op-loop\">while</span> \\("+cond.code+"\\)</summary>\n")
@@ -115,7 +115,7 @@ namespace Aqualis
                 p.codewrite("</div>\n")
                 p.codewrite("</details>\n")
                 p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.exit_false
                     p.codewrite("while("+cond.code+")\n")
@@ -141,7 +141,7 @@ namespace Aqualis
                     printfn "%s" ("Error: loop range invalid. "+i1.ToString()+","+i2.ToString())
             else
                 match p.lang with
-                |F ->
+                |Fortran ->
                     match i1,i2 with
                     |Int_c a, Int_c b when a>b -> 
                         p.comment ""
@@ -155,7 +155,7 @@ namespace Aqualis
                             code(Var(It 4,counter))
                             p.indentDec()
                             p.codewrite("end do"+"\n")
-                |C ->
+                |C99 ->
                     match i1,i2 with
                     |Int_c a, Int_c b when a>b -> 
                         p.comment ""
@@ -170,7 +170,7 @@ namespace Aqualis
                             code(Var(It 4,counter))
                             p.indentDec()
                             p.codewrite("}"+"\n")
-                |T ->
+                |LaTeX ->
                     match i1,i2 with
                     |Int_c a, Int_c b when a>b -> 
                         p.comment ""
@@ -183,7 +183,7 @@ namespace Aqualis
                             code(Var(It 4,counter))
                             p.indentDec()
                             p.codewrite("end"+"\\\\\n")
-                |H ->
+                |HTML ->
                     match i1,i2 with
                     |Int_c a, Int_c b when a>b -> 
                         p.comment ""
@@ -201,7 +201,7 @@ namespace Aqualis
                             p.codewrite("</div>\n")
                             p.codewrite("</details>\n")
                             p.codewrite("</div>\n")
-                |P ->
+                |Python ->
                     match i1,i2 with
                     |Int_c a, Int_c b when a>b -> 
                         p.comment ""
@@ -225,7 +225,7 @@ namespace Aqualis
         ///<summary>指定した範囲でループ(途中脱出可)</summary>
         static member range_exit (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
-            |F ->
+            |Fortran ->
                 match i1,i2 with
                 |Int_c a, Int_c b when a>b -> 
                     p.comment ""
@@ -239,7 +239,7 @@ namespace Aqualis
                         p.indentDec()
                         p.codewrite("end do"+"\n")
                         p.codewrite(goto+" continue"+"\n")
-            |C ->
+            |C99 ->
                 match i1,i2 with
                 |Int_c a, Int_c b when a>b -> 
                     p.comment ""
@@ -254,7 +254,7 @@ namespace Aqualis
                         p.indentDec()
                         p.codewrite("}"+"\n")
                         p.codewrite(goto+":;\n")
-            |T ->
+            |LaTeX ->
                 match i1,i2 with
                 |Int_c a, Int_c b when a>b -> 
                     p.comment ""
@@ -268,7 +268,7 @@ namespace Aqualis
                         p.indentDec()
                         p.codewrite("end"+"\\\\\n")
                         p.codewrite(goto+" continue"+"\n")
-            |H ->
+            |HTML ->
                 match i1,i2 with
                 |Int_c a, Int_c b when a>b -> 
                     p.comment ""
@@ -287,7 +287,7 @@ namespace Aqualis
                         p.codewrite("<span class=\"continue\"><span id=\""+goto+"\">"+goto+" continue</span></span>\n<br/>\n")
                         p.codewrite("</details>\n")
                         p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 match i1,i2 with
                 |Int_c a, Int_c b when a>b -> 
                     p.comment ""
@@ -311,14 +311,14 @@ namespace Aqualis
         ///<summary>指定した範囲でループ</summary>
         static member range_reverse (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("do "+counter+"="+i1.code+","+i2.code+",-1\n")
                     p.indentInc()
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("end do"+"\n")
-            |C ->
+            |C99 ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("for("+counter+"="+i1.code+"; "+counter+">="+i2.code+"; "+counter+"--)"+"\n")
                     p.codewrite("{"+"\n")
@@ -326,14 +326,14 @@ namespace Aqualis
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("}"+"\n")
-            |T ->
+            |LaTeX ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("end"+"\\\\\n")
-            |H ->
+            |HTML ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
@@ -345,7 +345,7 @@ namespace Aqualis
                     p.codewrite("</div>\n")
                     p.codewrite("</details>\n")
                     p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.exit_false
                     p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"-1, -1):"+"\n")
@@ -363,7 +363,7 @@ namespace Aqualis
         ///<summary>指定した範囲でループ</summary>
         static member range_reverse_exit (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("do "+counter+"="+i1.code+","+i2.code+",-1\n")
                     p.indentInc()
@@ -371,7 +371,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("end do"+"\n")
                     p.codewrite(goto+" continue"+"\n")
-            |C ->
+            |C99 ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("for("+counter+"="+i1.code+"; "+counter+">="+i2.code+"; "+counter+"--)"+"\n")
                     p.codewrite("{"+"\n")
@@ -380,7 +380,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("}"+"\n")
                     p.codewrite(goto+":;\n")
-            |T ->
+            |LaTeX ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
@@ -388,7 +388,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("end"+"\\\\\n")
                     p.codewrite(goto+" continue"+"\n")
-            |H ->
+            |HTML ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
@@ -401,7 +401,7 @@ namespace Aqualis
                     p.codewrite("<span class=\"continue\"><span id=\""+goto+"\">"+goto+" continue</span></span>\n<br/>\n")
                     p.codewrite("</details>\n")
                     p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"-1, -1):"+"\n")
                     p.indentInc()
@@ -420,14 +420,14 @@ namespace Aqualis
         ///<summary>指定した範囲でループ</summary>
         static member range_interval (i1:num0) = fun (i2:num0) -> fun (ii:num0) -> fun code -> 
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("do "+counter+"="+i1.code+","+i2.code+","+ii.code+"\n")
                     p.indentInc()
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("end do"+"\n")
-            |C ->
+            |C99 ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("for("+counter+"="+i1.code+"; "+counter+">="+i2.code+"; "+counter+"="+counter+"+"+ii.code+")"+"\n")
                     p.codewrite("{"+"\n")
@@ -435,14 +435,14 @@ namespace Aqualis
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("}"+"\n")
-            |T ->
+            |LaTeX ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+"("+ii.code+")"+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
                     code(Var(It 4,counter))
                     p.indentDec()
                     p.codewrite("end"+"\\\\\n")
-            |H ->
+            |HTML ->
                 p.getloopvar <| fun counter ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
@@ -454,7 +454,7 @@ namespace Aqualis
                     p.codewrite("</div>\n")
                     p.codewrite("</details>\n")
                     p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.exit_false
                     p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"-1, "+ii.code+"):"+"\n")
@@ -472,7 +472,7 @@ namespace Aqualis
         ///<summary>指定した範囲でループ(途中脱出可)</summary>
         static member range_interval_exit (i1:num0) = fun (i2:num0) -> fun (ii:num0) -> fun code -> 
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("do "+counter+"="+i1.code+","+i2.code+","+ii.code+"\n")
                     p.indentInc()
@@ -480,7 +480,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("end do"+"\n")
                     p.codewrite(goto+" continue"+"\n")
-            |C ->
+            |C99 ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("for("+counter+"="+i1.code+"; "+counter+">="+i2.code+"; "+counter+"="+counter+"+"+ii.code+")"+"\n")
                     p.codewrite("{"+"\n")
@@ -489,7 +489,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("}"+"\n")
                     p.codewrite(goto+":;\n")
-            |T ->
+            |LaTeX ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("for $"+counter+"="+i1.code+"\\cdots "+"("+ii.code+")"+"\\cdots "+i2.code+"$\\\\\n")
                     p.indentInc()
@@ -497,7 +497,7 @@ namespace Aqualis
                     p.indentDec()
                     p.codewrite("end"+"\n")
                     p.codewrite(goto+" continue"+"\\\\\n")
-            |H ->
+            |HTML ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("<div class=\"codeblock\">\n")
                     p.codewrite("<details open>\n")
@@ -510,7 +510,7 @@ namespace Aqualis
                     p.codewrite("<span class=\"continue\"><span id=\""+goto+"\">"+goto+" continue</span></span>\n<br/>\n")
                     p.codewrite("</details>\n")
                     p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 p.getloopvar_exit <| fun (goto,counter,exit) ->
                     p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"-1, "+ii.code+"):"+"\n")
                     p.indentInc()

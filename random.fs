@@ -14,7 +14,7 @@ namespace Aqualis
             ///<summary>0～1の一様乱数を取得</summary>
             static member random (code:(((num1->unit)->unit)*(num0->unit)->unit)) =
                 match p.lang with
-                |F ->
+                |Fortran ->
                     ch.i <| fun seedsize ->
                     ch.i01 <| fun seed ->
                         p.codewrite("call random_seed(size="+seedsize.code+")")
@@ -33,7 +33,7 @@ namespace Aqualis
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
                         seed.deallocate()
-                |C ->
+                |C99 ->
                     p.incld("<time.h>")
                     p.codewrite("srand((unsigned) time(NULL));")
                     ch.i1 _1 <| fun seed ->
@@ -47,7 +47,7 @@ namespace Aqualis
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
-                |T ->
+                |LaTeX ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
@@ -59,7 +59,7 @@ namespace Aqualis
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
-                |H ->
+                |HTML ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
@@ -71,7 +71,7 @@ namespace Aqualis
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
-                |P ->
+                |Python ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
@@ -86,7 +86,7 @@ namespace Aqualis
             ///<summary>0～1の一様乱数を取得</summary>
             static member random_s (seed_:int) = fun code ->
                 match p.lang with
-                |F ->
+                |Fortran ->
                     ch.i <| fun seedsize ->
                     ch.i01 <| fun seed ->
                         p.codewrite("call random_seed(size="+seedsize.code+")")
@@ -105,7 +105,7 @@ namespace Aqualis
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
                         seed.deallocate()
-                |C ->
+                |C99 ->
                     p.codewrite("srand((unsigned) time(NULL));")
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
@@ -118,7 +118,7 @@ namespace Aqualis
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
-                |T ->
+                |LaTeX ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
@@ -130,7 +130,7 @@ namespace Aqualis
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
-                |H ->
+                |HTML ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
@@ -142,7 +142,7 @@ namespace Aqualis
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
-                |P ->
+                |Python ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed

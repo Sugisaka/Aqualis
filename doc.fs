@@ -13,7 +13,7 @@ namespace Aqualis
         member _.eqReturn() =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite("\\\\")
             |_ ->
                 ()
@@ -22,7 +22,7 @@ namespace Aqualis
         member _.eqNonumber() =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite("\\nonumber")
             |_ ->
                 ()
@@ -31,7 +31,7 @@ namespace Aqualis
         member _.eqLabel(lb:string) =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite("\\label{"+lb+"}")
             |_ ->
                 ()
@@ -51,7 +51,7 @@ namespace Aqualis
         static member para code =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite("\\par")
                 code()
             |_ ->
@@ -61,7 +61,7 @@ namespace Aqualis
         static member text (s:string) =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite(s)
             |_ ->
                 ! s
@@ -71,7 +71,7 @@ namespace Aqualis
             let q = p.param
             p.incld("\\usepackage{graphicx}")
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite("\\begin{figure}[htbp]")
                 q.codewrite("\\begin{center}")
                 q.codewrite("\\includegraphics{"+filename+"}")
@@ -86,7 +86,7 @@ namespace Aqualis
         static member enumerate (slst:(unit->unit)list) =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite("\\begin{enumerate}")
                 for s in slst do
                     q.codewrite("\\item")
@@ -100,7 +100,7 @@ namespace Aqualis
         static member itemize (slst:(unit->unit)list) =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 q.codewrite("\\begin{itemize}")
                 for s in slst do
                     q.codewrite("\\item")
@@ -115,13 +115,13 @@ namespace Aqualis
             let q = p.param
             let e = eqmode()
             match p.lang with
-            |T ->
+            |LaTeX ->
                 AqualisCompiler.set_EquationSimplify OFF
                 q.codewrite("\\begin{align}")
                 code e
                 q.codewrite("\\end{align}")
                 AqualisCompiler.set_EquationSimplify ON
-            |H ->
+            |HTML ->
                 AqualisCompiler.set_EquationSimplify OFF
                 q.codewrite("\\[")
                 q.codewrite("\\begin{align}")
@@ -151,7 +151,7 @@ namespace Aqualis
         ///<summary>総和</summary>
         static member sum (a:num0,i:num0) = fun (b:num0) (c:num0) ->
             match p.lang with
-            |T ->
+            |LaTeX ->
                 p.param.frac_style <- 1
                 let ta = a.code
                 let ti = i.code
@@ -169,7 +169,7 @@ namespace Aqualis
         ///<summary>総和</summary>
         static member sum (a:num0) = fun (b:num0) (c:num0) ->
             match p.lang with
-            |T ->
+            |LaTeX ->
                 p.param.frac_style <- 1
                 let ta = a.code
                 p.param.frac_style <- 0
@@ -182,7 +182,7 @@ namespace Aqualis
         ///<summary>積分</summary>
         static member integral (a:num0,b:num0) = fun (eq:num0) (x:num0) ->
             match p.lang with
-            |T ->
+            |LaTeX ->
                 p.param.frac_style <- 1
                 let ta = a.code
                 let tb = b.code
@@ -208,7 +208,7 @@ namespace Aqualis
         ///<summary>微分</summary>
         static member diff (f:num0) (x:num0) =
             match p.lang with
-            |T ->
+            |LaTeX ->
                 let tf = f.code
                 let tx = x.code
                 Var(f.etype,"\\frac{\\mathrm{d}"+tf+"}^{\\mathrm{d}"+tx+"}")
@@ -218,7 +218,7 @@ namespace Aqualis
         ///<summary>偏微分</summary>
         static member pdiff (f:num0) (x:num0) =
             match p.lang with
-            |T ->
+            |LaTeX ->
                 let tf = f.code
                 let tx = x.code
                 Var(f.etype,"\\frac{\\partial "+tf+"}^{\\partial "+tx+"}")
@@ -229,7 +229,7 @@ namespace Aqualis
         static member cases (lst:(num0*string)list) =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 let c = 
                     [0..lst.Length-1]
                     |> List.fold (fun acc i ->
@@ -244,7 +244,7 @@ namespace Aqualis
         static member cases (lst:(num0*num0)list) =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 let c = 
                     [0..lst.Length-1]
                     |> List.fold (fun acc i ->
@@ -260,7 +260,7 @@ namespace Aqualis
         static member cases (lst:(num0*bool0)list) =
             let q = p.param
             match p.lang with
-            |T ->
+            |LaTeX ->
                 let c = 
                     [0..lst.Length-1]
                     |> List.fold (fun acc i ->

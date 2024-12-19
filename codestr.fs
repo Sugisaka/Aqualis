@@ -20,9 +20,9 @@ namespace Aqualis
         static member section (s:string) (code:unit->unit) = 
             let (!===) (s:string) = 
                 match p.lang with
-                |T ->
+                |LaTeX ->
                     p.codewrite("\\section{"+s+"}")
-                |H -> 
+                |HTML -> 
                     p.codewrite("<details open>")
                     p.codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                     p.codewrite("<div class=\"insidecode-section\">")
@@ -30,31 +30,31 @@ namespace Aqualis
                     p.comment ("==="+(s.PadRight(76,'=')))
             (!===)s
             match p.lang with
-            |P ->
+            |Python ->
                 ()
             |_ ->
                 p.indentInc()
             code()
             match p.lang with
-            |P ->
+            |Python ->
                 ()
             |_ ->
                 p.indentDec()
             match p.lang with 
-            |F |C |P-> 
+            |Fortran |C99 |Python -> 
                 (!===)("end "+s) 
                 p.codewrite(p.indentSpace+"\n")
-            |H ->
+            |HTML ->
                 p.codewrite("</div>")
                 p.codewrite("</details>")
-            |T  -> ()
+            |LaTeX  -> ()
               
         static member subsection (s:string) (code:unit->unit) = 
             let (!===) (s:string) = 
                 match p.lang with
-                |T ->
+                |LaTeX ->
                     p.codewrite("\\subsection{"+s+"}")
-                |H -> 
+                |HTML -> 
                     p.codewrite("<details open>")
                     p.codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                     p.codewrite("<div class=\"insidecode-section\">")
@@ -62,49 +62,49 @@ namespace Aqualis
                     p.comment ("---"+(s.PadRight(76,'-')))
             (!===)s
             match p.lang with
-            |P ->
+            |Python ->
                 ()
             |_ ->
                 p.indentInc()
             code()
             match p.lang with
-            |P ->
+            |Python ->
                 ()
             |_ ->
                 p.indentDec()
             match p.lang with 
-            |F |C -> 
+            |Fortran |C99 -> 
                 (!===)("end "+s) 
                 p.codewrite(p.indentSpace+"\n")
-            |P-> 
+            |Python -> 
                 (!===)("end "+s) 
-            |H   ->
+            |HTML   ->
                 p.codewrite("</div>")
                 p.codewrite("</details>")
-            |T  -> ()
+            |LaTeX  -> ()
               
         static member private header (c:char) (s:string) = 
             match p.lang with
-            |F   ->
+            |Fortran   ->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |C ->
+            |C99->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |P ->
+            |Python ->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |T   ->
+            |LaTeX   ->
                 p.codewrite("\\section{"+s+"}")
-            |H   -> 
+            |HTML   -> 
                 p.codewrite("<details open>")
                 p.codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                 p.codewrite("<div class=\"insidecode-section\">")
               
         static member private footer (c:char) (s:string) = 
             match p.lang with
-            |F   -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |C -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |P -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |T   -> ()
-            |H   ->
+            |Fortran   -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |C99 -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |Python -> p.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |LaTeX   -> ()
+            |HTML   ->
                 p.codewrite("</div>")
                 p.codewrite("</details>")
 
@@ -115,7 +115,7 @@ namespace Aqualis
             codestr.header '#' s
             if p.displaySection then print.t ("### "+s+" #########################")
             match p.lang with
-            |P ->
+            |Python ->
                 code()
             |_ ->
                 p.indentInc()
@@ -129,7 +129,7 @@ namespace Aqualis
             codestr.header '%' s
             if p.displaySection then print.t ("=== "+s+" ===================")
             match p.lang with
-            |P ->
+            |Python ->
                 code()
             |_ ->
                 p.indentInc()
@@ -143,7 +143,7 @@ namespace Aqualis
             codestr.header '=' s
             if p.displaySection then print.t ("--- "+s+" --------------")
             match p.lang with
-            |P ->
+            |Python ->
                 code()
             |_ ->
                 p.indentInc()
@@ -157,7 +157,7 @@ namespace Aqualis
             codestr.header '+' s
             if p.displaySection then print.t ("... "+s+" ...........")
             match p.lang with
-            |P ->
+            |Python ->
                 code()
             |_ ->
                 p.indentInc()
@@ -171,7 +171,7 @@ namespace Aqualis
             codestr.header '-' s
             if p.displaySection then print.t s
             match p.lang with
-            |P ->
+            |Python ->
                 code()
             |_ ->
                 p.indentInc()
