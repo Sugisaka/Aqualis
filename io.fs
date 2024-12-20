@@ -14,7 +14,7 @@ namespace Aqualis
         
         static member private fileAccess (filename:num0 list) readmode isbinary code =
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -39,7 +39,7 @@ namespace Aqualis
                             p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
                         code(fp)
                         p.codewrite("close("+fp+")"+"\n")
-            |C ->
+            |C99 ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -62,7 +62,7 @@ namespace Aqualis
                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose("+fp+")"+";\n")
-            |T ->
+            |LaTeX ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -83,7 +83,7 @@ namespace Aqualis
                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose $"+fp+" "+"$\n")
-            |H ->
+            |HTML ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -104,7 +104,7 @@ namespace Aqualis
                             p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose \\("+fp+" "+"\\)\n")
-            |P ->
+            |Python ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -129,7 +129,7 @@ namespace Aqualis
                         p.codewrite(fp+".close()"+"\n")
         static member private Write (fp:string) (lst:num0 list) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 let tab = var.ip0_noWarning("tab",2313)
                 let double0string_format_F = 
                     let (a,b)=p.dFormat
@@ -177,7 +177,7 @@ namespace Aqualis
                           ])
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
-            |C ->
+            |C99 ->
                 let int0string_format_C =
                     "%"+p.iFormat.ToString()+"d"
                 let double0string_format_C = 
@@ -217,7 +217,7 @@ namespace Aqualis
                         |_ -> ()]
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
-            |T ->
+            |LaTeX ->
                 let double0string_format_F = 
                     let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
@@ -244,7 +244,7 @@ namespace Aqualis
                           |_ -> "")
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
-            |H ->
+            |HTML ->
                 let double0string_format_F = 
                     let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
@@ -271,7 +271,7 @@ namespace Aqualis
                           |_ -> "")
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
-            |P ->
+            |Python ->
                 let int0string_format_C =
                     "%"+p.iFormat.ToString()+"d"
                 let double0string_format_C = 
@@ -314,7 +314,7 @@ namespace Aqualis
                 
         static member private Write_bin (fp:string) (v:num0) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 match v.etype,v with 
                 |_,Int_c(v) ->
                     p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
@@ -330,7 +330,7 @@ namespace Aqualis
                 |Dt,_ ->
                     p.codewrite("write("+fp+") "+v.code+"\n")
                 |_ -> ()
-            |C ->
+            |C99 ->
                 match v.etype,v with 
                 |_,Int_c _ ->
                     ch.i <| fun tmp ->
@@ -356,7 +356,7 @@ namespace Aqualis
                         p.codewrite("fwrite(&"+tmp.code+",sizeof("+tmp.code+"),1,"+fp+");\n")
                 |_ ->
                     ()
-            |T ->
+            |LaTeX ->
                 match v.etype,v with 
                 |_,Int_c(v) ->
                     p.codewrite("write("+fp+") "+p.ItoS(v)+"\n")
@@ -372,7 +372,7 @@ namespace Aqualis
                 |Dt,_ ->
                     p.codewrite("write("+fp+") "+v.code+"\n")
                 |_ -> ()
-            |H ->
+            |HTML ->
                 match v.etype,v with 
                 |_,Int_c(v) ->
                     p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+p.ItoS(v)+"\\)<br/>\n")
@@ -388,7 +388,7 @@ namespace Aqualis
                 |Dt,_ ->
                     p.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.code+"\\)<br/>\n")
                 |_ -> ()
-            |P ->
+            |Python ->
                 match v.etype,v with 
                 |_,Int_c _ ->
                     ch.i <| fun tmp ->
@@ -426,7 +426,7 @@ namespace Aqualis
             let Nz,varlist = cpxvarlist [] lst 0
     
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.d01 <| fun tmp ->
                     if Nz>0 then tmp.allocate(2*Nz)
                     let double0string_format_F = 
@@ -483,7 +483,7 @@ namespace Aqualis
                             |_ ->
                                 ()
                     if Nz>0 then tmp.deallocate()
-            |C ->
+            |C99 ->
                 ch.d1 (I <| 2*Nz) <| fun tmp ->
                     let format = 
                         varlist
@@ -524,7 +524,7 @@ namespace Aqualis
                             b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
                         |_ ->
                             ()
-            |T ->
+            |LaTeX ->
                 let double0string_format_F = 
                     let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
@@ -546,7 +546,7 @@ namespace Aqualis
                         |_ -> "")
                     |> (fun s -> String.Join(",",s))
                 p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
-            |H ->
+            |HTML ->
                 let double0string_format_F = 
                     let (a,b)=p.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
@@ -568,7 +568,7 @@ namespace Aqualis
                         |_ -> "")
                     |> (fun s -> String.Join("<mo>,</mo>",s))
                 p.codewrite("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
-            |P ->
+            |Python ->
                 ch.d1 (I <| 2*Nz) <| fun tmp ->
                     let format = 
                         varlist
@@ -623,7 +623,7 @@ namespace Aqualis
                 
         static member private Read_bin (fp:string) (iostat:num0) (v:num0) = 
             match p.lang with
-            |F ->
+            |Fortran ->
                 match v.etype,v with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
@@ -634,7 +634,7 @@ namespace Aqualis
                     p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |C->
+            |C99 ->
                 match v.etype,v with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
@@ -645,7 +645,7 @@ namespace Aqualis
                     p.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |T ->
+            |LaTeX ->
                 match v.etype,v with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
@@ -656,13 +656,13 @@ namespace Aqualis
                     p.codewrite("read("+fp+",iostat="+iostat.code+") "+n+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |H ->
+            |HTML ->
                 match v with 
                 |Var(_,n) ->
                     p.codewrite("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
-            |P->
+            |Python ->
                 match v.etype,v with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
@@ -1097,7 +1097,7 @@ namespace Aqualis
             
         static member private fileAccess (filename:num0 list) readmode isbinary code =
             match p.lang with
-            |F ->
+            |Fortran ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -1122,7 +1122,7 @@ namespace Aqualis
                             p.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
                         code(fp)
                         p.codewrite("close("+fp+")"+"\n")
-            |C ->
+            |C99 ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -1145,7 +1145,7 @@ namespace Aqualis
                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose("+fp+")"+";\n")
-            |T ->
+            |LaTeX ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -1166,7 +1166,7 @@ namespace Aqualis
                             p.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose $"+fp+" "+"$\n")
-            |H ->
+            |HTML ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -1187,7 +1187,7 @@ namespace Aqualis
                             p.codewrite("\\("+fp+"\\)"+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code(fp)
                         p.codewrite("fclose \\("+fp+" "+"\\)\n")
-            |P ->
+            |Python ->
                 ch.f <| fun fp ->
                     let f = 
                         filename
@@ -1212,7 +1212,7 @@ namespace Aqualis
                         p.codewrite(fp+".close()"+"\n")
         static member private Write (fp:string) (lst:num0 list) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 let format = 
                     lst
                     |> (fun b ->
@@ -1246,7 +1246,7 @@ namespace Aqualis
                             |_ -> () ])
                     |> io2.cat ","
                 p.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
-            |C ->
+            |C99 ->
                 let int0string_format_C = "%d"
                 let double0string_format_C = "%.3f"
                 let format = 
@@ -1278,7 +1278,7 @@ namespace Aqualis
                         |_ -> ()]
                     |> io2.cat ","
                 p.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
-            |T ->
+            |LaTeX ->
                 let code =
                     lst
                     |> List.map (fun b ->
@@ -1292,7 +1292,7 @@ namespace Aqualis
                         |_ -> "")
                     |> io2.cat ","
                 p.codewrite("write("+fp+") "+code+"\n")
-            |H ->
+            |HTML ->
                 let code =
                     lst
                     |> List.map (fun b ->
@@ -1306,7 +1306,7 @@ namespace Aqualis
                         |_ -> "")
                     |> io2.cat ","
                 p.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>\n")
-            |P ->
+            |Python ->
                 let int0string_format_C = "%d"
                 let double0string_format_C = "%.3f"
                 let format = 

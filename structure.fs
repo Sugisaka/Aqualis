@@ -83,7 +83,7 @@ namespace Aqualis
         ///<summary>構造体定義のコードを作成</summary>
         member this.Def_Structure()=
             match p.lang with
-            |F ->
+            |Fortran ->
                 for s in this.sort() do
                     p.hwrite("type "+s.sname+"\n")
                     p.indentInc()
@@ -92,7 +92,7 @@ namespace Aqualis
                         p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
                     p.hwrite("end type "+s.sname+"\n")
-            |C ->
+            |C99 ->
                 for s in this.sort() do
                     p.hwrite("typedef struct "+"_"+s.sname+"\n")
                     p.hwrite("{"+"\n")
@@ -102,7 +102,7 @@ namespace Aqualis
                         p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
                     p.hwrite("} "+s.sname+";\n")
-            |T ->
+            |LaTeX ->
                 for s in this.sort() do
                     p.hwrite("\\subsection{"+s.sname+"}")
                     p.hwrite("\\begin{itemize}\n")
@@ -112,7 +112,7 @@ namespace Aqualis
                         p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
                     p.hwrite("\\end{itemize}\n")
-            |H ->
+            |HTML ->
                 for s in this.sort() do
                     p.hwrite("<h3>"+s.sname+"</h3>\n")
                     p.hwrite("<ul>\n")
@@ -122,7 +122,7 @@ namespace Aqualis
                         p.hwrite(p.indentSpace + p.declare(typ,vtp,name,"")+"\n")
                     p.indentDec()
                     p.hwrite("</ul>\n")
-            |P ->
+            |Python ->
                 for s in this.sort() do
                     p.hwrite("class "+s.sname+":\n")
                     p.indentInc()
@@ -134,11 +134,11 @@ namespace Aqualis
         ///<summary>構造体メンバへのアクセス</summary>
         static member mem(vname,name) =
             match p.lang with
-            |F   -> vname+"%"+name
-            |C -> vname+"."+name
-            |T   -> vname+"."+name
-            |H   -> vname+"."+name
-            |P -> vname+"."+name
+            |Fortran   -> vname+"%"+name
+            |C99 -> vname+"."+name
+            |LaTeX   -> vname+"."+name
+            |HTML   -> vname+"."+name
+            |Python -> vname+"."+name
             
         member this.i0 (sname, vname, name) =
             this.addmember(sname,(It 4,A0,name))
@@ -223,42 +223,42 @@ namespace Aqualis
             num3(Zt,Var3(A3(0,0,0),structure.mem(vname,name)))
             
         member this.reg(sname,name:string) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
+            let str_ac = match p.lang with |Fortran -> "%" |C99 |LaTeX |HTML |Python -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                let name_ = match p.lang with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 p.var.setVar(Structure(sname),A0,name_,"")
             
         member this.reg(sname,name:string,size1) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
+            let str_ac = match p.lang with |Fortran -> "%" |C99 |LaTeX |HTML |Python -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                let name_ = match p.lang with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 p.var.setVar(Structure(sname),A1(size1),name_,"")
             
         member this.reg(sname,name:string,size1,size2) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
+            let str_ac = match p.lang with |Fortran -> "%" |C99 |LaTeX |HTML |Python -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                let name_ = match p.lang with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 p.var.setVar(Structure(sname),A2(size1,size2),name_,"")
             
         member this.reg(sname,name:string,size1,size2,size3) =
-            let str_ac = match p.lang with |F -> "%" |C |T |H |P -> "."
+            let str_ac = match p.lang with |Fortran -> "%" |C99 |LaTeX |HTML |Python -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match p.lang with |H -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                let name_ = match p.lang with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 p.var.setVar(Structure(sname),A3(size1,size2,size3),name_,"")
                 

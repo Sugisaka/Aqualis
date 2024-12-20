@@ -56,31 +56,31 @@ namespace Aqualis
         ///<summary>プログラムの実行を強制終了</summary>
         static member abort() =
             match p.lang with 
-            |F  -> p.codewrite("stop") 
-            |C-> p.codewrite("return 1;") 
-            |T  -> p.codewrite("stop")
-            |H  -> p.codewrite("stop")
-            |P  -> p.codewrite("sys.exit(1)")
+            |Fortran  -> p.codewrite("stop") 
+            |C99-> p.codewrite("return 1;") 
+            |LaTeX  -> p.codewrite("stop")
+            |HTML  -> p.codewrite("stop")
+            |Python  -> p.codewrite("sys.exit(1)")
               
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         static member stop() =
             match p.lang with
-            |F   -> p.codewrite("read *, \n")
-            |C -> p.codewrite("getchar();\n")
-            |T   -> p.codewrite("stop\n")
-            |H   -> p.codewrite("stop\n")
-            |P  -> p.codewrite("input()")
+            |Fortran   -> p.codewrite("read *, \n")
+            |C99 -> p.codewrite("getchar();\n")
+            |LaTeX   -> p.codewrite("stop\n")
+            |HTML   -> p.codewrite("stop\n")
+            |Python  -> p.codewrite("input()")
               
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         ///<param name="t">一時停止前に表示する文字列</param>
         static member stop(t:string) =
             print.t t
             match p.lang with
-            |F   -> p.codewrite("read *, \n")
-            |C -> p.codewrite("getchar();\n")
-            |T   -> p.codewrite("stop\n")
-            |H   -> p.codewrite("stop\n")
-            |P  -> p.codewrite("input()")
+            |Fortran   -> p.codewrite("read *, \n")
+            |C99 -> p.codewrite("getchar();\n")
+            |LaTeX   -> p.codewrite("stop\n")
+            |HTML   -> p.codewrite("stop\n")
+            |Python  -> p.codewrite("input()")
               
         /// <summary>
         /// インクルードファイル追加（TeXの場合はプリアンブル部挿入コード）

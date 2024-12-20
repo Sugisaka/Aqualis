@@ -28,18 +28,18 @@ namespace Aqualis
             ///</summary>
             member this.AddProcess() =
                     match AqualisCompiler.lang with 
-                    |F -> 
+                    |Fortran -> 
                         w.[id].Write("sh proc_"+AqualisCompiler.projname+"_F.sh"+"\n")
                         this.nextid()
-                    |C -> 
+                    |C99 -> 
                         w.[id].Write("sh proc_"+AqualisCompiler.projname+"_C.sh"+"\n")
                         this.nextid()
-                    |P -> 
+                    |Python -> 
                         w.[id].Write("sh proc_"+AqualisCompiler.projname+"_P.sh"+"\n")
                         this.nextid()
-                    |T -> 
+                    |LaTeX -> 
                         ()
-                    |H -> 
+                    |HTML -> 
                         ()
                     
             ///<summary>
@@ -50,21 +50,21 @@ namespace Aqualis
             ///<param name="address">メールアドレス</param>
             member __.AddProcess (address:string) =
                 match AqualisCompiler.lang with
-                |F   ->
+                |Fortran   ->
                     w.[id].Write("echo project "+AqualisCompiler.projname+" started | mail -s ProcessNotification "+address+"\n")
                     w.[id].Write("(time " + "sh proc_"+AqualisCompiler.projname+".sh" + ") > "+AqualisCompiler.projname+".log "+"&"+"> "+AqualisCompiler.projname+"_time.log\n") 
                     w.[id].Write("(echo project "+AqualisCompiler.projname+" finished | cat - "+AqualisCompiler.projname+"_time.log) | mail -s ProcessNotification "+address+"\n")
-                |C ->
+                |C99 ->
                     w.[id].Write("echo project "+AqualisCompiler.projname+" started | mail -s ProcessNotification "+address+"\n")
                     w.[id].Write("(time " + "sh proc_"+AqualisCompiler.projname+"_C.sh" + ") > "+AqualisCompiler.projname+".log "+"&"+"> "+AqualisCompiler.projname+"_time.log\n") 
                     w.[id].Write("(echo project "+AqualisCompiler.projname+" finished | cat - "+AqualisCompiler.projname+"_time.log) | mail -s ProcessNotification "+address+"\n")
-                |P   ->
+                |Python   ->
                     w.[id].Write("echo project "+AqualisCompiler.projname+" started | mail -s ProcessNotification "+address+"\n")
                     w.[id].Write("(time " + "sh proc_"+AqualisCompiler.projname+".sh" + ") > "+AqualisCompiler.projname+".log "+"&"+"> "+AqualisCompiler.projname+"_time.log\n") 
                     w.[id].Write("(echo project "+AqualisCompiler.projname+" finished | cat - "+AqualisCompiler.projname+"_time.log) | mail -s ProcessNotification "+address+"\n")
-                |T   ->
+                |LaTeX   ->
                     ()
-                |H   ->
+                |HTML   ->
                     ()
                     
             member __.Close() =

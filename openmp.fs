@@ -14,7 +14,7 @@ namespace Aqualis
         ///<summary>ループを並列化</summary>
         static member parallelize code =
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.isOmpUsed <- true
                 p.modl("omp_lib")
                 p.parmode <| fun () ->
@@ -47,7 +47,7 @@ namespace Aqualis
                 p.ParDelete()
                 p.codewrite("!$omp end parallel do\n")
                 p.pvar.clear()
-            |C ->
+            |C99 ->
                 p.isOmpUsed <- true
                 p.incld("<omp.h>")
                 p.parmode <| fun () ->
@@ -70,7 +70,7 @@ namespace Aqualis
         ///<summary>ループを並列化</summary>
         static member parallelize_th (th:int) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.isOmpUsed <- true
                 p.modl("omp_lib")
                 p.parmode <| fun () ->
@@ -101,7 +101,7 @@ namespace Aqualis
                 p.cwrite(p.readParText())
                 p.codewrite("!$omp end parallel do\n")
                 p.pvar.clear()
-            |C ->
+            |C99 ->
                 p.isOmpUsed <- true
                 p.incld("<omp.h>")
                 p.parmode <| fun () ->
@@ -124,7 +124,7 @@ namespace Aqualis
         ///<summary>ループを並列化</summary>
         static member reduction (var:num0) (ope:string) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.isOmpUsed <- true
                 p.modl("omp_lib")
                 p.parmode <| fun () ->
@@ -155,7 +155,7 @@ namespace Aqualis
                 p.cwrite(p.readParText())
                 p.codewrite("!$omp end parallel do\n")
                 p.pvar.clear()
-            |C ->
+            |C99 ->
                 p.isOmpUsed <- true
                 p.incld("<omp.h>")
                 p.parmode <| fun () ->
@@ -186,7 +186,7 @@ namespace Aqualis
         ///<summary>ループを並列化</summary>
         static member reduction_th (th:int) (var:num0) (ope:string) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.isOmpUsed <- true
                 p.modl("omp_lib")
                 p.parmode <| fun () ->
@@ -217,7 +217,7 @@ namespace Aqualis
                 p.cwrite(p.readParText())
                 p.codewrite("!$omp end parallel do\n")
                 p.pvar.clear()
-            |C ->
+            |C99 ->
                 p.isOmpUsed <- true
                 p.incld("<omp.h>")
                 p.parmode <| fun () ->
@@ -248,7 +248,7 @@ namespace Aqualis
         ///<summary>それぞれ別スレッドで実行</summary>
         static member sections (th:int) = fun code ->
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.isOmpUsed <- true
                 p.modl("omp_lib")
                 p.parmode <| fun () ->
@@ -273,7 +273,7 @@ namespace Aqualis
                 p.indentDec()
                 p.codewrite("!$omp end parallel\n")
                 p.pvar.clear()
-            |C ->
+            |C99 ->
                 p.isOmpUsed <- true
                 p.incld("<omp.h>")
                 p.parmode <| fun () ->
@@ -306,10 +306,10 @@ namespace Aqualis
         ///<summary>別スレッドで実行</summary>
         static member section code =
             match p.lang with
-            |F ->
+            |Fortran ->
                 p.codewrite("!$omp section"+"\n")
                 code()
-            |C ->
+            |C99 ->
                 p.codewrite("#pragma omp section"+"\n")
                 p.codewrite("{"+"\n")
                 code()
@@ -320,7 +320,7 @@ namespace Aqualis
         ///<summary>スレッド番号の取得</summary>
         static member thread_num with get() =
             match p.lang with
-            |F |C ->
+            |Fortran |C99 ->
                 Var(It 4,"omp_get_thread_num()")
             |_ ->
                 Console.WriteLine("Error : この言語ではスレッド番号の取得はできません")
@@ -329,7 +329,7 @@ namespace Aqualis
         ///<summary>最大スレッド数の取得</summary>
         static member max_threads with get() =
             match p.lang with
-            |F |C ->
+            |Fortran |C99 ->
                 Var(It 4,"omp_get_max_threads()")
             |_ ->
                 Console.WriteLine("この言語ではスレッド番号の取得はできません")

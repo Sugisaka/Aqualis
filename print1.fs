@@ -13,7 +13,7 @@ namespace Aqualis
         ///<summary>変数リストを画面表示</summary>
         static member s (lst:num0 list)  = 
             match p.lang with
-            |F ->
+            |Fortran ->
                 let clist = 
                     [for q in lst do
                         match q.etype,q with
@@ -26,7 +26,7 @@ namespace Aqualis
                             yield q.code ]
                 let code = List.fold (fun acc i -> acc + (if i=0 then "" else ",") + clist[i]) "" [0..clist.Length-1] 
                 p.codewrite("print *, "+code+"\n")
-            |C ->
+            |C99 ->
                 let int0string_format_C =
                     "%"+p.iFormat.ToString()+"d"
                 let double0string_format_C = 
@@ -53,13 +53,13 @@ namespace Aqualis
                                  |Zt -> acc+","+q.re.code+","+q.im.code
                                  |_  -> acc+","+q.code) "" lst
                 p.codewrite("printf(\""+format+"\""+code+");\n")
-            |T ->
+            |LaTeX ->
                 let code = 
                   (fun (s:string) -> s.Replace("#,","")) 
                     (List.fold (fun acc (q:num0) -> 
                         acc+","+q.code) "#" lst)
                 p.codewrite("print, "+code+"\n")
-            |H ->
+            |HTML ->
                 let code =  
                     (List.fold (fun acc (i:int) -> 
                         let q = lst.[i]
@@ -70,7 +70,7 @@ namespace Aqualis
                     ) "" [0..lst.Length-1])
                 p.codewrite("Print \\("+code+"\\)\n")
                 p.codewrite("<br/>\n")
-            |P ->
+            |Python ->
                 let int0string_format_C =
                     "%"+p.iFormat.ToString()+"d"
                 let double0string_format_C = 

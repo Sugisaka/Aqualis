@@ -14,18 +14,18 @@ namespace Aqualis
         ///<summary>複素数の初期値</summary>
         static member private init_z (re,im) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 "("+(p.DtoS re)+","+(p.DtoS im)+")"
-            |C ->
+            |C99 ->
                 if im<0.0 then
                     (p.DtoS re)+"-uj*"+(p.DtoS (abs im))
                 else
                     (p.DtoS re)+"+uj*"+(p.DtoS im)
-            |T ->
+            |LaTeX ->
                 "("+(p.DtoS re)+(if im>=0.0 then "+" else "")+(p.DtoS im)+"\\mathrm{j})"
-            |H ->
+            |HTML ->
                 "("+(p.DtoS re)+(if im>=0.0 then "+" else "")+(p.DtoS im)+"\\mathrm{j})"
-            |P ->
+            |Python ->
                 if im<0.0 then
                     (p.DtoS re)+"-"+(p.DtoS (abs im))+"i"
                 else
@@ -34,43 +34,43 @@ namespace Aqualis
         ///<summary>整数型配列の初期値</summary>
         static member private init_i1 (v:int list) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 "(/"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"/)"
-            |C ->
+            |C99 ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"}"
-            |T ->
+            |LaTeX ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"}"
-            |H ->
+            |HTML ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"}"
-            |P ->
+            |Python ->
                 "["+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.ItoS v.[i])) "" [0..v.Length-1])+"]"
                 
         ///<summary>倍精度浮動小数点型配列の初期値</summary>
         static member private init_d1 (v:double list) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 "(/"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"/)"
-            |C ->
+            |C99->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"}"
-            |T ->
+            |LaTeX ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"}"
-            |H ->
+            |HTML ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"}"
-            |P ->
+            |Python ->
                 "["+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(p.DtoS v.[i])) "" [0..v.Length-1])+"]"
                 
         ///<summary>複素数型配列の初期値</summary>
         static member private init_z1 (v:(double*double) list) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 "(/"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"/)"
-            |C ->
+            |C99 ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"}"
-            |T ->
+            |LaTeX ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"}"
-            |H ->
+            |HTML ->
                 "{"+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"}"
-            |P ->
+            |Python ->
                 "["+(List.fold (fun acc i -> acc+(if i<>0 then "," else "")+(var.init_z v.[i])) "" [0..v.Length-1])+"]"
     
         ///<summary>バイト型変数</summary>

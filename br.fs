@@ -15,7 +15,7 @@ namespace Aqualis
         ///<summary>条件分岐式を生成</summary>
         let branch_ (el:Branch) (cond:bool0) (code:(unit->unit)) =
             match p.lang with
-            |F ->
+            |Fortran ->
                 match el with
                 |IF   ->
                     p.codewrite("if"+"("+cond.code+") then"+"\n")
@@ -26,7 +26,7 @@ namespace Aqualis
                 p.indentInc()
                 code()
                 p.indentDec()
-            |C ->
+            |C99 ->
                 match el with
                 |IF   ->
                     p.codewrite("if"+"("+cond.code+")"+"\n")
@@ -39,7 +39,7 @@ namespace Aqualis
                 code()
                 p.indentDec()
                 p.codewrite("}\n")
-            |T ->
+            |LaTeX ->
                 match el with
                 |IF   ->
                     p.codewrite("if"+"("+cond.code+")"+"\\\\\n")
@@ -51,7 +51,7 @@ namespace Aqualis
                 code()
                 p.indentDec()
                 p.codewrite("end\\\\\n")
-            |H ->
+            |HTML ->
                 p.codewrite("<div class=\"codeblock\">\n")
                 p.codewrite("<details open>\n")
                 match el with
@@ -68,7 +68,7 @@ namespace Aqualis
                 p.indentDec()
                 p.codewrite("</details>\n")
                 p.codewrite("</div>\n")
-            |P ->
+            |Python ->
                 match el with
                 |IF   ->
                     p.codewrite("if"+" "+cond.code+" "+":\n")
@@ -97,7 +97,7 @@ namespace Aqualis
         static member branch code =
             let ib = br()
             code(ib)
-            if p.lang=F then p.codewrite("end if\n")
+            if p.lang=Fortran then p.codewrite("end if\n")
             
         ///<summary>条件分岐式(if式)</summary>
         static member if1 (cond:bool0) code =
