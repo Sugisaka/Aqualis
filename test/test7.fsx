@@ -4,14 +4,14 @@ let projectname = "test7"
 let version = "1.0.0"
 //#############################################################################
  
-let outputdir = @"C:\home\kitahara\Aqualis\test\result"
+let outputdir = __SOURCE_DIRECTORY__ + @"\result"
 
-#I @"C:\home\kitahara\Aqualis\bin\Debug\net8.0"
+#I @"..\bin\Debug\net8.0"
 #r "Aqualis.dll"
  
 open Aqualis
 
-Compile [F;C;P] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
     let dd = 1E-7
     ch.dddd <| fun (x,y1,y2,dy) ->
     ch.d <| fun c1 ->
