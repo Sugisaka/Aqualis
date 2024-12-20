@@ -57,7 +57,7 @@ namespace Aqualis
         static member abort() =
             match p.lang with 
             |Fortran  -> p.codewrite("stop") 
-            |C99-> p.codewrite("return 1;") 
+            |C99 -> p.codewrite("return 1;") 
             |LaTeX  -> p.codewrite("stop")
             |HTML  -> p.codewrite("stop")
             |Python  -> p.codewrite("sys.exit(1)")

@@ -87,7 +87,7 @@ namespace Aqualis
             match p.lang with
             |Fortran   ->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |C99->
+            |C99 ->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |Python ->
                 p.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))

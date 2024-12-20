@@ -69,7 +69,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\183_1_8_0"
+#I "C:\\Aqualis\\lib\\184_0_1_0"
 #r "Aqualis.dll"
 #load "version.fsx"
 
@@ -77,7 +77,7 @@ let fullversion = preprocess.backup outputdir __SOURCE_DIRECTORY__ __SOURCE_FILE
  
 open Aqualis
  
-Compile [F] outputdir projectname fullversion <| fun () ->
+Compile [Fortran] outputdir projectname fullversion <| fun () ->
     ch.d2 2 2 <| fun A ->
         ch.d1 2 <| fun b ->
             A[1,1] <== 1.0

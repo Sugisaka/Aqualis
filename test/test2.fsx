@@ -6,13 +6,13 @@ let version = "1.0.0"
  
 let outputdir = __SOURCE_DIRECTORY__
 
-#I @"C:\home\kitahara\Aqualis\bin\Debug\net8.0"
+#I @"..\bin\Debug\net8.0"
 #r "Aqualis.dll"
  
 open Aqualis
 open Aqualis_base
  
-Compile [F;C;P] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
     AqualisCompiler.set_DebugMode OFF
     codestr.h2 "test1" <| fun () ->
         ch.i <| fun m ->

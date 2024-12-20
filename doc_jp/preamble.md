@@ -9,9 +9,9 @@ let projectname = "template"
 let version = "1.0.0"
 //#############################################################################
  
-let outputdir = @"C:\cygwin64\home\work"
+let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\183_1_5_0"
+#I "C:\\Aqualis\\lib\\184_0_1_0"
 #r "Aqualis.dll"
 #load "version.fsx"
 
@@ -19,7 +19,7 @@ let fullversion = preprocess.backup outputdir __SOURCE_DIRECTORY__ __SOURCE_FILE
  
 open Aqualis
  
-Compile [F] outputdir projectname fullversion <| fun () ->
+Compile [Fortran] outputdir projectname fullversion <| fun () ->
     (コード本体)
 ```
 
@@ -32,17 +32,16 @@ Compile [F] outputdir projectname fullversion <| fun () ->
 - 11行目：fsxファイルのバックアップを行う処理が書かれたプログラムを読み込む
 - 13行目：このソースファイルのバックアップ処理を行い、リビジョン番号を決定したバージョン番号(`fullversion`)を決定する
 - 15行目：Aqualisを使用可能にする
-- 17行目：出力ソースファイルの言語を`[]`の中に指定。セミコロン`;`で区切って複数指定することもできる
-  - `F`：Fortran
-  - `C89`：C89
-  - `C99`：C99
-  - `T`：LaTeX
-  - `H`：HTML
-  - Aqualis.dllに記述してあるAqualisの設定を読み込む
+- 17行目：出力ソースファイルの言語を`[]`の中に指定。セミコロン`;`で区切って複数指定することもできる。以下の言語を指定可能
+  - Fortran
+  - C99
+  - Python
+  - LaTeX
+  - HTML
 
 以下のコードでは、「`print.c !."aaa"`」と「`print.c !."bbb"`」がFortranのコードに変換される。「`print.c !."ccc"`」はインデントが戻っているので出力の対象外となる。
 ```fsharp
-Compile [F] outputdir projectname fullversion <| fun () ->
+Compile [Fortran] outputdir projectname fullversion <| fun () ->
     print.c !."aaa"
     print.c !."bbb"
 print.c !."ccc"
