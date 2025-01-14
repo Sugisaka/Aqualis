@@ -6,7 +6,7 @@ let version = "1.0.0"
  
 let outputdir = __SOURCE_DIRECTORY__
 
-#I @"C:\home\kitahara\Aqualis\bin\Debug\net8.0"
+#I @"..\bin\Debug\net8.0"
 #r "Aqualis.dll"
  
 open Aqualis
@@ -24,7 +24,7 @@ type testClass1(sname_,name) =
         testClass1(testClass1.sname,structure.mem(vname,name))
     member __.farg cm code = fn.addarg (Structure(testClass1.sname),A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
     
-Compile [F;C;P] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
     let f(y:num0,x:num0,n:num0,n1:num1,s:testClass1) =
         func "func1" <| fun () ->
             y.farg <| fun y ->

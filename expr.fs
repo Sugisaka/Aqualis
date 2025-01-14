@@ -1615,7 +1615,7 @@ namespace Aqualis
                 match p.lang with
                 |Fortran ->
                     p.codewrite(x.code + " = " + y.code)
-                |C99->
+                |C99 ->
                     p.codewrite(x.code + " = " + y.code + ";")
                 |LaTeX ->
                     p.codewrite(x.code + " \\leftarrow " + y.code)
@@ -1641,7 +1641,7 @@ namespace Aqualis
                 match p.lang with
                 |Fortran ->
                     ()
-                |C99->
+                |C99 ->
                     ()
                 |LaTeX ->
                     p.codewrite(x.code + " = " + y.code)
@@ -1662,7 +1662,7 @@ namespace Aqualis
                 match p.lang with
                 |Fortran ->
                     ()
-                |C99->
+                |C99 ->
                     ()
                 |LaTeX ->
                     p.codewrite(x.code + " =& " + y.code)

@@ -6,13 +6,13 @@ let version = "1.0.0"
  
 let outputdir = __SOURCE_DIRECTORY__
 
-#I @"C:\home\kitahara\Aqualis\bin\Debug\net8.0"
+#I @"..\bin\Debug\net8.0"
 #r "Aqualis.dll"
  
 open Aqualis
 open Aqualis_base
  
-Compile [F;C;P] outputdir (projectname+"tw") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"tw") ("aaa","aaa") <| fun () ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2
@@ -26,7 +26,7 @@ Compile [F;C;P] outputdir (projectname+"tw") ("aaa","aaa") <| fun () ->
             wr [x+asm.cos(x);]
             wr [z.abs;z.pow]
 
-Compile [F;C;P] outputdir (projectname+"tr") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"tr") ("aaa","aaa") <| fun () ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2
@@ -55,7 +55,7 @@ Compile [F;C;P] outputdir (projectname+"tr") ("aaa","aaa") <| fun () ->
             print.cc z.abs x1
             print.cc z.pow x2
 
-Compile [F;C;P] outputdir (projectname+"bw") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"bw") ("aaa","aaa") <| fun () ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2
@@ -76,7 +76,7 @@ Compile [F;C;P] outputdir (projectname+"bw") ("aaa","aaa") <| fun () ->
             wr z.abs
             wr z.pow
 
-Compile [F;C;P] outputdir (projectname+"br") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"br") ("aaa","aaa") <| fun () ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2
