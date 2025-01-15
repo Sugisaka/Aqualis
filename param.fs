@@ -372,17 +372,17 @@ namespace Aqualis
                   |_                      -> name+" = "+(if param<>"" then param else "0")
                 |A1(0) -> 
                   match typ with 
-                  |Structure(sname)       -> name+" = numpy.array([], dtype="+(this.Stype typ)+")"
+                  |Structure(sname)       -> name+" = numpy.array([], dtype=object)"
                   |_                      -> name+" = numpy.array([])"
                 |A2(0,0) -> 
                   match typ with 
-                  |Structure(sname)      -> name+" = numpy.array([[]], dtype="+(this.Stype typ)+")"
+                  |Structure(sname)      -> name+" = numpy.array([[]], dtype=object)"
                   |It _ |It 1            -> name+" = numpy.array([[]], dtype="+(this.Stype typ)+")"
                   |Zt                    -> name+" = numpy.array([[]], dtype=numpy.complex128)"
                   |_                     -> name+" = numpy.array([[]])"
                 |A3(0,0,0) -> 
                   match typ with 
-                  |Structure(sname)       -> name+" = numpy.array([[[]]], dtype="+(this.Stype typ)+")"
+                  |Structure(sname)       -> name+" = numpy.array([[[]]], dtype=object)"
                   |It _ |It 1             -> name+" = numpy.array([[[]]], dtype="+(this.Stype typ)+")"
                   |Zt                     -> name+" = numpy.array([[[]]], dtype=numpy.complex128)"
                   |_                      -> name+" = numpy.array([[[]]])"

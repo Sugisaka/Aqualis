@@ -121,7 +121,9 @@ namespace Aqualis
                     p.codewrite("while("+cond.code+")\n")
                     p.indentInc()
                     code()
-                    p.codewrite("flag = "+goto+"\n")
+                    if goto="10" then ()
+                    else 
+                        p.codewrite("flag = "+goto+"\n")
                     p.indentDec()
                     if goto="10" then ()
                     else 
@@ -213,7 +215,9 @@ namespace Aqualis
                             p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"+1, 1):"+"\n")
                             p.indentInc()
                             code(Var(It 4,counter))
-                            p.codewrite("flag = "+goto+"\n")
+                            if goto="10" then ()
+                            else 
+                                p.codewrite("flag = "+goto+"\n")
                             p.indentDec()
                             if goto="10" then ()
                             else 
@@ -351,7 +355,9 @@ namespace Aqualis
                     p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"-1, -1):"+"\n")
                     p.indentInc()
                     code(Var(It 4,counter))
-                    p.codewrite("flag = "+goto+"\n")
+                    if goto="10" then ()
+                    else 
+                        p.codewrite("flag = "+goto+"\n")
                     p.indentDec()
                     if goto="10" then ()
                     else 
@@ -460,7 +466,9 @@ namespace Aqualis
                     p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"-1, "+ii.code+"):"+"\n")
                     p.indentInc()
                     code(Var(It 4,counter))
-                    p.codewrite("flag = "+goto+"\n")
+                    if goto="10" then ()
+                    else 
+                        p.codewrite("flag = "+goto+"\n")
                     p.indentDec()
                     if goto="10" then ()
                     else 

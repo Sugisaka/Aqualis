@@ -1337,7 +1337,7 @@ namespace Aqualis
                         |(It _|Dt),_ -> yield b.code
                         |_ -> ()]
                     |> io2.cat ","
-                p.codewrite(fp+".write(\""+format+"\" % ("+code+"))\n")
+                p.codewrite(fp+".write(\""+format+"\\n\" % ("+code+"))\n")
                 
         ///<summary>ファイル出力</summary>
         static member fileOutput (filename:num0 list) code =
