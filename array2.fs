@@ -501,9 +501,7 @@ namespace Aqualis
                 |Python ->
                     match v1.etype with
                     |Structure(sname) -> p.codewrite(x+" = numpy.array([["+sname+"() for _ in range(int("+v1.size2.code+"))] for _ in range(int("+v1.size1.code+"))], dtype=object).reshape(int("+v1.size1.code+"),int("+v1.size2.code+"))\n")
-                    |It _ |It 1       -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=int)\n")
-                    |Zt               -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=numpy.complex128)\n")
-                    |_                -> p.codewrite(x + "= numpy.full("+x+".shape,"+v2.code+", dtype=float)\n")
+                    |_                -> p.codewrite(x+"[:,:]="+v2.code+"\n")
             |Arx2(_,_,_) ->
                 match p.lang with
                 |Fortran|LaTeX|C99|HTML|Python -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
