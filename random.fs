@@ -72,14 +72,15 @@ namespace Aqualis
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
                 |Python ->
+                    p.codewrite("random_seed = numpy.random.default_rng()")
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
-                            p.codewrite("rng_"+seed.code+" = numpy.random.default_rng("+seed.code+"[0])")
+                            p.codewrite("random_seed = numpy.random.default_rng("+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x with
                             |Var(_,n) -> 
-                                p.codewrite(n + " = rng_"+seed.code+".uniform(0.0, 1.0)")
+                                p.codewrite(n + " = random_seed.uniform(0.0, 1.0)")
                             |_ -> 
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
@@ -143,6 +144,7 @@ namespace Aqualis
                                 p.codewrite("Error:double型以外の変数に乱数値を代入できません")
                         code(setseed,getrand)
                 |Python ->
+                    p.codewrite("rng_"+seed_.ToString()+" = numpy.random.default_rng()")
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
