@@ -17,7 +17,7 @@ namespace Aqualis
             member this.y (x:num0) code =
                 ch.i <| fun flag ->
                     flag<==0
-                    iter.num (X.size1-1) <| fun i ->
+                    iter.range _1 (X.size1-1) <| fun i ->
                         br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             ch.d <| fun z ->
@@ -36,7 +36,7 @@ namespace Aqualis
             member this.y (x:num0) code =
                 ch.i <| fun flag ->
                     flag<==0
-                    iter.num (X.size1-1) <| fun i ->
+                    iter.range _1 (X.size1-1) <| fun i ->
                         br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             ch.z <| fun z ->
@@ -84,7 +84,7 @@ namespace Aqualis
                     f.[1,a(_1)] <== 0.0
                     f.[1,b(_1)] <== 2
                     g.[1] <== 0
-                    iter.range _1 (N-1) <| fun n ->
+                    iter.range _2 (N-1) <| fun n ->
                         ch.d <| fun dx ->
                             dx <== x.[n]-x.[n-1]
                             !"f(xn)=yN"

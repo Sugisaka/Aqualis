@@ -19,24 +19,24 @@ namespace Aqualis
                 c1.clear()
                 c2.clear()
                 //初期値：微分前なのでe^(-jx)(x^(-1))の項のみ
-                c1[0] <== 1.0
+                c1[1] <== 1.0
                 //(d/dx)[e^(-jx)(x^(-m))] = (-j)e^(-jx)(x^(-m)) + (-m)e^(-jx)(x^(-(m+1)))
                 iter.num n <| fun _ ->
                     //(d/dx)
                     iter.num (2*n) <| fun m ->
                         c2[m  ] <== c2[m  ] - asm.uj*c1[m] //e^(-jx)を微分、x^(-m)はそのまま
-                        c2[m+1] <== c2[m+1] - (m+1)*c1[m]      //e^(-jx)はそのままでx^(-m)を微分
+                        c2[m+1] <== c2[m+1] - m*c1[m]      //e^(-jx)はそのままでx^(-m)を微分
                     //x^(-1)
                     iter.num (2*n) <| fun m ->
-                        c2[2*n-m] <== c2[2*n-m-1]
-                    c2[0] <== 0
+                        c2[2*n+1-m+1] <== c2[2*n+1-m]
+                    c2[1] <== 0
                     //c1 ← c2
                     c1 <== c2
                     c2.clear()
                 //c(m): e^(-jx)(x^(n-m))の係数
                 hn.clear()
                 iter.range _0 (2*n) <| fun m ->
-                    hn <== hn + asm.pow(x,n-m-1)*c1[m]
+                    hn <== hn + asm.pow(x,n-m-1)*c1[m+1]
                 hn <== asm.uj*asm.pow(-1,n)*asm.exp(-asm.uj*x)*hn
                 
         ///<summary>整数次第2種球ハンケル関数を計算</summary>
@@ -52,17 +52,17 @@ namespace Aqualis
                 c1.clear()
                 c2.clear()
                 //初期値：微分前なのでe^(-jx)(x^(-1))の項のみ
-                c1[0] <== 1.0
+                c1[1] <== 1.0
                 //(d/dx)[e^(-jx)(x^(-m))] = (-j)e^(-jx)(x^(-m)) + (-m)e^(-jx)(x^(-(m+1)))
                 iter.num n <| fun _ ->
                     //(d/dx)
                     iter.num (2*n) <| fun m ->
                         c2[m  ] <== c2[m  ] - asm.uj*c1[m] //e^(-jx)を微分、x^(-m)はそのまま
-                        c2[m+1] <== c2[m+1] - (m+1)*c1[m]      //e^(-jx)はそのままでx^(-m)を微分
+                        c2[m+1] <== c2[m+1] - m*c1[m]      //e^(-jx)はそのままでx^(-m)を微分
                     //x^(-1)
                     iter.num (2*n) <| fun m ->
-                        c2[2*n-m] <== c2[2*n-m-1]
-                    c2[0] <== 0
+                        c2[2*n+1-m+1] <== c2[2*n+1-m]
+                    c2[1] <== 0
                     //c1 ← c2
                     c1 <== c2
                     c2.clear()
@@ -70,7 +70,7 @@ namespace Aqualis
                 iter.num N <| fun i ->
                     hn(i).clear()
                     iter.range _0 (2*n) <| fun m ->
-                        hn(i) <== hn(i) + asm.pow(x(i),n-m-1)*c1[m]
+                        hn(i) <== hn(i) + asm.pow(x(i),n-m-1)*c1[m+1]
                     hn(i) <== asm.uj*asm.pow(-1,n)*asm.exp(-asm.uj*x(i))*hn(i)
     
         ///<summary>整数次第2種球ハンケル関数を計算</summary>
@@ -84,17 +84,17 @@ namespace Aqualis
                 c1.clear()
                 c2.clear()
                 //初期値：微分前なのでe^(-jx)(x^(-1))の項のみ
-                c1[0] <== 1.0
+                c1[1] <== 1.0
                 //(d/dx)[e^(-jx)(x^(-m))] = (-j)e^(-jx)(x^(-m)) + (-m)e^(-jx)(x^(-(m+1)))
                 iter.num n <| fun _ ->
                     //(d/dx)
                     iter.num (2*n) <| fun m ->
                         c2[m  ] <== c2[m  ] - asm.uj*c1[m] //e^(-jx)を微分、x^(-m)はそのまま
-                        c2[m+1] <== c2[m+1] - (m+1)*c1[m]      //e^(-jx)はそのままでx^(-m)を微分
+                        c2[m+1] <== c2[m+1] - m*c1[m]      //e^(-jx)はそのままでx^(-m)を微分
                     //x^(-1)
                     iter.num (2*n) <| fun m ->
-                        c2[2*n-m] <== c2[2*n-m-1]
-                    c2[0] <== 0
+                        c2[2*n+1-m+1] <== c2[2*n+1-m]
+                    c2[1] <== 0
                     //c1 ← c2
                     c1 <== c2
                     c2.clear()
@@ -102,7 +102,7 @@ namespace Aqualis
                 let f (hn:num0,x:num0) =
                     hn.clear()
                     iter.range _0 (2*n) <| fun m ->
-                        hn <== hn + asm.pow(x,n-m-1)*c1[m]
+                        hn <== hn + asm.pow(x,n-m-1)*c1[m+1]
                     hn <== asm.uj*asm.pow(-1,n)*asm.exp(-asm.uj*x)*hn
                 code f
                 
@@ -141,21 +141,21 @@ namespace Aqualis
                 ch.d <| fun pmmp1 ->
                 ch.d <| fun somx2 ->
                     pmm<==1.0
-                    pl[0]<==pmm
+                    pl[1]<==pmm
                     br.branch <| fun b ->
                         b.IF (l .= 0) <| fun () -> 
-                            pl[l] <== pmm
+                            pl[l+1] <== pmm
                         b.EL <| fun () -> 
                             pmmp1<==x*pmm
                             br.branch <| fun b ->
                                 b.IF (l .= 1) <| fun () ->
-                                    pl[l]<==pmmp1
+                                    pl[l+1]<==pmmp1
                                 b.EL <| fun () ->
-                                    pl[1]<==pmmp1
-                                    iter.range _2 (l-1) <| fun ll ->
-                                        pl[ll]<==(x*(2*ll-1)*pmmp1-(ll-1)*pmm)/ll
+                                    pl[2]<==pmmp1
+                                    iter.range _2 l <| fun ll ->
+                                        pl[ll+1]<==(x*(2*ll-1)*pmmp1-(ll-1)*pmm)/ll
                                         pmm<==pmmp1
-                                        pmmp1<==pl[ll]
+                                        pmmp1<==pl[ll+1]
                                         
         //<summary>Legendre陪多項式を計算</summary>
         //<param name="pl">P_l^m</param>
