@@ -681,9 +681,9 @@ namespace Aqualis
                 |Log(_,x) -> "log("+x.code+")"
                 |Log10(_,x) -> "log10("+x.code+")"
                 |Sqrt(_,x) -> "sqrt("+x.code+")"
-                |Idx1(_,u,n1) -> u+"("+n1.code+")"
-                |Idx2(_,u,n1,n2) -> u+"("+n1.code+","+n2.code+")"
-                |Idx3(_,u,n1,n2,n3) -> u+"("+n1.code+","+n2.code+","+n3.code+")"
+                |Idx1(_,u,n1) -> u+"("+(n1+Int_c 1).code+")"
+                |Idx2(_,u,n1,n2) -> u+"("+(n1+Int_c 1).code+","+(n2+Int_c 1).code+")"
+                |Idx3(_,u,n1,n2,n3) -> u+"("+(n1+Int_c 1).code+","+(n2+Int_c 1).code+","+(n3+Int_c 1).code+")"
                 |Formula(_,s) -> s
                 |Sum(t,n1,n2,f) ->
                     let g = num0.ch t
@@ -733,14 +733,14 @@ namespace Aqualis
                 |Log10(_,x) -> "log10("+x.code+")"
                 |Sqrt(Zt,x) -> "csqrt("+x.code+")"
                 |Sqrt(_,x) -> "sqrt("+x.code+")"
-                |Idx1(_,u,n1) -> u+"["+(n1-Int_c 1).code+"]"
+                |Idx1(_,u,n1) -> u+"["+n1.code+"]"
                 |Idx2(_,u,n1,n2) -> 
                     let size1 = Var(It 4,u+"_size[0]")
-                    u+"["+(((n2-Int_c 1)*size1+(n1-Int_c 1))).code+"]"
+                    u+"["+(n2*size1+n1).code+"]"
                 |Idx3(_,u,n1,n2,n3) -> 
                     let size1 = Var(It 4,u+"_size[0]")
                     let size2 = Var(It 4,u+"_size[1]")
-                    u+"["+((n3-Int_c 1)*size1*size2+(n2-Int_c 1)*size1+(n1-Int_c 1)).code+"]"
+                    u+"["+(n3*size1*size2+n2*size1+n1).code+"]"
                 |Formula(_,s) -> s
                 |Sum(t,n1,n2,f) ->
                     let g = num0.ch t
@@ -787,11 +787,11 @@ namespace Aqualis
                 |Sqrt(Zt,x) -> "cmath.sqrt("+x.code+")"
                 |Sqrt(_,x) -> "math.sqrt("+x.code+")"
                 //↓一応いじったけど、不安が残る
-                |Idx1(_,u,n1) -> u+"["+(n1-Int_c 1).code+"]"
+                |Idx1(_,u,n1) -> u+"["+n1.code+"]"
                 |Idx2(_,u,n1,n2) -> 
-                    u+"["+(n1-Int_c 1).code+","+(n2-Int_c 1).code+"]"
+                    u+"["+n1.code+","+n2.code+"]"
                 |Idx3(_,u,n1,n2,n3) -> 
-                    u+"["+(n1-Int_c 1).code+","+(n2-Int_c 1).code+","+(n3-Int_c 1).code+"]"
+                    u+"["+n1.code+","+n2.code+","+n3.code+"]"
                 |Formula(_,s) -> s
                 |Sum(t,n1,n2,f) ->
                     let g = num0.ch t
