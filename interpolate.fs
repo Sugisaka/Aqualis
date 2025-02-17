@@ -17,7 +17,7 @@ namespace Aqualis
             member this.y (x:num0) code =
                 ch.i <| fun flag ->
                     flag<==0
-                    iter.range _1 (X.size1-1) <| fun i ->
+                    iter.range _0 (X.size1-2) <| fun i ->
                         br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             ch.d <| fun z ->
@@ -26,7 +26,7 @@ namespace Aqualis
                     br.if1 (x.=X.[X.size1]) <| fun () ->
                         flag<==1
                         code(Y.[X.size1])
-                    br.if1(flag.=0) <| fun () -> print.s[x;!."is out of range:";X.[1];X.[X.size1];]
+                    br.if1(flag.=0) <| fun () -> print.s [x;!."is out of range:";X.[1];X.[X.size1];]
                     
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
         type LinearInterpolate1z(id:string,data_x,data_y) =
@@ -36,7 +36,7 @@ namespace Aqualis
             member this.y (x:num0) code =
                 ch.i <| fun flag ->
                     flag<==0
-                    iter.range _1 (X.size1-1) <| fun i ->
+                    iter.range _0 (X.size1-2) <| fun i ->
                         br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             ch.z <| fun z ->
@@ -45,7 +45,7 @@ namespace Aqualis
                     br.if1 (x.=X.[X.size1]) <| fun () ->
                         flag<==1
                         code(Y.[X.size1])
-                    br.if1(flag.=0) <| fun () -> print.s[x;!."is out of range:";X.[1];X.[X.size1];]
+                    br.if1(flag.=0) <| fun () -> print.s [x;!."is out of range:";X.[1];X.[X.size1];]
                     
         type splineInterpolate(iscpx:bool) =
             
@@ -81,42 +81,42 @@ namespace Aqualis
                     f.clear()
                     g.clear()
                     !"f''(x1)=0"
-                    f.[1,a(_1)] <== 0.0
-                    f.[1,b(_1)] <== 2
-                    g.[1] <== 0
-                    iter.range _2 (N-1) <| fun n ->
+                    f.[1-1,a(_1)-1] <== 0.0
+                    f.[1-1,b(_1)-1] <== 2
+                    g.[1-1] <== 0
+                    iter.range _1 (N-2) <| fun n ->
                         ch.d <| fun dx ->
-                            dx <== x.[n]-x.[n-1]
+                            dx <== x.[n+1-1]-x.[n+1-1-1]
                             !"f(xn)=yN"
-                            f.[3*n-4,a(n-1)] <== asm.pow(dx,3)
-                            f.[3*n-4,b(n-1)] <== asm.pow(dx,2)
-                            f.[3*n-4,c(n-1)] <== dx
-                            g.[3*n-4] <== y.[n] - y.[n-1]
+                            f.[3*(n+1)-4-1,a((n+1)-1)-1] <== asm.pow(dx,3)
+                            f.[3*(n+1)-4-1,b((n+1)-1)-1] <== asm.pow(dx,2)
+                            f.[3*(n+1)-4-1,c((n+1)-1)-1] <== dx
+                            g.[3*(n+1)-4-1] <== y.[(n+1)-1] - y.[(n+1)-1-1]
                             !"f'(x[n-1])=f'(x[n])"
-                            f.[3*n-3,a(n-1)] <== 3*asm.pow(dx,2)
-                            f.[3*n-3,b(n-1)] <== 2*dx
-                            f.[3*n-3,c(n-1)] <== 1
-                            f.[3*n-3,a(n)] <== 0.0
-                            f.[3*n-3,b(n)] <== 0.0
-                            f.[3*n-3,c(n)] <== -1
-                            g.[3*n-3] <== 0.0
+                            f.[3*(n+1)-3-1,a((n+1)-1)-1] <== 3*asm.pow(dx,2)
+                            f.[3*(n+1)-3-1,b((n+1)-1)-1] <== 2*dx
+                            f.[3*(n+1)-3-1,c((n+1)-1)-1] <== 1
+                            f.[3*(n+1)-3-1,a((n+1))-1] <== 0.0
+                            f.[3*(n+1)-3-1,b((n+1))-1] <== 0.0
+                            f.[3*(n+1)-3-1,c((n+1))-1] <== -1
+                            g.[3*(n+1)-3-1] <== 0.0
                             !"f''(x[n-1])=f''(x[n])"
-                            f.[3*n-2,a(n-1)] <== 6*dx
-                            f.[3*n-2,b(n-1)] <== 2
-                            f.[3*n-2,a(n)] <== 0.0
-                            f.[3*n-2,b(n)] <== -2
-                            g.[3*n-2] <== 0.0
+                            f.[3*(n+1)-2-1,a((n+1)-1)-1] <== 6*dx
+                            f.[3*(n+1)-2-1,b((n+1)-1)-1] <== 2
+                            f.[3*(n+1)-2-1,a((n+1))-1] <== 0.0
+                            f.[3*(n+1)-2-1,b((n+1))-1] <== -2
+                            g.[3*(n+1)-2-1] <== 0.0
                     ch.d <| fun dx ->
-                        dx <== x.[N]-x.[N-1]
+                        dx <== x.[N-1]-x.[N-1-1]
                         !"f(xN)=yN"
-                        f.[3*N-4,a(N-1)] <== asm.pow(dx,3)
-                        f.[3*N-4,b(N-1)] <== asm.pow(dx,2)
-                        f.[3*N-4,c(N-1)] <== dx
-                        g.[3*N-4] <== y.[N] - y.[N-1]
+                        f.[3*N-4-1,a(N-1)-1] <== asm.pow(dx,3)
+                        f.[3*N-4-1,b(N-1)-1] <== asm.pow(dx,2)
+                        f.[3*N-4-1,c(N-1)-1] <== dx
+                        g.[3*N-4-1] <== y.[N-1] - y.[N-1-1]
                         !"f''(xN)=0"
-                        f.[3*N-3,a(N-1)] <== 6*dx
-                        f.[3*N-3,b(N-1)] <== 2
-                        g.[3*N-3] <== 0
+                        f.[3*N-3-1,a(N-1)-1] <== 6*dx
+                        f.[3*N-3-1,b(N-1)-1] <== 2
+                        g.[3*N-3-1] <== 0
                         
                     //io.array f [!."f.dat"]
                     //io.array g [!."g.dat"]
@@ -199,7 +199,7 @@ namespace Aqualis
                 yy.clear()
                 iter.num_exit <| x.size1-1 <| fun (ex,i) ->
                     br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
-                        yy <== g.[a(i)]*asm.pow(xx-x.[i],3) + g.[b(i)]*asm.pow(xx-x.[i],2) + g.[c(i)]*(xx-x.[i]) + y.[i]
+                        yy <== g.[a(i+1)-1]*asm.pow(xx-x.[i],3) + g.[b(i+1)-1]*asm.pow(xx-x.[i],2) + g.[c(i+1)-1]*(xx-x.[i+1]) + y.[i]
                         ex()
                         
             /// <summary>
@@ -211,6 +211,6 @@ namespace Aqualis
                 yy.clear()
                 iter.num_exit <| x.size1-1 <| fun (ex,i) ->
                     br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
-                        yy <== 3*g.[a(i)]*asm.pow(xx-x.[i],2) + 2*g.[b(i)]*(xx-x.[i]) + g.[c(i)]
+                        yy <== 3*g.[a(i+1)-1]*asm.pow(xx-x.[i+1],2) + 2*g.[b(i+1)-1]*(xx-x.[i+1]) + g.[c(i+1)-1]
                         ex()
                         

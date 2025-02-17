@@ -1057,5 +1057,5 @@ namespace Aqualis
                     La.svd mat (u,s,vt)
                     !"0に近いほど正確な解"
                     print.tc "solve_homogeneq" s.[mat.size1]
-                    iter.range _1 mat.size1 <| fun i ->
+                    iter.num mat.size1 <| fun i ->
                         f.[i] <== asm.conj(vt.[mat.size1,i])
