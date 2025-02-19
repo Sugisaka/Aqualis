@@ -7,7 +7,7 @@ http://opensource.org/licenses/mit-license.php
 namespace Aqualis
     
     open Aqualis_base
-
+    
     ///<summary>反復処理</summary>
     type iter () =
         
@@ -82,7 +82,6 @@ namespace Aqualis
                         p.codewrite("break\n")
                         p.indentDec()
                         
-                
         ///<summary>条件を満たす間ループ</summary>
         static member whiledo (cond:bool0) = fun code ->
             match p.lang with
@@ -131,189 +130,7 @@ namespace Aqualis
                         p.indentInc()
                         p.codewrite("break\n")
                         p.indentDec()
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (i1:num0) = fun code -> 
-            if p.isEmpty then
-                match i1 with
-                |Int_c i1 ->
-                    for i in 0..i1 do
-                        code(Int_c i)
-                |_ ->
-                    printfn "%s" ("Error: loop range invalid. "+i1.ToString()+"")
-            else
-                match p.lang with
-                |Fortran ->
-                    match i1 with
-                    |Int_c a when 0>a -> 
-                        p.comment ""
-                        p.comment ("skipped loop from 0 to "+a.ToString())
-                        p.comment ""
-                    |_ ->
-                        p.getloopvar <| fun counter ->
-                            if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
-                            p.codewrite("do "+counter+"=0,"+i1.code+"-1\n")
-                            p.indentInc()
-                            code(Var(It 4,counter))
-                            p.indentDec()
-                            p.codewrite("end do"+"\n")
-                |C99 ->
-                    match i1 with
-                    |Int_c a when 0>a -> 
-                        p.comment ""
-                        p.comment ("skipped loop from 0 to "+a.ToString())
-                        p.comment ""
-                    |_ ->
-                        p.getloopvar <| fun counter ->
-                            if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
-                            p.codewrite("for("+counter+"=0; "+counter+"<"+i1.code+"; "+counter+"++)"+"\n")
-                            p.codewrite("{"+"\n")
-                            p.indentInc()
-                            code(Var(It 4,counter))
-                            p.indentDec()
-                            p.codewrite("}"+"\n")
-                |LaTeX ->
-                    match i1 with
-                    |Int_c a when 0>a -> 
-                        p.comment ""
-                        p.comment ("skipped loop from 0 to "+a.ToString())
-                        p.comment ""
-                    |_ ->
-                        p.getloopvar <| fun counter ->
-                            p.codewrite("for $"+counter+"=0\\cdots "+i1.code+"$\\\\\n")
-                            p.indentInc()
-                            code(Var(It 4,counter))
-                            p.indentDec()
-                            p.codewrite("end"+"\\\\\n")
-                |HTML ->
-                    match i1 with
-                    |Int_c a when 0>a -> 
-                        p.comment ""
-                        p.comment ("skipped loop from 0 to "+a.ToString())
-                        p.comment ""
-                    |_ ->
-                        p.getloopvar <| fun counter ->
-                            p.codewrite("<div class=\"codeblock\">\n")
-                            p.codewrite("<details open>\n")
-                            p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"=0,"+i1.code+"\\)</summary>\n")
-                            p.codewrite("<div class=\"insidecode-loop\">\n")
-                            p.indentInc()
-                            code(Var(It 4,counter))
-                            p.indentDec()
-                            p.codewrite("</div>\n")
-                            p.codewrite("</details>\n")
-                            p.codewrite("</div>\n")
-                |Python ->
-                    match i1 with
-                    |Int_c a when 0>a -> 
-                        p.comment ""
-                        p.comment ("skipped loop from 0 to "+a.ToString())
-                        p.comment ""
-                    |_ ->
-                        p.getloopvar_exit <| fun (goto,counter,exit) ->
-                            p.exit_false
-                            p.codewrite("for "+counter+" in range("+i1.code+"):"+"\n")
-                            p.indentInc()
-                            code(Var(It 4,counter))
-                            if goto="10" then ()
-                            else 
-                                p.codewrite("flag = "+goto+"\n")
-                            p.indentDec()
-                            if goto="10" then ()
-                            else 
-                                p.codewrite("if flag < "+goto+":\n")
-                                p.indentInc()
-                                p.codewrite("break\n")
-                                p.indentDec()
-
-        ///<summary>0(Fortranは1)から指定した回数ループ(途中脱出可)</summary>
-        static member num_exit (i1:num0) = fun code -> 
-            match p.lang with
-            |Fortran ->
-                match i1 with
-                |Int_c a when 0>a -> 
-                    p.comment ""
-                    p.comment ("skipped loop from 0 to "+a.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar_exit <| fun (goto,counter,exit) ->
-                        p.codewrite("do "+counter+"=0,"+i1.code+"-1\n")
-                        p.indentInc()
-                        code(exit,Var(It 4,counter))
-                        p.indentDec()
-                        p.codewrite("end do"+"\n")
-                        p.codewrite(goto+" continue"+"\n")
-            |C99 ->
-                match i1 with
-                |Int_c a when 0>a -> 
-                    p.comment ""
-                    p.comment ("skipped loop from 0 to "+a.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar_exit <| fun (goto,counter,exit) ->
-                        if p.isparmode then p.pvar.setVar(It 4,A0,counter,"")
-                        p.codewrite("for("+counter+"=0; "+counter+"<"+i1.code+"; "+counter+"++)"+"\n")
-                        p.codewrite("{"+"\n")
-                        p.indentInc()
-                        code(exit,Var(It 4,counter))
-                        p.indentDec()
-                        p.codewrite("}"+"\n")
-                        p.codewrite(goto+":;\n")
-            |LaTeX ->
-                match i1 with
-                |Int_c a when 0>a -> 
-                    p.comment ""
-                    p.comment ("skipped loop from 0 to "+a.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar_exit <| fun (goto,counter,exit) ->
-                        p.codewrite("for $"+counter+"=0\\cdots "+i1.code+"$\\\\\n")
-                        p.indentInc()
-                        code(exit,Var(It 4,counter))
-                        p.indentDec()
-                        p.codewrite("end"+"\\\\\n")
-                        p.codewrite(goto+" continue"+"\n")
-            |HTML ->
-                match i1 with
-                |Int_c a when 0>a -> 
-                    p.comment ""
-                    p.comment ("skipped loop from 0 to "+a.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar_exit <| fun (goto,counter,exit) ->
-                        p.codewrite("<div class=\"codeblock\">\n")
-                        p.codewrite("<details open>\n")
-                        p.codewrite("<summary><span class=\"op-loop\">for</span> \\("+counter+"=0,"+i1.code+"\\)</summary>\n")
-                        p.codewrite("<div class=\"insidecode-loop\">\n")
-                        p.indentInc()
-                        code(exit,Var(It 4,counter))
-                        p.indentDec()
-                        p.codewrite("</div>\n")
-                        p.codewrite("<span class=\"continue\"><span id=\""+goto+"\">"+goto+" continue</span></span>\n<br/>\n")
-                        p.codewrite("</details>\n")
-                        p.codewrite("</div>\n")
-            |Python ->
-                match i1 with
-                |Int_c a when 0>a -> 
-                    p.comment ""
-                    p.comment ("skipped loop from 0 to "+a.ToString())
-                    p.comment ""
-                |_ ->
-                    p.getloopvar_exit <| fun (goto,counter,exit) ->
-                        p.exit_false
-                        p.codewrite("for "+counter+" in range("+i1.code+"):"+"\n")
-                        p.indentInc()
-                        code(exit,Var(It 4,counter))
-                        p.indentDec()
-                        if goto="10" then
-                            p.exit_reset
-                        else 
-                            p.codewrite("if flag < "+goto+":\n")
-                            p.indentInc()
-                            p.codewrite("break\n")
-                            p.indentDec()
-
-
+                        
         ///<summary>指定した範囲でループ</summary>
         static member range (i1:num0) = fun (i2:num0) -> fun code -> 
             if p.isEmpty then
@@ -407,7 +224,7 @@ namespace Aqualis
                                 p.indentInc()
                                 p.codewrite("break\n")
                                 p.indentDec()
-                
+                                
         ///<summary>指定した範囲でループ(途中脱出可)</summary>
         static member range_exit (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
@@ -493,7 +310,7 @@ namespace Aqualis
                             p.indentInc()
                             p.codewrite("break\n")
                             p.indentDec()
-                
+                            
         ///<summary>指定した範囲でループ</summary>
         static member range_reverse (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
@@ -547,7 +364,7 @@ namespace Aqualis
                         p.indentInc()
                         p.codewrite("break\n")
                         p.indentDec()
-                
+                        
         ///<summary>指定した範囲でループ</summary>
         static member range_reverse_exit (i1:num0) = fun (i2:num0) -> fun code -> 
             match p.lang with
@@ -603,8 +420,7 @@ namespace Aqualis
                         p.indentInc()
                         p.codewrite("break\n")
                         p.indentDec()
-
-                
+                        
         ///<summary>指定した範囲でループ</summary>
         static member range_interval (i1:num0) = fun (i2:num0) -> fun (ii:num0) -> fun code -> 
             match p.lang with
@@ -658,7 +474,7 @@ namespace Aqualis
                         p.indentInc()
                         p.codewrite("break\n")
                         p.indentDec()
-                
+                        
         ///<summary>指定した範囲でループ(途中脱出可)</summary>
         static member range_interval_exit (i1:num0) = fun (i2:num0) -> fun (ii:num0) -> fun code -> 
             match p.lang with
@@ -715,7 +531,7 @@ namespace Aqualis
                         p.indentInc()
                         p.codewrite("break\n")
                         p.indentDec()
-                    
+                        
         ///<summary>指定した範囲i=i1->i2,j=j1->j2に対しcode(i,j)を実行</summary>
         static member range (i1:num0,j1:num0) = fun (i2:num0,j2:num0) -> fun code -> 
             iter.range i1 i2 <| fun i ->
@@ -750,22 +566,22 @@ namespace Aqualis
             iter.range (i1.I,j1.I,k1.I) (i2.I,j2.I,k2.I) code
             
         ///<summary>0から指定した回数ループ</summary>
-        // static member num (n1:num0) = fun code -> 
-        //     iter.range _0 n1 code
+        static member num (n1:num0) = fun code -> 
+            iter.range _0 (n1-1) code
             
         ///<summary>0から指定した回数ループ</summary>
         static member num (n1:num0,n2:num0) = fun code ->
             iter.num n1 <| fun i ->
                 iter.num n2 <| fun j ->
                     code(i,j)
-            
+                    
         ///<summary>1から指定した回数ループ</summary>
         static member num (n1:num0,n2:num0,n3:num0) = fun code ->
             iter.num n1 <| fun i ->
                 iter.num n2 <| fun j ->
                     iter.num n3 <| fun k ->
                         code(i,j,k)
-            
+                        
         ///<summary>0から指定した回数ループ</summary>
         static member num (n1:int) = fun code -> 
             iter.num n1.I code
@@ -779,9 +595,9 @@ namespace Aqualis
             iter.num (n1.I,n2.I,n3.I) code
             
         ///<summary>0から指定した回数ループ(途中脱出可)</summary>
-        // static member num_exit (n1:num0) = fun code -> 
-        //     iter.range_exit _0 n1 code 
-
+        static member num_exit (n1:num0) = fun code -> 
+            iter.range_exit _0 (n1-1) code 
+            
         ///<summary>lstの各要素に対しcodeを実行</summary>
         static member list (lst:seq<'a>) (code:'a->unit) =
             for a in lst do
