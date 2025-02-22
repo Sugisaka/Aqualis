@@ -732,22 +732,22 @@ namespace Aqualis
         ///<summary>配列をファイルに保存</summary>
         static member save_text (f:num3) =
             fun filename ->
-                io.fileOutput filename <| fun w -> 
-                    iter.array f <| fun (i,j,k) ->
+                io.fileOutput filename <| fun w ->
+                    f.foreach <| fun (i,j,k) ->
                         w [i;j;k;f.[i,j,k]]
                         
         ///<summary>配列をファイルに保存</summary>
         static member save_text (f:num2) =
             fun filename ->
                 io.fileOutput filename <| fun w -> 
-                    iter.array f <| fun (i,j) ->
+                    f.foreach <| fun (i,j) ->
                         w [i;j;f.[i,j]]
                         
         ///<summary>配列をファイルに保存</summary>
         static member save_text (f:num1) =
             fun filename ->
                 io.fileOutput filename <| fun w -> 
-                    iter.array f <| fun i -> 
+                    f.foreach <| fun i -> 
                         w [i;f.[i]]
 
         ///<summary>数値をファイルに保存</summary>

@@ -168,7 +168,7 @@ namespace Aqualis
                     pCy <== c_y-0.5
                     pDx <== c_x+0.5
                     pDy <== c_y-0.5
-                    let printerror s = br.if1 <| Or [f.>1.0; f.<0.0] <| fun () -> print.s[!.("error at pattern "+s+".")]
+                    let printerror s = br.if1 <| Or [f.>1.0; f.<0.0] <| fun () -> print.s [!.("error at pattern "+s+".")]
                     //重なり面積の計算 
                     br.branch <| fun b ->
                         //---pattern 1.--------------------------------------

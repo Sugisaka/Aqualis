@@ -39,7 +39,7 @@ namespace Aqualis
                             ch.d <| fun norm_ ->
                                 norm(norm_,r)
                                 err <== norm_/bnrm2
-                                print.s[_0;err;]
+                                print.s [_0;err;]
                             br.if1 (err .> tol) <| fun () ->
                                 ch.z <| fun omega ->
                                     omega <== 1
@@ -84,13 +84,13 @@ namespace Aqualis
                                             ch.d <| fun norm_ ->
                                                 norm(norm_,r)
                                                 err <== norm_/bnrm2
-                                            print.s[i;err]
+                                            print.s [i;err]
                                             //収束判定
                                             br.if1 (err .<= tol) <| fun () -> 
-                                                print.s[!."converged"]
+                                                print.s [!."converged"]
                                                 exit()
                                             br.if1 (asm.abs(omega) .= 0.0) <| fun () -> 
-                                                print.s[!."error_BiCGSTAB"]
+                                                print.s [!."error_BiCGSTAB"]
                                                 exit()
                                             rho_1 <== rho
                                     

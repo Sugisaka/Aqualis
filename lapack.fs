@@ -215,7 +215,7 @@ namespace Aqualis
                                 p.codewrite("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
                             |Python ->
                                 p.codewrite(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
-                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("InvMatrix Info: ");info]
+                        br.if1 (info .=/ 0) <| fun () -> print.s [!.("InvMatrix Info: ");info]
                         
         ///<summary>行列の階数</summary>
         ///<param name="rank">行列matの階数</param>
@@ -326,9 +326,9 @@ namespace Aqualis
                                 //行列の階級rank.codeを求める
                                 p.codewrite(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
 
-                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("rank Info: ");info]
+                        br.if1 (info .=/ 0) <| fun () -> print.s [!.("rank Info: ");info]
                         rank.clear()
-                        iter.array s <| fun i -> 
+                        s.foreach <| fun i -> 
                             br.if1 (s.[i] .> cond) <| fun () -> rank.inc()
                             
         ///<summary>疑似逆行列の計算</summary>
@@ -339,13 +339,19 @@ namespace Aqualis
             codestr.section "疑似逆行列" <| fun () ->
                 ch.iii <| fun (npre,info,lwork) ->
                     npre<==mat.size1
-                    ch.i1 npre <| fun ipiv -> ch.d1 npre <| fun s -> ch.z2 npre npre <| fun u -> ch.z2 npre npre <| fun u2 -> ch.z2 npre npre <| fun vt -> ch.d1 (npre*(5*npre+7)) <| fun rwork -> ch.i1 (8*npre) <| fun iwork -> 
+                    ch.i1 npre <| fun ipiv -> 
+                    ch.d1 npre <| fun s -> 
+                    ch.z2 npre npre <| fun u -> 
+                    ch.z2 npre npre <| fun u2 -> 
+                    ch.z2 npre npre <| fun vt -> 
+                    ch.d1 (npre*(5*npre+7)) <| fun rwork -> 
+                    ch.i1 (8*npre) <| fun iwork -> 
                         ipiv.clear()
                         lwork <== npre*npre+2*npre+npre
                         La.svd mat (u,s,vt)
                         //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
-                        iter.array s <| fun i -> 
-                            iter.array s <| fun j -> 
+                        s.foreach <| fun i -> 
+                            s.foreach <| fun j -> 
                                 br.if2 (s.[i] .> cond)
                                     (fun () ->
                                     u2.[i,j]<==(asm.conj(u.[j,i])/s.[i]))
@@ -353,9 +359,9 @@ namespace Aqualis
                                     //condより小さい特異値は無視
                                     u2.[i,j].clear())
                         mat2.clear()
-                        iter.array s <| fun i -> 
-                            iter.array s <| fun j ->
-                                iter.array s <| fun p ->
+                        s.foreach <| fun i -> 
+                            s.foreach <| fun j ->
+                                s.foreach <| fun p ->
                                     mat2.[i,j] <== mat2.[i,j] + asm.conj(vt.[p,i])*u2.[p,j]
                                     
         /// <summary>
@@ -415,7 +421,7 @@ namespace Aqualis
                                                 p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
                                             |Python -> 
                                                 p.codewrite(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
-                                            br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                            br.if1 (info .=/ 0) <| fun () -> print.s [!.("Eigenvalue Info: ");info]
             tbinder.d mat1 <| fun () ->
                 codestr.section "非対称実行列の固有値" <| fun () ->
                     eigenvectors.clear()
@@ -465,7 +471,7 @@ namespace Aqualis
                                                 p.codewrite("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
                                             |Python -> 
                                                 p.codewrite(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
-                                            br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                            br.if1 (info .=/ 0) <| fun () -> print.s [!.("Eigenvalue Info: ");info]
                             eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
                             
         /// <summary>
@@ -545,7 +551,7 @@ namespace Aqualis
                                         |Python -> 
                                             p.codewrite(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
                                             p.codewrite(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
-                                        br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                        br.if1 (info .=/ 0) <| fun () -> print.s [!.("Eigenvalue Info: ");info]
             tbinder.d mat1 <| fun () ->
                 codestr.section "非対称複素行列の一般化固有値" <| fun () ->
                     p.option("-llapack")
@@ -610,7 +616,7 @@ namespace Aqualis
                                     |Python -> 
                                             p.codewrite(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
                                             p.codewrite(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
-                                    br.if1 (info .=/ 0) <| fun () -> print.s[!.("Eigenvalue Info: ");info]
+                                    br.if1 (info .=/ 0) <| fun () -> print.s [!.("Eigenvalue Info: ");info]
                         iter.num eigenvalues1.size1 <| fun i ->
                             eigenvalues1.[i] <== eigenvalues1re.[i] + asm.uj + eigenvalues1im.[i]
                                         
