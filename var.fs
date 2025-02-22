@@ -252,7 +252,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp1(name:string,v:double list) = 
-            p.var.setUniqVarWarning(Zt,A1(v.Length),name,var.init_d1 v)
+            p.var.setUniqVarWarning(Dt,A1(v.Length),name,var.init_d1 v)
             num1(Dt,Var1(A1(v.Length),name))
             
         ///<summary>複素数型1次元配列定数</summary>

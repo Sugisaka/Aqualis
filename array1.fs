@@ -344,8 +344,8 @@ namespace Aqualis
                     p.codewrite(x + " \\leftarrow " + v2.code)
                 |Python ->
                     match v1.etype with
-                    |Structure(sname)       -> p.codewrite(x+" = numpy.array(["+sname+"() for _ in range(int("+v1.size1.code+"))], dtype=object)\n")
-                    |_                      -> p.codewrite(x+"[:]="+v2.code+"\n")
+                    |Structure(sname) -> p.codewrite(x+" = numpy.array(["+sname+"() for _ in range(int("+v1.size1.code+"))], dtype=object)\n")
+                    |_                -> p.codewrite(x+"[:]="+v2.code+"\n")
             |Arx1(_,_) ->
                 match p.lang with
                 |Fortran|LaTeX|C99|HTML|Python -> iter.num v1.size1 <| fun i -> v1[i] <== v2

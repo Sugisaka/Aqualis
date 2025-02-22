@@ -49,7 +49,7 @@ namespace Aqualis
                                         iter.num_exit (I max_iteration) <| fun (exit,i) ->
                                             dot_product2(rho,r_tld,r)
                                             br.if1 (asm.abs(rho) .= 0.0) <| fun () -> exit()
-                                            br.if2 (i .> 1)
+                                            br.if2 (i .> 0)
                                               (fun () ->
                                                 beta <== ( rho/rho_1 )*( alpha/omega )
                                                 iter.num r.size1 <| fun j -> p.[j] <== r.[j] + beta*( p.[j] - omega*v.[j]))

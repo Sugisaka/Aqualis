@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -23,7 +23,7 @@
     <Compile Include="array2.fs" />
     <Compile Include="array3.fs" />
     <Compile Include="tbinder.fs" />
-    <Compile Include="iter2.fs" />
+    
     <Compile Include="var.fs" />
     <Compile Include="ch.fs" />
     <Compile Include="random.fs" />

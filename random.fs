@@ -20,7 +20,7 @@ namespace Aqualis
                         p.codewrite("call random_seed(size="+seedsize.code+")")
                         seed.allocate(seedsize)
                         iter.num seedsize <| fun i ->
-                            p.codewrite("call system_clock(count="+seed.code+"("+i.code+"))")
+                            p.codewrite("call system_clock(count="+seed.code+"("+(i+1).code+"))")
                             p.codewrite("call random_seed(put="+seed.code+"(:))")
                         let setseed code =
                             code seed

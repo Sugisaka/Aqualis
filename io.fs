@@ -461,8 +461,8 @@ namespace Aqualis
                                 [for (t,m,b) in b do
                                     match t,b with 
                                     |Zt,Var _ ->
+                                        yield tmp.[2*m  ].code
                                         yield tmp.[2*m+1].code
-                                        yield tmp.[2*m+2].code
                                     |_,Var(_,n) ->
                                         yield n
                                     |_ -> 
@@ -472,14 +472,14 @@ namespace Aqualis
                             |> (fun b ->
                                   [for n in 0..(b.Length-1) do
                                       yield b.[n]
-                                      if n<(b.Length-1) then yield tab.[n+1].code
+                                      if n<(b.Length-1) then yield tab.[n].code
                                   ])
                             |> (fun s -> String.Join(",",s))
                         p.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.code+") "+code+"\n")
                         for (t,m,b) in varlist do
                             match t with
                             |Zt ->
-                                b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
+                                b <== tmp.[2*m]+asm.uj*tmp.[2*m+1]
                             |_ ->
                                 ()
                     if Nz>0 then tmp.deallocate()
@@ -508,8 +508,8 @@ namespace Aqualis
                             [for (t,m,a) in b do
                                 match t,a with 
                                 |Zt,Var _ ->
+                                    yield "&"+tmp.[2*m  ].code
                                     yield "&"+tmp.[2*m+1].code
-                                    yield "&"+tmp.[2*m+2].code
                                 |_,Var(_,n) ->
                                     yield "&"+n
                                 |_ ->
@@ -521,7 +521,7 @@ namespace Aqualis
                     for (t,m,b) in varlist do
                         match t with
                         |Zt ->
-                            b <== tmp.[2*m+1]+asm.uj*tmp.[2*m+2]
+                            b <== tmp.[2*m]+asm.uj*tmp.[2*m+1]
                         |_ ->
                             ()
             |LaTeX ->
@@ -593,8 +593,8 @@ namespace Aqualis
                             [for (t,m,a) in b do
                                 match t,a with 
                                 |Zt,Var _ ->
+                                    yield tmp.[2*m  ].code
                                     yield tmp.[2*m+1].code
-                                    yield tmp.[2*m+2].code
                                 |_,Var(_,n) ->
                                     yield n
                                 |_ ->
@@ -798,7 +798,7 @@ namespace Aqualis
                     w f.size1
                     //データ本体
                     iter.num f.size1 <| fun i ->
-                        match f[1].etype with
+                        match f[0].etype with
                         |Zt ->
                             w f[i].re
                             w f[i].im
@@ -825,7 +825,7 @@ namespace Aqualis
                     //データ本体
                     iter.num f.size2 <| fun j ->
                         iter.num f.size1 <| fun i ->
-                            match f[1,1].etype with
+                            match f[0,0].etype with
                             |Zt ->
                                 w f[i,j].re
                                 w f[i,j].im
@@ -854,7 +854,7 @@ namespace Aqualis
                     iter.num f.size3 <| fun k ->
                         iter.num f.size2 <| fun j ->
                             iter.num f.size1 <| fun i ->
-                                match f[1,1,1].etype with
+                                match f[0,0,0].etype with
                                 |Zt ->
                                     w f[i,j,k].re
                                     w f[i,j,k].im
@@ -953,13 +953,13 @@ namespace Aqualis
                     r n
                     br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
-                            match f[1].etype with
+                            match f[0].etype with
                             |Etype.It(4) ->
-                                reader r (1004,f[1].etype)
+                                reader r (1004,f[0].etype)
                             |Etype.Dt    -> 
-                                reader r (2000,f[1].etype)
+                                reader r (2000,f[0].etype)
                             |Etype.Zt    -> 
-                                reader r (3000,f[1].etype)
+                                reader r (3000,f[0].etype)
                             |_ -> 
                                 print.t "invalid data type"
                                   
@@ -1015,13 +1015,13 @@ namespace Aqualis
                     r n
                     br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
-                            match f[1,1].etype with
+                            match f[0,0].etype with
                             |Etype.It(4) ->
-                                reader r (1004,f[1,1].etype)
+                                reader r (1004,f[0,0].etype)
                             |Etype.Dt    -> 
-                                reader r (2000,f[1,1].etype)
+                                reader r (2000,f[0,0].etype)
                             |Etype.Zt    -> 
-                                reader r (3000,f[1,1].etype)
+                                reader r (3000,f[0,0].etype)
                             |_ -> 
                                 print.t "invalid data type"
                                   
@@ -1080,13 +1080,13 @@ namespace Aqualis
                     r n
                     br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
-                            match f[1,1,1].etype with
+                            match f[0,0,0].etype with
                             |Etype.It(4) ->
-                                reader r (1004,f[1,1,1].etype)
+                                reader r (1004,f[0,0,0].etype)
                             |Etype.Dt    -> 
-                                reader r (2000,f[1,1,1].etype)
+                                reader r (2000,f[0,0,0].etype)
                             |Etype.Zt    -> 
-                                reader r (3000,f[1,1,1].etype)
+                                reader r (3000,f[0,0,0].etype)
                             |_ -> 
                                   print.t "invalid data type"
                                   

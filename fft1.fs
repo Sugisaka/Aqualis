@@ -21,37 +21,37 @@ namespace Aqualis
             let n1 = a.size1
             let n2 = a.size1./2
             ch.z <| fun tmp ->
-                tmp <== a[n2+1]
+                tmp <== a[n2+1-1]
                 iter.num n2 <| fun i ->
-                    a[i+n2] <== a[i]
-                    a[i] <== a[i+n2+1]
-                a[a.size1] <== tmp
+                    a[i+n2-1] <== a[i-1]
+                    a[i-1] <== a[i+n2+1-1]
+                a[a.size1-1] <== tmp
         
         let fftshift_even(a:num1) =
             let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
-                    tmp <== a[i+n2]
-                    a[i+n2] <== a[i]
-                    a[i] <== tmp
+                    tmp <== a[i+n2-1]
+                    a[i+n2-1] <== a[i-1]
+                    a[i-1] <== tmp
                     
         let ifftshift_odd(a:num1) =
             let n1 = a.size1
             let n2 = n1./2
             ch.z <| fun tmp ->
-                tmp <== a[n2+1]
+                tmp <== a[n2+1-1]
                 iter.num n2 <| fun i ->
-                    a[n1-i+1-n2] <== a[n1-i+1]
-                    a[n1-i+1] <== a[n1-i+1-n2-1]
-                a[1] <== tmp
+                    a[n1-i+1-n2-1] <== a[n1-i+1-1]
+                    a[n1-i+1-1] <== a[n1-i+1-n2-1-1]
+                a[1-1] <== tmp
         
         let ifftshift_even(a:num1) =
             let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
-                    tmp <== a[i+n2]
-                    a[i+n2] <== a[i]
-                    a[i] <== tmp
+                    tmp <== a[i+n2-1]
+                    a[i+n2-1] <== a[i-1]
+                    a[i-1] <== tmp
                     
         let fftshift1(x:num1) =
             br.if2 (x.size1%2 .= 0)

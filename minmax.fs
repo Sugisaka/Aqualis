@@ -11,7 +11,7 @@ namespace Aqualis
         type asm with
             static member private cp1(zA:num1,v:num0,iv:num0 option,compare:num0*num0->bool0) =
                 match iv with |Some(iv) -> iv <== 1 |_ -> ()
-                v <== zA[1]
+                v <== zA[1-1]
                 iter.num zA.size1 <| fun i ->
                     br.if1 (compare(v, i)) <| fun () ->
                         match iv with |Some(iv) -> iv <== i |_ -> ()
@@ -20,7 +20,7 @@ namespace Aqualis
             static member private cp2(zA:num2,v:num0,iv1:num0 option,iv2:num0 option, compare:num0*num0*num0->bool0) =
                 match iv1 with |Some(iv1) -> iv1 <== 1 |_ -> ()
                 match iv2 with |Some(iv2) -> iv2 <== 1 |_ -> ()
-                v <== zA[1,1]
+                v <== zA[1-1,1-1]
                 iter.num zA.size1 <| fun i ->
                 iter.num zA.size2 <| fun j ->
                     br.if1 (compare(v, i, j)) <| fun () ->
@@ -32,7 +32,7 @@ namespace Aqualis
                 match iv1 with |Some(iv1) -> iv1 <== 1 |_ -> ()
                 match iv2 with |Some(iv2) -> iv2 <== 1 |_ -> ()
                 match iv3 with |Some(iv3) -> iv3 <== 1 |_ -> ()
-                v <== zA[1,1,1]
+                v <== zA[1-1,1-1,1-1]
                 iter.num zA.size1 <| fun i ->
                 iter.num zA.size2 <| fun j ->
                 iter.num zA.size3 <| fun k ->

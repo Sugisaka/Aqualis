@@ -142,7 +142,7 @@ type optimization() =
                     ch.d1 x0.size1 <| fun df0 -> 
                         df df0 x0
                         br.branch <| fun r ->
-                            r.IF (i.=1) <| fun () ->
+                            r.IF (i.=0) <| fun () ->
                                 a <== 0
                             r.EL <| fun () ->
                                 ch.d2 x0.size1 x0.size1 <| fun h ->
@@ -195,7 +195,7 @@ type optimization() =
                     ch.d1 x0.size1 <| fun (df0:num1) ->
                         df df0 x0
                         br.branch <| fun r ->
-                            r.IF (i.=1) <| fun () ->
+                            r.IF (i.=0) <| fun () ->
                                 a <== 0
                             r.EL <| fun () ->
                                 p1.foreach <| fun j ->
@@ -289,7 +289,7 @@ type optimization() =
                 dd0_ <== dd0
                 ch.d1 x0.size1 <| fun df0 ->
                     df df0 x0
-                    br.if1 (i.>1) <| fun () ->
+                    br.if1 (i.>0) <| fun () ->
                         y.foreach <| fun j -> y.[j] <== df0.[j] - df1.[j]
                         ch.d <| fun p ->
                             p.clear()
