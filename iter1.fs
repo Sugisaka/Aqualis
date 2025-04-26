@@ -211,7 +211,7 @@ namespace Aqualis
                     |_ ->
                         p.getloopvar_exit <| fun (goto,counter,exit) ->
                             p.exit_false
-                            p.codewrite("for "+counter+" in range("+i1.code+", "+i2.code+"+1, 1):"+"\n")
+                            p.codewrite("for "+counter+" in range("+i1.code+", "+(i2+1).code+", 1):"+"\n")
                             p.indentInc()
                             code(Var(It 4,counter))
                             if goto="10" then ()
