@@ -977,11 +977,11 @@ namespace Aqualis
                                         rwork.code + ", " + 
                                         info.code + ")")
                                         let nb = 64
-                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
                                             <| fun () ->
                                                 lwork <== m+3*n+nb*(m+n)
                                             <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
                                         work.allocate(lwork)
                                         p.codewrite("call zgesvd("+
                                         "'A', "+
@@ -1030,11 +1030,11 @@ namespace Aqualis
                                             rwork.code + ", " + 
                                             "&" + info.code + ");")
                                         let nb = 64
-                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
                                             <| fun () ->
                                                 lwork <== m+3*n+nb*(m+n)
                                             <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
                                         work.allocate(lwork)
                                         p.codewrite("zgesvd_(" + 
                                             "'A'" + ", " + 
@@ -1094,11 +1094,11 @@ namespace Aqualis
                                         rwork.code + ", " + 
                                         info.code + ")")
                                         let nb = 64
-                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
                                             <| fun () ->
                                                 lwork <== m+4*n+nb*(m+n)
                                             <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
                                         work.allocate(lwork)
                                         p.codewrite("call dgesvd("+
                                         "'A', "+
@@ -1148,11 +1148,11 @@ namespace Aqualis
                                             rwork.code + ", " + 
                                             "&" + info.code + ");")
                                         let nb = 64
-                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[1,1].re+0.5)))
+                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
                                             <| fun () ->
                                                 lwork <== m+4*n+nb*(m+n)
                                             <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[1,1].re+0.5))
+                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
                                         work.allocate(lwork)
                                         p.codewrite("dgesvd_(" + 
                                             "'A'" + ", " + 
