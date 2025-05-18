@@ -93,6 +93,8 @@ namespace Aqualis
         member this.d_cache_var with get() = this.param.d_cache_var
         ///<summary>一時変数(複素数)</summary>
         member this.z_cache_var with get() = this.param.z_cache_var
+        ///<summary>一時変数(文字)</summary>
+        member this.c_cache_var with get() = this.param.c_cache_var
         ///<summary>一時変数(整数1次元配列)</summary>
         member this.i1_cache_var with get() = this.param.i1_cache_var
         ///<summary>一時変数(小数1次元配列)</summary>

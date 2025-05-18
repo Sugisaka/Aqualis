@@ -20,7 +20,7 @@ namespace Aqualis
             x.clear()
             iter.num a.size1 <| fun i ->
                 iter.num a.size2 <| fun j ->
-                    x.[i] <== x.[i] + a.[i,j] * b.[j]                      
+                    x[i] <== x[i] + a[i,j] * b[j]                      
                     
         /// <summary>
         /// 行列×ベクトルの計算
@@ -41,7 +41,7 @@ namespace Aqualis
             iter.num a.size1 <| fun i ->
                 iter.num b.size2 <| fun j ->
                     iter.num a.size2 <| fun k ->
-                        u.[i,j] <== u.[i,j] + a.[i,k] * b.[k,j]
+                        u[i,j] <== u[i,j] + a[i,k] * b[k,j]
 
         /// <summary>
         /// 行列a×行列bの計算
@@ -64,11 +64,11 @@ namespace Aqualis
             tbinder.d a <| fun () ->
                 x.clear()
                 iter.num a.size1 <| fun j ->
-                    x <== x + a.[j] * b.[j]
+                    x <== x + a[j] * b[j]
             tbinder.z a <| fun () ->
                 x.clear()
                 iter.num a.size1 <| fun j ->
-                    x <== x + asm.conj(a.[j]) * b.[j]
+                    x <== x + asm.conj(a[j]) * b[j]
             
         /// <summary>
         /// ベクトルの内積計算
@@ -208,7 +208,7 @@ namespace Aqualis
             p.option "-lblas"
             codestr.section "逆行列の計算" <| fun () ->
                 mat2.clear()
-                iter.num mat1.size1 <| fun i -> mat2.[i,i] <== 1.0
+                iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
                 tbinder.z mat2 <| fun () ->
                     match p.lang with
                     |Fortran -> 
@@ -294,24 +294,27 @@ namespace Aqualis
                                 npre<==mat.size1
                                 ch.i1 mat.size1 <| fun ipiv -> ch.d1 (5*mat.size1) <| fun rwork -> ch.i1 (8*mat.size1) <| fun iwork -> 
                                 ch.z1 lwork <| fun work ->
+                                ch.c <| fun jobz ->
                                     ipiv.clear()
                                     lwork <== 2*npre+npre
                                     p.extn "void zgesdd_(char jobz, int m, int n, double complex *a, int lda, double *s, double complex *u, int ldu, double complex *vt, int ldvt, double complex *work, int lwork, double *rwork, int *iwork, int info)"
-                                    p.codewrite("zgesdd_('N', &" +  
-                                        npre.code + "," + "&" + 
-                                        npre.code + ", " + 
-                                        mat.code+", &" + 
-                                        npre.code + ", *" + 
-                                        s.code + ", *" + 
-                                        u.code + ", &" + 
-                                        npre.code + ", *" + 
-                                        vt.code + ", &" + 
-                                        npre.code + ", &" + 
-                                        work.code + ", &" + 
-                                        lwork.code + ", *" + 
-                                        rwork.code + ", *" + 
-                                        iwork.code + ", &" + 
-                                        info.code + ");")
+                                    p.codewrite(jobz.code + " = 'N';")
+                                    p.codewrite("zgesdd_(" +
+                                        "&" + jobz.code + ", " +
+                                        "&" + npre.code + "," +
+                                        "&" + npre.code + ", " + 
+                                        mat.code+", " +
+                                        "&" + npre.code + ", " +
+                                        "*" + s.code + ", " +
+                                        "*" + u.code + ", " +
+                                        "&" + npre.code + ", " +
+                                        "*" + vt.code + ", " +
+                                        "&" + npre.code + ", " +
+                                        "&" + work.code + ", " +
+                                        "&" + lwork.code + ", " +
+                                        "*" + rwork.code + ", " +
+                                        "*" + iwork.code + ", " +
+                                        "&" + info.code + ");")
                                     br.if1 (info .=/ 0) <| fun () -> print.s [!. "rank Info: ";info]
                         |LaTeX -> 
                             p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
@@ -354,24 +357,27 @@ namespace Aqualis
                                 npre<==mat.size1
                                 ch.i1 mat.size1 <| fun ipiv -> ch.d1 (5*mat.size1) <| fun rwork -> ch.i1 (8*mat.size1) <| fun iwork -> 
                                 ch.d1 lwork <| fun work ->
+                                ch.c <| fun jobz ->
                                     ipiv.clear()
                                     lwork <== 2*npre+npre
                                     p.extn "void dgesdd_(char jobz, int m, int n, double *a, int lda, double *s, double *u, int ldu, double *vt, int ldvt, double *work, int lwork, int *iwork, int info)"
-                                    p.codewrite("dgesdd_('N', &" +  
-                                        npre.code + "," + "&" + 
-                                        npre.code + ", " + 
-                                        mat.code+", &" + 
-                                        npre.code + ", *" + 
-                                        s.code + ", *" + 
-                                        u.code + ", &" + 
-                                        npre.code + ", *" + 
-                                        vt.code + ", &" + 
-                                        npre.code + ", &" + 
-                                        work.code + ", &" + 
-                                        lwork.code + ", *" + 
-                                        rwork.code + ", *" + 
-                                        iwork.code + ", &" + 
-                                        info.code + ");")
+                                    p.codewrite(jobz.code + " = 'N';")
+                                    p.codewrite("dgesdd_(" +
+                                        "&" + jobz.code + ", " +
+                                        "&" + npre.code + "," +
+                                        "&" + npre.code + ", " + 
+                                        mat.code+", " +
+                                        "&" + npre.code + ", " +
+                                        "*" + s.code + ", " +
+                                        "*" + u.code + ", "+
+                                        "&" + npre.code + ", " +
+                                        "*" + vt.code + ", " +
+                                        "&" + npre.code + ", " +
+                                        "&" + work.code + ", " +
+                                        "&" + lwork.code + ", " +
+                                        "*" + rwork.code + ", " +
+                                        "*" + iwork.code + ", " +
+                                        "&" + info.code + ");")
                                     br.if1 (info .=/ 0) <| fun () -> print.s [!. "rank Info: ";info]
                         |LaTeX -> 
                             p.codewrite("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
@@ -385,12 +391,12 @@ namespace Aqualis
                             p.codewrite(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
                     rank.clear()
                     s.foreach <| fun i -> 
-                        br.if1 (s.[i] .> cond) <| fun () -> rank.inc()
+                        br.if1 (s[i] .> cond) <| fun () -> rank.inc()
                         
         ///<summary>疑似逆行列の計算</summary>
         ///<param name="mat2">matの疑似逆行列</param>
         ///<param name="mat">行列</param>
-        ///<param name="cond">0とみなす上限値</param>
+        ///<param name="cond">特異値を0とみなす上限値</param>
         static member inverse_matrix2 (mat2:num2) (mat:num2) (cond:num0) =
             codestr.section "疑似逆行列" <| fun () ->
                 ch.i <| fun ns ->
@@ -399,26 +405,47 @@ namespace Aqualis
                         ns <== mat.size1 
                     <| fun () -> 
                         ns <== mat.size2
-                    ch.d1 ns <| fun s -> 
-                    ch.z2 mat.size1 mat.size1 <| fun u -> 
-                    ch.z2 mat.size2 mat.size2 <| fun vt -> 
-                    ch.z2 mat.size1 mat.size1 <| fun u2 -> 
-                        La.svd mat (u,s,vt)
-                        //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
-                        iter.num ns <| fun i -> 
-                            iter.num u.size1 <| fun j -> 
-                                br.if2 (s.[i]/s.[0] .> cond)
-                                <| fun () ->
-                                    u2.[i,j]<==(asm.conj(u.[j,i])/s.[i])
-                                <| fun () ->
-                                    //condより小さい特異値は無視
-                                    u2.[i,j].clear()
-                        mat2.clear()
-                        iter.num vt.size2 <| fun i -> 
-                            iter.num u2.size2  <| fun j ->
-                                iter.num u2.size1 <| fun p ->
-                                    mat2.[i,j] <== mat2.[i,j] + asm.conj(vt.[p,i])*u2.[p,j]
-                                    
+                    tbinder.z mat <| fun () ->
+                        ch.d1 ns <| fun s -> 
+                        ch.z2 mat.size1 mat.size1 <| fun u -> 
+                        ch.z2 mat.size2 mat.size2 <| fun vt -> 
+                        ch.z2 mat.size1 mat.size1 <| fun u2 -> 
+                            La.svd mat (u,s,vt)
+                            //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
+                            iter.num ns <| fun i -> 
+                                iter.num u.size1 <| fun j -> 
+                                    br.if2 (s[i]/s[0] .> cond)
+                                    <| fun () ->
+                                        u2[i,j] <== asm.conj(u[j,i]) / s[i]
+                                    <| fun () ->
+                                        //condより小さい特異値は無視
+                                        u2[i,j].clear()
+                            mat2.clear()
+                            iter.num vt.size2 <| fun i -> 
+                                iter.num u2.size2  <| fun j ->
+                                    iter.num u2.size1 <| fun p ->
+                                        mat2[i,j] <== mat2[i,j] + asm.conj(vt[p,i])*u2[p,j]
+                    tbinder.d mat <| fun () ->
+                        ch.d1 ns <| fun s -> 
+                        ch.d2 mat.size1 mat.size1 <| fun u -> 
+                        ch.d2 mat.size2 mat.size2 <| fun vt -> 
+                        ch.d2 mat.size1 mat.size1 <| fun u2 -> 
+                            La.svd mat (u,s,vt)
+                            //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
+                            iter.num ns <| fun i -> 
+                                iter.num u.size1 <| fun j -> 
+                                    br.if2 (s[i]/s[0] .> cond)
+                                    <| fun () ->
+                                        u2[i,j] <== u[j,i] / s[i]
+                                    <| fun () ->
+                                        //condより小さい特異値は無視
+                                        u2[i,j].clear()
+                            mat2.clear()
+                            iter.num vt.size2 <| fun i -> 
+                                iter.num u2.size2  <| fun j ->
+                                    iter.num u2.size1 <| fun p ->
+                                        mat2[i,j] <== mat2[i,j] + vt[p,i] * u2[p,j]
+                                        
         /// <summary>
         /// Ax=λxの固有値λと固有ベクトルxを計算
         /// </summary>
@@ -464,22 +491,28 @@ namespace Aqualis
                                         lwork <== 2*npre
                                         ch.z1 lwork <| fun work ->
                                             ch.d1 (2*npre) <| fun rwork ->
+                                            ch.c <| fun jobvl ->
+                                            ch.c <| fun jobvr ->
                                                 eigenvalues.clear()
                                                 ldvldummy <== 1
                                                 p.extn "void zgeev_(char *, char *, int *, double complex *, int *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
-                                                p.codewrite("zgeev_('N', 'V', &" + 
-                                                    npre.code + ", "  + 
-                                                    mat1.code + ", &" + 
-                                                    npre.code + ", " + 
+                                                p.codewrite(jobvl.code + " = 'N';")
+                                                p.codewrite(jobvr.code + " = 'V';")
+                                                p.codewrite("zgeev_(" +
+                                                    "&" + jobvl.code + ", " +
+                                                    "&" + jobvr.code + ", " +
+                                                    "&" + npre.code + ", "  + 
+                                                    mat1.code + ", " +
+                                                    "&" + npre.code + ", " + 
                                                     eigenvalues.code + ", " + 
-                                                    dummy.code + ", &" + 
-                                                    ldvldummy.code + ", " + 
-                                                    eigenvectors.code + ", &" + 
-                                                    npre.code + ", " + 
-                                                    work.code + ", &" + 
-                                                    lwork.code + ", " + 
-                                                    rwork.code + ", &" + 
-                                                    info.code + ");")
+                                                    dummy.code + ", " +
+                                                    "&" + ldvldummy.code + ", " + 
+                                                    eigenvectors.code + ", " +
+                                                    "&" + npre.code + ", " + 
+                                                    work.code + ", " +
+                                                    "&" + lwork.code + ", " + 
+                                                    rwork.code + ", " +
+                                                    "&" + info.code + ");")
                                                 br.if1 (info .=/ 0) <| fun () -> print.s [!. "Eigenvalue Info: ";info]
                     |LaTeX -> 
                         p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
@@ -526,22 +559,28 @@ namespace Aqualis
                                     ch.i <| fun lwork ->
                                         lwork <== 4*npre
                                         ch.d1 lwork <| fun work ->
+                                        ch.c <| fun jobvl ->
+                                        ch.c <| fun jobvr ->
                                                 eigenvalues.clear()
                                                 ldvldummy <== 1
                                                 p.extn "void dgeev_(char *, char *, int *, double *, int *, double *, double *, int *, double *, int *, double *, int *, double *, int *)"
-                                                p.codewrite("dgeev_('N', 'V', &" + 
-                                                    npre.code + ", "  + 
-                                                    mat1.code + ", &" + 
-                                                    npre.code + ", " + 
+                                                p.codewrite(jobvl.code + " = 'N';")
+                                                p.codewrite(jobvr.code + " = 'V';")
+                                                p.codewrite("dgeev_("+
+                                                    "&" + jobvl.code + ", " +
+                                                    "&" + jobvr.code + ", " +
+                                                    "&" + npre.code + ", "  + 
+                                                    mat1.code + ", "+
+                                                    "&" + npre.code + ", " + 
                                                     eigenvalues_re.code + ", " + 
                                                     eigenvalues_im.code + ", " + 
-                                                    dummy.code + ", &" + 
-                                                    ldvldummy.code + ", " + 
-                                                    eigenvectors.code + ", &" + 
-                                                    npre.code + ", " + 
-                                                    work.code + ", &" + 
-                                                    lwork.code + ", &" + 
-                                                    info.code + ");")
+                                                    dummy.code + ", " +
+                                                    "&" + ldvldummy.code + ", " + 
+                                                    eigenvectors.code + ", " +
+                                                    "&" + npre.code + ", " + 
+                                                    work.code + ", " +
+                                                    "&" + lwork.code + ", " +
+                                                    "&" + info.code + ");")
                                                 br.if1 (info .=/ 0) <| fun () -> print.s [!. "Eigenvalue Info: ";info]
                                                 eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
                     |LaTeX -> 
@@ -596,25 +635,29 @@ namespace Aqualis
                                                 rwork.code + ", "  + 
                                                 info.code + ")")
                                         |C99 -> 
-                                            p.extn "void zggev_(char *, char *, int *, double complex *, int *, double complex *, int *, double complex *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
-                                            p.codewrite("zggev_(" +
-                                                "'N'" + ", " +
-                                                "'V'" + ", " +
-                                                "&" + npre.code + ", " +
-                                                mat1.code + ", " +
-                                                "&" + npre.code + ", " +
-                                                mat2.code + ", " +
-                                                "&" + npre.code + ", " +
-                                                eigenvalues1.code + ", " +
-                                                eigenvalues2.code + ", " +
-                                                dummy.code + ", "+
-                                                "&" + ldvldummy.code + ", " +
-                                                eigenvectors.code + ", "+
-                                                "&" + npre.code + ", " +
-                                                work.code + ", " +
-                                                "&" + lwork.code + ", " +
-                                                rwork.code + ", " +
-                                                "&" + info.code + ");")
+                                            ch.c <| fun jobvl ->
+                                            ch.c <| fun jobvr ->
+                                                p.extn "void zggev_(char *, char *, int *, double complex *, int *, double complex *, int *, double complex *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
+                                                p.codewrite(jobvl.code + " = 'N';")
+                                                p.codewrite(jobvr.code + " = 'V';")
+                                                p.codewrite("zggev_(" +
+                                                    "&" + jobvl.code + ", " +
+                                                    "&" + jobvr.code + ", " +
+                                                    "&" + npre.code + ", " +
+                                                    mat1.code + ", " +
+                                                    "&" + npre.code + ", " +
+                                                    mat2.code + ", " +
+                                                    "&" + npre.code + ", " +
+                                                    eigenvalues1.code + ", " +
+                                                    eigenvalues2.code + ", " +
+                                                    dummy.code + ", "+
+                                                    "&" + ldvldummy.code + ", " +
+                                                    eigenvectors.code + ", "+
+                                                    "&" + npre.code + ", " +
+                                                    work.code + ", " +
+                                                    "&" + lwork.code + ", " +
+                                                    rwork.code + ", " +
+                                                    "&" + info.code + ");")
                                         |LaTeX -> 
                                             p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                                         |HTML -> 
@@ -668,7 +711,7 @@ namespace Aqualis
                                             info.code + ")")
                                         br.if1 (info .=/ 0) <| fun () -> print.s [!. "Eigenvalue Info: ";info]
                                         iter.num eigenvalues1.size1 <| fun i ->
-                                            eigenvalues1.[i] <== eigenvalues1re.[i] + asm.uj + eigenvalues1im.[i]
+                                            eigenvalues1[i] <== eigenvalues1re[i] + asm.uj + eigenvalues1im[i]
                     |C99 -> 
                         ch.d1 eigenvalues1.size1 <| fun eigenvalues1re ->
                         ch.d1 eigenvalues1.size1 <| fun eigenvalues1im ->
@@ -678,14 +721,18 @@ namespace Aqualis
                                 ch.i <| fun lwork ->
                                     lwork <== npre + 64 * npre
                                     ch.d1 lwork <| fun work ->
+                                    ch.c <| fun jobvl ->
+                                    ch.c <| fun jobvr ->
                                         eigenvalues1re.clear()
                                         eigenvalues1im.clear()
                                         eigenvalues2.clear()
                                         ldvldummy <== 1
                                         p.extn "void dggev_(char *, char *, int *, double complex *, int *, double complex *, int *, double complex *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
+                                        p.codewrite(jobvl.code + " = 'N';")
+                                        p.codewrite(jobvr.code + " = 'V';")
                                         p.codewrite("dggev_(" +
-                                            "'N'" + ", " +
-                                            "'V'" + ", " +
+                                            "&" + jobvl.code + ", " +
+                                            "&" + jobvr.code + ", " +
                                             "&" + npre.code + ", " +
                                             mat1.code + ", " +
                                             "&" + npre.code + ", " +
@@ -703,7 +750,7 @@ namespace Aqualis
                                             "&" + info.code + ");")
                                         br.if1 (info .=/ 0) <| fun () -> print.s [!. "Eigenvalue Info: ";info]
                                         iter.num eigenvalues1.size1 <| fun i ->
-                                            eigenvalues1.[i] <== eigenvalues1re.[i] + asm.uj + eigenvalues1im.[i]
+                                            eigenvalues1[i] <== eigenvalues1re[i] + asm.uj + eigenvalues1im[i]
                     |LaTeX -> 
                         p.codewrite("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                     |HTML -> 
@@ -730,20 +777,20 @@ namespace Aqualis
                             iter.num FF.size2 <| fun j ->
                                 tmp.clear()
                                 iter.num fu_mat.size1 <| fun k ->
-                                    tmp <== tmp + fu_mat.[k,i]*fu_mat.[k,j]
-                                FF.[i,j] <== tmp
+                                    tmp <== tmp + fu_mat[k,i]*fu_mat[k,j]
+                                FF[i,j] <== tmp
                                 
                     //FF = fu_mat^T * fu_mat + λ^2 * I
                     iter.num FF.size1 <| fun i ->
-                            FF.[i,i] <== FF.[i,i] + lambda * lambda
+                            FF[i,i] <== FF[i,i] + lambda * lambda
                     //bb = fu_mat^T * fu_cst
                     ch.d <| fun tmp ->
                         bb.clear()
                         iter.num bb.size1 <| fun i ->
                             tmp.clear()
                             iter.num fu_cst.size1 <| fun k ->
-                                tmp <== tmp + fu_mat.[k,i]*fu_cst.[k]
-                            bb.[i] <== tmp
+                                tmp <== tmp + fu_mat[k,i]*fu_cst[k]
+                            bb[i] <== tmp
                     La.solve_simuleq(FF,bb)
                     code bb
                     
@@ -768,19 +815,19 @@ namespace Aqualis
                                 iter.num FF.size2 <| fun j ->
                                     tmp.clear()
                                     iter.num fu_mat.size1 <| fun k ->
-                                        tmp <== tmp + asm.conj(fu_mat.[k,i])*fu_mat.[k,j]
-                                    FF.[i,j] <== tmp
+                                        tmp <== tmp + asm.conj(fu_mat[k,i])*fu_mat[k,j]
+                                    FF[i,j] <== tmp
                         //FF = fu_mat^T * fu_mat + λ^2 * I
                         iter.num FF.size1 <| fun i ->
-                                FF.[i,i] <== FF.[i,i] + lambda * lambda
+                                FF[i,i] <== FF[i,i] + lambda * lambda
                         //bb = fu_mat^T * fu_cst
                         ch.z <| fun tmp ->
                             bb.clear()
                             iter.num bb.size1 <| fun i ->
                                 tmp.clear()
                                 iter.num fu_cst.size1 <| fun k ->
-                                    tmp <== tmp + asm.conj(fu_mat.[k,i])*fu_cst.[k]
-                                bb.[i] <== tmp
+                                    tmp <== tmp + asm.conj(fu_mat[k,i])*fu_cst[k]
+                                bb[i] <== tmp
                         La.solve_simuleq(FF,bb)
                         code(bb)
                 |_ ->
@@ -794,19 +841,19 @@ namespace Aqualis
                                 iter.num FF.size2 <| fun j ->
                                     tmp.clear()
                                     iter.num fu_mat.size1 <| fun k ->
-                                        tmp <== tmp + fu_mat.[k,i]*fu_mat.[k,j]
-                                    FF.[i,j] <== tmp
+                                        tmp <== tmp + fu_mat[k,i]*fu_mat[k,j]
+                                    FF[i,j] <== tmp
                         //FF = fu_mat^T * fu_mat + λ^2 * I
                         iter.num FF.size1 <| fun i ->
-                                FF.[i,i] <== FF.[i,i] + lambda * lambda
+                                FF[i,i] <== FF[i,i] + lambda * lambda
                         //bb = fu_mat^T * fu_cst
                         ch.d <| fun tmp ->
                             bb.clear()
                             iter.num bb.size1 <| fun i ->
                                 tmp.clear()
                                 iter.num fu_cst.size1 <| fun k ->
-                                    tmp <== tmp + fu_mat.[k,i]*fu_cst.[k]
-                                bb.[i] <== tmp
+                                    tmp <== tmp + fu_mat[k,i]*fu_cst[k]
+                                bb[i] <== tmp
                         La.solve_simuleq(FF,bb)
                         code bb
                         
@@ -828,19 +875,19 @@ namespace Aqualis
                             iter.num FF.size2 <| fun j ->
                                 tmp.clear()
                                 iter.num fu_mat.size1 <| fun k ->
-                                    tmp <== tmp + asm.conj(fu_mat.[k,i])*fu_mat.[k,j]
-                                FF.[i,j] <== tmp
+                                    tmp <== tmp + asm.conj(fu_mat[k,i])*fu_mat[k,j]
+                                FF[i,j] <== tmp
                     //FF = fu_mat^T * fu_mat + λ^2 * I
                     iter.num FF.size1 <| fun i ->
-                            FF.[i,i] <== FF.[i,i] + lambda * lambda
+                            FF[i,i] <== FF[i,i] + lambda * lambda
                     //bb = fu_mat^T * fu_cst
                     ch.z <| fun tmp ->
                         bb.clear()
                         iter.num bb.size1 <| fun i ->
                             tmp.clear()
                             iter.num fu_cst.size1 <| fun k ->
-                                tmp <== tmp + asm.conj(fu_mat.[k,i])*fu_cst.[k,1]
-                            bb.[i] <== tmp
+                                tmp <== tmp + asm.conj(fu_mat[k,i])*fu_cst[k,1]
+                            bb[i] <== tmp
                     La.solve_simuleq(FF,bb)
                     code bb
                     
@@ -884,7 +931,7 @@ namespace Aqualis
                             p.codewrite(d.code+" = numpy.log10(det_"+matrix.code+")"+"\n")
                         d.clear()
                         iter.num matrix.size1 <| fun i ->
-                            d <== d + asm.log10(asm.abs(matrix.[i,i]))
+                            d <== d + asm.log10(asm.abs(matrix[i,i]))
                         code d
             tbinder.d matrix <| fun () ->
                 codestr.section "行列式の常用対数を計算" <| fun () ->
@@ -918,7 +965,7 @@ namespace Aqualis
                             p.codewrite(d.code+" = np.log10(np.abs(det_"+matrix.code+"))"+"\n")
                         d.clear()
                         iter.num matrix.size1 <| fun i ->
-                            d <== d + asm.log10(asm.abs(matrix.[i,i]))
+                            d <== d + asm.log10(asm.abs(matrix[i,i]))
                         code d
                         
         /// <summary>
@@ -948,73 +995,78 @@ namespace Aqualis
                         match p.lang with
                         |Fortran -> 
                             ch.iiii <| fun (m,n,lda,info) ->
+                            ch.i <| fun ns ->
                                 m <== mat1.size1
                                 n <== mat1.size2
+                                br.if2 (m.<n) (fun () -> ns <== m) (fun () -> ns <== n)
                                 ch.ii <| fun (ldu,ldvt) ->
                                 ch.i <| fun lwork ->
                                     ch.z01 <| fun work ->
-                                    ch.z2 1 1 <| fun dummy ->
-                                    ch.d1 (5*m) <| fun rwork ->
+                                    ch.d1 (5*ns) <| fun rwork ->
                                         lda <== m
                                         ldu <== u.size1
                                         ldvt <== vt.size2
                                         lwork <== -1
+                                        work.allocate 1
                                         p.codewrite("call zgesvd("+
-                                        "'A', "+
-                                        "'A', " + 
-                                        m.code + ", " + 
-                                        n.code + ", " +
-                                        mat1.code + ", " +
-                                        lda.code + ", " +
-                                        s.code+ ", " + 
-                                        u.code + ", "  + 
-                                        ldu.code + ", " + 
-                                        vt.code + ", "  + 
-                                        ldvt.code + ", " + 
-                                        dummy.code + ", " + 
-                                        lwork.code + ", " + 
-                                        rwork.code + ", " + 
-                                        info.code + ")")
-                                        let nb = 64
-                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
-                                            <| fun () ->
-                                                lwork <== m+3*n+nb*(m+n)
-                                            <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
-                                        work.allocate(lwork)
+                                            "'A', "+
+                                            "'A', " + 
+                                            m.code + ", " + 
+                                            n.code + ", " +
+                                            mat1.code + ", " +
+                                            lda.code + ", " +
+                                            s.code+ ", " + 
+                                            u.code + ", "  + 
+                                            ldu.code + ", " + 
+                                            vt.code + ", "  + 
+                                            ldvt.code + ", " + 
+                                            work.code + ", " + 
+                                            lwork.code + ", " + 
+                                            rwork.code + ", " + 
+                                            info.code + ")")
+                                        lwork <== asm.toint work[0].re
+                                        work.deallocate()
+                                        work.allocate lwork
                                         p.codewrite("call zgesvd("+
-                                        "'A', "+
-                                        "'A', " + 
-                                        m.code + ", " + 
-                                        n.code + ", " +
-                                        mat1.code + ", " +
-                                        lda.code + ", " +
-                                        s.code+ ", " + 
-                                        u.code + ", "  + 
-                                        ldu.code + ", " + 
-                                        vt.code + ", "  + 
-                                        ldvt.code + ", " + 
-                                        work.code + ", " + 
-                                        lwork.code + ", " + 
-                                        rwork.code + ", " + 
-                                        info.code + ")")
+                                            "'A', "+
+                                            "'A', " + 
+                                            m.code + ", " + 
+                                            n.code + ", " +
+                                            mat1.code + ", " +
+                                            lda.code + ", " +
+                                            s.code+ ", " + 
+                                            u.code + ", "  + 
+                                            ldu.code + ", " + 
+                                            vt.code + ", "  + 
+                                            ldvt.code + ", " + 
+                                            work.code + ", " + 
+                                            lwork.code + ", " + 
+                                            rwork.code + ", " + 
+                                            info.code + ")")
                                         work.deallocate()
                         |C99 -> 
                             ch.iiii <| fun (m,n,lda,info) ->
+                            ch.i <| fun ns ->
                                 m <== mat1.size1
                                 n <== mat1.size2
+                                br.if2 (m.<n) (fun () -> ns <== m) (fun () -> ns <== n)
                                 ch.ii <| fun (ldu,ldvt) ->
                                 ch.i <| fun lwork ->
                                     ch.z01 <| fun work ->
-                                    ch.z2 1 1 <| fun dummy ->
-                                    ch.d1 (5*m) <| fun rwork ->
+                                    ch.z <| fun wkopt ->
+                                    ch.d1 (5*ns) <| fun rwork ->
+                                    ch.c <| fun jobu ->
+                                    ch.c <| fun jobv ->
                                         lda <== m
                                         ldu <== u.size1
                                         ldvt <== vt.size2
+                                        lwork <== -1
                                         p.extn "void zgesvd_(char *, char *, int *, int *, double complex *, int *, double *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
+                                        p.codewrite(jobu.code + " = 'A';")
+                                        p.codewrite(jobv.code + " = 'A';")
                                         p.codewrite("zgesvd_(" + 
-                                            "'A'" + ", " + 
-                                            "'A'" + ", " + 
+                                            "&" + jobu.code + ", " + 
+                                            "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
                                             "&" + n.code + ", " +
                                             mat1.code + ", " +
@@ -1024,20 +1076,15 @@ namespace Aqualis
                                             "&" + ldu.code + ", " + 
                                             vt.code + ", "  + 
                                             "&" + ldvt.code + ", " + 
-                                            dummy.code + ", " + 
+                                            "&" + wkopt.code + ", " + 
                                             "&" + lwork.code + ", " + 
                                             rwork.code + ", " + 
                                             "&" + info.code + ");")
-                                        let nb = 64
-                                        br.if2 (m+3*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
-                                            <| fun () ->
-                                                lwork <== m+3*n+nb*(m+n)
-                                            <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
-                                        work.allocate(lwork)
+                                        lwork <== asm.toint wkopt.re
+                                        work.allocate lwork
                                         p.codewrite("zgesvd_(" + 
-                                            "'A'" + ", " + 
-                                            "'A'" + ", " + 
+                                            "&" + jobu.code + ", " + 
+                                            "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
                                             "&" + n.code + ", " +
                                             mat1.code + ", " +
@@ -1069,52 +1116,45 @@ namespace Aqualis
                                 n <== mat1.size2
                                 ch.ii <| fun (ldu,ldvt) ->
                                 ch.i <| fun lwork ->
-                                    ch.d1 lwork <| fun work ->
-                                    ch.d2 1 1 <| fun dummy ->
-                                    ch.d1 (5*m) <| fun rwork ->
+                                    ch.d01 <| fun work ->
                                         lda <== m
                                         ldu <== u.size1
                                         ldvt <== vt.size2
                                         lwork <== -1
+                                        work.allocate 1
                                         p.codewrite("call dgesvd("+
-                                        "'A', "+
-                                        "'A', " + 
-                                        m.code + ", " + 
-                                        n.code + ", " +
-                                        mat1.code + ", " +
-                                        lda.code + ", " +
-                                        s.code+ ", " + 
-                                        u.code + ", "  + 
-                                        ldu.code + ", " + 
-                                        vt.code + ", "  + 
-                                        ldvt.code + ", " + 
-                                        dummy.code + ", " + 
-                                        lwork.code + ", " + 
-                                        rwork.code + ", " + 
-                                        info.code + ")")
-                                        let nb = 64
-                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
-                                            <| fun () ->
-                                                lwork <== m+4*n+nb*(m+n)
-                                            <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
-                                        work.allocate(lwork)
+                                            "'A', "+
+                                            "'A', " + 
+                                            m.code + ", " + 
+                                            n.code + ", " +
+                                            mat1.code + ", " +
+                                            lda.code + ", " +
+                                            s.code+ ", " + 
+                                            u.code + ", "  + 
+                                            ldu.code + ", " + 
+                                            vt.code + ", "  + 
+                                            ldvt.code + ", " + 
+                                            work.code + ", " + 
+                                            lwork.code + ", " + 
+                                            info.code + ")")
+                                        lwork <== asm.toint work[0]
+                                        work.deallocate()
+                                        work.allocate lwork
                                         p.codewrite("call dgesvd("+
-                                        "'A', "+
-                                        "'A', " + 
-                                        m.code + ", " + 
-                                        n.code + ", " +
-                                        mat1.code + ", " +
-                                        lda.code + ", " +
-                                        s.code+ ", " + 
-                                        u.code + ", "  + 
-                                        ldu.code + ", " + 
-                                        vt.code + ", "  + 
-                                        ldvt.code + ", " + 
-                                        work.code + ", " + 
-                                        lwork.code + ", " + 
-                                        rwork.code + ", " + 
-                                        info.code + ")")
+                                            "'A', "+
+                                            "'A', " + 
+                                            m.code + ", " + 
+                                            n.code + ", " +
+                                            mat1.code + ", " +
+                                            lda.code + ", " +
+                                            s.code+ ", " + 
+                                            u.code + ", "  + 
+                                            ldu.code + ", " + 
+                                            vt.code + ", "  + 
+                                            ldvt.code + ", " + 
+                                            work.code + ", " + 
+                                            lwork.code + ", " + 
+                                            info.code + ")")
                                         work.deallocate()
                         |C99 -> 
                             ch.iiii <| fun (m,n,lda,info) ->
@@ -1122,17 +1162,20 @@ namespace Aqualis
                                 n <== mat1.size2
                                 ch.ii <| fun (ldu,ldvt) ->
                                 ch.i <| fun lwork ->
-                                    ch.d1 lwork <| fun work ->
-                                    ch.d2 1 1 <| fun dummy ->
-                                    ch.d1 (5*m) <| fun rwork ->
+                                    ch.d01 <| fun work ->
+                                    ch.c <| fun jobu ->
+                                    ch.c <| fun jobv ->
                                         lda <== m
                                         ldu <== u.size1
                                         ldvt <== vt.size2
-                                        p.extn "void dgesvd_(char *, char *, int *, int *, double complex *, int *, double *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
+                                        p.extn "void dgesvd_(char *, char *, int *, int *, double *, int *, double *, double *, int *, double *, int *, double *, int *, int *)"
+                                        p.codewrite(jobu.code + " = 'A';")
+                                        p.codewrite(jobv.code + " = 'A';")
                                         lwork <== -1
+                                        work.allocate 1
                                         p.codewrite("dgesvd_(" + 
-                                            "'A'" + ", " + 
-                                            "'A'" + ", " + 
+                                            "&" + jobu.code + ", " + 
+                                            "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
                                             "&" + n.code + ", " +
                                             mat1.code + ", " +
@@ -1144,18 +1187,13 @@ namespace Aqualis
                                             "&" + ldvt.code + ", " + 
                                             work.code + ", " + 
                                             "&" + lwork.code + ", " + 
-                                            rwork.code + ", " + 
                                             "&" + info.code + ");")
-                                        let nb = 64
-                                        br.if2 (m+4*n+nb*(m+n) .> asm.toint(asm.floor(dummy[0,0].re+0.5)))
-                                            <| fun () ->
-                                                lwork <== m+4*n+nb*(m+n)
-                                            <| fun () ->
-                                                lwork <== asm.toint(asm.floor(dummy[0,0].re+0.5))
-                                        work.allocate(lwork)
+                                        lwork <== asm.toint work[0]
+                                        work.deallocate()
+                                        work.allocate lwork
                                         p.codewrite("dgesvd_(" + 
-                                            "'A'" + ", " + 
-                                            "'A'" + ", " + 
+                                            "&" + jobu.code + ", " + 
+                                            "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
                                             "&" + n.code + ", " +
                                             mat1.code + ", " +
@@ -1167,7 +1205,6 @@ namespace Aqualis
                                             "&" + ldvt.code + ", " + 
                                             work.code + ", " + 
                                             "&" + lwork.code + ", " + 
-                                            rwork.code + ", " + 
                                             "&" + info.code + ");")
                                         work.deallocate()
                         |Python -> 
@@ -1187,6 +1224,6 @@ namespace Aqualis
                 ch.z2 mat.size1 mat.size2 <| fun vt ->
                     La.svd mat (u,s,vt)
                     !"0に近いほど正確な解"
-                    print.tc "solve_homogeneq" s.[mat.size1]
+                    print.tc "solve_homogeneq" s[mat.size1]
                     iter.num mat.size1 <| fun i ->
-                        f.[i] <== asm.conj(vt.[mat.size1,i])
+                        f[i] <== asm.conj(vt[mat.size1,i])

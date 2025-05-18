@@ -29,6 +29,12 @@ namespace Aqualis
             code <| Var(Zt, x)
             p.z_cache_var.setVar(Zt,A0,x,"")
             
+        ///<summary>文字型一時変数の生成</summary>
+        static member c code = 
+            let x = p.c_cache_var.getAutoVar()
+            code <| Var(Structure "char", x)
+            p.c_cache_var.setVar(Structure "char",A0,x,"")
+            
         ///<summary>整数型一時変数を生成し、valueを代入してからcodeで使用</summary>
         static member si (value:num0) = fun code ->
             ch.i <| fun v ->

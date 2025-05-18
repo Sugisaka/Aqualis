@@ -137,6 +137,9 @@ namespace Aqualis
         ///<summary>複数の代入文で続けて使用できる一時変数（複素数）</summary>
         member val z_cache_var = new VarController("z",lan)
         
+        ///<summary>複数の代入文で続けて使用できる一時変数（文字）</summary>
+        member val c_cache_var = new VarController("c",lan)
+        
         ///<summary>複数の代入文で続けて使用できる一時変数（ファイルポインタ）</summary>
         member val f_cache_var = new VarController("f",lan)
         
@@ -233,6 +236,7 @@ namespace Aqualis
             this.i_cache_var.clear()
             this.d_cache_var.clear()
             this.z_cache_var.clear()
+            this.c_cache_var.clear()
             this.f_cache_var.clear()
             this.i1_cache_var.clear()
             this.d1_cache_var.clear()
@@ -441,6 +445,10 @@ namespace Aqualis
                 //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
                 for i in 1..this.z_cache_var.maxcounter do
                     this.vwrite(this.declare(Zt,A0,this.z_cache_var.getAutoVarName(i),"")+"\n")
+
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.c_cache_var.maxcounter do
+                    this.vwrite(this.declare(Structure "char",A0,this.c_cache_var.getAutoVarName(i),"")+"\n")
                     
                 for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
@@ -488,7 +496,11 @@ namespace Aqualis
                 //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
                 for i in 1..this.z_cache_var.maxcounter do
                     this.vwrite(this.declare(Zt,A0,this.z_cache_var.getAutoVarName(i),"")+"\n")
-                        
+                    
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.c_cache_var.maxcounter do
+                    this.vwrite(this.declare(Structure "char",A0,this.c_cache_var.getAutoVarName(i),"")+"\n")
+                    
                 for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
@@ -515,6 +527,8 @@ namespace Aqualis
                     this.vwrite("\\item Cache variables (double): \\(d_m (m = 1"+(if this.d_cache_var.maxcounter=1 then "" else " \\cdots "+this.d_cache_var.maxcounter.ToString())+")\\)"+"\n")
                 if this.z_cache_var.maxcounter>0 then
                     this.vwrite("\\item Cache variables (complex): \\(z_m (m = 1"+(if this.z_cache_var.maxcounter=1 then "" else " \\cdots "+this.z_cache_var.maxcounter.ToString())+")\\)"+"\n")
+                if this.c_cache_var.maxcounter>0 then
+                    this.vwrite("\\item Cache variables (char): \\(c_m (m = 1"+(if this.c_cache_var.maxcounter=1 then "" else " \\cdots "+this.c_cache_var.maxcounter.ToString())+")\\)"+"\n")
                     
                 if this.i1_cache_var.maxcounter>0 then
                     this.vwrite("\\item Cache array (integer,1d): \\(\\dot{i}_m (m = 1"+(if this.i1_cache_var.maxcounter=1 then "" else " \\cdots "+this.i1_cache_var.maxcounter.ToString()+")")+")\\)"+"\n")
@@ -549,6 +563,8 @@ namespace Aqualis
                     this.vwrite("\t\t\t<li>Cache variables (double): \\(d_m (m = 1"+(if this.d_cache_var.maxcounter=1 then "" else " \\cdots "+this.d_cache_var.maxcounter.ToString())+")\\)</li>"+"\n")
                 if this.z_cache_var.maxcounter>0 then
                     this.vwrite("\t\t\t<li>Cache variables (complex): \\(z_m (m = 1"+(if this.z_cache_var.maxcounter=1 then "" else " \\cdots "+this.z_cache_var.maxcounter.ToString())+")\\)</li>"+"\n")
+                if this.c_cache_var.maxcounter>0 then
+                    this.vwrite("\t\t\t<li>Cache variables (char): \\(c_m (m = 1"+(if this.c_cache_var.maxcounter=1 then "" else " \\cdots "+this.c_cache_var.maxcounter.ToString())+")\\)</li>"+"\n")
                     
                 if this.i1_cache_var.maxcounter>0 then
                     this.vwrite("\t\t\t<li>Cache array (integer,1d): \\(\\dot{i}_m (m = 1"+(if this.i1_cache_var.maxcounter=1 then "" else " \\cdots "+this.i1_cache_var.maxcounter.ToString()+")")+")\\)</li>"+"\n")
@@ -604,6 +620,10 @@ namespace Aqualis
                 for i in 1..this.z_cache_var.maxcounter do
                     this.vwrite(this.declare(Zt,A0,this.z_cache_var.getAutoVarName(i),"")+"\n")
                         
+                //リストでなくmaxcounterから変数宣言（sumで使用された変数はリストに格納されないため）
+                for i in 1..this.c_cache_var.maxcounter do
+                    this.vwrite(this.declare(Structure "char",A0,this.c_cache_var.getAutoVarName(i),"")+"\n")
+                    
                 for x in [this.i1_cache_var;this.d1_cache_var;this.z1_cache_var] do
                     for (etyp,vtyp,name,p) in x.list do 
                         this.vwrite(this.declare(etyp,vtyp,name,p)+"\n")
