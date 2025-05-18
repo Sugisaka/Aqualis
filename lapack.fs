@@ -409,17 +409,15 @@ namespace Aqualis
                         ch.d1 ns <| fun s -> 
                         ch.z2 mat.size1 mat.size1 <| fun u -> 
                         ch.z2 mat.size2 mat.size2 <| fun vt -> 
-                        ch.z2 mat.size1 mat.size1 <| fun u2 -> 
+                        ch.z2 mat.size2 mat.size1 <| fun u2 -> 
                             La.svd mat (u,s,vt)
                             //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
+                            u2.clear()
                             iter.num ns <| fun i -> 
                                 iter.num u.size1 <| fun j -> 
-                                    br.if2 (s[i]/s[0] .> cond)
-                                    <| fun () ->
+                                    //condより小さい特異値は無視
+                                    br.if1 (s[i]/s[0] .> cond) <| fun () ->
                                         u2[i,j] <== asm.conj(u[j,i]) / s[i]
-                                    <| fun () ->
-                                        //condより小さい特異値は無視
-                                        u2[i,j].clear()
                             mat2.clear()
                             iter.num vt.size2 <| fun i -> 
                                 iter.num u2.size2  <| fun j ->
@@ -429,17 +427,14 @@ namespace Aqualis
                         ch.d1 ns <| fun s -> 
                         ch.d2 mat.size1 mat.size1 <| fun u -> 
                         ch.d2 mat.size2 mat.size2 <| fun vt -> 
-                        ch.d2 mat.size1 mat.size1 <| fun u2 -> 
+                        ch.d2 mat.size2 mat.size1 <| fun u2 -> 
                             La.svd mat (u,s,vt)
                             //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
+                            u2.clear()
                             iter.num ns <| fun i -> 
                                 iter.num u.size1 <| fun j -> 
-                                    br.if2 (s[i]/s[0] .> cond)
-                                    <| fun () ->
+                                    br.if1 (s[i]/s[0] .> cond) <| fun () ->
                                         u2[i,j] <== u[j,i] / s[i]
-                                    <| fun () ->
-                                        //condより小さい特異値は無視
-                                        u2[i,j].clear()
                             mat2.clear()
                             iter.num vt.size2 <| fun i -> 
                                 iter.num u2.size2  <| fun j ->
