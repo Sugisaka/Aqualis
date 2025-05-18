@@ -393,31 +393,30 @@ namespace Aqualis
         ///<param name="cond">0とみなす上限値</param>
         static member inverse_matrix2 (mat2:num2) (mat:num2) (cond:num0) =
             codestr.section "疑似逆行列" <| fun () ->
-                ch.iii <| fun (npre,info,lwork) ->
-                    npre<==mat.size1
-                    ch.i1 npre <| fun ipiv -> 
-                    ch.d1 npre <| fun s -> 
-                    ch.z2 npre npre <| fun u -> 
-                    ch.z2 npre npre <| fun u2 -> 
-                    ch.z2 npre npre <| fun vt -> 
-                    ch.d1 (npre*(5*npre+7)) <| fun rwork -> 
-                    ch.i1 (8*npre) <| fun iwork -> 
-                        ipiv.clear()
-                        lwork <== npre*npre+2*npre+npre
+                ch.i <| fun ns ->
+                    br.if2  (mat.size1.<mat.size2) 
+                    <| fun () -> 
+                        ns <== mat.size1 
+                    <| fun () -> 
+                        ns <== mat.size2
+                    ch.d1 ns <| fun s -> 
+                    ch.z2 mat.size1 mat.size1 <| fun u -> 
+                    ch.z2 mat.size2 mat.size2 <| fun vt -> 
+                    ch.z2 mat.size1 mat.size1 <| fun u2 -> 
                         La.svd mat (u,s,vt)
                         //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
-                        s.foreach <| fun i -> 
-                            s.foreach <| fun j -> 
-                                br.if2 (s.[i] .> cond)
-                                    (fun () ->
-                                    u2.[i,j]<==(asm.conj(u.[j,i])/s.[i]))
-                                    (fun () ->
+                        iter.num ns <| fun i -> 
+                            iter.num u.size1 <| fun j -> 
+                                br.if2 (s.[i]/s.[0] .> cond)
+                                <| fun () ->
+                                    u2.[i,j]<==(asm.conj(u.[j,i])/s.[i])
+                                <| fun () ->
                                     //condより小さい特異値は無視
-                                    u2.[i,j].clear())
+                                    u2.[i,j].clear()
                         mat2.clear()
-                        s.foreach <| fun i -> 
-                            s.foreach <| fun j ->
-                                s.foreach <| fun p ->
+                        iter.num vt.size2 <| fun i -> 
+                            iter.num u2.size2  <| fun j ->
+                                iter.num u2.size1 <| fun p ->
                                     mat2.[i,j] <== mat2.[i,j] + asm.conj(vt.[p,i])*u2.[p,j]
                                     
         /// <summary>

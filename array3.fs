@@ -75,11 +75,11 @@ namespace Aqualis
                     p.comment("***debug array1 access check: "+p.errorID.ToString()+"*****************************")
                     br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () -> 
                         print.t ("ERROR"+p.errorID.ToString()+" array "+name+" is not allocated")
-                    br.if1 (Or [(i .< _1); (this.size1 .< i)]) <| fun () ->
+                    br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
-                    br.if1 (Or [(j .< _1); (this.size2 .< j)]) <| fun () ->
+                    br.if1 (Or [j .< _0; this.size2 .<= j]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");j;!." is out of range (1:";this.size2;!.")"]
-                    br.if1 (Or [(k .< _1); (this.size3 .< k)]) <| fun () ->
+                    br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
                         print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");k;!." is out of range (1:";this.size3;!.")"]
                     p.comment("****************************************************")
                 |_ -> ()

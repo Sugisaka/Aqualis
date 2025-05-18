@@ -52,7 +52,7 @@ namespace Aqualis
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () -> 
                             print.t ("ERROR"+p.errorID.ToString()+" array "+name+" is not allocated")
-                        b.IF (Or [(i .< _1); (this.size1 .< i)]) <| fun () ->
+                        b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
                             print.s [!.("ERROR"+p.errorID.ToString()+" array "+name+" illegal access. index ");i;!." is out of range (1:";this.size1;!.")"]
                     p.comment("****************************************************")
                 |_ -> ()
