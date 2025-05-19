@@ -182,7 +182,7 @@ namespace Aqualis
             let x = p.d3_cache_var.getAutoVar()
             let y = num3(Dt,Var3(A3(0,0,0),x))
             code y
-            p.i3_cache_var.setVar(Dt,A3(0,0,0),x,"")
+            p.d3_cache_var.setVar(Dt,A3(0,0,0),x,"")
             
         ///<summary>複素数型3次元配列を生成</summary>
         static member z03 code = 
