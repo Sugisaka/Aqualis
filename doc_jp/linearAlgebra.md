@@ -1,14 +1,6 @@
 [目次へ戻る](index.md)
 ## 線形代数演算
 
-`open Aqualis`の下の行に
-
-```fsharp
-open Aqualis.lapack
-```
-
-を追加しておく。
-
 ### 単独の連立方程式
 
 連立方程式
@@ -16,7 +8,6 @@ open Aqualis.lapack
 $$
 \begin{align}
 A\boldsymbol{x} = \boldsymbol{b}
-\tag{1}
 \end{align}
 $$
 
@@ -24,18 +15,18 @@ $$
 
 $$
 \begin{align}
-A=
+A &=
 \begin{bmatrix}
 1 & 2 \\
 3 & 4 
 \end{bmatrix}
 ,
-\boldsymbol{b}=
+\\
+\boldsymbol{b} &=
 \begin{bmatrix}
 5 \\
 6 
 \end{bmatrix}
-\tag{2}
 \end{align}
 $$
 
@@ -100,7 +91,6 @@ A\boldsymbol{x}_1 &= \boldsymbol{b}_1 \\
 A\boldsymbol{x}_2 &= \boldsymbol{b}_2 \\
 &\vdots \\
 A\boldsymbol{x}_N &= \boldsymbol{b}_N
-\tag{3}
 \end{align}
 $$
 
