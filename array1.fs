@@ -60,10 +60,10 @@ namespace Aqualis
             |Var1(_,name) -> Idx1(typ,name,i)
             |Arx1(_,f) -> f i
         member this.Idx1(i:int) = this.Idx1(i.I)
-        member this.Idx1(a:num0,b:num0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a-1))
-        member this.Idx1(a:num0,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a-1))
-        member this.Idx1(a:int ,b:num0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a-1))
-        member this.Idx1(a:int ,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a-1))
+        member this.Idx1(a:num0,b:num0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(a:num0,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(a:int ,b:num0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(a:int ,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
         
         ///<summary>配列のメモリ割り当て</summary>
         member this.allocate(n1:num0) =
