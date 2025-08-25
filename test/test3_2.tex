@@ -11,92 +11,25 @@
 \parindent=0mm
 \unitlength=1.00mm
 \begin{document}
-{\Large Program: test3\_2}
+{\Large test3\_2}
 
 \section{structures}
 \subsection{testClass1}\begin{itemize}
   \item int $n1$
-  \item double $x1$
-  \item complex $z1$
 \end{itemize}
 \subsection{testClass2}\begin{itemize}
-  \item testClass1 $s2$
   \item testClass1 (allocatable) $t2$ (:)
   \item int $t2_size$ (1)
 \end{itemize}
 \section{subroutines}
 \section{global variables}
 \begin{itemize}
-\item complex $\mathrm{j}$=(0d0,1d0)
 \item testClass2 (allocatable) $q$ (:)
-\item testClass2 $p$
-\item int (allocatable) $xx$ (:)
-\item testClass1 (allocatable) $d$ (:)
-\item testClass1 $c$
-\item Loop counter: \(n_m (m = 1)\)
-\item Cache array (integer,1d): \(\dot{i}_m (m = 1)\)
+\item Loop counter: \(n_m (m = 1 \cdots 0)\)
 \end{itemize}
 \section{main code}
-$d$: allocate($4$)\\
-$xx$: allocate($8$)\\
 $q$: allocate($5$)\\
-\begin{align}
-p.s2.n1 \leftarrow 100
-\end{align}
-\begin{align}
-p.s2.x1 \leftarrow 200
-\end{align}
-\begin{align}
-p.s2.z1 \leftarrow 300+\mathrm{j} \cdot 400
-\end{align}
-$p.t2$: allocate($3$)\\
-$q(1).t2$: allocate($2$)\\
-\begin{align}
-q(1).t2(2).n1 \leftarrow 2000
-\end{align}
-\begin{align}
-p.t2(1).n1 \leftarrow 1000
-\end{align}
-for $n_{1}=1\cdots \mathcal{S}_1[d]$\\
-  \begin{align}
-  d(n_{1}).n1 \leftarrow 1
-  \end{align}
-  \begin{align}
-  d(n_{1}).x1 \leftarrow 2
-  \end{align}
-  \begin{align}
-  d(n_{1}).z1 \leftarrow 3+\mathrm{j} \cdot 4
-  \end{align}
-end\\
-$\dot{i}_{1}$: allocate($10$)\\
-\begin{align}
-\dot{i}_{1}(1) \leftarrow 1
-\end{align}
-\begin{align}
-\dot{i}_{1}(2) \leftarrow 2
-\end{align}
-\begin{align}
-\dot{i}_{1}(3) \leftarrow 3
-\end{align}
-\begin{align}
-\dot{i}_{1}(4) \leftarrow 4
-\end{align}
-$\dot{i}_{1}$: deallocate\\
-$\dot{i}_{1}$: allocate($20$)\\
-\begin{align}
-\dot{i}_{1}(1) \leftarrow 1
-\end{align}
-\begin{align}
-\dot{i}_{1}(2) \leftarrow 2
-\end{align}
-\begin{align}
-\dot{i}_{1}(3) \leftarrow 3
-\end{align}
-\begin{align}
-\dot{i}_{1}(4) \leftarrow 4
-\end{align}
-$\dot{i}_{1}$: deallocate\\
-print, p.s2.n1
-print, p.s2.x1
-print, p.s2.z1
+$q[1].t2$: allocate($2$)\\
+q[1].t2[2].n1 \leftarrow 2000
+print, q[1].t2[2].n1
 \end{document}

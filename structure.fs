@@ -39,13 +39,19 @@ namespace Aqualis
                 strlist <- structmember(sname)::strlist
         
         ///<summary>構造体メンバ変数を追加</summary>
-        member __.addmember(sname,(typ,vtp,name)) =
+        member this.addmember(sname,(typ,vtp,name)) =
+            // 追加するメンバ変数の型が構造体の場合、その構造体定義も追加
+            match typ with
+            |Structure s ->
+                this.addstructure s
+            |_ ->
+                ()
             match strlist |> List.tryFindIndex (fun s -> s.sname=sname) with
-            |Some(i) ->
+            |Some i ->
                 strlist.[i].add(typ,vtp,name)
             |None ->
                 ()
-                  
+                
         ///<summary>構造体メンバがすべてそれ以前に定義された構造体となるようにソート</summary>
         member private __.sort() =
             //lst1：ソート済みリスト
