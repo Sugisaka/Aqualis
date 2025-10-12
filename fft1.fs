@@ -18,64 +18,72 @@ namespace Aqualis
             member __.code = name
             
         let fftshift_odd(a:num1) =
-            let n1 = a.size1
-            let n2 = a.size1./2
-            ch.z <| fun tmp ->
-                tmp <== a[n2+1-1]
-                iter.num n2 <| fun i ->
-                    a[i+n2-1] <== a[i-1]
-                    a[i-1] <== a[i+n2+1-1]
-                a[a.size1-1] <== tmp
-        
+            let n2 = a.size1./2 + 1
+            ch.iiz <| fun (c1,c2,tmp) ->
+                c1 <== 0
+                tmp <== a[c1]
+                iter.num a.size1 <| fun i ->
+                    br.if2 (c1+n2 .>= a.size1)
+                    <| fun () -> c2 <== c1+n2-a.size1
+                    <| fun () -> c2 <== c1+n2
+                    a[c1] <== a[c2]
+                    c1 <== c2
+                a[c1+n2-1] <== tmp
+                
         let fftshift_even(a:num1) =
             let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
-                    tmp <== a[i+n2-1]
-                    a[i+n2-1] <== a[i-1]
-                    a[i-1] <== tmp
+                    tmp <== a[i+n2]
+                    a[i+n2] <== a[i]
+                    a[i] <== tmp
                     
         let ifftshift_odd(a:num1) =
-            let n1 = a.size1
-            let n2 = n1./2
-            ch.z <| fun tmp ->
-                tmp <== a[n2+1-1]
-                iter.num n2 <| fun i ->
-                    a[n1-i+1-n2-1] <== a[n1-i+1-1]
-                    a[n1-i+1-1] <== a[n1-i+1-n2-1-1]
-                a[1-1] <== tmp
+            let n2 = a.size1./2
+            ch.iiz <| fun (c1,c2,tmp) ->
+                c1 <== 0
+                tmp <== a[c1]
+                iter.num a.size1 <| fun i ->
+                    br.if2 (c1+n2 .>= a.size1)
+                    <| fun () -> c2 <== c1+n2-a.size1
+                    <| fun () -> c2 <== c1+n2
+                    a[c1] <== a[c2]
+                    c1 <== c2
+                a[c1+n2+1] <== tmp
         
         let ifftshift_even(a:num1) =
             let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
-                    tmp <== a[i+n2-1]
-                    a[i+n2-1] <== a[i-1]
-                    a[i-1] <== tmp
+                    tmp <== a[i+n2]
+                    a[i+n2] <== a[i]
+                    a[i] <== tmp
                     
         let fftshift1(x:num1) =
-            br.if2 (x.size1%2 .= 0)
+            br.if1 (x.size1 .> 1) <| fun () ->
+                br.if2 (x.size1%2 .= 0)
                 <| fun () ->
-                    fftshift_even(x)
+                    fftshift_even x
                 <| fun () ->
-                    fftshift_odd(x)
+                    fftshift_odd x
                         
         let ifftshift1(x:num1) =
-            br.if2 (x.size1%2 .= 0)
+            br.if1 (x.size1 .> 1) <| fun () ->
+                br.if2 (x.size1%2 .= 0)
                 <| fun () ->
-                    ifftshift_even(x)
+                    ifftshift_even x
                 <| fun () ->
-                    ifftshift_odd(x)
+                    ifftshift_odd x
                     
         let private fft1(planname:string,data1:num1,data2:num1,fftdir:int) =
-            p.option("-lfftw3")
-            p.option("-I/usr/include")
+            p.option "-lfftw3"
+            p.option "-I/usr/local/include"
             ch.ii <| fun (N,N2) -> 
                 N <== data1.size1
                 N2 <== asm.floor(N/2.0)
                 match p.lang with
                 |Fortran ->
-                    p.incld("'fftw3.f'")
+                    p.incld "'fftw3.f'"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
                         p.codewrite("call dfftw_plan_dft_1d(" + plan.code + ", " + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
@@ -92,7 +100,7 @@ namespace Aqualis
                         ifftshift1(data2)
                         p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
                 |C99 ->
-                    p.incld("\"fftw3.h\"")
+                    p.incld "\"fftw3.h\""
                     let plan = fftw_plan1(planname)
                     if fftdir=1 then
                         p.codewrite(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
@@ -113,7 +121,7 @@ namespace Aqualis
                 |HTML ->
                     p.codewrite(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                 |Python ->
-                    p.incld("pyfftw")
+                    p.incld "pyfftw"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
                         p.codewrite(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")

@@ -50,8 +50,8 @@ namespace Aqualis
                         fft1.ifftshift_odd(x[(),i])
 
         let private fft2(planname:string,data1:num2,data2:num2,fftdir:int) =
-            p.option("-lfftw3")
-            p.option("-I/usr/include")
+            p.option "-lfftw3"
+            p.option "-I/usr/local/include"
             ch.iiii <| fun (nx,ny,nx2,ny2) -> 
                 nx <== data1.size1
                 ny <== data1.size2
@@ -59,7 +59,7 @@ namespace Aqualis
                 ny2 <== data1.size2./2
                 match p.lang with
                 |Fortran ->
-                    p.incld("'fftw3.f'")
+                    p.incld "'fftw3.f'"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
                         p.codewrite("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
@@ -76,7 +76,7 @@ namespace Aqualis
                         ifftshift2(data2)
                         p.codewrite("call dfftw_destroy_plan(" + plan.code + ")")
                 |C99 ->
-                    p.incld("<fftw3.h>")
+                    p.incld "<fftw3.h>"
                     let plan = fftw_plan2(planname)
                     if fftdir=1 then
                         p.codewrite(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
@@ -97,7 +97,7 @@ namespace Aqualis
                 |HTML ->
                     p.codewrite(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
                 |Python ->
-                    p.incld("pyfftw")
+                    p.incld "pyfftw"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
                         p.codewrite(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
