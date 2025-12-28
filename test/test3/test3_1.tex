@@ -1,0 +1,86 @@
+\documentclass[a4paper,fleqn]{ltjsarticle}
+\usepackage{amsmath}
+\oddsidemargin=-0.4mm
+\topmargin=4.6mm
+\headheight=0mm
+\headsep=0mm
+\footskip=15mm
+\textwidth=160mm
+\textheight=237mm
+\topsep=6pt
+\parindent=0mm
+\unitlength=1.00mm
+\begin{document}
+{\Large test3\_1}
+\section{structures}
+\subsection{testClass1}
+\begin{itemize}
+  \item int $x1$
+  \item double $y1$
+  \item complex $x2$
+\end{itemize}
+\section{subroutines}
+\section{global variables}
+\begin{itemize}
+\item int (allocatable) $xx$ (:)
+\item testClass1 (allocatable) $d$ (:)
+\item complex $\mathrm{j}$=(0d0,1d0)
+\item testClass1 $c$
+\item Cache variables (integer): \(i_m (m = 1)\)
+\item Cache array (integer,1d): \(\dot{i}_m (m = 1)\)
+\end{itemize}
+\section{main code}
+\begin{align}
+c.x1 \leftarrow 1
+\end{align}
+\begin{align}
+c.y1 \leftarrow 2
+\end{align}
+\begin{align}
+c.x2 \leftarrow 3+\mathrm{j}4
+\end{align}
+print, c.x1
+print, c.y1
+print, c.x2
+(Error:055-001 「d」は可変長1次元配列ではありません
+$xx \in \mathbb{Z}^{8}$\\
+for $i^{(1)}=0\cdots \mathcal{S}_1[d]-1$\\
+  \begin{align}
+  d_{i^{(1)}}.x1 \leftarrow 1
+  \end{align}
+  \begin{align}
+  d_{i^{(1)}}.y1 \leftarrow 2
+  \end{align}
+  \begin{align}
+  d_{i^{(1)}}.x2 \leftarrow 3+\mathrm{j}4
+  \end{align}
+end\\
+$\dot{i}^{(1)} \in \mathbb{Z}^{10}$\\
+\begin{align}
+\dot{i}^{(1)}_{0} \leftarrow 0
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{1} \leftarrow 1
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{2} \leftarrow 2
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{3} \leftarrow 3
+\end{align}
+$\dot{i}^{(1)}$: deallocate\\
+$\dot{i}^{(1)} \in \mathbb{Z}^{20}$\\
+\begin{align}
+\dot{i}^{(1)}_{0} \leftarrow 0
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{1} \leftarrow 1
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{2} \leftarrow 2
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{3} \leftarrow 3
+\end{align}
+$\dot{i}^{(1)}$: deallocate\\
+\end{document}

@@ -1,0 +1,433 @@
+\documentclass[a4paper,fleqn]{ltjsarticle}
+\usepackage{amsmath}
+\oddsidemargin=-0.4mm
+\topmargin=4.6mm
+\headheight=0mm
+\headsep=0mm
+\footskip=15mm
+\textwidth=160mm
+\textheight=237mm
+\topsep=6pt
+\parindent=0mm
+\unitlength=1.00mm
+\begin{document}
+{\Large test2}
+\section{structures}
+\section{subroutines}
+\section{global variables}
+\begin{itemize}
+\item complex $\mathrm{j}$=(0d0,1d0)
+\item Cache variables (integer): \(i_m (m = 1 \cdots [i^{(1)}; i^{(2)}])\)
+\item Cache variables (double): \(d_m (m = 1 \cdots [d^{(1)}; d^{(2)}; d^{(3)}])\)
+\item Cache variables (complex): \(z_m (m = 1 \cdots [z^{(1)}; z^{(2)}])\)
+\item Cache array (double,1d): \(\dot{d}_m (m = 1 \cdots [\dot{d}^{(1)}; \dot{d}^{(2)}; \dot{d}^{(3)}]))\)
+\item Cache array (double,2d): \(\ddot{d}_m (m = 1 \cdots [\ddot{d}^{(1)}; \ddot{d}^{(2)}; \ddot{d}^{(3)}]))\)
+\end{itemize}
+\section{main code}
+\section{testA}
+  %001
+  \begin{align}
+  i^{(2)} \leftarrow 1
+  \end{align}
+  \begin{align}
+  i^{(1)} \leftarrow 2
+  \end{align}
+  \begin{align}
+  d^{(1)} \leftarrow 3
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow 4
+  \end{align}
+  %002
+  \begin{align}
+  i^{(1)} \leftarrow i^{(2)}+1
+  \end{align}
+  %003
+  \begin{align}
+  i^{(1)} \leftarrow i^{(1)}+i^{(2)}
+  \end{align}
+  %004
+  \begin{align}
+  i^{(1)} \leftarrow \left(i^{(1)}+i^{(2)}\right)\left(i^{(1)}+i^{(2)}\right)
+  \end{align}
+  %005
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle i^{(1)}+i^{(2)}}{\displaystyle i^{(1)}+i^{(2)}}
+  \end{align}
+  %006
+  \begin{align}
+  d^{(2)} \leftarrow \frac{\displaystyle \frac{\displaystyle d^{(1)}}{\displaystyle d^{(2)}}}{\displaystyle d^{(2)}}
+  \end{align}
+  %007
+  \begin{align}
+  i^{(1)} \leftarrow i^{(1)}-i^{(2)}
+  \end{align}
+  %008
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle i^{(1)}}{\displaystyle i^{(2)}}
+  \end{align}
+  %009
+  \begin{align}
+  i^{(1)} \leftarrow \lfloor \frac{\displaystyle i^{(1)}}{\displaystyle i^{(2)}}\rfloor
+  \end{align}
+  %010
+  print, i^{(2)}
+  print, i^{(2)}
+  print, i^{(2)}+1
+  %011
+  \begin{align}
+  i^{(2)} \leftarrow -1
+  \end{align}
+  %012
+  \begin{align}
+  i^{(1)} \leftarrow -i^{(2)}+1
+  \end{align}
+  %013
+  \begin{align}
+  i^{(1)} \leftarrow -i^{(1)}+i^{(2)}
+  \end{align}
+  %014
+  \begin{align}
+  i^{(1)} \leftarrow -\left(i^{(1)}+i^{(2)}\right)\left(i^{(1)}+i^{(2)}\right)
+  \end{align}
+  %015
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle -\left(i^{(1)}+i^{(2)}\right)}{\displaystyle i^{(1)}+i^{(2)}}
+  \end{align}
+  %016
+  \begin{align}
+  d^{(2)} \leftarrow \frac{\displaystyle \frac{\displaystyle -d^{(1)}}{\displaystyle d^{(2)}}}{\displaystyle d^{(2)}}
+  \end{align}
+  %017
+  \begin{align}
+  i^{(1)} \leftarrow -i^{(1)}-i^{(2)}
+  \end{align}
+  %018
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle -i^{(1)}}{\displaystyle i^{(2)}}
+  \end{align}
+  %019
+  \begin{align}
+  i^{(1)} \leftarrow \lfloor \frac{\displaystyle -i^{(1)}}{\displaystyle i^{(2)}}\rfloor
+  \end{align}
+  %020
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle 4i^{(1)}}{\displaystyle 2}
+  \end{align}
+  %021
+  \begin{align}
+  i^{(1)} \leftarrow \lfloor \frac{\displaystyle 4i^{(1)}}{\displaystyle 2}\rfloor
+  \end{align}
+  %022
+  \begin{align}
+  d^{(1)} \leftarrow 0.745
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \sin\left[\frac{\displaystyle -\left(d^{(1)}+d^{(2)}\right)}{\displaystyle d^{(1)}}\right]
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \cos\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \tan\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \exp\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \log\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \log_{10}\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \sqrt{d^{(1)}}
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \arcsin\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \arccos\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \arctan\left(d^{(1)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \arctan\left(d^{(1)},d^{(2)}\right)
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \lfloor d^{(1)}\rfloor
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \lceil d^{(1)}\rceil
+  \end{align}
+\section{testB}
+  $\dot{d}^{(1)} \in \mathbb{R}^{10}$\\
+  $\dot{d}^{(2)} \in \mathbb{R}^{10}$\\
+  $\dot{d}^{(3)} \in \mathbb{R}^{10}$\\
+  %021
+  for $i^{(1)}=0\cdots \mathcal{S}_1[\dot{d}^{(3)}]-1$\\
+    \begin{align}
+    \dot{d}^{(3)}_{i^{(1)}} \leftarrow \dot{d}^{(1)}_{i^{(1)}}+\dot{d}^{(2)}_{i^{(1)}}
+    \end{align}
+  end\\
+  %022
+  for $i^{(1)}=0\cdots 2+1-1$\\
+    \begin{align}
+    \dot{d}^{(3)}_{i^{(1)}+1} \leftarrow \dot{d}^{(1)}_{i^{(1)}+4}+\dot{d}^{(2)}_{i^{(1)}+4}
+    \end{align}
+  end\\
+  %023
+  for $i^{(1)}=0\cdots \mathcal{S}_1[\dot{d}^{(3)}]-1$\\
+    \begin{align}
+    \dot{d}^{(3)}_{i^{(1)}} \leftarrow \dot{d}^{(1)}_{i^{(1)}}\left(\dot{d}^{(1)}_{i^{(1)}}+\dot{d}^{(2)}_{i^{(1)}}\right)
+    \end{align}
+  end\\
+  $\dot{d}^{(3)}$: deallocate\\
+  $\ddot{d}^{(1)} \in \mathbb{R}^{10\times5}$\\
+  $\ddot{d}^{(2)} \in \mathbb{R}^{10\times5}$\\
+  $\ddot{d}^{(3)} \in \mathbb{R}^{10\times5}$\\
+  %024
+  for $i^{(1)}=0\cdots \mathcal{S}_1[\ddot{d}^{(3)}]-1$\\
+    for $i^{(2)}=0\cdots \mathcal{S}_2[\ddot{d}^{(3)}]-1$\\
+      \begin{align}
+      \ddot{d}^{(3)}_{i^{(1)},i^{(2)}} \leftarrow \ddot{d}^{(1)}_{i^{(1)},i^{(2)}}+\ddot{d}^{(2)}_{i^{(1)},i^{(2)}}
+      \end{align}
+    end\\
+  end\\
+  %025
+  for $i^{(1)}=0\cdots 3-1+1-1$\\
+    \begin{align}
+    \ddot{d}^{(3)}_{i^{(1)}+1,3} \leftarrow \ddot{d}^{(1)}_{i^{(1)}+4,3}+\ddot{d}^{(2)}_{i^{(1)}+4,3}
+    \end{align}
+  end\\
+  %026
+  for $i^{(1)}=0\cdots \mathcal{S}_1[\ddot{d}^{(3)}]-1$\\
+    for $i^{(2)}=0\cdots \mathcal{S}_2[\ddot{d}^{(3)}]-1$\\
+      \begin{align}
+      \ddot{d}^{(3)}_{i^{(1)},i^{(2)}} \leftarrow \ddot{d}^{(1)}_{i^{(1)},i^{(2)}}\left(\ddot{d}^{(1)}_{i^{(1)},i^{(2)}}+\ddot{d}^{(2)}_{i^{(1)},i^{(2)}}\right)
+      \end{align}
+    end\\
+  end\\
+  $\ddot{d}^{(3)}$: deallocate\\
+  %027
+  \begin{align}
+  i^{(1)} \leftarrow 1
+  \end{align}
+  %028
+  \begin{align}
+  i^{(1)} \leftarrow 1
+  \end{align}
+  \begin{align}
+  i^{(2)} \leftarrow 1
+  \end{align}
+  \begin{align}
+  i^{(2)} \leftarrow 4i^{(1)}2
+  \end{align}
+  %aaa
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle 4i^{(1)}}{\displaystyle 2}
+  \end{align}
+  %bbb
+  \begin{align}
+  i^{(2)} \leftarrow \lfloor \frac{\displaystyle 4i^{(1)}}{\displaystyle 2}\rfloor
+  \end{align}
+  %ccc
+  $\ddot{d}^{(2)}$: deallocate\\
+  $\ddot{d}^{(1)}$: deallocate\\
+  $\dot{d}^{(2)}$: deallocate\\
+  $\dot{d}^{(1)}$: deallocate\\
+\section{testC}
+  %001
+  \begin{align}
+  i^{(1)} \leftarrow i^{(1)}+i^{(1)}
+  \end{align}
+  %002
+  \begin{align}
+  i^{(1)} \leftarrow i^{(1)}-i^{(1)}
+  \end{align}
+  %003
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle i^{(1)}}{\displaystyle i^{(1)}}
+  \end{align}
+  %004
+  \begin{align}
+  i^{(1)} \leftarrow \lfloor \frac{\displaystyle i^{(1)}}{\displaystyle i^{(1)}}\rfloor
+  \end{align}
+  %005
+  \begin{align}
+  d^{(1)} \leftarrow i^{(1)}+d^{(1)}+i^{(1)}+d^{(1)}
+  \end{align}
+  %006
+  \begin{align}
+  d^{(1)} \leftarrow i^{(1)}+i^{(1)}+i^{(1)}+i^{(1)}
+  \end{align}
+  %007
+  \begin{align}
+  d^{(1)} \leftarrow i^{(1)}+d^{(1)}-\left(i^{(1)}+d^{(1)}\right)
+  \end{align}
+  %008
+  \begin{align}
+  d^{(1)} \leftarrow i^{(1)}+i^{(1)}-\left(i^{(1)}+i^{(1)}\right)
+  \end{align}
+  %009
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle i^{(1)}+d^{(1)}}{\displaystyle i^{(1)}+d^{(1)}}
+  \end{align}
+  %010
+  \begin{align}
+  d^{(1)} \leftarrow \frac{\displaystyle i^{(1)}+i^{(1)}}{\displaystyle i^{(1)}+i^{(1)}}
+  \end{align}
+  %011
+  \begin{align}
+  d^{(1)} \leftarrow \lfloor \frac{\displaystyle i^{(1)}+i^{(1)}}{\displaystyle i^{(1)}+i^{(1)}}\rfloor
+  \end{align}
+\section{testD}
+  %001
+  print, "001"
+  \begin{align}
+  d^{(1)} \leftarrow 1
+  \end{align}
+  \begin{align}
+  d^{(2)} \leftarrow \sin\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \cos\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \tan\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \exp\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \log\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \log_{10}\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \sqrt{d^{(1)}}
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \arcsin\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \arccos\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \arctan\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(2)}
+  \begin{align}
+  d^{(2)} \leftarrow \arctan\left(d^{(1)},d^{(2)}\right)
+  \end{align}
+  print, d^{(2)}
+  %002
+  print, "002"
+  \begin{align}
+  d^{(1)} \leftarrow 0.28
+  \end{align}
+  \begin{align}
+  d^{(3)} \leftarrow \sin\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \cos\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \tan\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \exp\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \log\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \log_{10}\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \sqrt{d^{(1)}}
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \arcsin\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \arccos\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \arctan\left(d^{(1)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \arctan\left(d^{(1)},d^{(2)}\right)
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \lfloor d^{(1)}\rfloor
+  \end{align}
+  print, d^{(3)}
+  \begin{align}
+  d^{(3)} \leftarrow \lceil d^{(1)}\rceil
+  \end{align}
+  print, d^{(3)}
+  %003
+  print, "003"
+  \begin{align}
+  z^{(1)} \leftarrow 1-\mathrm{j}2
+  \end{align}
+  \begin{align}
+  z^{(2)} \leftarrow \sin\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \cos\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \tan\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \exp\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \log\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \sqrt{z^{(1)}}
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \arcsin\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \arccos\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+  \begin{align}
+  z^{(2)} \leftarrow \arctan\left(z^{(1)}\right)
+  \end{align}
+  print, z^{(2)}
+\end{document}

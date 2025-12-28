@@ -1,0 +1,28 @@
+- language.fs
+  - 型定義: 変換先言語の種類
+- etype.fs
+  - 型定義: 変数型の種類
+- expr.fs
+  - 型定義: 式を構成する要素
+- simp.fs
+  - 式の簡約
+- varControl.fs
+  - 登録変数の管理
+- evalN.fs
+  - expr式→直接演算処理
+- evalF.fs
+  - expr式→Fortranコードへの変換処理
+- diff.fs
+  - expr式→微分式変換
+- num0.fs
+  - 型定義・演算子定義
+  - 代入演算でeval・program参照するためeval.fs、varControlより下位
+- num0Const.fs
+  - 各定数定義
+- ch.fs
+  - 変数生成クラス
+- asm.fs
+  - 数学関数クラス
+- aqualisBuilder.fs
+  - expr式の式ビルダー
+- Program.fs

@@ -1,0 +1,41 @@
+\documentclass[a4paper,fleqn]{ltjsarticle}
+\usepackage{amsmath}
+\oddsidemargin=-0.4mm
+\topmargin=4.6mm
+\headheight=0mm
+\headsep=0mm
+\footskip=15mm
+\textwidth=160mm
+\textheight=237mm
+\topsep=6pt
+\parindent=0mm
+\unitlength=1.00mm
+\begin{document}
+{\Large test0}
+\section{structures}
+\section{subroutines}
+\section{global variables}
+\begin{itemize}
+\item double $\pi$=3.14159265358979
+\item double $y$
+\item double $x$
+\item Cache variables (double): \(d_m (m = 1)\)
+\item Cache array (double,1d): \(\dot{d}_m (m = 1)\)
+\item Cache array (complex,2d): \(\ddot{z}_m (m = 1)\)
+\end{itemize}
+\section{main code}
+\begin{align}
+x \leftarrow \pi
+\end{align}
+%test
+\begin{align}
+y \leftarrow 1
+\end{align}
+$\dot{d}^{(1)} \in \mathbb{R}^{10}$\\
+$\ddot{z}^{(1)} \in \mathbb{C}^{10\times20}$\\
+\begin{align}
+d^{(1)} \leftarrow 1.234
+\end{align}
+$\ddot{z}^{(1)}$: deallocate\\
+$\dot{d}^{(1)}$: deallocate\\
+\end{document}

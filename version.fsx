@@ -9,7 +9,7 @@
 open System
 open System.IO
 
-let version = "185.0.6.0"
+let version = "186.0.0.0"
 
 let backup outputDir sourceDir sourceFile projectname (codever:string) = 
     //バックアップリストファイル

@@ -1,52 +1,62 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Authors>Jun-ichiro Sugisaka</Authors>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="main.fs" />
-    <Compile Include="param.fs" />
-    <Compile Include="program.fs" />
-    <Compile Include="expr.fs" />
-    <Compile Include="num0.fs" />
-    <Compile Include="const.fs" />
-    <Compile Include="br.fs" />
-    <Compile Include="diff.fs" />
-    <Compile Include="iter1.fs" />
-    <Compile Include="openmp.fs" />
-    <Compile Include="openacc.fs" />
-    <Compile Include="print1.fs" />
-    <Compile Include="array1.fs" />
-    <Compile Include="array2.fs" />
-    <Compile Include="array3.fs" />
-    <Compile Include="tbinder.fs" />
-    
-    <Compile Include="var.fs" />
-    <Compile Include="ch.fs" />
-    <Compile Include="random.fs" />
-    <Compile Include="minmax.fs" />
-    <Compile Include="print2.fs" />
-    <Compile Include="codestr.fs" />
-    <Compile Include="setting.fs" />
-    <Compile Include="structure.fs" />
-    <Compile Include="io.fs" />
-    <Compile Include="function.fs" />
-    <Compile Include="compile.fs" />
-    <Compile Include="geometry.fs" />
-    <Compile Include="lapack.fs" />
-    <Compile Include="bessel.fs" />
-    <Compile Include="fft1.fs" />
-    <Compile Include="fft2.fs" />
-    <Compile Include="math.fs" />
-    <Compile Include="interpolate.fs" />
-    <Compile Include="coordinate.fs" />
-    <Compile Include="optimization.fs" />
-    <Compile Include="shellscript.fs" />
-    <Compile Include="simuleq.fs" />
-    <Compile Include="doc.fs" />
+    <Compile Include="expr\language.fs" />
+    <Compile Include="expr\etype.fs" />
+    <Compile Include="expr\expr.fs" />
+    <Compile Include="expr\simp.fs" />
+    <Compile Include="program\varControl.fs" />
+    <Compile Include="program\programManager.fs" />
+    <Compile Include="eval\evalN.fs" />
+    <Compile Include="eval\evalF.fs" />
+    <Compile Include="eval\evalC.fs" />
+    <Compile Include="eval\evalPy.fs" />
+    <Compile Include="eval\evalL.fs" />
+    <Compile Include="eval\evalH.fs" />
+    <Compile Include="eval\eval.fs" />
+    <Compile Include="eval\diff.fs" />
+    <Compile Include="main\num0.fs" />
+    <Compile Include="main\num0Const.fs" />
+    <Compile Include="main\ch.fs" />
+    <Compile Include="main\asm.fs" />
+    <Compile Include="main\br.fs" />
+    <Compile Include="main\iter.fs" />
+    <Compile Include="main\openmp.fs" />
+    <Compile Include="main\openacc.fs" />
+    <Compile Include="main\print1.fs" />
+    <Compile Include="main\array1.fs" />
+    <Compile Include="main\array2.fs" />
+    <Compile Include="main\array3.fs" />
+    <Compile Include="main\tbinder.fs" />
+    <Compile Include="main\var.fs" />
+    <Compile Include="main\ch2.fs" />
+    <Compile Include="main\random.fs" />
+    <Compile Include="main\minmax.fs" />
+    <Compile Include="main\print2.fs" />
+    <Compile Include="main\codestr.fs" />
+    <Compile Include="main\structure.fs" />
+    <Compile Include="main\io.fs" />
+    <Compile Include="main\function.fs" />
+    <Compile Include="main\declare.fs" />
+    <Compile Include="main\compile.fs" />
+    <Compile Include="math\geometry.fs" />
+    <Compile Include="math\lapack.fs" />
+    <Compile Include="math\bessel.fs" />
+    <Compile Include="math\fft1.fs" />
+    <Compile Include="math\fft2.fs" />
+    <Compile Include="math\math.fs" />
+    <Compile Include="math\interpolate.fs" />
+    <Compile Include="math\coordinate.fs" />
+    <Compile Include="math\optimization.fs" />
+    <Compile Include="math\shellscript.fs" />
+    <Compile Include="math\simuleq.fs" />
+    <Compile Include="math\docs.fs" />
+    <Compile Include="math\aqualisBuilder.fs" />
   </ItemGroup>
 
 </Project>
