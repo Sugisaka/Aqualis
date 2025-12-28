@@ -16,6 +16,13 @@ namespace Aqualis
             |Nvr x -> NSL[Nvr x; Str y]
             |NSL x -> NSL(x@[Str y])
             
+        static member ( ++ ) (x:exprString,y:exprString) = 
+            match x,y with
+            |NSL x,NSL y -> NSL(x@y)
+            |NSL x,y -> NSL(x@[y])
+            |x,NSL y -> NSL([x]@y)
+            |_ -> NSL[x;y]
+            
     ///<summary>変数（数値データ）クラス</summary>
     type num0(x:expr) =
         

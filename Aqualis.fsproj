@@ -57,6 +57,24 @@
     <Compile Include="math\simuleq.fs" />
     <Compile Include="math\docs.fs" />
     <Compile Include="math\aqualisBuilder.fs" />
+    <Compile Include="graphics\color.fs" />
+    <Compile Include="graphics\gensvg.fs" />
+    <Compile Include="graphics\genaiscript.fs" />
+    <Compile Include="graphics\mathgraph.fs" />
+    <Compile Include="graphics\graph1d.fs" />
+    <Compile Include="graphics\plot2d.fs" />
+    <Compile Include="web\io.fs" />
+    <Compile Include="web\num0.fs" />
+    <Compile Include="web\asm.fs" />
+    <Compile Include="web\greek.fs" />
+    <Compile Include="web\style.fs" />
+    <Compile Include="web\figure.fs" />
+    <Compile Include="web\param.fs" />
+    <Compile Include="web\PHPvar.fs" />
+    <Compile Include="web\php.fs" />
+    <Compile Include="web\html.fs" />
+    <Compile Include="web\post.fs" />
+    <Compile Include="web\form.fs" />
   </ItemGroup>
 
 </Project>
