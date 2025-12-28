@@ -239,7 +239,7 @@ namespace Aqualis
                         pr.cwriter.codewrite(fp+".close()"+"\n")
             |_ -> ()
             
-        static member private Write (fp:string) (lst:num0 list) =
+        static member private Write1 (fp:string) (lst:num0 list) =
             match pr.language with
             |Fortran ->
                 let tab = var.ip0_noWarning("tab",2313)
@@ -411,7 +411,174 @@ namespace Aqualis
                     |> (fun s -> String.Join(",",s))
                 pr.cwriter.codewrite(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
-                
+            
+        static member private Write2 (fp:string) (lst:exprString) =
+            let lst = reduceExprString.reduce lst
+            match pr.language with
+            |Fortran ->
+                let tab = var.ip0_noWarning("tab",2313)
+                let double0string_format_F = 
+                    let a,b = pr.numFormat.dFormat
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                    lst
+                    |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            match b[n].etype with
+                            |It _ -> 
+                                yield "I"+pr.numFormat.iFormat.ToString()
+                            |Dt ->
+                                yield double0string_format_F
+                            |Zt ->
+                                yield double0string_format_F
+                                yield double0string_format_F 
+                            |_ -> ()
+                        ])
+                    |> fun s -> String.Join(",",s)
+                let code =
+                    lst
+                    |> (fun b ->
+                        [for n in 0..(b.Length-1) do
+                            match b[n].etype,b[n] with 
+                            |It _,RNvr(Int v) -> yield pr.numFormat.ItoS(v)
+                            |Dt  ,RNvr(Int v) -> yield pr.numFormat.DtoS(double v)
+                            |_   ,RNvr(Dbl v) -> yield pr.numFormat.DtoS v
+                            |Zt  ,RNvr v ->
+                                yield (Re v).eval pr
+                                yield (Im v).eval pr
+                            |(It _|Dt),RNvr v -> yield v.eval pr
+                            |_ -> ()])
+                    |> fun s -> String.Join(",",s)
+                pr.cwriter.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+            |C99 ->
+                let int0string_format_C =
+                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                let double0string_format_C = 
+                    let a,b = pr.numFormat.dFormat
+                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let format = 
+                    lst
+                    |> (fun b -> 
+                        [for n in 0..(b.Length-1) do
+                            match b[n],b[n].etype with
+                            |_,It _ ->
+                                yield int0string_format_C
+                            |_,Dt ->
+                                yield double0string_format_C
+                            |_,Zt ->
+                                yield double0string_format_C
+                                yield double0string_format_C
+                            |_ -> ()
+                        ])
+                    |> fun s -> String.Join("",s)
+                let code =
+                    [for b in lst do
+                        match b.etype,b with 
+                        |It _,RNvr(Int v) ->
+                            yield pr.numFormat.ItoS v
+                        |Dt ,RNvr(Int v) ->
+                            yield pr.numFormat.DtoS (double v)
+                        |_ ,RNvr(Dbl v) ->
+                            yield pr.numFormat.DtoS v
+                        |Zt ,RNvr v ->
+                            yield (Re v).eval pr
+                            yield (Im v).eval pr
+                        |(It _|Dt),RNvr v ->
+                            yield v.eval pr
+                        |_ -> ()]
+                    |> (fun s -> String.Join(",",s))
+                pr.cwriter.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
+            |LaTeX ->
+                let double0string_format_F = 
+                    let a,b = pr.numFormat.dFormat
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                    lst
+                    |> List.map (fun b -> 
+                        match b.etype with
+                          |It _ ->"I"+pr.numFormat.iFormat.ToString()
+                          |Dt -> double0string_format_F
+                          |Zt -> double0string_format_F+","+double0string_format_F 
+                          |_ -> "")
+                    |> (fun s -> String.Join("",s))
+                let code =
+                    lst
+                    |> List.map (fun b ->
+                        match b.etype,b with 
+                          |It _,RNvr(Int v) -> pr.numFormat.ItoS v
+                          |Dt,RNvr(Int v) -> pr.numFormat.DtoS (double v)
+                          |_,RNvr(Dbl v) -> pr.numFormat.DtoS v
+                          |Zt,RNvr v -> (Re v).eval pr+","+(Im v).eval pr
+                          |(It _|Dt),RNvr v -> v.eval pr
+                          |_ -> "")
+                    |> fun s -> String.Join(",",s)
+                pr.cwriter.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+            |HTML ->
+                let double0string_format_F = 
+                    let a,b = pr.numFormat.dFormat
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format = 
+                    lst
+                    |> List.map (fun b -> 
+                        match b.etype with
+                          |It _ ->"I"+pr.numFormat.iFormat.ToString()
+                          |Dt -> double0string_format_F
+                          |Zt -> double0string_format_F+","+double0string_format_F 
+                          |_ -> "")
+                    |> fun s -> String.Join("",s)
+                let code =
+                    lst
+                    |> List.map (fun b ->
+                        match b.etype,b with 
+                          |It _,RNvr(Int v) -> pr.numFormat.ItoS v
+                          |Dt,RNvr(Int v) -> pr.numFormat.DtoS(double v)
+                          |_,RNvr(Dbl v) -> pr.numFormat.DtoS v
+                          |Zt,RNvr v -> (Re v).eval pr+","+(Im v).eval pr
+                          |(It _ |Dt),RNvr v -> v.eval pr
+                          |_ -> "")
+                    |> fun s -> String.Join(",",s)
+                pr.cwriter.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
+            |Python ->
+                let int0string_format_C =
+                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                let double0string_format_C = 
+                    let a,b = pr.numFormat.dFormat
+                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let format = 
+                    lst
+                    |> (fun b -> 
+                        [for n in 0..(b.Length-1) do
+                            match b.[n],b.[n].etype with
+                            |_,It _ ->
+                                yield int0string_format_C
+                            |_,Dt ->
+                                yield double0string_format_C
+                            |_,Zt ->
+                                yield double0string_format_C
+                                yield double0string_format_C
+                            |_ -> ()
+                        ])
+                    |> (fun b ->
+                          [for n in 0..(b.Length-1) do
+                              yield b.[n]
+                              if n<(b.Length-1) then yield "\\t"
+                          ])
+                    |> (fun s -> String.Join("",s))
+                let code =
+                    [for b in lst do
+                        match b.etype,b with 
+                        |It _,RNvr(Int v) -> yield pr.numFormat.ItoS v
+                        |Dt,RNvr(Int v) -> yield pr.numFormat.DtoS(double v)
+                        |_,RNvr(Dbl v) -> yield pr.numFormat.DtoS v
+                        |Zt,RNvr v ->
+                            yield (Re v).eval pr
+                            yield (Im v).eval pr
+                        |(It _|Dt),RNvr v -> yield v.eval pr
+                        |_ -> ()]
+                    |> fun s -> String.Join(",",s)
+                pr.cwriter.codewrite(fp+".write(\""+format+"\\n\" %("+code+"))\n")
+            |_ -> ()
+            
         static member private Write_bin (fp:string) (v:num0) =
             match pr.language with
             |Fortran ->
@@ -768,20 +935,28 @@ namespace Aqualis
                 |_ -> "byte値を整数型以外の変数に格納できません"
             pr.cwriter.codewrite(ee + "=" + "byte_tmp\n")
             
-        ///<summary>ファイル出力</summary>
+        ///<summary>ファイル出力（タブ区切りデータ）</summary>
         static member fileOutput (filename:exprString) = fun code ->
             io.fileAccess filename false false <| fun fp ->
-                code(io.Write fp)
+                code(io.Write1 fp)
                 
-        ///<summary>ファイル出力</summary>
+        ///<summary>ファイル出力（コード出力）</summary>
+        static member codeOutput (filename:exprString) = fun code ->
+            io.fileAccess filename false false <| fun fp ->
+                code(io.Write2 fp)
+                
+        ///<summary>ファイル出力（タブ区切りデータ）</summary>
         static member fileOutput (filename:string) = fun code -> io.fileOutput (Str filename) code
-
-        ///<summary>ファイル出力</summary>
+        
+        ///<summary>ファイル出力（コード出力）</summary>
+        static member codeOutput (filename:string) = fun code -> io.codeOutput (Str filename) code
+        
+        ///<summary>バイナリファイル出力</summary>
         static member binfileOutput (filename:exprString) = fun code ->
             io.fileAccess filename false true <| fun fp ->
                 code(io.Write_bin fp)
 
-        ///<summary>ファイル出力</summary>
+        ///<summary>バイナリファイル出力</summary>
         static member binfileOutput (filename:string) = fun code -> io.binfileOutput (Str filename) code
 
         ///<summary>ファイル読み込み</summary>

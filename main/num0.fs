@@ -16,12 +16,39 @@ namespace Aqualis
             |Nvr x -> NSL[Nvr x; Str y]
             |NSL x -> NSL(x@[Str y])
             
+        static member ( ++ ) (x:string,y:exprString) = 
+            match y with
+            |Str y -> NSL[Str x; Str y]
+            |Nvr y -> NSL[Str x; Nvr y]
+            |NSL y -> NSL([Str x]@y)
+            
         static member ( ++ ) (x:exprString,y:exprString) = 
             match x,y with
             |NSL x,NSL y -> NSL(x@y)
             |NSL x,y -> NSL(x@[y])
             |x,NSL y -> NSL([x]@y)
             |_ -> NSL[x;y]
+            
+    ///<summary>数値と文字列の結合</summary>
+    type reduceExprString = 
+        |RStr of string
+        |RNvr of expr
+        
+        member this.etype with get() =
+            match this with
+            |RStr t -> Structure "string"
+            |RNvr t -> t.etype
+            
+        static member reduce(x:exprString) =
+            let rec rd (r:list<exprString>) =
+                r
+                |> List.collect (fun s ->
+                    match s with
+                    | Str t -> [RStr t]
+                    | Nvr t -> [RNvr t]
+                    | NSL y -> rd y
+                )
+            rd [x]
             
     ///<summary>変数（数値データ）クラス</summary>
     type num0(x:expr) =

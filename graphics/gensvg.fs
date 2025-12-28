@@ -50,28 +50,31 @@ type gensvg =
               |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) ->
                   "stroke:rgb("++r++","++g++","++b++");stroke-opacity:"++a++";stroke-width:"++width++
                   Str (match dash with |[] -> "" |_ -> ";stroke-dasharray:")++
-                  NSL (dash |> List.map (fun x -> Nvr x.Expr))++Str ";"
+                  (dash |> List.fold (fun acc x -> acc++x++" ") (NSL []))++Str ";"
               |None -> Str "stroke:none;"
         "style=\""++style_fill++style_stroke++"\""
         
     static member style(strokecolor:color.stroke) =
         let style_stroke =
             match strokecolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) -> [!."stroke:rgb(";r++",";g++",";b++");stroke-opacity:";a++";stroke-width:";width;]@(match dash with |[] -> [] |_ -> [!.";stroke-dasharray:";]@(dash |> List.fold (fun acc x -> acc@[x++" "]) []))@[!.";"]
-              |None -> [!."stroke:none;"]
-        [!."style=\""]@style_stroke@[!."\""]
-
-    static member line(cvx,cvy,wr:num0 list -> unit,x1:num0,y1:num0,x2:num0,y2:num0,strokecolor) =
+              |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) -> 
+                  "stroke:rgb("++r++","++g++","++b++");stroke-opacity:"++a++";stroke-width:"++width++
+                  Str(match dash with |[] -> "" |_ -> ";stroke-dasharray:")++
+                  (dash |> List.fold (fun acc x -> acc++x++" ") (NSL []))++";"
+              |None ->Str "stroke:none;"
+        "style=\""++style_stroke++"\""
+        
+    static member line(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,x2:num0,y2:num0,strokecolor) =
         let x1 = 0.5*cvx+x1
         let y1 = 0.5*cvy-y1
         let x2 = 0.5*cvx+x2
         let y2 = 0.5*cvy-y2
-        wr <| [!."<path "]
-        wr <| [!."d=\"M ";x1++",";y1++" L ";x2++",";y2++"\""]
-        wr <| gensvg.style(strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "<path "
+        wr <| "d=\"M "++x1++","++y1++" L "++x2++","++y2++"\""
+        wr <| gensvg.style strokecolor
+        wr <| Str "/>"
         
-    static member line3D(cvx,cvy,wr:num0 list -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,p3D:Setting3D,strokecolor) =
+    static member line3D(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,p3D:Setting3D,strokecolor) =
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
@@ -81,154 +84,154 @@ type gensvg =
         let y1 = 0.5*cvy-ys
         let x2 = 0.5*cvx+xe
         let y2 = 0.5*cvy-ye
-        wr <| [!."<path "]
-        wr <| [!."d=\"M ";x1++",";y1++" L ";x2++",";y2++"\""]
-        wr <| gensvg.style(strokecolor)
-        wr <| [!."/>"]
-
-    static member polygon(cvx,cvy,wr:num0 list -> unit,px:double list,py:double list,fillcolor,strokecolor) =
-        wr <| [!."<path d=\""]
+        wr <| Str "<path "
+        wr <| "d=\"M "++x1++","++y1++" L "++x2++","++y2++"\""
+        wr <| gensvg.style strokecolor
+        wr <| Str "/>"
+        
+    static member polygon(cvx,cvy,wr:exprString -> unit,px:double list,py:double list,fillcolor,strokecolor) =
+        wr <| Str "<path d=\""
         for i in 0..px.Length-1 do
             let pxi = 0.5*cvx+px.[i]
             let pyi = 0.5*cvy-py.[i]
             if i=0 then
-                wr <| [!.("M"+pxi.ToString("0.000")+","+pyi.ToString("0.000"))]
+                wr <| Str("M" + pxi.ToString "0.000" + "," + pyi.ToString "0.000")
             else
-                wr <| [!.("L"+pxi.ToString("0.000")+","+pyi.ToString("0.000"))]
-        wr <| [!."\""]
+                wr <| Str("L" + pxi.ToString "0.000" + "," + pyi.ToString "0.000")
+        wr <| Str "\""
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member polygon(cvx,cvy,wr:num0 list -> unit,px:num1,py:num1,fillcolor,strokecolor) =
-        wr <| [!."<path d=\""]
+    static member polygon(cvx,cvy,wr:exprString -> unit,px:num1,py:num1,fillcolor,strokecolor) =
+        wr <| Str "<path d=\""
         iter.range _1 px.size1 <| fun i ->
             let pxi = 0.5*cvx+px.[i-1]
             let pyi = 0.5*cvy-py.[i-1]
             br.if2 (i.=1)
                 <| fun () ->
-                    wr <| [!."M ";pxi++",";pyi]
+                    wr <| "M "++pxi++","++pyi
                 <| fun () ->
-                    wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\""]
+                    wr <| " L "++pxi++","++pyi
+        wr <| Str "\""
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member polygon(cvx,cvy,wr:num0 list -> unit,px:num0 list,py:num0 list,fillcolor,strokecolor) =
-        wr <| [!."<path d=\""]
+    static member polygon(cvx,cvy,wr:exprString -> unit,px:num0 list,py:num0 list,fillcolor,strokecolor) =
+        wr <| Str "<path d=\""
         for i in 0..px.Length-1 do
             let pxi = 0.5*cvx+px.[i]
             let pyi = 0.5*cvy-py.[i]
             if i=0 then
-                wr <| [!."M ";pxi++",";pyi]
+                wr <| "M "++pxi++","++pyi
             else
-                wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\""]
+                wr <| " L "++pxi++","++pyi
+        wr <| Str "\""
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
-
-    static member polygon(cvx,cvy,wr:num0 list -> unit,pxy:(num0*num0) list,fillcolor,strokecolor) =
-        wr <| [!."<path d=\""]
-        for i in 0..pxy.Length-1 do
-            let (px,py) = pxy[i]
-            let pxi = 0.5*cvx+px
-            let pyi = 0.5*cvy-py
-            if i=0 then
-                wr <| [!."M ";pxi++",";pyi]
-            else
-                wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\""]
-        wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
-
-    static member polygon(cvx,cvy,wr:num0 list -> unit,pxy:(double*double) list,fillcolor,strokecolor) =
-        wr <| [!."<path d=\""]
-        for i in 0..pxy.Length-1 do
-            let (px,py) = pxy[i]
-            let pxi = 0.5*cvx+px
-            let pyi = 0.5*cvy-py
-            if i=0 then
-                wr <| [!."M ";D pxi++",";D pyi]
-            else
-                wr <| [!." L ";D pxi++",";D pyi]
-        wr <| [!."\""]
-        wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member polygon3D(cvx,cvy,wr:num0 list -> unit,px:double list,py:double list,pz:double list,p3D:Setting3D,fillcolor,strokecolor) =
+    static member polygon(cvx,cvy,wr:exprString -> unit,pxy:(num0*num0) list,fillcolor,strokecolor) =
+        wr <| Str "<path d=\""
+        for i in 0..pxy.Length-1 do
+            let (px,py) = pxy[i]
+            let pxi = 0.5*cvx+px
+            let pyi = 0.5*cvy-py
+            if i=0 then
+                wr <| "M "++pxi++","++pyi
+            else
+                wr <| " L "++pxi++","++pyi
+        wr <| Str "\""
+        wr <| gensvg.style(fillcolor,strokecolor)
+        wr <| Str "/>"
+
+    static member polygon(cvx,cvy,wr:exprString -> unit,pxy:(double*double) list,fillcolor,strokecolor) =
+        wr <| Str "<path d=\""
+        for i in 0..pxy.Length-1 do
+            let px,py = pxy[i]
+            let pxi = 0.5*cvx+px
+            let pyi = 0.5*cvy-py
+            if i=0 then
+                wr <| "M "++D pxi++","++D pyi
+            else
+                wr <| " L "++D pxi++","++D pyi
+        wr <| Str "\""
+        wr <| gensvg.style(fillcolor,strokecolor)
+        wr <| Str "/>"
+        
+    static member polygon3D(cvx,cvy,wr:exprString -> unit,px:double list,py:double list,pz:double list,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double) (y:double) (z:double) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
-        wr <| [!."<path d=\""]
+        wr <| Str "<path d=\""
         for i in 0..px.Length-1 do
             let xs,ys = xy3D <| px[i] <| py[i] <| pz[i]
             let pxi = 0.5*cvx+xs
             let pyi = 0.5*cvy-ys
             if i=0 then
-                wr <| [!."M ";pxi++",";pyi;]
+                wr <| "M "++pxi++","++pyi
             else
-                wr <| [!." L ";pxi++",";pyi;]
-        wr <| [!."\""]
+                wr <| " L "++pxi++","++pyi
+        wr <| Str "\""
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member polygon3D(cvx,cvy,wr:num0 list -> unit,px:num1,py:num1,pz:num1,p3D:Setting3D,fillcolor,strokecolor) =
+    static member polygon3D(cvx,cvy,wr:exprString -> unit,px:num1,py:num1,pz:num1,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
-        wr <| [!."<path d=\""]
+        wr <| Str "<path d=\""
         iter.range _1 px.size1 <| fun i ->
             let xs,ys = xy3D px[i-1] py[i-1] pz[i-1]
             let pxi = 0.5*cvx+xs
             let pyi = 0.5*cvy-ys
             br.if2 (i.=1)
-                <| fun () ->
-                    wr <| [!."M ";pxi++",";pyi]
-                <| fun () ->
-                    wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\" "]@gensvg.style(fillcolor,strokecolor)@[!."/>"]
-
-    static member circle(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,r:num0,fillcolor,strokecolor) =
+            <| fun () ->
+                wr <| "M "++pxi++","++pyi
+            <| fun () ->
+                wr <| " L "++pxi++","++pyi
+        wr <| Str "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
+        
+    static member circle(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,r:num0,fillcolor,strokecolor) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
-        wr <| [!."<circle ";]
-        wr <| [!."cx=\"";cx++"\"";]
-        wr <| [!."cy=\"";cy++"\"";]
-        wr <| [!."r=\"";r++"\" "]
+        wr <| Str "<circle "
+        wr <| Str "cx=\""++cx++"\""
+        wr <| Str "cy=\""++cy++"\""
+        wr <| Str "r=\""++r++"\" "
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member circle(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,r:num0,t1:num0,t2:num0,strokecolor) =
+    static member circle(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,r:num0,t1:num0,t2:num0,strokecolor) =
         let pi = Math.PI
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
-        let x1 = match t1 with |Dbl_c t1 -> cx + r*cos(-t1*pi/180.0) |_ -> cx + r*asm.cos(-t1*asm.pi/180.0)
-        let y1 = match t1 with |Dbl_c t1 -> cy + r*sin(-t1*pi/180.0) |_ -> cy + r*asm.sin(-t1*asm.pi/180.0)
-        let x2 = match t2 with |Dbl_c t2 -> cx + r*cos(-t2*pi/180.0) |_ -> cx + r*asm.cos(-t2*asm.pi/180.0)
-        let y2 = match t2 with |Dbl_c t2 -> cy + r*sin(-t2*pi/180.0) |_ -> cy + r*asm.sin(-t2*asm.pi/180.0)
-        wr <| [!."<path "]
+        let x1 = match t1.Expr with |Dbl t1 -> cx + r*cos(-t1*pi/180.0) |_ -> cx + r*asm.cos(-t1*asm.pi/180.0)
+        let y1 = match t1.Expr with |Dbl t1 -> cy + r*sin(-t1*pi/180.0) |_ -> cy + r*asm.sin(-t1*asm.pi/180.0)
+        let x2 = match t2.Expr with |Dbl t2 -> cx + r*cos(-t2*pi/180.0) |_ -> cx + r*asm.cos(-t2*asm.pi/180.0)
+        let y2 = match t2.Expr with |Dbl t2 -> cy + r*sin(-t2*pi/180.0) |_ -> cy + r*asm.sin(-t2*asm.pi/180.0)
+        wr <| Str "<path "
         br.if2 (t2-t1.>180.0)
             <| fun () ->
-                wr <| [!."d=\"M "; x1; !.","; y1; !." "; !."A"; !." "; r; !." "; r; !." "; !."0"; !." "; !."1"; !." "; !."0"; !." "; x2; !." "; y2; !."\""]
+                wr <| "d=\"M "++x1++","++y1++" "++"A"++" "++r++" "++r++" "++"0"++" "++"1"++" "++"0"++" "++x2++" "++y2++"\""
             <| fun () ->
-                wr <| [!."d=\"M "; x1; !.","; y1; !." "; !."A"; !." "; r; !." "; r; !." "; !."0"; !." "; !."0"; !." "; !."0"; !." "; x2; !." "; y2; !."\""]
-        wr <| [!.""]@gensvg.style(color.fill.none,strokecolor)
-        wr <| [!."/>"]
+                wr <| "d=\"M "++x1++","++y1++" "++"A"++" "++r++" "++r++" "++"0"++" "++"0"++" "++"0"++" "++x2++" "++y2++"\""
+        wr <| gensvg.style(color.fill.none,strokecolor)
+        wr <| Str "/>"
         
-    static member circle3D(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,cz:num0,r:num0,p3D:Setting3D,fillcolor,strokecolor) =
+    static member circle3D(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         let xs,ys = xy3D cx cy cz
         let cx = 0.5*cvx+xs
         let cy = 0.5*cvy-ys
-        wr <| [!."<circle ";]
-        wr <| [!."cx=\"";cx++"\"";]
-        wr <| [!."cy=\"";cy++"\"";]
-        wr <| [!."r=\"";r++"\" "]
+        wr <| Str "<circle "
+        wr <| Str "cx=\""++cx++"\""
+        wr <| Str "cy=\""++cy++"\""
+        wr <| Str "r=\""++r++"\" "
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member circle3D(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,cz:num0,r:num0,t1:num0,t2:num0,p3D:Setting3D,fillcolor,strokecolor) =
+    static member circle3D(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,t1:num0,t2:num0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
@@ -239,21 +242,21 @@ type gensvg =
         let y1 = cy + r*asm.sin(-t1*asm.pi/180.0)
         let x2 = cx + r*asm.cos(-t2*asm.pi/180.0)
         let y2 = cy + r*asm.sin(-t2*asm.pi/180.0)
-        wr <| [!."<path "]
+        wr <| Str "<path "
         br.if2 (t2-t1.>180.0)
             <| fun () ->
-                wr <| [!."d=\"M ";x1++",";y1++" A ";r++" ";r++" 0 "++"1, 0 ";x2++", ";y2++"\""]
+                wr <| "d=\"M "++x1++","++y1++" A "++r++" "++r++" 0 "++"1, 0 "++x2++", "++y2++"\""
             <| fun () ->
-                wr <| [!."d=\"M ";x1++",";y1++" A ";r++" ";r++" 0 "++"0, 0 ";x2++", ";y2++"\""]
-        wr <| [!.""]@gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
-
-    static member circle3Dxy(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
+                wr <| "d=\"M "++x1++","++y1++" A "++r++" "++r++" 0 "++"0, 0 "++x2++", "++y2++"\""
+        wr <| gensvg.style(fillcolor,strokecolor)
+        wr <| Str "/>"
+        
+    static member circle3Dxy(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
-        wr <| [!."<path d=\""]
-        iter.range _1 (n+1) <| fun i ->
+        wr <| Str "<path d=\""
+        iter.range (1,n+1) <| fun i ->
             let px = cx + r*asm.cos(2*asm.pi*i/n)
             let py = cy + r*asm.sin(2*asm.pi*i/n)
             let pz = cz
@@ -262,16 +265,16 @@ type gensvg =
             let pyi = 0.5*cvy-ys
             br.if2 (i.=1)
                 <| fun () ->
-                    wr <| [!."M ";pxi++",";pyi]
+                    wr <| "M "++pxi++","++pyi
                 <| fun () ->
-                    wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\" "]@gensvg.style(fillcolor,strokecolor)@[!."/>"]
-
-    static member circle3Dyz(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
+                    wr <| " L "++pxi++","++pyi
+        wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
+        
+    static member circle3Dyz(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
-        wr <| [!."<path d=\""]
+        wr <| Str "<path d=\""
         iter.range _1 (n+1) <| fun i ->
             let px = cx
             let py = cy + r*asm.cos(2*asm.pi*i/n)
@@ -281,16 +284,16 @@ type gensvg =
             let pyi = 0.5*cvy-ys
             br.if2 (i.=1)
                 <| fun () ->
-                    wr <| [!."M ";pxi++",";pyi]
+                    wr <| Str "M "++pxi++","++pyi
                 <| fun () ->
-                    wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\" "]@gensvg.style(fillcolor,strokecolor)@[!."/>"]
+                    wr <| Str " L "++pxi++","++pyi
+        wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member circle3Dzx(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
+    static member circle3Dzx(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
-        wr <| [!."<path d=\""]
+        wr <| Str "<path d=\""
         iter.range _1 (n+1) <| fun i ->
             let px = cx + r*asm.cos(2*asm.pi*i/n)
             let py = cy
@@ -300,96 +303,100 @@ type gensvg =
             let pyi = 0.5*cvy-ys
             br.if2 (i.=1)
                 <| fun () ->
-                    wr <| [!."M ";pxi++",";pyi]
+                    wr <| "M "++pxi++","++pyi
                 <| fun () ->
-                    wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\" "]@gensvg.style(fillcolor,strokecolor)@[!."/>"]
+                    wr <| " L "++pxi++","++pyi
+        wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member ellipse(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,rx:num0,ry:num0,fillcolor,strokecolor) =
+    static member ellipse(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,rx:num0,ry:num0,fillcolor,strokecolor) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
-        wr <| [!."<ellipse";]
-        wr <| [!."cx=\"";cx++"\"";]
-        wr <| [!."cy=\"";cy++"\"";]
-        wr <| [!."rx=\"";rx++"\"";]
-        wr <| [!."ry=\"";ry++"\" ";]
+        wr <| Str "<ellipse"
+        wr <| "cx=\""++cx++"\""
+        wr <| "cy=\""++cy++"\""
+        wr <| "rx=\""++rx++"\""
+        wr <| "ry=\""++ry++"\" "
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member rectangle(cvx,cvy,wr:num0 list -> unit,x:num0,y:num0,width:num0,height:num0,fillcolor,strokecolor) =
+    static member rectangle(cvx,cvy,wr:exprString -> unit,x:num0,y:num0,width:num0,height:num0,fillcolor,strokecolor) =
         let x = 0.5*cvx+x-0.5*width
         let y = 0.5*cvy-y-0.5*height
-        wr <| [!."<rect";]
-        wr <| [!."x=\"";x++"\"";]
-        wr <| [!."y=\"";y++"\"";]
-        wr <| [!."width=\"";width++"\"";]
-        wr <| [!."height=\"";height++"\" ";]
+        wr <| Str "<rect"
+        wr <| "x=\""++x++"\""
+        wr <| "y=\""++y++"\""
+        wr <| "width=\""++width++"\""
+        wr <| "height=\""++height++"\" "
         wr <| gensvg.style(fillcolor,strokecolor)
-        wr <| [!."/>"]
+        wr <| Str "/>"
         
-    static member triangle3D(cvx,cvy,wr:num0 list -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3:num0,y3:num0,z3:num0,p3D:Setting3D,fillcolor,strokecolor) =
+    static member triangle3D(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3:num0,y3:num0,z3:num0,p3D:Setting3D,fillcolor,strokecolor) =
         let pi = Math.PI
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
-        wr <| [!."<path d=\""]
+        wr <| Str "<path d=\""
         let xs,ys = xy3D x1 y1 z1
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!."M ";pxi++",";pyi]
+        wr <| "M "++pxi++","++pyi
         let xs,ys = xy3D x2 y2 z2
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!." L ";pxi++",";pyi]
+        wr <| " L "++pxi++","++pyi
         let xs,ys = xy3D x3 y3 z3
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!." L ";pxi++",";pyi]
+        wr <| " L "++pxi++","++pyi
         let xs,ys = xy3D x1 y1 z1
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\" "]@gensvg.style(fillcolor,strokecolor)@[!."/>"]
-
-    static member quadrangle3D(cvx,cvy,wr:num0 list -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3:num0,y3:num0,z3:num0,x4:num0,y4:num0,z4:num0,p3D:Setting3D,fillcolor,strokecolor) =
+        wr <| " L "++pxi++","++pyi
+        wr <| "\" "++gensvg.style(fillcolor,strokecolor)++Str "/>"
+        
+    static member quadrangle3D(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3:num0,y3:num0,z3:num0,x4:num0,y4:num0,z4:num0,p3D:Setting3D,fillcolor,strokecolor) =
         let pi = Math.PI
         let xy3D (x:num0) (y:num0) (z:num0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
-        wr <| [!."<path d=\""]
+        wr <| Str "<path d=\""
         let xs,ys = xy3D x1 y1 z1
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!."M ";pxi++",";pyi]
+        wr <| "M "++pxi++","++pyi
         let xs,ys = xy3D x2 y2 z2
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!." L ";pxi++",";pyi]
+        wr <| " L "++pxi++","++pyi
         let xs,ys = xy3D x3 y3 z3
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!." L ";pxi++",";pyi]
+        wr <| " L "++pxi++","++pyi
         let xs,ys = xy3D x4 y4 z4
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!." L ";pxi++",";pyi]
+        wr <| " L "++pxi++","++pyi
         let xs,ys = xy3D x1 y1 z1
         let pxi = 0.5*cvx+xs
         let pyi = 0.5*cvy-ys
-        wr <| [!." L ";pxi++",";pyi]
-        wr <| [!."\" "]@gensvg.style(fillcolor,strokecolor)@[!."/>"]
+        wr <| " L "++pxi++","++pyi
+        wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member text(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,text:num0,size:num0,font:Font,textAnchor:TextAnchor,rotation:double option,fillcolor:color.fill,strokecolor:color.stroke) =
+    static member text(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,text:exprString,size:num0,font:Font,textAnchor:TextAnchor,rotation:double option,fillcolor:color.fill,strokecolor:color.stroke) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
         let style_fill =
             match fillcolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0) -> [!."fill:rgb(";r++",";g++",";b++"); fill-opacity:";a++"; "]
-              |None -> [!."fill:none; "]
+              |Some(r:num0,g:num0,b:num0,a:num0) -> "fill:rgb("++r++","++g++","++b++"); fill-opacity:"++a++"; "
+              |None -> Str "fill:none; "
         let style_stroke =
             match strokecolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) -> [!."stroke:rgb(";r++",";g++",";b++"); stroke-opacity:";a++"; stroke-width:";width;]@(match dash with |[] -> [] |_ -> [!."; stroke-dasharray:";]@(dash |> List.fold (fun acc x -> acc@[x++" "]) []))@[!."; "]
-              |None -> [!."stroke:none; "]
+              |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) -> 
+                  "stroke:rgb("++r++","++g++","++b++"); stroke-opacity:"++a++"; stroke-width:"++
+                  width++Str(match dash with |[] -> "" |_ -> "; stroke-dasharray:")++
+                  (dash |> List.fold (fun acc x -> acc++x++" ") (NSL []))++"; "
+              |None ->
+                  Str "stroke:none; "
         let ft =
             match font with
             |TimesNewRoman -> "'TimesNewRomanPSMT', 'Times New Roman', serif"
@@ -401,17 +408,17 @@ type gensvg =
             |Right -> "text-anchor=\"end\""
         let rt =
             match rotation with
-            |None -> []
-            |Some r -> [!.("transform=\"rotate("+r.ToString()+","); cx; !.","; cy; !.")\""]
+            |None -> NSL []
+            |Some r -> "transform=\"rotate("+r.ToString()+","++cx++","++cy++")\""
             
-        wr <| [!."<text";]
-        wr <| [!."x=\"";cx++"\"";]
-        wr <| [!."y=\"";cy++"\"";]
-        wr <| [!."style=\""]@style_fill@style_stroke@[!.("font-family:"+ft+"; font-size:");size++(";\" "+ta+" ")]@rt@[!.">"]
-        wr <| [text;]
-        wr <| [!."</text>"]
+        wr <| Str "<text"
+        wr <| "x=\""++cx++"\""
+        wr <| "y=\""++cy++"\""
+        wr <| "style=\""++style_fill++style_stroke++("font-family:"+ft+"; font-size:")++size++(";\" "+ta+" ")++rt++">"
+        wr <| text
+        wr <| Str "</text>"
         
-    static member text(cvx,cvy,wr:num0 list -> unit,cx:num0,cy:num0,text:num0,size:num0,fillcolor,strokecolor) =
+    static member text(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,text:exprString,size:num0,fillcolor,strokecolor) =
         gensvg.text(cvx,cvy,wr,cx,cy,text,size,TimesNewRoman,Left,None,fillcolor,strokecolor)
         
 type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
@@ -421,6 +428,7 @@ type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
             |Str s -> wr.Write s
             |Nvr(Int s) -> wr.Write(s.ToString())
             |Nvr(Dbl s) -> wr.Write(s.ToString "0.000")
+            |Nvr s -> printfn "出力できない値です：%s" <| s.ToString()
             |NSL lst -> for x in lst do write x
             wr.Write "\n"
         write x
@@ -633,7 +641,7 @@ type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
     /// <param name="strokecolor">線色</param>
     member this.text(c:double*double,text:string,size, fillcolor, strokecolor) = 
         let (cx, cy) = c
-        gensvg.text(cvx,cvy,wr,D scale*cx,D scale*cy,!.text,D size,fillcolor,strokecolor)
+        gensvg.text(cvx,cvy,wr,D scale*cx,D scale*cy,Str text,D size,fillcolor,strokecolor)
     /// <summary>
     /// テキストを追加
     /// </summary>
@@ -644,9 +652,9 @@ type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
     /// <param name="strokecolor">線色</param>
     member this.text(c:double*double,text:string,size, font, textAnchor, rot, fillcolor, strokecolor) = 
         let (cx, cy) = c
-        gensvg.text(cvx, cvy, wr, D scale*cx, D scale*cy, !.text, D size, font, textAnchor, rot, fillcolor,strokecolor)
+        gensvg.text(cvx, cvy, wr, D scale*cx, D scale*cy, Str text, D size, font, textAnchor, rot, fillcolor,strokecolor)
         
-type svgfilemaker_aq(cvx:double,cvy:double,wr:num0 list -> unit,scale:double) =
+type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     member internal this.header code = gensvg.header (cvx,cvy) wr this code
     /// <summary>
     /// レイヤーを追加
@@ -990,8 +998,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:num0 list -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.text(c:num0*num0,text:num0,size, fillcolor, strokecolor) = 
-        let (cx, cy) = c
-        gensvg.text(cvx,cvy,wr,scale*cx,scale*cy,text,D size,fillcolor,strokecolor)
+        let cx,cy = c
+        gensvg.text(cvx,cvy,wr,scale*cx,scale*cy,Nvr text.Expr,D size,fillcolor,strokecolor)
     /// <summary>
     /// テキストを追加
     /// </summary>
@@ -1002,7 +1010,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:num0 list -> unit,scale:double) =
     /// <param name="strokecolor">線色</param>
     member this.text(c:num0*num0,text:num0,size, font, textAnchor, rot, fillcolor, strokecolor) = 
         let (cx, cy) = c
-        gensvg.text(cvx,cvy,wr,D scale*cx,D scale*cy,text,D size, font, textAnchor, rot, fillcolor,strokecolor)
+        gensvg.text(cvx,cvy,wr,D scale*cx,D scale*cy,Nvr text.Expr,D size, font, textAnchor, rot, fillcolor,strokecolor)
         
 type svgfile =
     
@@ -1014,15 +1022,15 @@ type svgfile =
         let wr = new StreamWriter(dir+"\\"+filename,false,Encoding.Default)
         let sv = svgfilemaker(cvx,cvy,wr,scale)
         sv.header <| fun sv ->
-            code(sv)
+            code sv
         wr.Close()
         
     /// <summary>
     /// SVGファイルを作成
     /// </summary>
     /// <param name="filename">ファイル名</param>
-    static member make (filename:num0 list) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
-        io2.fileOutput filename <| fun wr ->
+    static member make (filename:exprString) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
+        io.codeOutput filename <| fun wr ->
             let sv = svgfilemaker_aq(cvx,cvy,wr,scale)
             sv.header <| fun sv ->
-                code(sv)
+                code sv
