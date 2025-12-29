@@ -11,6 +11,13 @@ type php =
         pr.cwriter.close()
         backProgram()
         
+    static member fnvar (s:string) = num0(Var(Nt,s,NaN))
+    static member fnvar (s:exprString) = 
+        reduceExprString.reduce s
+        |> List.map (fun s -> match s with |RStr t -> t |RNvr t -> t.eval pr)
+        |> fun s -> String.Join (" + ", s)
+        |> fun s -> php.fnvar s
+        
     /// htmlコード内にphpコードを埋め込み
     static member phpcode (code:unit->unit) =
         pr.cwriter.codewrite "<?php "
@@ -147,7 +154,7 @@ type php =
     static member sendMail(body:string,subject:string,smtp:string,fromAddress:string,toAddress:string) =
         let cmd = num0.var "cmd"
         //cmd <== "echo \\\""+body+"\\\" | s-nail -s \\\""+subject+"\\\" -Smta=smtp://"+smtp+":25 -r "+fromAddress+" "+toAddress
-        cmd <== "echo \\\""+body+"\\\" | mail -s \\\""+subject+"\\\" -S smtp=smtp://"+smtp+":25 -r "+fromAddress+" "+toAddress
+        cmd <== php.fnvar("echo \\\"" + body + "\\\" | mail -s \\\"" + subject + "\\\" -S smtp=smtp://" + smtp + ":25 -r " + fromAddress + " " + toAddress)
         php.phpcode <| fun () -> pr.cwriter.codewrite("exec("+cmd.Expr.eval pr+");")
     /// メール送信
     static member sendMail(body:num0,subject:num0,fromAddress:string,toAddress:num0) =
@@ -162,12 +169,12 @@ type php =
     /// Discordへメッセージ送信
     static member sendDiscord(body:num0,webhookURL:num0) =
         let cmd = num0.var "cmd"
-        cmd <== "curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\""++body++"\\\\\\\"}\\\" "++webhookURL 
+        cmd <== php.fnvar("curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\""++body++"\\\\\\\"}\\\" "++webhookURL)
         php.phpcode <| fun () -> pr.cwriter.codewrite("exec("+cmd.Expr.eval pr+");")
     /// Discordへメッセージ送信
     static member sendDiscord(body:string,webhookURL:string) =
         let cmd = num0.var "cmd"
-        cmd <== "curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\""+body+"\\\\\\\"}\\\" "+webhookURL 
+        cmd <== php.fnvar("curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\"" + body + "\\\\\\\"}\\\" " + webhookURL)
         php.phpcode <| fun () -> pr.cwriter.codewrite("exec("+cmd.Expr.eval pr+");")
     /// 文字列置換
     static member str_replace(strfrom:string,strto:string,str:num0) = num0(Var(Nt, "str_replace("+"\""+strfrom+"\""+","+"\""+strto+"\""+","+str.Expr.eval pr+")", NaN))

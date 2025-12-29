@@ -12,7 +12,7 @@ namespace Aqualis
         static member addarg (typ:Etype,vtp:VarType,n:string) =
             fun code ->
                 match pr.language with
-                |Fortran |LaTeX |Numeric ->
+                |Fortran ->
                     //関数内ではこの変数名を使用
                     let name = 
                         match typ,vtp with
@@ -60,6 +60,31 @@ namespace Aqualis
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> "(*"+name+")"
+                        |_ -> name
+                    code(vtp,argname)
+                |LaTeX ->
+                    //関数内ではこの変数名を使用
+                    let name = 
+                        match typ,vtp with
+                        |(It _|Dt|Zt|Structure _),A0 ->
+                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                        |_ -> 
+                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                    match vtp with
+                    |A0 ->
+                        pr.arg.add(n,(typ,vtp,name))
+                    |A1 _ ->
+                        pr.arg.add(n,(typ,vtp,name))
+                        pr.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                    |A2 _ ->
+                        pr.arg.add(n,(typ,vtp,name))
+                        pr.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                    |A3 _ ->
+                        pr.arg.add(n,(typ,vtp,name))
+                        pr.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                    let argname =
+                        match typ,vtp with
+                        |(It _|Dt|Zt|Structure _),A0 -> name
                         |_ -> name
                     code(vtp,argname)
                 |HTML ->
@@ -112,6 +137,7 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0 -> name
                         |_ -> name
                     code(vtp,argname)
+                |_ -> ()
                     
         /// <summary>
         /// 関数定義の引数を追加

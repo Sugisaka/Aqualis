@@ -35,6 +35,10 @@ namespace Aqualis
                         ()
                     |HTML -> 
                         ()
+                    |JavaScript ->
+                        ()
+                    |PHP ->
+                        ()
                     |Numeric -> 
                         ()
                     
@@ -61,6 +65,10 @@ namespace Aqualis
                 |LaTeX   ->
                     ()
                 |HTML   ->
+                    ()
+                |JavaScript ->
+                    ()
+                |PHP ->
                     ()
                 |Numeric -> 
                     ()

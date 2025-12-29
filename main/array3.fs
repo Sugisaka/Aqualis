@@ -33,6 +33,8 @@ namespace Aqualis
                 |LaTeX -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |HTML -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |Python -> num0(Var(It 4,name+"_size[0]",NaN))
+                |JavaScript -> num0(Var(It 4,name+"_size[0]",NaN))
+                |PHP -> num0(Var(It 4,name+"_size[0]",NaN))
                 |Numeric -> num0 NaN
             |Arx3(s1,_,_,_) -> s1
         ///<summary>変数の要素数</summary>
@@ -46,6 +48,8 @@ namespace Aqualis
                 |LaTeX -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
                 |HTML -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
                 |Python -> num0(Var(It 4,name+"_size[1]",NaN))
+                |JavaScript -> num0(Var(It 4,name+"_size[1]",NaN))
+                |PHP -> num0(Var(It 4,name+"_size[1]",NaN))
                 |Numeric -> num0 NaN
             |Arx3(_,s2,_,_) -> s2
         ///<summary>変数の要素数</summary>
@@ -59,6 +63,8 @@ namespace Aqualis
                 |LaTeX -> num0(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
                 |HTML -> num0(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
                 |Python -> num0(Var(It 4,name+"_size[2]",NaN))
+                |JavaScript -> num0(Var(It 4,name+"_size[2]",NaN))
+                |PHP -> num0(Var(It 4,name+"_size[2]",NaN))
                 |Numeric -> num0 NaN
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
@@ -491,6 +497,24 @@ namespace Aqualis
                             |_               -> pr.cwriter.codewrite(name+" = numpy.zeros("+this.size1.Expr.eval pr+"*"+this.size2.Expr.eval pr+"*"+this.size3.Expr.eval pr+").reshape("+this.size1.Expr.eval pr+","+this.size2.Expr.eval pr+","+this.size3.Expr.eval pr+")"+"\n")
                         |_ -> 
                             pr.cwriter.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                    |JavaScript ->
+                        match size with
+                        |A3(0,0,0) ->
+                            this.size1 <== n1
+                            this.size2 <== n2
+                            this.size3 <== n3
+                            pr.cwriter.codewrite(name+" = "+"Array("+this.size1.Expr.eval pr+"*"+this.size2.Expr.eval pr+"*"+this.size3.Expr.eval pr+");\n")
+                        |_ -> 
+                            pr.cwriter.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                    |PHP ->
+                        match size with
+                        |A3(0,0,0) ->
+                            this.size1 <== n1
+                            this.size2 <== n2
+                            this.size3 <== n3
+                            pr.cwriter.codewrite(name+" = [];\n")
+                        |_ -> 
+                            pr.cwriter.codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |Numeric ->
                         ()
                 |_ -> ()
@@ -551,6 +575,18 @@ namespace Aqualis
                         this.size2 <== -1
                         this.size3 <== -1
                         pr.cwriter.codewrite("del "+name+""+"\n")
+                    |_ -> ()
+                |JavaScript ->
+                    match size with
+                    |A3(0,0,0) ->
+                        this.size1 <== -1
+                        pr.cwriter.codewrite(name+"= null;"+"\n")
+                    |_ -> ()
+                |PHP ->
+                    match size with
+                    |A3(0,0,0) ->
+                        this.size1 <== -1
+                        pr.cwriter.codewrite("unset("+name+");"+"\n")
                     |_ -> ()
                 |Numeric ->
                     ()
@@ -1204,16 +1240,20 @@ namespace Aqualis
                     pr.cwriter.codewrite(x + " \\leftarrow " + y)
                 |Python ->
                     pr.cwriter.codewrite(x + " = copy.deepcopy("+y+")")
+                |JavaScript ->
+                    iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
+                |PHP ->
+                    iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
                 |Numeric -> ()
             |Var3(_,x),Arx3(_,_,_,f) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
             |Arx3(_,_,_,_),Var3(_,_) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
             |Arx3(_,_,_,_),Arx3(_,_,_,_) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
         static member (<==) (v1:num3,v2:num0) =
             match v1.Expr with
             |Var3(_,x) ->
@@ -1228,10 +1268,14 @@ namespace Aqualis
                     match v1.etype with
                     |Structure sname -> pr.cwriter.codewrite(x + " = numpy.array([[["+sname+"() for _ in range(int("+v1.size3.Expr.eval pr+"))] for _ in range(int("+v1.size2.Expr.eval pr+"))] for _ in range(int("+v1.size1.Expr.eval pr+"))], dtype=object).reshape(int("+v1.size1.Expr.eval pr+"),int("+v1.size2.Expr.eval pr+"),int("+v1.size3.Expr.eval pr+"))\n")
                     |_               -> pr.cwriter.codewrite(x+"[:,:,:]="+v2.Expr.eval pr+"\n")
+                |JavaScript ->
+                    iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
+                |PHP ->
+                    iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |Numeric -> ()
             |Arx3(_,_,_,_) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
         static member (<==) (v1:num3,v2:double) =
             v1 <== D v2
         static member (<==) (v1:num3,v2:int) =

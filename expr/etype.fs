@@ -81,6 +81,28 @@ namespace Aqualis
                 |Structure "file" -> "io.TextIOWrapper"
                 |Structure sname -> sname
                 |_ -> ""
+            |JavaScript ->
+                match this with 
+                |It 1 -> "unsigned char" 
+                |It _ -> "int" 
+                |Dt -> "double" 
+                |Zt -> "double complex"
+                |Structure "string" -> "string" 
+                |Structure "char" -> "char" 
+                |Structure "file" -> "FILE*" 
+                |Structure sname -> sname 
+                |_ -> ""
+            |PHP ->
+                match this with 
+                |It 1 -> "unsigned char" 
+                |It _ -> "int" 
+                |Dt -> "double" 
+                |Zt -> "double complex"
+                |Structure "string" -> "string" 
+                |Structure "char" -> "char" 
+                |Structure "file" -> "FILE*" 
+                |Structure sname -> sname 
+                |_ -> ""
             |Numeric ->
                 match this with 
                 |It 1 -> "byte" 

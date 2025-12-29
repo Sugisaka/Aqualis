@@ -187,6 +187,8 @@ namespace Aqualis
             |LaTeX   -> pr.cwriter.codewrite "stop"
             |HTML    -> pr.cwriter.codewrite "stop"
             |Python  -> pr.cwriter.codewrite "sys.exit(1)"
+            |JavaScript -> ()
+            |PHP -> ()
             |Numeric -> ()
             
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
@@ -197,6 +199,8 @@ namespace Aqualis
             |LaTeX   -> pr.cwriter.codewrite "stop\n"
             |HTML    -> pr.cwriter.codewrite "stop\n"
             |Python  -> pr.cwriter.codewrite "input()"
+            |JavaScript -> ()
+            |PHP -> ()
             |Numeric -> ()
             
         /// <summary>

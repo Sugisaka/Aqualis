@@ -86,7 +86,7 @@ namespace Aqualis
                     pr.hwriter.codewrite("type "+s.sname+"\n")
                     pr.hwriter.indent.inc()
                     for i in 0..s.memlist.Length-1 do
-                        let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
+                        let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
                         pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
                     pr.hwriter.indent.dec()
                     pr.hwriter.codewrite("end type "+s.sname+"\n")
@@ -96,49 +96,56 @@ namespace Aqualis
                     pr.hwriter.codewrite("{"+"\n")
                     pr.hwriter.indent.inc()
                     for i in 0..s.memlist.Length-1 do
-                        let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
+                        let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
                         pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
                     pr.hwriter.indent.dec()
                     pr.hwriter.codewrite("} "+s.sname+";\n")
             |LaTeX ->
                 for s in this.sort() do
                     pr.hwriter.codewrite("\\subsection{"+s.sname+"}")
-                    pr.hwriter.codewrite("\\begin{itemize}\n")
+                    pr.hwriter.codewrite "\\begin{itemize}\n"
                     pr.hwriter.indent.inc()
                     for i in 0..s.memlist.Length-1 do
-                        let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
+                        let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
                         pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
                     pr.hwriter.indent.dec()
-                    pr.hwriter.codewrite("\\end{itemize}\n")
+                    pr.hwriter.codewrite "\\end{itemize}\n"
             |HTML ->
                 for s in this.sort() do
                     pr.hwriter.codewrite("<h3>"+s.sname+"</h3>\n")
-                    pr.hwriter.codewrite("<ul>\n")
+                    pr.hwriter.codewrite "<ul>\n"
                     pr.hwriter.indent.inc()
                     for i in 0..s.memlist.Length-1 do
-                        let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
+                        let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
                         pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
                     pr.hwriter.indent.dec()
-                    pr.hwriter.codewrite("</ul>\n")
+                    pr.hwriter.codewrite "</ul>\n"
             |Python ->
                 for s in this.sort() do
                     pr.hwriter.codewrite("class "+s.sname+":\n")
                     pr.hwriter.indent.inc()
                     for i in 0..s.memlist.Length-1 do
-                        let (typ,vtp,name) = s.memlist.[s.memlist.Length-1-i]
+                        let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
                         pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
                     pr.hwriter.indent.dec()
-            |Numeric -> ()
+            |JavaScript ->
+                ()
+            |PHP ->
+                ()
+            |Numeric ->
+                ()
             
         ///<summary>構造体メンバへのアクセス</summary>
         static member mem(vname,name) =
             match pr.language with
-            |Fortran -> vname+"%"+name
-            |C99     -> vname+"."+name
-            |LaTeX   -> vname+"."+name
-            |HTML    -> vname+"."+name
-            |Python  -> vname+"."+name
-            |Numeric -> vname+"."+name
+            |Fortran    -> vname+"%"+name
+            |C99        -> vname+"."+name
+            |LaTeX      -> vname+"."+name
+            |HTML       -> vname+"."+name
+            |Python     -> vname+"."+name
+            |JavaScript -> vname+"."+name
+            |PHP        -> vname+"."+name
+            |Numeric    -> vname+"."+name
             
         member this.i0 (sname, vname, name) =
             this.addmember(sname,(It 4,A0,name))
@@ -223,7 +230,7 @@ namespace Aqualis
             num3(Zt,Var3(A3(0,0,0),structure.mem(vname,name)))
             
         member this.reg(sname,name:string) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |Numeric -> "."
+            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
@@ -233,7 +240,7 @@ namespace Aqualis
                 pr.var.setVar(Structure(sname),A0,name_,"")
             
         member this.reg(sname,name:string,size1) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |Numeric -> "."
+            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
@@ -243,7 +250,7 @@ namespace Aqualis
                 pr.var.setVar(Structure(sname),A1(size1),name_,"")
             
         member this.reg(sname,name:string,size1,size2) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |Numeric -> "."
+            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
@@ -253,7 +260,7 @@ namespace Aqualis
                 pr.var.setVar(Structure(sname),A2(size1,size2),name_,"")
             
         member this.reg(sname,name:string,size1,size2,size3) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |Numeric -> "."
+            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加

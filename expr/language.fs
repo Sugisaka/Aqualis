@@ -12,6 +12,10 @@ namespace Aqualis
         |HTML
         ///<summary>Python</summary>
         |Python
+        ///<summary>JavaScript</summary>
+        |JavaScript
+        ///<summary>PHP</summary>
+        |PHP
         ///<summary>直接計算</summary>
         |Numeric
 

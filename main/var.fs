@@ -24,8 +24,12 @@ namespace Aqualis
                     pr.numFormat.DtoS re + "-" + pr.numFormat.DtoS (abs im) + "i"
                 else
                     pr.numFormat.DtoS re + "+" + pr.numFormat.DtoS im + "i"
+            |JavaScript ->
+                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + ")"
+            |PHP ->
+                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + ")"
             |Numeric ->
-                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + "\\mathrm{j})"
+                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + ")"
                 
         ///<summary>整数型配列の初期値</summary>
         static member private init_i1 (v:int list) =
@@ -36,6 +40,8 @@ namespace Aqualis
             |LaTeX -> "{" + join v + "}"
             |HTML -> "{" + join v + "}"
             |Python -> "[" + join v + "]"
+            |JavaScript -> "[" + join v + "]"
+            |PHP -> "[" + join v + "]"
             |Numeric -> "{" + join v + "}"
             
         ///<summary>倍精度浮動小数点型配列の初期値</summary>
@@ -47,6 +53,8 @@ namespace Aqualis
             |LaTeX -> "{" + join v + "}"
             |HTML -> "{" + join v + "}"
             |Python -> "[" + join v + "]"
+            |JavaScript -> "[" + join v + "]"
+            |PHP -> "[" + join v + "]"
             |Numeric -> "{" + join v + "}"
             
         ///<summary>複素数型配列の初期値</summary>
@@ -58,6 +66,8 @@ namespace Aqualis
             |LaTeX -> "{" + join v + "}"
             |HTML -> "{" + join v + "}"
             |Python -> "[" + join v + "]"
+            |JavaScript -> "[" + join v + "]"
+            |PHP -> "[" + join v + "]"
             |Numeric -> "{" + join v + "}"
             
         ///<summary>バイト型変数</summary>

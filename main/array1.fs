@@ -28,12 +28,14 @@ namespace Aqualis
             match x with
             |Var1(_,name) -> 
                 match pr.language with 
-                |Fortran -> num0(Var(It 4,name+"_size(1)",NaN))
-                |C99     -> num0(Var(It 4,name+"_size[0]",NaN))
-                |LaTeX   -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
-                |HTML    -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
-                |Python  -> num0(Var(It 4,name+"_size[0]",NaN))
-                |Numeric -> num0 NaN
+                |Fortran    -> num0(Var(It 4,name+"_size(1)",NaN))
+                |C99        -> num0(Var(It 4,name+"_size[0]",NaN))
+                |LaTeX      -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                |HTML       -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                |Python     -> num0(Var(It 4,name+"_size[0]",NaN))
+                |JavaScript -> num0(Var(It 4,name+"_size[0]",NaN))
+                |PHP        -> num0(Var(It 4,name+"_size[0]",NaN))
+                |Numeric    -> num0 NaN
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:num0) =
@@ -116,6 +118,20 @@ namespace Aqualis
                             |_               -> pr.cwriter.codewrite(name+" = "+"numpy.zeros("+this.size1.Expr.eval pr+")\n")
                         |_ -> 
                             pr.cwriter.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                    |JavaScript ->
+                        match size1 with
+                        |A1 0 ->
+                            this.size1 <== n1
+                            pr.cwriter.codewrite(name+" = Array(" + this.size1.Expr.eval pr + ");\n")
+                        |_ -> 
+                            pr.cwriter.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                    |PHP ->
+                        match size1 with
+                        |A1 0 ->
+                            this.size1 <== n1
+                            pr.cwriter.codewrite(name+" = [];\n")
+                        |_ -> 
+                            pr.cwriter.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |Numeric ->
                         ()
                 |_ -> ()
@@ -134,35 +150,47 @@ namespace Aqualis
                     pr.cwriter.comment("****************************************************")
                 |_ -> ()
             match x with
-            |Var1(size1,name) ->
+            |Var1(size,name) ->
                 match pr.language with
                 |Fortran ->
-                    match size1 with
+                    match size with
                     |A1 0 ->
                         this.size1 <== -1
                         pr.cwriter.codewrite("deallocate("+name+")"+"\n")
                     |_ -> ()
                 |C99 ->
-                    match size1 with
+                    match size with
                     |A1 0 ->
                         this.size1 <== -1
                         pr.cwriter.codewrite("free("+name+");"+"\n")
                     |_ -> ()
                 |LaTeX ->
-                    match size1 with
+                    match size with
                     |A1 0 ->
                         pr.cwriter.codewrite("$"+name+"$: deallocate\\\\\n")
                     |_ -> ()
                 |HTML ->
-                    match size1 with
+                    match size with
                     |A1 0 ->
                         pr.cwriter.codewrite("\\("+name+"\\): deallocate<br/>\n")
                     |_ -> ()
                 |Python ->
-                    match size1 with
+                    match size with
                     |A1 0 ->
                         this.size1 <== -1
                         pr.cwriter.codewrite("del "+name+""+"\n")
+                    |_ -> ()
+                |JavaScript ->
+                    match size with
+                    |A1 0 ->
+                        this.size1 <== -1
+                        pr.cwriter.codewrite(name+"= null;"+"\n")
+                    |_ -> ()
+                |PHP ->
+                    match size with
+                    |A1 0 ->
+                        this.size1 <== -1
+                        pr.cwriter.codewrite("unset("+name+");"+"\n")
                     |_ -> ()
                 |Numeric ->
                     ()
@@ -329,17 +357,21 @@ namespace Aqualis
                     pr.cwriter.codewrite(x + " \\leftarrow " + y)
                 |Python ->
                     pr.cwriter.codewrite(x + " = copy.deepcopy("+y+")")
+                |JavaScript ->
+                    iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
+                |PHP ->
+                    iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
                 |Numeric ->
                     ()
             |Var1(_,x),Arx1(_,f) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
             |Arx1(_,_),Var1(_,_) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
             |Arx1(_,_),Arx1(_,_) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
                 
         static member (<==) (v1:num1,v2:num0) =
             match v1.Expr with
@@ -355,11 +387,15 @@ namespace Aqualis
                     match v1.etype with
                     |Structure sname -> pr.cwriter.codewrite(x+" = numpy.array(["+sname+"() for _ in range(int("+v1.size1.Expr.eval pr+"))], dtype=object)\n")
                     |_               -> pr.cwriter.codewrite(x+"[:]="+v2.Expr.eval pr+"\n")
+                |JavaScript ->
+                    iter.num v1.size1 <| fun i -> v1[i] <== v2
+                |PHP ->
+                    iter.num v1.size1 <| fun i -> v1[i] <== v2
                 |Numeric ->
                     ()
             |Arx1(_,_) ->
                 match pr.language with
-                |Fortran|LaTeX|C99|HTML|Python|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2
+                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2
         static member (<==) (x:num1,y:double) = x <== D y
         static member (<==) (x:num1,y:int) = x <== I y
         

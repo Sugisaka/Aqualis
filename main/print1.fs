@@ -98,6 +98,60 @@ namespace Aqualis
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 pr.cwriter.codewrite("print(\"" + format + "\" %(" + code + "))\n")
+            |JavaScript ->
+                let int0string_format_C =
+                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                let double0string_format_C = 
+                    let a,b = pr.numFormat.dFormat
+                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let format = 
+                    lst
+                    |> List.map (fun q ->
+                        match q with
+                        |Str x -> x
+                        |Nvr x when x.etype = It 4 -> int0string_format_C
+                        |Nvr x when x.etype = Dt  -> double0string_format_C
+                        |Nvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |_ -> "")
+                    |> List.filter (fun s -> s <> "")
+                    |> fun s -> String.Join("",s)
+                let code = 
+                    lst
+                    |> List.map (fun q ->
+                        match q with
+                        |Nvr x when x.etype = Zt -> (Re x).eval pr + "," + (Im x).eval pr
+                        |Nvr x -> x.eval pr
+                        |_ -> "")
+                    |> List.filter (fun s -> s <> "")
+                    |> fun s -> String.Join(",",s)
+                pr.cwriter.codewrite("print(" + code + ");\n")
+            |PHP ->
+                let int0string_format_C =
+                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                let double0string_format_C = 
+                    let a,b = pr.numFormat.dFormat
+                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let format = 
+                    lst
+                    |> List.map (fun q ->
+                        match q with
+                        |Str x -> x
+                        |Nvr x when x.etype = It 4 -> int0string_format_C
+                        |Nvr x when x.etype = Dt  -> double0string_format_C
+                        |Nvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |_ -> "")
+                    |> List.filter (fun s -> s <> "")
+                    |> fun s -> String.Join("",s)
+                let code = 
+                    lst
+                    |> List.map (fun q ->
+                        match q with
+                        |Nvr x when x.etype = Zt -> (Re x).eval pr + "," + (Im x).eval pr
+                        |Nvr x -> x.eval pr
+                        |_ -> "")
+                    |> List.filter (fun s -> s <> "")
+                    |> fun s -> String.Join(",",s)
+                pr.cwriter.codewrite("print(" + code + ");\n")
             |Numeric ->
                 for v in lst do
                     match v with
@@ -118,6 +172,10 @@ namespace Aqualis
                 pr.cwriter.codewrite("Print \\("+str+"\\)\n")
                 pr.cwriter.codewrite "<br/>\n"
             |Python ->
+                pr.cwriter.codewrite("print(\""+str+"\")\n")
+            |JavaScript ->
+                pr.cwriter.codewrite("print(\""+str+"\")\n")
+            |PHP ->
                 pr.cwriter.codewrite("print(\""+str+"\")\n")
             |Numeric ->
                 printfn "%s" str

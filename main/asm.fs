@@ -13,15 +13,18 @@ namespace Aqualis
             |C99 -> 
                 //#defineで定義済み
                 num0(Var(Zt,"uj",NaN))
-            |LaTeX   ->
+            |LaTeX ->
                 pr.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 num0(Var(Zt,"\\mathrm{j}",NaN))
-            |HTML   ->
+            |HTML ->
                 pr.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 num0(Var(Zt,"\\mathrm{j}",NaN))
             |Python -> 
-                //#defineで定義済み
                 num0(Var(Zt,"1.0j",NaN))
+            |JavaScript -> 
+                num0(Cpx(0.0,1.0))
+            |PHP -> 
+                num0(Cpx(0.0,1.0))
             |Numeric -> 
                 num0(Cpx(0.0,1.0))
         ///<summary>円周率</summary>
@@ -40,6 +43,12 @@ namespace Aqualis
                 pr.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                 num0(Var(Dt,"\\pi",NaN))
             |Python ->
+                pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                num0(Var(Dt,"pi",NaN))
+            |JavaScript ->
+                pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                num0(Var(Dt,"pi",NaN))
+            |PHP ->
                 pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                 num0(Var(Dt,"pi",NaN))
             |Numeric -> 

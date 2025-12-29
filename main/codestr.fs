@@ -104,8 +104,8 @@ namespace Aqualis
             |Python -> 
                 (!===)("end "+s) 
             |HTML   ->
-                pr.cwriter.codewrite("</div>")
-                pr.cwriter.codewrite("</details>")
+                pr.cwriter.codewrite "</div>"
+                pr.cwriter.codewrite "</details>"
             |_  -> ()
               
         static member private header (c:char) (s:string) = 
@@ -116,12 +116,16 @@ namespace Aqualis
                 pr.cwriter.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |Python ->
                 pr.cwriter.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+            |JavaScript ->
+                pr.cwriter.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+            |PHP ->
+                pr.cwriter.comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |LaTeX ->
                 pr.cwriter.codewrite("\\section{"+s+"}")
             |HTML -> 
-                pr.cwriter.codewrite("<details open>")
+                pr.cwriter.codewrite "<details open>"
                 pr.cwriter.codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                pr.cwriter.codewrite("<div class=\"insidecode-section\">")
+                pr.cwriter.codewrite "<div class=\"insidecode-section\">"
             |Numeric -> ()
 
         static member private footer (c:char) (s:string) = 
@@ -130,8 +134,8 @@ namespace Aqualis
             |C99 -> pr.cwriter.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |Python -> pr.cwriter.comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |HTML   ->
-                pr.cwriter.codewrite("</div>")
-                pr.cwriter.codewrite("</details>")
+                pr.cwriter.codewrite "</div>"
+                pr.cwriter.codewrite "</details>"
             |_   -> ()
 
         static member private blank () = 

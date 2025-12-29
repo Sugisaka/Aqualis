@@ -11,6 +11,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(0, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
                     bes <== num0(besselj0_(x))
@@ -23,6 +25,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(0, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
                     bes <== num0(bessely0_(x))
@@ -35,6 +39,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(0, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 let bessely0_ (v:num0) = 
                     match pr.language with
@@ -43,6 +49,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(0, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
                     bes <== num0(besselj0_(x))-num0(bessely0_(x))*asm.uj
@@ -55,6 +63,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(1, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
                     bes <== num0(besselj1_(x))
@@ -67,6 +77,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(1, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
                     bes <== num0(bessely1_(x))
@@ -79,6 +91,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(1, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 let bessely1_ (v:num0) = 
                     match pr.language with
@@ -87,6 +101,8 @@ namespace Aqualis
                     |LaTeX -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(1, "+v.code+")",NaN)
+                    |JavaScript -> NaN
+                    |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
                     bes <== num0(besselj1_(x))-num0(bessely1_(x))*asm.uj

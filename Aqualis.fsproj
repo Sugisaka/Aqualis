@@ -19,6 +19,7 @@
     <Compile Include="eval\evalL.fs" />
     <Compile Include="eval\evalH.fs" />
     <Compile Include="eval\evalJ.fs" />
+    <Compile Include="eval\evalPh.fs" />
     <Compile Include="eval\evalT.fs" />
     <Compile Include="eval\eval.fs" />
     <Compile Include="eval\diff.fs" />

@@ -210,7 +210,15 @@ namespace Aqualis
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space + code + "\n")) slist
-            |Python -> //暫定、正しいかはわからない
+            |Python ->
+                if ss<>"" then 
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
+                    Array.iter (fun code -> this.cwrite(this.indent.space + code + "\n")) slist
+            |JavaScript ->
+                if ss<>"" then 
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
+                    Array.iter (fun code -> this.cwrite(this.indent.space + code + "\n")) slist
+            |PHP ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space + code + "\n")) slist
@@ -241,9 +249,17 @@ namespace Aqualis
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space + "#" + code + "\n")) slist
+            |JavaScript ->
+                if ss<>"" then 
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
+                    Array.iter (fun code -> this.cwrite(this.indent.space + "//" + code + "\n")) slist
+            |PHP ->
+                if ss<>"" then 
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
+                    Array.iter (fun code -> this.cwrite(this.indent.space + "/*" + code + "*/\n")) slist
             |Numeric ->
                 ()
-
+                
         ///<summary>ファイルを閉じる</summary>
         member this.close() =
             match cwriter with
@@ -451,4 +467,22 @@ namespace Aqualis
                     |It _ |It 1             -> name + " = " + (if param<>"" then "numpy.array(" + param + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")" else "numpy.zeros(" + fmt.ItoS size1 + "*" + (fmt.ItoS size2) + "*" + (fmt.ItoS size3) + ",dtype=" + this.Stype typ + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")") + ""
                     |Zt                     -> name + " = " + (if param<>"" then "numpy.array(" + param + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")" else "numpy.zeros(" + fmt.ItoS size1 + "*" + (fmt.ItoS size2) + "*" + (fmt.ItoS size3) + ", dtype=numpy.complex128).reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")") + ""
                     |_                      -> name + " = " + (if param<>"" then "numpy.array(" + param + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")" else "numpy.zeros(" + fmt.ItoS size1 + "*" + (fmt.ItoS size2) + "*" + (fmt.ItoS size3) + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")") + ""
+            |JavaScript ->
+                match vtp with 
+                |A0        -> name + if param<>"" then " = " + param else " = 0;"
+                |A1 0      -> name + " = Array();"
+                |A2(0,0)   -> name + " = Array();"
+                |A3(0,0,0) -> name + " = Array();"
+                |A1 _      -> name + " = " + if param<>"" then param else "Array();"
+                |A2(_,_)   -> name + " = " + if param<>"" then param else "Array();"
+                |A3(_,_,_) -> name + " = " + if param<>"" then param else "Array();"
+            |PHP ->
+                match vtp with 
+                |A0        -> name + if param<>"" then " = " + param else " = 0;"
+                |A1 0      -> name + " = [];"
+                |A2(0,0)   -> name + " = [];"
+                |A3(0,0,0) -> name + " = [];"
+                |A1 _      -> name + " = " + if param<>"" then param + ";" else "[];"
+                |A2(_,_)   -> name + " = " + if param<>"" then param + ";" else "[];"
+                |A3(_,_,_) -> name + " = " + if param<>"" then param + ";" else "[];"
             |Numeric -> ""
