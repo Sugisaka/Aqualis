@@ -1,15 +1,14 @@
-namespace docWriter
+namespace Aqualis
 
 open System.IO
 
 type Serif(subtitle:string,hatsuon:string) = 
     new(subtitle:string) = Serif(subtitle,subtitle)
-    new(subtitle:num0) = Serif("\\("+subtitle.str(LaTeX)+"\\)",subtitle.str(Text))
+    new(subtitle:num0) = Serif("\\("+subtitle.Expr.eval pr+"\\)",subtitle.Expr.evalT())
     member _.Subtitle with get() = subtitle
     member _.Hatsuon with get() = hatsuon
-    static member (+) (a:Serif,b:Serif) =
-        Serif(a.Subtitle+b.Subtitle,a.Hatsuon+b.Hatsuon)
-        
+    static member (+) (a:Serif,b:Serif) = Serif(a.Subtitle+b.Subtitle,a.Hatsuon+b.Hatsuon)
+    
 type CSS = {Key:string; Value:string}
 
 [<AutoOpen>]

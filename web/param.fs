@@ -1,4 +1,4 @@
-namespace docWriter
+namespace Aqualis
 
 /// 水平方向アライメント
 type BorderH = |L |C |R |J |Ll |Cl |Rl |Jl |Lr |Cr |Rr |Jr |Llr |Clr |Rlr |Jlr

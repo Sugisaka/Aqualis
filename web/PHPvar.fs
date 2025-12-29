@@ -1,4 +1,4 @@
-namespace docWriter
+namespace Aqualis
 
 open System
 
@@ -6,98 +6,49 @@ type PHPbool(x:string) =
     
     member this.name with get() = x
     static member var(x) = PHPbool("$"+x)
-    static member (<==) (a:PHPbool,b:PHPbool) = write ("<?php " + a.name + " = " + b.name + " ?>")
+    static member (<==) (a:PHPbool,b:PHPbool) = pr.cwriter.codewrite ("<?php " + a.name + " = " + b.name + " ?>")
     
-type PHPvar =
-    |Var of string
-    |Str of string
-
-    member this.name with get() = 
-        match this with
-        |Var x -> x
-        |Str x -> x
-    member this.code with get() = 
-        match this with
-        |Var _ -> "<?php echo "+this.name+"; ?>"
-        |Str _ -> this.name
-    member this.Item with get(i:PHPvar) = Var(this.name+"["+i.name+"]")
-    member this.Item with get(i:int) = Var(this.name+"["+i.ToString()+"]")
-    member this.Item with get(i:string) = Var(this.name+"["+"\""+i+"\""+"]")
-    static member var(x) = Var("$"+x)
-    static member var(x,init:PHPvar) = 
-        let v = Var("$"+x)
-        v <== init
-        v
-    static member var(x,init:int) = 
-        let v = Var("$"+x)
-        v <== init
-        v
-    static member var(x,init:double) = 
-        let v = Var("$"+x)
-        v <== init
-        v
-    static member var(x,init:string) = 
-        let v = Var("$"+x)
-        v <== init
-        v
-    static member str(x) = Str("\""+x+"\"")
-    static member (<==) (a:PHPvar,b:PHPvar) = write ("<?php " + a.name + " = " + b.name + "; ?>")
-    static member (<==) (a:PHPvar,b:string) = write ("<?php " + a.name + " = " + "\""+b+"\"" + "; ?>")
-    static member (<==) (a:PHPvar,b:int) = write ("<?php " + a.name + " = " + b.ToString() + "; ?>")
-    static member (<==) (a:PHPvar,b:double) = write ("<?php " + a.name + " = " + b.ToString() + "; ?>")
-    static member ( + ) (a:PHPvar,b:PHPvar) = Var("(" + a.name + "+" + b.name + ")")
-    static member ( ++ ) (a:PHPvar,b:PHPvar) = Var(a.name + "." + b.name)
-    static member ( ++ ) (a:string,b:PHPvar) = PHPvar.str(a) ++ b
-    static member ( ++ ) (a:PHPvar,b:string) = a ++ PHPvar.str(b)
-    static member ( + ) (a:PHPvar,b:int) = Var("(" + a.name + "+" + b.ToString() + ")")
-    static member ( - ) (a:PHPvar,b:PHPvar) = Var("(" + a.name + "-" + b.name + ")")
-    static member ( - ) (a:PHPvar,b:int) = Var("(" + a.name + "-" + b.ToString() + ")")
-    static member ( * ) (a:PHPvar,b:PHPvar) = Var("(" + a.name + "*" + b.name + ")")
-    static member ( * ) (a:double,b:PHPvar) = Var("(" + a.ToString() + "*" + b.name + ")")
-    static member ( * ) (a:int,b:PHPvar) = Var("(" + a.ToString() + "*" + b.name + ")")
-    static member ( / ) (a:PHPvar,b:PHPvar) = Var("(" + a.name + "/" + b.name + ")")
-    static member (.=) (a:PHPvar,b:PHPvar) = PHPbool(a.name + " == " + b.name)
-    static member (.=) (a:PHPvar,b:string) = a .= PHPvar.str(b)
-    static member (.=) (a:PHPvar,b:int) = PHPbool(a.name + " == " + b.ToString())
-    static member (.=) (a:PHPvar,b:double) = PHPbool(a.name + " == " + b.ToString())
-    static member (.=/) (a:PHPvar,b:PHPvar) = PHPbool(a.name + " != " + b.name)
-    static member (.=/) (a:PHPvar,b:string) = PHPbool(a.name + " != " + "\"" + b + "\"")
-    static member (.=/) (a:PHPvar,b:int) = PHPbool(a.name + " != " + b.ToString())
-    static member (.>) (a:PHPvar,b:PHPvar) = PHPbool(a.name + " > " + b.name)
-    static member (.>) (a:PHPvar,b:int) = PHPbool(a.name + " > " + b.ToString())
-    static member (.>) (a:PHPvar,b:double) = PHPbool(a.name + " > " + b.ToString())
-    static member (.<) (a:PHPvar,b:PHPvar) = PHPbool(a.name + " < " + b.name)
-    static member (.<) (a:PHPvar,b:int) = PHPbool(a.name + " < " + b.ToString())
-    static member (.<) (a:PHPvar,b:double) = PHPbool(a.name + " < " + b.ToString())
-    static member (.>=) (a:PHPvar,b:PHPvar) = PHPbool(a.name + " >= " + b.name)
-    static member (.>=) (a:PHPvar,b:int) = PHPbool(a.name + " >= " + b.ToString())
-    static member (.>=) (a:PHPvar,b:double) = PHPbool(a.name + " >= " + b.ToString())
-    static member (.<=) (a:PHPvar,b:PHPvar) = PHPbool(a.name + " <= " + b.name)
-    static member (.<=) (a:PHPvar,b:int) = PHPbool(a.name + " <= " + b.ToString())
-    static member (.<=) (a:PHPvar,b:double) = PHPbool(a.name + " <= " + b.ToString())
-    
-    static member array(arrayname:string) = 
-        let c = PHPvar.var(arrayname)
-        write ("<?php "+c.name+" = array(); ?>")
-        c
+[<AutoOpen>]
+module num0ForPHP =
+    type num0 with
+        member this.code(pr:program) = "<?php echo " + this.Expr.eval pr + "; ?>"
+        static member var x = num0(Var(Nt,"$"+x,NaN))
+        static member var(x,init:num0) = 
+            let v = num0(Var(Nt,"$"+x,NaN))
+            v <== init
+            v
+        static member var(x,init:int) = 
+            let v = num0(Var(Nt,"$"+x,NaN))
+            v <== init
+            v
+        static member var(x,init:double) = 
+            let v = num0(Var(Nt,"$"+x,NaN))
+            v <== init
+            v
+        static member str x = num0(Var(Nt,"\""+x+"\"",NaN))
         
-    static member array(arrayname:string,data:list<string*string>) = 
-        let c = PHPvar.var(arrayname)
-        write ("<?php "+c.name+" = array(); ?>")
-        write ("<?php "+c.name+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
-        c
+        static member array(arrayname:string) = 
+            let c = num0.var arrayname
+            pr.cwriter.codewrite ("<?php "+arrayname+" = array(); ?>")
+            c
+            
+        static member array(arrayname:string,data:list<string*string>) = 
+            let c = num0.var arrayname
+            pr.cwriter.codewrite ("<?php "+arrayname+" = array(); ?>")
+            pr.cwriter.codewrite ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
+            c
 
-    static member array(arrayname:string,data:list<string*PHPvar>) = 
-        let c = PHPvar.var(arrayname)
-        write ("<?php "+c.name+" = array(); ?>")
-        write ("<?php "+c.name+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.name))+"); ?>")
-        c
+        static member array(arrayname:string,data:list<string*num0>) = 
+            let c = num0.var arrayname
+            pr.cwriter.codewrite ("<?php "+arrayname+" = array(); ?>")
+            pr.cwriter.codewrite ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.Expr.eval pr))+"); ?>")
+            c
 
-    ///配列に要素を複数追加
-    member this.push (x:list<PHPvar>) = write ("<?php array_push(" + this.name + ", " + String.Join(",",List.map(fun (q:PHPvar) -> q.name) x) + "); ?>")
-    ///配列に文字列要素を複数追加
-    member this.push (x:list<string>) = this.push (List.map(fun (q:string) -> PHPvar.str(q)) x)
-    ///配列に要素を追加
-    member this.push (x:PHPvar) = this.push [x]
-    ///配列に文字列要素を追加
-    member this.push (x:string) = this.push [x]
+        ///配列に要素を複数追加
+        member this.push (x:list<num0>) = pr.cwriter.codewrite ("<?php array_push(" + this.Expr.eval pr + ", " + String.Join(",",List.map(fun (q:num0) -> q.Expr.eval pr) x) + "); ?>")
+        ///配列に文字列要素を複数追加
+        member this.push (x:list<string>) = this.push (List.map(fun (q:string) -> num0.str q) x)
+        ///配列に要素を追加
+        member this.push (x:num0) = this.push [x]
+        ///配列に文字列要素を追加
+        member this.push (x:string) = this.push [x]

@@ -18,6 +18,8 @@
     <Compile Include="eval\evalPy.fs" />
     <Compile Include="eval\evalL.fs" />
     <Compile Include="eval\evalH.fs" />
+    <Compile Include="eval\evalJ.fs" />
+    <Compile Include="eval\evalT.fs" />
     <Compile Include="eval\eval.fs" />
     <Compile Include="eval\diff.fs" />
     <Compile Include="main\num0.fs" />
@@ -63,12 +65,12 @@
     <Compile Include="graphics\mathgraph.fs" />
     <Compile Include="graphics\graph1d.fs" />
     <Compile Include="graphics\plot2d.fs" />
-    <Compile Include="web\io.fs" />
-    <Compile Include="web\num0.fs" />
-    <Compile Include="web\asm.fs" />
+    <None Include="web\io.fs" />
+    <None Include="web\num0.fs" />
+    <None Include="web\asm.fs" />
     <Compile Include="web\greek.fs" />
     <Compile Include="web\style.fs" />
-    <Compile Include="web\figure.fs" />
+    <None Include="web\figure.fs" />
     <Compile Include="web\param.fs" />
     <Compile Include="web\PHPvar.fs" />
     <Compile Include="web\php.fs" />

@@ -6,7 +6,7 @@
  version 3.0.1
 -----------------------------------------------------------------
 *)
-namespace docWriter
+namespace Aqualis
 
 open System
 open System.IO
@@ -26,7 +26,7 @@ type Button(name:string) =
     
 type ButtonVar() =
     /// ボタンが押されたか判定
-    member _.isset(id:PHPvar) = php.isset (post id).get
+    member _.isset(id:num0) = php.isset (post id).get
     member _.isset(id:string) = php.isset (post id).get
     /// <summary>
     /// ボタンの表示
@@ -34,13 +34,13 @@ type ButtonVar() =
     /// <param name="id">ボタンID</param>
     /// <param name="file">ボタン押下時の移動先ファイル</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:PHPvar,file:string,text:string) = (post id).submit(file,text)
+    member _.show(id:num0,file:string,text:string) = (post id).submit(file,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:PHPvar,text:string) = html.submit(id,text)
+    member _.show(id:num0,text:string) = html.submit(id,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
@@ -52,11 +52,11 @@ type ButtonVar() =
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show_disabled(id:PHPvar,text:string) = html.submit_disabled(id,text)
+    member _.show_disabled(id:num0,text:string) = html.submit_disabled(id,text)
     
-type TextBox(name:PHPvar) =
+type TextBox(name:num0) =
     let t = post name
-    new(name:string) = TextBox (PHPvar.str name)
+    new(name:string) = TextBox (num0.str name)
     /// テキストが送信されたか判定
     member _.isset with get() = php.isset t.get
     /// 送信されたテキスト
@@ -71,8 +71,8 @@ type TextBox(name:PHPvar) =
     /// テキストボックスの表示(表示テキストとスタイル指定)
     member _.show(text:string,atr:list<string*string>) = t.input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
-    member _.show(text:PHPvar,atr:list<string*string>) = t.input(text,atr)
-    member _.show_lock(v:PHPvar) = t.input_lock v
+    member _.show(text:num0,atr:list<string*string>) = t.input(text,atr)
+    member _.show_lock(v:num0) = t.input_lock v
     member _.show_lock(v:string) = t.input_lock v
     /// テキストボックスの表示(送信テキストを表示)
     member _.show_copy(atr:list<string*string>) = t.input_copy atr
@@ -87,67 +87,67 @@ type TextBox(name:PHPvar) =
     
 type TextBoxVar() =
     /// テキストが送信されたか判定
-    member _.isset(id:PHPvar) = php.isset (post id).get
+    member _.isset(id:num0) = php.isset (post id).get
     /// テキストが送信されたか判定
     member _.isset(id:string) = php.isset (post id).get
     /// 送信されたテキスト
-    member _.text(id:PHPvar) = (post id).get
+    member _.text(id:num0) = (post id).get
     /// 送信されたテキスト
     member _.text(id:string) = (post id).get
     /// テキストボックスの表示
-    member _.show(id:PHPvar) = (post id).input()
+    member _.show(id:num0) = (post id).input()
     /// テキストボックスの表示
     member _.show(id:string) = (post id).input()
     /// テキストボックスの表示(送信テキストを表示)
-    member _.show_copy(id:PHPvar) = (post id).input_copy()
+    member _.show_copy(id:num0) = (post id).input_copy()
     /// テキストボックスの表示(送信テキストを表示)
     member _.show_copy(id:string) = (post id).input_copy()
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:PHPvar,s:string) = (post id).input s
+    member _.show(id:num0,s:string) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
     member _.show(id:string,s:string) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:PHPvar,s:PHPvar) = (post id).input s
+    member _.show(id:num0,s:num0) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:string,s:PHPvar) = (post id).input s
+    member _.show(id:string,s:num0) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:PHPvar,atr:list<string*string>) = (post id).input atr
+    member _.show(id:num0,atr:list<string*string>) = (post id).input atr
     /// テキストボックスの表示(スタイル指定)
     member _.show(id:string,atr:list<string*string>) = (post id).input atr
     /// テキストボックスの表示(表示テキストとスタイル指定)
-    member _.show(id:PHPvar,text:string,atr:list<string*string>) = (post id).input(text,atr)
+    member _.show(id:num0,text:string,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
     member _.show(id:string,text:string,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
-    member _.show(id:PHPvar,text:PHPvar,atr:list<string*string>) = (post id).input(text,atr)
+    member _.show(id:num0,text:num0,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
-    member _.show(id:string,text:PHPvar,atr:list<string*string>) = (post id).input(text,atr)
+    member _.show(id:string,text:num0,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
-    member _.show_lock(id:PHPvar,v:PHPvar) = (post id).input_lock v
+    member _.show_lock(id:num0,v:num0) = (post id).input_lock v
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
-    member _.show_lock(id:string,v:PHPvar) = (post id).input_lock v
+    member _.show_lock(id:string,v:num0) = (post id).input_lock v
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
-    member _.show_lock(id:PHPvar,v:string) = (post id).input_lock v
+    member _.show_lock(id:num0,v:string) = (post id).input_lock v
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
     member _.show_lock(id:string,v:string) = (post id).input_lock v
     /// テキストボックスの表示(送信テキストを表示)
-    member _.show_copy(id:PHPvar,atr:list<string*string>) = (post id).input_copy atr
+    member _.show_copy(id:num0,atr:list<string*string>) = (post id).input_copy atr
     /// テキストボックスの表示(送信テキストを表示)
     member _.show_copy(id:string,atr:list<string*string>) = (post id).input_copy atr
     /// テキストボックスの表示(送信テキストを表示、編集不可)
-    member _.show_copy_lock(id:PHPvar) = (post id).input_copy_lock()
+    member _.show_copy_lock(id:num0) = (post id).input_copy_lock()
     /// テキストボックスの表示(送信テキストを表示、編集不可)
     member _.show_copy_lock(id:string) = (post id).input_copy_lock()
     /// テキストボックスの表示(パスワード入力用)
-    member _.show_password(id:PHPvar) = (post id).password()
+    member _.show_password(id:num0) = (post id).password()
     /// テキストボックスの表示(パスワード入力用)
     member _.show_password(id:string) = (post id).password()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示)
-    member _.show_password_copy(id:PHPvar) = (post id).password_copy()
+    member _.show_password_copy(id:num0) = (post id).password_copy()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示)
     member _.show_password_copy(id:string) = (post id).password_copy()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示、編集不可)
-    member _.show_password_copy_lock(id:PHPvar) = (post id).password_copy_lock()
+    member _.show_password_copy_lock(id:num0) = (post id).password_copy_lock()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示、編集不可)
     member _.show_password_copy_lock(id:string) = (post id).password_copy_lock()
     
@@ -190,7 +190,7 @@ type ComboBox(name:string,items:list<ComboBoxItem>) =
                 <| fun () ->
                     html.option i.Tag <| fun () -> write i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selectedItem(text:PHPvar) =
+    member this.show_selectedItem(text:num0) =
         //c.select <| fun () ->
         html.select name <| fun () ->
             for i in items do
@@ -210,10 +210,10 @@ type ComboBox(name:string,items:list<ComboBoxItem>) =
         
 type ComboBoxVar() =
     /// 選択されたテキスト
-    member _.selectedTag(id:PHPvar) = (post id).get
+    member _.selectedTag(id:num0) = (post id).get
     member _.selectedTag(id:string) = (post id).get
     /// コンボボックスを表示（指定された選択項目を選択状態にする）
-    member this.show_selectedItem(id:PHPvar,items:list<ComboBoxItem>,selectedIndex:int) =    
+    member this.show_selectedItem(id:num0,items:list<ComboBoxItem>,selectedIndex:int) =    
         let c = post id
         c.select <| fun () ->
             for i in items do
@@ -223,7 +223,7 @@ type ComboBoxVar() =
                 else
                     html.option i.Tag <| fun () -> write i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selected(id:PHPvar,items:list<ComboBoxItem>) =
+    member this.show_selected(id:num0,items:list<ComboBoxItem>) =
         let c = post id
         //c.select <| fun () ->
         html.select id <| fun () ->
@@ -234,7 +234,7 @@ type ComboBoxVar() =
                 <| fun () ->
                     html.option i.Tag <| fun () -> write i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selectedTag(id:PHPvar,items:list<ComboBoxItem>,tag:PHPvar) =
+    member this.show_selectedTag(id:num0,items:list<ComboBoxItem>,tag:num0) =
         //c.select <| fun () ->
         html.select id <| fun () ->
             for i in items do
@@ -244,7 +244,7 @@ type ComboBoxVar() =
                 <| fun () ->
                     html.option i.Tag <| fun () -> write i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selectedTag_disabled(id:PHPvar,items:list<ComboBoxItem>,tag:PHPvar) =
+    member this.show_selectedTag_disabled(id:num0,items:list<ComboBoxItem>,tag:num0) =
         //c.select <| fun () ->
         html.select_disabled id <| fun () ->
             for i in items do
@@ -254,7 +254,7 @@ type ComboBoxVar() =
                 <| fun () ->
                     html.option i.Tag <| fun () -> write i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selectedItem(id:PHPvar,items:list<ComboBoxItem>,text:PHPvar) =
+    member this.show_selectedItem(id:num0,items:list<ComboBoxItem>,text:num0) =
         //c.select <| fun () ->
         html.select id <| fun () ->
             for i in items do
@@ -264,7 +264,7 @@ type ComboBoxVar() =
                 <| fun () ->
                     html.option i.Tag <| fun () -> write i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selectedItem_disabled(id:PHPvar,items:list<ComboBoxItem>,text:PHPvar) =
+    member this.show_selectedItem_disabled(id:num0,items:list<ComboBoxItem>,text:num0) =
         //c.select <| fun () ->
         html.select_disabled id <| fun () ->
             for i in items do
@@ -275,7 +275,7 @@ type ComboBoxVar() =
                     html.option i.Tag <| fun () -> write i.Text
 
     /// コンボボックスを表示
-    member _.show(id:PHPvar,items:list<ComboBoxItem>) =
+    member _.show(id:num0,items:list<ComboBoxItem>) =
         //c.select <| fun () ->
         html.select id <| fun () ->
             for i in items do
@@ -283,9 +283,9 @@ type ComboBoxVar() =
     member _.foreach (items:list<ComboBoxItem>) code =
         for i in items do code i
         
-type CheckBox(name:PHPvar) =
+type CheckBox(name:num0) =
     let cb = post name
-    new(name:string) = CheckBox(PHPvar.str name)
+    new(name:string) = CheckBox(num0.str name)
     member _.isChecked with get() = cb.get .= 1
     member _.status with get() = cb.get
     member _.show() = html.checkbox name
@@ -298,12 +298,12 @@ type CheckBox(name:PHPvar) =
     
 /// IDによって複数のチェックボックスを表す
 type CheckBoxVar() =
-    member _.isChecked(id:PHPvar) = (post id).get .= 1
-    member _.status(id:PHPvar) = (post id).get
-    member _.show(id:PHPvar) = html.checkbox id
+    member _.isChecked(id:num0) = (post id).get .= 1
+    member _.status(id:num0) = (post id).get
+    member _.show(id:num0) = html.checkbox id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_disabled(id:PHPvar) = html.checkbox_disabled id
+    member _.show_disabled(id:num0) = html.checkbox_disabled id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_checked(id:PHPvar) = html.checkbox_checked id
+    member _.show_checked(id:num0) = html.checkbox_checked id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_checked_disabled(id:PHPvar) = html.checkbox_checked_disabled id
+    member _.show_checked_disabled(id:num0) = html.checkbox_checked_disabled id

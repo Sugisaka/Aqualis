@@ -1,4 +1,4 @@
-namespace docWriter
+namespace Aqualis
 
 open System.IO
 
@@ -8,193 +8,193 @@ type html =
         code ()
         wrBody.Close()
     static member head title = fun code ->
-        write "<!doctype html>"
-        write "<html lang=\"ja\">"
-        write "<meta http-equiv=\"content-language\" content=\"ja\">"
-        write "<head>"
-        write("    <title>"+title+"</title>")
-        write "    <meta charset=\"utf-8\">"
-        write "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-        write "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-        write "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-        write "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-        write "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-        write "    <link rel='stylesheet' href='style.css' />"
-        write "</head>"
-        write "<body>"
+        pr.cwriter.codewrite "<!doctype html>"
+        pr.cwriter.codewrite "<html lang=\"ja\">"
+        pr.cwriter.codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
+        pr.cwriter.codewrite "<head>"
+        pr.cwriter.codewrite("    <title>"+title+"</title>")
+        pr.cwriter.codewrite "    <meta charset=\"utf-8\">"
+        pr.cwriter.codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+        pr.cwriter.codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+        pr.cwriter.codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+        pr.cwriter.codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+        pr.cwriter.codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+        pr.cwriter.codewrite "    <link rel='stylesheet' href='style.css' />"
+        pr.cwriter.codewrite "</head>"
+        pr.cwriter.codewrite "<body>"
         code()
-        write "</body>"
-        write "</html>"
+        pr.cwriter.codewrite "</body>"
+        pr.cwriter.codewrite "</html>"
         wrBody.Close()
     static member head (title,refresh:int) = fun code ->
-        write "<!doctype html>"
-        write "<html lang=\"ja\">"
-        write "<meta http-equiv=\"content-language\" content=\"ja\">"
-        write "<head>"
-        write("    <title>"+title+"</title>")
-        write "    <meta charset=\"utf-8\">"
-        write "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-        write "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-        write "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-        write "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-        write "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-        write "    <link rel='stylesheet' href='style.css' />"
-        write("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
-        write "</head>"
-        write "<body>"
+        pr.cwriter.codewrite "<!doctype html>"
+        pr.cwriter.codewrite "<html lang=\"ja\">"
+        pr.cwriter.codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
+        pr.cwriter.codewrite "<head>"
+        pr.cwriter.codewrite("    <title>"+title+"</title>")
+        pr.cwriter.codewrite "    <meta charset=\"utf-8\">"
+        pr.cwriter.codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+        pr.cwriter.codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+        pr.cwriter.codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+        pr.cwriter.codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+        pr.cwriter.codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+        pr.cwriter.codewrite "    <link rel='stylesheet' href='style.css' />"
+        pr.cwriter.codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+        pr.cwriter.codewrite "</head>"
+        pr.cwriter.codewrite "<body>"
         code()
-        write "</body>"
-        write "</html>"
+        pr.cwriter.codewrite "</body>"
+        pr.cwriter.codewrite "</html>"
         wrBody.Close()
     static member head (title,cssfile,jsfile,refresh:int) = fun code ->
-        write("<!doctype html>")
-        write("<html lang=\"ja\">")
-        write("<meta http-equiv=\"content-language\" content=\"ja\">")
-        write("<head>")
-        write("    <title>"+title+"</title>")
-        write("    <meta charset=\"utf-8\">")
-        write("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
-        write("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
-        write("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
-        write("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
-        write("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
-        write("    <link rel='stylesheet' href='"+cssfile+"'>")
-        write("    <script type='text/javascript' src='"+jsfile+"'></script>")
-        write("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
-        write("</head>")
-        write("<body>")
+        pr.cwriter.codewrite("<!doctype html>")
+        pr.cwriter.codewrite("<html lang=\"ja\">")
+        pr.cwriter.codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
+        pr.cwriter.codewrite("<head>")
+        pr.cwriter.codewrite("    <title>"+title+"</title>")
+        pr.cwriter.codewrite("    <meta charset=\"utf-8\">")
+        pr.cwriter.codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
+        pr.cwriter.codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
+        pr.cwriter.codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
+        pr.cwriter.codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
+        pr.cwriter.codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
+        pr.cwriter.codewrite("    <link rel='stylesheet' href='"+cssfile+"'>")
+        pr.cwriter.codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
+        pr.cwriter.codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+        pr.cwriter.codewrite("</head>")
+        pr.cwriter.codewrite("<body>")
         code()
-        write("</body>")
-        write("</html>")
+        pr.cwriter.codewrite("</body>")
+        pr.cwriter.codewrite("</html>")
         wrBody.Close()
     static member head (title,cssfile,jsfile) = fun code ->
-        write("<!doctype html>")
-        write("<html lang=\"ja\">")
-        write("<meta http-equiv=\"content-language\" content=\"ja\">")
-        write("<head>")
-        write("    <title>"+title+"</title>")
-        write("    <meta charset=\"utf-8\">")
-        write("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
-        write("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
-        write("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
-        write("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
-        write("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
-        write("    <link rel='stylesheet' href='"+cssfile+"' />")
-        write("    <script type='text/javascript' src='"+jsfile+"'></script>")
-        write("</head>")
-        write("<body>")
+        pr.cwriter.codewrite("<!doctype html>")
+        pr.cwriter.codewrite("<html lang=\"ja\">")
+        pr.cwriter.codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
+        pr.cwriter.codewrite("<head>")
+        pr.cwriter.codewrite("    <title>"+title+"</title>")
+        pr.cwriter.codewrite("    <meta charset=\"utf-8\">")
+        pr.cwriter.codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
+        pr.cwriter.codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
+        pr.cwriter.codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
+        pr.cwriter.codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
+        pr.cwriter.codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
+        pr.cwriter.codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
+        pr.cwriter.codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
+        pr.cwriter.codewrite("</head>")
+        pr.cwriter.codewrite("<body>")
         code()
-        write("</body>")
-        write("</html>")
+        pr.cwriter.codewrite("</body>")
+        pr.cwriter.codewrite("</html>")
         wrBody.Close()
     static member head (title,cssfile) = fun code ->
-        write("<!doctype html>")
-        write("<html lang=\"ja\">")
-        write("<meta http-equiv=\"content-language\" content=\"ja\">")
-        write("<head>")
-        write("    <title>"+title+"</title>")
-        write("    <meta charset=\"utf-8\">")
-        write("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
-        write("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
-        write("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
-        write("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
-        write("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
-        write("    <link rel='stylesheet' href='"+cssfile+"' />")
-        write("</head>")
-        write("<body>")
+        pr.cwriter.codewrite("<!doctype html>")
+        pr.cwriter.codewrite("<html lang=\"ja\">")
+        pr.cwriter.codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
+        pr.cwriter.codewrite("<head>")
+        pr.cwriter.codewrite("    <title>"+title+"</title>")
+        pr.cwriter.codewrite("    <meta charset=\"utf-8\">")
+        pr.cwriter.codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
+        pr.cwriter.codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
+        pr.cwriter.codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
+        pr.cwriter.codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
+        pr.cwriter.codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
+        pr.cwriter.codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
+        pr.cwriter.codewrite("</head>")
+        pr.cwriter.codewrite("<body>")
         code()
-        write("</body>")
-        write("</html>")
+        pr.cwriter.codewrite("</body>")
+        pr.cwriter.codewrite("</html>")
         wrBody.Close()
     /// 内部要素のないタグ
     static member taga (t:string,s:Style) =
-        write("<"+t+" "+s.code+" />")
+        pr.cwriter.codewrite("<"+t+" "+s.code+" />")
     /// 内部要素のないタグ
     static member taga (t:string,atr:list<Atr>) =
-        write("<"+t+" "+Atr.list atr+" />")
+        pr.cwriter.codewrite("<"+t+" "+Atr.list atr+" />")
     /// 内部要素のないタグ
     static member taga (t:string,lst:list<string*PHPvar>) =
-        write("<"+t+" ")
+        pr.cwriter.codewrite("<"+t+" ")
         for (a,s) in lst do
-            write(a + "=" + s.code + " ")
-        write " />"
+            pr.cwriter.codewrite(a + "=" + s.code + " ")
+        pr.cwriter.codewrite " />"
     /// 内部要素のないタグ
     static member taga (t:string,lst:list<string*string>) =
-        write("<"+t+" ")
+        pr.cwriter.codewrite("<"+t+" ")
         for (a,s) in lst do
-            write(a + "=" + s + " ")
-        write " />"
+            pr.cwriter.codewrite(a + "=" + s + " ")
+        pr.cwriter.codewrite " />"
     /// 内部要素のないタグ
     static member taga (t:string) =
-        write("<"+t+" ")
-        write " />"
+        pr.cwriter.codewrite("<"+t+" ")
+        pr.cwriter.codewrite " />"
     /// 内部要素のないタグ
     static member taga (t:string,a:string) =
-        write("<"+t+" "+a+" />")
+        pr.cwriter.codewrite("<"+t+" "+a+" />")
     /// 内部要素のあるタグ
     static member tagb (t:string,atr:Style) = fun code ->
         let a = atr.code
         if a = "" then
-            write("<"+t+">")
+            pr.cwriter.codewrite("<"+t+">")
         else
-            write("<"+t+" "+a+" >")
+            pr.cwriter.codewrite("<"+t+" "+a+" >")
         code()
-        write ("</"+t+">")
+        pr.cwriter.codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,atr:list<Atr>) = fun code ->
         let a = Atr.list atr
         if a = "" then
-            write("<"+t+">")
+            pr.cwriter.codewrite("<"+t+">")
         else
-            write("<"+t+" "+a+" >")
+            pr.cwriter.codewrite("<"+t+" "+a+" >")
         code()
-        write ("</"+t+">")
+        pr.cwriter.codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,lst:list<string*PHPvar>) = fun code ->
         if lst.Length=0 then
-            write("<"+t+">")
+            pr.cwriter.codewrite("<"+t+">")
         else
-            write("<"+t+" ")
+            pr.cwriter.codewrite("<"+t+" ")
             for (a,s) in lst do
-                write(a + "=" + s.code + " ")
-            write ">"
+                pr.cwriter.codewrite(a + "=" + s.code + " ")
+            pr.cwriter.codewrite ">"
         code()
-        write ("</"+t+">")
+        pr.cwriter.codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,lst:list<string*string>) = fun code ->
         if lst.Length=0 then
-            write("<"+t+">")
+            pr.cwriter.codewrite("<"+t+">")
         else
-            write("<"+t+" ")
+            pr.cwriter.codewrite("<"+t+" ")
             for (a,s) in lst do
-                write(a + "=" + s + " ")
-            write(">")
+                pr.cwriter.codewrite(a + "=" + s + " ")
+            pr.cwriter.codewrite(">")
         code()
-        write ("</"+t+">")
+        pr.cwriter.codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,a:string) = fun code ->
         if a="" then
-            write("<"+t+">")
+            pr.cwriter.codewrite("<"+t+">")
         else
-            write("<"+t+" "+a+">")
+            pr.cwriter.codewrite("<"+t+" "+a+">")
         code()
-        write ("</"+t+">")
+        pr.cwriter.codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string) = fun code ->
-        write("<"+t+">")
+        pr.cwriter.codewrite("<"+t+">")
         code()
-        write ("</"+t+">")
+        pr.cwriter.codewrite ("</"+t+">")
     static member h1 (t:PHPvar) = fun code ->
         html.tagb "h1" <| fun () -> php.echo t.name
         code()
     static member h1 (t:string) = fun code ->
-        html.tagb "h1" <| fun () -> write(t)
+        html.tagb "h1" <| fun () -> pr.cwriter.codewrite(t)
         code()
     static member h1 (t:PHPvar,atr:Style) = fun code ->
         html.tagb ("h1",atr) <| fun () -> php.echo t.name
         code()
     static member h1 (t:string,atr:Style) = fun code ->
-        html.tagb ("h1",atr) <| fun () -> write(t)
+        html.tagb ("h1",atr) <| fun () -> pr.cwriter.codewrite(t)
         code()
 
 
@@ -202,13 +202,13 @@ type html =
         html.tagb "h2" <| fun () -> php.echo t.name
         code()
     static member h2 (t:string) = fun code ->
-        html.tagb "h2" <| fun () -> write(t)
+        html.tagb "h2" <| fun () -> pr.cwriter.codewrite(t)
         code()
     static member h2 (t:PHPvar,atr:Style) = fun code ->
         html.tagb ("h2",atr) <| fun () -> php.echo t.name
         code()
     static member h2 (t:string,atr:Style) = fun code ->
-        html.tagb ("h2",atr) <| fun () -> write(t)
+        html.tagb ("h2",atr) <| fun () -> pr.cwriter.codewrite(t)
         code()
 
 
@@ -216,13 +216,13 @@ type html =
         html.tagb "h3" <| fun () -> php.echo t.name
         code()
     static member h3 (t:string) = fun code ->
-        html.tagb "h3" <| fun () -> write(t)
+        html.tagb "h3" <| fun () -> pr.cwriter.codewrite(t)
         code()
     static member h3 (t:PHPvar,atr:Style) = fun code ->
         html.tagb ("h3",atr) <| fun () -> php.echo t.name
         code()
     static member h3 (t:string,atr:Style) = fun code ->
-        html.tagb ("h3",atr) <| fun () -> write(t)
+        html.tagb ("h3",atr) <| fun () -> pr.cwriter.codewrite(t)
         code()
 
     static member form (action:string) = fun code -> html.tagb ("form",["method","\"post\""; "action","\""+action+"\"";]) code
@@ -242,8 +242,8 @@ type html =
     static member th = fun code -> html.tagb "th" code
     static member td_ = fun code -> html.tagb "td" code
     static member td (a:list<string*string>) = fun code -> html.tagb ("td",a) code
-    static member strong(t:string) = html.tagb "strong" <| fun () -> write(t)
-    // static member image (s:Style) = fun filename -> write("<img src=\""+filename+"\">")
+    static member strong(t:string) = html.tagb "strong" <| fun () -> pr.cwriter.codewrite(t)
+    // static member image (s:Style) = fun filename -> pr.cwriter.codewrite("<img src=\""+filename+"\">")
     static member enumerate_ code = html.tagb "ol" code
     static member itemize_ code = html.tagb "ul" code
     static member itemize (a:list<string*string>) = fun code -> html.tagb ("ul",a) code
@@ -253,8 +253,8 @@ type html =
     static member item (a:list<string*string>) = fun code -> html.tagb ("li",a) code
     static member para_ code = html.tagb "p" code
     static member para (a:list<string*string>) = html.tagb ("p",a)
-    static member para (t:string) = html.tagb "p" <| fun () -> write(t)
-    static member span(cls:string,t) = html.tagb ("span",["class","\""+cls+"\""]) <| fun () -> write(t)
+    static member para (t:string) = html.tagb "p" <| fun () -> pr.cwriter.codewrite(t)
+    static member span(cls:string,t) = html.tagb ("span",["class","\""+cls+"\""]) <| fun () -> pr.cwriter.codewrite(t)
     static member span(cls:string) = fun code -> html.tagb ("span",["class","\""+cls+"\""]) code
     static member link(url:PHPvar) = fun code -> html.tagb ("a",["href","\""+url.code+"\"";]) code
     static member link(url:string) = fun code -> html.tagb ("a",["href","\""+url+"\"";]) code
@@ -266,14 +266,14 @@ type html =
     static member splitTag t code = 
         let b (lst:list<string*PHPvar>) =
             if lst.Length=0 then
-                write ("<"+t+">")
+                pr.cwriter.codewrite ("<"+t+">")
             else
-                write("<"+t+" ")
+                pr.cwriter.codewrite("<"+t+" ")
                 for (a,s) in lst do
-                    write(a + "=" + s.code + " ")
-                write ">"
+                    pr.cwriter.codewrite(a + "=" + s.code + " ")
+                pr.cwriter.codewrite ">"
         code b 
-        write ("</"+t+">")
+        pr.cwriter.codewrite ("</"+t+">")
     static member Select = html.splitTag "select" 
     static member Tr = html.splitTag "tr" 
     static member option(value:string) = fun code -> html.tagb ("option",["value","\""+value+"\"";]) code
@@ -299,40 +299,40 @@ type html =
         html.taga("input",["type","\"checkbox\""; "name",("\\\""++name++"\\\"").code; "value","1"; "checked","\"checked\""; "disabled","\"disabled\""])
     static member bold code = html.tagb "b" code
     static member align code =
-        write "\\[\\begin{align}"
+        pr.cwriter.codewrite "\\[\\begin{align}"
         code()
-        write "\\end{align}\\]"
+        pr.cwriter.codewrite "\\end{align}\\]"
     static member eq q = "\\("+q+"\\)"
 
     static member latexTag (tagname:string) code =
-        write("\\begin{"+tagname+"}")
+        pr.cwriter.codewrite("\\begin{"+tagname+"}")
         code()
-        write("\\end{"+tagname+"}")
+        pr.cwriter.codewrite("\\end{"+tagname+"}")
     static member listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
         html.tagb("div",["class","\"fig\""]) <| fun () ->
             html.tagb ("span",["class","\"caption\""]) <| fun () ->
-                write(caption)
+                pr.cwriter.codewrite(caption)
             html.tagb("table",["class","\"tab\""]) <| fun () ->
                 for j in 0..tlist.Length-1 do
                     html.tagb ("tr",["class",match borderV[j] with |TB -> "\"trtb\"" |T -> "\"trt\"" |B -> "\"trb\"" |N -> "\"trn\""]) <| fun () ->
                         for i in 0..tlist[j].Length-1 do
                             html.tagb ("td",["class",match borderH[i] with |L -> "\"tdl\"" |BorderH.C -> "\"tdc\"" |BorderH.R -> "\"tdr\"" |J -> "\"tdj\"" |Ll -> "\"tdlL\"" |Cl -> "\"tdcL\"" |Rl -> "\"tdrL\"" |Jl -> "\"tdjL\"" |Lr -> "\"tdlR\"" |Cr -> "\"tdcR\"" |Rr -> "\"tdrR\"" |Jr -> "\"tdjR\"" |Llr -> "\"tdlLR\"" |Clr -> "\"tdcLR\"" |Rlr -> "\"tdrLR\"" |Jlr -> "\"tdjLR\""]) <| fun () ->
-                                write <| tlist[j][i]
+                                pr.cwriter.codewrite <| tlist[j][i]
                                 
     static member footer code = html.tagb ("footer", ["class","footer"]) <| fun () -> code()
     static member footer (s:Style) = fun code -> html.tagb ("footer", s) <| fun () -> code()
-    static member br() = write "<br>"
-    static member hr() = write "<hr>"
+    static member br() = pr.cwriter.codewrite "<br>"
+    static member hr() = pr.cwriter.codewrite "<hr>"
     
     // /// タグの生成
-    // static member writeTag tagname attr code =
-    //     write("<"+tagname+(if attr="" then "" else " "+attr)+">")
+    // static member pr.cwriter.codewriteTag tagname attr code =
+    //     pr.cwriter.codewrite("<"+tagname+(if attr="" then "" else " "+attr)+">")
     //     code()
-    //     write("</"+tagname+">")
+    //     pr.cwriter.codewrite("</"+tagname+">")
         
     // /// タグの生成
-    // static member writeTag_ tagname attr =
-    //     write("<"+tagname+(if attr="" then "" else " "+attr)+"/>")
+    // static member pr.cwriter.codewriteTag_ tagname attr =
+    //     pr.cwriter.codewrite("<"+tagname+(if attr="" then "" else " "+attr)+"/>")
         
     static member setjs filename =
         html.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
@@ -346,14 +346,14 @@ type html =
                         {Key = "font-weight"; Value = "bold";}
                         {Key = "white-space"; Value = "nowrap";}]
         html.tagb ("div",s1+s) <| fun () ->
-            write text
+            pr.cwriter.codewrite text
             
     static member Mathtext (s:Style) (p:position) (text:num0) =
         let s1 = Style [{Key = "margin-left"; Value=p.x.ToString()+"px"}
                         {Key = "margin-top"; Value=p.y.ToString()+"px"}
                         {Key = "white-space"; Value="nowrap"}]
         html.tagb ("div", s1+s) <| fun () ->
-            write ("\\(" + text.str LaTeX + "\\)")
+            pr.cwriter.codewrite ("\\(" + text.str LaTeX + "\\)")
             
     static member image (s:Style,p:position) = fun (filename:string) ->
         let f = Path.GetFileName filename
@@ -399,7 +399,7 @@ type html =
         html.taga (tagname, s)
         
     static member eq(text:num0) =
-        write ("\\("+text.str LaTeX + "\\)")
+        pr.cwriter.codewrite ("\\("+text.str LaTeX + "\\)")
         
     /// キャラクター付き解説ページ
     static member page (c:list<Character*string>) (audio:Audio) code2 =
@@ -486,19 +486,19 @@ type html =
             match audio.Speaker with
             |Character.Tale -> 
                 html.tag "div" <| "id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #d11aff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\""
-                    <| fun () -> write audio.Subtitle.Subtitle
+                    <| fun () -> pr.cwriter.codewrite audio.Subtitle.Subtitle
             |Character.Dang -> 
                 html.tag "div" <| "id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #455eff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\""
-                    <| fun () -> write audio.Subtitle.Subtitle
+                    <| fun () -> pr.cwriter.codewrite audio.Subtitle.Subtitle
             |Character.Armi -> 
                 html.tag "div" <| "id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #ff8800; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\""
-                    <| fun () -> write audio.Subtitle.Subtitle
+                    <| fun () -> pr.cwriter.codewrite audio.Subtitle.Subtitle
                     
     static member fig (p:position) code =
         let f = figure()
         code(f,p)
         let sx,sy,mx,my = f.setWriteMode()
-        write (
+        pr.cwriter.codewrite (
             "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
             "width=\""+sx.ToString()+"px\" "+
             "heigth=\""+sy.ToString()+"px\" "+
@@ -508,12 +508,12 @@ type html =
             "position: absolute;"+
             "\">")
         code(f,p)
-        write "</svg>"
+        pr.cwriter.codewrite "</svg>"
         
     static member animation (s:ViewBoxStyle) (p:position) code =
         figcounter <- figcounter + 1
         let f = FigureAnimation(wrBody,wrJS,figcounter)
-        write (
+        pr.cwriter.codewrite (
             "<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" "+
             "width=\""+s.sX.ToString()+"px\" "+
             "heigth=\""+s.sY.ToString()+"px\" "+
@@ -524,7 +524,7 @@ type html =
             "background-color: "+s.backgroundColor+";"+
             "\">")
         code(f,p)
-        write "</svg>"
+        pr.cwriter.codewrite "</svg>"
         
     static member slide (p:position)  code =
             anicounter <- anicounter + 1
@@ -533,28 +533,28 @@ type html =
                 
     static member prevButton() =
             html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
-                write "前へ"
+                pr.cwriter.codewrite "前へ"
     static member nextButton() =
             html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
-                write "次へ"
+                pr.cwriter.codewrite "次へ"
                 
     static member switchCharacter() =
         html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" checked")
         html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
-            write "キャラクター"
+            pr.cwriter.codewrite "キャラクター"
     static member switchSubtitle() =
         html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" checked")
         html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
-            write "字幕"
+            pr.cwriter.codewrite "字幕"
     static member switchAudio() =
         html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" checked")
         html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
-            write "音声"
+            pr.cwriter.codewrite "音声"
     static member audioPlayer() =
             html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
             
 and SlideAnimation =
-    static member writeAudioList() =
+    static member pr.cwriter.codewriteAudioList() =
         wrDraw.Write "const audioList = ["
         for i in 0..audioList.Length-1 do
             wrDraw.Write ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
@@ -697,12 +697,12 @@ and SlideAnimation =
 and canvas() =
     
     member _.Mathtext (s:Style) (p:position) (text:num0) =
-        // html.writeTag "div" ("style = \"font-size:"+s.size.ToString()+ "px;margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; white-space: nowrap;\" id=\"contents\"") <| fun () ->
+        // html.pr.cwriter.codewriteTag "div" ("style = \"font-size:"+s.size.ToString()+ "px;margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; white-space: nowrap;\" id=\"contents\"") <| fun () ->
         let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                         {Key = "margin-top"; Value = p.y.ToString()+"px";}
                         {Key = "position"; Value = "absolute";}]
         html.tagb ("div", s1+s) <| fun () ->
-            write ("\\(" + text.str LaTeX + "\\)")
+            pr.cwriter.codewrite ("\\(" + text.str LaTeX + "\\)")
             
     member _.image (s:Style) (p:position) (filename:string) =
         let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
@@ -719,21 +719,21 @@ and canvas() =
         html.taga ("img", s1+s)
         
     member _.text (s:Style) = fun (p:position) (text:string) ->
-        // html.writeTag "div" ("style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
+        // html.pr.cwriter.codewriteTag "div" ("style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
         let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                         {Key = "margin-top"; Value = p.y.ToString()+"px";}
                         {Key = "position"; Value = "absolute";}]
         html.tagb ("div", s1+s) <| fun () ->
-            write text
+            pr.cwriter.codewrite text
             
     // member _.text (s:list<Atr>) = fun (p:position) (id:string) (text:string) ->
-    //     // html.writeTag "div" ("id = \""+id+"\" style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
-    //     html.writeTag "div" (Atr.list s) <| fun () ->
-    //         write text
+    //     // html.pr.cwriter.codewriteTag "div" ("id = \""+id+"\" style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
+    //     html.pr.cwriter.codewriteTag "div" (Atr.list s) <| fun () ->
+    //         pr.cwriter.codewrite text
             
     member _.blockText (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
         let padding = 5
-        // html.writeTag "div" 
+        // html.pr.cwriter.codewriteTag "div" 
         //     ("style = \"font-size: "+s.size.ToString()+"px;"+
         //         "margin-left: "+p.x.ToString()+"px; "+
         //         "margin-top: "+p.y.ToString()+"px; "+
@@ -759,8 +759,8 @@ and canvas() =
                         {Key = "position"; Value = "absolute";}
                         {Key = "overflow-wrap"; Value = "break-word";}]
         html.tagb ("div", s1+s) <| fun () ->
-            text |> List.iter (fun s -> write (s+"<br>"))
-            write("\r\n")
+            text |> List.iter (fun s -> pr.cwriter.codewrite (s+"<br>"))
+            pr.cwriter.codewrite("\r\n")
         {Left = p.x;
          Right = p.x+double width+2.0*double padding;
          Top = p.y;
@@ -768,7 +768,7 @@ and canvas() =
          
     member _.blockTextcode (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
         let padding = 5
-        // html.writeTag "div" 
+        // html.pr.cwriter.codewriteTag "div" 
         //     ("style = \"font-size: "+s.size.ToString()+"px;"+
         //         "margin-left: "+p.x.ToString()+"px; "+
         //         "margin-top: "+p.y.ToString()+"px; "+
@@ -795,24 +795,24 @@ and canvas() =
                         {Key = "overflow-wrap"; Value = "break-word";}]
         html.tagb ("div", s1+s)
             <| fun () ->
-                text |> List.iter (fun s -> write (s+"<br>"))
-                write "\r\n"
+                text |> List.iter (fun s -> pr.cwriter.codewrite (s+"<br>"))
+                pr.cwriter.codewrite "\r\n"
         {Left = p.x;
          Right = p.x+double width+2.0*double padding;
          Top = p.y;
          Bottom = p.y+double height+2.0*double padding;}
          
     member _.table (lst:list<list<string>>) (p:position) (size:int) =
-        write ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
+        pr.cwriter.codewrite ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
         for m in 0..lst.Length-1 do
-            write "<tr>"
+            pr.cwriter.codewrite "<tr>"
             for s in lst[m] do
-                write "<td>"
-                write s
-                write "</td>"
-            write "</tr>"
-        write "</table>"
-        write "</div>"
+                pr.cwriter.codewrite "<td>"
+                pr.cwriter.codewrite s
+                pr.cwriter.codewrite "</td>"
+            pr.cwriter.codewrite "</tr>"
+        pr.cwriter.codewrite "</table>"
+        pr.cwriter.codewrite "</div>"
             
 and figure() =
     let padding = 10.0
@@ -820,14 +820,14 @@ and figure() =
     let mutable xmax:option<double> = None
     let mutable ymin:option<double> = None
     let mutable ymax:option<double> = None
-    let mutable writeMode = false
+    let mutable pr.cwriter.codewriteMode = false
     member _.Padding with get() = padding
     member _.Xmin with get() = match xmin with |None -> 0.0 |Some v -> v
     member _.Xmax with get() = match xmax with |None -> 0.0 |Some v -> v
     member _.Ymin with get() = match ymin with |None -> 0.0 |Some v -> v
     member _.Ymax with get() = match ymax with |None -> 0.0 |Some v -> v
     member this.setWriteMode() =
-        writeMode <- true
+        pr.cwriter.codewriteMode <- true
         let sizeX = this.Xmax-this.Xmin+2.0*padding
         let sizeY = this.Ymax-this.Ymin+2.0*padding
         let marginX = this.Xmin-padding
@@ -861,7 +861,7 @@ and figure() =
             ymax <- Some(p.y)
         |_ -> ()
     member this.line (s:Style) (startP:position) (endP:position) =
-        if writeMode then
+        if pr.cwriter.codewriteMode then
             html.taga ("line", [
                 Atr("x1",(startP.x-this.Xmin+this.Padding).ToString());
                 Atr("y1",(startP.y-this.Ymin+this.Padding).ToString());
@@ -872,7 +872,7 @@ and figure() =
             this.updateRange endP
 
     member this.Rect (s:Style) (startP:position) (sx:int) (sy:int) =
-        if writeMode then
+        if pr.cwriter.codewriteMode then
             html.taga ("rect", [
                 Atr("x", (startP.x-this.Xmin+this.Padding).ToString());
                 Atr("y", (startP.y-this.Ymin+this.Padding).ToString());
@@ -883,7 +883,7 @@ and figure() =
             this.updateRange(startP.shift(sx,sy))
 
     member this.ellipse (s:Style) (center:position) (radiusX:int) (radiusY:int) =
-        if writeMode then
+        if pr.cwriter.codewriteMode then
             html.taga ("circle", [
                 Atr("cx", (center.x-this.Xmin+this.Padding).ToString());
                 Atr("cy", (center.y-this.Ymin+this.Padding).ToString());
@@ -896,14 +896,14 @@ and figure() =
             this.updateRange(center.shiftY(radiusY))
 
     member this.polygon (s:Style) (apex:list<position>) =
-        if writeMode then
+        if pr.cwriter.codewriteMode then
             let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
             html.taga ("polygon", [Atr("points",pp)]@[s.atr])
         else
             for q in apex do
                 this.updateRange q
     member this.polyline (s:Style) (apex:list<position>) =
-        if writeMode then
+        if pr.cwriter.codewriteMode then
             let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
             html.taga ("polygon", [Atr("points", pp)]@[s.atr])
         else
@@ -921,7 +921,7 @@ and figure() =
             let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
             endP.x + (startP.x-endP.x)*c,
             endP.y + (startP.y-endP.y)*c
-        if writeMode then
+        if pr.cwriter.codewriteMode then
             this.line s startP (position(ux,uy))
         else
             this.updateRange(startP)
@@ -941,7 +941,7 @@ and figure() =
             let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
             endP.x + (startP.x-endP.x)*c,
             endP.y + (startP.y-endP.y)*c
-        if writeMode then
+        if pr.cwriter.codewriteMode then
             this.line (s+Style[stroke.width lineWidth]) startP (position(ux,uy))
         else
             this.updateRange(startP)
@@ -967,20 +967,20 @@ and FigureAnimation(wr:OptionWriter,jswr:OptionWriter,figcounter:int) =
         jswr.Write("e.setAttribute(\"x2\", " + (endP.X t).str JavaScript + ");")
         jswr.Write("e.setAttribute(\"y2\", " + (endP.Y t).str JavaScript + ");")
     static member jsAnimation codejs =
-        write "var t = 0;"
-        write "var dt = 1;"
-        write "window.onload=function(){"
-        write "    var timer;"
-        write "    var delay = 33;"
-        write "    var loop = function(){"
-        write "        t = t + dt;"
-        write "        if(t >= 100){t = 0;}"
-        write codejs
-        write "        clearTimeout(timer);"
-        write "        timer=setTimeout(loop,delay);"
-        write "    }"
-        write "    loop();"
-        write "}"
+        pr.cwriter.codewrite "var t = 0;"
+        pr.cwriter.codewrite "var dt = 1;"
+        pr.cwriter.codewrite "window.onload=function(){"
+        pr.cwriter.codewrite "    var timer;"
+        pr.cwriter.codewrite "    var delay = 33;"
+        pr.cwriter.codewrite "    var loop = function(){"
+        pr.cwriter.codewrite "        t = t + dt;"
+        pr.cwriter.codewrite "        if(t >= 100){t = 0;}"
+        pr.cwriter.codewrite codejs
+        pr.cwriter.codewrite "        clearTimeout(timer);"
+        pr.cwriter.codewrite "        timer=setTimeout(loop,delay);"
+        pr.cwriter.codewrite "    }"
+        pr.cwriter.codewrite "    loop();"
+        pr.cwriter.codewrite "}"
 
 [<AutoOpen>]
 module dochtml =
@@ -1009,7 +1009,7 @@ module dochtml =
         wrJS.FileSet filename_js
         code()
         if isPageAnimation then
-            SlideAnimation.writeAudioList()
+            SlideAnimation.pr.cwriter.codewriteAudioList()
             SlideAnimation.jsSetCharacter()
             SlideAnimation.jsSetSubtitle()
             SlideAnimation.jsDrawNext()
@@ -1018,27 +1018,27 @@ module dochtml =
         let codeDraw,codeBody,codejs = read()
         // html書き込みストリーム作成
         wrBody.FileSet (dir + "\\" + filename + "//" + filename + ".html")
-        write "<!DOCTYPE html>"
+        pr.cwriter.codewrite "<!DOCTYPE html>"
         // html要素
         html.tagb ("html", "lang=\"ja\"") <| fun () ->
             // head要素
             html.tagb ("head", "") <| fun () ->
                 // metaタグ
-                write "<meta charset=\"UTF-8\">"    
+                pr.cwriter.codewrite "<meta charset=\"UTF-8\">"    
                 // titleタグ
                 html.tagb ("title", "") <| fun () ->
-                    write filename
+                    pr.cwriter.codewrite filename
                 // MathJax
                 html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
                 // scriptタグ
                 html.tagb ("script", "") <| fun () ->
-                    write codeDraw
+                    pr.cwriter.codewrite codeDraw
                     if codejs <> "" then
                         FigureAnimation.jsAnimation codejs
                 // webフォント取得
-                write "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                write "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                write "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                pr.cwriter.codewrite "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                pr.cwriter.codewrite "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                pr.cwriter.codewrite "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
             // body要素
             let s0 = Style [area.backGroundColor "#aaaaaa"]
             match pagesizeX,pagesizeY with
@@ -1048,7 +1048,7 @@ module dochtml =
                     font.weight "500"
                     font.size 16]
                 html.tagb ("body", [Atr("onload","draw()");s.atr]) <| fun () ->
-                    write codeBody
+                    pr.cwriter.codewrite codeBody
             |Some x,None ->
                 html.tagb ("body", s0) <| fun () ->
                     let s1 = Style [
@@ -1057,7 +1057,7 @@ module dochtml =
                         margin.right "auto"
                         size.width (x.ToString()+"px")]
                     html.tagb ("div", s1) <| fun () ->
-                        write codeBody
+                        pr.cwriter.codewrite codeBody
             |None,Some y->
                 html.tagb ("body", s0) <| fun () ->
                     let s1 = Style [
@@ -1066,7 +1066,7 @@ module dochtml =
                         margin.right "auto"
                         size.height (y.ToString()+"px")]
                     html.tagb ("div", s1) <| fun () ->
-                        write codeBody
+                        pr.cwriter.codewrite codeBody
             |Some x,Some y ->
                 html.tagb ("body", s0) <| fun () ->
                     let s1 = Style [
@@ -1076,7 +1076,7 @@ module dochtml =
                         size.width (x.ToString()+"px")
                         size.height (y.ToString()+"px")]
                     html.tagb ("div", s1) <| fun () ->
-                        write codeBody
+                        pr.cwriter.codewrite codeBody
         wrBody.Close()
         
     let group (t:string) d code = code d

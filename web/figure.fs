@@ -1,4 +1,4 @@
-namespace docWriter
+namespace Aqualis
 
 open System.IO
 

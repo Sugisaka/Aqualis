@@ -363,6 +363,7 @@ namespace Aqualis
                         wr.Write("$FC " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
                         wr.Write("./" + projectname + ".exe\n")
                     wr.Close()
+                    backProgram()
                 |C99 ->
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
@@ -445,6 +446,7 @@ namespace Aqualis
                         wr.Write("gcc" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
                         wr.Write("./" + projectname + ".exe\n")
                     wr.Close()
+                    backProgram()
                 |LaTeX ->
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
@@ -498,6 +500,7 @@ namespace Aqualis
                     pr.hwriter.delete()
                     pr.vwriter.delete()
                     pr.pwriter.delete()
+                    backProgram()
                 |HTML ->
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
@@ -674,6 +677,7 @@ namespace Aqualis
                     pr.hwriter.delete()
                     pr.vwriter.delete()
                     pr.pwriter.delete()
+                    backProgram()
                 |Python ->
                     for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
@@ -736,4 +740,5 @@ namespace Aqualis
                     wr.Write "\n"
                     wr.Write("python3 " + projectname + ".py\n")
                     wr.Close()
+                    backProgram()
                 |Numeric -> code()
