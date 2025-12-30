@@ -53,18 +53,18 @@ namespace Aqualis
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         pr.var.setUniqVar(Structure "integer(1)",A0,btname,"")
-                        pr.cwriter.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
+                        pr.codewrite("write("+id+",\"("+f+")\") "+s+"\n")
                         ch.i <| fun counter ->
                             let c = counter.Expr.eval pr
-                            pr.cwriter.codewrite("do "+c+" = 1, len_trim("+id+")"+"\n")
-                            pr.cwriter.codewrite("  if ( "+id+"( "+c+":"+c+" ).EQ.\" \" ) "+id+"( "+c+":"+c+" ) = \"0\""+"\n")
-                            pr.cwriter.codewrite("end do"+"\n")
+                            pr.codewrite("do "+c+" = 1, len_trim("+id+")"+"\n")
+                            pr.codewrite("  if ( "+id+"( "+c+":"+c+" ).EQ.\" \" ) "+id+"( "+c+":"+c+" ) = \"0\""+"\n")
+                            pr.codewrite("end do"+"\n")
                         if isbinary then
-                            pr.cwriter.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
+                            pr.codewrite("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
                         else
-                            pr.cwriter.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
+                            pr.codewrite("open("+fp+", file=trim("+id+"))"+"\n")
                         code fp
-                        pr.cwriter.codewrite("close("+fp+")"+"\n")
+                        pr.codewrite("close("+fp+")"+"\n")
             |C99 ->
                 ch.f <| fun fp ->
                     let f = 
@@ -113,13 +113,13 @@ namespace Aqualis
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         pr.var.setUniqVar(Structure "char",A0,btname,"")
-                        pr.cwriter.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
+                        pr.codewrite("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
                         if isbinary then
-                            pr.cwriter.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                            pr.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
                         else
-                            pr.cwriter.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                            pr.codewrite(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code fp
-                        pr.cwriter.codewrite("fclose("+fp+")"+";\n")
+                        pr.codewrite("fclose("+fp+")"+";\n")
             |LaTeX ->
                 ch.f <| fun fp ->
                     let s = 
@@ -146,11 +146,11 @@ namespace Aqualis
                     ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         if isbinary then
-                            pr.cwriter.codewrite(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                            pr.codewrite(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
                         else
-                            pr.cwriter.codewrite(fp+" = "+"open text file("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                            pr.codewrite(fp+" = "+"open text file("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code fp
-                        pr.cwriter.codewrite("close("+fp+")"+";\n")
+                        pr.codewrite("close("+fp+")"+";\n")
             |HTML ->
                 ch.f <| fun fp ->
                     let s = 
@@ -177,11 +177,11 @@ namespace Aqualis
                     ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         if isbinary then
-                            pr.cwriter.codewrite(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
+                            pr.codewrite(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
                         else
-                            pr.cwriter.codewrite(fp+" = "+"open text file("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                            pr.codewrite(fp+" = "+"open text file("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
                         code fp
-                        pr.cwriter.codewrite("close("+fp+")"+";\n")
+                        pr.codewrite("close("+fp+")"+";\n")
             |Python ->
                 ch.f <| fun fp ->
                     let f = 
@@ -230,13 +230,13 @@ namespace Aqualis
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         pr.var.setUniqVar(Structure "char",A0,btname,"")
-                        pr.cwriter.codewrite(id+"= \""+f+"\"%("+s+")\n")
+                        pr.codewrite(id+"= \""+f+"\"%("+s+")\n")
                         if isbinary then
-                            pr.cwriter.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
+                            pr.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
                         else
-                            pr.cwriter.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "r" else "w")+"\")"+"\n")
+                            pr.codewrite(fp+" = "+"open("+id+",mode=\""+(if readmode then "r" else "w")+"\")"+"\n")
                         code(fp)
-                        pr.cwriter.codewrite(fp+".close()"+"\n")
+                        pr.codewrite(fp+".close()"+"\n")
             |_ -> ()
             
         static member private Write1 (fp:string) (lst:num0 list) =
@@ -285,7 +285,7 @@ namespace Aqualis
                               if n<(b.Length-1) then yield tab.Expr.eval pr
                           ])
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+                pr.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
             |C99 ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -323,7 +323,7 @@ namespace Aqualis
                         |(It _|Dt),_ -> yield b.Expr.eval pr
                         |_ -> ()]
                     |> (fun s -> String.Join(",",s))
-                pr.cwriter.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
+                pr.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
             |LaTeX ->
                 let double0string_format_F = 
                     let a,b = pr.numFormat.dFormat
@@ -347,7 +347,7 @@ namespace Aqualis
                           |(It _|Dt),_ -> b.Expr.eval pr
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+                pr.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
             |HTML ->
                 let double0string_format_F = 
                     let a,b = pr.numFormat.dFormat
@@ -371,7 +371,7 @@ namespace Aqualis
                           |(It _ |Dt),_ -> b.Expr.eval pr
                           |_ -> "")
                     |> (fun s -> String.Join(",",s))
-                pr.cwriter.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
+                pr.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
             |Python ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -409,11 +409,11 @@ namespace Aqualis
                         |(It _|Dt),_ -> yield b.Expr.eval pr
                         |_ -> ()]
                     |> (fun s -> String.Join(",",s))
-                pr.cwriter.codewrite(fp+".write(\""+format+"\\n\" %("+code+"))\n")
+                pr.codewrite(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
             
         static member private Write2 (fp:string) (lst:exprString) =
-            let lst = reduceExprString.reduce lst
+            let lst = lst.reduce
             match pr.language with
             |Fortran ->
                 let tab = var.ip0_noWarning("tab",2313)
@@ -449,7 +449,7 @@ namespace Aqualis
                             |(It _|Dt),RNvr v -> yield v.eval pr
                             |_ -> ()])
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+                pr.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
             |C99 ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -487,7 +487,7 @@ namespace Aqualis
                             yield v.eval pr
                         |_ -> ()]
                     |> (fun s -> String.Join(",",s))
-                pr.cwriter.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
+                pr.codewrite("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
             |LaTeX ->
                 let double0string_format_F = 
                     let a,b = pr.numFormat.dFormat
@@ -512,7 +512,7 @@ namespace Aqualis
                           |(It _|Dt),RNvr v -> v.eval pr
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
+                pr.codewrite("write("+fp+",\"("+format+")\") "+code+"\n")
             |HTML ->
                 let double0string_format_F = 
                     let a,b = pr.numFormat.dFormat
@@ -537,7 +537,7 @@ namespace Aqualis
                           |(It _ |Dt),RNvr v -> v.eval pr
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
+                pr.codewrite("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
             |Python ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -576,7 +576,7 @@ namespace Aqualis
                         |(It _|Dt),RNvr v -> yield v.eval pr
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite(fp+".write(\""+format+"\\n\" %("+code+"))\n")
+                pr.codewrite(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
             
         static member private Write_bin (fp:string) (v:num0) =
@@ -584,95 +584,95 @@ namespace Aqualis
             |Fortran ->
                 match v.etype,v.Expr with 
                 |_,Int(v) ->
-                    pr.cwriter.codewrite("write("+fp+") "+pr.numFormat.ItoS(v)+"\n")
+                    pr.codewrite("write("+fp+") "+pr.numFormat.ItoS(v)+"\n")
                 |_,Dbl(v) ->
-                    pr.cwriter.codewrite("write("+fp+") "+pr.numFormat.DtoS(v)+"\n")
+                    pr.codewrite("write("+fp+") "+pr.numFormat.DtoS(v)+"\n")
                 |Zt,_ ->
-                    pr.cwriter.codewrite("write("+fp+") "+v.re.Expr.eval pr+"\n")
-                    pr.cwriter.codewrite("write("+fp+") "+v.im.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.re.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.im.Expr.eval pr+"\n")
                 |It _,_ ->
-                    pr.cwriter.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
                 |Dt,_ ->
-                    pr.cwriter.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
                 |_ -> ()
             |C99 ->
                 match v.etype,v.Expr with 
                 |_,Int _ ->
                     ch.i <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
+                        pr.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
                 |_,Dbl _ ->
                     ch.i <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
+                        pr.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
                 |Zt,_ ->
                     ch.dd <| fun (tmp_r,tmp_i) ->
                         tmp_r <== v.re
                         tmp_i <== v.im
-                        pr.cwriter.codewrite("fwrite(&"+tmp_r.Expr.eval pr+",sizeof("+tmp_r.Expr.eval pr+"),1,"+fp+");\n")
-                        pr.cwriter.codewrite("fwrite(&"+tmp_i.Expr.eval pr+",sizeof("+tmp_i.Expr.eval pr+"),1,"+fp+");\n")
+                        pr.codewrite("fwrite(&"+tmp_r.Expr.eval pr+",sizeof("+tmp_r.Expr.eval pr+"),1,"+fp+");\n")
+                        pr.codewrite("fwrite(&"+tmp_i.Expr.eval pr+",sizeof("+tmp_i.Expr.eval pr+"),1,"+fp+");\n")
                 |It _,_ ->
                     ch.i <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
+                        pr.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
                 |Dt,_ ->
                     ch.d <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
+                        pr.codewrite("fwrite(&"+tmp.Expr.eval pr+",sizeof("+tmp.Expr.eval pr+"),1,"+fp+");\n")
                 |_ ->
                     ()
             |LaTeX ->
                 match v.etype,v.Expr with 
                 |_,Int v ->
-                    pr.cwriter.codewrite("write("+fp+") "+pr.numFormat.ItoS(v)+"\n")
+                    pr.codewrite("write("+fp+") "+pr.numFormat.ItoS(v)+"\n")
                 |_,Dbl v ->
-                    pr.cwriter.codewrite("write("+fp+") "+pr.numFormat.DtoS(v)+"\n")
+                    pr.codewrite("write("+fp+") "+pr.numFormat.DtoS(v)+"\n")
                 |Zt,_ ->
-                    pr.cwriter.codewrite("write("+fp+") "+v.re.Expr.eval pr+"\n")
-                    pr.cwriter.codewrite("write("+fp+") "+v.im.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.re.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.im.Expr.eval pr+"\n")
                 |It _,_ ->
-                    pr.cwriter.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
                 |Dt,_ ->
-                    pr.cwriter.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
+                    pr.codewrite("write("+fp+") "+v.Expr.eval pr+"\n")
                 |_ -> ()
             |HTML ->
                 match v.etype,v.Expr with 
                 |_,Int v ->
-                    pr.cwriter.codewrite("Write(binary): \\("+fp+" \\leftarrow "+pr.numFormat.ItoS(v)+"\\)<br/>\n")
+                    pr.codewrite("Write(binary): \\("+fp+" \\leftarrow "+pr.numFormat.ItoS(v)+"\\)<br/>\n")
                 |_,Dbl v ->
-                    pr.cwriter.codewrite("Write(binary): \\("+fp+" \\leftarrow "+pr.numFormat.DtoS(v)+"\\)<br/>\n")
+                    pr.codewrite("Write(binary): \\("+fp+" \\leftarrow "+pr.numFormat.DtoS(v)+"\\)<br/>\n")
                 |Zt,_ ->
-                    pr.cwriter.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.re.Expr.eval pr+"\\)<br/>\n")
-                    pr.cwriter.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.im.Expr.eval pr+"\\)<br/>\n")
+                    pr.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.re.Expr.eval pr+"\\)<br/>\n")
+                    pr.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.im.Expr.eval pr+"\\)<br/>\n")
                 |It _,_ ->
-                    pr.cwriter.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.Expr.eval pr+"\\)<br/>\n")
+                    pr.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.Expr.eval pr+"\\)<br/>\n")
                 |Dt,_ ->
-                    pr.cwriter.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.Expr.eval pr+"\\)<br/>\n")
+                    pr.codewrite("Write(binary): \\("+fp+" \\leftarrow "+v.Expr.eval pr+"\\)<br/>\n")
                 |_ -> ()
             |Python ->
                 match v.etype,v.Expr with 
                 |_,Int _ ->
                     ch.i <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite(fp+".write(struct.pack('i', "+tmp.Expr.eval pr+"))\n")
+                        pr.codewrite(fp+".write(struct.pack('i', "+tmp.Expr.eval pr+"))\n")
                 |_,Dbl _ ->
                     ch.i <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite(fp+".write(struct.pack('d', "+tmp.Expr.eval pr+"))\n")
+                        pr.codewrite(fp+".write(struct.pack('d', "+tmp.Expr.eval pr+"))\n")
                 |Zt,_ ->
                     ch.dd <| fun (tmp_r,tmp_i) ->
                         tmp_r <== v.re
                         tmp_i <== v.im
-                        pr.cwriter.codewrite(fp+".write(struct.pack('d', "+tmp_r.Expr.eval pr+"))\n")
-                        pr.cwriter.codewrite(fp+".write(struct.pack('d', "+tmp_i.Expr.eval pr+"))\n")
+                        pr.codewrite(fp+".write(struct.pack('d', "+tmp_r.Expr.eval pr+"))\n")
+                        pr.codewrite(fp+".write(struct.pack('d', "+tmp_i.Expr.eval pr+"))\n")
                 |It _,_ ->
                     ch.i <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite(fp+".write(struct.pack('i', "+tmp.Expr.eval pr+"))\n")
+                        pr.codewrite(fp+".write(struct.pack('i', "+tmp.Expr.eval pr+"))\n")
                 |Dt,_ ->
                     ch.d <| fun tmp ->
                         tmp <== v
-                        pr.cwriter.codewrite(fp+".write(struct.pack('d', "+tmp.Expr.eval pr+"))\n")
+                        pr.codewrite(fp+".write(struct.pack('d', "+tmp.Expr.eval pr+"))\n")
                 |_ ->
                     ()
             |_ -> ()
@@ -734,7 +734,7 @@ namespace Aqualis
                                       if n<(b.Length-1) then yield tab[n].Expr.eval pr
                                   ])
                             |> fun s -> String.Join(",",s)
-                        pr.cwriter.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval pr+") "+code+"\n")
+                        pr.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval pr+") "+code+"\n")
                         for (t,m,b) in varlist do
                             match t with
                             |Zt ->
@@ -773,7 +773,7 @@ namespace Aqualis
                                     yield ""
                             ])
                       |> fun s -> String.Join(",",s)
-                    pr.cwriter.codewrite("fscanf("+fp+",\""+format+"\","+code+");\n")
+                    pr.codewrite("fscanf("+fp+",\""+format+"\","+code+");\n")
                     for t,m,b in varlist do
                         match t with
                         |Zt ->
@@ -799,7 +799,7 @@ namespace Aqualis
                         |Var(_,n,_) -> n
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval pr+") "+code+"\n")
+                pr.codewrite("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval pr+") "+code+"\n")
             |HTML ->
                 let double0string_format_F = 
                     let a,b = pr.numFormat.dFormat
@@ -819,7 +819,7 @@ namespace Aqualis
                         |Var(_,n,_) -> n
                         |_ -> "")
                     |> fun s -> String.Join("<mo>,</mo>",s)
-                pr.cwriter.codewrite("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
+                pr.codewrite("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
             |Python ->
                 ch.dx (2*Nz) <| fun tmp ->
                     let format = 
@@ -853,20 +853,20 @@ namespace Aqualis
                             ])
                       |> fun s -> String.Join(",",s)
                     //書式指定をしてファイルから値を読み込み。まだ、完成してない
-                    pr.cwriter.codewrite("lines = " + fp + ".readline()\n")
-                    pr.cwriter.codewrite "word_list = re.split(r\'[\\t\\n]\', lines)\n"
+                    pr.codewrite("lines = " + fp + ".readline()\n")
+                    pr.codewrite "word_list = re.split(r\'[\\t\\n]\', lines)\n"
                     let mutable cnt = 0
                     for t,_,a in varlist do
                         //let a_string = string a
                         match t with
                         |It _ ->
-                            pr.cwriter.codewrite(a.Expr.eval pr+" = int(word_list["+cnt.ToString()+"])")
+                            pr.codewrite(a.Expr.eval pr+" = int(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
                         |Dt -> 
-                            pr.cwriter.codewrite(a.Expr.eval pr+"= float(word_list["+cnt.ToString()+"])")
+                            pr.codewrite(a.Expr.eval pr+"= float(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
                         |Zt -> 
-                            pr.cwriter.codewrite(a.Expr.eval pr+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
+                            pr.codewrite(a.Expr.eval pr+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
                             cnt <- cnt + 2
                         |_ -> ()
             |_ -> ()
@@ -877,63 +877,63 @@ namespace Aqualis
                 match v.etype,v.Expr with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
-                        pr.cwriter.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+re.Expr.eval pr+"\n")
-                        pr.cwriter.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+im.Expr.eval pr+"\n")
+                        pr.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+re.Expr.eval pr+"\n")
+                        pr.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+im.Expr.eval pr+"\n")
                         v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    pr.cwriter.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+n+"\n")
+                    pr.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+n+"\n")
                 |_ -> 
                     Console.WriteLine("ファイル読み込みデータの保存先が変数ではありません")
             |C99 ->
                 match v.etype,v.Expr with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
-                        pr.cwriter.codewrite("fread(&"+re.Expr.eval pr+",sizeof("+re.Expr.eval pr+"),1,"+fp+");"+"\n")
-                        pr.cwriter.codewrite("fread(&"+im.Expr.eval pr+",sizeof("+im.Expr.eval pr+"),1,"+fp+");"+"\n")
+                        pr.codewrite("fread(&"+re.Expr.eval pr+",sizeof("+re.Expr.eval pr+"),1,"+fp+");"+"\n")
+                        pr.codewrite("fread(&"+im.Expr.eval pr+",sizeof("+im.Expr.eval pr+"),1,"+fp+");"+"\n")
                         v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    pr.cwriter.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
+                    pr.codewrite("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
                 |_ -> 
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |LaTeX ->
                 match v.etype,v.Expr with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
-                        pr.cwriter.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+re.Expr.eval pr+"\n")
-                        pr.cwriter.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+im.Expr.eval pr+"\n")
+                        pr.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+re.Expr.eval pr+"\n")
+                        pr.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+im.Expr.eval pr+"\n")
                         v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    pr.cwriter.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+n+"\n")
+                    pr.codewrite("read("+fp+",iostat="+iostat.Expr.eval pr+") "+n+"\n")
                 |_ -> 
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |HTML ->
                 match v.Expr with 
                 |Var(_,n,_) ->
-                    pr.cwriter.codewrite("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
+                    pr.codewrite("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
                 |_ -> 
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |Python ->
                 match v.etype,v.Expr with 
                 |Zt,Var _ ->
                     ch.dd <| fun (re,im) ->
-                        pr.cwriter.codewrite(re.Expr.eval pr+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
-                        pr.cwriter.codewrite(im.Expr.eval pr+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        pr.codewrite(re.Expr.eval pr+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        pr.codewrite(im.Expr.eval pr+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                         v <== re+asm.uj*im
                 |It _,Var(_,n,_) ->
-                    pr.cwriter.codewrite(n+" = struct.unpack('i', "+fp+".read(4))[0]"+"\n")
+                    pr.codewrite(n+" = struct.unpack('i', "+fp+".read(4))[0]"+"\n")
                 |Dt,Var(_,n,_) ->
-                    pr.cwriter.codewrite(n+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                    pr.codewrite(n+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                 |_ -> 
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |_ -> ()
                     
         static member private Read_byte (fp:string) (iostat:num0) (e:num0) = 
-            pr.cwriter.codewrite("read("+fp+", iostat="+iostat.Expr.eval pr+") byte_tmp\n")
+            pr.codewrite("read("+fp+", iostat="+iostat.Expr.eval pr+") byte_tmp\n")
             let ee =
                 match e.etype,e.Expr with 
                 |It _,Var(_,n,_) -> n 
                 |_ -> "byte値を整数型以外の変数に格納できません"
-            pr.cwriter.codewrite(ee + "=" + "byte_tmp\n")
+            pr.codewrite(ee + "=" + "byte_tmp\n")
             
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
         static member fileOutput (filename:exprString) = fun code ->

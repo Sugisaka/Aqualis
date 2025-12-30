@@ -1,9 +1,30 @@
 namespace Aqualis
     
+    open System
+    
+    ///<summary>exprStringの文字列変換時の処理</summary>
+    type ExprConcatOption = 
+        ///<summary>そのまま連結</summary>
+        |Direct
+        ///<summary>文字列をダブルクォーテーションで囲んで連結</summary>
+        |StrQuotation
+        ///<summary>文字列をダブルクォーテーションの文字列で囲んで連結</summary>
+        |CodeStrQuotation
+        
     type bool0(x:expr) =
         member this.Expr with get() = x
         member this.code with get() = x.eval pr
         
+    ///<summary>数値と文字列の結合</summary>
+    type reduceExprString = 
+        |RStr of string
+        |RNvr of expr
+        
+        member this.etype with get() =
+            match this with
+            |RStr t -> Structure "string"
+            |RNvr t -> t.etype
+            
     ///<summary>数値と文字列の結合</summary>
     type exprString = 
         |Str of string
@@ -29,17 +50,7 @@ namespace Aqualis
             |x,NSL y -> NSL([x]@y)
             |_ -> NSL[x;y]
             
-    ///<summary>数値と文字列の結合</summary>
-    type reduceExprString = 
-        |RStr of string
-        |RNvr of expr
-        
-        member this.etype with get() =
-            match this with
-            |RStr t -> Structure "string"
-            |RNvr t -> t.etype
-            
-        static member reduce(x:exprString) =
+        member this.reduce =
             let rec rd (r:list<exprString>) =
                 r
                 |> List.collect (fun s ->
@@ -48,7 +59,18 @@ namespace Aqualis
                     | Nvr t -> [RNvr t]
                     | NSL y -> rd y
                 )
-            rd [x]
+            rd [this]
+            
+        member this.toString(c:string,op:ExprConcatOption) =
+            this.reduce
+            |> List.map (function
+                |RStr x ->
+                    match op with
+                    |Direct -> x
+                    |StrQuotation -> "\""+x+"\""
+                    |CodeStrQuotation -> "\\\""+x+"\\\""
+                |RNvr x -> x.eval pr)
+            |> fun s -> String.Join(c,s)
             
     ///<summary>変数（数値データ）クラス</summary>
     type num0(x:expr) =

@@ -2,53 +2,28 @@ namespace Aqualis
 
 open System
 
+type PHPdata(x:string) =
+    member this.Item(i:exprString) = PHPdata(x + "[" + i.toString(" . ",StrQuotation) + "]")
+    member this.Item(i:num0) = this[Nvr i.Expr]
+    member this.Item(i:int) = this[Nvr (Int i)]
+    member this.Item(i:string) = this[Str i]
+    member private this.toString with get() = x
+    member this.tonum0 with get() = num0(Var(Nt, x, NaN))
+    static member (++) (a:string,b:PHPdata) = PHPdata(a+b.toString)
+    static member (++) (a:PHPdata,b:string) = PHPdata(a.toString+b)
+    member this.foreach code =
+        ch.i <| fun i ->
+            php.phpcode <| fun () -> pr.codewrite("for("+i.Expr.eval pr+"=0; "+i.Expr.eval pr+"<count("+this.toString+"); "+i.Expr.eval pr+"++):")
+            code i
+            php.phpcode <| fun () -> pr.codewrite "endfor;"
+    member this.foreach (key:num0,value:num0) = fun code ->
+        ch.i <| fun i ->
+            php.phpcode <| fun () -> pr.codewrite("foreach("+this.toString+" as "+key.Expr.eval pr+" => "+value.Expr.eval pr+"):")
+            code()
+            php.phpcode <| fun () -> pr.codewrite "endforeach;"
+            
 type PHPbool(x:string) =
     
     member this.name with get() = x
     static member var(x) = PHPbool("$"+x)
-    static member (<==) (a:PHPbool,b:PHPbool) = pr.cwriter.codewrite ("<?php " + a.name + " = " + b.name + " ?>")
-    
-[<AutoOpen>]
-module num0ForPHP =
-    type num0 with
-        member this.code(pr:program) = "<?php echo " + this.Expr.eval pr + "; ?>"
-        static member var x = num0(Var(Nt,"$"+x,NaN))
-        static member var(x,init:num0) = 
-            let v = num0(Var(Nt,"$"+x,NaN))
-            v <== init
-            v
-        static member var(x,init:int) = 
-            let v = num0(Var(Nt,"$"+x,NaN))
-            v <== init
-            v
-        static member var(x,init:double) = 
-            let v = num0(Var(Nt,"$"+x,NaN))
-            v <== init
-            v
-        static member str x = num0(Var(Nt,"\""+x+"\"",NaN))
-        
-        static member array(arrayname:string) = 
-            let c = num0.var arrayname
-            pr.cwriter.codewrite ("<?php "+arrayname+" = array(); ?>")
-            c
-            
-        static member array(arrayname:string,data:list<string*string>) = 
-            let c = num0.var arrayname
-            pr.cwriter.codewrite ("<?php "+arrayname+" = array(); ?>")
-            pr.cwriter.codewrite ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
-            c
-
-        static member array(arrayname:string,data:list<string*num0>) = 
-            let c = num0.var arrayname
-            pr.cwriter.codewrite ("<?php "+arrayname+" = array(); ?>")
-            pr.cwriter.codewrite ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.Expr.eval pr))+"); ?>")
-            c
-
-        ///配列に要素を複数追加
-        member this.push (x:list<num0>) = pr.cwriter.codewrite ("<?php array_push(" + this.Expr.eval pr + ", " + String.Join(",",List.map(fun (q:num0) -> q.Expr.eval pr) x) + "); ?>")
-        ///配列に文字列要素を複数追加
-        member this.push (x:list<string>) = this.push (List.map(fun (q:string) -> num0.str q) x)
-        ///配列に要素を追加
-        member this.push (x:num0) = this.push [x]
-        ///配列に文字列要素を追加
-        member this.push (x:string) = this.push [x]
+    static member (<==) (a:PHPbool,b:PHPbool) = pr.codewrite ("<?php " + a.name + " = " + b.name + " ?>")

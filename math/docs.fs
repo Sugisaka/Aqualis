@@ -7,7 +7,7 @@ namespace Aqualis
         member _.eqReturn() =
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite "\\\\"
+                pr.codewrite "\\\\"
             |_ ->
                 ()
                 
@@ -15,7 +15,7 @@ namespace Aqualis
         member _.eqNonumber() =
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite "\\nonumber"
+                pr.codewrite "\\nonumber"
             |_ ->
                 ()
                 
@@ -23,7 +23,7 @@ namespace Aqualis
         member _.eqLabel(lb:string) =
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite("\\label{"+lb+"}")
+                pr.codewrite("\\label{"+lb+"}")
             |_ ->
                 ()
                 
@@ -42,7 +42,7 @@ namespace Aqualis
         static member para code =
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite "\\par"
+                pr.codewrite "\\par"
                 code()
             |_ ->
                 code()
@@ -51,7 +51,7 @@ namespace Aqualis
         static member text (s:string) =
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite s
+                pr.codewrite s
             |_ ->
                 ! s
                 
@@ -60,13 +60,13 @@ namespace Aqualis
             pr.hlist.add "\\usepackage{graphicx}"
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite "\\begin{figure}[htbp]"
-                pr.cwriter.codewrite "\\begin{center}"
-                pr.cwriter.codewrite("\\includegraphics{"+filename+"}")
-                pr.cwriter.codewrite "\\end{center}"
-                pr.cwriter.codewrite("\\caption{"+caption+"}")
-                pr.cwriter.codewrite("\\label{"+filename+"}")
-                pr.cwriter.codewrite "\\end{figure}"
+                pr.codewrite "\\begin{figure}[htbp]"
+                pr.codewrite "\\begin{center}"
+                pr.codewrite("\\includegraphics{"+filename+"}")
+                pr.codewrite "\\end{center}"
+                pr.codewrite("\\caption{"+caption+"}")
+                pr.codewrite("\\label{"+filename+"}")
+                pr.codewrite "\\end{figure}"
             |_ ->
                 ! (filename+": "+caption)
                 
@@ -74,11 +74,11 @@ namespace Aqualis
         static member enumerate (slst:(unit->unit)list) =
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite "\\begin{enumerate}"
+                pr.codewrite "\\begin{enumerate}"
                 for s in slst do
-                    pr.cwriter.codewrite "\\item"
+                    pr.codewrite "\\item"
                     s()
-                pr.cwriter.codewrite "\\end{enumerate}"
+                pr.codewrite "\\end{enumerate}"
             |_ ->
                 for s in slst do
                     s()
@@ -87,11 +87,11 @@ namespace Aqualis
         static member itemize (slst:(unit->unit)list) =
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite "\\begin{itemize}"
+                pr.codewrite "\\begin{itemize}"
                 for s in slst do
-                    pr.cwriter.codewrite "\\item"
+                    pr.codewrite "\\item"
                     s()
-                pr.cwriter.codewrite "\\end{itemize}"
+                pr.codewrite "\\end{itemize}"
             |_ ->
                 for s in slst do
                     s()
@@ -101,15 +101,15 @@ namespace Aqualis
             let e = eqmode()
             match pr.language with
             |LaTeX ->
-                pr.cwriter.codewrite "\\begin{align}"
+                pr.codewrite "\\begin{align}"
                 code e
-                pr.cwriter.codewrite "\\end{align}"
+                pr.codewrite "\\end{align}"
             |HTML ->
-                pr.cwriter.codewrite "\\["
-                pr.cwriter.codewrite "\\begin{align}"
+                pr.codewrite "\\["
+                pr.codewrite "\\begin{align}"
                 code e
-                pr.cwriter.codewrite "\\end{align}"
-                pr.cwriter.codewrite "\\]"
+                pr.codewrite "\\end{align}"
+                pr.codewrite "\\]"
             |_ ->
                 code e
                 

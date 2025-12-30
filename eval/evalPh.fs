@@ -8,7 +8,7 @@ namespace Aqualis
         type expr with
             
             static member substPh (x:expr) (y:expr) (c:program) =
-                c.cwriter.codewrite ("<?php " + x.evalPh c + " = " + "\"" + x.evalPh c + "\"" + "; ?>")
+                c.codewrite ("<?php " + x.evalPh c + " = " + "\"" + x.evalPh c + "\"" + "; ?>")
                 
             static member equivPh (x:expr) (y:expr) (c:program) =
                 printfn "PHPでこの文は使用できません"
@@ -22,12 +22,12 @@ namespace Aqualis
                 let n1_ = n1.evalPh c
                 let n2_ = n2.evalPh c
                 if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
-                c.cwriter.codewrite("for(" + i.evalPh c + " = " + n1_ + "; " + i.evalPh c + " <= " + n2_ + "; " + i.evalPh c + "++)")
-                c.cwriter.codewrite "{"
-                c.cwriter.indent.inc()
+                c.codewrite("for(" + i.evalPh c + " = " + n1_ + "; " + i.evalPh c + " <= " + n2_ + "; " + i.evalPh c + "++)")
+                c.codewrite "{"
+                c.indentInc()
                 code i
-                c.cwriter.indent.dec()
-                c.cwriter.codewrite "}"
+                c.indentDec()
+                c.codewrite "}"
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -35,25 +35,25 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = "_" + gotoLabel.nextGotoLabel()
-                let exit() = c.cwriter.codewrite("goto "+label+";")
+                let exit() = c.codewrite("goto "+label+";")
                 expr.substPh i (Int 1) c
                 if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
-                c.cwriter.codewrite "for(;;):"
-                c.cwriter.indent.inc()
+                c.codewrite "for(;;):"
+                c.indentInc()
                 code(exit,i)
                 expr.substPh i (Add(It 4, i, Int 1)) c
-                c.cwriter.indent.dec()
-                c.cwriter.codewrite "endfor;"
-                c.cwriter.codewrite(label+":;")
+                c.indentDec()
+                c.codewrite "endfor;"
+                c.codewrite(label+":;")
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoPh (c:program) (cond:expr) = fun code ->
-                c.cwriter.codewrite("while(" + cond.evalPh c + "):")
-                c.cwriter.indent.inc()
+                c.codewrite("while(" + cond.evalPh c + "):")
+                c.indentInc()
                 code()
-                c.cwriter.indent.dec()
-                c.cwriter.codewrite "endwhile;"
+                c.indentDec()
+                c.codewrite "endwhile;"
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangePh (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -62,21 +62,21 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
-                    c.cwriter.comment("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
-                    c.cwriter.indent.inc()
+                    c.comment("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
+                    c.indentInc()
                     code i
-                    c.cwriter.indent.dec()
-                    c.cwriter.comment "endfor;"
+                    c.indentDec()
+                    c.comment "endfor;"
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
-                    c.cwriter.codewrite("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
-                    c.cwriter.indent.inc()
+                    c.codewrite("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
+                    c.indentInc()
                     code i
-                    c.cwriter.indent.dec()
-                    c.cwriter.codewrite "endfor;"
+                    c.indentDec()
+                    c.codewrite "endfor;"
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
@@ -86,49 +86,49 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.cwriter.codewrite("goto "+label+"")
+                    let exit() = c.codewrite("goto "+label+"")
                     if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
-                    c.cwriter.comment("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
-                    c.cwriter.indent.inc()
+                    c.comment("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
+                    c.indentInc()
                     code(exit,i)
-                    c.cwriter.indent.dec()
-                    c.cwriter.comment "endfor;"
-                    c.cwriter.comment(label+":")
+                    c.indentDec()
+                    c.comment "endfor;"
+                    c.comment(label+":")
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.cwriter.codewrite("goto "+label+"")
+                    let exit() = c.codewrite("goto "+label+"")
                     if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
-                    c.cwriter.codewrite("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
-                    c.cwriter.indent.inc()
+                    c.codewrite("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
+                    c.indentInc()
                     code(exit,i)
-                    c.cwriter.indent.dec()
-                    c.cwriter.codewrite "endfor;"
-                    c.cwriter.codewrite(label+":")
+                    c.indentDec()
+                    c.codewrite "endfor;"
+                    c.codewrite(label+":")
                     returnVar()
                     
             static member branchPh (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPh c
-                    c.cwriter.codewrite("if(" + cond + "):")
-                    c.cwriter.indent.inc()
+                    c.codewrite("if(" + cond + "):")
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalPh c
-                    c.cwriter.codewrite("else if(" + cond + "):")
-                    c.cwriter.indent.inc()
+                    c.codewrite("else if(" + cond + "):")
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 let elsecode code =
-                    c.cwriter.codewrite "else:"
-                    c.cwriter.indent.inc()
+                    c.codewrite "else:"
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 code(ifcode,elseifcode,elsecode)
-                c.cwriter.codewrite "endif;"
+                c.codewrite "endif;"
                 
             member this.evalPh(c:program) =
                 match this.simp with

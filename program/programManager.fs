@@ -4,6 +4,8 @@ namespace Aqualis
     
     type program(outputdir,pjname,lang:Language) =
         
+        let cwriter = codeWriter(outputdir+"\\"+pjname+"_code.bee",2,lang)
+
         ///<summary>言語設定</summary>
         member val language = lang with get
         
@@ -67,18 +69,6 @@ namespace Aqualis
         ///<summary>複素数型3次元配列リスト</summary>
         member val z3 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\dddot{z}^{("+n.ToString()+")}") |_ -> fun n -> "z3"+n.ToString "000") with get
         
-        ///<summary>コード書き込み先一時ファイルストリーム</summary>
-        member val cwriter = codeWriter((if pjname="" then "" else outputdir+"\\"+pjname+"_code.bee"),2,lang) with get
-        
-        ///<summary>変数宣言書き込み先一時ファイルストリーム</summary>
-        member val vwriter = codeWriter((if pjname="" then "" else outputdir+"\\"+pjname+"_var.bee"),2,lang) with get
-        
-        ///<summary>構造体・関数宣言書き込み先一時ファイルストリーム</summary>
-        member val hwriter = codeWriter((if pjname="" then "" else outputdir+"\\"+pjname+"_str.bee"),2,lang) with get
-        
-        ///<summary>並列ループ処理書き込み先一時ファイルストリーム</summary>
-        member val pwriter = codeWriter((if pjname="" then "" else outputdir+"\\"+pjname+"_par.bee"),2,lang) with get
-        
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
         member val hlist = new UniqueList()
         
@@ -101,9 +91,14 @@ namespace Aqualis
         
         member val arg = argumentController lang with get
         
-        // ///<summary>セクションのヘッダを画面出力</summary>
-        // member this.displaySection with get() = display_section
-        // member this.setDisplaySection s = display_section <- s
+        member _.comment(s:string) = cwriter.comment s
+        
+        member _.codewrite(s:string) = cwriter.codewrite s
+        member _.indentInc() = cwriter.indent.inc()
+        member _.indentDec() = cwriter.indent.dec()
+        member _.appendOpen() = cwriter.appendOpen()
+        member _.close() = cwriter.close()
+        member _.delete() = cwriter.delete()
         
     [<AutoOpen>]
     module aqualisProgram =
@@ -118,6 +113,9 @@ namespace Aqualis
         let mutable isParMode = false
         ///<summary>定義された関数のリスト</summary>
         let mutable funlist: string list = []
+        ///<summary>現在生成中のプログラミング言語</summary>
+        let mutable language = Numeric
+        
         let funlist_nonoverlap() =
             let rec reduce lst1 lst2 =
                 match lst1 with
@@ -129,16 +127,21 @@ namespace Aqualis
                         reduce y lst2
                 |[] -> lst2
             reduce funlist []
-        let mutable private programList:list<program> = [program("","",Numeric)]
+        let mutable private programList:list<program> = []
+                    
+        let mutable prIndex = 0
         
-        let mutable pr = programList[0]
+        let mutable pr = programList[prIndex]
         
-        let nextProgram(outputdir,projectname,lang:Language) =
-            programList <- program(outputdir,projectname,lang)::programList
-            pr <- programList[0]
-        let backProgram() =
-            programList <- programList.Tail
-            pr <- programList[0]
+        let makeProgram(programInfo:list<string*string*Language>) code =
+            let programList_temp = programList
+            let prIndex_temp = prIndex
+            programList <- [for x in programInfo -> program x]
+            prIndex <- 0
+            let result = code()
+            programList <- programList_temp
+            prIndex <- prIndex_temp
+            result
             
     ///<summary>コード生成の設定</summary>
     type AqualisCompiler () =
@@ -182,11 +185,11 @@ namespace Aqualis
         ///<summary>プログラムの実行を強制終了</summary>
         static member abort() =
             match pr.language with 
-            |Fortran -> pr.cwriter.codewrite "stop" 
-            |C99     -> pr.cwriter.codewrite "return 1;" 
-            |LaTeX   -> pr.cwriter.codewrite "stop"
-            |HTML    -> pr.cwriter.codewrite "stop"
-            |Python  -> pr.cwriter.codewrite "sys.exit(1)"
+            |Fortran -> pr.codewrite "stop" 
+            |C99     -> pr.codewrite "return 1;" 
+            |LaTeX   -> pr.codewrite "stop"
+            |HTML    -> pr.codewrite "stop"
+            |Python  -> pr.codewrite "sys.exit(1)"
             |JavaScript -> ()
             |PHP -> ()
             |Numeric -> ()
@@ -194,11 +197,11 @@ namespace Aqualis
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         static member stop() =
             match pr.language with
-            |Fortran -> pr.cwriter.codewrite "read *, \n"
-            |C99     -> pr.cwriter.codewrite "getchar();\n"
-            |LaTeX   -> pr.cwriter.codewrite "stop\n"
-            |HTML    -> pr.cwriter.codewrite "stop\n"
-            |Python  -> pr.cwriter.codewrite "input()"
+            |Fortran -> pr.codewrite "read *, \n"
+            |C99     -> pr.codewrite "getchar();\n"
+            |LaTeX   -> pr.codewrite "stop\n"
+            |HTML    -> pr.codewrite "stop\n"
+            |Python  -> pr.codewrite "input()"
             |JavaScript -> ()
             |PHP -> ()
             |Numeric -> ()

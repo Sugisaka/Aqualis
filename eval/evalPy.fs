@@ -8,7 +8,7 @@ namespace Aqualis
         type expr with
             
             static member substPy (x:expr) (y:expr) (c:program) =
-                c.cwriter.codewrite (x.evalPy c  + " = " + y.evalPy c)
+                c.codewrite (x.evalPy c  + " = " + y.evalPy c)
                 
             static member equivPy (x:expr) (y:expr) (c:program) =
                 printfn "Pythonでこの文は使用できません"
@@ -21,10 +21,10 @@ namespace Aqualis
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalPy c
                 let n2_ = (Add(It 4, n2, Int 1)).evalPy c
-                c.cwriter.codewrite("for " + i.evalPy c + " in range(" + n1_ + ", " + n2_ + ", 1):")
-                c.cwriter.indent.inc()
+                c.codewrite("for " + i.evalPy c + " in range(" + n1_ + ", " + n2_ + ", 1):")
+                c.indentInc()
                 code i
-                c.cwriter.indent.dec()
+                c.indentDec()
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -32,29 +32,29 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = gotoLabel.nextGotoLabel()
-                let exit() = c.cwriter.codewrite("goto "+label)
+                let exit() = c.codewrite("goto "+label)
                 expr.substPy i (Int 1) c
-                c.cwriter.codewrite "while True:"
-                c.cwriter.indent.inc()
+                c.codewrite "while True:"
+                c.indentInc()
                 code(exit,i)
-                c.cwriter.codewrite("flag = " + label)
+                c.codewrite("flag = " + label)
                 expr.substPy i (Add(It 4, i, Int 1)) c
-                c.cwriter.indent.dec()
+                c.indentDec()
                 if label = "10" then
                     gotoLabel.exit_reset()
                 else 
-                    c.cwriter.codewrite("if flag < " + label + ":")
-                    c.cwriter.indent.inc()
-                    c.cwriter.codewrite "break"
-                    c.cwriter.indent.dec()
+                    c.codewrite("if flag < " + label + ":")
+                    c.indentInc()
+                    c.codewrite "break"
+                    c.indentDec()
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoPy (c:program) (cond:expr) = fun code ->
-                c.cwriter.codewrite("while(" + cond.evalPy c + ")")
-                c.cwriter.indent.inc()
+                c.codewrite("while(" + cond.evalPy c + ")")
+                c.indentInc()
                 code()
-                c.cwriter.indent.dec()
+                c.indentDec()
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangePy (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -62,18 +62,18 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    c.cwriter.comment("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
-                    c.cwriter.indent.inc()
+                    c.comment("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    c.indentInc()
                     code i
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                     returnVar()
                 |_ ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    c.cwriter.codewrite("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
-                    c.cwriter.indent.inc()
+                    c.codewrite("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    c.indentInc()
                     code i
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
@@ -83,55 +83,55 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.cwriter.comment("goto "+label)
-                    c.cwriter.comment("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
-                    c.cwriter.indent.inc()
+                    let exit() = c.comment("goto "+label)
+                    c.comment("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    c.indentInc()
                     code(exit,i)
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                     if label = "10" then
                         gotoLabel.exit_reset()
                     else 
-                        c.cwriter.comment("if flag < "+label)
-                        c.cwriter.indent.inc()
-                        c.cwriter.comment "break"
-                        c.cwriter.indent.dec()
+                        c.comment("if flag < "+label)
+                        c.indentInc()
+                        c.comment "break"
+                        c.indentDec()
                     returnVar()
                 |_ ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.cwriter.codewrite("goto "+label)
-                    c.cwriter.codewrite("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
-                    c.cwriter.indent.inc()
+                    let exit() = c.codewrite("goto "+label)
+                    c.codewrite("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    c.indentInc()
                     code(exit,i)
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                     if label = "10" then
                         gotoLabel.exit_reset()
                     else 
-                        c.cwriter.codewrite("if flag < "+label+":")
-                        c.cwriter.indent.inc()
-                        c.cwriter.codewrite "break"
-                        c.cwriter.indent.dec()
+                        c.codewrite("if flag < "+label+":")
+                        c.indentInc()
+                        c.codewrite "break"
+                        c.indentDec()
                     returnVar()
                     
             static member branchPy (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPy c
-                    c.cwriter.codewrite("if " + cond + ":")
-                    c.cwriter.indent.inc()
+                    c.codewrite("if " + cond + ":")
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalPy c
-                    c.cwriter.codewrite("elif " + cond + ":")
-                    c.cwriter.indent.inc()
+                    c.codewrite("elif " + cond + ":")
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 let elsecode code =
-                    c.cwriter.codewrite "else:"
-                    c.cwriter.indent.inc()
+                    c.codewrite "else:"
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 code(ifcode,elseifcode,elsecode)
                 
             member this.evalPy(c:program) =

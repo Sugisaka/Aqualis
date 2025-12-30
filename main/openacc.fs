@@ -15,28 +15,28 @@ namespace Aqualis
                     let instr  = String.Join(",", pr.varCopyIn.list)
                     if pr.varCopyOut.list.Length>0 then
                         let outstr = String.Join(",", pr.varCopyOut.list)
-                        pr.cwriter.codewrite("!$acc data copyin("+instr+") copyout("+outstr+")\n")
-                        pr.cwriter.codewrite("!$acc kernels"+"\n")
+                        pr.codewrite("!$acc data copyin("+instr+") copyout("+outstr+")\n")
+                        pr.codewrite("!$acc kernels"+"\n")
                         code()
-                        pr.cwriter.codewrite("!$acc end kernels"+"\n")
-                        pr.cwriter.codewrite("!$acc end data"+"\n")
+                        pr.codewrite("!$acc end kernels"+"\n")
+                        pr.codewrite("!$acc end data"+"\n")
                     else
-                        pr.cwriter.codewrite("!$acc data copyin("+instr+")\n")
-                        pr.cwriter.codewrite("!$acc kernels"+"\n")
+                        pr.codewrite("!$acc data copyin("+instr+")\n")
+                        pr.codewrite("!$acc kernels"+"\n")
                         code()
-                        pr.cwriter.codewrite("!$acc end kernels"+"\n")
-                        pr.cwriter.codewrite("!$acc end data"+"\n")
+                        pr.codewrite("!$acc end kernels"+"\n")
+                        pr.codewrite("!$acc end data"+"\n")
                 elif pr.varCopyOut.list.Length>0 then
                     let outstr = String.Join(",", pr.varCopyOut.list)
-                    pr.cwriter.codewrite("!$acc data copyout("+outstr+")\n")
-                    pr.cwriter.codewrite("!$acc kernels"+"\n")
+                    pr.codewrite("!$acc data copyout("+outstr+")\n")
+                    pr.codewrite("!$acc kernels"+"\n")
                     code()
-                    pr.cwriter.codewrite("!$acc end kernels"+"\n")
-                    pr.cwriter.codewrite("!$acc end data"+"\n")
+                    pr.codewrite("!$acc end kernels"+"\n")
+                    pr.codewrite("!$acc end data"+"\n")
                 else
-                    pr.cwriter.codewrite("!$acc kernels"+"\n")
+                    pr.codewrite("!$acc kernels"+"\n")
                     code()
-                    pr.cwriter.codewrite "!$acc end kernels\n"
+                    pr.codewrite "!$acc end kernels\n"
                 isParMode <- false
             |C99 ->
                 isOaccUsed <- true
@@ -45,37 +45,37 @@ namespace Aqualis
                     let instr  = String.Join(",", pr.varCopyIn.list)
                     if pr.varCopyOut.list.Length>0 then
                         let outstr = String.Join(",", pr.varCopyOut.list)
-                        pr.cwriter.codewrite("#pragma acc data copyin("+instr+") copyout("+outstr+")\n")
-                        pr.cwriter.codewrite("{"+"\n")
-                        pr.cwriter.codewrite("#pragma acc kernels"+"\n")
-                        pr.cwriter.codewrite("{"+"\n")
+                        pr.codewrite("#pragma acc data copyin("+instr+") copyout("+outstr+")\n")
+                        pr.codewrite("{"+"\n")
+                        pr.codewrite("#pragma acc kernels"+"\n")
+                        pr.codewrite("{"+"\n")
                         code()
-                        pr.cwriter.codewrite("}"+"\n")
-                        pr.cwriter.codewrite("}"+"\n")
+                        pr.codewrite("}"+"\n")
+                        pr.codewrite("}"+"\n")
                     else
-                        pr.cwriter.codewrite("#pragma acc data copyin("+instr+")\n")
-                        pr.cwriter.codewrite("{"+"\n")
-                        pr.cwriter.codewrite("#pragma acc kernels"+"\n")
-                        pr.cwriter.codewrite("{"+"\n")
+                        pr.codewrite("#pragma acc data copyin("+instr+")\n")
+                        pr.codewrite("{"+"\n")
+                        pr.codewrite("#pragma acc kernels"+"\n")
+                        pr.codewrite("{"+"\n")
                         code()
-                        pr.cwriter.codewrite("}"+"\n")
-                        pr.cwriter.codewrite("}"+"\n")
+                        pr.codewrite("}"+"\n")
+                        pr.codewrite("}"+"\n")
                 elif pr.varCopyOut.list.Length>0 then
                     let outstr = String.Join(",", pr.varCopyOut.list)
-                    pr.cwriter.codewrite("#pragma acc data copyout("+outstr+")\n")
-                    pr.cwriter.codewrite("{"+"\n")
-                    pr.cwriter.codewrite("#pragma acc kernels"+"\n")
-                    pr.cwriter.codewrite("{"+"\n")
+                    pr.codewrite("#pragma acc data copyout("+outstr+")\n")
+                    pr.codewrite("{"+"\n")
+                    pr.codewrite("#pragma acc kernels"+"\n")
+                    pr.codewrite("{"+"\n")
                     code()
-                    pr.cwriter.codewrite("}"+"\n")
-                    pr.cwriter.codewrite("}"+"\n")
+                    pr.codewrite("}"+"\n")
+                    pr.codewrite("}"+"\n")
                 else
-                    pr.cwriter.codewrite("#pragma acc kernels"+"\n")
-                    pr.cwriter.codewrite("{"+"\n")
+                    pr.codewrite("#pragma acc kernels"+"\n")
+                    pr.codewrite("{"+"\n")
                     code()
-                    pr.cwriter.codewrite("}"+"\n")
+                    pr.codewrite("}"+"\n")
                 isParMode <- false
             |_ ->
                 Console.WriteLine "Error : この言語では並列化を実行できません"
-                pr.cwriter.codewrite "Error : この言語では並列化を実行できません"
+                pr.codewrite "Error : この言語では並列化を実行できません"
                 

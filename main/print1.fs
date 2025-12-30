@@ -19,7 +19,7 @@ namespace Aqualis
                         |Nvr x ->
                             yield x.eval pr
                         |_ -> () ]
-                pr.cwriter.codewrite("print *, " + String.concat "," clist + "\n")
+                pr.codewrite("print *, " + String.concat "," clist + "\n")
             |C99 ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -47,7 +47,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("printf(\""+format+"\\n\","+code+");\n")
+                pr.codewrite("printf(\""+format+"\\n\","+code+");\n")
             |LaTeX ->
                 let code = 
                     lst
@@ -58,7 +58,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("print, " + code + "\n")
+                pr.codewrite("print, " + code + "\n")
             |HTML ->
                 let code = 
                     lst
@@ -69,8 +69,8 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("Print \\("+code+"\\)\n")
-                pr.cwriter.codewrite "<br/>\n"
+                pr.codewrite("Print \\("+code+"\\)\n")
+                pr.codewrite "<br/>\n"
             |Python ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -97,7 +97,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("print(\"" + format + "\" %(" + code + "))\n")
+                pr.codewrite("print(\"" + format + "\" %(" + code + "))\n")
             |JavaScript ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -124,7 +124,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("print(" + code + ");\n")
+                pr.codewrite("print(" + code + ");\n")
             |PHP ->
                 let int0string_format_C =
                     "%"+pr.numFormat.iFormat.ToString()+"d"
@@ -151,7 +151,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.cwriter.codewrite("print(" + code + ");\n")
+                pr.codewrite("print(" + code + ");\n")
             |Numeric ->
                 for v in lst do
                     match v with
@@ -163,20 +163,20 @@ namespace Aqualis
         static member t (str:string) =
             match pr.language with
             |Fortran ->
-                pr.cwriter.codewrite("print *, "+"\""+str+"\""+"\n")
+                pr.codewrite("print *, "+"\""+str+"\""+"\n")
             |C99 ->
-                pr.cwriter.codewrite("printf(\""+str+"\""+");\n")
+                pr.codewrite("printf(\""+str+"\""+");\n")
             |LaTeX ->
-                pr.cwriter.codewrite("print, \""+str+"\"\n")
+                pr.codewrite("print, \""+str+"\"\n")
             |HTML ->
-                pr.cwriter.codewrite("Print \\("+str+"\\)\n")
-                pr.cwriter.codewrite "<br/>\n"
+                pr.codewrite("Print \\("+str+"\\)\n")
+                pr.codewrite "<br/>\n"
             |Python ->
-                pr.cwriter.codewrite("print(\""+str+"\")\n")
+                pr.codewrite("print(\""+str+"\")\n")
             |JavaScript ->
-                pr.cwriter.codewrite("print(\""+str+"\")\n")
+                pr.codewrite("print(\""+str+"\")\n")
             |PHP ->
-                pr.cwriter.codewrite("print(\""+str+"\")\n")
+                pr.codewrite("print(\""+str+"\")\n")
             |Numeric ->
                 printfn "%s" str
         static member w (ss:exprString) = print.s (match ss with |Str _ |Nvr _ -> [ss] |NSL lst -> lst)

@@ -66,15 +66,15 @@
     <Compile Include="graphics\mathgraph.fs" />
     <Compile Include="graphics\graph1d.fs" />
     <Compile Include="graphics\plot2d.fs" />
-    <None Include="web\io.fs" />
+    <Compile Include="web\io.fs" />
     <None Include="web\num0.fs" />
     <None Include="web\asm.fs" />
     <Compile Include="web\greek.fs" />
     <Compile Include="web\style.fs" />
     <None Include="web\figure.fs" />
     <Compile Include="web\param.fs" />
-    <Compile Include="web\PHPvar.fs" />
     <Compile Include="web\php.fs" />
+    <Compile Include="web\PHPvar.fs" />
     <Compile Include="web\html.fs" />
     <Compile Include="web\post.fs" />
     <Compile Include="web\form.fs" />

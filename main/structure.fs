@@ -79,55 +79,55 @@ namespace Aqualis
             sort [] [] strlist
             
         ///<summary>構造体定義のコードを作成</summary>
-        member this.Def_Structure() =
+        member this.Def_Structure(writer:codeWriter) =
             match pr.language with
             |Fortran ->
                 for s in this.sort() do
-                    pr.hwriter.codewrite("type "+s.sname+"\n")
-                    pr.hwriter.indent.inc()
+                    writer.codewrite("type "+s.sname+"\n")
+                    writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
-                    pr.hwriter.indent.dec()
-                    pr.hwriter.codewrite("end type "+s.sname+"\n")
+                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                    writer.indent.dec()
+                    writer.codewrite("end type "+s.sname+"\n")
             |C99 ->
                 for s in this.sort() do
-                    pr.hwriter.codewrite("typedef struct "+"_"+s.sname+"\n")
-                    pr.hwriter.codewrite("{"+"\n")
-                    pr.hwriter.indent.inc()
+                    writer.codewrite("typedef struct "+"_"+s.sname+"\n")
+                    writer.codewrite("{"+"\n")
+                    writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
-                    pr.hwriter.indent.dec()
-                    pr.hwriter.codewrite("} "+s.sname+";\n")
+                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                    writer.indent.dec()
+                    writer.codewrite("} "+s.sname+";\n")
             |LaTeX ->
                 for s in this.sort() do
-                    pr.hwriter.codewrite("\\subsection{"+s.sname+"}")
-                    pr.hwriter.codewrite "\\begin{itemize}\n"
-                    pr.hwriter.indent.inc()
+                    writer.codewrite("\\subsection{"+s.sname+"}")
+                    writer.codewrite "\\begin{itemize}\n"
+                    writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
-                    pr.hwriter.indent.dec()
-                    pr.hwriter.codewrite "\\end{itemize}\n"
+                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                    writer.indent.dec()
+                    writer.codewrite "\\end{itemize}\n"
             |HTML ->
                 for s in this.sort() do
-                    pr.hwriter.codewrite("<h3>"+s.sname+"</h3>\n")
-                    pr.hwriter.codewrite "<ul>\n"
-                    pr.hwriter.indent.inc()
+                    writer.codewrite("<h3>"+s.sname+"</h3>\n")
+                    writer.codewrite "<ul>\n"
+                    writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
-                    pr.hwriter.indent.dec()
-                    pr.hwriter.codewrite "</ul>\n"
+                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                    writer.indent.dec()
+                    writer.codewrite "</ul>\n"
             |Python ->
                 for s in this.sort() do
-                    pr.hwriter.codewrite("class "+s.sname+":\n")
-                    pr.hwriter.indent.inc()
+                    writer.codewrite("class "+s.sname+":\n")
+                    writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        pr.hwriter.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
-                    pr.hwriter.indent.dec()
+                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                    writer.indent.dec()
             |JavaScript ->
                 ()
             |PHP ->

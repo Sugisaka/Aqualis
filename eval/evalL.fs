@@ -8,27 +8,27 @@ namespace Aqualis
         type expr with
             
             static member substL (x:expr) (y:expr) (c:program) =
-                c.cwriter.codewrite "\\begin{align}"
-                c.cwriter.codewrite (x.evalL c  + " \\leftarrow " + y.evalL c)
-                c.cwriter.codewrite "\\end{align}"
+                c.codewrite "\\begin{align}"
+                c.codewrite (x.evalL c  + " \\leftarrow " + y.evalL c)
+                c.codewrite "\\end{align}"
 
                 
             static member equivL (x:expr) (y:expr) (c:program) =
-                c.cwriter.codewrite (x.evalL c  + " = " + y.evalL c)
+                c.codewrite (x.evalL c  + " = " + y.evalL c)
                 
             static member equivAlignL (x:expr) (y:expr) (c:program) =
-                c.cwriter.codewrite (x.evalL c  + " =& " + y.evalL c)
+                c.codewrite (x.evalL c  + " =& " + y.evalL c)
                 
             static member forLoopL (c:program) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalL c
                 let n2_ = n2.evalL c
-                c.cwriter.codewrite("for $" + i.evalL c + "=" + n1_ + "\\cdots " + n2_ + "$\\\\")
-                c.cwriter.indent.inc()
+                c.codewrite("for $" + i.evalL c + "=" + n1_ + "\\cdots " + n2_ + "$\\\\")
+                c.indentInc()
                 code i
-                c.cwriter.indent.dec()
-                c.cwriter.codewrite "end\\\\"
+                c.indentDec()
+                c.codewrite "end\\\\"
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -36,24 +36,24 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = gotoLabel.nextGotoLabel()
-                let exit() = c.cwriter.codewrite("goto " + label)
+                let exit() = c.codewrite("goto " + label)
                 expr.substL i (Int 1) c
-                c.cwriter.codewrite "do"
-                c.cwriter.indent.inc()
+                c.codewrite "do"
+                c.indentInc()
                 code(exit,i)
                 expr.substL i (Add(It 4, i, Int 1)) c
-                c.cwriter.indent.dec()
-                c.cwriter.codewrite "end do"
-                c.cwriter.codewrite(label + " continue")
+                c.indentDec()
+                c.codewrite "end do"
+                c.codewrite(label + " continue")
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoL (c:program) (cond:expr) = fun code ->
-                c.cwriter.codewrite("while " + cond.evalL c + "\\\\")
-                c.cwriter.indent.inc()
+                c.codewrite("while " + cond.evalL c + "\\\\")
+                c.indentInc()
                 code()
-                c.cwriter.indent.dec()
-                c.cwriter.codewrite "end\\\\"
+                c.indentDec()
+                c.codewrite "end\\\\"
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangeL (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -61,20 +61,20 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    c.cwriter.comment("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
-                    c.cwriter.indent.inc()
+                    c.comment("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
+                    c.indentInc()
                     code i
-                    c.cwriter.indent.dec()
-                    c.cwriter.comment "end\\\\"
+                    c.indentDec()
+                    c.comment "end\\\\"
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    c.cwriter.codewrite("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
-                    c.cwriter.indent.inc()
+                    c.codewrite("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
+                    c.indentInc()
                     code i
-                    c.cwriter.indent.dec()
-                    c.cwriter.codewrite "end\\\\"
+                    c.indentDec()
+                    c.codewrite "end\\\\"
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
@@ -84,47 +84,47 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.cwriter.codewrite("goto " + label)
-                    c.cwriter.comment("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
-                    c.cwriter.indent.inc()
+                    let exit() = c.codewrite("goto " + label)
+                    c.comment("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
+                    c.indentInc()
                     code(exit,i)
-                    c.cwriter.indent.dec()
-                    c.cwriter.comment "end"
-                    c.cwriter.comment(label + " continue")
+                    c.indentDec()
+                    c.comment "end"
+                    c.comment(label + " continue")
                     returnVar()
                 |_ ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.cwriter.codewrite("goto " + label)
-                    c.cwriter.codewrite("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
-                    c.cwriter.indent.inc()
+                    let exit() = c.codewrite("goto " + label)
+                    c.codewrite("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
+                    c.indentInc()
                     code(exit,i)
-                    c.cwriter.indent.dec()
-                    c.cwriter.codewrite "end"
-                    c.cwriter.codewrite(label + " continue")
+                    c.indentDec()
+                    c.codewrite "end"
+                    c.codewrite(label + " continue")
                     returnVar()
                     
             static member branchL (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalL c
-                    c.cwriter.codewrite("if " + cond)
-                    c.cwriter.indent.inc()
+                    c.codewrite("if " + cond)
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalL c
-                    c.cwriter.codewrite("else if " + cond)
-                    c.cwriter.indent.inc()
+                    c.codewrite("else if " + cond)
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 let elsecode code =
-                    c.cwriter.codewrite "else"
-                    c.cwriter.indent.inc()
+                    c.codewrite "else"
+                    c.indentInc()
                     code()
-                    c.cwriter.indent.dec()
+                    c.indentDec()
                 code(ifcode,elseifcode,elsecode)
-                c.cwriter.codewrite "endif"
+                c.codewrite "endif"
                 
             member this.evalL(c:program) =
                 let par (s:string) (pl:int) =
