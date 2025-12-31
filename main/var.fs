@@ -7,34 +7,34 @@ namespace Aqualis
         
         ///<summary>複素数の初期値</summary>
         static member private init_z (re:double,im:double) =
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran ->
-                "(" + pr.numFormat.DtoS re + "," + pr.numFormat.DtoS im+")"
+                "(" + programList[prIndex].numFormat.DtoS re + "," + programList[prIndex].numFormat.DtoS im+")"
             |C99 ->
                 if im<0.0 then
-                    pr.numFormat.DtoS re + "-uj*"+pr.numFormat.DtoS (abs im)
+                    programList[prIndex].numFormat.DtoS re + "-uj*"+programList[prIndex].numFormat.DtoS (abs im)
                 else
-                    pr.numFormat.DtoS re + "+uj*"+pr.numFormat.DtoS im
+                    programList[prIndex].numFormat.DtoS re + "+uj*"+programList[prIndex].numFormat.DtoS im
             |LaTeX ->
-                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + "\\mathrm{j})"
+                "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + "\\mathrm{j})"
             |HTML ->
-                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + "\\mathrm{j})"
+                "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + "\\mathrm{j})"
             |Python ->
                 if im<0.0 then
-                    pr.numFormat.DtoS re + "-" + pr.numFormat.DtoS (abs im) + "i"
+                    programList[prIndex].numFormat.DtoS re + "-" + programList[prIndex].numFormat.DtoS (abs im) + "i"
                 else
-                    pr.numFormat.DtoS re + "+" + pr.numFormat.DtoS im + "i"
+                    programList[prIndex].numFormat.DtoS re + "+" + programList[prIndex].numFormat.DtoS im + "i"
             |JavaScript ->
-                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + ")"
+                "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + ")"
             |PHP ->
-                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + ")"
+                "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + ")"
             |Numeric ->
-                "(" + pr.numFormat.DtoS re + (if im>=0.0 then "+" else "") + pr.numFormat.DtoS im + ")"
+                "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + ")"
                 
         ///<summary>整数型配列の初期値</summary>
         static member private init_i1 (v:int list) =
-            let join (s:list<int>) = String.Join(",", s |> List.map (fun v -> pr.numFormat.ItoS v))
-            match pr.language with
+            let join (s:list<int>) = String.Join(",", s |> List.map (fun v -> programList[prIndex].numFormat.ItoS v))
+            match programList[prIndex].language with
             |Fortran -> "(/" + join v + "/)"
             |C99 -> "{" + join v + "}"
             |LaTeX -> "{" + join v + "}"
@@ -46,8 +46,8 @@ namespace Aqualis
             
         ///<summary>倍精度浮動小数点型配列の初期値</summary>
         static member private init_d1 (v:double list) =
-            let join (s:list<double>) = String.Join(",", s |> List.map (fun v -> pr.numFormat.DtoS v))
-            match pr.language with
+            let join (s:list<double>) = String.Join(",", s |> List.map (fun v -> programList[prIndex].numFormat.DtoS v))
+            match programList[prIndex].language with
             |Fortran -> "(/" + join v + "/)"
             |C99 -> "{" + join v + "}"
             |LaTeX -> "{" + join v + "}"
@@ -60,7 +60,7 @@ namespace Aqualis
         ///<summary>複素数型配列の初期値</summary>
         static member private init_z1 (v:(double*double) list) =
             let join (s:list<double*double>) = String.Join(",", s |> List.map (fun v -> var.init_z v))
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran -> "(/" + join v + "/)"
             |C99 -> "{" + join v + "}"
             |LaTeX -> "{" + join v + "}"
@@ -73,25 +73,25 @@ namespace Aqualis
         ///<summary>バイト型変数</summary>
         ///<param name="name">変数名</param>
         static member b0 (name:string) = 
-            pr.var.setUniqVarWarning(It 1,A0,name,"")
+            programList[prIndex].var.setUniqVarWarning(It 1,A0,name,"")
             num0(Var(It 1,name,NaN))
             
         ///<summary>整数型変数</summary>
         ///<param name="name">変数名</param>
         static member i0 (name:string) = 
-            pr.var.setUniqVarWarning(It 4,A0,name,"")
+            programList[prIndex].var.setUniqVarWarning(It 4,A0,name,"")
             num0(Var(It 1,name,NaN))
             
         ///<summary>倍精度浮動小数点型変数</summary>
         ///<param name="name">変数名</param>
         static member d0 (name:string) =
-            pr.var.setUniqVarWarning(Dt,A0,name,"")
+            programList[prIndex].var.setUniqVarWarning(Dt,A0,name,"")
             num0(Var(Dt,name,NaN))
             
         ///<summary>複素数型変数</summary>
         ///<param name="name">変数名</param>
         static member z0 (name:string) = 
-            pr.var.setUniqVarWarning(Zt,A0,name,"")
+            programList[prIndex].var.setUniqVarWarning(Zt,A0,name,"")
             num0(Var(Zt,name,NaN))
             
         ///<summary>整数型1次元配列</summary>
@@ -206,28 +206,28 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member ip0(name:string,v) = 
-            pr.var.setUniqVarWarning(It 4,A0,name,(pr.numFormat.ItoS v))
+            programList[prIndex].var.setUniqVarWarning(It 4,A0,name,(programList[prIndex].numFormat.ItoS v))
             num0(Var(It 4, name,NaN))
             
         ///<summary>倍精度浮動小数点型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp0(name:string,v) = 
-            pr.var.setUniqVarWarning(Dt,A0,name,(pr.numFormat.DtoS v))
+            programList[prIndex].var.setUniqVarWarning(Dt,A0,name,(programList[prIndex].numFormat.DtoS v))
             num0(Var(Dt, name,NaN))
             
         ///<summary>整数型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal ip0_noWarning(name:string,v) = 
-            pr.var.setUniqVar(It 4,A0,name,pr.numFormat.ItoS v)
+            programList[prIndex].var.setUniqVar(It 4,A0,name,programList[prIndex].numFormat.ItoS v)
             num0(Var(It 4, name,NaN))
             
         ///<summary>倍精度浮動小数点型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal dp0_noWarning(name:string,v) = 
-            pr.var.setUniqVar(Dt,A0,name,pr.numFormat.DtoS v)
+            programList[prIndex].var.setUniqVar(Dt,A0,name,programList[prIndex].numFormat.DtoS v)
             num0(Var(Dt, name,NaN))
             
         ///<summary>複素数型定数</summary>
@@ -235,28 +235,28 @@ namespace Aqualis
         ///<param name="v">定数</param>
         static member zp0(name,(v:double*double)) =
             let (v_re,v_im) = v
-            pr.var.setUniqVarWarning(Zt,A0,name,var.init_z (v_re,v_im))
+            programList[prIndex].var.setUniqVarWarning(Zt,A0,name,var.init_z (v_re,v_im))
             num0(Var(Zt, name,NaN))
             
         ///<summary>整数型1次元配列定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member ip1(name:string,v:int list) =
-            pr.var.setUniqVarWarning(It 4,A1 v.Length,name,var.init_i1 v)
+            programList[prIndex].var.setUniqVarWarning(It 4,A1 v.Length,name,var.init_i1 v)
             num1(It 4,Var1(A1 v.Length,name))
             
         ///<summary>倍精度浮動小数点型1次元配列定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp1(name:string,v:double list) = 
-            pr.var.setUniqVarWarning(Dt,A1 v.Length,name,var.init_d1 v)
+            programList[prIndex].var.setUniqVarWarning(Dt,A1 v.Length,name,var.init_d1 v)
             num1(Dt,Var1(A1 v.Length,name))
             
         ///<summary>複素数型1次元配列定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member zp1(name:string,v:(double*double) list) =
-            pr.var.setUniqVarWarning(Zt,A0,name,var.init_z1 v)
+            programList[prIndex].var.setUniqVarWarning(Zt,A0,name,var.init_z1 v)
             num1(Zt,Var1(A1 v.Length,name))
             
         ///<summary>整数型変数</summary>
@@ -265,7 +265,7 @@ namespace Aqualis
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n0)" <| e.ToString()
             |_ -> ()
-            pr.var.setUniqVarWarning(e,A0,name,"")
+            programList[prIndex].var.setUniqVarWarning(e,A0,name,"")
             num0(Var(e,name,NaN))
             
         ///<summary>整数型1次元配列</summary>

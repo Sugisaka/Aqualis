@@ -6,220 +6,220 @@ type html =
     static member htmlfile (dir:string,filename:string) code =
         makeProgram [dir,filename,HTML] code
     static member head title = fun code ->
-        pr.codewrite "<!doctype html>"
-        pr.codewrite "<html lang=\"ja\">"
-        pr.codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
-        pr.codewrite "<head>"
-        pr.codewrite("    <title>"+title+"</title>")
-        pr.codewrite "    <meta charset=\"utf-8\">"
-        pr.codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-        pr.codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-        pr.codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-        pr.codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-        pr.codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-        pr.codewrite "    <link rel='stylesheet' href='style.css' />"
-        pr.codewrite "</head>"
-        pr.codewrite "<body>"
+        programList[prIndex].codewrite "<!doctype html>"
+        programList[prIndex].codewrite "<html lang=\"ja\">"
+        programList[prIndex].codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
+        programList[prIndex].codewrite "<head>"
+        programList[prIndex].codewrite("    <title>"+title+"</title>")
+        programList[prIndex].codewrite "    <meta charset=\"utf-8\">"
+        programList[prIndex].codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+        programList[prIndex].codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+        programList[prIndex].codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+        programList[prIndex].codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+        programList[prIndex].codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+        programList[prIndex].codewrite "    <link rel='stylesheet' href='style.css' />"
+        programList[prIndex].codewrite "</head>"
+        programList[prIndex].codewrite "<body>"
         code()
-        pr.codewrite "</body>"
-        pr.codewrite "</html>"
+        programList[prIndex].codewrite "</body>"
+        programList[prIndex].codewrite "</html>"
     static member head (title,refresh:int) = fun code ->
-        pr.codewrite "<!doctype html>"
-        pr.codewrite "<html lang=\"ja\">"
-        pr.codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
-        pr.codewrite "<head>"
-        pr.codewrite("    <title>"+title+"</title>")
-        pr.codewrite "    <meta charset=\"utf-8\">"
-        pr.codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-        pr.codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-        pr.codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-        pr.codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-        pr.codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-        pr.codewrite "    <link rel='stylesheet' href='style.css' />"
-        pr.codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
-        pr.codewrite "</head>"
-        pr.codewrite "<body>"
+        programList[prIndex].codewrite "<!doctype html>"
+        programList[prIndex].codewrite "<html lang=\"ja\">"
+        programList[prIndex].codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
+        programList[prIndex].codewrite "<head>"
+        programList[prIndex].codewrite("    <title>"+title+"</title>")
+        programList[prIndex].codewrite "    <meta charset=\"utf-8\">"
+        programList[prIndex].codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+        programList[prIndex].codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+        programList[prIndex].codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+        programList[prIndex].codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+        programList[prIndex].codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+        programList[prIndex].codewrite "    <link rel='stylesheet' href='style.css' />"
+        programList[prIndex].codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+        programList[prIndex].codewrite "</head>"
+        programList[prIndex].codewrite "<body>"
         code()
-        pr.codewrite "</body>"
-        pr.codewrite "</html>"
+        programList[prIndex].codewrite "</body>"
+        programList[prIndex].codewrite "</html>"
     static member head (title,cssfile,jsfile,refresh:int) = fun code ->
-        pr.codewrite("<!doctype html>")
-        pr.codewrite("<html lang=\"ja\">")
-        pr.codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
-        pr.codewrite("<head>")
-        pr.codewrite("    <title>"+title+"</title>")
-        pr.codewrite("    <meta charset=\"utf-8\">")
-        pr.codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
-        pr.codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
-        pr.codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
-        pr.codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
-        pr.codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
-        pr.codewrite("    <link rel='stylesheet' href='"+cssfile+"'>")
-        pr.codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
-        pr.codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
-        pr.codewrite("</head>")
-        pr.codewrite("<body>")
+        programList[prIndex].codewrite("<!doctype html>")
+        programList[prIndex].codewrite("<html lang=\"ja\">")
+        programList[prIndex].codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
+        programList[prIndex].codewrite("<head>")
+        programList[prIndex].codewrite("    <title>"+title+"</title>")
+        programList[prIndex].codewrite("    <meta charset=\"utf-8\">")
+        programList[prIndex].codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
+        programList[prIndex].codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
+        programList[prIndex].codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
+        programList[prIndex].codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
+        programList[prIndex].codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
+        programList[prIndex].codewrite("    <link rel='stylesheet' href='"+cssfile+"'>")
+        programList[prIndex].codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
+        programList[prIndex].codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+        programList[prIndex].codewrite("</head>")
+        programList[prIndex].codewrite("<body>")
         code()
-        pr.codewrite("</body>")
-        pr.codewrite("</html>")
+        programList[prIndex].codewrite("</body>")
+        programList[prIndex].codewrite("</html>")
     static member head (title,cssfile,jsfile) = fun code ->
-        pr.codewrite("<!doctype html>")
-        pr.codewrite("<html lang=\"ja\">")
-        pr.codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
-        pr.codewrite("<head>")
-        pr.codewrite("    <title>"+title+"</title>")
-        pr.codewrite("    <meta charset=\"utf-8\">")
-        pr.codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
-        pr.codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
-        pr.codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
-        pr.codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
-        pr.codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
-        pr.codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
-        pr.codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
-        pr.codewrite("</head>")
-        pr.codewrite("<body>")
+        programList[prIndex].codewrite("<!doctype html>")
+        programList[prIndex].codewrite("<html lang=\"ja\">")
+        programList[prIndex].codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
+        programList[prIndex].codewrite("<head>")
+        programList[prIndex].codewrite("    <title>"+title+"</title>")
+        programList[prIndex].codewrite("    <meta charset=\"utf-8\">")
+        programList[prIndex].codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
+        programList[prIndex].codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
+        programList[prIndex].codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
+        programList[prIndex].codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
+        programList[prIndex].codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
+        programList[prIndex].codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
+        programList[prIndex].codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
+        programList[prIndex].codewrite("</head>")
+        programList[prIndex].codewrite("<body>")
         code()
-        pr.codewrite("</body>")
-        pr.codewrite("</html>")
+        programList[prIndex].codewrite("</body>")
+        programList[prIndex].codewrite("</html>")
     static member head (title,cssfile) = fun code ->
-        pr.codewrite("<!doctype html>")
-        pr.codewrite("<html lang=\"ja\">")
-        pr.codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
-        pr.codewrite("<head>")
-        pr.codewrite("    <title>"+title+"</title>")
-        pr.codewrite("    <meta charset=\"utf-8\">")
-        pr.codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
-        pr.codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
-        pr.codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
-        pr.codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
-        pr.codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
-        pr.codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
-        pr.codewrite("</head>")
-        pr.codewrite("<body>")
+        programList[prIndex].codewrite("<!doctype html>")
+        programList[prIndex].codewrite("<html lang=\"ja\">")
+        programList[prIndex].codewrite("<meta http-equiv=\"content-language\" content=\"ja\">")
+        programList[prIndex].codewrite("<head>")
+        programList[prIndex].codewrite("    <title>"+title+"</title>")
+        programList[prIndex].codewrite("    <meta charset=\"utf-8\">")
+        programList[prIndex].codewrite("    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>")
+        programList[prIndex].codewrite("    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>")
+        programList[prIndex].codewrite("    <link rel='preconnect' href='https://fonts.googleapis.com'>")
+        programList[prIndex].codewrite("    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>")
+        programList[prIndex].codewrite("    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>")
+        programList[prIndex].codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
+        programList[prIndex].codewrite("</head>")
+        programList[prIndex].codewrite("<body>")
         code()
-        pr.codewrite("</body>")
-        pr.codewrite("</html>")
+        programList[prIndex].codewrite("</body>")
+        programList[prIndex].codewrite("</html>")
         
     /// 内部要素のないタグ
     static member taga (t:string,s:Style) =
-        pr.codewrite("<"+t+" "+s.code+" />")
+        programList[prIndex].codewrite("<"+t+" "+s.code+" />")
     /// 内部要素のないタグ
     static member taga (t:string,atr:list<Atr>) =
-        pr.codewrite("<"+t+" "+Atr.list atr+" />")
+        programList[prIndex].codewrite("<"+t+" "+Atr.list atr+" />")
     /// 内部要素のないタグ
     static member taga (t:string,lst:list<string*exprString>) =
-        pr.codewrite("<"+t+" ")
+        programList[prIndex].codewrite("<"+t+" ")
         for (a,s) in lst do
-            pr.codewrite(a + "=" + s.toString(" . ",StrQuotation) + " ")
-        pr.codewrite " />"
+            programList[prIndex].codewrite(a + "=" + s.toString(" . ",StrQuotation) + " ")
+        programList[prIndex].codewrite " />"
     /// 内部要素のないタグ
     static member taga (t:string,lst:list<string*string>) =
-        pr.codewrite("<"+t+" ")
+        programList[prIndex].codewrite("<"+t+" ")
         for (a,s) in lst do
-            pr.codewrite(a + "=" + s + " ")
-        pr.codewrite " />"
+            programList[prIndex].codewrite(a + "=" + s + " ")
+        programList[prIndex].codewrite " />"
     /// 内部要素のないタグ
     static member taga (t:string) =
-        pr.codewrite("<"+t+" ")
-        pr.codewrite " />"
+        programList[prIndex].codewrite("<"+t+" ")
+        programList[prIndex].codewrite " />"
     /// 内部要素のないタグ
     static member taga (t:string,a:string) =
-        pr.codewrite("<"+t+" "+a+" />")
+        programList[prIndex].codewrite("<"+t+" "+a+" />")
     /// 内部要素のあるタグ
     static member tagb (t:string,atr:Style) = fun code ->
         let a = atr.code
         if a = "" then
-            pr.codewrite("<"+t+">")
+            programList[prIndex].codewrite("<"+t+">")
         else
-            pr.codewrite("<"+t+" "+a+" >")
+            programList[prIndex].codewrite("<"+t+" "+a+" >")
         code()
-        pr.codewrite ("</"+t+">")
+        programList[prIndex].codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,atr:list<Atr>) = fun code ->
         let a = Atr.list atr
         if a = "" then
-            pr.codewrite("<"+t+">")
+            programList[prIndex].codewrite("<"+t+">")
         else
-            pr.codewrite("<"+t+" "+a+" >")
+            programList[prIndex].codewrite("<"+t+" "+a+" >")
         code()
-        pr.codewrite ("</"+t+">")
+        programList[prIndex].codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,lst:list<string*num0>) = fun code ->
         if lst.Length=0 then
-            pr.codewrite("<"+t+">")
+            programList[prIndex].codewrite("<"+t+">")
         else
-            pr.codewrite("<"+t+" ")
+            programList[prIndex].codewrite("<"+t+" ")
             for (a,s) in lst do
-                pr.codewrite(a + "=" + s.code + " ")
-            pr.codewrite ">"
+                programList[prIndex].codewrite(a + "=" + s.code + " ")
+            programList[prIndex].codewrite ">"
         code()
-        pr.codewrite ("</"+t+">")
+        programList[prIndex].codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,lst:list<string*string>) = fun code ->
         if lst.Length=0 then
-            pr.codewrite("<"+t+">")
+            programList[prIndex].codewrite("<"+t+">")
         else
-            pr.codewrite("<"+t+" ")
+            programList[prIndex].codewrite("<"+t+" ")
             for (a,s) in lst do
-                pr.codewrite(a + "=" + s + " ")
-            pr.codewrite(">")
+                programList[prIndex].codewrite(a + "=" + s + " ")
+            programList[prIndex].codewrite(">")
         code()
-        pr.codewrite ("</"+t+">")
+        programList[prIndex].codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string,a:string) = fun code ->
         if a="" then
-            pr.codewrite("<"+t+">")
+            programList[prIndex].codewrite("<"+t+">")
         else
-            pr.codewrite("<"+t+" "+a+">")
+            programList[prIndex].codewrite("<"+t+" "+a+">")
         code()
-        pr.codewrite ("</"+t+">")
+        programList[prIndex].codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string) = fun code ->
-        pr.codewrite("<"+t+">")
+        programList[prIndex].codewrite("<"+t+">")
         code()
-        pr.codewrite ("</"+t+">")
+        programList[prIndex].codewrite ("</"+t+">")
     static member h1 (t:num0) = fun code ->
-        html.tagb "h1" <| fun () -> php.echo (t.Expr.eval pr)
+        html.tagb "h1" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
         code()
     static member h1 (t:string) = fun code ->
-        html.tagb "h1" <| fun () -> pr.codewrite t
+        html.tagb "h1" <| fun () -> programList[prIndex].codewrite t
         code()
     static member h1 (t:num0,atr:Style) = fun code ->
-        html.tagb ("h1",atr) <| fun () -> php.echo (t.Expr.eval pr)
+        html.tagb ("h1",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
         code()
     static member h1 (t:string,atr:Style) = fun code ->
-        html.tagb ("h1",atr) <| fun () -> pr.codewrite t
+        html.tagb ("h1",atr) <| fun () -> programList[prIndex].codewrite t
         code()
         
     static member h2 (t:num0) = fun code ->
-        html.tagb "h2" <| fun () -> php.echo (t.Expr.eval pr)
+        html.tagb "h2" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
         code()
     static member h2 (t:string) = fun code ->
-        html.tagb "h2" <| fun () -> pr.codewrite t
+        html.tagb "h2" <| fun () -> programList[prIndex].codewrite t
         code()
     static member h2 (t:num0,atr:Style) = fun code ->
-        html.tagb ("h2",atr) <| fun () -> php.echo (t.Expr.eval pr)
+        html.tagb ("h2",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
         code()
     static member h2 (t:string,atr:Style) = fun code ->
-        html.tagb ("h2",atr) <| fun () -> pr.codewrite t
+        html.tagb ("h2",atr) <| fun () -> programList[prIndex].codewrite t
         code()
         
     static member h3 (t:num0) = fun code ->
-        html.tagb "h3" <| fun () -> php.echo (t.Expr.eval pr)
+        html.tagb "h3" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
         code()
     static member h3 (t:string) = fun code ->
-        html.tagb "h3" <| fun () -> pr.codewrite(t)
+        html.tagb "h3" <| fun () -> programList[prIndex].codewrite(t)
         code()
     static member h3 (t:num0,atr:Style) = fun code ->
-        html.tagb ("h3",atr) <| fun () -> php.echo (t.Expr.eval pr)
+        html.tagb ("h3",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
         code()
     static member h3 (t:string,atr:Style) = fun code ->
-        html.tagb ("h3",atr) <| fun () -> pr.codewrite(t)
+        html.tagb ("h3",atr) <| fun () -> programList[prIndex].codewrite(t)
         code()
 
     static member form (action:string) = fun code -> html.tagb ("form",["method","\"post\""; "action","\""+action+"\"";]) code
     static member form_fileUpload (action:string) = fun code -> html.tagb ("form",["method","\"post\""; "enctype","\"multipart/form-data\""; "action","\""+action+"\"";]) code
-    static member submit(name:string,value:num0) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value",(value.Expr.eval pr)])
+    static member submit(name:string,value:num0) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value",(value.Expr.eval (programList[prIndex]))])
     static member submit(name:num0,value:string) = html.taga("input",["type",Str "submit"; "name", "\\\""++name++"\\\""; "value",Str value])
     static member submit(url:string,name:num0,value:string) = html.taga("input",["type",Str "submit"; "name", "\\\""++name++"\\\""; "value",Str value; "formaction",Str url])
     static member submit(name:string,value:string) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value","\""+value+"\""])
@@ -234,8 +234,8 @@ type html =
     static member th = fun code -> html.tagb "th" code
     static member td_ = fun code -> html.tagb "td" code
     static member td (a:list<string*string>) = fun code -> html.tagb ("td",a) code
-    static member strong(t:string) = html.tagb "strong" <| fun () -> pr.codewrite(t)
-    // static member image (s:Style) = fun filename -> pr.codewrite("<img src=\""+filename+"\">")
+    static member strong(t:string) = html.tagb "strong" <| fun () -> programList[prIndex].codewrite(t)
+    // static member image (s:Style) = fun filename -> programList[prIndex].codewrite("<img src=\""+filename+"\">")
     static member enumerate_ code = html.tagb "ol" code
     static member itemize_ code = html.tagb "ul" code
     static member itemize (a:list<string*string>) = fun code -> html.tagb ("ul",a) code
@@ -245,8 +245,8 @@ type html =
     static member item (a:list<string*string>) = fun code -> html.tagb ("li",a) code
     static member para_ code = html.tagb "p" code
     static member para (a:list<string*string>) = html.tagb ("p",a)
-    static member para (t:string) = html.tagb "p" <| fun () -> pr.codewrite(t)
-    static member span(cls:string,t) = html.tagb ("span",["class","\""+cls+"\""]) <| fun () -> pr.codewrite(t)
+    static member para (t:string) = html.tagb "p" <| fun () -> programList[prIndex].codewrite(t)
+    static member span(cls:string,t) = html.tagb ("span",["class","\""+cls+"\""]) <| fun () -> programList[prIndex].codewrite(t)
     static member span(cls:string) = fun code -> html.tagb ("span",["class","\""+cls+"\""]) code
     static member link(url:num0) = fun code -> html.tagb ("a",["href","\""+url.code+"\"";]) code
     static member link(url:string) = fun code -> html.tagb ("a",["href","\""+url+"\"";]) code
@@ -258,14 +258,14 @@ type html =
     static member splitTag t code = 
         let b (lst:list<string*num0>) =
             if lst.Length=0 then
-                pr.codewrite ("<"+t+">")
+                programList[prIndex].codewrite ("<"+t+">")
             else
-                pr.codewrite("<"+t+" ")
+                programList[prIndex].codewrite("<"+t+" ")
                 for (a,s) in lst do
-                    pr.codewrite(a + "=" + s.code + " ")
-                pr.codewrite ">"
+                    programList[prIndex].codewrite(a + "=" + s.code + " ")
+                programList[prIndex].codewrite ">"
         code b 
-        pr.codewrite ("</"+t+">")
+        programList[prIndex].codewrite ("</"+t+">")
     static member Select = html.splitTag "select" 
     static member Tr = html.splitTag "tr" 
     static member option(value:string) = fun code -> html.tagb ("option",["value","\""+value+"\"";]) code
@@ -291,40 +291,40 @@ type html =
         html.taga("input",["type",Str "checkbox"; "name",Nvr name.Expr; "value",Str "1"; "checked",Str "checked"; "disabled",Str "disabled"])
     static member bold code = html.tagb "b" code
     static member align code =
-        pr.codewrite "\\[\\begin{align}"
+        programList[prIndex].codewrite "\\[\\begin{align}"
         code()
-        pr.codewrite "\\end{align}\\]"
+        programList[prIndex].codewrite "\\end{align}\\]"
     static member eq q = "\\("+q+"\\)"
 
     static member latexTag (tagname:string) code =
-        pr.codewrite("\\begin{"+tagname+"}")
+        programList[prIndex].codewrite("\\begin{"+tagname+"}")
         code()
-        pr.codewrite("\\end{"+tagname+"}")
+        programList[prIndex].codewrite("\\end{"+tagname+"}")
     static member listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
         html.tagb("div",["class","\"fig\""]) <| fun () ->
             html.tagb ("span",["class","\"caption\""]) <| fun () ->
-                pr.codewrite(caption)
+                programList[prIndex].codewrite(caption)
             html.tagb("table",["class","\"tab\""]) <| fun () ->
                 for j in 0..tlist.Length-1 do
                     html.tagb ("tr",["class",match borderV[j] with |TB -> "\"trtb\"" |T -> "\"trt\"" |B -> "\"trb\"" |N -> "\"trn\""]) <| fun () ->
                         for i in 0..tlist[j].Length-1 do
                             html.tagb ("td",["class",match borderH[i] with |L -> "\"tdl\"" |BorderH.C -> "\"tdc\"" |BorderH.R -> "\"tdr\"" |J -> "\"tdj\"" |Ll -> "\"tdlL\"" |Cl -> "\"tdcL\"" |Rl -> "\"tdrL\"" |Jl -> "\"tdjL\"" |Lr -> "\"tdlR\"" |Cr -> "\"tdcR\"" |Rr -> "\"tdrR\"" |Jr -> "\"tdjR\"" |Llr -> "\"tdlLR\"" |Clr -> "\"tdcLR\"" |Rlr -> "\"tdrLR\"" |Jlr -> "\"tdjLR\""]) <| fun () ->
-                                pr.codewrite <| tlist[j][i]
+                                programList[prIndex].codewrite <| tlist[j][i]
                                 
     static member footer code = html.tagb ("footer", ["class","footer"]) <| fun () -> code()
     static member footer (s:Style) = fun code -> html.tagb ("footer", s) <| fun () -> code()
-    static member br() = pr.codewrite "<br>"
-    static member hr() = pr.codewrite "<hr>"
+    static member br() = programList[prIndex].codewrite "<br>"
+    static member hr() = programList[prIndex].codewrite "<hr>"
     
     // /// タグの生成
-    // static member pr.codewriteTag tagname attr code =
-    //     pr.codewrite("<"+tagname+(if attr="" then "" else " "+attr)+">")
+    // static member programList[prIndex].codewriteTag tagname attr code =
+    //     programList[prIndex].codewrite("<"+tagname+(if attr="" then "" else " "+attr)+">")
     //     code()
-    //     pr.codewrite("</"+tagname+">")
+    //     programList[prIndex].codewrite("</"+tagname+">")
         
     // /// タグの生成
-    // static member pr.codewriteTag_ tagname attr =
-    //     pr.codewrite("<"+tagname+(if attr="" then "" else " "+attr)+"/>")
+    // static member programList[prIndex].codewriteTag_ tagname attr =
+    //     programList[prIndex].codewrite("<"+tagname+(if attr="" then "" else " "+attr)+"/>")
         
     static member setjs filename =
         html.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
@@ -338,14 +338,14 @@ type html =
                         {Key = "font-weight"; Value = "bold";}
                         {Key = "white-space"; Value = "nowrap";}]
         html.tagb ("div",s1+s) <| fun () ->
-            pr.codewrite text
+            programList[prIndex].codewrite text
             
     static member Mathtext (s:Style) (p:position) (text:num0) =
         let s1 = Style [{Key = "margin-left"; Value=p.x.ToString()+"px"}
                         {Key = "margin-top"; Value=p.y.ToString()+"px"}
                         {Key = "white-space"; Value="nowrap"}]
         html.tagb ("div", s1+s) <| fun () ->
-            pr.codewrite ("\\(" + text.Expr.evalL pr + "\\)")
+            programList[prIndex].codewrite ("\\(" + text.Expr.evalL programList[prIndex] + "\\)")
             
     static member image (s:Style,p:position) = fun (filename:string) ->
         let f = Path.GetFileName filename
@@ -391,7 +391,7 @@ type html =
         html.taga (tagname, s)
         
     static member eq(text:num0) =
-        pr.codewrite ("\\("+text.Expr.evalL pr + "\\)")
+        programList[prIndex].codewrite ("\\("+text.Expr.evalL programList[prIndex] + "\\)")
         
     /// キャラクター付き解説ページ
     static member page (c:list<Character*string>) (audio:Audio) code2 =
@@ -478,19 +478,19 @@ type html =
             match audio.Speaker with
             |Character.Tale -> 
                 html.tag "div" <| "id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #d11aff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\""
-                    <| fun () -> pr.codewrite audio.Subtitle.Subtitle
+                    <| fun () -> programList[prIndex].codewrite audio.Subtitle.Subtitle
             |Character.Dang -> 
                 html.tag "div" <| "id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #455eff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\""
-                    <| fun () -> pr.codewrite audio.Subtitle.Subtitle
+                    <| fun () -> programList[prIndex].codewrite audio.Subtitle.Subtitle
             |Character.Armi -> 
                 html.tag "div" <| "id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #ff8800; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\""
-                    <| fun () -> pr.codewrite audio.Subtitle.Subtitle
+                    <| fun () -> programList[prIndex].codewrite audio.Subtitle.Subtitle
                     
     static member fig (p:position) code =
         let f = figure()
         code(f,p)
         let sx,sy,mx,my = f.setWriteMode()
-        pr.codewrite (
+        programList[prIndex].codewrite (
             "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
             "width=\""+sx.ToString()+"px\" "+
             "heigth=\""+sy.ToString()+"px\" "+
@@ -500,12 +500,12 @@ type html =
             "position: absolute;"+
             "\">")
         code(f,p)
-        pr.codewrite "</svg>"
+        programList[prIndex].codewrite "</svg>"
         
     static member animation (s:ViewBoxStyle) (p:position) code =
         figcounter <- figcounter + 1
         let f = FigureAnimation figcounter
-        pr.codewrite (
+        programList[prIndex].codewrite (
             "<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" "+
             "width=\""+s.sX.ToString()+"px\" "+
             "heigth=\""+s.sY.ToString()+"px\" "+
@@ -516,7 +516,7 @@ type html =
             "background-color: "+s.backgroundColor+";"+
             "\">")
         code(f,p)
-        pr.codewrite "</svg>"
+        programList[prIndex].codewrite "</svg>"
         
     static member slide (p:position)  code =
             anicounter <- anicounter + 1
@@ -525,172 +525,172 @@ type html =
                 
     static member prevButton() =
             html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
-                pr.codewrite "前へ"
+                programList[prIndex].codewrite "前へ"
     static member nextButton() =
             html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
-                pr.codewrite "次へ"
+                programList[prIndex].codewrite "次へ"
                 
     static member switchCharacter() =
         html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" checked")
         html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
-            pr.codewrite "キャラクター"
+            programList[prIndex].codewrite "キャラクター"
     static member switchSubtitle() =
         html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" checked")
         html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
-            pr.codewrite "字幕"
+            programList[prIndex].codewrite "字幕"
     static member switchAudio() =
         html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" checked")
         html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
-            pr.codewrite "音声"
+            programList[prIndex].codewrite "音声"
     static member audioPlayer() =
             html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
             
 and SlideAnimation =
     static member writeAudioList() =
         switchDraw <| fun () ->
-            pr.codewrite "const audioList = ["
+            programList[prIndex].codewrite "const audioList = ["
             for i in 0..audioList.Length-1 do
-                pr.codewrite ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
-            pr.codewrite "];"
+                programList[prIndex].codewrite ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
+            programList[prIndex].codewrite "];"
     static member jsSetCharacter() =
         switchDraw <| fun () ->
-            pr.codewrite "let pagecount = 1;"
-            pr.codewrite"function setCharacter()"
-            pr.codewrite"{"
-            pr.codewrite"        const swc = document.getElementById(\"switchCharacter\");"
-            pr.codewrite"        const c = document.getElementById(\"c\"+pagecount);"
-            pr.codewrite"        if(swc.checked)"
-            pr.codewrite"        {"
-            pr.codewrite"            c.style.visibility = \"visible\";"
-            pr.codewrite"        }"
-            pr.codewrite"        else"
-            pr.codewrite"        {"
-            pr.codewrite"            c.style.visibility = \"hidden\";"
-            pr.codewrite"        }"
-            pr.codewrite"}"
+            programList[prIndex].codewrite "let pagecount = 1;"
+            programList[prIndex].codewrite"function setCharacter()"
+            programList[prIndex].codewrite"{"
+            programList[prIndex].codewrite"        const swc = document.getElementById(\"switchCharacter\");"
+            programList[prIndex].codewrite"        const c = document.getElementById(\"c\"+pagecount);"
+            programList[prIndex].codewrite"        if(swc.checked)"
+            programList[prIndex].codewrite"        {"
+            programList[prIndex].codewrite"            c.style.visibility = \"visible\";"
+            programList[prIndex].codewrite"        }"
+            programList[prIndex].codewrite"        else"
+            programList[prIndex].codewrite"        {"
+            programList[prIndex].codewrite"            c.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite"        }"
+            programList[prIndex].codewrite"}"
     static member jsSetSubtitle() =
         switchDraw <| fun () ->
-            pr.codewrite "function setSubtitle()"
-            pr.codewrite "{"
-            pr.codewrite "        const sws = document.getElementById(\"switchSubtitle\");"
-            pr.codewrite "        const b2 = document.getElementById(\"sb\"+pagecount);"
-            pr.codewrite "        const s2 = document.getElementById(\"s\"+pagecount);"
-            pr.codewrite "        if(sws.checked)"
-            pr.codewrite "        {"
-            pr.codewrite "            b2.style.visibility = \"visible\";"
-            pr.codewrite "            s2.style.visibility = \"visible\";"
-            pr.codewrite "        }"
-            pr.codewrite "        else"
-            pr.codewrite "        {"
-            pr.codewrite "            b2.style.visibility = \"hidden\";"
-            pr.codewrite "            s2.style.visibility = \"hidden\";"
-            pr.codewrite "        }"
-            pr.codewrite "}"
+            programList[prIndex].codewrite "function setSubtitle()"
+            programList[prIndex].codewrite "{"
+            programList[prIndex].codewrite "        const sws = document.getElementById(\"switchSubtitle\");"
+            programList[prIndex].codewrite "        const b2 = document.getElementById(\"sb\"+pagecount);"
+            programList[prIndex].codewrite "        const s2 = document.getElementById(\"s\"+pagecount);"
+            programList[prIndex].codewrite "        if(sws.checked)"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            b2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "            s2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        else"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            b2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "            s2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "}"
     static member jsDrawNext() =
         switchDraw <| fun () ->
-            pr.codewrite "function drawNext()"
-            pr.codewrite "{"
-            pr.codewrite("    if(pagecount<"+anicounter.ToString()+")")
-            pr.codewrite "    {"
-            pr.codewrite "        const swc = document.getElementById(\"switchCharacter\");"
-            pr.codewrite "        const sws = document.getElementById(\"switchSubtitle\");"
-            pr.codewrite "        const swa = document.getElementById(\"switchAudio\");"
-            pr.codewrite "        "
-            pr.codewrite "        const p1 = document.getElementById(\"p\"+pagecount);"
-            pr.codewrite "        p1.style.visibility = \"hidden\";"
-            pr.codewrite "        const b1 = document.getElementById(\"sb\"+pagecount);"
-            pr.codewrite "        b1.style.visibility = \"hidden\";"
-            pr.codewrite "        const s1 = document.getElementById(\"s\"+pagecount);"
-            pr.codewrite "        s1.style.visibility = \"hidden\";"
-            pr.codewrite "        const c1 = document.getElementById(\"c\"+pagecount);"
-            pr.codewrite "        c1.style.visibility = \"hidden\";"
-            pr.codewrite "        pagecount++;"
-            pr.codewrite "        const p2 = document.getElementById(\"p\"+pagecount);"
-            pr.codewrite "        p2.style.visibility = \"visible\";"
-            pr.codewrite "        if(sws.checked)"
-            pr.codewrite "        {"
-            pr.codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            pr.codewrite "            b2.style.visibility = \"visible\";"
-            pr.codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
-            pr.codewrite "            s2.style.visibility = \"visible\";"
-            pr.codewrite "        }"
-            pr.codewrite "        else"
-            pr.codewrite "        {"
-            pr.codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            pr.codewrite "            b2.style.visibility = \"hidden\";"
-            pr.codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
-            pr.codewrite "            s2.style.visibility = \"hidden\";"
-            pr.codewrite "        }"
-            pr.codewrite "        if(swc.checked)"
-            pr.codewrite "        {"
-            pr.codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
-            pr.codewrite "            c2.style.visibility = \"visible\";"
-            pr.codewrite "        }"
-            pr.codewrite "        else"
-            pr.codewrite "        {"
-            pr.codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
-            pr.codewrite "            c2.style.visibility = \"hidden\";"
-            pr.codewrite "        }"
-            pr.codewrite "        const audioPlayer = document.getElementById(\"audioPlayer\");"
-            pr.codewrite "        if(audioList[pagecount-1] != \"\" && swa.checked)"
-            pr.codewrite "        {"
-            pr.codewrite "            audioPlayer.src = audioList[pagecount-1];"
-            pr.codewrite "            audioPlayer.play();"
-            pr.codewrite "        }"
-            pr.codewrite "    }"
-            pr.codewrite "}"
+            programList[prIndex].codewrite "function drawNext()"
+            programList[prIndex].codewrite "{"
+            programList[prIndex].codewrite("    if(pagecount<"+anicounter.ToString()+")")
+            programList[prIndex].codewrite "    {"
+            programList[prIndex].codewrite "        const swc = document.getElementById(\"switchCharacter\");"
+            programList[prIndex].codewrite "        const sws = document.getElementById(\"switchSubtitle\");"
+            programList[prIndex].codewrite "        const swa = document.getElementById(\"switchAudio\");"
+            programList[prIndex].codewrite "        "
+            programList[prIndex].codewrite "        const p1 = document.getElementById(\"p\"+pagecount);"
+            programList[prIndex].codewrite "        p1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        const b1 = document.getElementById(\"sb\"+pagecount);"
+            programList[prIndex].codewrite "        b1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        const s1 = document.getElementById(\"s\"+pagecount);"
+            programList[prIndex].codewrite "        s1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        const c1 = document.getElementById(\"c\"+pagecount);"
+            programList[prIndex].codewrite "        c1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        pagecount++;"
+            programList[prIndex].codewrite "        const p2 = document.getElementById(\"p\"+pagecount);"
+            programList[prIndex].codewrite "        p2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "        if(sws.checked)"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            programList[prIndex].codewrite "            b2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
+            programList[prIndex].codewrite "            s2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        else"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            programList[prIndex].codewrite "            b2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
+            programList[prIndex].codewrite "            s2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        if(swc.checked)"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
+            programList[prIndex].codewrite "            c2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        else"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
+            programList[prIndex].codewrite "            c2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        const audioPlayer = document.getElementById(\"audioPlayer\");"
+            programList[prIndex].codewrite "        if(audioList[pagecount-1] != \"\" && swa.checked)"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            audioPlayer.src = audioList[pagecount-1];"
+            programList[prIndex].codewrite "            audioPlayer.play();"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "    }"
+            programList[prIndex].codewrite "}"
     static member jsDrawPrev() =
         switchDraw <| fun () ->
-            pr.codewrite "function drawPrev()"
-            pr.codewrite "{"
-            pr.codewrite "    if(pagecount>1)"
-            pr.codewrite "    {"
-            pr.codewrite "        const swc = document.getElementById(\"switchCharacter\");"
-            pr.codewrite "        const sws = document.getElementById(\"switchSubtitle\");"
-            pr.codewrite "        const swa = document.getElementById(\"switchAudio\");"
-            pr.codewrite "        const p1 = document.getElementById(\"p\"+pagecount);"
-            pr.codewrite "        p1.style.visibility = \"hidden\";"
-            pr.codewrite "        const b1 = document.getElementById(\"sb\"+pagecount);"
-            pr.codewrite "        b1.style.visibility = \"hidden\";"
-            pr.codewrite "        const s1 = document.getElementById(\"s\"+pagecount);"
-            pr.codewrite "        s1.style.visibility = \"hidden\";"
-            pr.codewrite "        const c1 = document.getElementById(\"c\"+pagecount);"
-            pr.codewrite "        c1.style.visibility = \"hidden\";"
-            pr.codewrite "        pagecount--;"
-            pr.codewrite "        const p2 = document.getElementById(\"p\"+pagecount);"
-            pr.codewrite "        p2.style.visibility = \"visible\";"
-            pr.codewrite "        if(sws.checked)"
-            pr.codewrite "        {"
-            pr.codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            pr.codewrite "            b2.style.visibility = \"visible\";"
-            pr.codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
-            pr.codewrite "            s2.style.visibility = \"visible\";"
-            pr.codewrite "        }"
-            pr.codewrite "        else"
-            pr.codewrite "        {"
-            pr.codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            pr.codewrite "            b2.style.visibility = \"hidden\";"
-            pr.codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
-            pr.codewrite "            s2.style.visibility = \"hidden\";"
-            pr.codewrite "        }"
-            pr.codewrite "        if(swc.checked)"
-            pr.codewrite "        {"
-            pr.codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
-            pr.codewrite "            c2.style.visibility = \"visible\";"
-            pr.codewrite "        }"
-            pr.codewrite "        else"
-            pr.codewrite "        {"
-            pr.codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
-            pr.codewrite "            c2.style.visibility = \"hidden\";"
-            pr.codewrite "        }"
-            pr.codewrite "        const audioPlayer = document.getElementById(\"audioPlayer\");"
-            pr.codewrite "        if(audioList[pagecount-1] != \"\" && swa.checked)"
-            pr.codewrite "        {"
-            pr.codewrite "            audioPlayer.src = audioList[pagecount-1];"
-            pr.codewrite "            audioPlayer.play();"
-            pr.codewrite "        }"
-            pr.codewrite "    }"
-            pr.codewrite "}"
+            programList[prIndex].codewrite "function drawPrev()"
+            programList[prIndex].codewrite "{"
+            programList[prIndex].codewrite "    if(pagecount>1)"
+            programList[prIndex].codewrite "    {"
+            programList[prIndex].codewrite "        const swc = document.getElementById(\"switchCharacter\");"
+            programList[prIndex].codewrite "        const sws = document.getElementById(\"switchSubtitle\");"
+            programList[prIndex].codewrite "        const swa = document.getElementById(\"switchAudio\");"
+            programList[prIndex].codewrite "        const p1 = document.getElementById(\"p\"+pagecount);"
+            programList[prIndex].codewrite "        p1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        const b1 = document.getElementById(\"sb\"+pagecount);"
+            programList[prIndex].codewrite "        b1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        const s1 = document.getElementById(\"s\"+pagecount);"
+            programList[prIndex].codewrite "        s1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        const c1 = document.getElementById(\"c\"+pagecount);"
+            programList[prIndex].codewrite "        c1.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        pagecount--;"
+            programList[prIndex].codewrite "        const p2 = document.getElementById(\"p\"+pagecount);"
+            programList[prIndex].codewrite "        p2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "        if(sws.checked)"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            programList[prIndex].codewrite "            b2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
+            programList[prIndex].codewrite "            s2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        else"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            programList[prIndex].codewrite "            b2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "            const s2 = document.getElementById(\"s\"+pagecount);"
+            programList[prIndex].codewrite "            s2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        if(swc.checked)"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
+            programList[prIndex].codewrite "            c2.style.visibility = \"visible\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        else"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            const c2 = document.getElementById(\"c\"+pagecount);"
+            programList[prIndex].codewrite "            c2.style.visibility = \"hidden\";"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "        const audioPlayer = document.getElementById(\"audioPlayer\");"
+            programList[prIndex].codewrite "        if(audioList[pagecount-1] != \"\" && swa.checked)"
+            programList[prIndex].codewrite "        {"
+            programList[prIndex].codewrite "            audioPlayer.src = audioList[pagecount-1];"
+            programList[prIndex].codewrite "            audioPlayer.play();"
+            programList[prIndex].codewrite "        }"
+            programList[prIndex].codewrite "    }"
+            programList[prIndex].codewrite "}"
             
 and canvas() =
     
@@ -701,7 +701,7 @@ and canvas() =
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", s1+s) <| fun () ->
-                pr.codewrite ("\\(" + text.Expr.evalL pr + "\\)")
+                programList[prIndex].codewrite ("\\(" + text.Expr.evalL programList[prIndex] + "\\)")
             
     member _.image (s:Style) (p:position) (filename:string) =
         switchBody <| fun () ->
@@ -725,12 +725,12 @@ and canvas() =
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", s1+s) <| fun () ->
-                pr.codewrite text
+                programList[prIndex].codewrite text
                 
     // member _.text (s:list<Atr>) = fun (p:position) (id:string) (text:string) ->
     //     // html.pr.codewriteTag "div" ("id = \""+id+"\" style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
     //     html.pr.codewriteTag "div" (Atr.list s) <| fun () ->
-    //         pr.codewrite text
+    //         programList[prIndex].codewrite text
             
     member _.blockText (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
         switchBody <| fun () ->
@@ -761,8 +761,8 @@ and canvas() =
                             {Key = "position"; Value = "absolute";}
                             {Key = "overflow-wrap"; Value = "break-word";}]
             html.tagb ("div", s1+s) <| fun () ->
-                text |> List.iter (fun s -> pr.codewrite (s+"<br>"))
-                pr.codewrite("\r\n")
+                text |> List.iter (fun s -> programList[prIndex].codewrite (s+"<br>"))
+                programList[prIndex].codewrite("\r\n")
             {Left = p.x;
              Right = p.x+double width+2.0*double padding;
              Top = p.y;
@@ -798,8 +798,8 @@ and canvas() =
                             {Key = "overflow-wrap"; Value = "break-word";}]
             html.tagb ("div", s1+s)
                 <| fun () ->
-                    text |> List.iter (fun s -> pr.codewrite (s+"<br>"))
-                    pr.codewrite "\r\n"
+                    text |> List.iter (fun s -> programList[prIndex].codewrite (s+"<br>"))
+                    programList[prIndex].codewrite "\r\n"
             {Left = p.x;
              Right = p.x+double width+2.0*double padding;
              Top = p.y;
@@ -807,16 +807,16 @@ and canvas() =
              
     member _.table (lst:list<list<string>>) (p:position) (size:int) =
         switchBody <| fun () ->
-            pr.codewrite ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
+            programList[prIndex].codewrite ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
             for m in 0..lst.Length-1 do
-                pr.codewrite "<tr>"
+                programList[prIndex].codewrite "<tr>"
                 for s in lst[m] do
-                    pr.codewrite "<td>"
-                    pr.codewrite s
-                    pr.codewrite "</td>"
-                pr.codewrite "</tr>"
-            pr.codewrite "</table>"
-            pr.codewrite "</div>"
+                    programList[prIndex].codewrite "<td>"
+                    programList[prIndex].codewrite s
+                    programList[prIndex].codewrite "</td>"
+                programList[prIndex].codewrite "</tr>"
+            programList[prIndex].codewrite "</table>"
+            programList[prIndex].codewrite "</div>"
             
 and figure() =
     let padding = 10.0
@@ -966,27 +966,27 @@ and FigureAnimation(figcounter:int) =
         html.taga ("line", [Atr("id",this.id)]@[s.atr])
         let t = num0(Var(It 4, "t", NaN))
         switchJS <| fun () ->
-            pr.codewrite("var e = document.getElementById(\""+this.id+"\");")
-            pr.codewrite("e.setAttribute(\"x1\", " + (startP.X t).Expr.eval pr + ");")
-            pr.codewrite("e.setAttribute(\"y1\", " + (startP.Y t).Expr.eval pr + ");")
-            pr.codewrite("e.setAttribute(\"x2\", " + (endP.X t).Expr.eval pr + ");")
-            pr.codewrite("e.setAttribute(\"y2\", " + (endP.Y t).Expr.eval pr + ");")
+            programList[prIndex].codewrite("var e = document.getElementById(\""+this.id+"\");")
+            programList[prIndex].codewrite("e.setAttribute(\"x1\", " + (startP.X t).Expr.eval (programList[prIndex]) + ");")
+            programList[prIndex].codewrite("e.setAttribute(\"y1\", " + (startP.Y t).Expr.eval (programList[prIndex]) + ");")
+            programList[prIndex].codewrite("e.setAttribute(\"x2\", " + (endP.X t).Expr.eval (programList[prIndex]) + ");")
+            programList[prIndex].codewrite("e.setAttribute(\"y2\", " + (endP.Y t).Expr.eval (programList[prIndex]) + ");")
     static member jsAnimation codejs =
         switchBody <| fun () ->
-            pr.codewrite "var t = 0;"
-            pr.codewrite "var dt = 1;"
-            pr.codewrite "window.onload=function(){"
-            pr.codewrite "    var timer;"
-            pr.codewrite "    var delay = 33;"
-            pr.codewrite "    var loop = function(){"
-            pr.codewrite "        t = t + dt;"
-            pr.codewrite "        if(t >= 100){t = 0;}"
-            pr.codewrite codejs
-            pr.codewrite "        clearTimeout(timer);"
-            pr.codewrite "        timer=setTimeout(loop,delay);"
-            pr.codewrite "    }"
-            pr.codewrite "    loop();"
-            pr.codewrite "}"
+            programList[prIndex].codewrite "var t = 0;"
+            programList[prIndex].codewrite "var dt = 1;"
+            programList[prIndex].codewrite "window.onload=function(){"
+            programList[prIndex].codewrite "    var timer;"
+            programList[prIndex].codewrite "    var delay = 33;"
+            programList[prIndex].codewrite "    var loop = function(){"
+            programList[prIndex].codewrite "        t = t + dt;"
+            programList[prIndex].codewrite "        if(t >= 100){t = 0;}"
+            programList[prIndex].codewrite codejs
+            programList[prIndex].codewrite "        clearTimeout(timer);"
+            programList[prIndex].codewrite "        timer=setTimeout(loop,delay);"
+            programList[prIndex].codewrite "    }"
+            programList[prIndex].codewrite "    loop();"
+            programList[prIndex].codewrite "}"
             
 [<AutoOpen>]
 module dochtml =
@@ -1028,39 +1028,39 @@ module dochtml =
                 // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
                 let codeDraw = 
                     switchDraw <| fun () ->
-                        pr.close()
-                        File.ReadAllText(dir + "\\" + filename_draw)
+                        programList[prIndex].close()
+                        programList[prIndex].allCodes
                 let codeJS = 
-                    switchDraw <| fun () ->
-                        pr.close()
-                        File.ReadAllText(dir + "\\" + filename_js)
+                    switchJS <| fun () ->
+                        programList[prIndex].close()
+                        programList[prIndex].allCodes
                 let codeBody = 
-                    switchDraw <| fun () ->
-                        pr.close()
-                        File.ReadAllText(dir + "\\" + filename_body)
+                    switchBody <| fun () ->
+                        programList[prIndex].close()
+                        programList[prIndex].allCodes
                 // html書き込みストリーム作成
                 switchMain <| fun () ->
-                    pr.codewrite "<!DOCTYPE html>"
+                    programList[prIndex].codewrite "<!DOCTYPE html>"
                     // html要素
                     html.tagb ("html", "lang=\"ja\"") <| fun () ->
                         // head要素
                         html.tagb ("head", "") <| fun () ->
                             // metaタグ
-                            pr.codewrite "<meta charset=\"UTF-8\">"    
+                            programList[prIndex].codewrite "<meta charset=\"UTF-8\">"    
                             // titleタグ
                             html.tagb ("title", "") <| fun () ->
-                                pr.codewrite filename
+                                programList[prIndex].codewrite filename
                             // MathJax
                             html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
                             // scriptタグ
                             html.tagb ("script", "") <| fun () ->
-                                pr.codewrite codeDraw
+                                programList[prIndex].codewrite codeDraw
                                 if codeJS <> "" then
                                     FigureAnimation.jsAnimation codeJS
                             // webフォント取得
-                            pr.codewrite "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                            pr.codewrite "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                            pr.codewrite "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                            programList[prIndex].codewrite "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                            programList[prIndex].codewrite "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                            programList[prIndex].codewrite "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
                         // body要素
                         let s0 = Style [area.backGroundColor "#aaaaaa"]
                         match pagesizeX,pagesizeY with
@@ -1070,7 +1070,7 @@ module dochtml =
                                 font.weight "500"
                                 font.size 16]
                             html.tagb ("body", [Atr("onload","draw()");s.atr]) <| fun () ->
-                                pr.codewrite codeBody
+                                programList[prIndex].codewrite codeBody
                         |Some x,None ->
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
@@ -1079,7 +1079,7 @@ module dochtml =
                                     margin.right "auto"
                                     size.width (x.ToString()+"px")]
                                 html.tagb ("div", s1) <| fun () ->
-                                    pr.codewrite codeBody
+                                    programList[prIndex].codewrite codeBody
                         |None,Some y->
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
@@ -1088,7 +1088,7 @@ module dochtml =
                                     margin.right "auto"
                                     size.height (y.ToString()+"px")]
                                 html.tagb ("div", s1) <| fun () ->
-                                    pr.codewrite codeBody
+                                    programList[prIndex].codewrite codeBody
                         |Some x,Some y ->
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
@@ -1098,7 +1098,7 @@ module dochtml =
                                     size.width (x.ToString()+"px")
                                     size.height (y.ToString()+"px")]
                                 html.tagb ("div", s1) <| fun () ->
-                                    pr.codewrite codeBody
+                                    programList[prIndex].codewrite codeBody
                                     
     let group (t:string) d code = code d
     

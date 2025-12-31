@@ -21,7 +21,7 @@ namespace Aqualis
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalF c
                 let n2_ = n2.evalF c
-                if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                 c.codewrite("do " + i.evalF c + "=" + n1_ + "," + n2_)
                 c.indentInc()
                 code i
@@ -59,7 +59,7 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
                     code i
@@ -69,7 +69,7 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.codewrite("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
                     code i
@@ -85,7 +85,7 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewrite("goto "+label)
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
                     code(exit,i)
@@ -98,7 +98,7 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewrite("goto "+label)
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.codewrite("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
                     code(exit,i)

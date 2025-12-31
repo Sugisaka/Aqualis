@@ -23,13 +23,13 @@ namespace Aqualis
             
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
         static member branch code =
-            expr.branch pr <| fun q ->
+            expr.branch programList[prIndex] <| fun q ->
             let ib = br q
             code ib
             
         ///<summary>条件分岐式(if式)</summary>
         static member if1 (cond:bool0) code =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX|HTML ->
                 br.branch <| fun b ->
                     b.IF cond <| fun () ->
@@ -45,7 +45,7 @@ namespace Aqualis
                         
         ///<summary>条件分岐式(if...else...式)</summary>
         static member if2 (cond:bool0) code1 code2 =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX|HTML ->
                 br.branch <| fun b ->
                     b.IF cond <| fun () ->

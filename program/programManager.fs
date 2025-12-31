@@ -1,6 +1,6 @@
 namespace Aqualis
     
-    open System
+    open System.IO
     
     type program(outputdir,pjname,lang:Language) =
         
@@ -98,6 +98,7 @@ namespace Aqualis
         member _.indentDec() = cwriter.indent.dec()
         member _.appendOpen() = cwriter.appendOpen()
         member _.close() = cwriter.close()
+        member _.allCodes with get() = File.ReadAllText(outputdir+"\\"+pjname+"_code.bee")
         member _.delete() = cwriter.delete()
         
     [<AutoOpen>]
@@ -114,8 +115,6 @@ namespace Aqualis
         ///<summary>定義された関数のリスト</summary>
         let mutable funlist: string list = []
         ///<summary>現在生成中のプログラミング言語</summary>
-        let mutable language = Numeric
-        
         let funlist_nonoverlap() =
             let rec reduce lst1 lst2 =
                 match lst1 with
@@ -127,11 +126,13 @@ namespace Aqualis
                         reduce y lst2
                 |[] -> lst2
             reduce funlist []
-        let mutable private programList:list<program> = []
+        let mutable programList:list<program> = []
                     
         let mutable prIndex = 0
         
-        let mutable pr = programList[prIndex]
+        // let mutable pr = 
+        //     if prIndex >= programList.Length then printfn "%d %d" prIndex programList.Length
+        //     programList[prIndex]
         
         let makeProgram(programInfo:list<string*string*Language>) code =
             let programList_temp = programList
@@ -143,26 +144,32 @@ namespace Aqualis
             prIndex <- prIndex_temp
             result
             
+        let codewrite(s:string) = programList[prIndex].codewrite s
+        let comment(s:string) = programList[prIndex].comment s
+        let language() = programList[prIndex].language
+        let projectname() = programList[prIndex].projectname
+        let iFormat() = programList[prIndex].numFormat.iFormat
+
     ///<summary>コード生成の設定</summary>
     type AqualisCompiler () =
         
         ///<summary>言語</summary>
-        static member lang = pr.language
+        static member lang() = language()
         
         ///<summary>プロジェクト名</summary>
-        static member projname = pr.projectname
+        static member projname() = projectname()
         
         ///<summary>整数を文字列に変換した時の桁数</summary>
-        static member int_string_format with get() = pr.numFormat.iFormat
+        static member int_string_format with get() = iFormat()
 
         ///<summary>整数をn桁の文字列で変換するように設定</summary>
-        static member set_int_string_format(d) = pr.numFormat.setIFormat(d)
+        static member set_int_string_format(d) = programList[prIndex].numFormat.setIFormat(d)
         
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member double_string_format with get() = pr.numFormat.dFormat
+        static member double_string_format with get() = programList[prIndex].numFormat.dFormat
         
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member set_double_string_format(n,d) = pr.numFormat.setDFormat(n,d)
+        static member set_double_string_format(n,d) = programList[prIndex].numFormat.setDFormat(n,d)
         
         ///<summary>デバッグモードの切り替え</summary>
         static member set_DebugMode (x:Switch) =
@@ -184,24 +191,24 @@ namespace Aqualis
             
         ///<summary>プログラムの実行を強制終了</summary>
         static member abort() =
-            match pr.language with 
-            |Fortran -> pr.codewrite "stop" 
-            |C99     -> pr.codewrite "return 1;" 
-            |LaTeX   -> pr.codewrite "stop"
-            |HTML    -> pr.codewrite "stop"
-            |Python  -> pr.codewrite "sys.exit(1)"
+            match language() with 
+            |Fortran -> codewrite "stop" 
+            |C99     -> codewrite "return 1;" 
+            |LaTeX   -> codewrite "stop"
+            |HTML    -> codewrite "stop"
+            |Python  -> codewrite "sys.exit(1)"
             |JavaScript -> ()
             |PHP -> ()
             |Numeric -> ()
             
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         static member stop() =
-            match pr.language with
-            |Fortran -> pr.codewrite "read *, \n"
-            |C99     -> pr.codewrite "getchar();\n"
-            |LaTeX   -> pr.codewrite "stop\n"
-            |HTML    -> pr.codewrite "stop\n"
-            |Python  -> pr.codewrite "input()"
+            match language() with
+            |Fortran -> codewrite "read *, \n"
+            |C99     -> codewrite "getchar();\n"
+            |LaTeX   -> codewrite "stop\n"
+            |HTML    -> codewrite "stop\n"
+            |Python  -> codewrite "input()"
             |JavaScript -> ()
             |PHP -> ()
             |Numeric -> ()
@@ -211,11 +218,11 @@ namespace Aqualis
         /// </summary>
         /// <param name="t">オプション</param>
         static member incld(s:string) =
-            pr.hlist.add s
+            programList[prIndex].hlist.add s
             
         /// <summary>
         /// コンパイルオプションを追加
         /// </summary>
         /// <param name="t">オプション</param>
         static member option(t:string) =
-            pr.olist.add("-"+t)
+            programList[prIndex].olist.add("-"+t)

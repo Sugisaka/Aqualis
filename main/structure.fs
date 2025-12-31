@@ -80,14 +80,14 @@ namespace Aqualis
             
         ///<summary>構造体定義のコードを作成</summary>
         member this.Def_Structure(writer:codeWriter) =
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran ->
                 for s in this.sort() do
                     writer.codewrite("type "+s.sname+"\n")
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                        writer.codewrite(programList[prIndex].var.declare(typ,vtp,name,"",programList[prIndex].numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewrite("end type "+s.sname+"\n")
             |C99 ->
@@ -97,7 +97,7 @@ namespace Aqualis
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                        writer.codewrite(programList[prIndex].var.declare(typ,vtp,name,"",programList[prIndex].numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewrite("} "+s.sname+";\n")
             |LaTeX ->
@@ -107,7 +107,7 @@ namespace Aqualis
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                        writer.codewrite(programList[prIndex].var.declare(typ,vtp,name,"",programList[prIndex].numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewrite "\\end{itemize}\n"
             |HTML ->
@@ -117,7 +117,7 @@ namespace Aqualis
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                        writer.codewrite(programList[prIndex].var.declare(typ,vtp,name,"",programList[prIndex].numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewrite "</ul>\n"
             |Python ->
@@ -126,7 +126,7 @@ namespace Aqualis
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(pr.var.declare(typ,vtp,name,"",pr.numFormat)+"\n")
+                        writer.codewrite(programList[prIndex].var.declare(typ,vtp,name,"",programList[prIndex].numFormat)+"\n")
                     writer.indent.dec()
             |JavaScript ->
                 ()
@@ -137,7 +137,7 @@ namespace Aqualis
             
         ///<summary>構造体メンバへのアクセス</summary>
         static member mem(vname,name) =
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran    -> vname+"%"+name
             |C99        -> vname+"."+name
             |LaTeX      -> vname+"."+name
@@ -230,42 +230,42 @@ namespace Aqualis
             num3(Zt,Var3(A3(0,0,0),structure.mem(vname,name)))
             
         member this.reg(sname,name:string) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
+            let str_ac = match programList[prIndex].language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match pr.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                pr.var.setVar(Structure(sname),A0,name_,"")
+                let name_ = match programList[prIndex].language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                programList[prIndex].var.setVar(Structure(sname),A0,name_,"")
             
         member this.reg(sname,name:string,size1) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
+            let str_ac = match programList[prIndex].language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match pr.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                pr.var.setVar(Structure(sname),A1(size1),name_,"")
+                let name_ = match programList[prIndex].language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                programList[prIndex].var.setVar(Structure(sname),A1(size1),name_,"")
             
         member this.reg(sname,name:string,size1,size2) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
+            let str_ac = match programList[prIndex].language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match pr.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                pr.var.setVar(Structure(sname),A2(size1,size2),name_,"")
+                let name_ = match programList[prIndex].language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                programList[prIndex].var.setVar(Structure(sname),A2(size1,size2),name_,"")
             
         member this.reg(sname,name:string,size1,size2,size3) =
-            let str_ac = match pr.language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
+            let str_ac = match programList[prIndex].language with |Fortran -> "%" |C99 |LaTeX |HTML |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
                 this.addstructure(sname)
                 //構造体変数の宣言
-                let name_ = match pr.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                pr.var.setVar(Structure(sname),A3(size1,size2,size3),name_,"")
+                let name_ = match programList[prIndex].language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                programList[prIndex].var.setVar(Structure(sname),A3(size1,size2,size3),name_,"")
                 

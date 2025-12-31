@@ -6,7 +6,7 @@ namespace Aqualis
     type print () =
         ///<summary>変数リストを画面表示</summary>
         static member s (lst:exprString list)  = 
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran ->
                 let clist = 
                     [for q in lst do
@@ -14,17 +14,17 @@ namespace Aqualis
                         |Str x ->
                             yield "\""+x+"\""
                         |Nvr x when x.etype = Zt ->
-                            yield (Re x).eval pr
-                            yield (Im x).eval pr
+                            yield (Re x).eval (programList[prIndex])
+                            yield (Im x).eval (programList[prIndex])
                         |Nvr x ->
-                            yield x.eval pr
+                            yield x.eval (programList[prIndex])
                         |_ -> () ]
-                pr.codewrite("print *, " + String.concat "," clist + "\n")
+                programList[prIndex].codewrite("print *, " + String.concat "," clist + "\n")
             |C99 ->
                 let int0string_format_C =
-                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                    "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
                 let double0string_format_C = 
-                    let a,b = pr.numFormat.dFormat
+                    let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
                     lst 
@@ -42,40 +42,40 @@ namespace Aqualis
                     |> List.map (fun q ->
                         match q with
                         |Str _ -> ""
-                        |Nvr x when x.etype = Zt -> (Re x).eval pr + "," + (Im x).eval pr
-                        |Nvr x -> x.eval pr
+                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |Nvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.codewrite("printf(\""+format+"\\n\","+code+");\n")
+                programList[prIndex].codewrite("printf(\""+format+"\\n\","+code+");\n")
             |LaTeX ->
                 let code = 
                     lst
                     |> List.map (fun q ->
                         match q with
                         |Str x -> x
-                        |Nvr x -> x.eval pr
+                        |Nvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.codewrite("print, " + code + "\n")
+                programList[prIndex].codewrite("print, " + code + "\n")
             |HTML ->
                 let code = 
                     lst
                     |> List.map (fun q ->
                         match q with
                         |Str x -> x
-                        |Nvr x -> x.eval pr
+                        |Nvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.codewrite("Print \\("+code+"\\)\n")
-                pr.codewrite "<br/>\n"
+                programList[prIndex].codewrite("Print \\("+code+"\\)\n")
+                programList[prIndex].codewrite "<br/>\n"
             |Python ->
                 let int0string_format_C =
-                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                    "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
                 let double0string_format_C = 
-                    let a,b = pr.numFormat.dFormat
+                    let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
                     lst
@@ -92,17 +92,17 @@ namespace Aqualis
                     lst
                     |> List.map (fun q ->
                         match q with
-                        |Nvr x when x.etype = Zt -> (Re x).eval pr + "," + (Im x).eval pr
-                        |Nvr x -> x.eval pr
+                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |Nvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.codewrite("print(\"" + format + "\" %(" + code + "))\n")
+                programList[prIndex].codewrite("print(\"" + format + "\" %(" + code + "))\n")
             |JavaScript ->
                 let int0string_format_C =
-                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                    "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
                 let double0string_format_C = 
-                    let a,b = pr.numFormat.dFormat
+                    let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
                     lst
@@ -119,17 +119,17 @@ namespace Aqualis
                     lst
                     |> List.map (fun q ->
                         match q with
-                        |Nvr x when x.etype = Zt -> (Re x).eval pr + "," + (Im x).eval pr
-                        |Nvr x -> x.eval pr
+                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |Nvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.codewrite("print(" + code + ");\n")
+                programList[prIndex].codewrite("print(" + code + ");\n")
             |PHP ->
                 let int0string_format_C =
-                    "%"+pr.numFormat.iFormat.ToString()+"d"
+                    "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
                 let double0string_format_C = 
-                    let a,b = pr.numFormat.dFormat
+                    let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
                     lst
@@ -146,12 +146,12 @@ namespace Aqualis
                     lst
                     |> List.map (fun q ->
                         match q with
-                        |Nvr x when x.etype = Zt -> (Re x).eval pr + "," + (Im x).eval pr
-                        |Nvr x -> x.eval pr
+                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |Nvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                pr.codewrite("print(" + code + ");\n")
+                programList[prIndex].codewrite("print(" + code + ");\n")
             |Numeric ->
                 for v in lst do
                     match v with
@@ -161,22 +161,22 @@ namespace Aqualis
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
         static member t (str:string) =
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran ->
-                pr.codewrite("print *, "+"\""+str+"\""+"\n")
+                programList[prIndex].codewrite("print *, "+"\""+str+"\""+"\n")
             |C99 ->
-                pr.codewrite("printf(\""+str+"\""+");\n")
+                programList[prIndex].codewrite("printf(\""+str+"\""+");\n")
             |LaTeX ->
-                pr.codewrite("print, \""+str+"\"\n")
+                programList[prIndex].codewrite("print, \""+str+"\"\n")
             |HTML ->
-                pr.codewrite("Print \\("+str+"\\)\n")
-                pr.codewrite "<br/>\n"
+                programList[prIndex].codewrite("Print \\("+str+"\\)\n")
+                programList[prIndex].codewrite "<br/>\n"
             |Python ->
-                pr.codewrite("print(\""+str+"\")\n")
+                programList[prIndex].codewrite("print(\""+str+"\")\n")
             |JavaScript ->
-                pr.codewrite("print(\""+str+"\")\n")
+                programList[prIndex].codewrite("print(\""+str+"\")\n")
             |PHP ->
-                pr.codewrite("print(\""+str+"\")\n")
+                programList[prIndex].codewrite("print(\""+str+"\")\n")
             |Numeric ->
                 printfn "%s" str
         static member w (ss:exprString) = print.s (match ss with |Str _ |Nvr _ -> [ss] |NSL lst -> lst)

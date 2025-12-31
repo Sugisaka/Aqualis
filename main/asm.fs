@@ -6,18 +6,18 @@ namespace Aqualis
     type asm =
         ///<summary>虚数単位</summary>
         static member uj with get() =
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran   -> 
-                pr.var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
+                programList[prIndex].var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
                 num0(Var(Zt,"uj",NaN))
             |C99 -> 
                 //#defineで定義済み
                 num0(Var(Zt,"uj",NaN))
             |LaTeX ->
-                pr.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 num0(Var(Zt,"\\mathrm{j}",NaN))
             |HTML ->
-                pr.var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 num0(Var(Zt,"\\mathrm{j}",NaN))
             |Python -> 
                 num0(Var(Zt,"1.0j",NaN))
@@ -29,27 +29,27 @@ namespace Aqualis
                 num0(Cpx(0.0,1.0))
         ///<summary>円周率</summary>
         static member pi with get() = 
-            match pr.language with
+            match programList[prIndex].language with
             |Fortran   ->
-                pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
+                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
                 num0(Var(Dt,"pi",NaN))
             |C99 ->
-                pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                 num0(Var(Dt,"pi",NaN))
             |LaTeX   ->
-                pr.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                 num0(Var(Dt,"\\pi",NaN))
             |HTML   ->
-                pr.var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                 num0(Var(Dt,"\\pi",NaN))
             |Python ->
-                pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                 num0(Var(Dt,"pi",NaN))
             |JavaScript ->
-                pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                 num0(Var(Dt,"pi",NaN))
             |PHP ->
-                pr.var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                 num0(Var(Dt,"pi",NaN))
             |Numeric -> 
                 num0(Dbl Math.PI)
@@ -113,7 +113,7 @@ namespace Aqualis
         static member zLet (x:int) = asm.zLet (I x)
         static member zLet (x:double) = asm.zLet (D x)
         static member zLet (x:double*double) = asm.zLet (Z x)
-        static member diff (f:num0) (x:num0) = num0(expr.diff f.Expr x.Expr pr)
+        static member diff (f:num0) (x:num0) = num0(expr.diff f.Expr x.Expr programList[prIndex])
         
     [<AutoOpen>]
     module num0_op =

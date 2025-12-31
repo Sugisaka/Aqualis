@@ -11,11 +11,11 @@ namespace Aqualis
     type base1 (typ:Etype,x:Expr1) =
         ///<summary>変数を作成しリストに追加</summary>
         new (typ,size,name,para) = 
-            pr.var.setVar(typ,size,name,para)
+            programList[prIndex].var.setVar(typ,size,name,para)
             base1(typ,Var1(size,name))
         ///<summary>変数を作成しリストに追加</summary>
         new(sname,size,name) =
-            pr.var.setVar(Structure sname,size,name,"")
+            programList[prIndex].var.setVar(Structure sname,size,name,"")
             base1(Structure sname,Var1(size,name))
         member _.Expr with get() = x
         member _.code with get() =
@@ -27,7 +27,7 @@ namespace Aqualis
           with get() =
             match x with
             |Var1(_,name) -> 
-                match pr.language with 
+                match programList[prIndex].language with 
                 |Fortran    -> num0(Var(It 4,name+"_size(1)",NaN))
                 |C99        -> num0(Var(It 4,name+"_size[0]",NaN))
                 |LaTeX      -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
@@ -43,15 +43,15 @@ namespace Aqualis
                 match x with
                 |Var1(_,name) ->
                     error.inc()
-                    pr.comment("***debug array1 access check: "+error.ID+"*****************************")
+                    programList[prIndex].comment("***debug array1 access check: "+error.ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () -> 
                             print.t <| "ERROR" + error.ID + " array " + name + " is not allocated"
                         b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
                             print.w <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
-                    pr.comment "****************************************************"
+                    programList[prIndex].comment "****************************************************"
                 |_ -> ()
-            match x,pr.language with
+            match x,language() with
             |Var1(_,name),Fortran -> num0(Idx1(typ,name,(i+1).Expr))
             |Var1(_,name),_       -> num0(Idx1(typ,name,i.Expr))
             |Arx1(_,f),_ -> f i
@@ -67,71 +67,71 @@ namespace Aqualis
                 |Var1(size1,name) ->
                     if debug.debugMode then
                         error.inc()
-                        pr.comment("***debug array1 allocate check: "+error.ID+"*****************************")
+                        programList[prIndex].comment("***debug array1 allocate check: "+error.ID+"*****************************")
                         br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
                                 print.t ("ERROR"+error.ID+" array "+name+" is already allocated")
-                        pr.comment "****************************************************"
-                    match pr.language with
+                        programList[prIndex].comment "****************************************************"
+                    match programList[prIndex].language with
                     |Fortran ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            pr.codewrite("allocate("+name+"(1:"+this.size1.Expr.eval pr+")"+")"+"\n")
+                            programList[prIndex].codewrite("allocate("+name+"(1:"+this.size1.Expr.eval (programList[prIndex])+")"+")"+"\n")
                         |_ -> 
-                            pr.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |C99 ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            pr.codewrite(name+" = "+"("+typ.tostring pr.language+" *)"+"malloc("+"sizeof("+typ.tostring pr.language+")*"+this.size1.Expr.eval pr+");\n")
+                            programList[prIndex].codewrite(name+" = "+"("+typ.tostring programList[prIndex].language+" *)"+"malloc("+"sizeof("+typ.tostring programList[prIndex].language+")*"+this.size1.Expr.eval (programList[prIndex])+");\n")
                         |_ -> 
-                            pr.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |LaTeX ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            pr.codewrite("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval pr+"}$\\\\\n")
+                            programList[prIndex].codewrite("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |A1 0,Dt   ->
-                            pr.codewrite("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval pr+"}$\\\\\n")
+                            programList[prIndex].codewrite("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |A1 0,Zt   ->
-                            pr.codewrite("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval pr+"}$\\\\\n")
+                            programList[prIndex].codewrite("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |_ -> 
-                            pr.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |HTML ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            pr.codewrite("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval pr+"}\\)<br>\n")
+                            programList[prIndex].codewrite("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A1 0,Dt   ->
-                            pr.codewrite("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval pr+"}\\)<br>\n")
+                            programList[prIndex].codewrite("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A1 0,Zt   ->
-                            pr.codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval pr+"}\\)<br>\n")
+                            programList[prIndex].codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |_ -> 
-                            pr.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |Python ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
                             match typ with
-                            |Structure sname -> pr.codewrite(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval pr+"))], dtype=object)\n")
-                            |It _ |It 1      -> pr.codewrite(name+" = numpy.zeros("+this.size1.Expr.eval pr+", dtype=int)\n")
-                            |Zt              -> pr.codewrite(name+" = numpy.zeros("+this.size1.Expr.eval pr+", dtype=numpy.complex128)\n")
-                            |_               -> pr.codewrite(name+" = "+"numpy.zeros("+this.size1.Expr.eval pr+")\n")
+                            |Structure sname -> programList[prIndex].codewrite(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval (programList[prIndex])+"))], dtype=object)\n")
+                            |It _ |It 1      -> programList[prIndex].codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+", dtype=int)\n")
+                            |Zt              -> programList[prIndex].codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+", dtype=numpy.complex128)\n")
+                            |_               -> programList[prIndex].codewrite(name+" = "+"numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+")\n")
                         |_ -> 
-                            pr.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |JavaScript ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            pr.codewrite(name+" = Array(" + this.size1.Expr.eval pr + ");\n")
+                            programList[prIndex].codewrite(name+" = Array(" + this.size1.Expr.eval (programList[prIndex]) + ");\n")
                         |_ -> 
-                            pr.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |PHP ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            pr.codewrite(name+" = [];\n")
+                            programList[prIndex].codewrite(name+" = [];\n")
                         |_ -> 
-                            pr.codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
+                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |Numeric ->
                         ()
                 |_ -> ()
@@ -143,54 +143,54 @@ namespace Aqualis
                 match x with
                 |Var1(_,name) ->
                     error.inc()
-                    pr.comment("***debug array1 deallocate check: "+error.ID+"*****************************")
+                    programList[prIndex].comment("***debug array1 deallocate check: "+error.ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
                             print.t ("ERROR"+error.ID+" cannot deallocate array "+name)
-                    pr.comment("****************************************************")
+                    programList[prIndex].comment("****************************************************")
                 |_ -> ()
             match x with
             |Var1(size,name) ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran ->
                     match size with
                     |A1 0 ->
                         this.size1 <== -1
-                        pr.codewrite("deallocate("+name+")"+"\n")
+                        programList[prIndex].codewrite("deallocate("+name+")"+"\n")
                     |_ -> ()
                 |C99 ->
                     match size with
                     |A1 0 ->
                         this.size1 <== -1
-                        pr.codewrite("free("+name+");"+"\n")
+                        programList[prIndex].codewrite("free("+name+");"+"\n")
                     |_ -> ()
                 |LaTeX ->
                     match size with
                     |A1 0 ->
-                        pr.codewrite("$"+name+"$: deallocate\\\\\n")
+                        programList[prIndex].codewrite("$"+name+"$: deallocate\\\\\n")
                     |_ -> ()
                 |HTML ->
                     match size with
                     |A1 0 ->
-                        pr.codewrite("\\("+name+"\\): deallocate<br/>\n")
+                        programList[prIndex].codewrite("\\("+name+"\\): deallocate<br/>\n")
                     |_ -> ()
                 |Python ->
                     match size with
                     |A1 0 ->
                         this.size1 <== -1
-                        pr.codewrite("del "+name+""+"\n")
+                        programList[prIndex].codewrite("del "+name+""+"\n")
                     |_ -> ()
                 |JavaScript ->
                     match size with
                     |A1 0 ->
                         this.size1 <== -1
-                        pr.codewrite(name+"= null;"+"\n")
+                        programList[prIndex].codewrite(name+"= null;"+"\n")
                     |_ -> ()
                 |PHP ->
                     match size with
                     |A1 0 ->
                         this.size1 <== -1
-                        pr.codewrite("unset("+name+");"+"\n")
+                        programList[prIndex].codewrite("unset("+name+");"+"\n")
                     |_ -> ()
                 |Numeric ->
                     ()
@@ -219,17 +219,17 @@ namespace Aqualis
         static member sizeMismatchError(x:base1,y:base1) =
             if debug.debugMode then
                 error.inc()
-                pr.comment("***debug array1 access check: "+error.ID+"*****************************")
+                programList[prIndex].comment("***debug array1 access check: "+error.ID+"*****************************")
                 br.branch <| fun b ->
                     b.IF (x.size1 .=/ y.size1) <| fun () -> 
                         print.t ("ERROR"+error.ID+" array size (first index) mismatch")
-                pr.comment "****************************************************"
+                programList[prIndex].comment "****************************************************"
                 
     ///<summary>数値型1次元配列</summary>
     type num1 (typ:Etype,x:Expr1) =
         inherit base1(typ,x)
         new (typ,size,name,para) =
-            pr.var.setVar(typ,size,name,para)
+            programList[prIndex].var.setVar(typ,size,name,para)
             num1(typ,Var1(size,name))
         member this.etype with get() = typ
         member this.Item with get(i:num0) = this.Idx1 i
@@ -284,11 +284,11 @@ namespace Aqualis
         static member sizeMismatchError(x:num1,y:num1) =
             if debug.debugMode then
                 error.inc()
-                pr.comment("***debug array1 access check: "+error.ID+"*****************************")
+                programList[prIndex].comment("***debug array1 access check: "+error.ID+"*****************************")
                 br.branch <| fun b ->
                     b.IF (x.size1 .=/ y.size1) <| fun () -> 
                         print.t ("ERROR"+error.ID+" operator '+' array size mismatch")
-                pr.comment("****************************************************")
+                programList[prIndex].comment("****************************************************")
                 
         static member (+) (x:num1,y:num1) =
             num1.sizeMismatchError(x,y)
@@ -341,22 +341,22 @@ namespace Aqualis
         static member (<==) (v1:num1,v2:num1) =
             if debug.debugMode then
                 error.inc()
-                pr.comment("***debug array1 access check: "+error.ID+"*****************************")
+                programList[prIndex].comment("***debug array1 access check: "+error.ID+"*****************************")
                 br.branch <| fun b ->
                     b.IF (v1.size1 .=/ v2.size1) <| fun () -> 
                         print.t ("ERROR"+error.ID+" operator '<==' array size mismatch")
-                pr.comment "****************************************************"
+                programList[prIndex].comment "****************************************************"
             match v1.Expr,v2.Expr with
             |Var1(_,x),Var1(_,y) ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran|LaTeX ->
-                    pr.codewrite(x + "=" + y)
+                    programList[prIndex].codewrite(x + "=" + y)
                 |C99 ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
                 |HTML ->
-                    pr.codewrite(x + " \\leftarrow " + y)
+                    programList[prIndex].codewrite(x + " \\leftarrow " + y)
                 |Python ->
-                    pr.codewrite(x + " = copy.deepcopy("+y+")")
+                    programList[prIndex].codewrite(x + " = copy.deepcopy("+y+")")
                 |JavaScript ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
                 |PHP ->
@@ -364,29 +364,29 @@ namespace Aqualis
                 |Numeric ->
                     ()
             |Var1(_,x),Arx1(_,f) ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
             |Arx1(_,_),Var1(_,_) ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
             |Arx1(_,_),Arx1(_,_) ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
                 
         static member (<==) (v1:num1,v2:num0) =
             match v1.Expr with
             |Var1(_,x) ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran|LaTeX ->
-                    pr.codewrite(x + "=" + v2.Expr.eval pr)
+                    programList[prIndex].codewrite(x + "=" + v2.Expr.eval (programList[prIndex]))
                 |C99 ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2
                 |HTML ->
-                    pr.codewrite(x + " \\leftarrow " + v2.Expr.eval pr)
+                    programList[prIndex].codewrite(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
                 |Python ->
                     match v1.etype with
-                    |Structure sname -> pr.codewrite(x+" = numpy.array(["+sname+"() for _ in range(int("+v1.size1.Expr.eval pr+"))], dtype=object)\n")
-                    |_               -> pr.codewrite(x+"[:]="+v2.Expr.eval pr+"\n")
+                    |Structure sname -> programList[prIndex].codewrite(x+" = numpy.array(["+sname+"() for _ in range(int("+v1.size1.Expr.eval (programList[prIndex])+"))], dtype=object)\n")
+                    |_               -> programList[prIndex].codewrite(x+"[:]="+v2.Expr.eval (programList[prIndex])+"\n")
                 |JavaScript ->
                     iter.num v1.size1 <| fun i -> v1[i] <== v2
                 |PHP ->
@@ -394,7 +394,7 @@ namespace Aqualis
                 |Numeric ->
                     ()
             |Arx1(_,_) ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2
         static member (<==) (x:num1,y:double) = x <== D y
         static member (<==) (x:num1,y:int) = x <== I y

@@ -65,7 +65,7 @@ for i in 1..1000 do
     wr.WriteLine "        //printfn \"simp:\""
     wr.WriteLine "        //printfn \"%s\" <| z0.Expr.simp.ToString()"
     if eq.Contains("x") || eq.Contains("y") then
-        wr.WriteLine("        let s = (" + eq + ").Expr.eval pr")
+        wr.WriteLine("        let s = (" + eq + ").Expr.eval (programList[prIndex])")
         wr.WriteLine "        if (not <| s.ToString().Contains(\"NaN\")) && (not <| s.ToString().Contains(\"∞\")) then"
         wr.WriteLine("            z1 <== " + eq.Replace("x","p").Replace("y","q"))
         wr.WriteLine("            z2 <== " + eq)

@@ -74,7 +74,6 @@
     <None Include="web\figure.fs" />
     <Compile Include="web\param.fs" />
     <Compile Include="web\php.fs" />
-    <Compile Include="web\PHPvar.fs" />
     <Compile Include="web\html.fs" />
     <Compile Include="web\post.fs" />
     <Compile Include="web\form.fs" />

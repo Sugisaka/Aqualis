@@ -5,25 +5,25 @@ namespace Aqualis
     type eqmode() =
         ///<summary>改行</summary>
         member _.eqReturn() =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite "\\\\"
+                programList[prIndex].codewrite "\\\\"
             |_ ->
                 ()
                 
         ///<summary>数式番号なし</summary>
         member _.eqNonumber() =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite "\\nonumber"
+                programList[prIndex].codewrite "\\nonumber"
             |_ ->
                 ()
                 
         ///<summary>改行</summary>
         member _.eqLabel(lb:string) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite("\\label{"+lb+"}")
+                programList[prIndex].codewrite("\\label{"+lb+"}")
             |_ ->
                 ()
                 
@@ -40,58 +40,58 @@ namespace Aqualis
         
         ///<summary>段落</summary>
         static member para code =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite "\\par"
+                programList[prIndex].codewrite "\\par"
                 code()
             |_ ->
                 code()
                 
         ///<summary>テキスト</summary>
         static member text (s:string) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite s
+                programList[prIndex].codewrite s
             |_ ->
                 ! s
                 
         ///<summary>図の挿入</summary>
         static member inputfigure (filename:string) (caption:string) =
-            pr.hlist.add "\\usepackage{graphicx}"
-            match pr.language with
+            programList[prIndex].hlist.add "\\usepackage{graphicx}"
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite "\\begin{figure}[htbp]"
-                pr.codewrite "\\begin{center}"
-                pr.codewrite("\\includegraphics{"+filename+"}")
-                pr.codewrite "\\end{center}"
-                pr.codewrite("\\caption{"+caption+"}")
-                pr.codewrite("\\label{"+filename+"}")
-                pr.codewrite "\\end{figure}"
+                programList[prIndex].codewrite "\\begin{figure}[htbp]"
+                programList[prIndex].codewrite "\\begin{center}"
+                programList[prIndex].codewrite("\\includegraphics{"+filename+"}")
+                programList[prIndex].codewrite "\\end{center}"
+                programList[prIndex].codewrite("\\caption{"+caption+"}")
+                programList[prIndex].codewrite("\\label{"+filename+"}")
+                programList[prIndex].codewrite "\\end{figure}"
             |_ ->
                 ! (filename+": "+caption)
                 
         ///<summary>番号付き箇条書き</summary>
         static member enumerate (slst:(unit->unit)list) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite "\\begin{enumerate}"
+                programList[prIndex].codewrite "\\begin{enumerate}"
                 for s in slst do
-                    pr.codewrite "\\item"
+                    programList[prIndex].codewrite "\\item"
                     s()
-                pr.codewrite "\\end{enumerate}"
+                programList[prIndex].codewrite "\\end{enumerate}"
             |_ ->
                 for s in slst do
                     s()
                     
         ///<summary>番号なし箇条書き</summary>
         static member itemize (slst:(unit->unit)list) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite "\\begin{itemize}"
+                programList[prIndex].codewrite "\\begin{itemize}"
                 for s in slst do
-                    pr.codewrite "\\item"
+                    programList[prIndex].codewrite "\\item"
                     s()
-                pr.codewrite "\\end{itemize}"
+                programList[prIndex].codewrite "\\end{itemize}"
             |_ ->
                 for s in slst do
                     s()
@@ -99,17 +99,17 @@ namespace Aqualis
         ///<summary>数式</summary>
         static member eq code =
             let e = eqmode()
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
-                pr.codewrite "\\begin{align}"
+                programList[prIndex].codewrite "\\begin{align}"
                 code e
-                pr.codewrite "\\end{align}"
+                programList[prIndex].codewrite "\\end{align}"
             |HTML ->
-                pr.codewrite "\\["
-                pr.codewrite "\\begin{align}"
+                programList[prIndex].codewrite "\\["
+                programList[prIndex].codewrite "\\begin{align}"
                 code e
-                pr.codewrite "\\end{align}"
-                pr.codewrite "\\]"
+                programList[prIndex].codewrite "\\end{align}"
+                programList[prIndex].codewrite "\\]"
             |_ ->
                 code e
                 
@@ -131,7 +131,7 @@ namespace Aqualis
             
         ///<summary>総和</summary>
         static member sum (a:num0,i:num0) = fun (b:num0) (c:num0) ->
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let ta = a.code
                 let ti = i.code
@@ -147,7 +147,7 @@ namespace Aqualis
             
         ///<summary>総和</summary>
         static member sum (a:num0) = fun (b:num0) (c:num0) ->
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let ta = a.code
                 let tb = b.code
@@ -158,7 +158,7 @@ namespace Aqualis
                 
         ///<summary>積分</summary>
         static member integral (a:num0,b:num0) = fun (eq:num0) (x:num0) ->
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let ta = a.code
                 let tb = b.code
@@ -182,7 +182,7 @@ namespace Aqualis
             
         ///<summary>微分</summary>
         static member diff (f:num0) (x:num0) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let tf = f.code
                 let tx = x.code
@@ -192,7 +192,7 @@ namespace Aqualis
                 
         ///<summary>偏微分</summary>
         static member pdiff (f:num0) (x:num0) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let tf = f.code
                 let tx = x.code
@@ -202,7 +202,7 @@ namespace Aqualis
                 
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*string)list) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let c = 
                     lst
@@ -214,7 +214,7 @@ namespace Aqualis
                 
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*num0)list) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let c = 
                     lst
@@ -226,7 +226,7 @@ namespace Aqualis
                 
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*bool0)list) =
-            match pr.language with
+            match programList[prIndex].language with
             |LaTeX ->
                 let c = 
                     lst

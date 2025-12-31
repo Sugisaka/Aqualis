@@ -11,27 +11,27 @@ namespace Aqualis
         /// <param name="n">変数名</param>
         static member addarg (typ:Etype,vtp:VarType,n:string) =
             fun code ->
-                match pr.language with
+                match programList[prIndex].language with
                 |Fortran ->
                     //関数内ではこの変数名を使用
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                         |_ -> 
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        pr.arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -42,21 +42,21 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                         |_ -> 
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        pr.arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> "(*"+name+")"
@@ -67,21 +67,21 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                         |_ -> 
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        pr.arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -92,21 +92,21 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                         |_ -> 
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        pr.arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -117,21 +117,21 @@ namespace Aqualis
                     let name = 
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                         |_ -> 
-                            "arg"+(pr.arg.list.Length+1).ToString("00")
+                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        pr.arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        pr.arg.add(n,(typ,vtp,name))
-                        pr.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        programList[prIndex].arg.add(n,(typ,vtp,name))
+                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -154,7 +154,7 @@ namespace Aqualis
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg code =
-                fn.addarg (this.etype,A0,this.Expr.eval pr) <| fun (v,n) -> 
+                fn.addarg (this.etype,A0,this.Expr.eval (programList[prIndex])) <| fun (v,n) -> 
                     code(num0(Var(this.etype, n, NaN)))
                     
         type num1 with

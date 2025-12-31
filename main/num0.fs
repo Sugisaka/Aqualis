@@ -13,7 +13,7 @@ namespace Aqualis
         
     type bool0(x:expr) =
         member this.Expr with get() = x
-        member this.code with get() = x.eval pr
+        member this.code with get() = x.eval (programList[prIndex])
         
     ///<summary>数値と文字列の結合</summary>
     type reduceExprString = 
@@ -69,7 +69,7 @@ namespace Aqualis
                     |Direct -> x
                     |StrQuotation -> "\""+x+"\""
                     |CodeStrQuotation -> "\\\""+x+"\\\""
-                |RNvr x -> x.eval pr)
+                |RNvr x -> x.eval (programList[prIndex]))
             |> fun s -> String.Join(c,s)
             
     ///<summary>変数（数値データ）クラス</summary>
@@ -79,7 +79,7 @@ namespace Aqualis
         
         member this.etype with get() = x.etype
         
-        member this.code with get() = x.eval pr
+        member this.code with get() = x.eval (programList[prIndex])
         
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:num0,y:num0) = 
@@ -261,17 +261,17 @@ namespace Aqualis
                 bool0 NaN
                 
         ///<summary>代入</summary>
-        static member (<==) (x:num0,y:num0) = expr.subst x.Expr y.Expr pr
+        static member (<==) (x:num0,y:num0) = expr.subst x.Expr y.Expr (programList[prIndex])
         static member (<==) (x:num0,y:int) = x <== num0(Int y)
         static member (<==) (x:num0,y:double) = x <== num0(Dbl y)
         member this.clear() = this <== 0
         
         ///<summary>等式(TeX、HTMLのみ)</summary>
-        static member (===) (x:num0,y:num0) = expr.equiv x.Expr y.Expr pr
+        static member (===) (x:num0,y:num0) = expr.equiv x.Expr y.Expr (programList[prIndex])
         static member (===) (x:num0,y:int) = x === num0(Int y)
         static member (===) (x:num0,y:double) = x === num0(Dbl y)
         
         ///<summary>等号揃等式(TeX、HTMLのみ)</summary>
-        static member (=|=) (x:num0,y:num0) = expr.equivAlign x.Expr y.Expr pr
+        static member (=|=) (x:num0,y:num0) = expr.equivAlign x.Expr y.Expr (programList[prIndex])
         static member (=|=) (x:num0,y:int) = x =|= num0(Int y)
         static member (=|=) (x:num0,y:double) = x =|= num0(Dbl y)

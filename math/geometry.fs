@@ -57,8 +57,8 @@ namespace Aqualis
             new(name,size1) =
                 str.reg(point2.sname,name,size1)
                 point2_1(name,A1(size1))
-            member this.Item with get(i:num0) = point2(this.Idx1(i).Expr.eval pr)
-            member this.Item with get(i:int ) = point2(this.Idx1(i).Expr.eval pr)
+            member this.Item with get(i:num0) = point2(this.Idx1(i).Expr.eval (programList[prIndex]))
+            member this.Item with get(i:int ) = point2(this.Idx1(i).Expr.eval (programList[prIndex]))
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
             static member str_mem(sname, vname, name, size1) =
                 str.addmember(sname,(Structure(sname),A1(size1),name))
@@ -123,8 +123,8 @@ namespace Aqualis
             new(name,size1) =
                 str.reg(point3.sname,name,size1)
                 point3_1(point3.sname,name,A1(size1))
-            member this.Item with get(i:num0) = point3(this.Idx1(i).Expr.eval pr)
-            member this.Item with get(i:int ) = point3(this.Idx1(i).Expr.eval pr)
+            member this.Item with get(i:num0) = point3(this.Idx1(i).Expr.eval (programList[prIndex]))
+            member this.Item with get(i:int ) = point3(this.Idx1(i).Expr.eval (programList[prIndex]))
             
         ///<summary>
         ///中心(x,y)、1辺の長さdの正方形領域に、中心(center_x,center_y)、半径radiusの円が占める割合を計算
@@ -137,7 +137,7 @@ namespace Aqualis
                     b.IF (x.>0.0) <| fun () -> t <== (asm.atan(y/x))
                     b.EL <| fun () -> t <== (asm.atan(y/x)+asm.pi)
                 t
-            codestr.section ("中心("+x.Expr.eval pr+","+y.Expr.eval pr+")、サイズ"+d.Expr.eval pr+"の正方形領域に、"+"中心("+center_x.Expr.eval pr+","+center_y.Expr.eval pr+")、半径"+radius.Expr.eval pr+"の円が占める割合を計算→結果は"+f.Expr.eval pr) <| fun () ->
+            codestr.section ("中心("+x.Expr.eval (programList[prIndex])+","+y.Expr.eval (programList[prIndex])+")、サイズ"+d.Expr.eval (programList[prIndex])+"の正方形領域に、"+"中心("+center_x.Expr.eval (programList[prIndex])+","+center_y.Expr.eval (programList[prIndex])+")、半径"+radius.Expr.eval (programList[prIndex])+"の円が占める割合を計算→結果は"+f.Expr.eval (programList[prIndex])) <| fun () ->
                 ch.ii <| fun (Nx,Ny) ->
                 ch.dddd <| fun (c_x,c_y,r,rr) ->
                 ch.d  <| fun ep_out ->

@@ -21,7 +21,7 @@ namespace Aqualis
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalPh c
                 let n2_ = n2.evalPh c
-                if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                 c.codewrite("for(" + i.evalPh c + " = " + n1_ + "; " + i.evalPh c + " <= " + n2_ + "; " + i.evalPh c + "++)")
                 c.codewrite "{"
                 c.indentInc()
@@ -37,7 +37,7 @@ namespace Aqualis
                 let label = "_" + gotoLabel.nextGotoLabel()
                 let exit() = c.codewrite("goto "+label+";")
                 expr.substPh i (Int 1) c
-                if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                 c.codewrite "for(;;):"
                 c.indentInc()
                 code(exit,i)
@@ -61,7 +61,7 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
                     c.indentInc()
                     code i
@@ -71,7 +71,7 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.codewrite("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
                     c.indentInc()
                     code i
@@ -87,7 +87,7 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewrite("goto "+label+"")
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
                     c.indentInc()
                     code(exit,i)
@@ -100,7 +100,7 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewrite("goto "+label+"")
-                    if isParMode then pr.varPrivate.setVar(It 4,A0,iname,"")
+                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.codewrite("for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++):")
                     c.indentInc()
                     code(exit,i)
