@@ -150,9 +150,11 @@ namespace Aqualis
         
         member _.cwrite(s:string) =
             match cwriter with
-            |None -> ()
-            |Some w -> w.Write s
-            
+            |None -> 
+                printfn "file %s not opened" filename
+            |Some w -> 
+                w.Write s
+                
         ///<summary>適切な位置で改行してコード出力</summary>
         member this.codefold (s:string,cm:string,writer:string->unit,sp:int) =
             //文字列に空白文字しか含まれていなければtrue

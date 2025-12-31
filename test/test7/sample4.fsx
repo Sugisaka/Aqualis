@@ -1,6 +1,6 @@
 //#############################################################################
 // project title
-let projectname = "genHTML_test"
+let projectname = "test7D"
 let version = "1.0.0"
 //#############################################################################
 
@@ -12,7 +12,7 @@ let outputdir = __SOURCE_DIRECTORY__
 open System
 open Aqualis
 
-fixedPage outputdir "sampleC" 1920 1080 <| fun wr ->
+fixedPage outputdir "sampleD" 1920 1080 <| fun wr ->
     let t = num0(Var(Nt, "t", NaN))
     let ft = num0(Var(Nt, "f(t)", NaN))
     html.page

@@ -1,6 +1,6 @@
 //#############################################################################
 // project title
-let projectname = "genHTML_test"
+let projectname = "test7B"
 let version = "1.0.0"
 //#############################################################################
 
@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-freeCanvas outputdir "sampleE" <| fun cv ->
+freeCanvas outputdir "sampleB" <| fun cv ->
     //ページ左上角
     let p0 = position.Origin
     //ソースコードボックス1段目

@@ -8,4 +8,7 @@ bin/
 *.gz
 *.aux
 *.log
+*.png
+*.PNG
+*.wav
 .fake

@@ -42,7 +42,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + ".bee", 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
                     writer.codewrite "!=============================================================================================\n"
                     writer.codewrite("! Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -76,7 +76,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + ".bee", 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
                     writer.codewrite "/*==========================================================================================*/\n"
                     writer.codewrite("/* Subroutine name: " + projectname + " */\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -116,7 +116,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + ".bee", 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
                     writer.codewrite "%=============================================================================================\n"
                     writer.codewrite("% Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -150,7 +150,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + ".bee", 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
                     writer.codewrite("<h3>" + projectname + "</h3>\n")
                     writer.codewrite "<ul>\n"
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -186,7 +186,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + ".bee", 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
                     writer.codewrite "#==========================================================================================\n"
                     writer.codewrite("# Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -230,7 +230,7 @@ namespace Aqualis
                     writer.codewrite("return " + re_argvar + "\n")
                     writer.indent.dec()
                     writer.close()
-                    File.Delete(dir + "\\" + projectname + "_code.bee")
+                    programList[prIndex].delete()
                     re_args,args
                 programList[prIndex].codewrite(re_args + " = " + projectname + "(" + args + ")\n")
             |_ -> ()
@@ -240,7 +240,6 @@ namespace Aqualis
             for lang in langgList do
                 match lang with 
                 |Fortran -> 
-                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete f //残っている中間コードファイルを削除
                     str.clear()
                     makeProgram [dir,projectname,Fortran] <| fun () ->
                         //メインコード生成
@@ -273,8 +272,8 @@ namespace Aqualis
                         writer.codewrite "contains\n"
                         writer.codewrite "\n"
                         for funname in programList[prIndex].flist.list do
-                            writer.codewrite(File.ReadAllText(dir + "\\" + funname + ".bee"))
-                            File.Delete(dir + "\\" + funname + ".bee")
+                            writer.codewrite(File.ReadAllText(dir + "\\" + funname))
+                            File.Delete(dir + "\\" + funname)
                             writer.codewrite "\n"
                         writer.codewrite("end program " + projectname + "\n")
                         writer.close()
@@ -310,7 +309,6 @@ namespace Aqualis
                         wr.Write("./" + projectname + ".exe\n")
                     wr.Close()
                 |C99 ->
-                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
                     makeProgram [dir,projectname,C99] <| fun () ->
                         //メインコード生成
@@ -346,8 +344,8 @@ namespace Aqualis
                             writer.codewrite ("extern " + s + ";\n")
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewrite (File.ReadAllText(dir + "\\" + funname + ".bee"))
-                            File.Delete(dir + "\\" + funname + ".bee")
+                            writer.codewrite (File.ReadAllText(dir + "\\" + funname))
+                            File.Delete(dir + "\\" + funname)
                             writer.codewrite ("\n")
                         //Main関数
                         writer.codewrite "int main()\n"
@@ -383,7 +381,6 @@ namespace Aqualis
                         wr.Write("./" + projectname + ".exe\n")
                     wr.Close()
                 |LaTeX ->
-                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete f //残っている中間コードファイルを削除
                     str.clear()
                     makeProgram [dir,projectname,LaTeX] <| fun () ->
                         //メインコード生成
@@ -412,8 +409,8 @@ namespace Aqualis
                         //関数定義
                         writer.codewrite "\\section{subroutines}\n"
                         for funname in programList[prIndex].flist.list do
-                            writer.codewrite(File.ReadAllText(dir + "\\" + funname + ".bee"))
-                            File.Delete(dir + "\\" + funname + ".bee")
+                            writer.codewrite(File.ReadAllText(dir + "\\" + funname))
+                            File.Delete(dir + "\\" + funname)
                             writer.codewrite("\n")
                         //グローバル変数の定義
                         writer.codewrite "\\section{global variables}\n"
@@ -428,7 +425,6 @@ namespace Aqualis
                         //beeファイル削除
                         programList[prIndex].delete()
                 |HTML ->
-                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
                     makeProgram [dir,projectname,HTML] <| fun () ->
                         //メインコード生成
@@ -571,8 +567,8 @@ namespace Aqualis
                         writer.codewrite "\t\t<div id=\"deffunc\">\n"
                         writer.codewrite "\t\t<h2>関数定義</h2>\n"
                         for funname in programList[prIndex].flist.list do
-                            writer.codewrite(File.ReadAllText(dir + "\\" + funname + ".bee"))
-                            File.Delete(dir + "\\" + funname + ".bee")
+                            writer.codewrite(File.ReadAllText(dir + "\\" + funname))
+                            File.Delete(dir + "\\" + funname)
                             writer.codewrite "\n"
                         writer.codewrite "\t\t</div>\n"
                         //グローバル変数の定義
@@ -596,7 +592,6 @@ namespace Aqualis
                         //beeファイル削除
                         programList[prIndex].delete()
                 |Python ->
-                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
                     makeProgram [dir,projectname,Python] <| fun () ->
                         //メインコード生成
@@ -631,8 +626,8 @@ namespace Aqualis
                         declareall writer
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewrite(File.ReadAllText(dir + "\\" + funname + ".bee"))
-                            File.Delete(dir + "\\" + funname + ".bee")
+                            writer.codewrite(File.ReadAllText(dir + "\\" + funname))
+                            File.Delete(dir + "\\" + funname)
                             writer.codewrite("\n")
                         //メインコード
                         writer.codewrite(programList[prIndex].allCodes)
@@ -649,7 +644,6 @@ namespace Aqualis
                     wr.Write("python3 " + projectname + ".py\n")
                     wr.Close()
                 |JavaScript ->
-                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
                     makeProgram [dir,projectname,JavaScript] <| fun () ->
                         //メインコード生成
@@ -684,8 +678,8 @@ namespace Aqualis
                             writer.codewrite ("extern " + s + ";\n")
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewrite (File.ReadAllText(dir + "\\" + funname + ".bee"))
-                            File.Delete(dir + "\\" + funname + ".bee")
+                            writer.codewrite (File.ReadAllText(dir + "\\" + funname))
+                            File.Delete(dir + "\\" + funname)
                             writer.codewrite ("\n")
                         //Main
                         writer.codewrite (programList[prIndex].allCodes)
@@ -693,7 +687,6 @@ namespace Aqualis
                         //beeファイル削除
                         programList[prIndex].delete()
                 |PHP ->
-                    for f in Directory.GetFiles(dir, "*.bee") do File.Delete(f) //残っている中間コードファイルを削除
                     str.clear()
                     makeProgram [dir,projectname,PHP] <| fun () ->
                         //メインコード生成
@@ -728,8 +721,8 @@ namespace Aqualis
                             writer.codewrite ("extern " + s + ";\n")
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewrite (File.ReadAllText(dir + "\\" + funname + ".bee"))
-                            File.Delete(dir + "\\" + funname + ".bee")
+                            writer.codewrite (File.ReadAllText(dir + "\\" + funname))
+                            File.Delete(dir + "\\" + funname)
                             writer.codewrite ("\n")
                         //Main
                         writer.codewrite (programList[prIndex].allCodes)

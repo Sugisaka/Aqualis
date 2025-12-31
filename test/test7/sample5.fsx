@@ -7,7 +7,8 @@
 //     log → /kit-cwslab.org/log
 //#############################################################################
 
-let outputdir = @"C:\xampp\htdocs\test_sgproc"
+let outputdir = __SOURCE_DIRECTORY__
+//let outputdir = @"C:\xampp\htdocs\test_sgproc"
 
 #I @"..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"

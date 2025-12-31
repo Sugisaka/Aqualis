@@ -24,20 +24,32 @@ module htmlio =
     
     /// HTMLファイルへの書き込み
     let switchMain code =
+        let prIndex_temp = prIndex
         prIndex <- 0
-        code()
+        let p = code()
+        prIndex <- prIndex_temp
+        p
     /// HTMLファイルbodyタグ内への書き込み
     let switchBody code =
+        let prIndex_temp = prIndex
         prIndex <- 1
-        code()
+        let p = code()
+        prIndex <- prIndex_temp
+        p
     /// HTMLファイルJavaScriptコードの書き込み
     let switchJS code =
+        let prIndex_temp = prIndex
         prIndex <- 2
-        code()
+        let p = code()
+        prIndex <- prIndex_temp
+        p
     /// HTMLファイルdraw関数への書き込み
     let switchDraw code =
+        let prIndex_temp = prIndex
         prIndex <- 3
-        code()
+        let p = code()
+        prIndex <- prIndex_temp
+        p
         
     let mutable audioList:string list = []
     /// 図面カウンタ

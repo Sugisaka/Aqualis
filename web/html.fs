@@ -175,47 +175,60 @@ type html =
         programList[prIndex].codewrite ("</"+t+">")
     /// 内部要素のあるタグ
     static member tagb (t:string) = fun code ->
+        printfn "%d %d" prIndex programList.Length
         programList[prIndex].codewrite("<"+t+">")
         code()
         programList[prIndex].codewrite ("</"+t+">")
     static member h1 (t:num0) = fun code ->
-        html.tagb "h1" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
-        code()
+        switchBody <| fun () ->
+            html.tagb "h1" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
+            code()
     static member h1 (t:string) = fun code ->
-        html.tagb "h1" <| fun () -> programList[prIndex].codewrite t
-        code()
+        switchBody <| fun () ->
+            html.tagb "h1" <| fun () -> programList[prIndex].codewrite t
+            code()
     static member h1 (t:num0,atr:Style) = fun code ->
-        html.tagb ("h1",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
-        code()
+        switchBody <| fun () ->
+            html.tagb ("h1",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
+            code()
     static member h1 (t:string,atr:Style) = fun code ->
-        html.tagb ("h1",atr) <| fun () -> programList[prIndex].codewrite t
-        code()
+        switchBody <| fun () ->
+            html.tagb ("h1",atr) <| fun () -> programList[prIndex].codewrite t
+            code()
         
     static member h2 (t:num0) = fun code ->
-        html.tagb "h2" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
-        code()
+        switchBody <| fun () ->
+            html.tagb "h2" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
+            code()
     static member h2 (t:string) = fun code ->
-        html.tagb "h2" <| fun () -> programList[prIndex].codewrite t
-        code()
+        switchBody <| fun () ->
+            html.tagb "h2" <| fun () -> programList[prIndex].codewrite t
+            code()
     static member h2 (t:num0,atr:Style) = fun code ->
-        html.tagb ("h2",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
-        code()
+        switchBody <| fun () ->
+            html.tagb ("h2",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
+            code()
     static member h2 (t:string,atr:Style) = fun code ->
-        html.tagb ("h2",atr) <| fun () -> programList[prIndex].codewrite t
-        code()
+        switchBody <| fun () ->
+            html.tagb ("h2",atr) <| fun () -> programList[prIndex].codewrite t
+            code()
         
     static member h3 (t:num0) = fun code ->
-        html.tagb "h3" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
-        code()
+        switchBody <| fun () ->
+            html.tagb "h3" <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
+            code()
     static member h3 (t:string) = fun code ->
-        html.tagb "h3" <| fun () -> programList[prIndex].codewrite(t)
-        code()
+        switchBody <| fun () ->
+            html.tagb "h3" <| fun () -> programList[prIndex].codewrite(t)
+            code()
     static member h3 (t:num0,atr:Style) = fun code ->
-        html.tagb ("h3",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
-        code()
+        switchBody <| fun () ->
+            html.tagb ("h3",atr) <| fun () -> php.echo (t.Expr.eval (programList[prIndex]))
+            code()
     static member h3 (t:string,atr:Style) = fun code ->
-        html.tagb ("h3",atr) <| fun () -> programList[prIndex].codewrite(t)
-        code()
+        switchBody <| fun () ->
+            html.tagb ("h3",atr) <| fun () -> programList[prIndex].codewrite(t)
+            code()
 
     static member form (action:string) = fun code -> html.tagb ("form",["method","\"post\""; "action","\""+action+"\"";]) code
     static member form_fileUpload (action:string) = fun code -> html.tagb ("form",["method","\"post\""; "enctype","\"multipart/form-data\""; "action","\""+action+"\"";]) code
@@ -999,7 +1012,7 @@ module dochtml =
         // head、body要素書き込みストリーム作成
         // head、body要素書き込み
         /// draw関数のコード出力先ファイル名
-        let filename_main = filename + "//" + filename + ".html"
+        let filename_main = filename + "\\" + filename + ".html"
         /// draw関数のコード出力先ファイル名
         let filename_draw = filename + "\\" + filename+"_draw"
         /// HTML本体のコード出力先ファイル名
@@ -1034,10 +1047,6 @@ module dochtml =
                     switchJS <| fun () ->
                         programList[prIndex].close()
                         programList[prIndex].allCodes
-                let codeBody = 
-                    switchBody <| fun () ->
-                        programList[prIndex].close()
-                        programList[prIndex].allCodes
                 // html書き込みストリーム作成
                 switchMain <| fun () ->
                     programList[prIndex].codewrite "<!DOCTYPE html>"
@@ -1062,6 +1071,10 @@ module dochtml =
                             programList[prIndex].codewrite "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
                             programList[prIndex].codewrite "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
                         // body要素
+                        let codeBody = 
+                            switchBody <| fun () ->
+                                programList[prIndex].close()
+                                programList[prIndex].allCodes
                         let s0 = Style [area.backGroundColor "#aaaaaa"]
                         match pagesizeX,pagesizeY with
                         |None,None ->
@@ -1099,7 +1112,11 @@ module dochtml =
                                     size.height (y.ToString()+"px")]
                                 html.tagb ("div", s1) <| fun () ->
                                     programList[prIndex].codewrite codeBody
-                                    
+                    programList[prIndex].close()
+                programList[1].delete()
+                programList[2].delete()
+                programList[3].delete()
+                
     let group (t:string) d code = code d
     
     /// 全体がキャンバスの無制限レイアウト

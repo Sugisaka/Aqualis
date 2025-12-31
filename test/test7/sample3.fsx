@@ -1,6 +1,6 @@
 //#############################################################################
 // project title
-let projectname = "genHTML_test"
+let projectname = "test7C"
 let version = "1.0.0"
 //#############################################################################
 
@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-fixedWidthPage outputdir "sampleA" 1920 <| fun () ->
+fixedWidthPage outputdir "sampleC" 1920 <| fun () ->
     programList[prIndex].codewrite "AAA"
     html.br()
     programList[prIndex].codewrite "AAA"

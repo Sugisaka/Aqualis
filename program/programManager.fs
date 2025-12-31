@@ -4,7 +4,7 @@ namespace Aqualis
     
     type program(outputdir,pjname,lang:Language) =
         
-        let cwriter = codeWriter(outputdir+"\\"+pjname+"_code.bee",2,lang)
+        let cwriter = codeWriter(outputdir+"\\"+pjname,2,lang)
 
         ///<summary>言語設定</summary>
         member val language = lang with get
@@ -98,7 +98,9 @@ namespace Aqualis
         member _.indentDec() = cwriter.indent.dec()
         member _.appendOpen() = cwriter.appendOpen()
         member _.close() = cwriter.close()
-        member _.allCodes with get() = File.ReadAllText(outputdir+"\\"+pjname+"_code.bee")
+        member _.allCodes with get() = 
+            cwriter.close()
+            File.ReadAllText(outputdir+"\\"+pjname)
         member _.delete() = cwriter.delete()
         
     [<AutoOpen>]
@@ -149,7 +151,7 @@ namespace Aqualis
         let language() = programList[prIndex].language
         let projectname() = programList[prIndex].projectname
         let iFormat() = programList[prIndex].numFormat.iFormat
-
+        
     ///<summary>コード生成の設定</summary>
     type AqualisCompiler () =
         
