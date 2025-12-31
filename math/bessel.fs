@@ -15,7 +15,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== num0(besselj0_(x))
+                    bes <== num0(besselj0_ x)
                     code bes
             static member bessely0 (x:num0) = fun code ->
                 let bessely0_ (v:num0) = 
@@ -53,7 +53,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
-                    bes <== num0(besselj0_(x))-num0(bessely0_(x))*asm.uj
+                    bes <== num0(besselj0_ x)-num0(bessely0_ x)*asm.uj
                     code bes
             static member besselj1 (x:num0) = fun code ->
                 let besselj1_ (v:num0) = 
@@ -81,7 +81,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== num0(bessely1_(x))
+                    bes <== num0(bessely1_ x)
                     code bes
             static member besselh1 (x:num0) = fun code ->
                 let besselj1_ (v:num0) = 
@@ -105,5 +105,5 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
-                    bes <== num0(besselj1_(x))-num0(bessely1_(x))*asm.uj
+                    bes <== num0(besselj1_ x)-num0(bessely1_ x)*asm.uj
                     code bes

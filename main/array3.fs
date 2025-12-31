@@ -15,8 +15,8 @@ namespace Aqualis
             base3(typ,Var3(size,name))
         ///<summary>変数を作成しリストに追加</summary>
         new(sname,size,name) =
-            programList[prIndex].var.setVar(Structure(sname),size,name,"")
-            base3(Structure(sname),Var3(size,name))
+            programList[prIndex].var.setVar(Structure sname,size,name,"")
+            base3(Structure sname,Var3(size,name))
         member _.Expr with get() = x
         member _.code with get() =
             match x with
@@ -73,7 +73,7 @@ namespace Aqualis
                 match x with
                 |Var3(_,name) ->
                     error.inc()
-                    programList[prIndex].comment("***debug array3 access check: "+error.ID+"*****************************")
+                    comment("***debug array3 access check: "+error.ID+"*****************************")
                     br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () -> 
                         print.t ("ERROR"+error.ID+" array "+name+" is not allocated")
                     br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
@@ -82,7 +82,7 @@ namespace Aqualis
                         print.w <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
                     br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
                         print.w <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
-                    programList[prIndex].comment "****************************************************"
+                    comment "****************************************************"
                 |_ -> ()
             match x,language() with
             |Var3(_,name),Fortran -> num0(Idx3(typ,name,(i+1).Expr,(j+1).Expr,(k+1).Expr))
@@ -90,7 +90,6 @@ namespace Aqualis
             |Var3(_,name),_ -> num0(Idx3(typ,name,i.Expr,j.Expr,k.Expr))
             |Arx3(_,_,_,f),_ -> f (i,j,k)
             
-(*
         member this.Idx3(i:num0,j:num0,k:int) = this.Idx3(i,j,I k)
         member this.Idx3(i:num0,j:int,k:num0) = this.Idx3(i,I j,k)
         member this.Idx3(i:num0,j:int,k:int) = this.Idx3(i,I j,I k)
@@ -432,19 +431,18 @@ namespace Aqualis
         member this.Idx3(_:unit,_:unit,(a3:num0,b3:int)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
         member this.Idx3(_:unit,_:unit,(a3:int,b3:num0)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
         member this.Idx3(_:unit,_:unit,(a3:int,b3:int)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
-*)
-
+        
         ///<summary>配列のメモリ割り当て</summary>
         member this.allocate(n1:num0,n2:num0,n3:num0) =
                 match x with
                 |Var3(size,name) ->
                     if debug.debugMode then
                         error.inc()
-                        programList[prIndex].comment("***debug array1 allocate check: "+error.ID+"*****************************")
+                        comment("***debug array1 allocate check: "+error.ID+"*****************************")
                         br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
                                 print.t ("ERROR"+error.ID+" array "+name+" is already allocated")
-                        programList[prIndex].comment "****************************************************"
+                        comment "****************************************************"
                     match programList[prIndex].language with
                     |Fortran ->
                         match size with
@@ -452,38 +450,38 @@ namespace Aqualis
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            programList[prIndex].codewrite("allocate("+name+"(1:"+this.size1.Expr.eval (programList[prIndex])+",1:"+this.size2.Expr.eval (programList[prIndex])+",1:"+this.size3.Expr.eval (programList[prIndex])+")"+")"+"\n")
+                            codewrite("allocate("+name+"(1:"+this.size1.Expr.eval (programList[prIndex])+",1:"+this.size2.Expr.eval (programList[prIndex])+",1:"+this.size3.Expr.eval (programList[prIndex])+")"+")"+"\n")
                         |_ -> 
-                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                            codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |C99 ->
                         match size with
                         |A3(0,0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            programList[prIndex].codewrite(name+" = "+"("+typ.tostring(language())+" *)"+"malloc("+"sizeof("+typ.tostring(language())+")*"+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+");\n")
+                            codewrite(name+" = "+"("+typ.tostring(language())+" *)"+"malloc("+"sizeof("+typ.tostring(language())+")*"+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+");\n")
                         |_ -> 
-                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                            codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |LaTeX ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            programList[prIndex].codewrite("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            codewrite("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |A3(0,0,0),Dt   ->
-                            programList[prIndex].codewrite("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            codewrite("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |A3(0,0,0),Zt   ->
-                            programList[prIndex].codewrite("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            codewrite("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |_ -> 
-                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                            codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |HTML ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            programList[prIndex].codewrite("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewrite("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A3(0,0,0),Dt   ->
-                            programList[prIndex].codewrite("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewrite("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A3(0,0,0),Zt   ->
-                            programList[prIndex].codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |_ -> 
-                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                            codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |Python ->
                         match size with
                         |A3(0,0,0) ->
@@ -491,30 +489,30 @@ namespace Aqualis
                             this.size2 <== n2
                             this.size3 <== n3
                             match typ with
-                            |Structure sname -> programList[prIndex].codewrite(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"),int("+this.size3.Expr.eval (programList[prIndex])+"))\n")
-                            |It _ |It 1      -> programList[prIndex].codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+", dtype=int).reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
-                            |Zt              -> programList[prIndex].codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+", dtype=numpy.complex128).reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
-                            |_               -> programList[prIndex].codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+").reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
+                            |Structure sname -> codewrite(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"),int("+this.size3.Expr.eval (programList[prIndex])+"))\n")
+                            |It _ |It 1      -> codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+", dtype=int).reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
+                            |Zt              -> codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+", dtype=numpy.complex128).reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
+                            |_               -> codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+").reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
                         |_ -> 
-                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                            codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |JavaScript ->
                         match size with
                         |A3(0,0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            programList[prIndex].codewrite(name+" = "+"Array("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+");\n")
+                            codewrite(name+" = "+"Array("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+");\n")
                         |_ -> 
-                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                            codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |PHP ->
                         match size with
                         |A3(0,0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            programList[prIndex].codewrite(name+" = [];\n")
+                            codewrite(name+" = [];\n")
                         |_ -> 
-                            programList[prIndex].codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
+                            codewrite("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |Numeric ->
                         ()
                 |_ -> ()
@@ -533,11 +531,11 @@ namespace Aqualis
                 match x with
                 |Var3(_,name) ->
                     error.inc()
-                    programList[prIndex].comment("***debug array1 deallocate check: "+error.ID+"*****************************")
+                    comment("***debug array1 deallocate check: "+error.ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
                             print.t ("ERROR"+error.ID+" cannot deallocate array "+name)
-                    programList[prIndex].comment "****************************************************"
+                    comment "****************************************************"
                 |_ -> ()
             match x with
             |Var3(size,name) ->
@@ -548,7 +546,7 @@ namespace Aqualis
                         this.size1 <== -1
                         this.size2 <== -1
                         this.size3 <== -1
-                        programList[prIndex].codewrite("deallocate("+name+")"+"\n")
+                        codewrite("deallocate("+name+")"+"\n")
                     |_ -> ()
                 |C99 ->
                     match size with
@@ -556,17 +554,17 @@ namespace Aqualis
                         this.size1 <== -1
                         this.size2 <== -1
                         this.size3 <== -1
-                        programList[prIndex].codewrite("free("+name+");"+"\n")
+                        codewrite("free("+name+");"+"\n")
                     |_ -> ()
                 |LaTeX ->
                     match size with
                     |A3(0,0,0) ->
-                        programList[prIndex].codewrite("deallocate($"+name+"$)\\\\\n")
+                        codewrite("deallocate($"+name+"$)\\\\\n")
                     |_ -> ()
                 |HTML ->
                     match size with
                     |A3(0,0,0) ->
-                        programList[prIndex].codewrite("\\("+name+"\\): deallocate<br/>\n")
+                        codewrite("\\("+name+"\\): deallocate<br/>\n")
                     |_ -> ()
                 |Python ->
                     match size with
@@ -574,19 +572,19 @@ namespace Aqualis
                         this.size1 <== -1
                         this.size2 <== -1
                         this.size3 <== -1
-                        programList[prIndex].codewrite("del "+name+""+"\n")
+                        codewrite("del "+name+""+"\n")
                     |_ -> ()
                 |JavaScript ->
                     match size with
                     |A3(0,0,0) ->
                         this.size1 <== -1
-                        programList[prIndex].codewrite(name+"= null;"+"\n")
+                        codewrite(name+"= null;"+"\n")
                     |_ -> ()
                 |PHP ->
                     match size with
                     |A3(0,0,0) ->
                         this.size1 <== -1
-                        programList[prIndex].codewrite("unset("+name+");"+"\n")
+                        codewrite("unset("+name+");"+"\n")
                     |_ -> ()
                 |Numeric ->
                     ()
@@ -619,14 +617,14 @@ namespace Aqualis
         static member sizeMismatchError(v1:base3,v2:base3) =
             if debug.debugMode then
                 error.inc()
-                programList[prIndex].comment("***debug array1 access check: "+error.ID+"*****************************")
+                comment("***debug array1 access check: "+error.ID+"*****************************")
                 br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '<==' array size1 mismatch")
                 br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '<==' array size2 mismatch")
                 br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '<==' array size3 mismatch")
-                programList[prIndex].comment "****************************************************"
+                comment "****************************************************"
                 
     ///<summary>数値型1次元配列</summary>
     type num3 (typ:Etype,x:Expr3) =
@@ -636,7 +634,6 @@ namespace Aqualis
             num3(typ,Var3(size,name))
         member this.etype with get() = typ
         member this.Item with get(i:num0,j:num0,k:num0) = this.Idx3(i,j,k)
-(*
         member this.Item with get(i:num0,j:num0,k:int) = this.Idx3(i,j,I k)
         member this.Item with get(i:num0,j:int,k:num0) = this.Idx3(i,I j,k)
         member this.Item with get(i:num0,j:int,k:int) = this.Idx3(i,I j,I k)
@@ -978,7 +975,6 @@ namespace Aqualis
         member this.Item with get(_:unit,_:unit,(a3:num0,b3:int)) = num3(typ,this.Idx3((),(),(a3,I b3)))
         member this.Item with get(_:unit,_:unit,(a3:int,b3:num0)) = num3(typ,this.Idx3((),(),(I a3,b3)))
         member this.Item with get(_:unit,_:unit,(a3:int,b3:int)) = num3(typ,this.Idx3((),(),(I a3,I b3)))
-*)
         
         //<summary>3次元配列生成(整数型)</summary> 
         ///<param name="s1">第1要素数</param>
@@ -1163,83 +1159,83 @@ namespace Aqualis
         static member sizeMismatchError(x:num3,y:num3) =
             if debug.debugMode then
                 error.inc()
-                programList[prIndex].comment("***debug array1 access check: "+error.ID+"*****************************")
+                comment("***debug array1 access check: "+error.ID+"*****************************")
                 br.if1 (x.size1 .=/ y.size1) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '+' array size1 mismatch")
                 br.if1 (x.size2 .=/ y.size2) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '+' array size2 mismatch")
-                programList[prIndex].comment "****************************************************"
+                comment "****************************************************"
                 
         static member (+) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y[i,j,k]))
         static member (+) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x+y[i,j,k]))
-        static member (+) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x+y[i,j,k]))
+        static member (+) (x:int,y:num3) = num3(It 4%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x+y[i,j,k]))
         static member (+) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x+y[i,j,k]))
         static member (+) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
-        static member (+) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
+        static member (+) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
         static member (+) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
         
         static member (-) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y[i,j,k]))
         static member (-) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x-y[i,j,k]))
-        static member (-) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x-y[i,j,k]))
+        static member (-) (x:int,y:num3) = num3(It 4%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x-y[i,j,k]))
         static member (-) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x-y[i,j,k]))
         static member (-) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
-        static member (-) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
+        static member (-) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
         static member (-) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
         
         static member ( * ) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y[i,j,k]))
         static member ( * ) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x*y[i,j,k]))
-        static member ( * ) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x*y[i,j,k]))
+        static member ( * ) (x:int,y:num3) = num3(It 4%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x*y[i,j,k]))
         static member ( * ) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x*y[i,j,k]))
         static member ( * ) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
-        static member ( * ) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
+        static member ( * ) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
         static member ( * ) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
         
         static member (/) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y[i,j,k]))
         static member (/) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x/y[i,j,k]))
-        static member (/) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x/y[i,j,k]))
+        static member (/) (x:int,y:num3) = num3(It 4%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x/y[i,j,k]))
         static member (/) (x:double,y:num3) = num3(Dt%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x/y[i,j,k]))
         static member (/) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y))
-        static member (/) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y))
+        static member (/) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y))
         static member (/) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y))
 
         static member (./) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y[i,j,k])
         static member (./) (x:num0,y:num3) = num3(x.etype%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x./y[i,j,k]))
-        static member (./) (x:int,y:num3) = num3((It 4)%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x./y[i,j,k]))
+        static member (./) (x:int,y:num3) = num3(It 4%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x./y[i,j,k]))
         static member (./) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
-        static member (./) (x:num3,y:int) = num3(x.etype%%(It 4),Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
+        static member (./) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
         
         static member (<==) (v1:num3,v2:num3) =
             if debug.debugMode then
                 error.inc()
-                programList[prIndex].comment("***debug array1 access check: "+error.ID+"*****************************")
+                comment("***debug array1 access check: "+error.ID+"*****************************")
                 br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '<==' array size1 mismatch")
                 br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '<==' array size2 mismatch")
                 br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
                     print.t ("ERROR"+error.ID+" operator '<==' array size3 mismatch")
-                programList[prIndex].comment("****************************************************")
+                comment("****************************************************")
             match v1.Expr,v2.Expr with
             |Var3(_,x),Var3(_,y) ->
                 match programList[prIndex].language with
                 |Fortran|LaTeX ->
-                    programList[prIndex].codewrite(x + "=" + y)
+                    codewrite(x + "=" + y)
                 |C99 ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
                 |HTML ->
-                    programList[prIndex].codewrite(x + " \\leftarrow " + y)
+                    codewrite(x + " \\leftarrow " + y)
                 |Python ->
-                    programList[prIndex].codewrite(x + " = copy.deepcopy("+y+")")
+                    codewrite(x + " = copy.deepcopy("+y+")")
                 |JavaScript ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
                 |PHP ->
@@ -1259,15 +1255,15 @@ namespace Aqualis
             |Var3(_,x) ->
                 match programList[prIndex].language with
                 |Fortran|LaTeX ->
-                    programList[prIndex].codewrite(x + "=" + v2.Expr.eval (programList[prIndex]))
+                    codewrite(x + "=" + v2.Expr.eval (programList[prIndex]))
                 |C99 ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |HTML ->
-                    programList[prIndex].codewrite(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
+                    codewrite(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
                 |Python ->
                     match v1.etype with
-                    |Structure sname -> programList[prIndex].codewrite(x + " = numpy.array([[["+sname+"() for _ in range(int("+v1.size3.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+v1.size1.Expr.eval (programList[prIndex])+"),int("+v1.size2.Expr.eval (programList[prIndex])+"),int("+v1.size3.Expr.eval (programList[prIndex])+"))\n")
-                    |_               -> programList[prIndex].codewrite(x+"[:,:,:]="+v2.Expr.eval (programList[prIndex])+"\n")
+                    |Structure sname -> codewrite(x + " = numpy.array([[["+sname+"() for _ in range(int("+v1.size3.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+v1.size1.Expr.eval (programList[prIndex])+"),int("+v1.size2.Expr.eval (programList[prIndex])+"),int("+v1.size3.Expr.eval (programList[prIndex])+"))\n")
+                    |_               -> codewrite(x+"[:,:,:]="+v2.Expr.eval (programList[prIndex])+"\n")
                 |JavaScript ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |PHP ->

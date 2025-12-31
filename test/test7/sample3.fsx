@@ -12,19 +12,19 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
 fixedWidthPage outputdir "sampleC" 1920 <| fun () ->
-    programList[prIndex].codewrite "AAA"
+    codewrite "AAA"
     html.br()
-    programList[prIndex].codewrite "AAA"
+    codewrite "AAA"
     html.br()
-    programList[prIndex].codewrite "AAA"
+    codewrite "AAA"
     html.br()
-    programList[prIndex].codewrite "AAA"
+    codewrite "AAA"
     html.br()
-    programList[prIndex].codewrite "AAA"
+    codewrite "AAA"
     html.br()
-    programList[prIndex].codewrite "AAA"
+    codewrite "AAA"
     html.br()
-    programList[prIndex].codewrite "AAA"
+    codewrite "AAA"
     html.br()
     html.canvas Style[size.width "1920px"; size.height "500px";] <| fun cv ->
         
@@ -137,17 +137,17 @@ fixedWidthPage outputdir "sampleC" 1920 <| fun () ->
                 <| position(grid_x1+codeBoxWidth/2.0, a1f.Bottom)
                 <| position(grid_x1+codeBoxWidth/2.0, a1r.Top)
                 <| 2
-    programList[prIndex].codewrite "BBB"
+    codewrite "BBB"
     html.br()
-    programList[prIndex].codewrite "BBB"
+    codewrite "BBB"
     html.br()
-    programList[prIndex].codewrite "BBB"
+    codewrite "BBB"
     html.br()
-    programList[prIndex].codewrite "BBB"
+    codewrite "BBB"
     html.br()
-    programList[prIndex].codewrite "BBB"
+    codewrite "BBB"
     html.br()
-    programList[prIndex].codewrite "BBB"
+    codewrite "BBB"
     html.br()
-    programList[prIndex].codewrite "BBB"
+    codewrite "BBB"
     html.br()

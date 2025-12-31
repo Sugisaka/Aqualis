@@ -606,7 +606,7 @@ namespace Aqualis
                     expr.simpDiv(x,y)
                 |Inv(t,x) ->
                     let x = x.simp
-                    expr.simpInv(x)
+                    expr.simpInv x
                 |Mod(_, x,y) ->
                     let x = x.simp
                     let y = y.simp

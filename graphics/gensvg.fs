@@ -626,10 +626,10 @@ type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.quadrangle3D(p1:double*double*double, p2:double*double*double, p3:double*double*double, p4:double*double*double, p3D:Setting3D, fillcolor, strokecolor) = 
-        let (x1, y1, z1) = p1
-        let (x2, y2, z2) = p2
-        let (x3, y3, z3) = p3
-        let (x4, y4, z4) = p4
+        let x1, y1, z1 = p1
+        let x2, y2, z2 = p2
+        let x3, y3, z3 = p3
+        let x4, y4, z4 = p4
         gensvg.quadrangle3D(cvx,cvy,wr,D scale*x1,D scale*y1,D scale*z1,D scale*x2,D scale*y2,D scale*z2,D scale*x3,D scale*y3,D scale*z3,D scale*x4,D scale*y4,D scale*z4,p3D,fillcolor,strokecolor)
     /// <summary>
     /// テキストを追加
@@ -651,7 +651,7 @@ type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.text(c:double*double,text:string,size, font, textAnchor, rot, fillcolor, strokecolor) = 
-        let (cx, cy) = c
+        let cx, cy = c
         gensvg.text(cvx, cvy, wr, D scale*cx, D scale*cy, Str text, D size, font, textAnchor, rot, fillcolor,strokecolor)
         
 type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
@@ -676,8 +676,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p2">終点</param>
     /// <param name="strokecolor">線色</param>
     member this.line(p1:num0*num0, p2:num0*num0, strokecolor:color.stroke) = 
-        let (x1, y1) = p1
-        let (x2, y2) = p2
+        let x1, y1 = p1
+        let x2, y2 = p2
         gensvg.line(cvx,cvy,wr,scale*x1,scale*y1,scale*x2,scale*y2,strokecolor)
     /// <summary>
     /// 直線を追加
@@ -686,7 +686,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p2">終点</param>
     /// <param name="strokecolor">線色</param>
     member this.line(p1:double*double, p2:double*double, strokecolor:color.stroke) = 
-        let (x1, y1) = p1
+        let x1, y1 = p1
         let (x2, y2) = p2
         gensvg.line(cvx,cvy,wr,D scale*x1,D scale*y1,D scale*x2,D scale*y2,strokecolor)
     /// <summary>
@@ -697,8 +697,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="strokecolor">線色</param>
     member this.line3D(p1:double*double*double, p2:double*double*double, p3D:Setting3D, strokecolor:color.stroke) = 
-        let (x1, y1, z1) = p1
-        let (x2, y2, z2) = p2
+        let x1, y1, z1 = p1
+        let x2, y2, z2 = p2
         gensvg.line3D(cvx,cvy,wr,D scale*x1,D scale*y1,D scale*z1,D scale*x2,D scale*y2,D scale*z2,p3D,strokecolor)
     /// <summary>
     /// 折れ線を追加
@@ -778,8 +778,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="strokecolor">線色</param>
     member this.line3D(p1:num0*num0*num0, p2:num0*num0*num0, p3D:Setting3D, strokecolor:color.stroke) = 
-        let (x1, y1, z1) = p1
-        let (x2, y2, z2) = p2
+        let x1, y1, z1 = p1
+        let x2, y2, z2 = p2
         gensvg.line3D(cvx,cvy,wr,scale*x1,scale*y1,scale*z1,scale*x2,scale*y2,scale*z2,p3D,strokecolor)
     /// <summary>
     /// 円を追加
@@ -789,7 +789,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle(c:double*double, r:double, fillcolor, strokecolor) = 
-        let (cx, cy) = c
+        let cx, cy = c
         gensvg.circle(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*r,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -799,7 +799,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle(c:num0*num0, r:num0, fillcolor, strokecolor) = 
-        let (cx, cy) = c
+        let cx, cy = c
         gensvg.circle(cvx,cvy,wr,scale*cx,scale*cy,scale*r,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -809,8 +809,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="t">開始,終了角[°]</param>
     /// <param name="strokecolor">線色</param>
     member this.circle(c, r, t, strokecolor) = 
-        let (cx, cy) = c
-        let (t1, t2) = t
+        let cx, cy = c
+        let t1, t2 = t
         gensvg.circle(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*r, D t1, D t2, strokecolor)
     /// <summary>
     /// 円を追加
@@ -820,8 +820,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="t">開始,終了角[°]</param>
     /// <param name="strokecolor">線色</param>
     member this.circle(c:num0*num0, r:num0, t, strokecolor) = 
-        let (cx, cy) = c
-        let (t1, t2) = t
+        let cx, cy = c
+        let t1, t2 = t
         gensvg.circle(cvx,cvy,wr,scale*cx,scale*cy,scale*r,t1,t2,strokecolor)
     /// <summary>
     /// 円を追加
@@ -832,8 +832,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3D(c:double*double*double, r, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
-        let (x3D,y3D,z3D) = p3D.DirX,p3D.DirY,p3D.DirZ
+        let cx, cy, cz = c
+        let x3D,y3D,z3D = p3D.DirX,p3D.DirY,p3D.DirZ
         gensvg.circle3D(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -844,8 +844,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3D(c:num0*num0*num0, r:num0, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
-        let (x3D,y3D,z3D) = p3D.DirX,p3D.DirY,p3D.DirZ
+        let cx, cy, cz = c
+        let x3D,y3D,z3D = p3D.DirX,p3D.DirY,p3D.DirZ
         gensvg.circle3D(cvx,cvy,wr,scale*cx,scale*cy,scale*cz,scale*r,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -857,8 +857,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3D(c, r, t, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
-        let (t1, t2) = t
+        let cx, cy, cz = c
+        let t1, t2 = t
         gensvg.circle3D(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,D t1,D t2,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -870,8 +870,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3D(c:num0*num0*num0, r:num0, t, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
-        let (t1, t2) = t
+        let cx, cy, cz = c
+        let t1, t2 = t
         gensvg.circle3D(cvx,cvy,wr,scale*cx,scale*cy,scale*cz,scale*r,t1,t2,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -883,7 +883,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3Dxy(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
+        let cx, cy, cz = c
         gensvg.circle3Dxy(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,I n,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -895,7 +895,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3Dxy(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
+        let cx, cy, cz = c
         gensvg.circle3Dxy(cvx,cvy,wr, scale*cx, scale*cy, scale*cz, scale*r, n, p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -907,7 +907,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3Dyz(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
+        let cx, cy, cz = c
         gensvg.circle3Dyz(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,I n,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -919,7 +919,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3Dyz(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
+        let cx, cy, cz = c
         gensvg.circle3Dyz(cvx,cvy,wr, scale*cx, scale*cy, scale*cz, scale*r, n, p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -931,7 +931,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3Dzx(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
+        let cx, cy, cz = c
         gensvg.circle3Dzx(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,I n,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -943,7 +943,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.circle3Dzx(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
-        let (cx, cy, cz) = c
+        let cx, cy, cz = c
         gensvg.circle3Dzx(cvx,cvy,wr, scale*cx, scale*cy, scale*cz, scale*r, n, p3D,fillcolor,strokecolor)
     /// <summary>
     /// 楕円を追加
@@ -953,8 +953,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.ellipse(c:double*double, r:double*double, fillcolor, strokecolor) = 
-        let (cx, cy) = c
-        let (rx, ry) = r
+        let cx, cy = c
+        let rx, ry = r
         gensvg.ellipse(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*rx,D scale*ry,fillcolor,strokecolor)
     /// <summary>
     /// 楕円を追加
@@ -964,8 +964,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.ellipse(c:num0*num0, r:num0*num0, fillcolor, strokecolor) = 
-        let (cx, cy) = c
-        let (rx, ry) = r
+        let cx, cy = c
+        let rx, ry = r
         gensvg.ellipse(cvx,cvy,wr,scale*cx,scale*cy,scale*rx,scale*ry,fillcolor,strokecolor)
     /// <summary>
     /// 長方形を追加
@@ -975,8 +975,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.rectangle(c:double*double, s:double*double, fillcolor, strokecolor) = 
-        let (cx, cy) = c
-        let (width, height) = s
+        let cx, cy = c
+        let width, height = s
         gensvg.rectangle(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*width,D scale*height,fillcolor,strokecolor)
     /// <summary>
     /// 長方形を追加
@@ -986,8 +986,8 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.rectangle(c:num0*num0, s:num0*num0, fillcolor, strokecolor) = 
-        let (cx, cy) = c
-        let (width, height) = s
+        let cx, cy = c
+        let width, height = s
         gensvg.rectangle(cvx,cvy,wr,scale*cx,scale*cy,scale*width,scale*height,fillcolor,strokecolor)
     /// <summary>
     /// テキストを追加
@@ -1009,7 +1009,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.text(c:num0*num0,text:num0,size, font, textAnchor, rot, fillcolor, strokecolor) = 
-        let (cx, cy) = c
+        let cx, cy = c
         gensvg.text(cvx,cvy,wr,D scale*cx,D scale*cy,Nvr text.Expr,D size, font, textAnchor, rot, fillcolor,strokecolor)
         
 type svgfile =

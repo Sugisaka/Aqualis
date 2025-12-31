@@ -155,7 +155,7 @@ type optimization() =
                         //勾配方向に最小値を探す
                         optimization.findmin m (x0,y) dd0_ f x0
                         match stepProc with
-                          |Some(pu) ->
+                          |Some pu ->
                                 pu(i,x0)
                           |None ->
                             ()
@@ -173,7 +173,7 @@ type optimization() =
     /// <param name="df">目的関数の勾配</param>
     static member findmin_ConjugateGradient2 (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:((num0*num1)->unit)option) =
         match stepProc with
-          |Some(pu) ->
+          |Some pu ->
                 pu (_0,x0)
           |None ->
             ()
@@ -231,7 +231,7 @@ type optimization() =
     /// <param name="fH"></param>
     static member findmin_Newton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (fH:num2->num1->unit) (stepProc:((num0*num1)->unit)option) =
         match stepProc with
-          |Some(pu) ->
+          |Some pu ->
                 pu (_0,x0)
           |None ->
             ()
@@ -251,7 +251,7 @@ type optimization() =
                                 a.[j] <== -a.[j]
                             optimization.findmin m (x0,a) dd0_ f x0
                             match stepProc with
-                              |Some(pu) ->
+                              |Some pu ->
                                     pu(i,x0)
                               |None ->
                                 ()
@@ -267,7 +267,7 @@ type optimization() =
     /// <param name="df"></param>
     static member findmin_quasiNewton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:((num0*num1)->unit)option) =
         match stepProc with
-          |Some(pu) ->
+          |Some pu ->
                 pu (_0,x0)
           |None ->
             ()
@@ -306,8 +306,7 @@ type optimization() =
                             df1 <== df0
                             x0.foreach <| fun i -> x0.[i] <== xx.[i]
                             match stepProc with
-                              |Some(pu) ->
+                              |Some pu ->
                                     pu(i,x0)
                               |None ->
                                 ()
-                                

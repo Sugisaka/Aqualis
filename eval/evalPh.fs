@@ -8,7 +8,7 @@ namespace Aqualis
         type expr with
             
             static member substPh (x:expr) (y:expr) (c:program) =
-                c.codewrite ("<?php " + x.evalPh c + " = " + "\"" + x.evalPh c + "\"" + "; ?>")
+                c.codewrite ("<?php " + x.evalPh c + " = " + y.evalPh c + "; ?>")
                 
             static member equivPh (x:expr) (y:expr) (c:program) =
                 printfn "PHPでこの文は使用できません"
@@ -112,23 +112,31 @@ namespace Aqualis
             static member branchPh (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPh c
+                    c.codewrite "<?php"
                     c.codewrite("if(" + cond + "):")
+                    c.codewrite " ?>"
                     c.indentInc()
                     code()
                     c.indentDec()
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalPh c
-                    c.codewrite("else if(" + cond + "):")
+                    c.codewrite "<?php"
+                    c.codewrite("elseif(" + cond + "):")
+                    c.codewrite " ?>"
                     c.indentInc()
                     code()
                     c.indentDec()
                 let elsecode code =
+                    c.codewrite "<?php"
                     c.codewrite "else:"
+                    c.codewrite " ?>"
                     c.indentInc()
                     code()
                     c.indentDec()
                 code(ifcode,elseifcode,elsecode)
+                c.codewrite "<?php"
                 c.codewrite "endif;"
+                c.codewrite " ?>"
                 
             member this.evalPh(c:program) =
                 match this.simp with

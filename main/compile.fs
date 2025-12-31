@@ -7,7 +7,7 @@ namespace Aqualis
     module Aqualis_main =
         
         ///<summary>コメント文を生成</summary>
-        let (!) s = programList[prIndex].comment s
+        let (!) s = comment s
         
         ///<summary>構造体定義</summary>
         let str = structure()
@@ -69,7 +69,7 @@ namespace Aqualis
                     programList[prIndex].delete()
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map(fun (n,(_,_,_)) -> n))
-                programList[prIndex].codewrite("call" + " " + projectname + "(" + args + ")\n")
+                codewrite("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,C99] <| fun () ->
@@ -109,7 +109,7 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0,true  -> n.Substring(2,n.Length-3)
                         |_ -> n)
                     |> fun s -> String.Join(", ", s)
-                programList[prIndex].codewrite(projectname + "(" + args + ");\n")
+                codewrite(projectname + "(" + args + ");\n")
             |LaTeX ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,LaTeX] <| fun () ->
@@ -121,7 +121,7 @@ namespace Aqualis
                     writer.codewrite("% Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
                         writer.codewrite("% " +  nm + "\n")
-                    writer.codewrite("%=============================================================================================\n")
+                    writer.codewrite "%=============================================================================================\n"
                     let argvar = String.Join(", ", programList[prIndex].arg.list |> List.map (fun (_,(_,_,n)) -> n))
                     writer.codewrite("subroutine " + projectname + "(" + argvar + ")\n")
                     writer.indent.inc()
@@ -143,7 +143,7 @@ namespace Aqualis
                     programList[prIndex].delete()
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                programList[prIndex].codewrite("call" + " " + projectname + "(" + args + ")\n")
+                codewrite("call" + " " + projectname + "(" + args + ")\n")
             |HTML ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,HTML] <| fun () ->
@@ -179,7 +179,7 @@ namespace Aqualis
                     programList[prIndex].delete()
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                programList[prIndex].codewrite("\\(" + projectname + "(" + args + ")\\)<br/>\n")
+                codewrite("\\(" + projectname + "(" + args + ")\\)<br/>\n")
             |Python ->
                 programList[prIndex].flist.add projectname
                 let re_args,args = makeProgram [dir,projectname,Python] <| fun () ->
@@ -232,7 +232,7 @@ namespace Aqualis
                     writer.close()
                     programList[prIndex].delete()
                     re_args,args
-                programList[prIndex].codewrite(re_args + " = " + projectname + "(" + args + ")\n")
+                codewrite(re_args + " = " + projectname + "(" + args + ")\n")
             |_ -> ()
             
         ///<summary>コンパイル</summary>
@@ -723,7 +723,7 @@ namespace Aqualis
                         for funname in programList[prIndex].flist.list do
                             writer.codewrite (File.ReadAllText(dir + "\\" + funname))
                             File.Delete(dir + "\\" + funname)
-                            writer.codewrite ("\n")
+                            writer.codewrite "\n"
                         //Main
                         writer.codewrite (programList[prIndex].allCodes)
                         writer.close()

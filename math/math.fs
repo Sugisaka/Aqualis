@@ -103,12 +103,9 @@ namespace Aqualis
         //Legendre多項式 P_l
         let plgndr (pl:num0) (l:num0,x:num0) =
             codestr.section "Legendre多項式を計算" <| fun () ->
-                ch.i <| fun ll ->
-                ch.d <| fun fact ->
                 ch.d <| fun pll ->
                 ch.d <| fun pmm ->
                 ch.d <| fun pmmp1 ->
-                ch.d <| fun somx2 ->
                     pmm<==1.0
                     br.branch <| fun b ->
                         b.IF (l .= 0) <| fun () -> 
@@ -130,10 +127,8 @@ namespace Aqualis
         //<param name="(l,x)">計算するLegendre多項式の最高次数と引数</param>
         let plgndrarray (pl:num1) (l:num0,x:num0) =
             codestr.section ("0次から"+l.code+"次までのLegendre多項式を計算") <| fun () ->
-                ch.d <| fun fact ->
                 ch.d <| fun pmm ->
                 ch.d <| fun pmmp1 ->
-                ch.d <| fun somx2 ->
                     pmm<==1.0
                     pl[1-1]<==pmm
                     br.branch <| fun b ->

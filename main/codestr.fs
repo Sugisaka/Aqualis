@@ -46,13 +46,13 @@ namespace Aqualis
             let (!===) (s:string) = 
                 match programList[prIndex].language with
                 |LaTeX ->
-                    programList[prIndex].codewrite("\\section{"+s+"}")
+                    codewrite("\\section{"+s+"}")
                 |HTML -> 
-                    programList[prIndex].codewrite("<details open>")
-                    programList[prIndex].codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                    programList[prIndex].codewrite("<div class=\"insidecode-section\">")
+                    codewrite "<details open>"
+                    codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                    codewrite "<div class=\"insidecode-section\">"
                 |_ ->
-                    programList[prIndex].comment ("==="+(s.PadRight(76,'=')))
+                    comment ("===" + s.PadRight(76,'='))
             (!===)s
             match programList[prIndex].language with
             |Python ->
@@ -68,23 +68,23 @@ namespace Aqualis
             match programList[prIndex].language with 
             |Fortran |C99 |Python -> 
                 (!===)("end "+s) 
-                programList[prIndex].codewrite "\n"
+                codewrite "\n"
             |HTML ->
-                programList[prIndex].codewrite "</div>"
-                programList[prIndex].codewrite "</details>"
+                codewrite "</div>"
+                codewrite "</details>"
             |_  -> ()
               
         static member subsection (s:string) (code:unit->unit) = 
             let (!===) (s:string) = 
                 match programList[prIndex].language with
                 |LaTeX ->
-                    programList[prIndex].codewrite("\\subsection{"+s+"}")
+                    codewrite("\\subsection{"+s+"}")
                 |HTML -> 
-                    programList[prIndex].codewrite "<details open>"
-                    programList[prIndex].codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                    programList[prIndex].codewrite "<div class=\"insidecode-section\">"
+                    codewrite "<details open>"
+                    codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                    codewrite "<div class=\"insidecode-section\">"
                 |_ ->
-                    programList[prIndex].comment ("---"+(s.PadRight(76,'-')))
+                    comment ("---" + s.PadRight(76,'-'))
             (!===)s
             match programList[prIndex].language with
             |Python ->
@@ -100,46 +100,46 @@ namespace Aqualis
             match programList[prIndex].language with 
             |Fortran |C99 -> 
                 (!===)("end "+s) 
-                programList[prIndex].codewrite "\n"
+                codewrite "\n"
             |Python -> 
                 (!===)("end "+s) 
             |HTML   ->
-                programList[prIndex].codewrite "</div>"
-                programList[prIndex].codewrite "</details>"
+                codewrite "</div>"
+                codewrite "</details>"
             |_  -> ()
               
         static member private header (c:char) (s:string) = 
             match programList[prIndex].language with
             |Fortran ->
-                programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |C99 ->
-                programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |Python ->
-                programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |JavaScript ->
-                programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |PHP ->
-                programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |LaTeX ->
-                programList[prIndex].codewrite("\\section{"+s+"}")
+                codewrite("\\section{"+s+"}")
             |HTML -> 
-                programList[prIndex].codewrite "<details open>"
-                programList[prIndex].codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                programList[prIndex].codewrite "<div class=\"insidecode-section\">"
+                codewrite "<details open>"
+                codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                codewrite "<div class=\"insidecode-section\">"
             |Numeric -> ()
 
         static member private footer (c:char) (s:string) = 
             match programList[prIndex].language with
-            |Fortran   -> programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |C99 -> programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |Python -> programList[prIndex].comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |Fortran   -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |C99 -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |Python -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |HTML   ->
-                programList[prIndex].codewrite "</div>"
-                programList[prIndex].codewrite "</details>"
+                codewrite "</div>"
+                codewrite "</details>"
             |_   -> ()
 
         static member private blank () = 
-            programList[prIndex].codewrite "\n"
+            codewrite "\n"
             
         static member h1 (s:string) (code:unit->unit) = 
             codestr.header '#' s

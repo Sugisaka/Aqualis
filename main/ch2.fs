@@ -41,21 +41,21 @@ namespace Aqualis
             ///<summary>整数型1次元配列を生成</summary>
             static member i01 code = 
                 let x,returnVar = programList[prIndex].i1.getVar()
-                let y = num1(It 4,Var1(A1(0),x))
+                let y = num1(It 4,Var1(A1 0,x))
                 code y
                 returnVar()
                 
             ///<summary>実数型1次元配列を生成</summary>
             static member d01 code = 
                 let x,returnVar = programList[prIndex].d1.getVar()
-                let y = num1(Dt,Var1(A1(0),x))
+                let y = num1(Dt,Var1(A1 0,x))
                 code y
                 returnVar()
                 
             ///<summary>複素数型1次元配列を生成</summary>
             static member z01 code = 
                 let x,returnVar = programList[prIndex].z1.getVar()
-                let y = num1(Zt,Var1(A1(0),x))
+                let y = num1(Zt,Var1(A1 0,x))
                 code y
                 returnVar()
                 
@@ -68,29 +68,29 @@ namespace Aqualis
                     
             ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member i1 (size1:int) = fun code ->
-                ch.i1 ((I size1)) code
+                ch.i1 (I size1) code
                 
             ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member d1 (size1:num0) = fun code ->
                 ch.d01 <| fun v ->
-                    v.allocate(size1)
+                    v.allocate size1
                     code v
                     v.deallocate()
                 
             ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member d1 (size1:int) = fun code ->
-                ch.d1 ((I size1)) code
+                ch.d1 (I size1) code
                 
             ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member z1 (size1:num0) = fun code ->
                 ch.z01 <| fun v ->
-                    v.allocate(size1)
+                    v.allocate size1
                     code v
                     v.deallocate()
                 
             ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member z1 (size1:int) = fun code ->
-                ch.z1 ((I size1)) code
+                ch.z1 (I size1) code
                 
             ///<summary>整数型2次元配列を生成</summary>
             static member i02 code = 
@@ -398,12 +398,12 @@ namespace Aqualis
             static member count0 code = 
                 ch.i <| fun counter -> 
                     counter.clear()
-                    code(counter)
+                    code counter
                     
             static member count1 code =
                 ch.i <| fun counter ->
                     counter <== _1
-                    code(counter)
+                    code counter
                     
             ///<summary>ファイルポインタcache変数を生成し、code内の処理を実行</summary>
             static member f code = 
@@ -494,20 +494,20 @@ namespace Aqualis
                     |Zt -> programList[prIndex].z1.getVar()
                     |Dt -> programList[prIndex].d1.getVar()
                     |_ -> programList[prIndex].i1.getVar()
-                let y = num1(e,Var1(A1(0),x))
+                let y = num1(e,Var1(A1 0,x))
                 code y
                 returnVar()
                 
             ///<summary>num0型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member n1 (e,size1:num0) = fun code ->
                 ch.n01 e <| fun v ->
-                    v.allocate(size1)
+                    v.allocate size1
                     code v
                     v.deallocate()
                     
             ///<summary>num0型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member n1 (e,size1:int) = fun code ->
-                ch.n1 (e,(I size1)) code
+                ch.n1 (e,I size1) code
                 
             ///<summary>num0型2次元配列を生成</summary>
             static member n02 e code = 
@@ -564,11 +564,11 @@ namespace Aqualis
                 match programList[prIndex].language with
                 |Fortran ->
                     ch.i1 size1 <| fun i ->
-                        programList[prIndex].varCopyIn.setVar(It 4, A1(0),i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
+                        programList[prIndex].varCopyIn.setVar(It 4, A1 0,i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
                         code i
                 |C99 ->
                     ch.i1 size1 <| fun i ->
-                        programList[prIndex].varCopyIn.setVar(It 4,A1(0),i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
+                        programList[prIndex].varCopyIn.setVar(It 4,A1 0,i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
                         code i
                 |_ ->
                     ()
@@ -582,11 +582,11 @@ namespace Aqualis
                 match programList[prIndex].language with
                 |Fortran ->
                     ch.d1 size1 <| fun i ->
-                        programList[prIndex].varCopyIn.setVar(Dt, A1(0),i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
+                        programList[prIndex].varCopyIn.setVar(Dt, A1 0,i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
                         code i
                 |C99 ->
                     ch.d1 size1 <| fun i ->
-                        programList[prIndex].varCopyIn.setVar(Dt,A1(0),i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
+                        programList[prIndex].varCopyIn.setVar(Dt,A1 0,i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
                         code i
                 |_ ->
                     ()
@@ -600,11 +600,11 @@ namespace Aqualis
                 match programList[prIndex].language with
                 |Fortran ->
                     ch.z1 size1 <| fun i ->
-                        programList[prIndex].varCopyIn.setVar(Zt, A1(0),i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
+                        programList[prIndex].varCopyIn.setVar(Zt, A1 0,i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
                         code i
                 |C99 ->
                     ch.z1 size1 <| fun i ->
-                        programList[prIndex].varCopyIn.setVar(Zt,A1(0),i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
+                        programList[prIndex].varCopyIn.setVar(Zt,A1 0,i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
                         code i
                 |_ ->
                     ()
@@ -726,11 +726,11 @@ namespace Aqualis
                 match programList[prIndex].language with
                 |Fortran ->
                     ch.i1 size1 <| fun i ->
-                        programList[prIndex].varCopyOut.setVar(It 4, A1(0),i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
+                        programList[prIndex].varCopyOut.setVar(It 4, A1 0,i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
                         code i
                 |C99 ->
                     ch.i1 size1 <| fun i ->
-                        programList[prIndex].varCopyOut.setVar(It 4,A1(0),i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
+                        programList[prIndex].varCopyOut.setVar(It 4,A1 0,i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
                         code i
                 |_ ->
                     ()
@@ -744,11 +744,11 @@ namespace Aqualis
                 match programList[prIndex].language with
                 |Fortran ->
                     ch.d1 size1 <| fun i ->
-                        programList[prIndex].varCopyOut.setVar(Dt, A1(0),i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
+                        programList[prIndex].varCopyOut.setVar(Dt, A1 0,i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
                         code i
                 |C99 ->
                     ch.d1 size1 <| fun i ->
-                        programList[prIndex].varCopyOut.setVar(Dt,A1(0),i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
+                        programList[prIndex].varCopyOut.setVar(Dt,A1 0,i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
                         code i
                 |_ ->
                     ()
@@ -762,11 +762,11 @@ namespace Aqualis
                 match programList[prIndex].language with
                 |Fortran ->
                     ch.z1 size1 <| fun i ->
-                        programList[prIndex].varCopyOut.setVar(Zt,A1(0),i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
+                        programList[prIndex].varCopyOut.setVar(Zt,A1 0,i.code+"(1:"+size1.Expr.eval (programList[prIndex])+")","")
                         code i
                 |C99 ->
                     ch.z1 size1 <| fun i ->
-                        programList[prIndex].varCopyOut.setVar(Zt,A1(0),i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
+                        programList[prIndex].varCopyOut.setVar(Zt,A1 0,i.code+"[0:"+size1.Expr.eval (programList[prIndex])+"]","")
                         code i
                 |_ ->
                     ()

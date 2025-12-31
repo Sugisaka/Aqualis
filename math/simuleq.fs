@@ -20,7 +20,7 @@ namespace Aqualis
                 let dot_product2(dot_product2_:num0,a:num1,b:num1) =
                   dot_product2_ <== 0
                   iter.num a.size1 <| fun i -> 
-                      dot_product2_ <== dot_product2_ + asm.conj(a.[i]) * b.[i]
+                      dot_product2_ <== dot_product2_ + asm.conj(a[i]) * b[i]
                       
                 ch.z1 b.size1 <| fun r -> ch.z1 b.size1 <| fun t -> ch.z1 b.size1 <| fun p -> ch.z1 b.size1 <| fun v -> ch.z1 b.size1 <| fun s -> ch.z1 b.size1 <| fun p_hat -> ch.z1 b.size1 <| fun s_hat -> ch.z1 b.size1 <| fun r_tld ->
                     ch.d <| fun bnrm2 ->
@@ -28,7 +28,7 @@ namespace Aqualis
                         br.if1 (bnrm2 .= 0.0) <| fun () -> bnrm2 <== 1.0
                         integralequation_matmul1(t,x)
                         iter.num r.size1 <| fun i -> 
-                            r.[i] <== b.[i] - t.[i]
+                            r[i] <== b[i] - t[i]
                         ch.d <| fun err ->
                             ch.d <| fun norm_ ->
                                 norm(norm_,r)
@@ -42,10 +42,10 @@ namespace Aqualis
                                         //反復処理
                                         iter.num_exit (I max_iteration) <| fun (exit,i) ->
                                             dot_product2(rho,r_tld,r)
-                                            br.if1 (asm.abs(rho) .= 0.0) <| fun () -> exit()
+                                            br.if1 (asm.abs rho .= 0.0) <| fun () -> exit()
                                             br.if2 (i .> 0)
                                               (fun () ->
-                                                beta <== ( rho/rho_1 )*( alpha/omega )
+                                                beta <== rho/rho_1*( alpha/omega )
                                                 iter.num r.size1 <| fun j -> p.[j] <== r.[j] + beta*( p.[j] - omega*v.[j]))
                                               (fun () ->
                                                 iter.num r.size1 <| fun j -> p.[j] <== r.[j])
@@ -83,8 +83,7 @@ namespace Aqualis
                                             br.if1 (err .<= tol) <| fun () -> 
                                                 print.t "converged"
                                                 exit()
-                                            br.if1 (asm.abs(omega) .= 0.0) <| fun () -> 
+                                            br.if1 (asm.abs omega .= 0.0) <| fun () -> 
                                                 print.t "error_BiCGSTAB"
                                                 exit()
                                             rho_1 <== rho
-                                    

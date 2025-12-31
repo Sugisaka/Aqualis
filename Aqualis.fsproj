@@ -67,11 +67,8 @@
     <Compile Include="graphics\graph1d.fs" />
     <Compile Include="graphics\plot2d.fs" />
     <Compile Include="web\io.fs" />
-    <None Include="web\num0.fs" />
-    <None Include="web\asm.fs" />
     <Compile Include="web\greek.fs" />
     <Compile Include="web\style.fs" />
-    <None Include="web\figure.fs" />
     <Compile Include="web\param.fs" />
     <Compile Include="web\php.fs" />
     <Compile Include="web\html.fs" />

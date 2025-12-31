@@ -8,7 +8,7 @@ namespace Aqualis
             let X = var.dp1(id+"_x",data_x)
             let Y = var.dp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
-            member this.y (x:num0) code =
+            member _.y (x:num0) code =
                 ch.i <| fun flag ->
                     flag<==0
                     iter.range _0 (X.size1-2) <| fun i ->
@@ -43,10 +43,10 @@ namespace Aqualis
                     
         type splineInterpolate(iscpx:bool) =
             
-            let f = if iscpx then var.z2("f") else var.d2("f")
-            let g = if iscpx then var.z1("g") else var.d1("g")
-            let x = var.d1("x")
-            let y = if iscpx then var.z1("y") else var.d1("y")
+            let f = if iscpx then var.z2 "f" else var.d2 "f"
+            let g = if iscpx then var.z1 "g" else var.d1 "g"
+            let x = var.d1 "x"
+            let y = if iscpx then var.z1 "y" else var.d1 "y"
             
             let a(n:num0) = 3*n-2
             
@@ -75,30 +75,30 @@ namespace Aqualis
                     f.clear()
                     g.clear()
                     !"f''(x1)=0"
-                    f.[1-1,a(_1)-1] <== 0.0
-                    f.[1-1,b(_1)-1] <== 2
+                    f.[1-1,a _1-1] <== 0.0
+                    f.[1-1,b _1-1] <== 2
                     g.[1-1] <== 0
                     iter.range _1 (N-2) <| fun n ->
                         ch.d <| fun dx ->
                             dx <== x.[n+1-1]-x.[n+1-1-1]
                             !"f(xn)=yN"
-                            f.[3*(n+1)-4-1,a((n+1)-1)-1] <== asm.pow(dx,3)
-                            f.[3*(n+1)-4-1,b((n+1)-1)-1] <== asm.pow(dx,2)
-                            f.[3*(n+1)-4-1,c((n+1)-1)-1] <== dx
+                            f.[3*(n+1)-4-1,a(n+1-1)-1] <== asm.pow(dx,3)
+                            f.[3*(n+1)-4-1,b(n+1-1)-1] <== asm.pow(dx,2)
+                            f.[3*(n+1)-4-1,c(n+1-1)-1] <== dx
                             g.[3*(n+1)-4-1] <== y.[(n+1)-1] - y.[(n+1)-1-1]
                             !"f'(x[n-1])=f'(x[n])"
-                            f.[3*(n+1)-3-1,a((n+1)-1)-1] <== 3*asm.pow(dx,2)
-                            f.[3*(n+1)-3-1,b((n+1)-1)-1] <== 2*dx
-                            f.[3*(n+1)-3-1,c((n+1)-1)-1] <== 1
-                            f.[3*(n+1)-3-1,a((n+1))-1] <== 0.0
-                            f.[3*(n+1)-3-1,b((n+1))-1] <== 0.0
-                            f.[3*(n+1)-3-1,c((n+1))-1] <== -1
+                            f.[3*(n+1)-3-1,a(n+1-1)-1] <== 3*asm.pow(dx,2)
+                            f.[3*(n+1)-3-1,b(n+1-1)-1] <== 2*dx
+                            f.[3*(n+1)-3-1,c(n+1-1)-1] <== 1
+                            f.[3*(n+1)-3-1,a(n+1)-1] <== 0.0
+                            f.[3*(n+1)-3-1,b(n+1)-1] <== 0.0
+                            f.[3*(n+1)-3-1,c(n+1)-1] <== -1
                             g.[3*(n+1)-3-1] <== 0.0
                             !"f''(x[n-1])=f''(x[n])"
-                            f.[3*(n+1)-2-1,a((n+1)-1)-1] <== 6*dx
-                            f.[3*(n+1)-2-1,b((n+1)-1)-1] <== 2
-                            f.[3*(n+1)-2-1,a((n+1))-1] <== 0.0
-                            f.[3*(n+1)-2-1,b((n+1))-1] <== -2
+                            f.[3*(n+1)-2-1,a(n+1-1)-1] <== 6*dx
+                            f.[3*(n+1)-2-1,b(n+1-1)-1] <== 2
+                            f.[3*(n+1)-2-1,a(n+1)-1] <== 0.0
+                            f.[3*(n+1)-2-1,b(n+1)-1] <== -2
                             g.[3*(n+1)-2-1] <== 0.0
                     ch.d <| fun dx ->
                         dx <== x.[N-1]-x.[N-1-1]

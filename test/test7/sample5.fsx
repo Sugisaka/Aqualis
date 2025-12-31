@@ -1,10 +1,5 @@
 //#############################################################################
-// 自動採点webページ生成
-// outputdirの生成ファイル
-// ファイルアップロード先：
-//     core009/sgproc → core009:/var/www/html/
-//     Xserver/sgproc → Xserver:/kit-cwslab.org/public_html/sgproc
-//     log → /kit-cwslab.org/log
+// webページログイン機能
 //#############################################################################
 
 let outputdir = __SOURCE_DIRECTORY__
@@ -96,34 +91,34 @@ let mainPage() =
                     br.branch <| fun b ->
                         // ユーザーが存在しない
                         b.IF (loginState .= 0) <| fun () ->
-                            programList[prIndex].codewrite "ユーザーが存在しません<br>"
-                            programList[prIndex].codewrite "ID:"
+                            codewrite "ユーザーが存在しません<br>"
+                            codewrite "ID:"
                             textBoxUserID.show_copy()
-                            programList[prIndex].codewrite "パスワード:"
+                            codewrite "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ユーザーが存在しない
                         b.IF (loginState .= 1) <| fun () ->
-                            programList[prIndex].codewrite "パスワードが誤りです<br>"
-                            programList[prIndex].codewrite "ID:"
+                            codewrite "パスワードが誤りです<br>"
+                            codewrite "ID:"
                             textBoxUserID.show_copy()
-                            programList[prIndex].codewrite "パスワード:"
+                            codewrite "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ログイン成功
                         b.EL <| fun () ->
-                            programList[prIndex].codewrite "ID:"
+                            codewrite "ID:"
                             textBoxUserID.show_copy_lock()
-                            programList[prIndex].codewrite "パスワード:"
+                            codewrite "パスワード:"
                             textBoxUserPW.show_password_copy_lock()
                             buttonLogin.show_disabled "ログイン"
-                            programList[prIndex].codewrite "<br>"
-                            programList[prIndex].codewrite "ログイン後のコンテンツ"
+                            codewrite "<br>"
+                            codewrite "ログイン後のコンテンツ"
                 <| fun () ->
                     // ログインボタンを押していないとき
-                    programList[prIndex].codewrite "ID:"
+                    codewrite "ID:"
                     textBoxUserID.show()
-                    programList[prIndex].codewrite "パスワード:"
+                    codewrite "パスワード:"
                     textBoxUserPW.show_password()
                     buttonLogin.show "ログイン"
                 ()

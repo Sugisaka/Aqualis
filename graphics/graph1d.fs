@@ -220,13 +220,13 @@ type TextStyle =
 type graph1d =
     ///<summary>A4縦2段組ドキュメント内の図：横2枚、縦ny枚配置</summary>
     static member A4PTwoColDouble (ny:int) = {
-        CanvasSize=(80.0, (float ny)*43.0);
+        CanvasSize=(80.0, float ny*43.0);
         Interval=(40.0, 43.0);
-        Origin=(-40.0+8.5, -0.5*(float ny)*43.0+7.5);
+        Origin=(-40.0+8.5, -0.5*float ny*43.0+7.5);
         GraphSize=(29.64, 0.473*70.0);
         SubCaptionShiftY = 4.0;
         SubCaptionTextY = 10.0;
-        FrameStyle = color.stroke.black(0.5);
+        FrameStyle = color.stroke.black 0.5;
         LegendPositionX = 15.0;
         LegendPositionY = 3.0;
         LegendGapY = 4.0;
@@ -236,13 +236,13 @@ type graph1d =
         }
     ///<summary>A4縦2段組ドキュメント内の図：横1枚、縦ny枚配置</summary>
     static member A4PTwoColSingle (ny:int) = {
-        CanvasSize=(80.0, (float ny)*43.0);
+        CanvasSize=(80.0, float ny*43.0);
         Interval=(80.0, 43.0);
-        Origin=(-40.0+8.5, -0.5*(float ny)*43.0+7.5);
+        Origin=(-40.0+8.5, -0.5*float ny*43.0+7.5);
         GraphSize=(70.00, 0.473*70.0);
         SubCaptionShiftY = 4.0;
         SubCaptionTextY = 10.0;
-        FrameStyle = color.stroke.black(0.5);
+        FrameStyle = color.stroke.black 0.5;
         LegendPositionX = 15.0;
         LegendPositionY = 3.0;
         LegendGapY = 4.0;
@@ -272,8 +272,8 @@ type graph1d =
         for i in 0..(nline-1) do
             let t = r.ReadLine()
             if i=0 then 
-                if t.Contains(",") then sep <- [|','|]
-                elif t.Contains("\t") then sep <- [|'\t'|]
+                if t.Contains "," then sep <- [|','|]
+                elif t.Contains "\t" then sep <- [|'\t'|]
             let k = t.Split(sep,StringSplitOptions.RemoveEmptyEntries)
             let pd i = 
                 if i<0 || i>k.Length then
@@ -297,10 +297,10 @@ type graph1d =
     /// <param name="setting">グラフプロット設定</param>
     /// <param name="code">グラフのプロット</param>
     static member makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code =
-        let (cLx,cLy) = setting.CanvasSize
-        let (dx,dy) = setting.Interval
-        let (cx0,cy0) = setting.Origin
-        let (gLx,gLy) = setting.GraphSize
+        let cLx,cLy = setting.CanvasSize
+        let dx,dy = setting.Interval
+        let cx0,cy0 = setting.Origin
+        let gLx,gLy = setting.GraphSize
         /// mmからptに変換
         let mmtopt(x:double) =
             /// 1mmのポイント値
@@ -312,11 +312,11 @@ type graph1d =
         svgfile.make outputdir filename (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
             let addGraph (ix:int,iy:int) (subcaption:option<string>) (gstyle:GraphStyle) (data:list<Plot>) =
                 printfn "Subplot: (%d,%d)" ix iy
-                let (gLx0,gLy0) = match subcaption with |None -> (gLx,gLy) |Some _ -> (gLx,gLy-setting.SubCaptionShiftY)
+                let gLx0,gLy0 = match subcaption with |None -> gLx,gLy |Some _ -> gLx,gLy-setting.SubCaptionShiftY
                 /// データファイルが存在するかチェック
                 let rec filecheck (lst:list<Plot>) =
                     match lst with
-                    |(Datafile f) :: lst0 ->
+                    |Datafile f :: lst0 ->
                         if File.Exists(outputdir+"\\"+f.FileName) then
                             printfn "source: %s" (outputdir+"\\"+f.FileName)
                             filecheck lst0
@@ -331,16 +331,16 @@ type graph1d =
                     let (cx,cy) =
                         match subcaption with
                         |None -> 
-                            cx0+(double (ix-1))*dx, cy0+(double (iy-1))*dy
+                            cx0+double (ix-1) *dx, cy0+double (iy-1) *dy
                         |Some _ -> 
-                            cx0+(double (ix-1))*dx, cy0+(double (iy-1))*dy+setting.SubCaptionShiftY
+                            cx0+double (ix-1) *dx, cy0+double (iy-1) *dy+setting.SubCaptionShiftY
                     /// 目盛り
                     let setTicInterval(range:double) =
                         let c = 
-                            if log10(range)<0.0 then
+                            if log10 range<0.0 then
                                 -ceil(-log10(range))
                             else
-                                floor(log10(range))
+                                floor(log10 range)
                         let n = int(range*10.0**(-c))
                         if n=1 then
                             0.2*10.0**c
@@ -362,7 +362,7 @@ type graph1d =
                         |Log10 ->
                             let tmin = floor(log10(x1))
                             let tmax = ceil(log10(x2))
-                            [ for i in tmin..tmax -> 10.0**(double i) ]
+                            [ for i in tmin..tmax -> 10.0**double i ]
                     /// プロット範囲
                     let (xr1,xr2),(yr1,yr2) =
                         let inrange x = match gstyle.Xaxis.Range with |Auto -> true |MinMax(x1,x2) -> x1<=x && x<=x2
@@ -372,7 +372,7 @@ type graph1d =
                             |Function _ -> None,None
                             |Datafile s ->
                                 if File.Exists(outputdir+"\\"+s.FileName) then
-                                    let (xdata,ydata) = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
+                                    let xdata,ydata = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
                                     let xr = 
                                         List.fold (fun (acc:option<double*double>) (i:int) -> 
                                             match acc with
@@ -424,10 +424,10 @@ type graph1d =
                                 let dt = setTicInterval(x2-x1)
                                 let r1 = if x1<0.0 then -dt*ceil(-x1/dt) else dt*floor(x1/dt)
                                 let r2 = if x2<0.0 then -dt*floor(-x2/dt) else dt*ceil(x2/dt)
-                                (r1,r2)
+                                r1,r2
                             |Log10 ->
                                 if x1<0.0 then printfn "負の値は対数軸にプロットできません"
-                                (10.0**floor(log10(x1)),10.0**ceil(log10(x2)))
+                                10.0**floor(log10 x1),10.0**ceil(log10 x2)
                         let dataxr,datayr = mergeRange data
                         // データの範囲表示(x)
                         match dataxr with
@@ -468,13 +468,13 @@ type graph1d =
                         |Linear ->
                             cx + gLx0*(x-xr1)/(xr2-xr1)
                         |Log10 ->
-                            cx + gLx0*(log10(x)-log10(xr1))/(log10(xr2)-log10(xr1))
+                            cx + gLx0*(log10 x-log10 xr1)/(log10 xr2-log10 xr1)
                     let fy y = 
                         match gstyle.Yaxis.Scale with
                         |Linear ->
                             cy + gLy0*(y-yr1)/(yr2-yr1)
                         |Log10 ->
-                            cy + gLy0*(log10(y)-log10(yr1))/(log10(yr2)-log10(yr1))
+                            cy + gLy0*(log10 y-log10 yr1)/(log10 yr2-log10 yr1)
                     let mline (x1,y1) (x2,y2) =
                         sv.line((mmtopt x1, mmtopt y1), (mmtopt x2, mmtopt y2), setting.FrameStyle)
                     let mtextL (x,y) str =
@@ -482,7 +482,7 @@ type graph1d =
                     let mtextC (x,y) str =
                         sv.text((mmtopt x, mmtopt y), str.ToString(), 8.0, TimesNewRoman, TextAnchor.Center, None, color.fill.black, color.stroke.none)
                     let mtextV (x,y) str =
-                        sv.text((mmtopt x, mmtopt y), str.ToString(), 8.0, TimesNewRoman, TextAnchor.Center, Some(-90.0), color.fill.black, color.stroke.none)
+                        sv.text((mmtopt x, mmtopt y), str.ToString(), 8.0, TimesNewRoman, TextAnchor.Center, Some -90.0, color.fill.black, color.stroke.none)
                     let mtextR (x,y) str =
                         sv.text((mmtopt x, mmtopt y), str.ToString(), 8.0, TimesNewRoman, TextAnchor.Right, None, color.fill.black, color.stroke.none)
                     // フレーム
@@ -492,7 +492,7 @@ type graph1d =
                     /// x軸目盛り
                     let xtic = ticList (gstyle.Xaxis,xr1,xr2)
                     for x in xtic do 
-                        mline (fx x, fy yr1) (fx x, (fy yr1)+1.0)
+                        mline (fx x, fy yr1) (fx x, fy yr1+1.0)
                         match gstyle.Xaxis.Scale with
                         |Linear ->
                             mtextC (fx x, fy yr1-3.0) <| x.ToString(match gstyle.Xaxis.NumFormat with |None -> "0.0" |Some s -> s)
@@ -501,7 +501,7 @@ type graph1d =
                     /// y軸目盛り
                     let ytic = ticList (gstyle.Yaxis,yr1,yr2)
                     for y in ytic do 
-                        mline (fx xr1, fy y) ((fx xr1)+1.0, fy y)
+                        mline (fx xr1, fy y) (fx xr1+1.0, fy y)
                         match gstyle.Yaxis.Scale with
                         |Linear ->
                             mtextR (fx xr1, fy y-1.0) <| y.ToString(match gstyle.Yaxis.NumFormat with |None -> "0.0" |Some s -> s)
@@ -520,11 +520,11 @@ type graph1d =
                                 |_ when i=s.Sampling+1 ->
                                     lst
                                 |None ->
-                                    let x = (xr1+(xr2-xr1)*(double(i-1))/double (s.Sampling-1))
+                                    let x = xr1+(xr2-xr1)*(double(i-1))/double (s.Sampling-1)
                                     let y = s.Function x
                                     xylist (lst@[x,y]) (Some(x,y)) (i+1)
                                 |Some(x0,y0) ->
-                                    let x = (xr1+(xr2-xr1)*(double(i-1))/double (s.Sampling-1))
+                                    let x = xr1+(xr2-xr1)*(double(i-1))/double (s.Sampling-1)
                                     let y = s.Function x
                                     if y>yr2 then
                                         let xx = (yr2-y0)*(x-x0)/(y-y0)+x0
@@ -535,13 +535,13 @@ type graph1d =
                                     else
                                         xylist (lst@[x,y]) (Some(x,y)) (i+1)
                             let datxy = xylist [] None 1
-                            sv.polygon(List.map (fun (x,y) -> (mmtopt <| fx x,mmtopt <| fy y)) datxy, color.fill.none, s.Style.lineStroke)
+                            sv.polygon(List.map (fun (x,y) -> mmtopt <| fx x,mmtopt <| fy y) datxy, color.fill.none, s.Style.lineStroke)
                         |Datafile s ->
                             let (xdata,ydata) = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
                             /// (x,y)がプロット範囲内にあるか判定
                             let inside (x,y) = (xr1<=x && x<=xr2 && yr1<=y && y<=yr2)
                             // 線のプロット
-                            (fun code -> match s.Style with |Lines l -> code(l) |LinesPoints lp -> code(lp.Lines) |_ -> ()) <| fun l ->
+                            (fun code -> match s.Style with |Lines l -> code l |LinesPoints lp -> code lp.Lines |_ -> ()) <| fun l ->
                                 /// プロット線(x1,y1)→(x2,y2)の間にあるグラフ境界線都の交点を計算
                                 let middle (x1,y1) (x2,y2) =
                                     if x1<=xr1 && xr1<=x2 then
@@ -577,7 +577,7 @@ type graph1d =
                                             // 前のプロット点は範囲外で現在のプロット点は範囲内
                                             |Some(x0,y0) when not(inside(x0,y0)) && inside(x,y)  ->
                                                 let x1,y1 = middle (x0,y0) (x,y)
-                                                plot (i+1) (lst@[(x1,y1);(x,y)]) (Some(x,y))
+                                                plot (i+1) (lst@[x1,y1;x,y]) (Some(x,y))
                                             // 前のプロット点は範囲内で現在のプロット点は範囲外
                                             |Some(x0,y0) when inside(x0,y0) && not(inside(x,y))  ->
                                                 let x1,y1 = middle (x0,y0) (x,y)
@@ -590,7 +590,7 @@ type graph1d =
                                                 plot (i+1) lst (Some(x,y))
                                 plot 0 [] None
                             // 点のプロット
-                            (fun code -> match s.Style with |Points p -> code(p) |LinesPoints lp -> code(lp.Points) |_ -> ()) <| fun p ->
+                            (fun code -> match s.Style with |Points p -> code p |LinesPoints lp -> code lp.Points |_ -> ()) <| fun p ->
                                 sv.group <| fun () ->
                                     for i in 0..xdata.Length-1 do
                                         let x = xdata[i]
@@ -607,22 +607,22 @@ type graph1d =
                             |Function s ->
                                 match s.Legend with
                                 |None ->
-                                    (xlegend,ylegend)
+                                    xlegend,ylegend
                                 |Some u ->
                                     code(s.Style,u)
-                                    (xlegend,ylegend-setting.LegendGapY)
+                                    xlegend,ylegend-setting.LegendGapY
                             |Datafile s ->
                                 match s.Legend with
                                 |None ->
-                                    (xlegend,ylegend)
+                                    xlegend,ylegend
                                 |Some u ->
                                     code(s.Style,u)
-                                    (xlegend,ylegend-setting.LegendGapY))
+                                    xlegend,ylegend-setting.LegendGapY)
                         <| fun (s,u) ->
                             sv.group <| fun () ->
-                                (fun code -> match s with |Lines l -> code(l) |LinesPoints lp -> code(lp.Lines) |_ -> ()) <| fun l ->
+                                (fun code -> match s with |Lines l -> code l |LinesPoints lp -> code lp.Lines |_ -> ()) <| fun l ->
                                     sv.line((mmtopt <| xlegend-setting.LegendmarkX-0.5*setting.LegendLineLength, mmtopt <| ylegend+setting.LegendmarkY),(mmtopt <| xlegend-setting.LegendmarkX+0.5*setting.LegendLineLength, mmtopt <| ylegend+setting.LegendmarkY),l.Style)
-                                (fun code -> match s with |Points p -> code(p) |LinesPoints lp -> code(lp.Points) |_ -> ()) <| fun p ->
+                                (fun code -> match s with |Points p -> code p |LinesPoints lp -> code lp.Points |_ -> ()) <| fun p ->
                                     match p.Shape with
                                     |Circle ->
                                         sv.circle((mmtopt <| xlegend-setting.LegendmarkX, mmtopt <| ylegend+setting.LegendmarkY), p.Size, p.FillStyle (0.0,0.0), p.StrokeStyle (0.0,0.0))

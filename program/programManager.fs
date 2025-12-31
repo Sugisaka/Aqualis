@@ -13,7 +13,7 @@ namespace Aqualis
         member val dir = outputdir with get
         
         ///<summary>プロジェクト名</summary>
-        member val projectname = pjname with get
+        member val projectName = pjname with get
         
         ///<summary>定義された変数リスト</summary>
         member val var = varCollector lang with get
@@ -25,49 +25,124 @@ namespace Aqualis
         member val varCopyOut = varCollector lang with get
         
         ///<summary>整数型変数リスト</summary>
-        member val i0 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "i^{("+n.ToString()+")}") |_ -> fun n -> "i0"+n.ToString "000") with get
-        
+        member val i0 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "i^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$i0"+n.ToString "000"
+            |_ -> fun n -> "i0"+n.ToString "000"
+            ) with get
+            
         ///<summary>倍精度浮動小数点型変数リスト</summary>
-        member val d0 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "d^{("+n.ToString()+")}") |_ -> fun n -> "d0"+n.ToString "000") with get
+        member val d0 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "d^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$d0"+n.ToString "000"
+            |_ -> fun n -> "d0"+n.ToString "000"
+            ) with get
         
         ///<summary>複素数型変数リスト</summary>
-        member val z0 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "z^{("+n.ToString()+")}") |_ -> fun n -> "z0"+n.ToString "000") with get
+        member val z0 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "z^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$z0"+n.ToString "000"
+            |_ -> fun n -> "z0"+n.ToString "000"
+            ) with get
         
         ///<summary>文字変数リスト</summary>
-        member val c0 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "c^{("+n.ToString()+")}") |_ -> fun n -> "c0"+n.ToString "000") with get
+        member val c0 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "c^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$c0"+n.ToString "000"
+            |_ -> fun n -> "c0"+n.ToString "000"
+            ) with get
         
         ///<summary>文字列変数リスト</summary>
-        member val t0 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "t^{("+n.ToString()+")}") |_ -> fun n -> "t0"+n.ToString "000") with get
+        member val t0 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "t^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$t0"+n.ToString "000"
+            |_ -> fun n -> "t0"+n.ToString "000"
+            ) with get
         
         ///<summary>ファイルポインタリスト</summary>
-        member val f0 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "f^{("+n.ToString()+")}") |_ -> fun n -> "f0"+n.ToString "000") with get
+        member val f0 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "f^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$f0"+n.ToString "000"
+            |_ -> fun n -> "f0"+n.ToString "000"
+            ) with get
         
         ///<summary>整数型1次元配列リスト</summary>
-        member val i1 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\dot{i}^{("+n.ToString()+")}") |_ -> fun n -> "i1"+n.ToString "000") with get
+        member val i1 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "\\dot{i}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$i1"+n.ToString "000"
+            |_ -> fun n -> "i1"+n.ToString "000"
+            ) with get
         
         ///<summary>倍精度浮動小数点型1次元配列リスト</summary>
-        member val d1 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\dot{d}^{("+n.ToString()+")}") |_ -> fun n -> "d1"+n.ToString "000") with get
+        member val d1 = varGenerator (
+            match lang with 
+            |LaTeX|HTML -> fun n -> "\\dot{d}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$d1"+n.ToString "000"
+            |_ -> fun n -> "d1"+n.ToString "000"
+            ) with get
         
         ///<summary>複素数型1次元配列リスト</summary>
-        member val z1 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\dot{z}^{("+n.ToString()+")}") |_ -> fun n -> "z1"+n.ToString "000") with get
+        member val z1 = varGenerator (
+            match lang with 
+            |LaTeX|HTML -> fun n -> "\\dot{z}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$z1"+n.ToString "000"
+            |_ -> fun n -> "z1"+n.ToString "000"
+            ) with get
         
         ///<summary>整数型2次元配列リスト</summary>
-        member val i2 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\ddot{i}^{("+n.ToString()+")}") |_ -> fun n -> "i2"+n.ToString "000") with get
+        member val i2 = varGenerator (
+            match lang with 
+            |LaTeX|HTML -> fun n -> "\\ddot{i}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$i2"+n.ToString "000"
+            |_ -> fun n -> "i2"+n.ToString "000"
+            ) with get
         
         ///<summary>倍精度浮動小数点型2次元配列リスト</summary>
-        member val d2 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\ddot{d}^{("+n.ToString()+")}") |_ -> fun n -> "d2"+n.ToString "000") with get
+        member val d2 = varGenerator (
+            match lang with
+            |LaTeX|HTML -> fun n -> "\\ddot{d}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$d2"+n.ToString "000"
+            |_ -> fun n -> "d2"+n.ToString "000"
+            ) with get
         
         ///<summary>複素数型2次元配列リスト</summary>
-        member val z2 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\ddot{z}^{("+n.ToString()+")}") |_ -> fun n -> "z2"+n.ToString "000") with get
+        member val z2 = varGenerator (
+            match lang with 
+            |LaTeX|HTML -> fun n -> "\\ddot{z}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$z2"+n.ToString "000"
+            |_ -> fun n -> "z2"+n.ToString "000"
+            ) with get
         
         ///<summary>整数型3次元配列リスト</summary>
-        member val i3 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\dddot{i}^{("+n.ToString()+")}") |_ -> fun n -> "i3"+n.ToString "000") with get
+        member val i3 = varGenerator (
+            match lang with 
+            |LaTeX|HTML -> fun n -> "\\dddot{i}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$i3"+n.ToString "000"
+            |_ -> fun n -> "i3"+n.ToString "000"
+            ) with get
         
         ///<summary>倍精度浮動小数点型3次元配列リスト</summary>
-        member val d3 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\dddot{d}^{("+n.ToString()+")}") |_ -> fun n -> "d3"+n.ToString "000") with get
+        member val d3 = varGenerator (
+            match lang with 
+            |LaTeX|HTML -> fun n -> "\\dddot{d}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$d3"+n.ToString "000"
+            |_ -> fun n -> "d3"+n.ToString "000"
+            ) with get
         
         ///<summary>複素数型3次元配列リスト</summary>
-        member val z3 = varGenerator (match lang with |LaTeX|HTML -> (fun n -> "\\dddot{z}^{("+n.ToString()+")}") |_ -> fun n -> "z3"+n.ToString "000") with get
+        member val z3 = varGenerator (
+            match lang with 
+            |LaTeX|HTML -> fun n -> "\\dddot{z}^{("+n.ToString()+")}"
+            |PHP -> fun n -> "$z3"+n.ToString "000"
+            |_ -> fun n -> "z3"+n.ToString "000"
+            ) with get
         
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
         member val hlist = new UniqueList()
@@ -149,29 +224,27 @@ namespace Aqualis
         let codewrite(s:string) = programList[prIndex].codewrite s
         let comment(s:string) = programList[prIndex].comment s
         let language() = programList[prIndex].language
-        let projectname() = programList[prIndex].projectname
-        let iFormat() = programList[prIndex].numFormat.iFormat
         
     ///<summary>コード生成の設定</summary>
     type AqualisCompiler () =
         
         ///<summary>言語</summary>
-        static member lang() = language()
+        static member language with get() = programList[prIndex].language
         
         ///<summary>プロジェクト名</summary>
-        static member projname() = projectname()
+        static member projectName with get() = programList[prIndex].projectName
         
         ///<summary>整数を文字列に変換した時の桁数</summary>
-        static member int_string_format with get() = iFormat()
+        static member intFormat with get() = programList[prIndex].numFormat.iFormat
 
         ///<summary>整数をn桁の文字列で変換するように設定</summary>
-        static member set_int_string_format(d) = programList[prIndex].numFormat.setIFormat(d)
+        static member intFormatSet d = programList[prIndex].numFormat.setIFormat d
         
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member double_string_format with get() = programList[prIndex].numFormat.dFormat
+        static member doubleFormat with get() = programList[prIndex].numFormat.dFormat
         
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member set_double_string_format(n,d) = programList[prIndex].numFormat.setDFormat(n,d)
+        static member doubleFormatSet(n,d) = programList[prIndex].numFormat.setDFormat(n,d)
         
         ///<summary>デバッグモードの切り替え</summary>
         static member set_DebugMode (x:Switch) =

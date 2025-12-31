@@ -7,7 +7,7 @@ namespace Aqualis
         member _.eqReturn() =
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite "\\\\"
+                codewrite "\\\\"
             |_ ->
                 ()
                 
@@ -15,7 +15,7 @@ namespace Aqualis
         member _.eqNonumber() =
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite "\\nonumber"
+                codewrite "\\nonumber"
             |_ ->
                 ()
                 
@@ -23,7 +23,7 @@ namespace Aqualis
         member _.eqLabel(lb:string) =
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite("\\label{"+lb+"}")
+                codewrite("\\label{"+lb+"}")
             |_ ->
                 ()
                 
@@ -42,7 +42,7 @@ namespace Aqualis
         static member para code =
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite "\\par"
+                codewrite "\\par"
                 code()
             |_ ->
                 code()
@@ -51,7 +51,7 @@ namespace Aqualis
         static member text (s:string) =
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite s
+                codewrite s
             |_ ->
                 ! s
                 
@@ -60,13 +60,13 @@ namespace Aqualis
             programList[prIndex].hlist.add "\\usepackage{graphicx}"
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite "\\begin{figure}[htbp]"
-                programList[prIndex].codewrite "\\begin{center}"
-                programList[prIndex].codewrite("\\includegraphics{"+filename+"}")
-                programList[prIndex].codewrite "\\end{center}"
-                programList[prIndex].codewrite("\\caption{"+caption+"}")
-                programList[prIndex].codewrite("\\label{"+filename+"}")
-                programList[prIndex].codewrite "\\end{figure}"
+                codewrite "\\begin{figure}[htbp]"
+                codewrite "\\begin{center}"
+                codewrite("\\includegraphics{"+filename+"}")
+                codewrite "\\end{center}"
+                codewrite("\\caption{"+caption+"}")
+                codewrite("\\label{"+filename+"}")
+                codewrite "\\end{figure}"
             |_ ->
                 ! (filename+": "+caption)
                 
@@ -74,11 +74,11 @@ namespace Aqualis
         static member enumerate (slst:(unit->unit)list) =
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite "\\begin{enumerate}"
+                codewrite "\\begin{enumerate}"
                 for s in slst do
-                    programList[prIndex].codewrite "\\item"
+                    codewrite "\\item"
                     s()
-                programList[prIndex].codewrite "\\end{enumerate}"
+                codewrite "\\end{enumerate}"
             |_ ->
                 for s in slst do
                     s()
@@ -87,11 +87,11 @@ namespace Aqualis
         static member itemize (slst:(unit->unit)list) =
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite "\\begin{itemize}"
+                codewrite "\\begin{itemize}"
                 for s in slst do
-                    programList[prIndex].codewrite "\\item"
+                    codewrite "\\item"
                     s()
-                programList[prIndex].codewrite "\\end{itemize}"
+                codewrite "\\end{itemize}"
             |_ ->
                 for s in slst do
                     s()
@@ -101,15 +101,15 @@ namespace Aqualis
             let e = eqmode()
             match programList[prIndex].language with
             |LaTeX ->
-                programList[prIndex].codewrite "\\begin{align}"
+                codewrite "\\begin{align}"
                 code e
-                programList[prIndex].codewrite "\\end{align}"
+                codewrite "\\end{align}"
             |HTML ->
-                programList[prIndex].codewrite "\\["
-                programList[prIndex].codewrite "\\begin{align}"
+                codewrite "\\["
+                codewrite "\\begin{align}"
                 code e
-                programList[prIndex].codewrite "\\end{align}"
-                programList[prIndex].codewrite "\\]"
+                codewrite "\\end{align}"
+                codewrite "\\]"
             |_ ->
                 code e
                 

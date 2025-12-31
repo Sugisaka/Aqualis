@@ -90,7 +90,7 @@ namespace Aqualis
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.comment("end do")
+                    c.comment "end do"
                     c.comment(label+" continue")
                     returnVar()
                 |i1,i2 ->
@@ -103,7 +103,7 @@ namespace Aqualis
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.codewrite("end do")
+                    c.codewrite "end do"
                     c.codewrite(label+" continue")
                     returnVar()
                     

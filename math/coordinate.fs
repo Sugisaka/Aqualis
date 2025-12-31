@@ -34,8 +34,8 @@ namespace Aqualis
                 fun (x:num0,y:num0) ->
                     fun code ->
                         ch.dd <| fun (x_,y_) ->
-                            x_ <==  x*asm.cos(radian)+y*asm.sin(radian)
-                            y_ <== -x*asm.sin(radian)+y*asm.cos(radian)
+                            x_ <==  x * asm.cos radian + y * asm.sin radian
+                            y_ <== -x * asm.sin radian + y * asm.cos radian
                             code(x_,y_)
                             
             /// <summary>

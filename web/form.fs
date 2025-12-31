@@ -11,8 +11,9 @@ namespace Aqualis
 open System
 open System.IO
     
-type Button(name:string) =
+type Button(name:exprString) =
     let b = post name
+    new(name:string) = Button (Str name)
     /// ボタンが押されたか判定
     member _.isset with get() = php.isset b.get
     /// <summary>
@@ -40,13 +41,13 @@ type ButtonVar() =
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:num0,text:string) = html.submit(id,text)
+    member _.show(id:num0,text:string) = html.submit(Nvr id.Expr,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:string,text:string) = html.submit(id,text)
+    member _.show(id:string,text:string) = html.submit(Str id,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
@@ -54,9 +55,9 @@ type ButtonVar() =
     /// <param name="text">ボタンに表示するテキスト</param>
     member _.show_disabled(id:num0,text:string) = html.submit_disabled(id,text)
     
-type TextBox(name:num0) =
+type TextBox(name:exprString) =
     let t = post name
-    new(name:string) = TextBox (num0(Var(Nt,name,NaN)))
+    new(name:string) = TextBox (Str name)
     /// テキストが送信されたか判定
     member _.isset with get() = php.isset t.get
     /// 送信されたテキスト
@@ -151,9 +152,10 @@ type TextBoxVar() =
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示、編集不可)
     member _.show_password_copy_lock(id:string) = (post id).password_copy_lock()
     
-type TextArea(name:string) =
+type TextArea(name:exprString) =
     let a = post name
     /// 送信されたテキスト
+    new(name:string) = TextArea (Str name)
     member _.text with get() = a.get
     member _.text_html with get() = a.get_html
     member _.isset with get() = php.isset a.get
@@ -166,8 +168,9 @@ type TextArea(name:string) =
     
 type ComboBoxItem = {Tag:string; Text:string}
 
-type ComboBox(name:string,items:list<ComboBoxItem>) =
+type ComboBox(name:exprString,items:list<ComboBoxItem>) =
     let c = post name
+    new(name:string,items) = ComboBox(Str name,items)
     /// 選択されたテキスト
     member _.selectedTag with get() = c.get
     /// コンボボックスを表示（指定された選択項目を選択状態にする）
@@ -176,9 +179,9 @@ type ComboBox(name:string,items:list<ComboBoxItem>) =
             for i in items do
                 //指定された選択肢を選択中とする
                 if items[selectedIndex].Text = i.Text then
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 else
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem() =
         //c.select <| fun () ->
@@ -186,9 +189,9 @@ type ComboBox(name:string,items:list<ComboBoxItem>) =
             for i in items do
                 br.if2(this.selectedTag .= num0(Var(Nt,i.Tag,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem(text:num0) =
         //c.select <| fun () ->
@@ -196,15 +199,15 @@ type ComboBox(name:string,items:list<ComboBoxItem>) =
             for i in items do
                 br.if2(text .= num0(Var(Nt,i.Text,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示
     member _.show() =
         //c.select <| fun () ->
         html.select name <| fun () ->
             for i in items do
-                html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                html.option i.Tag <| fun () -> codewrite i.Text
     member _.foreach code =
         for i in items do code i
         
@@ -219,9 +222,9 @@ type ComboBoxVar() =
             for i in items do
                 //指定された選択肢を選択中とする
                 if items[selectedIndex].Text = i.Text then
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 else
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selected(id:num0,items:list<ComboBoxItem>) =
         let c = post id
@@ -230,9 +233,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(this.selectedTag id .= num0(Var(Nt,i.Tag,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedTag(id:num0,items:list<ComboBoxItem>,tag:num0) =
         //c.select <| fun () ->
@@ -240,9 +243,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(tag .= num0(Var(Nt,i.Tag,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedTag_disabled(id:num0,items:list<ComboBoxItem>,tag:num0) =
         //c.select <| fun () ->
@@ -250,9 +253,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(tag .= num0(Var(Nt,i.Tag,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem(id:num0,items:list<ComboBoxItem>,text:num0) =
         //c.select <| fun () ->
@@ -260,9 +263,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(text .= num0(Var(Nt,i.Text,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem_disabled(id:num0,items:list<ComboBoxItem>,text:num0) =
         //c.select <| fun () ->
@@ -270,16 +273,16 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(text .= num0(Var(Nt,i.Text,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                    html.option i.Tag <| fun () -> codewrite i.Text
 
     /// コンボボックスを表示
     member _.show(id:num0,items:list<ComboBoxItem>) =
         //c.select <| fun () ->
         html.select id <| fun () ->
             for i in items do
-                html.option i.Tag <| fun () -> programList[prIndex].codewrite i.Text
+                html.option i.Tag <| fun () -> codewrite i.Text
     member _.foreach (items:list<ComboBoxItem>) code =
         for i in items do code i
         

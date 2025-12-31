@@ -19,7 +19,7 @@ namespace Aqualis
                         |Nvr x ->
                             yield x.eval (programList[prIndex])
                         |_ -> () ]
-                programList[prIndex].codewrite("print *, " + String.concat "," clist + "\n")
+                codewrite("print *, " + String.concat "," clist + "\n")
             |C99 ->
                 let int0string_format_C =
                     "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
@@ -47,7 +47,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                programList[prIndex].codewrite("printf(\""+format+"\\n\","+code+");\n")
+                codewrite("printf(\""+format+"\\n\","+code+");\n")
             |LaTeX ->
                 let code = 
                     lst
@@ -58,7 +58,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                programList[prIndex].codewrite("print, " + code + "\n")
+                codewrite("print, " + code + "\n")
             |HTML ->
                 let code = 
                     lst
@@ -69,8 +69,8 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                programList[prIndex].codewrite("Print \\("+code+"\\)\n")
-                programList[prIndex].codewrite "<br/>\n"
+                codewrite("Print \\("+code+"\\)\n")
+                codewrite "<br/>\n"
             |Python ->
                 let int0string_format_C =
                     "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
@@ -97,7 +97,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                programList[prIndex].codewrite("print(\"" + format + "\" %(" + code + "))\n")
+                codewrite("print(\"" + format + "\" %(" + code + "))\n")
             |JavaScript ->
                 let int0string_format_C =
                     "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
@@ -124,7 +124,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                programList[prIndex].codewrite("print(" + code + ");\n")
+                codewrite("print(" + code + ");\n")
             |PHP ->
                 let int0string_format_C =
                     "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
@@ -151,7 +151,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                programList[prIndex].codewrite("print(" + code + ");\n")
+                codewrite("print(" + code + ");\n")
             |Numeric ->
                 for v in lst do
                     match v with
@@ -163,20 +163,20 @@ namespace Aqualis
         static member t (str:string) =
             match programList[prIndex].language with
             |Fortran ->
-                programList[prIndex].codewrite("print *, "+"\""+str+"\""+"\n")
+                codewrite("print *, "+"\""+str+"\""+"\n")
             |C99 ->
-                programList[prIndex].codewrite("printf(\""+str+"\""+");\n")
+                codewrite("printf(\""+str+"\""+");\n")
             |LaTeX ->
-                programList[prIndex].codewrite("print, \""+str+"\"\n")
+                codewrite("print, \""+str+"\"\n")
             |HTML ->
-                programList[prIndex].codewrite("Print \\("+str+"\\)\n")
-                programList[prIndex].codewrite "<br/>\n"
+                codewrite("Print \\("+str+"\\)\n")
+                codewrite "<br/>\n"
             |Python ->
-                programList[prIndex].codewrite("print(\""+str+"\")\n")
+                codewrite("print(\""+str+"\")\n")
             |JavaScript ->
-                programList[prIndex].codewrite("print(\""+str+"\")\n")
+                codewrite("print(\""+str+"\")\n")
             |PHP ->
-                programList[prIndex].codewrite("print(\""+str+"\")\n")
+                codewrite("print(\""+str+"\")\n")
             |Numeric ->
                 printfn "%s" str
         static member w (ss:exprString) = print.s (match ss with |Str _ |Nvr _ -> [ss] |NSL lst -> lst)

@@ -237,13 +237,13 @@ namespace gengraphics
                                     Double.Parse(tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[i - 1])
                                 with
                                 | :? System.FormatException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + (i.ToString()) + "列目「" + tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[i - 1] + "」を数値に変換できません"
+                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + i.ToString() + "列目「" + tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[i - 1] + "」を数値に変換できません"
                                     0.0
                                 | :? System.IndexOutOfRangeException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + (i.ToString()) + "列目は存在しません"
+                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + i.ToString() + "列目は存在しません"
                                     0.0
-                            let x = extract(ix)
-                            let y = extract(iy)
+                            let x = extract ix
+                            let y = extract iy
                             // エラー検出時：ファイル読み込み中断
                             if error<>"" then
                                 reader.Close()
@@ -260,8 +260,8 @@ namespace gengraphics
                                 let xmax1 = if xmax < x then x else xmax
                                 let ymin1 = if ymin > y then y else ymin
                                 let ymax1 = if ymax < y then y else ymax
-                                let dx1 = if dx=0.0 || (dx > abs(x-x0) && abs(x-x0)<>0.0) then abs(x-x0) else dx
-                                let dy1 = if dy=0.0 || (dy > abs(y-y0) && abs(y-y0)<>0.0) then abs(y-y0) else dy
+                                let dx1 = if dx=0.0 || dx > abs(x-x0) && abs(x-x0)<>0.0 then abs(x-x0) else dx
+                                let dy1 = if dy=0.0 || dy > abs(y-y0) && abs(y-y0)<>0.0 then abs(y-y0) else dy
                                 read (n+1) x0 y0 dx1 dy1 xmin1 xmax1 ymin1 ymax1
                                 
                     // read関数実行→sizeの返却値 *)
@@ -313,10 +313,10 @@ namespace gengraphics
                                     data[nx*iy+ix] <- re
                                 with
                                 | :? System.FormatException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + (izre.ToString()) + "列目「" + k.[izre - 1] + "」を数値に変換できません"
+                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + izre.ToString() + "列目「" + k.[izre - 1] + "」を数値に変換できません"
                                     reader.Close()
                                 | :? System.IndexOutOfRangeException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + (izre.ToString()) + "列目は存在しません"
+                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + izre.ToString() + "列目は存在しません"
                                     reader.Close()
                                 if error = "" then
                                     readD (n+1)
@@ -329,7 +329,7 @@ namespace gengraphics
                                 isDataLoaded <- true
                                 reader.Close()
                             // コメント行なら次の行の読み込みに進む
-                            |tmp when tmp.Contains("#") ->
+                            |tmp when tmp.Contains "#" ->
                                 readZ (n+1)
                             // ファイル末尾でなくコメント文でない場合
                             |tmp ->

@@ -73,24 +73,28 @@ namespace Aqualis
         ///<summary>バイト型変数</summary>
         ///<param name="name">変数名</param>
         static member b0 (name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(It 1,A0,name,"")
             num0(Var(It 1,name,NaN))
             
         ///<summary>整数型変数</summary>
         ///<param name="name">変数名</param>
         static member i0 (name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(It 4,A0,name,"")
             num0(Var(It 1,name,NaN))
             
         ///<summary>倍精度浮動小数点型変数</summary>
         ///<param name="name">変数名</param>
         static member d0 (name:string) =
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(Dt,A0,name,"")
             num0(Var(Dt,name,NaN))
             
         ///<summary>複素数型変数</summary>
         ///<param name="name">変数名</param>
         static member z0 (name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(Zt,A0,name,"")
             num0(Var(Zt,name,NaN))
             
@@ -98,33 +102,39 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="size1">要素数</param>
         static member i1(name:string,size1:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num1(It 4,A1 size1,name,"")
             
         ///<summary>整数型可変長1次元配列</summary>
         ///<param name="name">変数名</param>
         static member i1(name:string) =
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num1(It 4,A1 0,name,"")
             
         ///<summary>倍精度浮動小数点型1次元配列</summary>
         ///<param name="name">変数名</param>
         ///<param name="size1">要素数</param>
         static member d1(name:string,size1:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num1(Dt,A1 size1,name,"")
             
         ///<summary>倍精度浮動小数点型可変長1次元配列</summary>
         ///<param name="name">変数名</param>
         static member d1(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num1(Dt,A1 0,name,"")
             
         ///<summary>複素数型1次元配列</summary>
         ///<param name="name">変数名</param>
         ///<param name="size1">要素数</param>
         static member z1(name:string,size1:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num1(Zt,A1 size1,name,"")
             
         ///<summary>複素数型可変長1次元配列</summary>
         ///<param name="name">変数名</param>
         static member z1(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num1(Zt,A1 0,name,"")
             
         ///<summary>整数型2次元配列</summary>
@@ -132,11 +142,13 @@ namespace Aqualis
         ///<param name="size1">要素数1</param>
         ///<param name="size2">要素数2</param>
         static member i2(name:string,size1:int,size2:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num2(It 4,A2(size1,size2),name,"")
             
         ///<summary>整数型可変長2次元配列</summary>
         ///<param name="name">変数名</param>
         static member i2(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num2(It 4,A2(0,0),name,"")
             
         ///<summary>倍精度浮動小数点型2次元配列</summary>
@@ -144,11 +156,13 @@ namespace Aqualis
         ///<param name="size1">要素数1</param>
         ///<param name="size2">要素数2</param>
         static member d2(name:string,size1:int,size2:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num2(Dt,A2(size1,size2),name,"")
             
         ///<summary>倍精度浮動小数点型可変長2次元配列</summary>
         ///<param name="name">変数名</param>
         static member d2(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num2(Dt,A2(0,0),name,"")
             
         ///<summary>複素数型2次元配列</summary>
@@ -156,11 +170,13 @@ namespace Aqualis
         ///<param name="size1">要素数1</param>
         ///<param name="size2">要素数2</param>
         static member z2(name:string,size1:int,size2:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num2(Zt,A2(size1,size2),name,"")
             
         ///<summary>複素数型可変長2次元配列</summary>
         ///<param name="name">変数名</param>
         static member z2(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num2(Zt,A2(0,0),name,"")
             
         ///<summary>整数型3次元配列</summary>
@@ -169,11 +185,13 @@ namespace Aqualis
         ///<param name="size2">要素数2</param>
         ///<param name="size3">要素数3</param>
         static member i3(name:string,size1:int,size2:int,size3:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num3(It 4,A3(size1,size2,size3),name,"")
             
         ///<summary>整数型可変長3次元配列</summary>
         ///<param name="name">変数名</param>
         static member i3(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num3(It 4,A3(0,0,0),name,"")
             
         ///<summary>倍精度浮動小数点型3次元配列</summary>
@@ -182,11 +200,13 @@ namespace Aqualis
         ///<param name="size2">要素数2</param>
         ///<param name="size3">要素数3</param>
         static member d3(name:string,size1:int,size2:int,size3:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num3(Dt,A3(size1,size2,size3),name,"")
             
         ///<summary>倍精度浮動小数点型可変長3次元配列</summary>
         ///<param name="name">変数名</param>
         static member d3(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num3(Dt,A3(0,0,0),name,"")
             
         ///<summary>複素数型3次元配列</summary>
@@ -195,17 +215,20 @@ namespace Aqualis
         ///<param name="size2">要素数2</param>
         ///<param name="size3">要素数3</param>
         static member z3(name:string,size1:int,size2:int,size3:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num3(Zt,A3(size1,size2,size3),name,"")
             
         ///<summary>複素数型可変長3次元配列</summary>
         ///<param name="name">変数名</param>
         static member z3(name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             num3(Zt,A3(0,0,0),name,"")
             
         ///<summary>整数型定数</summary>
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member ip0(name:string,v) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(It 4,A0,name,(programList[prIndex].numFormat.ItoS v))
             num0(Var(It 4, name,NaN))
             
@@ -213,6 +236,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp0(name:string,v) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(Dt,A0,name,(programList[prIndex].numFormat.DtoS v))
             num0(Var(Dt, name,NaN))
             
@@ -220,6 +244,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal ip0_noWarning(name:string,v) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVar(It 4,A0,name,programList[prIndex].numFormat.ItoS v)
             num0(Var(It 4, name,NaN))
             
@@ -227,6 +252,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member internal dp0_noWarning(name:string,v) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVar(Dt,A0,name,programList[prIndex].numFormat.DtoS v)
             num0(Var(Dt, name,NaN))
             
@@ -234,6 +260,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member zp0(name,(v:double*double)) =
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             let (v_re,v_im) = v
             programList[prIndex].var.setUniqVarWarning(Zt,A0,name,var.init_z (v_re,v_im))
             num0(Var(Zt, name,NaN))
@@ -242,6 +269,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member ip1(name:string,v:int list) =
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(It 4,A1 v.Length,name,var.init_i1 v)
             num1(It 4,Var1(A1 v.Length,name))
             
@@ -249,6 +277,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member dp1(name:string,v:double list) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(Dt,A1 v.Length,name,var.init_d1 v)
             num1(Dt,Var1(A1 v.Length,name))
             
@@ -256,12 +285,14 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="v">定数</param>
         static member zp1(name:string,v:(double*double) list) =
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             programList[prIndex].var.setUniqVarWarning(Zt,A0,name,var.init_z1 v)
             num1(Zt,Var1(A1 v.Length,name))
             
         ///<summary>整数型変数</summary>
         ///<param name="name">変数名</param>
         static member n0(e:Etype,name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n0)" <| e.ToString()
             |_ -> ()
@@ -272,6 +303,7 @@ namespace Aqualis
         ///<param name="name">変数名</param>
         ///<param name="size1">要素数</param>
         static member n1(e:Etype,name:string,size1:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n1)" <| e.ToString()
             |_ -> ()
@@ -280,6 +312,7 @@ namespace Aqualis
         ///<summary>整数型可変長1次元配列</summary>
         ///<param name="name">変数名</param>
         static member n1(e:Etype,name:string) =
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n1)" <| e.ToString()
             |_ -> ()
@@ -290,6 +323,7 @@ namespace Aqualis
         ///<param name="size1">要素数1</param>
         ///<param name="size2">要素数2</param>
         static member n2(e:Etype,name:string,size1:int,size2:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n2)" <| e.ToString()
             |_ -> ()
@@ -298,6 +332,7 @@ namespace Aqualis
         ///<summary>整数型可変長2次元配列</summary>
         ///<param name="name">変数名</param>
         static member n2(e:Etype,name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n2)" <| e.ToString()
             |_ -> ()
@@ -309,6 +344,7 @@ namespace Aqualis
         ///<param name="size2">要素数2</param>
         ///<param name="size3">要素数3</param>
         static member n3(e:Etype,name:string,size1:int,size2:int,size3:int) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n3)" <| e.ToString()
             |_ -> ()
@@ -317,6 +353,7 @@ namespace Aqualis
         ///<summary>整数型可変長3次元配列</summary>
         ///<param name="name">変数名</param>
         static member n3(e:Etype,name:string) = 
+            let name = match programList[prIndex].language with |PHP -> "$"+name |_ -> name
             match e with 
             |Nt |Structure _ -> printfn "%s: 変数を生成できない型です(gvar.n3)" <| e.ToString()
             |_ -> ()
