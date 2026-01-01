@@ -1,192 +1,230 @@
 namespace Aqualis
     
-    ///<summary>関数定義の引数</summary>
-    type fn() =
-        
-        /// <summary>
-        /// 関数定義の引数を追加
-        /// </summary>
-        /// <param name="typ">変数の型</param>
-        /// <param name="vtp">変数の次元</param>
-        /// <param name="n">変数名</param>
-        static member addarg (typ:Etype,vtp:VarType,n:string) =
-            fun code ->
-                match programList[prIndex].language with
-                |Fortran ->
-                    //関数内ではこの変数名を使用
-                    let name = 
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                        |_ -> 
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                    match vtp with
-                    |A0 ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                    |A1 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
-                    |A2 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
-                    |A3 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
-                    let argname =
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 -> name
-                        |_ -> name
-                    code(vtp,argname)
-                |C99 ->
-                    //関数内ではこの変数名を使用
-                    let name = 
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                        |_ -> 
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                    match vtp with
-                    |A0 ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                    |A1 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
-                    |A2 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
-                    |A3 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
-                    let argname =
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 -> "(*"+name+")"
-                        |_ -> name
-                    code(vtp,argname)
-                |LaTeX ->
-                    //関数内ではこの変数名を使用
-                    let name = 
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                        |_ -> 
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                    match vtp with
-                    |A0 ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                    |A1 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
-                    |A2 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
-                    |A3 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
-                    let argname =
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 -> name
-                        |_ -> name
-                    code(vtp,argname)
-                |HTML ->
-                    //関数内ではこの変数名を使用
-                    let name = 
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                        |_ -> 
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                    match vtp with
-                    |A0 ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                    |A1 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
-                    |A2 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
-                    |A3 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
-                    let argname =
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 -> name
-                        |_ -> name
-                    code(vtp,argname)
-                |Python ->
-                    //関数内ではこの変数名を使用
-                    let name = 
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                        |_ -> 
-                            "arg"+(programList[prIndex].arg.list.Length+1).ToString("00")
-                    match vtp with
-                    |A0 ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                    |A1 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(1),name+"_size"))
-                    |A2 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(2),name+"_size"))
-                    |A3 _ ->
-                        programList[prIndex].arg.add(n,(typ,vtp,name))
-                        programList[prIndex].arg.add(n+"_size",(It 4,A1(3),name+"_size"))
-                    let argname =
-                        match typ,vtp with
-                        |(It _|Dt|Zt|Structure _),A0 -> name
-                        |_ -> name
-                    code(vtp,argname)
-                |_ -> ()
-                    
-        /// <summary>
-        /// 関数定義の引数を追加
-        /// </summary>
-        /// <param name="sname">構造体名</param>
-        /// <param name="vtp">変数の次元</param>
-        /// <param name="n">変数名</param>
-        static member addarg (sname:string,vtp:VarType,n:string) = fn.addarg(Structure sname,vtp,n)
-        
+    open System
+    open System.IO
+    
     [<AutoOpen>]
-    module num_farg =                    
-        type num0 with
-            /// <summary>
-            /// この変数を関数内変数に変換
-            /// </summary>
-            member this.farg code =
-                fn.addarg (this.etype,A0,this.Expr.eval (programList[prIndex])) <| fun (v,n) -> 
-                    code(num0(Var(this.etype, n, NaN)))
-                    
-        type num1 with
-            /// <summary>
-            /// この変数を関数内変数に変換
-            /// </summary>
-            member this.farg = fun code ->
-                match this.Expr with
-                |Var1(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(num1(this.etype,Var1(v,n)))
-                |_ -> 
-                    printfn "部分配列を関数の引数にできません"
-                    
-        type num2 with
-            /// <summary>
-            /// この変数を関数内変数に変換
-            /// </summary>
-            member this.farg = fun code ->
-                match this.Expr with
-                |Var2(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(num2(this.etype,Var2(v,n)))
-                |_ -> 
-                    printfn "部分配列を関数の引数にできません"
-                    
-        type num3 with
-            /// <summary>
-            /// この変数を関数内変数に変換
-            /// </summary>
-            member this.farg = fun code ->
-                match this.Expr with
-                |Var3(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(num3(this.etype,Var3(v,n)))
-                |_ -> 
-                    printfn "部分配列を関数の引数にできません"
-                    
+    module Aqualis_function =
+        
+        ///<summary>関数定義</summary>
+        let func (projectname:string) (code:unit->unit) =
+            let fdeclare (typ:Etype,vtp:VarType,name:string) =
+                match programList[prIndex].language with
+                |HTML ->
+                    match vtp with 
+                    |A0 -> typ.tostring programList[prIndex].language + " :: " + name
+                    |A1 0 -> typ.tostring programList[prIndex].language + ",allocatable" + " :: " + name + "(:)"
+                    |A2(0,0) -> typ.tostring programList[prIndex].language + ",allocatable" + " :: " + name + "(:,:)"
+                    |A3(0,0,0) -> typ.tostring programList[prIndex].language + ",allocatable" + " :: " + name + "(:,:,:)"
+                    |A1 _ -> typ.tostring programList[prIndex].language + " :: " + name + "(:)"
+                    |A2(_,_) -> typ.tostring programList[prIndex].language + " :: " + name + "(:,:)"
+                    |A3(_,_,_) -> typ.tostring programList[prIndex].language + " :: " + name + "(:,:,:)"
+                |_ ->
+                    match vtp with 
+                    |A0 -> typ.tostring programList[prIndex].language + " :: " + name
+                    |A1 0 -> typ.tostring programList[prIndex].language + ",allocatable" + " :: " + name + "(:)"
+                    |A2(0,0) -> typ.tostring programList[prIndex].language + ",allocatable" + " :: " + name + "(:,:)"
+                    |A3(0,0,0) -> typ.tostring programList[prIndex].language + ",allocatable" + " :: " + name + "(:,:,:)"
+                    |A1 _ -> typ.tostring programList[prIndex].language + " :: " + name + "(:)"
+                    |A2(_,_) -> typ.tostring programList[prIndex].language + " :: " + name + "(:,:)"
+                    |A3(_,_,_) -> typ.tostring programList[prIndex].language + " :: " + name + "(:,:,:)"
+            let dir = programList[prIndex].dir
+            match programList[prIndex].language with
+            |Fortran ->
+                programList[prIndex].flist.add projectname
+                let args = makeProgram [dir,projectname,Fortran] <| fun () ->
+                    code()
+                    programList[prIndex].close()
+                    //ソースファイル(関数部分)出力
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    writer.codewrite "!=============================================================================================\n"
+                    writer.codewrite("! Subroutine name: " + projectname + "\n")
+                    for _,(_,_,nm) in programList[prIndex].arg.list do
+                        writer.codewrite("!  " + nm + "\n")
+                    writer.codewrite "!============================================================================================="
+                    let argvar = String.Join(", ", programList[prIndex].arg.list |> List.map(fun (_,(_,_,n)) -> n))
+                    writer.codewrite("subroutine " + projectname + "(" + argvar + ")\n")
+                    writer.indent.inc()
+                    //モジュールファイルのインクルード
+                    List.iter (fun (s:string) -> writer.codewrite("use " + s + "\n")) <| programList[prIndex].mlist.list
+                    writer.codewrite "implicit none"
+                    //ヘッダファイルのインクルード
+                    List.iter (fun (s:string) -> writer.codewrite("include " + s + "\n")) <| programList[prIndex].hlist.list
+                    //サブルーチン引数の定義
+                    for _,s in programList[prIndex].arg.list do
+                        writer.codewrite(fdeclare s)
+                    //グローバル変数の定義
+                    declareall writer
+                    //メインコード
+                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.indent.dec()
+                    writer.codewrite("end subroutine " + projectname + "\n")
+                    writer.close()
+                    programList[prIndex].delete()
+                    //呼び出しコードを記述
+                    String.Join(", ", programList[prIndex].arg.list |> List.map(fun (n,(_,_,_)) -> n))
+                codewrite("call" + " " + projectname + "(" + args + ")\n")
+            |C99 ->
+                programList[prIndex].flist.add projectname
+                let args = makeProgram [dir,projectname,C99] <| fun () ->
+                    code()
+                    programList[prIndex].close()
+                    //ソースファイル(関数部分)出力
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    writer.codewrite "/*==========================================================================================*/\n"
+                    writer.codewrite("/* Subroutine name: " + projectname + " */\n")
+                    for _,(_,_,nm) in programList[prIndex].arg.list do
+                        writer.codewrite("/* " + nm + " */\n")
+                    writer.codewrite "/*==========================================================================================*/\n"
+                    //速度を上げるために参照渡しにしている
+                    let argvar =
+                        programList[prIndex].arg.list
+                        |> List.map (fun (_,(typ,vtp,n)) ->
+                            match vtp with
+                            |A1 _|A2 _|A3 _ -> typ.tostring programList[prIndex].language + " *" + n
+                            |_ -> typ.tostring programList[prIndex].language + " *" + n)
+                        |> fun s -> String.Join(", ", s)
+                    writer.codewrite("void " + projectname + "(" + argvar + ")\n")
+                    writer.codewrite "{\n"
+                    writer.indent.inc()
+                    //グローバル変数の定義
+                    declareall writer
+                    //メインコード
+                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.indent.dec()
+                    writer.codewrite "}\n"
+                    writer.close()
+                    programList[prIndex].delete()
+                    //呼び出しコードを記述
+                    programList[prIndex].arg.list
+                    |> List.map (fun (n,(typ,vtp,_)) ->
+                        match typ,vtp,n.StartsWith "(*" with
+                        |(It _|Dt|Zt|Structure _),A0,false -> "&" + n
+                        |(It _|Dt|Zt|Structure _),A0,true  -> n.Substring(2,n.Length-3)
+                        |_ -> n)
+                    |> fun s -> String.Join(", ", s)
+                codewrite(projectname + "(" + args + ");\n")
+            |LaTeX ->
+                programList[prIndex].flist.add projectname
+                let args = makeProgram [dir,projectname,LaTeX] <| fun () ->
+                    code()
+                    programList[prIndex].close()
+                    //ソースファイル(関数部分)出力
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    writer.codewrite "%=============================================================================================\n"
+                    writer.codewrite("% Subroutine name: " + projectname + "\n")
+                    for _,(_,_,nm) in programList[prIndex].arg.list do
+                        writer.codewrite("% " +  nm + "\n")
+                    writer.codewrite "%=============================================================================================\n"
+                    let argvar = String.Join(", ", programList[prIndex].arg.list |> List.map (fun (_,(_,_,n)) -> n))
+                    writer.codewrite("subroutine " + projectname + "(" + argvar + ")\n")
+                    writer.indent.inc()
+                    //モジュールファイルのインクルード
+                    List.iter (fun (s:string) -> writer.codewrite("use " + s + "\n")) <| programList[prIndex].mlist.list
+                    writer.codewrite "implicit none\n"
+                    //ヘッダファイルのインクルード
+                    List.iter (fun (s:string) -> writer.codewrite("include " + s + "\n")) <| programList[prIndex].hlist.list
+                    //サブルーチン引数の定義
+                    for _,s in programList[prIndex].arg.list do
+                        writer.codewrite(fdeclare s)
+                    //グローバル変数の定義
+                    declareall writer
+                    //メインコード
+                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.indent.dec()
+                    writer.codewrite("end subroutine " + projectname + "\n")
+                    writer.close()
+                    programList[prIndex].delete()
+                    //呼び出しコードを記述
+                    String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
+                codewrite("call" + " " + projectname + "(" + args + ")\n")
+            |HTML ->
+                programList[prIndex].flist.add projectname
+                let args = makeProgram [dir,projectname,HTML] <| fun () ->
+                    code()
+                    programList[prIndex].close()
+                    //ソースファイル(関数部分)出力
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    writer.codewrite("<h3>" + projectname + "</h3>\n")
+                    writer.codewrite "<ul>\n"
+                    for _,(_,_,nm) in programList[prIndex].arg.list do
+                        writer.codewrite("<li>\\(" + nm + "\\)</li>\n")
+                    writer.codewrite "</ul>\n"
+                    let argvar = String.Join(", ", programList[prIndex].arg.list |> List.map (fun (_,(_,_,n)) -> n))
+                    writer.codewrite "<div class=\"codeblock\">\n"
+                    writer.codewrite "<details>\n"
+                    writer.codewrite("<summary><span class=\"op-func\">function</span> \\(" + projectname + "(" + argvar + ")\\)</summary>\n")
+                    writer.codewrite "<div class=\"insidecode-func\">\n"
+                    writer.indent.inc()
+                    writer.codewrite "<ul>\n"
+                    //サブルーチン引数の定義
+                    for _,s in programList[prIndex].arg.list do
+                        writer.codewrite("<li>" + fdeclare s + "</li>\n")
+                    //グローバル変数の定義
+                    declareall writer
+                    writer.codewrite "</ul>"
+                    //メインコード
+                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.indent.dec()
+                    writer.codewrite "</div>\n"
+                    writer.codewrite "</details>\n"
+                    writer.codewrite "</div>\n"
+                    writer.close()
+                    programList[prIndex].delete()
+                    //呼び出しコードを記述
+                    String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
+                codewrite("\\(" + projectname + "(" + args + ")\\)<br/>\n")
+            |Python ->
+                programList[prIndex].flist.add projectname
+                let re_args,args = makeProgram [dir,projectname,Python] <| fun () ->
+                    code()
+                    programList[prIndex].close()
+                    //ソースファイル(関数部分)出力
+                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    writer.codewrite "#==========================================================================================\n"
+                    writer.codewrite("# Subroutine name: " + projectname + "\n")
+                    for _,(_,_,nm) in programList[prIndex].arg.list do
+                        writer.codewrite("# " + nm + "\n")
+                    writer.codewrite "#==========================================================================================\n"
+                    let argvar = 
+                        programList[prIndex].arg.list
+                        |> List.map (fun (_,(_,_,n)) -> n)
+                        |> fun s -> String.Join(", ", s)
+                    let re_argvar =
+                        programList[prIndex].arg.list 
+                        |> List.map (fun (_,(_,vtp,n)) -> 
+                            match vtp with
+                            |A1 _|A2 _|A3 _ -> ""
+                            |_ -> n)
+                        |> List.filter (fun s -> s <> "")
+                        |> fun s -> String.Join(", ", s)
+                    //呼び出しコードを記述
+                    let args =
+                        programList[prIndex].arg.list 
+                        |> List.map (fun (n,(typ,vtp,_)) -> 
+                            match typ,vtp,n.StartsWith "(*" with
+                            |(It _|Dt|Zt|Structure _),A0,false -> n
+                            |(It _|Dt|Zt|Structure _),A0,true  -> n.Substring(2,n.Length-3)
+                            |_ -> n)
+                        |> fun s -> String.Join(", ", s)
+                    let re_args =
+                        programList[prIndex].arg.list 
+                        |> List.map (fun (n,(_,vtp,_)) ->
+                            match vtp with
+                            |A1 _|A2 _|A3 _ -> ""
+                            |_ -> n)
+                        |> List.filter (fun s -> s <> "")
+                        |> fun s -> String.Join(", ", s)
+                    writer.codewrite("def " + projectname + "(" + argvar + "):\n")
+                    writer.indent.inc()
+                    //グローバル変数の定義
+                    declareall writer
+                    //メインコード
+                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.codewrite("return " + re_argvar + "\n")
+                    writer.indent.dec()
+                    writer.close()
+                    programList[prIndex].delete()
+                    re_args,args
+                codewrite(re_args + " = " + projectname + "(" + args + ")\n")
+            |_ -> ()

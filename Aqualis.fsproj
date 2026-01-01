@@ -44,9 +44,11 @@
     <Compile Include="main\codestr.fs" />
     <Compile Include="main\structure.fs" />
     <Compile Include="main\io.fs" />
-    <Compile Include="main\function.fs" />
+    <Compile Include="main\args.fs" />
     <Compile Include="main\declare.fs" />
+    <Compile Include="main\function.fs" />
     <Compile Include="main\compile.fs" />
+    <Compile Include="main\template.fs" />
     <Compile Include="math\geometry.fs" />
     <Compile Include="math\lapack.fs" />
     <Compile Include="math\bessel.fs" />
