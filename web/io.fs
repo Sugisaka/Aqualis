@@ -12,10 +12,16 @@ module htmlio =
     /// HTML本体のコード出力先ファイル名
     let mutable filename_body = ""
     let mutable filename_js = ""
+    let mutable filename_JSAnimationStart = ""
+    let mutable filename_JSAnimationSeqReset = ""
+    let mutable filename_JSAnimationReset = ""
     /// コンテンツディレクトリ
     let mutable contentsDir = ""
     /// 出力先ディレクトリ
     let mutable outputDir = ""
+    let mutable private contentsCounter = -1
+    let mutable private animtionSeqCounter = -1
+    let mutable private animationGroupCounter = -1
     // /// draw関数内のコード
     // let mutable wrDraw = OptionWriter()
     // /// body要素内のコード
@@ -50,13 +56,53 @@ module htmlio =
         let p = code()
         prIndex <- prIndex_temp
         p
+    /// アニメーション開始コードの書き込み
+    let switchJSAnimationStart code =
+        let prIndex_temp = prIndex
+        prIndex <- 4
+        let p = code()
+        prIndex <- prIndex_temp
+        p
+    /// アニメーション連結コードの書き込み
+    let switchJSAnimationSeqReset code =
+        let prIndex_temp = prIndex
+        prIndex <- 5
+        let p = code()
+        prIndex <- prIndex_temp
+        p
+    /// アニメーション初期化コードの書き込み
+    let switchJSAnimationReset code =
+        let prIndex_temp = prIndex
+        prIndex <- 6
+        let p = code()
+        prIndex <- prIndex_temp
+        p
         
+    let mutable animationButtonList:list<string*string*int*int> = []
     let mutable audioList:string list = []
     /// 図面カウンタ
     let mutable figcounter = 0
     /// アニメーションカウンタ
     let mutable anicounter = 0
-
+    
+    let nextContentsID() =
+        contentsCounter <- contentsCounter + 1
+        "contentsID"+contentsCounter.ToString()
+        
+    let nextAnimationSeqID() =
+        animtionSeqCounter <- animtionSeqCounter + 1
+        "animationSeqID"+animtionSeqCounter.ToString(),"animationSeqResetID"+animtionSeqCounter.ToString()
+        
+    let nextAnimationGroup() =
+        animationGroupCounter <- animationGroupCounter + 1
+        animationGroupCounter.ToString()
+        
+    let animationButtonReset() =
+        animationButtonList <- []
+        
+    let addAnimationButton(s) =
+       animationButtonList <- animationButtonList@[s]
+       
     // /// ファイル書き込み
     // let write (t:string) = wrBody.Write t
     // let fileOpen (t:string) = wrBody.FileSet t
