@@ -21,6 +21,7 @@
     <Compile Include="eval\evalJ.fs" />
     <Compile Include="eval\evalPh.fs" />
     <Compile Include="eval\evalT.fs" />
+    <Compile Include="eval\evalHS.fs" />
     <Compile Include="eval\eval.fs" />
     <Compile Include="eval\diff.fs" />
     <Compile Include="main\num0.fs" />
