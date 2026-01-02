@@ -428,11 +428,12 @@ module htmlexpr =
             code()
             
         static member submit(name:string,value:num0) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value",(value.code)])
+        static member submit(name:PHPdata,value:string) = html.taga("input",["type",Str "submit"; "name", Nvr (num0.var name.code).Expr; "value",Str value])
         static member submit(name:num0,value:string) = html.taga("input",["type",Str "submit"; "name", "\\\""++name++"\\\""; "value",Str value])
         static member submit(url:string,name:num0,value:string) = html.taga("input",["type",Str "submit"; "name", "\\\""++name++"\\\""; "value",Str value; "formaction",Str url])
         static member submit(name:exprString,value:string) = html.taga("input",["type","\"submit\""; "name",name.toString(" . ",StrQuotation); "value","\""+value+"\""])
         static member submit_disabled(name:string,value:num0) = html.taga("input",["type",Str "submit"; "name",Str name; "value",Nvr value.Expr; "disabled",Str "disabled"])
-        static member submit_disabled(name:num0,value:string) = html.taga("input",["type",Str "submit"; "name", "\\\""++name++"\\\""; "value",Str value; "disabled",Str "disabled"])
+        static member submit_disabled(name:PHPdata,value:string) = html.taga("input",["type",Str "submit"; "name", name.expr; "value",Str value; "disabled",Str "disabled"])
         static member submit_disabled(name:exprString,value:string) = html.taga("input",["type","\"submit\""; "name",name.toString(" . ",StrQuotation); "value","\""+value+"\""; "disabled","\"disabled\""])
         static member item (a:list<string*exprString>) = fun code -> html.tagb ("li",a) code
         static member link(url:num0) = fun code -> html.tagb ("a",["href","\""+url.code+"\"";]) code

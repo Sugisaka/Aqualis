@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-freeCanvas HTMLSequenceDiagram outputdir "test8" <| fun () ->
+Compile [HTMLSequenceDiagram] outputdir "test8" (version,"aaa") <| fun () ->
     ch.ii <| fun (x,x1) ->
         x <== 0
         x1 <== 0

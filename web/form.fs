@@ -27,7 +27,8 @@ type Button(name:exprString) =
     
 type ButtonVar() =
     /// ボタンが押されたか判定
-    member _.isset(id:num0) = php.isset (post id).get
+    member _.isset(id:PHPdata) = php.isset (post id).get
+    member _.isset(id:exprString) = php.isset (post id).get
     member _.isset(id:string) = php.isset (post id).get
     /// <summary>
     /// ボタンの表示
@@ -36,6 +37,18 @@ type ButtonVar() =
     /// <param name="file">ボタン押下時の移動先ファイル</param>
     /// <param name="text">ボタンに表示するテキスト</param>
     member _.show(id:num0,file:string,text:string) = (post id).submit(file,text)
+    /// <summary>
+    /// ボタンの表示
+    /// </summary>
+    /// <param name="id">ボタンID</param>
+    /// <param name="text">ボタンに表示するテキスト</param>
+    member _.show(id:exprString,text:string) = html.submit(id,text)
+    /// <summary>
+    /// ボタンの表示
+    /// </summary>
+    /// <param name="id">ボタンID</param>
+    /// <param name="text">ボタンに表示するテキスト</param>
+    member _.show(id:PHPdata,text:string) = html.submit(id,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
@@ -53,7 +66,7 @@ type ButtonVar() =
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show_disabled(id:num0,text:string) = html.submit_disabled(id,text)
+    member _.show_disabled(id:PHPdata,text:string) = html.submit_disabled(id,text)
     
 type TextBox(name:exprString) =
     let t = post name
@@ -202,6 +215,16 @@ type ComboBox(name:exprString,items:list<ComboBoxItem>) =
                     html.option_selected i.Tag <| fun () -> codewrite i.Text
                 <| fun () ->
                     html.option i.Tag <| fun () -> codewrite i.Text
+    /// コンボボックスを表示（送信された選択項目を選択状態にする）
+    member this.show_selectedItem(text:PHPdata) =
+        //c.select <| fun () ->
+        html.select name <| fun () ->
+            for i in items do
+                br.if2(text .= num0(Var(Nt,i.Text,NaN)))
+                <| fun () ->
+                    html.option_selected i.Tag <| fun () -> codewrite i.Text
+                <| fun () ->
+                    html.option i.Tag <| fun () -> codewrite i.Text
     /// コンボボックスを表示
     member _.show() =
         //c.select <| fun () ->
@@ -289,7 +312,7 @@ type ComboBoxVar() =
 type CheckBox(name:num0) =
     let cb = post name
     new(name:string) = CheckBox (num0(Var(Nt,name,NaN)))
-    member _.isChecked with get() = cb.get .= 1
+    member _.isChecked with get() = cb.get.num0 .= 1
     member _.status with get() = cb.get
     member _.show() = html.checkbox name
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
@@ -301,7 +324,7 @@ type CheckBox(name:num0) =
     
 /// IDによって複数のチェックボックスを表す
 type CheckBoxVar() =
-    member _.isChecked(id:num0) = (post id).get .= 1
+    member _.isChecked(id:num0) = (post id).get.num0 .= 1
     member _.status(id:num0) = (post id).get
     member _.show(id:num0) = html.checkbox id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）

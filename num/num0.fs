@@ -264,6 +264,13 @@ namespace Aqualis
         static member (<==) (x:num0,y:num0) = expr.subst x.Expr y.Expr (programList[prIndex])
         static member (<==) (x:num0,y:int) = x <== num0(Int y)
         static member (<==) (x:num0,y:double) = x <== num0(Dbl y)
+        static member (<==) (x:num0,y:exprString) = 
+            match programList[prIndex].language with 
+            |PHP ->
+                expr.subst x.Expr (Var(Nt,y.toString(" . ",StrQuotation),NaN)) (programList[prIndex])
+            |_ ->
+                printfn "この言語では文字列を含む値を代入できません"
+        static member (<==) (x:num0,y:string) = x <== Str y
         member this.clear() = this <== 0
         
         ///<summary>等式(TeX、HTMLのみ)</summary>
