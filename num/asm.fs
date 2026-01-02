@@ -7,7 +7,7 @@ namespace Aqualis
         ///<summary>虚数単位</summary>
         static member uj with get() =
             match programList[prIndex].language with
-            |Fortran   -> 
+            |Fortran -> 
                 programList[prIndex].var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
                 num0(Var(Zt,"uj",NaN))
             |C99 -> 
@@ -17,6 +17,9 @@ namespace Aqualis
                 programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 num0(Var(Zt,"\\mathrm{j}",NaN))
             |HTML ->
+                programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                num0(Var(Zt,"\\mathrm{j}",NaN))
+            |HTMLSequenceDiagram ->
                 programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                 num0(Var(Zt,"\\mathrm{j}",NaN))
             |Python -> 
@@ -30,16 +33,19 @@ namespace Aqualis
         ///<summary>円周率</summary>
         static member pi with get() = 
             match programList[prIndex].language with
-            |Fortran   ->
+            |Fortran ->
                 programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
                 num0(Var(Dt,"pi",NaN))
             |C99 ->
                 programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                 num0(Var(Dt,"pi",NaN))
-            |LaTeX   ->
+            |LaTeX ->
                 programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                 num0(Var(Dt,"\\pi",NaN))
-            |HTML   ->
+            |HTML ->
+                programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                num0(Var(Dt,"\\pi",NaN))
+            |HTMLSequenceDiagram ->
                 programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                 num0(Var(Dt,"\\pi",NaN))
             |Python ->

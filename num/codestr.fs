@@ -126,6 +126,10 @@ namespace Aqualis
                 codewrite "<details open>"
                 codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                 codewrite "<div class=\"insidecode-section\">"
+            |HTMLSequenceDiagram -> 
+                codewrite "<details open>"
+                codewrite("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                codewrite "<div class=\"insidecode-section\">"
             |Numeric -> ()
 
         static member private footer (c:char) (s:string) = 
@@ -134,6 +138,9 @@ namespace Aqualis
             |C99 -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |Python -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |HTML   ->
+                codewrite "</div>"
+                codewrite "</details>"
+            |HTMLSequenceDiagram   ->
                 codewrite "</div>"
                 codewrite "</details>"
             |_   -> ()

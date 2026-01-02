@@ -11,16 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-module cvdraw =
-    let mutable cv = canvas()
-    let canvasDraw filename code =
-        freeCanvas outputdir filename <| fun c ->
-            cv <- c
-            code()
-            
-open cvdraw
-
-canvasDraw "p24" <| fun () ->
+freeCanvas HTMLSequenceDiagram outputdir "test8" <| fun () ->
     ch.ii <| fun (x,x1) ->
         x <== 0
         x1 <== 0

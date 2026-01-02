@@ -6,18 +6,11 @@ namespace Aqualis
     [<AutoOpen>]
     module Aqualis_main =
         
-        ///<summary>コメント文を生成</summary>
-        let (!) s = comment s
-        
-        ///<summary>構造体定義</summary>
-        let str = structure()
-        
         ///<summary>コンパイル</summary>
         let Compile langgList dir projectname (aqver:string,codever:string) code =
             for lang in langgList do
                 match lang with 
                 |Fortran -> 
-                    str.clear()
                     makeProgram [dir,projectname,Fortran] <| fun () ->
                         //メインコード生成
                         code()
@@ -86,7 +79,6 @@ namespace Aqualis
                         wr.Write("./" + projectname + ".exe\n")
                     wr.Close()
                 |C99 ->
-                    str.clear()
                     makeProgram [dir,projectname,C99] <| fun () ->
                         //メインコード生成
                         programList[prIndex].olist.add "-lm"
@@ -158,7 +150,6 @@ namespace Aqualis
                         wr.Write("./" + projectname + ".exe\n")
                     wr.Close()
                 |LaTeX ->
-                    str.clear()
                     makeProgram [dir,projectname,LaTeX] <| fun () ->
                         //メインコード生成
                         code()
@@ -202,7 +193,6 @@ namespace Aqualis
                         //beeファイル削除
                         programList[prIndex].delete()
                 |HTML ->
-                    str.clear()
                     makeProgram [dir,projectname,HTML] <| fun () ->
                         //メインコード生成
                         code()
@@ -368,8 +358,10 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         programList[prIndex].delete()
+                |HTMLSequenceDiagram ->
+                    htmlpresentation dir projectname lang (None, None) false <| fun () ->
+                        html.canvas <| Style [size.width "0px"; size.height "0px"] <| code
                 |Python ->
-                    str.clear()
                     makeProgram [dir,projectname,Python] <| fun () ->
                         //メインコード生成
                         code()
@@ -421,7 +413,6 @@ namespace Aqualis
                     wr.Write("python3 " + projectname + ".py\n")
                     wr.Close()
                 |JavaScript ->
-                    str.clear()
                     makeProgram [dir,projectname,JavaScript] <| fun () ->
                         //メインコード生成
                         programList[prIndex].indentInc()
@@ -464,7 +455,6 @@ namespace Aqualis
                         //beeファイル削除
                         programList[prIndex].delete()
                 |PHP ->
-                    str.clear()
                     makeProgram [dir,projectname,PHP] <| fun () ->
                         //メインコード生成
                         programList[prIndex].indentInc()

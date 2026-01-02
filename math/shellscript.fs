@@ -35,6 +35,8 @@ namespace Aqualis
                         ()
                     |HTML -> 
                         ()
+                    |HTMLSequenceDiagram -> 
+                        ()
                     |JavaScript ->
                         ()
                     |PHP ->
@@ -65,6 +67,8 @@ namespace Aqualis
                 |LaTeX   ->
                     ()
                 |HTML   ->
+                    ()
+                |HTMLSequenceDiagram   ->
                     ()
                 |JavaScript ->
                     ()

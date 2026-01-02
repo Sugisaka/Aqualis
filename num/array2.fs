@@ -28,14 +28,24 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match programList[prIndex].language with 
-                |Fortran -> num0(Var(It 4,name+"_size(1)",NaN))
-                |C99 -> num0(Var(It 4,name+"_size[0]",NaN))
-                |LaTeX -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
-                |HTML -> num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
-                |Python -> num0(Var(It 4,name+"_size[0]",NaN))
-                |JavaScript -> num0(Var(It 4,name+"_size[0]",NaN))
-                |PHP -> num0(Var(It 4,name+"_size[0]",NaN))
-                |Numeric -> num0 NaN
+                |Fortran ->
+                    num0(Var(It 4,name+"_size(1)",NaN))
+                |C99 ->
+                    num0(Var(It 4,name+"_size[0]",NaN))
+                |LaTeX ->
+                    num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                |HTML ->
+                    num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                |HTMLSequenceDiagram ->
+                    num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                |Python ->
+                    num0(Var(It 4,name+"_size[0]",NaN))
+                |JavaScript ->
+                    num0(Var(It 4,name+"_size[0]",NaN))
+                |PHP ->
+                    num0(Var(It 4,name+"_size[0]",NaN))
+                |Numeric ->
+                    num0 NaN
             |Arx2(s1,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member _.size2 
@@ -43,14 +53,24 @@ namespace Aqualis
             match x with
             |Var2(_,name) -> 
                 match programList[prIndex].language with 
-                |Fortran -> num0(Var(It 4,name+"_size(2)",NaN))
-                |C99 -> num0(Var(It 4,name+"_size[1]",NaN))
-                |LaTeX -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
-                |HTML -> num0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
-                |Python -> num0(Var(It 4,name+"_size[1]",NaN))
-                |JavaScript -> num0(Var(It 4,name+"_size[1]",NaN))
-                |PHP -> num0(Var(It 4,name+"_size[1]",NaN))
-                |Numeric -> num0 NaN
+                |Fortran ->
+                    num0(Var(It 4,name+"_size(2)",NaN))
+                |C99 ->
+                    num0(Var(It 4,name+"_size[1]",NaN))
+                |LaTeX ->
+                    num0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
+                |HTML ->
+                    num0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
+                |HTMLSequenceDiagram ->
+                    num0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
+                |Python ->
+                    num0(Var(It 4,name+"_size[1]",NaN))
+                |JavaScript ->
+                    num0(Var(It 4,name+"_size[1]",NaN))
+                |PHP ->
+                    num0(Var(It 4,name+"_size[1]",NaN))
+                |Numeric ->
+                    num0 NaN
             |Arx2(_,s2,_) -> s2
         ///<summary>インデクサ</summary>
         member this.Idx2(i:num0,j:num0) =
@@ -170,6 +190,16 @@ namespace Aqualis
                             codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |_ -> 
                             codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                    |HTMLSequenceDiagram ->
+                        match size,typ with
+                        |A2(0,0),It _ ->
+                            codewrite("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                        |A2(0,0),Dt   ->
+                            codewrite("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                        |A2(0,0),Zt   ->
+                            codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                        |_ -> 
+                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |Python ->
                         match size with
                         |A2(0,0) ->
@@ -241,6 +271,11 @@ namespace Aqualis
                         codewrite("$"+name+"$: deallocate\\\\\n")
                     |_ -> ()
                 |HTML ->
+                    match size with
+                    |A2(0,0) ->
+                        codewrite("\\("+name+"\\): deallocate<br/>\n")
+                    |_ -> ()
+                |HTMLSequenceDiagram ->
                     match size with
                     |A2(0,0) ->
                         codewrite("\\("+name+"\\): deallocate<br/>\n")
@@ -520,6 +555,8 @@ namespace Aqualis
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
                 |HTML ->
                     codewrite(x + " \\leftarrow " + y)
+                |HTMLSequenceDiagram ->
+                    codewrite(x + " \\leftarrow " + y)
                 |Python ->
                     codewrite(x + " = copy.deepcopy("+y+")")
                 |JavaScript ->
@@ -529,13 +566,13 @@ namespace Aqualis
                 |Numeric -> ()
             |Var2(_,x),Arx2(_,_,f) ->
                 match programList[prIndex].language with
-                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
+                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
             |Arx2(_,_,_),Var2(_,_) ->
                 match programList[prIndex].language with
-                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
+                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
             |Arx2(_,_,_),Arx2(_,_,_) ->
                 match programList[prIndex].language with
-                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
+                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
         static member (<==) (v1:num2,v2:num0) =
             match v1.Expr with
             |Var2(_,x) ->
@@ -545,6 +582,8 @@ namespace Aqualis
                 |C99 ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
                 |HTML ->
+                    codewrite(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
+                |HTMLSequenceDiagram ->
                     codewrite(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
                 |Python ->
                     match v1.etype with
@@ -557,7 +596,7 @@ namespace Aqualis
                 |Numeric -> ()
             |Arx2(_,_,_) ->
                 match programList[prIndex].language with
-                |Fortran|LaTeX|C99|HTML|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
+                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
         static member (<==) (v1:num2,v2:int) =
             v1 <== I v2
         static member (<==) (v1:num2,v2:double) =

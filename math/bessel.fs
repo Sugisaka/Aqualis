@@ -10,6 +10,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"j0("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(0, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN
@@ -24,6 +25,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"y0("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(0, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN
@@ -38,6 +40,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"j0("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(0, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN
@@ -48,6 +51,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"y0("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(0, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN
@@ -62,6 +66,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"j1("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(1, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN
@@ -76,6 +81,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"y1("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(1, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN
@@ -90,6 +96,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"j1("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(1, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN
@@ -100,6 +107,7 @@ namespace Aqualis
                     |C99 -> Var(Dt,"y1("+v.code+")",NaN)
                     |LaTeX -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |HTML -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
+                    |HTMLSequenceDiagram -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(1, "+v.code+")",NaN)
                     |JavaScript -> NaN
                     |PHP -> NaN

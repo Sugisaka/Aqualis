@@ -19,6 +19,8 @@ namespace Aqualis
                 "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + "\\mathrm{j})"
             |HTML ->
                 "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + "\\mathrm{j})"
+            |HTMLSequenceDiagram ->
+                "(" + programList[prIndex].numFormat.DtoS re + (if im>=0.0 then "+" else "") + programList[prIndex].numFormat.DtoS im + "\\mathrm{j})"
             |Python ->
                 if im<0.0 then
                     programList[prIndex].numFormat.DtoS re + "-" + programList[prIndex].numFormat.DtoS (abs im) + "i"
@@ -39,6 +41,7 @@ namespace Aqualis
             |C99 -> "{" + join v + "}"
             |LaTeX -> "{" + join v + "}"
             |HTML -> "{" + join v + "}"
+            |HTMLSequenceDiagram -> "{" + join v + "}"
             |Python -> "[" + join v + "]"
             |JavaScript -> "[" + join v + "]"
             |PHP -> "[" + join v + "]"
@@ -52,6 +55,7 @@ namespace Aqualis
             |C99 -> "{" + join v + "}"
             |LaTeX -> "{" + join v + "}"
             |HTML -> "{" + join v + "}"
+            |HTMLSequenceDiagram -> "{" + join v + "}"
             |Python -> "[" + join v + "]"
             |JavaScript -> "[" + join v + "]"
             |PHP -> "[" + join v + "]"
@@ -65,6 +69,7 @@ namespace Aqualis
             |C99 -> "{" + join v + "}"
             |LaTeX -> "{" + join v + "}"
             |HTML -> "{" + join v + "}"
+            |HTMLSequenceDiagram -> "{" + join v + "}"
             |Python -> "[" + join v + "]"
             |JavaScript -> "[" + join v + "]"
             |PHP -> "[" + join v + "]"

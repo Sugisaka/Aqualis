@@ -63,6 +63,18 @@ namespace Aqualis
                             |_ -> 
                                 codewrite "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
+                |HTMLSequenceDiagram ->
+                    ch.i1 _1 <| fun seed ->
+                        let setseed code =
+                            code seed
+                            codewrite("random_seed="+seed.code+"[0])")
+                        let getrand (x:num0) =
+                            match x.Expr with
+                            |Var(_,n,_) -> 
+                                codewrite(n + " = (random number: 0->1);")
+                            |_ -> 
+                                codewrite "Error:double型以外の変数に乱数値を代入できません"
+                        code(setseed,getrand)
                 |Python ->
                     codewrite "random_seed = numpy.random.default_rng()"
                     ch.i1 _1 <| fun seed ->

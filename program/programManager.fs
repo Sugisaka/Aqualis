@@ -5,7 +5,10 @@ namespace Aqualis
     type program(outputdir,pjname,lang:Language) =
         
         let cwriter = codeWriter(outputdir+"\\"+pjname,2,lang)
-
+        
+        /// 構造体
+        let structData = structure()
+        
         ///<summary>言語設定</summary>
         member val language = lang with get
         
@@ -177,6 +180,7 @@ namespace Aqualis
             cwriter.close()
             File.ReadAllText(outputdir+"\\"+pjname)
         member _.delete() = cwriter.delete()
+        member _.str with get() = structData
         
     [<AutoOpen>]
     module aqualisProgram =
@@ -225,6 +229,9 @@ namespace Aqualis
         let comment(s:string) = programList[prIndex].comment s
         let language() = programList[prIndex].language
         
+        ///<summary>コメント文を生成</summary>
+        let (!) s = comment s
+        
     ///<summary>コード生成の設定</summary>
     type AqualisCompiler () =
         
@@ -267,27 +274,47 @@ namespace Aqualis
         ///<summary>プログラムの実行を強制終了</summary>
         static member abort() =
             match language() with 
-            |Fortran -> codewrite "stop" 
-            |C99     -> codewrite "return 1;" 
-            |LaTeX   -> codewrite "stop"
-            |HTML    -> codewrite "stop"
-            |Python  -> codewrite "sys.exit(1)"
-            |JavaScript -> ()
-            |PHP -> ()
-            |Numeric -> ()
+            |Fortran ->
+                codewrite "stop" 
+            |C99 ->
+                codewrite "return 1;" 
+            |LaTeX ->
+                codewrite "stop"
+            |HTML ->
+                codewrite "stop"
+            |HTMLSequenceDiagram ->
+                codewrite "stop"
+            |Python ->
+                codewrite "sys.exit(1)"
+            |JavaScript ->
+                ()
+            |PHP ->
+                ()
+            |Numeric ->
+                ()
             
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         static member stop() =
             match language() with
-            |Fortran -> codewrite "read *, \n"
-            |C99     -> codewrite "getchar();\n"
-            |LaTeX   -> codewrite "stop\n"
-            |HTML    -> codewrite "stop\n"
-            |Python  -> codewrite "input()"
-            |JavaScript -> ()
-            |PHP -> ()
-            |Numeric -> ()
-            
+            |Fortran ->
+                codewrite "read *, \n"
+            |C99 ->
+                codewrite "getchar();\n"
+            |LaTeX ->
+                codewrite "stop\n"
+            |HTML ->
+                codewrite "stop\n"
+            |HTMLSequenceDiagram ->
+                codewrite "stop\n"
+            |Python ->
+                codewrite "input()"
+            |JavaScript ->
+                ()
+            |PHP ->
+                ()
+            |Numeric ->
+                ()
+                
         /// <summary>
         /// インクルードファイル追加（TeXの場合はプリアンブル部挿入コード）
         /// </summary>

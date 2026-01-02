@@ -71,6 +71,18 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 codewrite("Print \\("+code+"\\)\n")
                 codewrite "<br/>\n"
+            |HTMLSequenceDiagram ->
+                let code = 
+                    lst
+                    |> List.map (fun q ->
+                        match q with
+                        |Str x -> x
+                        |Nvr x -> x.eval (programList[prIndex])
+                        |_ -> "")
+                    |> List.filter (fun s -> s <> "")
+                    |> fun s -> String.Join(",",s)
+                codewrite("Print \\("+code+"\\)\n")
+                codewrite "<br/>\n"
             |Python ->
                 let int0string_format_C =
                     "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
@@ -169,6 +181,9 @@ namespace Aqualis
             |LaTeX ->
                 codewrite("print, \""+str+"\"\n")
             |HTML ->
+                codewrite("Print \\("+str+"\\)\n")
+                codewrite "<br/>\n"
+            |HTMLSequenceDiagram ->
                 codewrite("Print \\("+str+"\\)\n")
                 codewrite "<br/>\n"
             |Python ->

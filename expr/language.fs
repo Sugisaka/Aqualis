@@ -10,6 +10,8 @@ namespace Aqualis
         |LaTeX
         ///<summary>HTML</summary>
         |HTML
+        ///<summary>HTMLシーケンス図</summary>
+        |HTMLSequenceDiagram
         ///<summary>Python</summary>
         |Python
         ///<summary>JavaScript</summary>

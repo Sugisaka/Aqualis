@@ -2,371 +2,58 @@ namespace Aqualis
     
     open System
     
-    type CSS = {Key:string; Value:string}
-    
-    type Atr(s:string) =
-        new(s:string,t:string) = Atr (s+" = \""+t+"\"")
-        new(s:Style) = 
-            let h:string = s.code
-            Atr h
-        member _.code with get() = s
-        static member list(s:list<Atr>) = String.concat " " (List.map (fun (s:Atr) -> s.code) s) 
-
-    and Style(s:list<CSS>) =
-        member _.list with get() = s
-        member _.code with get() =
-            s 
-            |> List.map (fun s -> s.Key+": "+s.Value) 
-            |> fun s -> String.concat "; " s
-            |> fun s -> "style = \""+s+"\""
-        member this.atr with get() = Atr this.code
-        static member (+) (a:Style,b:Style) = Style(a.list@b.list)
-        static member blank = Style []
-        
-    [<AutoOpen>]
-    module style =
-        module area = 
-            let backGroundColor (s:string) = {Key="background-color"; Value=s}
-        module font = 
-            let size (s:int) = {Key="font-size"; Value=s.ToString()+"px"}
-            let color (s:string) = {Key="color"; Value=s}
-            let weight (s:string) = {Key="font-weight"; Value=s.ToString()}
-            let family (s:string) = {Key="font-family"; Value=s}
-            let lineHeight (s:int) = {Key="line-height"; Value=s.ToString()+"px"}
-        module size = 
-            let width (s:string) = {Key="width"; Value=s}
-            let height (s:string) = {Key="height"; Value=s}
-        module margin = 
-            let left (s:string) = {Key="margin-left"; Value=s}
-            let right (s:string) = {Key="margin-right"; Value=s}
-            let top (s:string) = {Key="margin-top"; Value=s}
-            let bottom (s:string) = {Key="margin-bottom"; Value=s}
-            let all (s:int) = {Key="margin"; Value=s.ToString()+"px"}
-        module padding = 
-            let left (s:int) = {Key="padding-left"; Value=s.ToString()+"px"}
-            let right (s:int) = {Key="padding-right"; Value=s.ToString()+"px"}
-            let top (s:int) = {Key="padding-top"; Value=s.ToString()+"px"}
-            let bottom (s:int) = {Key="padding-bottom"; Value=s.ToString()+"px"}
-            let all (s:int) = {Key="padding"; Value=s.ToString()+"px"}
-        module border = 
-            let style (s:string) = {Key="border"; Value=s}
-            let color (s:string) = {Key="border-color"; Value=s}
-            module width = 
-                let top (s:int) = {Key="border-top-width"; Value=s.ToString()+"px"}
-                let bottom (s:int) = {Key="border-bottom-width"; Value=s.ToString()+"px"}
-                let left (s:int) = {Key="border-left-width"; Value=s.ToString()+"px"}
-                let right (s:int) = {Key="border-right-width"; Value=s.ToString()+"px"}
-        module stroke = 
-            let color (s:string) = {Key="stroke"; Value=s}
-            let width (s:float) = {Key="stroke-width"; Value=s.ToString()+"px"}
-            let dasharray (s:float) = {Key="stroke-dasharray"; Value=s.ToString()+"px"}
-        module align = 
-            module items = 
-                let center = {Key="align-items"; Value="center"}
-            let justifyContent (s:string) = {Key="justify-content"; Value=s}
-        module display = 
-            let flex = {Key="display"; Value="flex"}
-            
-    type Anchor = {Left:double; Right:double; Top:double; Bottom:double;}
-
-    type position(xx:float,yy:float) =
-        new(ix:int,iy:int) =
-            position(float ix,float iy)
-        member this.x with get() = xx
-        member this.y with get() = yy
-        member this.shift(x,y) = position(xx+x,yy+y)
-        member this.shiftX(x) = this.shift(x,0)
-        member this.shiftY(y) = this.shift(0,y)
-        member this.origin = this.shift(0,0)
-        static member Origin with get() = position(0,0)
-        static member (+) (p1:position,p2:position) = position(p1.x+p2.x, p1.y+p2.y)
-        static member (-) (p1:position,p2:position) = position(p1.x-p2.x, p1.y-p2.y)
-        
-    and html =
-        /// 内部要素のないタグ
-        static member taga (t:string,s:Style) =
-            codewrite("<"+t+" "+s.code+" />")
-        /// 内部要素のないタグ
-        static member taga (t:string,atr:list<Atr>) =
-            codewrite("<"+t+" "+Atr.list atr+" />")
-        /// 内部要素のないタグ
-        static member taga (t:string,lst:list<string*string>) =
-            codewrite("<"+t+" ")
-            for (a,s) in lst do
-                codewrite(a + "=" + s + " ")
-            codewrite " />"
-        /// 内部要素のないタグ
-        static member taga (t:string) =
-            codewrite("<"+t+" ")
-            codewrite " />"
-        /// 内部要素のないタグ
-        static member taga (t:string,a:string) =
-            codewrite("<"+t+" "+a+" />")
-        /// 内部要素のあるタグ
-        static member tagb (t:string,atr:Style) = fun code ->
-            let a = atr.code
-            if a = "" then
-                codewrite("<"+t+">")
-            else
-                codewrite("<"+t+" "+a+" >")
-            code()
-            codewrite ("</"+t+">")
-        /// 内部要素のあるタグ
-        static member tagb (t:string,atr:list<Atr>) = fun code ->
-            let a = Atr.list atr
-            if a = "" then
-                codewrite("<"+t+">")
-            else
-                codewrite("<"+t+" "+a+" >")
-            code()
-            codewrite ("</"+t+">")
-            
-        /// 内部要素のあるタグ
-        static member tagb (t:string,lst:list<string*string>) = fun code ->
-            if lst.Length=0 then
-                codewrite("<"+t+">")
-            else
-                codewrite("<"+t+" ")
-                for (a,s) in lst do
-                    codewrite(a + "=" + s + " ")
-                codewrite(">")
-            code()
-            codewrite ("</"+t+">")
-        /// 内部要素のあるタグ
-        static member tagb (t:string,a:string) = fun code ->
-            if a="" then
-                codewrite("<"+t+">")
-            else
-                codewrite("<"+t+" "+a+">")
-            code()
-            codewrite ("</"+t+">")
-        /// 内部要素のあるタグ
-        static member tagb (t:string) = fun code ->
-            codewrite("<"+t+">")
-            code()
-            codewrite ("</"+t+">")
-            
-        static member fig (p:position) code =
-            let f = figure()
-            code(f,p)
-            let sx,sy,mx,my = f.setWriteMode()
-            codewrite (
-                "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
-                "width=\""+sx.ToString()+"px\" "+
-                "heigth=\""+sy.ToString()+"px\" "+
-                "xmlns=\"http://www.w3.org/2000/svg\" "+
-                "style=\"margin-left: "+mx.ToString()+"; "+
-                "margin-top: "+my.ToString()+"; "+
-                "position: absolute;"+
-                "\">")
-            code(f,p)
-            codewrite "</svg>"
-            
-    and figure() =
-        let padding = 10.0
-        let mutable xmin:option<double> = None
-        let mutable xmax:option<double> = None
-        let mutable ymin:option<double> = None
-        let mutable ymax:option<double> = None
-        let mutable writeMode = false
-        member _.Padding with get() = padding
-        member _.Xmin with get() = match xmin with |None -> 0.0 |Some v -> v
-        member _.Xmax with get() = match xmax with |None -> 0.0 |Some v -> v
-        member _.Ymin with get() = match ymin with |None -> 0.0 |Some v -> v
-        member _.Ymax with get() = match ymax with |None -> 0.0 |Some v -> v
-        member this.setWriteMode() =
-            writeMode <- true
-            let sizeX = this.Xmax-this.Xmin+2.0*padding
-            let sizeY = this.Ymax-this.Ymin+2.0*padding
-            let marginX = this.Xmin-padding
-            let marginY = this.Ymin-padding
-            (sizeX,sizeY,marginX,marginY)
-
-        member private _.updateRange(p:position) =
-            match xmin with
-            |None ->
-                xmin <- Some(p.x)
-            |Some xx when p.x<xx -> 
-                xmin <- Some(p.x)
-            |_ -> ()
-            match ymin with
-            |None ->
-                ymin <- Some(p.y)
-            |Some yy when p.y<yy -> 
-                ymin <- Some(p.y)
-            |_ -> ()
-            
-            match xmax with
-            |None ->
-                xmax <- Some(p.x)
-            |Some xx when p.x>xx -> 
-                xmax <- Some(p.x)
-            |_ -> ()
-            match ymax with
-            |None ->
-                ymax <- Some(p.y)
-            |Some yy when p.y>yy -> 
-                ymax <- Some(p.y)
-            |_ -> ()
-        member this.line (s:Style) (startP:position) (endP:position) =
-            if writeMode then
-                html.taga ("line", [
-                    Atr("x1",(startP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y1",(startP.y-this.Ymin+this.Padding).ToString());
-                    Atr("x2",(endP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y2",(endP.y-this.Ymin+this.Padding).ToString());]@[s.atr])
-            else
-                this.updateRange startP
-                this.updateRange endP
-
-        member this.Rect (s:Style) (startP:position) (sx:int) (sy:int) =
-            if writeMode then
-                html.taga ("rect", [
-                    Atr("x", (startP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y", (startP.y-this.Ymin+this.Padding).ToString());
-                    Atr("width",sx.ToString())
-                    Atr("height", sy.ToString())]@[s.atr])
-            else
-                this.updateRange startP
-                this.updateRange(startP.shift(sx,sy))
-
-        member this.ellipse (s:Style) (center:position) (radiusX:int) (radiusY:int) =
-            if writeMode then
-                html.taga ("circle", [
-                    Atr("cx", (center.x-this.Xmin+this.Padding).ToString());
-                    Atr("cy", (center.y-this.Ymin+this.Padding).ToString());
-                    Atr("rx", radiusX.ToString());
-                    Atr("ry", radiusY.ToString());]@[s.atr])
-            else
-                this.updateRange(center.shiftX(-radiusX))
-                this.updateRange(center.shiftX(radiusX))
-                this.updateRange(center.shiftY(-radiusY))
-                this.updateRange(center.shiftY(radiusY))
-
-        member this.polygon (s:Style) (apex:list<position>) =
-            if writeMode then
-                let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
-                html.taga ("polygon", [Atr("points",pp)]@[s.atr])
-            else
-                for q in apex do
-                    this.updateRange q
-        member this.polyline (s:Style) (apex:list<position>) =
-            if writeMode then
-                let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
-                html.taga ("polygon", [Atr("points", pp)]@[s.atr])
-            else
-                for q in apex do
-                    this.updateRange q
-        member this.trianglearrow (s:Style) (lineWidth:float) (startP:position) (endP:position) =
-            let r = 30.0
-            let pi = 3.14159265358979
-            let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
-            let q1x = endP.x + r*cos(t0-15.0*pi/180.0)
-            let q1y = endP.y + r*sin(t0-15.0*pi/180.0)
-            let q2x = endP.x + r*cos(t0+15.0*pi/180.0)
-            let q2y = endP.y + r*sin(t0+15.0*pi/180.0)
-            let ux,uy = 
-                let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
-                endP.x + (startP.x-endP.x)*c,
-                endP.y + (startP.y-endP.y)*c
-            if writeMode then
-                this.line s startP (position(ux,uy))
-            else
-                this.updateRange(startP)
-                this.updateRange(endP)
-                this.updateRange(position(q1x,q1y))
-                this.updateRange(position(q2x,q2y))
-            this.polygon s [position(q1x,q1y);endP;position(q2x,q2y)]
-        member this.linearrow (s:Style) (startP:position) (endP:position) (lineWidth:float) =
-            let r = 12.0
-            let pi = 3.14159265358979
-            let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
-            let q1x = endP.x + r*cos(t0-15.0*pi/180.0)
-            let q1y = endP.y + r*sin(t0-15.0*pi/180.0)
-            let q2x = endP.x + r*cos(t0+15.0*pi/180.0)
-            let q2y = endP.y + r*sin(t0+15.0*pi/180.0)
-            let ux,uy = 
-                let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
-                endP.x + (startP.x-endP.x)*c,
-                endP.y + (startP.y-endP.y)*c
-            if writeMode then
-                this.line (s+Style[stroke.width lineWidth]) startP (position(ux,uy))
-            else
-                this.updateRange(startP)
-                this.updateRange(endP)
-                this.updateRange(position(q1x,q1y))
-                this.updateRange(position(q2x,q2y))
-            this.polyline s [position(q1x,q1y);endP;position(q2x,q2y)]
-            
-
-        
     [<AutoOpen>]
     module value =
         
-        let outputdir = @"C:\home\work"
-        
-        //classのy軸の位置
+        /// classのy軸の位置
         let y40 = 40.0
-        //classーキャプション間
+        /// classーキャプション間
         let gap20 = 20.0
-        //キャプション
+        /// キャプション
         let y20 = y40-gap20 //20.0
-        //class1
+        /// class1
         let x0 = 0.0
-        //class2
+        /// class2
         let x250 = 250.0
 
-        //classのサイズ
+        /// classのサイズ
         let classWidth = 90.0 //横幅 (100.0)
         let classHeight = 40.0 //高さ (50.0)
 
-        //時間軸
+        /// 時間軸
         let dashed_x50 = (classWidth+10.0)/2.0 //50.0
 
-        //実行中
-
-        let gap15 = 15.0 //実行中のx座標の調整
-        let x35 = dashed_x50-gap15 //実行中のx座標 (35.0)
-
-        let text_x160 = (x0+x35+x250+x35)/2.0 //160.0
-
-        let gap5 = 5.0 //代入先の実行中の間隔調整
-
+        /// 実行中
+        /// 実行中のx座標の調整
+        let gap15 = 15.0 
+        /// 実行中のx座標 (35.0)
+        let x35 = dashed_x50-gap15 
+        let text_x160 = (x0+x35+x250+x35)/2.0
+        /// 代入先の実行中の間隔調整
+        let gap5 = 5.0
         let run_width = 10.0
 
         //線,テキスト
-        let gap10 = 10.0 //横線のy座標と繰り返しのテキストのx座標の調整
-
+        /// 横線のy座標と繰り返しのテキストのx座標の調整
+        let gap10 = 10.0 
         let mutable frame_top_list  :list<float> = []
-
         let mutable frame_bottom = 0.0
         let mutable class_number = -1.0
-        
         let mutable count = -1.0
-
         let mutable sectionCount2 = 0.0
         let mutable dic:list<string*float*float> = []
-
         let mutable parameters:list<string*float*float> = []
-
         let mutable left = 0.0
         let mutable right = 0.0
-
         let mutable baseline = 0.0
         let mutable arrow_goal = 0.0
         let mutable text_position = 0.0
-
         let mutable count2 = -1.0
-
         let mutable run_top = 190.0
-
         let mutable distinction = 0.0
-
         let mutable stack  :list<float*float*float*float*int> = []
-
         let mutable start_goal = 0.0
         let mutable yMemry = 0.0
-
         let mutable for_check = 0.0
         let mutable branch_elifCheck = 0.0
 
@@ -380,25 +67,21 @@ namespace Aqualis
         let mutable boundaryY:list<float> = []
         let mutable branch_frame_top = 0.0
         
-
     [<AutoOpen>]
-    module value1 =
+    module seqStyles =
         //ページ左上角
-        let p0 = position.Origin
-        
-    [<AutoOpen>]
-    module value2 =
+        let p0 = position.Origin        
         //スタイル：class1
         let style_class1 = Style[font.size 10; font.color "black"; font.weight "normal"; border.style "1px solid"; area.backGroundColor "#BBEEFF"; font.lineHeight 14; padding.all 5]
         //スタイル：class2
         let style_class2  = Style[font.size 10; font.color "black"; font.weight "normal"; border.style "1px solid"; area.backGroundColor "#FFEEBB"; font.lineHeight 14; padding.all 5]
         
     [<AutoOpen>]
-    module exprEvalH =
+    module exprEvalHS =
         
         type expr with
             
-            //変数用
+            /// 変数用
             static member varList (e:expr,c:program) = 
                 let rec makeList (e:expr) =
                     match e with
@@ -408,10 +91,6 @@ namespace Aqualis
                         expr.draw_class (Var (t,v,p),c)
                         match List.tryFind (fun (label,x,y) -> label=v) parameters with
                         |Some (_,x,y) ->
-                            // if start_goal = 0.0 then
-                            //     [(v,x,y)]
-                            // else //start_goal = 1.0
-                            //     [(v,x,run_top)]
                             [(v,x,y)]
                         |None ->
                             []
@@ -462,13 +141,12 @@ namespace Aqualis
                     |LessEq (a,b) ->
                         makeList a @ makeList b
                     |_ -> []
-                        
-                // List.distinct (makeList e)
+                    
                 e
                 |> makeList
                 |> List.distinct
                 
-            //定数用
+            /// 定数用
             static member numList (e:expr) = 
                 let rec makeList (e:expr) =
                     match e with
@@ -523,7 +201,6 @@ namespace Aqualis
                         makeList a @ makeList b
                     |_ -> []
                     
-                // List.distinct (makeList e)
                 e
                 |> makeList
                 |> List.distinct
@@ -535,7 +212,6 @@ namespace Aqualis
                 count2 <- -1.0
                 
             static member next() =
-                // num0.reset_frame_bottom()
                 expr.reset_parameters()
                 expr.reset_count2()
                 
@@ -559,8 +235,7 @@ namespace Aqualis
             static member drawDasharray(x:float,y1:float,y2:float) =
                 expr.fig p0 <| fun (f,p) ->
                     //破線：classの縦線
-                    f.line
-                        <| Style[stroke.color "black"; stroke.dasharray 5.0]
+                    f.line Style[stroke.color "black"; stroke.dasharray 5.0]
                         <| position(x,y1)
                         <| position(x,y2)
                         
@@ -568,15 +243,13 @@ namespace Aqualis
             static member drawDasharray2(x1:float,x2:float,y1:float) =
                 html.fig p0 <| fun (f,p) ->
                     //破線：条件分岐の横線
-                    f.line
-                        <| Style[stroke.color "green"; stroke.dasharray 10.0]
+                    f.line Style[stroke.color "green"; stroke.dasharray 10.0]
                         <| position(x1,y1)
                         <| position(x2,y1)
             //矢印
             static member drawLineArrow(x1:float, x2:float, y:float) =
                 html.fig p0 <| fun (f,p) ->
-                    f.linearrow
-                        <| Style[stroke.color "black";]
+                    f.linearrow Style[stroke.color "black";]
                         <| position(x1, y)
                         <| position(x2, y)
                         <| 2
@@ -585,47 +258,10 @@ namespace Aqualis
             static member drawBaseline(x:float,y1:float,y2:float) =
                 html.fig p0 <| fun (f,p) ->
                     //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                    f.line
-                        <| Style[stroke.color "black"; stroke.width 2.0]
+                    f.line Style[stroke.color "black"; stroke.width 2.0]
                         <| position(x, y1)
                         <| position(x, y2)
                         
-            static member blockTextcode (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
-                let padding = 5
-                // html.writeTag "div" 
-                //     ("style = \"font-size: "+s.size.ToString()+"px;"+
-                //         "margin-left: "+p.x.ToString()+"px; "+
-                //         "margin-top: "+p.y.ToString()+"px; "+
-                //         "position: absolute; "+
-                //         (match s.weight with |Some c -> "font-weight: "+c+"; " |None -> "")+
-                //         (match s.textcolor with |Some c -> "color: "+c+"; " |None -> "")+
-                //         (match s.bgcolor with |Some c -> "background-color: "+c+"; " |None -> "")+
-                //         "width: "+width.ToString()+"px; "+
-                //         "height: "+height.ToString()+"px; "+
-                //         (match s.border with |Some c -> "border: "+c+"; " |None -> "")+
-                //         (match s.align with 
-                //             |Center -> "display: flex; align-items: center; justify-content: center; "
-                //             |Left -> "")+
-                //         "overflow-wrap: break-word; "+
-                //         "font-family: 'Noto Sans Mono',monospace; "+
-                //         "padding: "+padding.ToString()+"px; "+
-                //         "line-height: 14px;\"")
-                let s1 = Style [size.width (width.ToString()+"px")
-                                size.height (height.ToString()+"px")
-                                font.family "'Noto Sans Mono',monospace"
-                                {Key = "margin-left"; Value = p.x.ToString()+"px";}
-                                {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                                {Key = "position"; Value = "absolute";}
-                                {Key = "overflow-wrap"; Value = "break-word";}]
-                html.tagb ("div", s1+s)
-                    <| fun () ->
-                        text |> List.iter (fun s -> codewrite (s+"<br>"))
-                        codewrite ""
-                {Left = p.x;
-                Right = p.x+double width+2.0*double padding;
-                Top = p.y;
-                Bottom = p.y+double height+2.0*double padding;}
-                
             //代入元に変数があるか確かめる
             static member check_start(list, formula) =
                 if list = [] then //変数がない
@@ -634,7 +270,7 @@ namespace Aqualis
                 else //変数がある
                     distinction <- 0.0
                     
-            //変数名
+            /// 変数名
             static member draw_class(class_name:expr,c:program) =
                 let class_nameText = "\\("+class_name.evalHS c + "\\)"
                 
@@ -643,10 +279,6 @@ namespace Aqualis
                     match List.tryFind (fun (label,x,y) -> label=class_name) dic with
                     |Some (_,x,y) ->
                         class_number <- x
-                        // if start_goal = 0.0 then
-                        //     yMemry <- y
-                        // else //start_goal = 1.0
-                        //     yMemry <- run_top
                         yMemry <- y
 
                     |None ->
@@ -661,16 +293,14 @@ namespace Aqualis
                         // yMemry <- 0.0
 
                         //class1
-                        let x_1 = expr.blockTextcode style_class1
+                        let x_1 = html.blockTextcode style_class1
                                 <| p0.shift(x250*class_number,y40)
                                 <| (classWidth,classHeight) // (90.0,40.0) 横100.0 縦50.0
                                 <| [class_nameText] //x
-
-                        // ()
-
+                                
                         //破線：classの縦線
                         expr.drawDasharray(x250*class_number+dashed_x50,x_1.Bottom,run_top)
-
+                        
                     match List.tryFind (fun (label,x,y) -> label=class_name) parameters with
                     |Some x ->
                         ()
@@ -680,15 +310,14 @@ namespace Aqualis
                 |_ ->
                     ()
                     
-            //実行線
+            /// 実行線
             static member drawActiveLine(x:float, y1:float, y2:float, color:string) =
                 html.fig p0 <| fun (f,p) ->
                     //実行線
-                    f.line
-                        <| Style[stroke.color color; stroke.width run_width]
+                    f.line Style[stroke.color color; stroke.width run_width]
                         <| position(x, y1)
                         <| position(x, y2)
-
+                        
                 let updateRange(xMin,xMax,yMin,yMax,insideSection) =
                     let xMin' = 
                         if xMin = 0.0 then x 
@@ -708,8 +337,8 @@ namespace Aqualis
                         elif y1 > yMax && y1 > y2 then y1 
                         elif y2 > yMax && y2 > y1 then y2 
                         else yMax
-                    (xMin',xMax',yMin',yMax',insideSection)
-
+                    xMin',xMax',yMin',yMax',insideSection
+                    
                 stack <- List.map (fun xxyy -> updateRange xxyy) stack
                 
             static member text (s:Style) = fun (p:position) (text:string) ->
@@ -720,7 +349,7 @@ namespace Aqualis
                 html.tagb ("div", s1+s) <| fun () ->
                     codewrite text
                     
-            //テキスト
+            /// テキスト
             static member drawText(size:int,color:string,weight:string,x:float,y:float,text:string) =
                 // テキスト（実行内容）
                 expr.text 
@@ -728,14 +357,8 @@ namespace Aqualis
                     <| p0.shift(x,y)
                     <| text
                     
-            //代入
+            /// 代入
             static member drawBranchArrow_multiple_list(start:list<string*float*float>,goal:list<string*float*float>,eq:expr,c:program) =
-                // printfn "start: %d" start.Length
-                // for label,x in start do
-                //     printfn "%s %f" label x
-                // printfn "goal: %d" goal.Length
-                // for label2,x2 in goal do
-                //     printfn "%s %f" label2 x2
                 let getName = fun (name,_,_) -> name
                 if start.Length=1 && goal.Length=1 && getName start[0] = getName goal[0] then
                     
@@ -757,11 +380,7 @@ namespace Aqualis
                                     name, number, run_top+gap10*(float start.Length+float goal.Length+1.0) 
                                 else 
                                     name, number, yData)
-
-                        // let mutable a = [0; 1; 2]
-                        // a <- a |> List.map (fun (n:int) -> if n=1 then 2*n else n)
-                        // [0; 2; 2]
-
+                                    
                         //代入元に変数があるとき
                         if distinction = 0.0 then
 
@@ -773,25 +392,13 @@ namespace Aqualis
                                     ()
                                 else //goalX < x then
                                     right <- right + 1.0
-
+                                    
                             //基準線が左側の場合(右矢印)
                             if left > right then
                                 baseline <- x250*goalX
                                 arrow_goal <- x250*goalX+dashed_x50-run_width/2.0
                                 text_position <- x250*(goalX-1.0)+text_x160
-
-                                //代入元の変数の数だけ実行線を引く
-                                // for label,s,y in start do
-                                //     //代入元の実行線
-                                //     expr.drawActiveLine(x250*s+dashed_x50,y,run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-                                    
-                                //     dic <- dic |> List.map 
-                                //         (fun (name, number, yData) -> 
-                                //             if name=label then 
-                                //                 name, number, run_top+gap10*(float start.Length+float goal.Length+1.0)
-                                //             else 
-                                //                 name, number, yData)
-                                                
+                                
                                 //代入元の変数の数だけ矢印を引く
                                 for label,s,y in start do
                                     //次の変数の矢印のために1つ下にずらす
@@ -806,34 +413,19 @@ namespace Aqualis
                                     else //goalX < s then
                                         //左矢印：実行中→縦線
                                         expr.drawLineArrow(x250*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-
-                                // printfn "parameters: %d" parameters.Length
-
+                                        
                                 //基準線(縦線)：代入元の1番目から代入先まで(y軸)
                                 expr.drawBaseline(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
                                 //右矢印：基準線から代入先まで(x軸)
                                 expr.drawLineArrow(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
                                 // テキスト（実行内容）
                                 expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-
+                                
                             //基準線が右側の場合(左矢印)
-                            else //left <= right then
+                            else
                                 baseline <- 130.0 + x250*goalX
                                 arrow_goal <- x250*goalX+dashed_x50+run_width/2.0
                                 text_position <- x250*goalX+text_x160
-
-                                //代入元の変数の数だけ実行線を引く
-                                // for label,s,y in start do
-                                //     //代入元の実行線
-                                //     expr.drawActiveLine(x250*s+dashed_x50, y, run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-
-                                //     dic <- dic |> List.map 
-                                //         (fun (name, number, yData) -> 
-                                //             if name=label then 
-                                //                 name, number, run_top+gap10*(float start.Length+float goal.Length+1.0)
-                                //             else 
-                                //                 name, number, yData)
-                                                
                                 //代入元の変数の数だけ矢印を引く
                                 for label,s,y in start do
                                     //次の変数の矢印のために1つ下にずらす
@@ -848,57 +440,42 @@ namespace Aqualis
                                     else //goalX < s then
                                         //左矢印：実行中→縦線
                                         expr.drawLineArrow(x250*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-
-                                // printfn "parameters: %d" parameters.Length
-
                                 //基準線(縦線)：代入元の1番目から代入先まで(y軸)
                                 expr.drawBaseline(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
                                 //左矢印：基準線から代入先まで(x軸)
                                 expr.drawLineArrow(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
                                 // テキスト（実行内容）
                                 expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-
+                                
                         //定数を代入(変数なし)
-                        else //distinction = 1.0
+                        else
                             //左矢印：基準線から代入先まで(x軸)
                             expr.drawLineArrow(x250*goalX+text_x160-5.0,x250*goalX+dashed_x50+run_width/2.0,run_top+gap10*(float start.Length+1.0))
                             // テキスト（実行内容）
                             expr.drawText(12,"black","normal",x250*goalX+text_x160,run_top-gap10,equText)
-
-                    // printfn "left right: %f %f" left right
+                            
                     left <- 0.0
                     right <- 0.0
-
                     //実行線の下辺からさらに10.0下を描き始めとする
                     run_top <- run_top+gap10*(float start.Length+float goal.Length+2.0)
-
                     expr.next()
                 else
                     let equText = "\\(" + eq.evalHS c + "\\)"
-                    
                     //存在する変数すべてに破線を引く
                     for name, number, yData in dic do
                         //破線：classの縦線
                         expr.drawDasharray(dashed_x50+x250*number,run_top,run_top+gap10*(float start.Length+float goal.Length+2.0))
-
                     for goalName, goalX, goalY in goal do
                         //代入先の実行線
                         expr.drawActiveLine(x250*goalX+dashed_x50, run_top, run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-                        
                         dic <- dic |> List.map 
                             (fun (name, number, yData) -> 
                                 if name=goalName then 
                                     name, number, run_top+gap10*(float start.Length+float goal.Length+1.0) 
                                 else 
                                     name, number, yData)
-
-                        // let mutable a = [0; 1; 2]
-                        // a <- a |> List.map (fun (n:int) -> if n=1 then 2*n else n)
-                        // [0; 2; 2]
-
                         //代入元に変数があるとき
                         if distinction = 0.0 then
-
                             for label,x,y in start do
                                 // 基準線の左右分けの計算
                                 if goalX > x then
@@ -907,25 +484,21 @@ namespace Aqualis
                                     ()
                                 else //goalX < x then
                                     right <- right + 1.0
-
                             //基準線が左側の場合(右矢印)
                             if left > right then
                                 baseline <- x250*goalX
                                 arrow_goal <- x250*goalX+dashed_x50-run_width/2.0
                                 text_position <- x250*(goalX-1.0)+text_x160
-
                                 //代入元の変数の数だけ実行線を引く
                                 for label,s,y in start do
                                     //代入元の実行線
                                     expr.drawActiveLine(x250*s+dashed_x50,y,run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-                                    
                                     dic <- dic |> List.map 
                                         (fun (name, number, yData) -> 
                                             if name=label then 
                                                 name, number, run_top+gap10*(float start.Length+float goal.Length+1.0)
                                             else 
                                                 name, number, yData)
-                                                
                                 //代入元の変数の数だけ矢印を引く
                                 for label,s,y in start do
                                     //次の変数の矢印のために1つ下にずらす
@@ -940,34 +513,27 @@ namespace Aqualis
                                     else //goalX < s then
                                         //左矢印：実行中→縦線
                                         expr.drawLineArrow(x250*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-
-                                // printfn "parameters: %d" parameters.Length
-
                                 //基準線(縦線)：代入元の1番目から代入先まで(y軸)
                                 expr.drawBaseline(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
                                 //右矢印：基準線から代入先まで(x軸)
                                 expr.drawLineArrow(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
                                 // テキスト（実行内容）
                                 expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-
                             //基準線が右側の場合(左矢印)
                             else //left <= right then
                                 baseline <- 130.0 + x250*goalX
                                 arrow_goal <- x250*goalX+dashed_x50+run_width/2.0
                                 text_position <- x250*goalX+text_x160
-
                                 //代入元の変数の数だけ実行線を引く
                                 for label,s,y in start do
                                     //代入元の実行線
                                     expr.drawActiveLine(x250*s+dashed_x50, y, run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-
                                     dic <- dic |> List.map 
                                         (fun (name, number, yData) -> 
                                             if name=label then 
                                                 name, number, run_top+gap10*(float start.Length+float goal.Length+1.0)
                                             else 
                                                 name, number, yData)
-                                                
                                 //代入元の変数の数だけ矢印を引く
                                 for label,s,y in start do
                                     //次の変数の矢印のために1つ下にずらす
@@ -982,33 +548,25 @@ namespace Aqualis
                                     else //goalX < s then
                                         //左矢印：実行中→縦線
                                         expr.drawLineArrow(x250*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-
-                                // printfn "parameters: %d" parameters.Length
-
                                 //基準線(縦線)：代入元の1番目から代入先まで(y軸)
                                 expr.drawBaseline(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
                                 //左矢印：基準線から代入先まで(x軸)
                                 expr.drawLineArrow(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
                                 // テキスト（実行内容）
                                 expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-
                         //定数を代入(変数なし)
                         else //distinction = 1.0
                             //左矢印：基準線から代入先まで(x軸)
                             expr.drawLineArrow(x250*goalX+text_x160-5.0,x250*goalX+dashed_x50+run_width/2.0,run_top+gap10*(float start.Length+1.0))
                             // テキスト（実行内容）
                             expr.drawText(12,"black","normal",x250*goalX+text_x160,run_top-gap10,equText)
-
-                    // printfn "left right: %f %f" left right
                     left <- 0.0
                     right <- 0.0
-
                     //実行線の下辺からさらに10.0下を描き始めとする
                     run_top <- run_top+gap10*(float start.Length+float goal.Length+2.0)
-
                     expr.next()
-
-            //代入式から作図までの処理
+                    
+            /// 代入式から作図までの処理
             static member assignmentExpression(leftHandSide,rightHandSide,c) =
                 start_goal <- 0.0
                 let start = expr.varList(rightHandSide,c)
@@ -1018,11 +576,6 @@ namespace Aqualis
                 expr.drawBranchArrow_multiple_list(start,goal,rightHandSide,c)
                 
             static member substHS (x:expr) (y:expr) (c:program) =
-                // c.codewrite "\\["
-                // c.codewrite "\\begin{align}"
-                // c.codewrite (x.evalHS c  + " \\leftarrow " + y.evalHS c + "")
-                // c.codewrite "\\end{align}"
-                // c.codewrite "\\]"
                 start_goal <- 0.0
                 let start = expr.varList(y,c)
                 expr.check_start(start,y)
@@ -1047,11 +600,10 @@ namespace Aqualis
             //色線(枠用)
             static member colorLine(x1:float,y1:float,x2:float,y2:float,color:string) =
                 html.fig p0 <| fun (f,p) ->
-                    f.line
-                        <| Style[stroke.color color; stroke.width 2.0]
+                    f.line Style[stroke.color color; stroke.width 2.0]
                         <| position(x1,y1)
                         <| position(x2,y2)
-
+                        
             //ループの枠
             static member rectangle(startPoint_x:float,startPoint_y:float,endPoint_x:float,endPoint_y:float,color:string) =
                 //上辺:左上から右上
@@ -1070,13 +622,10 @@ namespace Aqualis
             static member aboveTheCode() =
                 //枠の上辺のy座標をリスト(frame_top_list)に追加(実行線の描き始めの5.0上)
                 frame_top_list <- value.run_top - 5.0 :: frame_top_list
-
                 //枠の下辺のずらす単位を0.0にリセットする
                 expr.reset_frame_bottom()
-
                 //枠の座標を決める4つの変数を定義
                 let xMin,xMax,yMin,yMax = 0.0, 0.0, 0.0, 0.0
-
                 //枠の座標と枠の深さをセットでリストにする(stack2)
                 let stack2 = 
                     [
@@ -1088,17 +637,14 @@ namespace Aqualis
                 //stack2をstackに乗っける(追加)
                 value.stack <- (xMin,xMax,yMin,yMax,0)::stack2
                 
-            //code()の下記
+            /// code()の下記
             static member belowTheCode() =
                 //下に10.0破線のスペースを作る
                 expr.space_dasharray 10.0
-
                 //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
                 frame_top_list <- frame_top_list.Tail
-
                 //枠の下辺のずらす単位を1.0(1個分)増やす
                 frame_bottom <- frame_bottom + 1.0
-
                 //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
                 value.stack <- value.stack.Tail
                 
@@ -1156,77 +702,42 @@ namespace Aqualis
             ///<summary>指定した範囲でループ</summary>
             static member rangeHS (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
                 let iname,returnVar = c.i0.getVar()
-                // let i = Var(It 4, iname, NaN)
-                // c.codewrite "<div class=\"codeblock\">"
-                // c.codewrite "<details open>"
-                // c.codewrite("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
-                // c.codewrite "<div class=\"insidecode-loop\">"
-                // c.indentInc()
-                // code i
-                // c.indentDec()
-                // c.codewrite "</div>"
-                // c.codewrite "</details>"
-                // c.codewrite "</div>"
-                // returnVar()
-                
                 //上に20.0破線のスペースを作る
                 expr.space_dasharray 20.0
-                
                 //枠の上辺のy座標をリスト(frame_top_list)に追加(実行線の描き始めの5.0上)
                 //枠の下辺のずらす単位を0.0にリセットする
                 //枠の座標を決める4つの変数を定義
                 //枠の座標と枠の深さをセットでリストにする(stack2)
                 //stack2をstackに乗っける(追加)
                 expr.aboveTheCode()
-                
                 //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
                 let sectionCount = float <| value.stack.Length-1
-                
                 //カウンター変数の処理
                 let i = "i" + string (int sectionCount + 1 - int sectionCount2)
                 let i0 = Var(It 4, i, NaN)
-                // let ii = "\\("+i0.str(LaTeX) + "\\)"
-                // printfn "%s" ii
-                
-                // expr.draw_class i0
-                
                 value.for_check <- 1.0
                 let counter_Var = expr.varList(i0,c)
                 value.for_check <- 0.0
-                
                 for countName, count_number, y in counter_Var do
                     //実行線
                     expr.drawActiveLine(x250*count_number+dashed_x50, value.run_top-gap10, value.run_top,"red")
-                    
                     //白線(ループ範囲のスペースのために破線を消すため)
                     expr.colorLine(x250*count_number+dashed_x50, value.run_top-gap20,x250*count_number+dashed_x50, value.run_top-gap10,"white")
-                    
                     // テキスト（ループ範囲）
                     expr.drawText(12,"red","normal",x250*count_number+dashed_x50-gap10,value.run_top-25.0,string i1+"~"+string i2)
-                    
                 code i0
-                
                 //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                let (xMin,xMax,yMin,yMax,insideSection) = value.stack.Head
-                
+                let xMin,xMax,yMin,yMax,insideSection = value.stack.Head
                 //最後に入れた枠の上辺のy座標の数値をframe_topとする
                 let frame_top = frame_top_list.Head
-                
                 for a, b, c, d, e in value.stack do
                     printfn "check: (%f, %f, %f, %f, %d)" a b c d e
                 printfn "xMin %f,xMax %f,yMin %f,yMax %f" xMin xMax yMin yMax
                 printfn "sectionCount %f,insideSection %d" sectionCount insideSection
-                
                 // ループの枠
                 expr.rectangle(xMin-50.0+10.0*sectionCount,frame_top,xMax+50.0-10.0*sectionCount,yMax+5.0+10.0*frame_bottom,"red")
-                
-                // let forText_str = "for i"+string (sectionCount+1.0)
-                // let forText_num = Var_e forText_str
-                // let forText = "\\("+forText_num.str(LaTeX) + "\\)"
-                
                 // テキスト（グループ名）
                 expr.drawText(12,"red","normal",xMin-50.0+10.0*sectionCount,frame_top-20.0,"\\(\\mathrm{For}\\)"+" "+"\\(" + i0.evalHS c + "\\)")
-                
                 //下に10.0破線のスペースを作る
                 //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
                 //枠の下辺のずらす単位を1.0(1個分)増やす
@@ -1282,26 +793,19 @@ namespace Aqualis
                     if branch_elifCheck = 0.0 then
                         //カウンター変数名の数字を増やした分戻す変数
                         sectionCount2 <- sectionCount2 + 1.0
-
                         //上に30.0破線のスペースを作る
-                        expr.space_dasharray(30.0)
-
+                        expr.space_dasharray 30.0
                         //枠の上辺のy座標(run_top - 5.0)をリスト(frame_top_list)に追加(実行線の描き始めの5.0上)
                         //枠の下辺のずらす単位(frame_bottom)を0.0にリセットする
                         //枠の座標を決める4つの変数(xMin,xMax,yMin,yMax)を定義
                         //枠の座標(xMin,xMax,yMin,yMax)と枠の深さ(insideSection)をセットでリストにする(stack2)
                         //stack2をstackに乗っける(追加)
                         expr.aboveTheCode()
-
                     //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
                     let sectionCount = float <| value.stack.Length-1
-
-
                     branch_text_name_list <- cond::branch_text_name_list
-
                     if branch_elifCheck =0.0 then
                         branch_text_yPoint_list <- value.run_top-5.0-20.0::branch_text_yPoint_list
-
                     if branch_IFELSE_IFELSE_check = 0.0 then
                         if branch_elifCheck = 0.0 then
                             if count_branch = 0.0 then
@@ -1319,116 +823,76 @@ namespace Aqualis
                     else //branch_IFELSE_IFELSE_check = 1.0
                         count_branch_memory_list <- count_branch::count_branch_memory_list
                         count_branch <- 1.0
-
                     branch_IFELSE_IFELSE_check <- 1.0
-
-
                     code()
-
-
                     //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                    let (xMin,xMax,yMin,yMax,insideSection) = value.stack.Head
-
+                    let xMin,xMax,yMin,yMax,insideSection = value.stack.Head
                     // 境界線のy座標を決定
                     boundaryLine <- yMax+5.0+10.0*frame_bottom
-
-                    // printfn "yMax: %f,boundaryLine %f" yMax boundaryLine
-
                     if branch_elifCheck = 0.0 then
                         branch_frame_top_list <- frame_top_list.Head :: branch_frame_top_list
-
                     //中に20.0破線のスペースを作る
                     expr.space_dasharray 20.0
-
-
                     branch_text_yPoint_list <- boundaryLine::branch_text_yPoint_list
-
                     //境界線のy座標をスタック用のリストに入れる
                     boundaryY <- boundaryLine::boundaryY
-
                     branch_IFELSE_IFELSE_check <- 0.0
                     branch_elifCheck <- 1.0
                 let elseifcode (cond:expr) code =
                     ifcode cond code
                 let elsecode code =
                     branch_text_name_list <- "\\(\\mathrm{Else}\\)"::branch_text_name_list
-
                     if branch_elifCheck = 0.0 then //ELの後のELのとき
                         count_branch <- count_branch_memory_list.Head
                         count_branch_memory_list <- count_branch_memory_list.Tail
                     else //branch_elifCheck = 1.0、elifの続きのとき
                         count_branch <- count_branch + 1.0
-
-
                     branch_IFELSE_IFELSE_check <- 1.0
                     branch_elifCheck <- 0.0
-
-
                     code()
-
-
                     //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
                     let xMin,xMax,yMin,yMax,insideSection = value.stack.Head
-
                     //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
                     let sectionCount = float <| value.stack.Length-1
-
                     for a, b, c, d, e in value.stack do
                         printfn "check: (%f, %f, %f, %f, %d)" a b c d e
                     printfn "xMin %f,xMax %f,yMin %f,yMax %f" xMin xMax yMin yMax
                     printfn "sectionCount %f,insideSection %d" sectionCount insideSection
-
                     branch_frame_top <- branch_frame_top_list.Head
                     // 条件分岐の枠(全体を囲む大きい枠)
                     expr.rectangle(xMin-50.0+10.0*sectionCount,branch_frame_top-20.0,xMax+50.0-10.0*sectionCount,yMax+5.0+10.0*frame_bottom,"green")
                     branch_frame_top_list <- branch_frame_top_list.Tail
-
                     if count_branch = 0.0 then
                         count_branch <- count_branch_memory_list.Head
                         count_branch_memory_list <- count_branch_memory_list.Tail
-
                     let text_times = int count_branch
                     printfn "count_branch_memory_list %A" count_branch_memory_list
                     printfn "text_times %i" text_times
-
                     let boundary_times = int (count_branch - 1.0)
-
                     count_branch <- 0.0
-
                     for i in 1..text_times do
-
                         printfn "name %A" branch_text_name_list
                         printfn "yPoint %A" branch_text_yPoint_list
-
                         let branch_text_name = branch_text_name_list.Head
                         let branch_text_yPoint = branch_text_yPoint_list.Head
                         // テキスト（条件式）
                         expr.drawText(12,"green","normal",5.0+xMin-50.0+10.0*sectionCount,branch_text_yPoint,string branch_text_name)
                         branch_text_name_list <- branch_text_name_list.Tail
                         branch_text_yPoint_list <- branch_text_yPoint_list.Tail
-
                     branch_IFELSE_IFELSE_check <- 0.0
-
-
                     for i in 1..boundary_times do
-
                         printfn "boundaryY %A" boundaryY
-
                         //最後に入れた枠の上辺のy座標の数値をboundaryとする
                         let boundary = boundaryY.Head
-
                         //破線：境界線(間の仕切り)
                         expr.drawDasharray2(xMin-50.0+10.0*sectionCount,xMax+50.0-10.0*sectionCount,boundary)
-
                         //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
                         boundaryY <- boundaryY.Tail
-
                     //下に10.0破線のスペースを作る
                     //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
                     //枠の下辺のずらす単位を1.0(1個分)増やす
                     //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
                     expr.belowTheCode()
-
                     //カウンター変数名の数字を増やした分戻す変数
                     sectionCount2 <- sectionCount2 - 1.0
                 code(ifcode,elseifcode,elsecode)

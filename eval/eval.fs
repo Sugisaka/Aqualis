@@ -14,7 +14,8 @@ namespace Aqualis
                 |PHP -> expr.substPh x y c
                 |LaTeX -> expr.substL x y c
                 |HTML -> expr.substH x y c
-                |_ -> expr.substF x y c
+                |HTMLSequenceDiagram -> expr.substHS x y c
+                |Numeric -> ()
                 
             static member equiv (x:expr) (y:expr) (c:program) =
                 match c.language with
@@ -25,7 +26,8 @@ namespace Aqualis
                 |PHP -> expr.equivPh x y c
                 |LaTeX -> expr.equivL x y c
                 |HTML -> expr.equivH x y c
-                |_ -> expr.equivF x y c
+                |HTMLSequenceDiagram -> expr.equivHS x y c
+                |Numeric -> ()
                 
             static member equivAlign (x:expr) (y:expr) (c:program) =
                 match c.language with
@@ -36,7 +38,8 @@ namespace Aqualis
                 |PHP -> expr.equivAlignPh x y c
                 |LaTeX -> expr.equivAlignL x y c
                 |HTML -> expr.equivAlignH x y c
-                |_ -> expr.equivAlignF x y c
+                |HTMLSequenceDiagram -> expr.equivAlignHS x y c
+                |Numeric -> ()
                 
             static member forLoop (c:program) (n1:expr,n2:expr) code =
                 match c.language with
@@ -47,7 +50,8 @@ namespace Aqualis
                 |PHP -> expr.forLoopPh c (n1,n2) code
                 |LaTeX -> expr.forLoopL c (n1,n2) code
                 |HTML -> expr.forLoopH c (n1,n2) code
-                |_ -> expr.forLoopF c (n1,n2) code
+                |HTMLSequenceDiagram -> expr.forLoopHS c (n1,n2) code
+                |Numeric -> ()
                 
             ///<summary>無限ループ</summary>
             static member loop (c:program) code =
@@ -59,7 +63,8 @@ namespace Aqualis
                 |PHP -> expr.loopPh c code
                 |LaTeX -> expr.loopL c code
                 |HTML -> expr.loopH c code
-                |_ -> expr.loopF c code
+                |HTMLSequenceDiagram -> expr.loopHS c code
+                |Numeric -> ()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledo (c:program) (cond:expr) = fun code ->
@@ -71,7 +76,8 @@ namespace Aqualis
                 |PHP -> expr.whiledoPh c cond code
                 |LaTeX -> expr.whiledoL c cond code
                 |HTML -> expr.whiledoH c cond code
-                |_ -> expr.whiledoF c cond code
+                |HTMLSequenceDiagram -> expr.whiledoHS c cond code
+                |Numeric -> ()
                 
             ///<summary>指定した範囲でループ</summary>
             static member range (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -83,7 +89,8 @@ namespace Aqualis
                 |PHP -> expr.rangePh c i1 i2 code
                 |LaTeX -> expr.rangeL c i1 i2 code
                 |HTML -> expr.rangeH c i1 i2 code
-                |_ -> expr.rangeF c i1 i2 code
+                |HTMLSequenceDiagram -> expr.rangeHS c i1 i2 code
+                |Numeric -> ()
                 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
             static member range_exit (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -95,7 +102,8 @@ namespace Aqualis
                 |PHP -> expr.range_exitPh c i1 i2 code
                 |LaTeX -> expr.range_exitL c i1 i2 code
                 |HTML -> expr.range_exitH c i1 i2 code
-                |_ -> expr.range_exitF c i1 i2 code
+                |HTMLSequenceDiagram -> expr.range_exitHS c i1 i2 code
+                |Numeric -> ()
                 
             static member branch (c:program) code =
                 match c.language with
@@ -106,7 +114,8 @@ namespace Aqualis
                 |PHP -> expr.branchPh c code
                 |LaTeX -> expr.branchL c code
                 |HTML -> expr.branchH c code
-                |_ -> expr.branchF c code
+                |HTMLSequenceDiagram -> expr.branchHS c code
+                |Numeric -> ()
                 
             member this.eval (c:program) =
                 match c.language with
@@ -117,4 +126,5 @@ namespace Aqualis
                 |PHP -> this.evalPh c
                 |LaTeX -> this.evalL c
                 |HTML -> this.evalH c
-                |_ -> this.evalF c
+                |HTMLSequenceDiagram -> this.evalHS c
+                |Numeric -> ""

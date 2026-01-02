@@ -70,6 +70,16 @@ namespace Aqualis
                 |Structure "char" -> "char" 
                 |Structure sname -> sname 
                 |_ -> ""
+            |HTMLSequenceDiagram ->
+                match this with 
+                |It 1 -> "byte" 
+                |It _ -> "int" 
+                |Dt -> "double" 
+                |Zt -> "complex"
+                |Structure "string" -> "char" 
+                |Structure "char" -> "char" 
+                |Structure sname -> sname 
+                |_ -> ""
             |Python ->
                 match this with 
                 |It 1 -> "int" 

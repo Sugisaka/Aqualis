@@ -212,6 +212,10 @@ namespace Aqualis
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space + code + "\n")) slist
+            |HTMLSequenceDiagram ->
+                if ss<>"" then 
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
+                    Array.iter (fun code -> this.cwrite(this.indent.space + code + "\n")) slist
             |Python ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
@@ -243,6 +247,11 @@ namespace Aqualis
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space + "%" + code + "\n")) slist
             |HTML ->
+                let comment_line (str:string) = this.codewrite("<span class=\"comment\">" + str + "</span><br/>\n")
+                if ss<>"" then 
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
+                    Array.iter (fun code -> this.cwrite(this.indent.space + "<span class=\"comment\">" + code + "</span><br/>\n")) slist
+            |HTMLSequenceDiagram ->
                 let comment_line (str:string) = this.codewrite("<span class=\"comment\">" + str + "</span><br/>\n")
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
@@ -336,10 +345,10 @@ namespace Aqualis
                 |It _ -> "integer" 
                 |Dt -> "double precision" 
                 |Zt -> "complex(kind(0d0))" 
-                |Structure("string") -> "character(100)" 
-                |Structure("integer(1)") -> "integer(1)" 
-                |Structure("file") -> "integer"
-                |Structure(sname) -> "type(" + sname + ")"
+                |Structure "string" -> "character(100)" 
+                |Structure "integer(1)" -> "integer(1)" 
+                |Structure "file" -> "integer"
+                |Structure sname -> "type(" + sname + ")"
                 |_ -> ""
             |C99 ->
                 match typ with 
@@ -347,10 +356,10 @@ namespace Aqualis
                 |It _ -> "int" 
                 |Dt -> "double" 
                 |Zt -> "double complex"
-                |Structure("string") -> "string" 
-                |Structure("char") -> "char" 
-                |Structure("file") -> "FILE*" 
-                |Structure(sname) -> sname 
+                |Structure "string" -> "string" 
+                |Structure "char" -> "char" 
+                |Structure "file" -> "FILE*" 
+                |Structure sname -> sname 
                 |_ -> ""
             |LaTeX ->
                 match typ with 
@@ -358,9 +367,9 @@ namespace Aqualis
                 |It _ -> "int" 
                 |Dt -> "double" 
                 |Zt -> "complex"
-                |Structure("string") -> "char" 
-                |Structure("char") -> "char" 
-                |Structure(sname) -> sname 
+                |Structure "string" -> "char" 
+                |Structure "char" -> "char" 
+                |Structure sname -> sname 
                 |_ -> ""
             |HTML ->
                 match typ with 
@@ -368,9 +377,9 @@ namespace Aqualis
                 |It _ -> "int" 
                 |Dt -> "double" 
                 |Zt -> "complex"
-                |Structure("string") -> "char" 
-                |Structure("char") -> "char" 
-                |Structure(sname) -> sname 
+                |Structure "string" -> "char" 
+                |Structure "char" -> "char" 
+                |Structure sname -> sname 
                 |_ -> ""
             |Python ->
                 match typ with 
@@ -378,10 +387,10 @@ namespace Aqualis
                 |It _ -> "int" 
                 |Dt -> "float" 
                 |Zt -> "complex"
-                |Structure("string") -> "str" 
-                |Structure("char") -> "str" 
-                |Structure("file") -> "io.TextIOWrapper"
-                |Structure(sname) -> sname
+                |Structure "string" -> "str" 
+                |Structure "char" -> "str" 
+                |Structure "file" -> "io.TextIOWrapper"
+                |Structure sname -> sname
                 |_ -> ""
             |_ -> ""
             
@@ -417,6 +426,15 @@ namespace Aqualis
                 |A2(size1,size2)       -> "\\item " + this.Stype typ + " $" + name + "$ (" + fmt.ItoS size1 + "," + fmt.ItoS size2 + ")" + if param<>"" then "=" + param else ""
                 |A3(size1,size2,size3) -> "\\item " + this.Stype typ + " $" + name + "$ (" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")" + if param<>"" then "=" + param else ""
             |HTML ->
+                match vtp with 
+                |A0                    -> "\t\t\t<li>" + this.Stype typ + ": \\(" + name + "" + (if param<>"" then "=" + param else "") + "\\)</li>"
+                |A1 0                  -> "\t\t\t<li>" + this.Stype typ + ": (allocatable)\\(" + " " + name + " [:]" + (if param<>"" then "=" + param else "") + "\\)</li>"
+                |A2(0,0)               -> "\t\t\t<li>" + this.Stype typ + ": (allocatable)\\(" + " " + name + " [:,:]" + (if param<>"" then "=" + param else "") + "\\)</li>"
+                |A3(0,0,0)             -> "\t\t\t<li>" + this.Stype typ + ": (allocatable)\\(" + " " + name + " [:,:,:]" + (if param<>"" then "=" + param else "") + "\\)</li>"
+                |A1 size1              -> "\t\t\t<li>" + this.Stype typ + ": \\(" + name + " (" + fmt.ItoS size1 + ")" + (if param<>"" then "=" + param else "") + "\\)</li>"
+                |A2(size1,size2)       -> "\t\t\t<li>" + this.Stype typ + ": \\(" + name + " (" + fmt.ItoS size1 + "," + fmt.ItoS size2 + ")" + (if param<>"" then "=" + param else "") + "\\)</li>"
+                |A3(size1,size2,size3) -> "\t\t\t<li>" + this.Stype typ + ": \\(" + name + " (" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")" + (if param<>"" then "=" + param else "") + "\\)</li>"
+            |HTMLSequenceDiagram ->
                 match vtp with 
                 |A0                    -> "\t\t\t<li>" + this.Stype typ + ": \\(" + name + "" + (if param<>"" then "=" + param else "") + "\\)</li>"
                 |A1 0                  -> "\t\t\t<li>" + this.Stype typ + ": (allocatable)\\(" + " " + name + " [:]" + (if param<>"" then "=" + param else "") + "\\)</li>"

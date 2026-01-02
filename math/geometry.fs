@@ -49,7 +49,7 @@ namespace Aqualis
                 a.y <== b.y
             static member str_mem(psname, vname, name) =
                 str.addmember(psname,(Structure point2.sname,A0,name))
-                point2(structure.mem(vname,name))
+                point2(str.mem(vname,name))
                 
         type point2_1(name,size1) =
             inherit base1(point2.sname,size1,name)
@@ -62,7 +62,7 @@ namespace Aqualis
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
             static member str_mem(sname, vname, name, size1) =
                 str.addmember(sname,(Structure sname,A1 size1,name))
-                point2_1(structure.mem(vname,name),size1)
+                point2_1(str.mem(vname,name),size1)
             
         /// 3次元ベクトル
         type Point3(x:num0,y:num0,z:num0) =
@@ -116,7 +116,7 @@ namespace Aqualis
                 a.z <== b.z
             static member str_mem(psname, vname, name) =
                 str.addmember(psname,(Structure(point3.sname),A0,name))
-                point3(structure.mem(vname,name))
+                point3(str.mem(vname,name))
             
         type point3_1(sname,name,size1) =
             inherit base1(point3.sname,size1,name)
