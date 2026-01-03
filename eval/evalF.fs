@@ -8,7 +8,7 @@ namespace Aqualis
         type expr with
             
             static member substF (x:expr) (y:expr) (c:program) =
-                c.codewrite (x.evalF c  + " = " + y.evalF c)
+                c.codewritein (x.evalF c  + " = " + y.evalF c)
                 
             static member equivF (x:expr) (y:expr) (c:program) =
                 printfn "Fortranでこの文は使用できません"
@@ -22,11 +22,11 @@ namespace Aqualis
                 let n1_ = n1.evalF c
                 let n2_ = n2.evalF c
                 if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
-                c.codewrite("do " + i.evalF c + "=" + n1_ + "," + n2_)
+                c.codewritein("do " + i.evalF c + "=" + n1_ + "," + n2_)
                 c.indentInc()
                 code i
                 c.indentDec()
-                c.codewrite "end do"
+                c.codewritein "end do"
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -34,24 +34,24 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = gotoLabel.nextGotoLabel()
-                let exit() = c.codewrite("goto "+label)
+                let exit() = c.codewritein("goto "+label)
                 expr.substF i (Int 1) c
-                c.codewrite "do"
+                c.codewritein "do"
                 c.indentInc()
                 code(exit,i)
                 expr.substF i (Add(It 4, i, Int 1)) c
                 c.indentDec()
-                c.codewrite "end do"
-                c.codewrite(label+" continue")
+                c.codewritein "end do"
+                c.codewritein(label+" continue")
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoF (c:program) (cond:expr) = fun code ->
-                c.codewrite("do while(" + cond.evalF c + ")")
+                c.codewritein("do while(" + cond.evalF c + ")")
                 c.indentInc()
                 code()
                 c.indentDec()
-                c.codewrite "end do"
+                c.codewritein "end do"
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangeF (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -70,11 +70,11 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewrite("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
+                    c.codewritein("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
                     code i
                     c.indentDec()
-                    c.codewrite "end do"
+                    c.codewritein "end do"
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
@@ -84,7 +84,7 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label)
+                    let exit() = c.codewritein("goto "+label)
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
@@ -97,36 +97,36 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label)
+                    let exit() = c.codewritein("goto "+label)
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewrite("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
+                    c.codewritein("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.codewrite "end do"
-                    c.codewrite(label+" continue")
+                    c.codewritein "end do"
+                    c.codewritein(label+" continue")
                     returnVar()
                     
             static member branchF (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalF c
-                    c.codewrite("if(" + cond + ") then")
+                    c.codewritein("if(" + cond + ") then")
                     c.indentInc()
                     code()
                     c.indentDec()
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalF c
-                    c.codewrite("else if(" + cond + ") then")
+                    c.codewritein("else if(" + cond + ") then")
                     c.indentInc()
                     code()
                     c.indentDec()
                 let elsecode code =
-                    c.codewrite "else"
+                    c.codewritein "else"
                     c.indentInc()
                     code()
                     c.indentDec()
                 code(ifcode,elseifcode,elsecode)
-                c.codewrite "endif"
+                c.codewritein "endif"
                 
             member this.evalF(c:program) =
                 match this.simp with

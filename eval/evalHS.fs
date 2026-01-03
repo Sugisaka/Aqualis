@@ -219,7 +219,7 @@ namespace Aqualis
                 let f = figure()
                 code(f,p)
                 let sx,sy,mx,my = f.setWriteMode()
-                codewrite (
+                codewritein (
                     "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
                     "width=\""+sx.ToString()+"px\" "+
                     "heigth=\""+sy.ToString()+"px\" "+
@@ -229,7 +229,7 @@ namespace Aqualis
                     "position: absolute;"+
                     "\">")
                 code(f,p)
-                codewrite "</svg>"
+                codewritein "</svg>"
                 
             //破線(縦線)
             static member drawDasharray(x:float,y1:float,y2:float) =
@@ -347,7 +347,7 @@ namespace Aqualis
                                 {Key = "margin-top"; Value = p.y.ToString()+"px";}
                                 {Key = "position"; Value = "absolute";}]
                 html.tagb ("div", s1+s) <| fun () ->
-                    codewrite text
+                    codewritein text
                     
             /// テキスト
             static member drawText(size:int,color:string,weight:string,x:float,y:float,text:string) =
@@ -584,10 +584,10 @@ namespace Aqualis
                 expr.drawBranchArrow_multiple_list(start,goal,y,c)
                 
             static member equivHS (x:expr) (y:expr) (c:program) =
-                c.codewrite (x.evalHS c  + " = " + y.evalHS c)
+                c.codewritein (x.evalHS c  + " = " + y.evalHS c)
                 
             static member equivAlignHS (x:expr) (y:expr) (c:program) =
-                c.codewrite (x.evalHS c  + " =& " + y.evalHS c)
+                c.codewritein (x.evalHS c  + " =& " + y.evalHS c)
                 
             //破線(実行線や枠との(y座標の)隙間をつくるため)
             static member space_dasharray(gap:float) =
@@ -653,16 +653,16 @@ namespace Aqualis
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalHS c
                 let n2_ = n2.evalHS c
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
-                c.codewrite("<summary><span class=\"op-loop\">for</span> \\(" + i.evalHS c + "=" + n1_ + "," + n2_ + "\\)</summary>")
-                c.codewrite "<div class=\"insidecode-loop\">"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
+                c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalHS c + "=" + n1_ + "," + n2_ + "\\)</summary>")
+                c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code i
                 c.indentDec()
-                c.codewrite "</div>"
-                c.codewrite "</details>"
-                c.codewrite "</div>"
+                c.codewritein "</div>"
+                c.codewritein "</details>"
+                c.codewritein "</div>"
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -670,34 +670,34 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = gotoLabel.nextGotoLabel()
-                let exit() = c.codewrite("goto " + label)
+                let exit() = c.codewritein("goto " + label)
                 expr.substH i (Int 1) c
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
-                c.codewrite "<summary><span class=\"op-loop\">repeat</span></summary>"
-                c.codewrite "<div class=\"insidecode-loop\">"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
+                c.codewritein "<summary><span class=\"op-loop\">repeat</span></summary>"
+                c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code(exit,i)
                 expr.substH i (Add(It 4, i, Int 1)) c
                 c.indentDec()
-                c.codewrite "</div>"
-                c.codewrite("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
-                c.codewrite "</details>"
-                c.codewrite "</div>"
+                c.codewritein "</div>"
+                c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                c.codewritein "</details>"
+                c.codewritein "</div>"
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoHS (c:program) (cond:expr) = fun code ->
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
-                c.codewrite("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalHS c + "\\)</summary>")
-                c.codewrite "<div class=\"insidecode-loop\">"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
+                c.codewritein("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalHS c + "\\)</summary>")
+                c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code()
                 c.indentDec()
-                c.codewrite "</div>"
-                c.codewrite "</details>"
-                c.codewrite "</div>"
+                c.codewritein "</div>"
+                c.codewritein "</details>"
+                c.codewritein "</div>"
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangeHS (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -752,7 +752,7 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label)
+                    let exit() = c.codewritein("goto "+label)
                     c.comment "<div class=\"codeblock\">"
                     c.comment "<details open>"
                     c.comment("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
@@ -770,24 +770,24 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label)
-                    c.codewrite "<div class=\"codeblock\">"
-                    c.codewrite "<details open>"
-                    c.codewrite("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
-                    c.codewrite "<div class=\"insidecode-loop\">"
+                    let exit() = c.codewritein("goto "+label)
+                    c.codewritein "<div class=\"codeblock\">"
+                    c.codewritein "<details open>"
+                    c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
+                    c.codewritein "<div class=\"insidecode-loop\">"
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.codewrite "</div>"
-                    c.codewrite("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
-                    c.codewrite "</details>"
-                    c.codewrite "</div>"
-                    c.codewrite(label+" continue")
+                    c.codewritein "</div>"
+                    c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                    c.codewritein "</details>"
+                    c.codewritein "</div>"
+                    c.codewritein(label+" continue")
                     returnVar()
                     
             static member branchHS (c:program) code =
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
                 let ifcode (cond:expr) code =
                     let cond = cond.evalHS c
                     if branch_elifCheck = 0.0 then

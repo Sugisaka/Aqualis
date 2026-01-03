@@ -11,60 +11,60 @@ module Aqualis_str =
             match programList[0].language with
             |Fortran ->
                 for s in this.sort() do
-                    writer.codewrite("type "+s.sname+"\n")
+                    writer.codewritein("type "+s.sname+"\n")
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
+                        writer.codewritein(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
                     writer.indent.dec()
-                    writer.codewrite("end type "+s.sname+"\n")
+                    writer.codewritein("end type "+s.sname+"\n")
             |C99 ->
                 for s in this.sort() do
-                    writer.codewrite("typedef struct "+"_"+s.sname+"\n")
-                    writer.codewrite("{"+"\n")
+                    writer.codewritein("typedef struct "+"_"+s.sname+"\n")
+                    writer.codewritein("{"+"\n")
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
+                        writer.codewritein(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
                     writer.indent.dec()
-                    writer.codewrite("} "+s.sname+";\n")
+                    writer.codewritein("} "+s.sname+";\n")
             |LaTeX ->
                 for s in this.sort() do
-                    writer.codewrite("\\subsection{"+s.sname+"}")
-                    writer.codewrite "\\begin{itemize}\n"
+                    writer.codewritein("\\subsection{"+s.sname+"}")
+                    writer.codewritein "\\begin{itemize}\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
+                        writer.codewritein(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
                     writer.indent.dec()
-                    writer.codewrite "\\end{itemize}\n"
+                    writer.codewritein "\\end{itemize}\n"
             |HTML ->
                 for s in this.sort() do
-                    writer.codewrite("<h3>"+s.sname+"</h3>\n")
-                    writer.codewrite "<ul>\n"
+                    writer.codewritein("<h3>"+s.sname+"</h3>\n")
+                    writer.codewritein "<ul>\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
+                        writer.codewritein(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
                     writer.indent.dec()
-                    writer.codewrite "</ul>\n"
+                    writer.codewritein "</ul>\n"
             |HTMLSequenceDiagram ->
                 for s in this.sort() do
-                    writer.codewrite("<h3>"+s.sname+"</h3>\n")
-                    writer.codewrite "<ul>\n"
+                    writer.codewritein("<h3>"+s.sname+"</h3>\n")
+                    writer.codewritein "<ul>\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
+                        writer.codewritein(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
                     writer.indent.dec()
-                    writer.codewrite "</ul>\n"
+                    writer.codewritein "</ul>\n"
             |Python ->
                 for s in this.sort() do
-                    writer.codewrite("class "+s.sname+":\n")
+                    writer.codewritein("class "+s.sname+":\n")
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewrite(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
+                        writer.codewritein(programList[0].var.declare(typ,vtp,name,"",programList[0].numFormat)+"\n")
                     writer.indent.dec()
             |JavaScript ->
                 ()

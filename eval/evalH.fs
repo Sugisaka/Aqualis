@@ -8,33 +8,33 @@ namespace Aqualis
         type expr with
             
             static member substH (x:expr) (y:expr) (c:program) =
-                c.codewrite "\\["
-                c.codewrite "\\begin{align}"
-                c.codewrite (x.evalH c  + " \\leftarrow " + y.evalH c + "")
-                c.codewrite "\\end{align}"
-                c.codewrite "\\]"
+                c.codewritein "\\["
+                c.codewritein "\\begin{align}"
+                c.codewritein (x.evalH c  + " \\leftarrow " + y.evalH c + "")
+                c.codewritein "\\end{align}"
+                c.codewritein "\\]"
                 
             static member equivH (x:expr) (y:expr) (c:program) =
-                c.codewrite (x.evalL c  + " = " + y.evalL c)
+                c.codewritein (x.evalL c  + " = " + y.evalL c)
                 
             static member equivAlignH (x:expr) (y:expr) (c:program) =
-                c.codewrite (x.evalL c  + " =& " + y.evalL c)
+                c.codewritein (x.evalL c  + " =& " + y.evalL c)
                 
             static member forLoopH (c:program) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalH c
                 let n2_ = n2.evalH c
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
-                c.codewrite("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + n1_ + "," + n2_ + "\\)</summary>")
-                c.codewrite "<div class=\"insidecode-loop\">"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
+                c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + n1_ + "," + n2_ + "\\)</summary>")
+                c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code i
                 c.indentDec()
-                c.codewrite "</div>"
-                c.codewrite "</details>"
-                c.codewrite "</div>"
+                c.codewritein "</div>"
+                c.codewritein "</details>"
+                c.codewritein "</div>"
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -42,34 +42,34 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = gotoLabel.nextGotoLabel()
-                let exit() = c.codewrite("goto " + label)
+                let exit() = c.codewritein("goto " + label)
                 expr.substH i (Int 1) c
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
-                c.codewrite "<summary><span class=\"op-loop\">repeat</span></summary>"
-                c.codewrite "<div class=\"insidecode-loop\">"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
+                c.codewritein "<summary><span class=\"op-loop\">repeat</span></summary>"
+                c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code(exit,i)
                 expr.substH i (Add(It 4, i, Int 1)) c
                 c.indentDec()
-                c.codewrite "</div>"
-                c.codewrite("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
-                c.codewrite "</details>"
-                c.codewrite "</div>"
+                c.codewritein "</div>"
+                c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                c.codewritein "</details>"
+                c.codewritein "</div>"
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoH (c:program) (cond:expr) = fun code ->
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
-                c.codewrite("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalH c + "\\)</summary>")
-                c.codewrite "<div class=\"insidecode-loop\">"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
+                c.codewritein("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalH c + "\\)</summary>")
+                c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code()
                 c.indentDec()
-                c.codewrite "</div>"
-                c.codewrite "</details>"
-                c.codewrite "</div>"
+                c.codewritein "</div>"
+                c.codewritein "</details>"
+                c.codewritein "</div>"
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangeH (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -91,16 +91,16 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    c.codewrite "<div class=\"codeblock\">"
-                    c.codewrite "<details open>"
-                    c.codewrite("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
-                    c.codewrite "<div class=\"insidecode-loop\">"
+                    c.codewritein "<div class=\"codeblock\">"
+                    c.codewritein "<details open>"
+                    c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
+                    c.codewritein "<div class=\"insidecode-loop\">"
                     c.indentInc()
                     code i
                     c.indentDec()
-                    c.codewrite "</div>"
-                    c.codewrite "</details>"
-                    c.codewrite "</div>"
+                    c.codewritein "</div>"
+                    c.codewritein "</details>"
+                    c.codewritein "</div>"
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
@@ -110,7 +110,7 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label)
+                    let exit() = c.codewritein("goto "+label)
                     c.comment "<div class=\"codeblock\">"
                     c.comment "<details open>"
                     c.comment("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
@@ -128,50 +128,50 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label)
-                    c.codewrite "<div class=\"codeblock\">"
-                    c.codewrite "<details open>"
-                    c.codewrite("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
-                    c.codewrite "<div class=\"insidecode-loop\">"
+                    let exit() = c.codewritein("goto "+label)
+                    c.codewritein "<div class=\"codeblock\">"
+                    c.codewritein "<details open>"
+                    c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
+                    c.codewritein "<div class=\"insidecode-loop\">"
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.codewrite "</div>"
-                    c.codewrite("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
-                    c.codewrite "</details>"
-                    c.codewrite "</div>"
-                    c.codewrite(label+" continue")
+                    c.codewritein "</div>"
+                    c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                    c.codewritein "</details>"
+                    c.codewritein "</div>"
+                    c.codewritein(label+" continue")
                     returnVar()
                     
             static member branchH (c:program) code =
-                c.codewrite "<div class=\"codeblock\">"
-                c.codewrite "<details open>"
+                c.codewritein "<div class=\"codeblock\">"
+                c.codewritein "<details open>"
                 let ifcode (cond:expr) code =
                     let cond = cond.evalH c
-                    c.codewrite("<summary><span class=\"op-if\">if</span>"+" \\(" + cond + "\\)</summary>")
-                    c.codewrite "<div class=\"insidecode-if\">"
+                    c.codewritein("<summary><span class=\"op-if\">if</span>"+" \\(" + cond + "\\)</summary>")
+                    c.codewritein "<div class=\"insidecode-if\">"
                     c.indentInc()
                     code()
                     c.indentDec()
-                    c.codewrite "</div>"
+                    c.codewritein "</div>"
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalH c
-                    c.codewrite("<summary><span class=\"op-if\">else if</span>"+" \\(" + cond + "\\)</summary>")
-                    c.codewrite "<div class=\"insidecode-if\">"
+                    c.codewritein("<summary><span class=\"op-if\">else if</span>"+" \\(" + cond + "\\)</summary>")
+                    c.codewritein "<div class=\"insidecode-if\">"
                     c.indentInc()
                     code()
                     c.indentDec()
-                    c.codewrite "</div>"
+                    c.codewritein "</div>"
                 let elsecode code =
-                    c.codewrite "<summary><span class=\"op-if\">else</span></summary>"
-                    c.codewrite "<div class=\"insidecode-if\">"
+                    c.codewritein "<summary><span class=\"op-if\">else</span></summary>"
+                    c.codewritein "<div class=\"insidecode-if\">"
                     c.indentInc()
                     code()
                     c.indentDec()
-                    c.codewrite "</div>"
+                    c.codewritein "</div>"
                 code(ifcode,elseifcode,elsecode)
-                c.codewrite "</details>"
-                c.codewrite "</div>"
+                c.codewritein "</details>"
+                c.codewritein "</div>"
                 
             member this.evalH(c:program) =
                 let par (s:string) (pl:int) =

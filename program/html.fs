@@ -124,215 +124,215 @@ namespace Aqualis
         
     type html =
         static member head title = fun code ->
-            codewrite "<!doctype html>"
-            codewrite "<html lang=\"ja\">"
-            codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
-            codewrite "<head>"
-            codewrite("    <title>"+title+"</title>")
-            codewrite "    <meta charset=\"utf-8\">"
-            codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-            codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            codewrite "    <link rel='stylesheet' href='style.css' />"
-            codewrite "</head>"
-            codewrite "<body>"
+            codewritein "<!doctype html>"
+            codewritein "<html lang=\"ja\">"
+            codewritein "<meta http-equiv=\"content-language\" content=\"ja\">"
+            codewritein "<head>"
+            codewritein("    <title>"+title+"</title>")
+            codewritein "    <meta charset=\"utf-8\">"
+            codewritein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            codewritein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+            codewritein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+            codewritein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+            codewritein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            codewritein "    <link rel='stylesheet' href='style.css' />"
+            codewritein "</head>"
+            codewritein "<body>"
             code()
-            codewrite "</body>"
-            codewrite "</html>"
+            codewritein "</body>"
+            codewritein "</html>"
         static member head (title,refresh:int) = fun code ->
-            codewrite "<!doctype html>"
-            codewrite "<html lang=\"ja\">"
-            codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
-            codewrite "<head>"
-            codewrite("    <title>"+title+"</title>")
-            codewrite "    <meta charset=\"utf-8\">"
-            codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-            codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            codewrite "    <link rel='stylesheet' href='style.css' />"
-            codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
-            codewrite "</head>"
-            codewrite "<body>"
+            codewritein "<!doctype html>"
+            codewritein "<html lang=\"ja\">"
+            codewritein "<meta http-equiv=\"content-language\" content=\"ja\">"
+            codewritein "<head>"
+            codewritein("    <title>"+title+"</title>")
+            codewritein "    <meta charset=\"utf-8\">"
+            codewritein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            codewritein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+            codewritein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+            codewritein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+            codewritein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            codewritein "    <link rel='stylesheet' href='style.css' />"
+            codewritein("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+            codewritein "</head>"
+            codewritein "<body>"
             code()
-            codewrite "</body>"
-            codewrite "</html>"
+            codewritein "</body>"
+            codewritein "</html>"
         static member head (title,cssfile,jsfile,refresh:int) = fun code ->
-            codewrite "<!doctype html>"
-            codewrite "<html lang=\"ja\">"
-            codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
-            codewrite "<head>"
-            codewrite("    <title>"+title+"</title>")
-            codewrite "    <meta charset=\"utf-8\">"
-            codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-            codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            codewrite("    <link rel='stylesheet' href='"+cssfile+"'>")
-            codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
-            codewrite("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
-            codewrite "</head>"
-            codewrite "<body>"
+            codewritein "<!doctype html>"
+            codewritein "<html lang=\"ja\">"
+            codewritein "<meta http-equiv=\"content-language\" content=\"ja\">"
+            codewritein "<head>"
+            codewritein("    <title>"+title+"</title>")
+            codewritein "    <meta charset=\"utf-8\">"
+            codewritein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            codewritein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+            codewritein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+            codewritein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+            codewritein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            codewritein("    <link rel='stylesheet' href='"+cssfile+"'>")
+            codewritein("    <script type='text/javascript' src='"+jsfile+"'></script>")
+            codewritein("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+            codewritein "</head>"
+            codewritein "<body>"
             code()
-            codewrite "</body>"
-            codewrite "</html>"
+            codewritein "</body>"
+            codewritein "</html>"
         static member head (title,cssfile,jsfile) = fun code ->
-            codewrite "<!doctype html>"
-            codewrite "<html lang=\"ja\">"
-            codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
-            codewrite "<head>"
-            codewrite("    <title>"+title+"</title>")
-            codewrite "    <meta charset=\"utf-8\">"
-            codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-            codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
-            codewrite("    <script type='text/javascript' src='"+jsfile+"'></script>")
-            codewrite "</head>"
-            codewrite "<body>"
+            codewritein "<!doctype html>"
+            codewritein "<html lang=\"ja\">"
+            codewritein "<meta http-equiv=\"content-language\" content=\"ja\">"
+            codewritein "<head>"
+            codewritein("    <title>"+title+"</title>")
+            codewritein "    <meta charset=\"utf-8\">"
+            codewritein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            codewritein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+            codewritein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+            codewritein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+            codewritein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            codewritein("    <link rel='stylesheet' href='"+cssfile+"' />")
+            codewritein("    <script type='text/javascript' src='"+jsfile+"'></script>")
+            codewritein "</head>"
+            codewritein "<body>"
             code()
-            codewrite "</body>"
-            codewrite "</html>"
+            codewritein "</body>"
+            codewritein "</html>"
         static member head (title,cssfile) = fun code ->
-            codewrite "<!doctype html>"
-            codewrite "<html lang=\"ja\">"
-            codewrite "<meta http-equiv=\"content-language\" content=\"ja\">"
-            codewrite "<head>"
-            codewrite("    <title>"+title+"</title>")
-            codewrite "    <meta charset=\"utf-8\">"
-            codewrite "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-            codewrite "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            codewrite "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            codewrite "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            codewrite "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            codewrite("    <link rel='stylesheet' href='"+cssfile+"' />")
-            codewrite "</head>"
-            codewrite "<body>"
+            codewritein "<!doctype html>"
+            codewritein "<html lang=\"ja\">"
+            codewritein "<meta http-equiv=\"content-language\" content=\"ja\">"
+            codewritein "<head>"
+            codewritein("    <title>"+title+"</title>")
+            codewritein "    <meta charset=\"utf-8\">"
+            codewritein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            codewritein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
+            codewritein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
+            codewritein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
+            codewritein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            codewritein("    <link rel='stylesheet' href='"+cssfile+"' />")
+            codewritein "</head>"
+            codewritein "<body>"
             code()
-            codewrite "</body>"
-            codewrite "</html>"
+            codewritein "</body>"
+            codewritein "</html>"
         /// 内部要素のないタグ
         static member taga (t:string,s:Style) =
-            codewrite("<"+t+" "+s.code+" />")
+            codewritein("<"+t+" "+s.code+" />")
         /// 内部要素のないタグ
         static member taga (t:string,atr:list<Atr>) =
-            codewrite("<"+t+" "+Atr.list atr+" />")
+            codewritein("<"+t+" "+Atr.list atr+" />")
         /// 内部要素のないタグ
         static member taga (t:string,lst:list<string*string>) =
-            codewrite("<"+t+" ")
+            codewritein("<"+t+" ")
             for a,s in lst do
-                codewrite(a + "=" + s + " ")
-            codewrite " />"
+                codewritein(a + "=" + s + " ")
+            codewritein " />"
         /// 内部要素のないタグ
         static member taga (t:string) =
-            codewrite("<"+t+" ")
-            codewrite " />"
+            codewritein("<"+t+" ")
+            codewritein " />"
         /// 内部要素のないタグ
         static member taga (t:string,a:string) =
-            codewrite("<"+t+" "+a+" />")
+            codewritein("<"+t+" "+a+" />")
         /// 内部要素のあるタグ
         static member tagb (t:string,atr:Style) = fun code ->
             let a = atr.code
             if a = "" then
-                codewrite("<"+t+">")
+                codewritein("<"+t+">")
             else
-                codewrite("<"+t+" "+a+" >")
+                codewritein("<"+t+" "+a+" >")
             code()
-            codewrite ("</"+t+">")
+            codewritein ("</"+t+">")
         /// 内部要素のあるタグ
         static member tagb (t:string,atr:list<Atr>) = fun code ->
             let a = Atr.list atr
             if a = "" then
-                codewrite("<"+t+">")
+                codewritein("<"+t+">")
             else
-                codewrite("<"+t+" "+a+" >")
+                codewritein("<"+t+" "+a+" >")
             code()
-            codewrite ("</"+t+">")
+            codewritein ("</"+t+">")
             
         /// 内部要素のあるタグ
         static member tagb (t:string,lst:list<string*string>) = fun code ->
             if lst.Length=0 then
-                codewrite("<"+t+">")
+                codewritein("<"+t+">")
             else
-                codewrite("<"+t+" ")
+                codewritein("<"+t+" ")
                 for a,s in lst do
-                    codewrite(a + "=" + s + " ")
-                codewrite(">")
+                    codewritein(a + "=\"" + s + "\" ")
+                codewritein(">")
             code()
-            codewrite ("</"+t+">")
+            codewritein ("</"+t+">")
         /// 内部要素のあるタグ
         static member tagb (t:string,a:string) = fun code ->
             if a="" then
-                codewrite("<"+t+">")
+                codewritein("<"+t+">")
             else
-                codewrite("<"+t+" "+a+">")
+                codewritein("<"+t+" "+a+">")
             code()
-            codewrite ("</"+t+">")
+            codewritein ("</"+t+">")
         /// 内部要素のあるタグ
         static member tagb (t:string) = fun code ->
-            codewrite("<"+t+">")
+            codewritein("<"+t+">")
             code()
-            codewrite ("</"+t+">")
+            codewritein ("</"+t+">")
             
         static member tagv (t:string,atr:list<Atr>) =
-            codewrite("<" + t + " " + Atr.list atr + ">")
+            codewritein("<" + t + " " + Atr.list atr + ">")
             
         static member tage (t:string) =
-            codewrite("</" + t + ">") 
+            codewritein("</" + t + ">") 
             
         static member h1 (t:string) = fun code ->
-            html.tagb "h1" <| fun () -> codewrite t
+            html.tagb "h1" <| fun () -> codewritein t
             code()
             
         static member h1 (t:string,atr:Style) = fun code ->
-            html.tagb ("h1",atr) <| fun () -> codewrite t
+            html.tagb ("h1",atr) <| fun () -> codewritein t
             code()
             
         static member h2 (t:string) = fun code ->
-            html.tagb "h2" <| fun () -> codewrite t
+            html.tagb "h2" <| fun () -> codewritein t
             code()
             
         static member h2 (t:string,atr:Style) = fun code ->
-            html.tagb ("h2",atr) <| fun () -> codewrite t
+            html.tagb ("h2",atr) <| fun () -> codewritein t
             code()
         static member h3 (t:string) = fun code ->
-            html.tagb "h3" <| fun () -> codewrite t
+            html.tagb "h3" <| fun () -> codewritein t
             code()
         static member h3 (t:string,atr:Style) = fun code ->
-            html.tagb ("h3",atr) <| fun () -> codewrite t
+            html.tagb ("h3",atr) <| fun () -> codewritein t
             code()
         static member h4 (t:string) = fun code ->
-            html.tagb "h4" <| fun () -> codewrite t
+            html.tagb "h4" <| fun () -> codewritein t
             code()
         static member h4 (t:string,atr:Style) = fun code ->
-            html.tagb ("h4",atr) <| fun () -> codewrite t
+            html.tagb ("h4",atr) <| fun () -> codewritein t
             code()
         static member h5 (t:string) = fun code ->
-            html.tagb "h5" <| fun () -> codewrite t
+            html.tagb "h5" <| fun () -> codewritein t
             code()
         static member h5 (t:string,atr:Style) = fun code ->
-            html.tagb ("h5",atr) <| fun () -> codewrite t
+            html.tagb ("h5",atr) <| fun () -> codewritein t
             code()
         static member linkstyle1 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle1",atr) <| fun () -> codewrite t
+            html.tagb ("linkstyle1",atr) <| fun () -> codewritein t
             code()
 
         static member linkstyle2 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle2",atr) <| fun () -> codewrite t
+            html.tagb ("linkstyle2",atr) <| fun () -> codewritein t
             code()
 
         static member linkstyle3 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle3",atr) <| fun () -> codewrite t
+            html.tagb ("linkstyle3",atr) <| fun () -> codewritein t
             code()
 
         static member linkstyle4 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle4",atr) <| fun () -> codewrite t
+            html.tagb ("linkstyle4",atr) <| fun () -> codewritein t
             code()
 
         static member boxA (atr:Style) = fun code ->
@@ -486,9 +486,9 @@ namespace Aqualis
             html.tagb ("card_box_wrap",atr) <| fun () ->
             code()
 
-        static member form (action:string) = fun code -> html.tagb ("form",["method","\"post\""; "action","\""+action+"\"";]) code
-        static member form_fileUpload (action:string) = fun code -> html.tagb ("form",["method","\"post\""; "enctype","\"multipart/form-data\""; "action","\""+action+"\"";]) code
-        static member submit(url:string,name:string,value:string) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value","\""+value+"\""; "formaction","\""+url+"\""])
+        static member form (action:string) = fun code -> html.tagb ("form",["method","post"; "action",action;]) code
+        static member form_fileUpload (action:string) = fun code -> html.tagb ("form",["method","post"; "enctype","multipart/form-data"; "action",action;]) code
+        static member submit(url:string,name:string,value:string) = html.taga("input",["type","submit"; "name",name; "value",value; "formaction",url])
         static member table_ code = html.tagb "table" code
         static member table (a:list<string*string>) = fun code -> html.tagb ("table",a) code
         static member tr_ = fun code -> html.tagb "tr" code
@@ -496,7 +496,7 @@ namespace Aqualis
         static member th = fun code -> html.tagb "th" code
         static member td_ = fun code -> html.tagb "td" code
         static member td (a:list<string*string>) = fun code -> html.tagb ("td",a) code
-        static member strong(t:string) = html.tagb "strong" <| fun () -> codewrite t
+        static member strong(t:string) = html.tagb "strong" <| fun () -> codewritein t
         static member enumerate_ code = html.tagb "ol" code
         static member ol (atr:Style) = fun code -> html.tagb ("ol",atr) code
         static member itemize_ code = html.tagb "ul" code
@@ -506,38 +506,38 @@ namespace Aqualis
         static member item (a:list<string*string>) = fun code -> html.tagb ("li",a) code
         static member para_ code = html.tagb "p" code
         static member para (a:list<string*string>) = html.tagb ("p",a)
-        static member para (t:string) = html.tagb "p" <| fun () -> codewrite(t)
-        static member span(cls:string,t) = html.tagb ("span",["class","\""+cls+"\""]) <| fun () -> codewrite(t)
-        static member span(cls:string) = fun code -> html.tagb ("span",["class","\""+cls+"\""]) code
-        static member span(cls:string, s:Style) = fun code -> html.tagb ("span",[s.atr; Atr("class","\""+cls+"\"")]) code
-        static member link(url:string) = fun code -> html.tagb ("a",["href","\""+url+"\"";]) code
+        static member para (t:string) = html.tagb "p" <| fun () -> codewritein(t)
+        static member span(cls:string,t) = html.tagb ("span",["class",cls]) <| fun () -> codewritein(t)
+        static member span(cls:string) = fun code -> html.tagb ("span",["class",cls]) code
+        static member span(cls:string, s:Style) = fun code -> html.tagb ("span",[s.atr; Atr("class",cls)]) code
+        static member link(url:string) = fun code -> html.tagb ("a",["href",url;]) code
         static member link(url:string, s:Style) = fun code -> html.tagb ("a",[s.atr; Atr("href",url)]) code
-        static member link_newtab(url:string) = fun code -> html.tagb ("a",["href","\""+url+"\""; "target","\"_blank\""]) code
-        static member select_disabled(x:string) = fun code -> html.tagb ("select",["name","\""+x+"\""; "disabled","\"disabled\""]) code
-        static member time(datatime:string, s:Style) = fun code -> html.tagb ("time",[s.atr; Atr("datatime","\""+datatime+"\"")]) code
-        static member article(cls:string) = fun code -> html.tagb ("article", ["class", "\"" + cls + "\""]) code
-        static member aside (cls:string, s:Style) = fun code -> html.tagb ("aside", [s.atr; Atr("class", "\"" + cls + "\"")]) code
+        static member link_newtab(url:string) = fun code -> html.tagb ("a",["href",url; "target","_blank"]) code
+        static member select_disabled(x:string) = fun code -> html.tagb ("select",["name",x; "disabled","disabled"]) code
+        static member time(datatime:string, s:Style) = fun code -> html.tagb ("time",[s.atr; Atr("datatime",datatime)]) code
+        static member article(cls:string) = fun code -> html.tagb ("article", ["class", cls]) code
+        static member aside (cls:string, s:Style) = fun code -> html.tagb ("aside", [s.atr; Atr("class", cls)]) code
         static member aside (a:list<string*string>) = fun code -> html.tagb ("aside",a) code
-        static member section(cls:string, s:Style) = fun code -> html.tagb ("section", [s.atr; Atr("class", "\"" + cls + "\"")]) code
+        static member section(cls:string, s:Style) = fun code -> html.tagb ("section", [s.atr; Atr("class", cls)]) code
 
-        static member option(value:string) = fun code -> html.tagb ("option",["value","\""+value+"\"";]) code
-        static member option_selected(value:string) = fun code -> html.tagb ("option",["value","\""+value+"\"";"selected","\"selected\"";]) code
+        static member option(value:string) = fun code -> html.tagb ("option",["value",value;]) code
+        static member option_selected(value:string) = fun code -> html.tagb ("option",["value",value;"selected","selected";]) code
         static member div (a:list<string*string>) = fun code -> html.tagb ("div",a) code
-        static member button(value:string,onclick:string) = html.taga("input",["type","\"button\""; "value","\""+value+"\""; "onclick","\""+onclick+"\"";])
+        static member button(value:string,onclick:string) = html.taga("input",["type","button"; "value",value; "onclick",onclick;])
         static member bold code = html.tagb "b" code
         static member latexTag (tagname:string) code =
-            codewrite("\\begin{"+tagname+"}")
+            codewritein("\\begin{"+tagname+"}")
             code()
-            codewrite("\\end{"+tagname+"}")
+            codewritein("\\end{"+tagname+"}")
         static member eq q = "\\("+q+"\\)"
         static member align code =
-            codewrite "\\[\\begin{align}"
+            codewritein "\\[\\begin{align}"
             code()
-            codewrite "\\end{align}\\]"
+            codewritein "\\end{align}\\]"
         static member footer code = html.tagb ("footer", ["class","footer"]) <| fun () -> code()
         static member footer (s:Style) = fun code -> html.tagb ("footer", s) <| fun () -> code()
-        static member br() = codewrite "<br>"
-        static member hr() = codewrite "<hr>"
+        static member br() = codewritein "<br>"
+        static member hr() = codewritein "<hr>"
         static member setjs filename =
             html.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
 
@@ -551,7 +551,7 @@ namespace Aqualis
                             {Key = "white-space"; Value = "nowrap";}
                             {Key = "font-size"; Value = "90px";}]
             html.tagb ("div",s1+s) <| fun () ->
-                codewrite text
+                codewritein text
 
         static member contents (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
@@ -566,7 +566,7 @@ namespace Aqualis
                             {Key = "border-left-color"; Value= "#1e6eff";}
                             {Key = "padding-left"; Value="10px";}]
             html.tagb ("div",s1+s) <| fun () ->
-                codewrite text
+                codewritein text
 
         static member subtitle1 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
@@ -581,7 +581,7 @@ namespace Aqualis
                             {Key = "border-left-color"; Value= "#1e6eff";}
                             {Key = "padding-left"; Value="10px";}]
             html.tagb ("div",s1+s) <| fun () ->
-                codewrite text
+                codewritein text
 
         static member subtitle2 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
@@ -600,7 +600,7 @@ namespace Aqualis
                             {Key = "padding-left"; Value="10px";}
                             {Key = "display"; Value="inline-block";}]
             html.tagb ("div",s1+s) <| fun () ->
-                codewrite text
+                codewritein text
                 
 
                 
@@ -611,7 +611,7 @@ namespace Aqualis
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-size"; Value = "30px";}]
             html.tagb ("div", s1+s) <| fun () ->
-                codewrite text
+                codewritein text
 
         static member textB (s:Style) = fun (p:position) (text:string) ->
             // html.writeTag "div" ("style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
@@ -620,7 +620,7 @@ namespace Aqualis
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-size"; Value = "40px";}]
             html.tagb ("div", s1+s) <| fun () ->
-                codewrite text
+                codewritein text
         static member textC (s:Style) = fun (p:position) (size:string) (c:string) (text:string) ->
             // html.writeTag "div" ("style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
@@ -629,7 +629,7 @@ namespace Aqualis
                             {Key = "font-size"; Value = size.ToString()+"px";}
                             {Key = "color"; Value = c.ToString();}]
             html.tagb ("div", s1+s) <| fun () ->
-                codewrite text
+                codewritein text
                 
 
             
@@ -641,7 +641,7 @@ namespace Aqualis
                 code ()
                 
         static member div (cls:string, s:Style) = fun code ->
-            html.tagb ("div", [s.atr; Atr("class", "\"" + cls + "\"")]) code
+            html.tagb ("div", [s.atr; Atr("class", cls)]) code
             
         static member div (s:list<Atr>) = fun code ->
             html.tagb ("div", s) code
@@ -656,7 +656,7 @@ namespace Aqualis
             let f = figure()
             code(f,p)
             let sx,sy,mx,my = f.setWriteMode()
-            codewrite (
+            codewritein (
                 "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
                 "width=\""+sx.ToString()+"px\" "+
                 "heigth=\""+sy.ToString()+"px\" "+
@@ -666,7 +666,7 @@ namespace Aqualis
                 "position: absolute;"+
                 "\">")
             code(f,p)
-            codewrite "</svg>"
+            codewritein "</svg>"
             
         static member blockTextcode (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
             let padding = 5
@@ -679,24 +679,24 @@ namespace Aqualis
                             {Key = "overflow-wrap"; Value = "break-word";}]
             html.tagb ("div", s1+s)
                 <| fun () ->
-                    text |> List.iter (fun s -> codewrite (s+"<br>"))
-                    codewrite ""
+                    text |> List.iter (fun s -> codewritein (s+"<br>"))
+                    codewritein ""
             {Left = p.x;
             Right = p.x+double width+2.0*double padding;
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding;}
             
         static member table (lst:list<list<string>>) = fun (p:position) (size:int) ->
-            codewrite ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
+            codewritein ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
             for m in 0..lst.Length-1 do
-                codewrite "<tr>"
+                codewritein "<tr>"
                 for s in lst[m] do
-                    codewrite "<td>"
-                    codewrite s
-                    codewrite "</td>"
-                codewrite "</tr>"
-            codewrite "</table>"
-            codewrite "</div>"
+                    codewritein "<td>"
+                    codewritein s
+                    codewritein "</td>"
+                codewritein "</tr>"
+            codewritein "</table>"
+            codewritein "</div>"
             
     and figure() =
         let padding = 10.0

@@ -37,33 +37,33 @@ namespace Aqualis
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
                     let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
-                    writer.codewrite "!=============================================================================================\n"
-                    writer.codewrite("! Subroutine name: " + projectname + "\n")
+                    writer.codewritein "!=============================================================================================\n"
+                    writer.codewritein("! Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
-                        writer.codewrite("!  " + nm + "\n")
-                    writer.codewrite "!============================================================================================="
+                        writer.codewritein("!  " + nm + "\n")
+                    writer.codewritein "!============================================================================================="
                     let argvar = String.Join(", ", programList[prIndex].arg.list |> List.map(fun (_,(_,_,n)) -> n))
-                    writer.codewrite("subroutine " + projectname + "(" + argvar + ")\n")
+                    writer.codewritein("subroutine " + projectname + "(" + argvar + ")\n")
                     writer.indent.inc()
                     //モジュールファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewrite("use " + s + "\n")) <| programList[prIndex].mlist.list
-                    writer.codewrite "implicit none"
+                    List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| programList[prIndex].mlist.list
+                    writer.codewritein "implicit none"
                     //ヘッダファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewrite("include " + s + "\n")) <| programList[prIndex].hlist.list
+                    List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| programList[prIndex].hlist.list
                     //サブルーチン引数の定義
                     for _,s in programList[prIndex].arg.list do
-                        writer.codewrite(fdeclare s)
+                        writer.codewritein(fdeclare s)
                     //グローバル変数の定義
                     declareall writer
                     //メインコード
-                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.codewritein(programList[prIndex].allCodes)
                     writer.indent.dec()
-                    writer.codewrite("end subroutine " + projectname + "\n")
+                    writer.codewritein("end subroutine " + projectname + "\n")
                     writer.close()
                     programList[prIndex].delete()
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map(fun (n,(_,_,_)) -> n))
-                codewrite("call" + " " + projectname + "(" + args + ")\n")
+                codewritein("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,C99] <| fun () ->
@@ -71,11 +71,11 @@ namespace Aqualis
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
                     let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
-                    writer.codewrite "/*==========================================================================================*/\n"
-                    writer.codewrite("/* Subroutine name: " + projectname + " */\n")
+                    writer.codewritein "/*==========================================================================================*/\n"
+                    writer.codewritein("/* Subroutine name: " + projectname + " */\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
-                        writer.codewrite("/* " + nm + " */\n")
-                    writer.codewrite "/*==========================================================================================*/\n"
+                        writer.codewritein("/* " + nm + " */\n")
+                    writer.codewritein "/*==========================================================================================*/\n"
                     //速度を上げるために参照渡しにしている
                     let argvar =
                         programList[prIndex].arg.list
@@ -84,15 +84,15 @@ namespace Aqualis
                             |A1 _|A2 _|A3 _ -> typ.tostring programList[prIndex].language + " *" + n
                             |_ -> typ.tostring programList[prIndex].language + " *" + n)
                         |> fun s -> String.Join(", ", s)
-                    writer.codewrite("void " + projectname + "(" + argvar + ")\n")
-                    writer.codewrite "{\n"
+                    writer.codewritein("void " + projectname + "(" + argvar + ")\n")
+                    writer.codewritein "{\n"
                     writer.indent.inc()
                     //グローバル変数の定義
                     declareall writer
                     //メインコード
-                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.codewritein(programList[prIndex].allCodes)
                     writer.indent.dec()
-                    writer.codewrite "}\n"
+                    writer.codewritein "}\n"
                     writer.close()
                     programList[prIndex].delete()
                     //呼び出しコードを記述
@@ -103,7 +103,7 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0,true  -> n.Substring(2,n.Length-3)
                         |_ -> n)
                     |> fun s -> String.Join(", ", s)
-                codewrite(projectname + "(" + args + ");\n")
+                codewritein(projectname + "(" + args + ");\n")
             |LaTeX ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,LaTeX] <| fun () ->
@@ -111,33 +111,33 @@ namespace Aqualis
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
                     let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
-                    writer.codewrite "%=============================================================================================\n"
-                    writer.codewrite("% Subroutine name: " + projectname + "\n")
+                    writer.codewritein "%=============================================================================================\n"
+                    writer.codewritein("% Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
-                        writer.codewrite("% " +  nm + "\n")
-                    writer.codewrite "%=============================================================================================\n"
+                        writer.codewritein("% " +  nm + "\n")
+                    writer.codewritein "%=============================================================================================\n"
                     let argvar = String.Join(", ", programList[prIndex].arg.list |> List.map (fun (_,(_,_,n)) -> n))
-                    writer.codewrite("subroutine " + projectname + "(" + argvar + ")\n")
+                    writer.codewritein("subroutine " + projectname + "(" + argvar + ")\n")
                     writer.indent.inc()
                     //モジュールファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewrite("use " + s + "\n")) <| programList[prIndex].mlist.list
-                    writer.codewrite "implicit none\n"
+                    List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| programList[prIndex].mlist.list
+                    writer.codewritein "implicit none\n"
                     //ヘッダファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewrite("include " + s + "\n")) <| programList[prIndex].hlist.list
+                    List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| programList[prIndex].hlist.list
                     //サブルーチン引数の定義
                     for _,s in programList[prIndex].arg.list do
-                        writer.codewrite(fdeclare s)
+                        writer.codewritein(fdeclare s)
                     //グローバル変数の定義
                     declareall writer
                     //メインコード
-                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.codewritein(programList[prIndex].allCodes)
                     writer.indent.dec()
-                    writer.codewrite("end subroutine " + projectname + "\n")
+                    writer.codewritein("end subroutine " + projectname + "\n")
                     writer.close()
                     programList[prIndex].delete()
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                codewrite("call" + " " + projectname + "(" + args + ")\n")
+                codewritein("call" + " " + projectname + "(" + args + ")\n")
             |HTML ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,HTML] <| fun () ->
@@ -145,35 +145,35 @@ namespace Aqualis
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
                     let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
-                    writer.codewrite("<h3>" + projectname + "</h3>\n")
-                    writer.codewrite "<ul>\n"
+                    writer.codewritein("<h3>" + projectname + "</h3>\n")
+                    writer.codewritein "<ul>\n"
                     for _,(_,_,nm) in programList[prIndex].arg.list do
-                        writer.codewrite("<li>\\(" + nm + "\\)</li>\n")
-                    writer.codewrite "</ul>\n"
+                        writer.codewritein("<li>\\(" + nm + "\\)</li>\n")
+                    writer.codewritein "</ul>\n"
                     let argvar = String.Join(", ", programList[prIndex].arg.list |> List.map (fun (_,(_,_,n)) -> n))
-                    writer.codewrite "<div class=\"codeblock\">\n"
-                    writer.codewrite "<details>\n"
-                    writer.codewrite("<summary><span class=\"op-func\">function</span> \\(" + projectname + "(" + argvar + ")\\)</summary>\n")
-                    writer.codewrite "<div class=\"insidecode-func\">\n"
+                    writer.codewritein "<div class=\"codeblock\">\n"
+                    writer.codewritein "<details>\n"
+                    writer.codewritein("<summary><span class=\"op-func\">function</span> \\(" + projectname + "(" + argvar + ")\\)</summary>\n")
+                    writer.codewritein "<div class=\"insidecode-func\">\n"
                     writer.indent.inc()
-                    writer.codewrite "<ul>\n"
+                    writer.codewritein "<ul>\n"
                     //サブルーチン引数の定義
                     for _,s in programList[prIndex].arg.list do
-                        writer.codewrite("<li>" + fdeclare s + "</li>\n")
+                        writer.codewritein("<li>" + fdeclare s + "</li>\n")
                     //グローバル変数の定義
                     declareall writer
-                    writer.codewrite "</ul>"
+                    writer.codewritein "</ul>"
                     //メインコード
-                    writer.codewrite(programList[prIndex].allCodes)
+                    writer.codewritein(programList[prIndex].allCodes)
                     writer.indent.dec()
-                    writer.codewrite "</div>\n"
-                    writer.codewrite "</details>\n"
-                    writer.codewrite "</div>\n"
+                    writer.codewritein "</div>\n"
+                    writer.codewritein "</details>\n"
+                    writer.codewritein "</div>\n"
                     writer.close()
                     programList[prIndex].delete()
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                codewrite("\\(" + projectname + "(" + args + ")\\)<br/>\n")
+                codewritein("\\(" + projectname + "(" + args + ")\\)<br/>\n")
             |Python ->
                 programList[prIndex].flist.add projectname
                 let re_args,args = makeProgram [dir,projectname,Python] <| fun () ->
@@ -181,11 +181,11 @@ namespace Aqualis
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
                     let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
-                    writer.codewrite "#==========================================================================================\n"
-                    writer.codewrite("# Subroutine name: " + projectname + "\n")
+                    writer.codewritein "#==========================================================================================\n"
+                    writer.codewritein("# Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
-                        writer.codewrite("# " + nm + "\n")
-                    writer.codewrite "#==========================================================================================\n"
+                        writer.codewritein("# " + nm + "\n")
+                    writer.codewritein "#==========================================================================================\n"
                     let argvar = 
                         programList[prIndex].arg.list
                         |> List.map (fun (_,(_,_,n)) -> n)
@@ -215,16 +215,16 @@ namespace Aqualis
                             |_ -> n)
                         |> List.filter (fun s -> s <> "")
                         |> fun s -> String.Join(", ", s)
-                    writer.codewrite("def " + projectname + "(" + argvar + "):\n")
+                    writer.codewritein("def " + projectname + "(" + argvar + "):\n")
                     writer.indent.inc()
                     //グローバル変数の定義
                     declareall writer
                     //メインコード
-                    writer.codewrite(programList[prIndex].allCodes)
-                    writer.codewrite("return " + re_argvar + "\n")
+                    writer.codewritein(programList[prIndex].allCodes)
+                    writer.codewritein("return " + re_argvar + "\n")
                     writer.indent.dec()
                     writer.close()
                     programList[prIndex].delete()
                     re_args,args
-                codewrite(re_args + " = " + projectname + "(" + args + ")\n")
+                codewritein(re_args + " = " + projectname + "(" + args + ")\n")
             |_ -> ()

@@ -15,28 +15,28 @@ namespace Aqualis
                     let instr  = String.Join(",", programList[prIndex].varCopyIn.list)
                     if programList[prIndex].varCopyOut.list.Length>0 then
                         let outstr = String.Join(",", programList[prIndex].varCopyOut.list)
-                        codewrite("!$acc data copyin("+instr+") copyout("+outstr+")\n")
-                        codewrite("!$acc kernels"+"\n")
+                        codewritein("!$acc data copyin("+instr+") copyout("+outstr+")\n")
+                        codewritein("!$acc kernels"+"\n")
                         code()
-                        codewrite("!$acc end kernels"+"\n")
-                        codewrite("!$acc end data"+"\n")
+                        codewritein("!$acc end kernels"+"\n")
+                        codewritein("!$acc end data"+"\n")
                     else
-                        codewrite("!$acc data copyin("+instr+")\n")
-                        codewrite("!$acc kernels"+"\n")
+                        codewritein("!$acc data copyin("+instr+")\n")
+                        codewritein("!$acc kernels"+"\n")
                         code()
-                        codewrite("!$acc end kernels"+"\n")
-                        codewrite("!$acc end data"+"\n")
+                        codewritein("!$acc end kernels"+"\n")
+                        codewritein("!$acc end data"+"\n")
                 elif programList[prIndex].varCopyOut.list.Length>0 then
                     let outstr = String.Join(",", programList[prIndex].varCopyOut.list)
-                    codewrite("!$acc data copyout("+outstr+")\n")
-                    codewrite("!$acc kernels"+"\n")
+                    codewritein("!$acc data copyout("+outstr+")\n")
+                    codewritein("!$acc kernels"+"\n")
                     code()
-                    codewrite("!$acc end kernels"+"\n")
-                    codewrite("!$acc end data"+"\n")
+                    codewritein("!$acc end kernels"+"\n")
+                    codewritein("!$acc end data"+"\n")
                 else
-                    codewrite("!$acc kernels"+"\n")
+                    codewritein("!$acc kernels"+"\n")
                     code()
-                    codewrite "!$acc end kernels\n"
+                    codewritein "!$acc end kernels\n"
                 isParMode <- false
             |C99 ->
                 isOaccUsed <- true
@@ -45,37 +45,37 @@ namespace Aqualis
                     let instr  = String.Join(",", programList[prIndex].varCopyIn.list)
                     if programList[prIndex].varCopyOut.list.Length>0 then
                         let outstr = String.Join(",", programList[prIndex].varCopyOut.list)
-                        codewrite("#pragma acc data copyin("+instr+") copyout("+outstr+")\n")
-                        codewrite("{"+"\n")
-                        codewrite("#pragma acc kernels"+"\n")
-                        codewrite("{"+"\n")
+                        codewritein("#pragma acc data copyin("+instr+") copyout("+outstr+")\n")
+                        codewritein("{"+"\n")
+                        codewritein("#pragma acc kernels"+"\n")
+                        codewritein("{"+"\n")
                         code()
-                        codewrite("}"+"\n")
-                        codewrite("}"+"\n")
+                        codewritein("}"+"\n")
+                        codewritein("}"+"\n")
                     else
-                        codewrite("#pragma acc data copyin("+instr+")\n")
-                        codewrite("{"+"\n")
-                        codewrite("#pragma acc kernels"+"\n")
-                        codewrite("{"+"\n")
+                        codewritein("#pragma acc data copyin("+instr+")\n")
+                        codewritein("{"+"\n")
+                        codewritein("#pragma acc kernels"+"\n")
+                        codewritein("{"+"\n")
                         code()
-                        codewrite("}"+"\n")
-                        codewrite("}"+"\n")
+                        codewritein("}"+"\n")
+                        codewritein("}"+"\n")
                 elif programList[prIndex].varCopyOut.list.Length>0 then
                     let outstr = String.Join(",", programList[prIndex].varCopyOut.list)
-                    codewrite("#pragma acc data copyout("+outstr+")\n")
-                    codewrite("{"+"\n")
-                    codewrite("#pragma acc kernels"+"\n")
-                    codewrite("{"+"\n")
+                    codewritein("#pragma acc data copyout("+outstr+")\n")
+                    codewritein("{"+"\n")
+                    codewritein("#pragma acc kernels"+"\n")
+                    codewritein("{"+"\n")
                     code()
-                    codewrite("}"+"\n")
-                    codewrite("}"+"\n")
+                    codewritein("}"+"\n")
+                    codewritein("}"+"\n")
                 else
-                    codewrite("#pragma acc kernels"+"\n")
-                    codewrite("{"+"\n")
+                    codewritein("#pragma acc kernels"+"\n")
+                    codewritein("{"+"\n")
                     code()
-                    codewrite("}"+"\n")
+                    codewritein("}"+"\n")
                 isParMode <- false
             |_ ->
                 Console.WriteLine "Error : この言語では並列化を実行できません"
-                codewrite "Error : この言語では並列化を実行できません"
+                codewritein "Error : この言語では並列化を実行できません"
                 

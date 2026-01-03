@@ -8,7 +8,7 @@ namespace Aqualis
         type expr with
             
             static member substPy (x:expr) (y:expr) (c:program) =
-                c.codewrite (x.evalPy c  + " = " + y.evalPy c)
+                c.codewritein (x.evalPy c  + " = " + y.evalPy c)
                 
             static member equivPy (x:expr) (y:expr) (c:program) =
                 printfn "Pythonでこの文は使用できません"
@@ -21,7 +21,7 @@ namespace Aqualis
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalPy c
                 let n2_ = (Add(It 4, n2, Int 1)).evalPy c
-                c.codewrite("for " + i.evalPy c + " in range(" + n1_ + ", " + n2_ + ", 1):")
+                c.codewritein("for " + i.evalPy c + " in range(" + n1_ + ", " + n2_ + ", 1):")
                 c.indentInc()
                 code i
                 c.indentDec()
@@ -32,26 +32,26 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = gotoLabel.nextGotoLabel()
-                let exit() = c.codewrite("goto "+label)
+                let exit() = c.codewritein("goto "+label)
                 expr.substPy i (Int 1) c
-                c.codewrite "while True:"
+                c.codewritein "while True:"
                 c.indentInc()
                 code(exit,i)
-                c.codewrite("flag = " + label)
+                c.codewritein("flag = " + label)
                 expr.substPy i (Add(It 4, i, Int 1)) c
                 c.indentDec()
                 if label = "10" then
                     gotoLabel.exit_reset()
                 else 
-                    c.codewrite("if flag < " + label + ":")
+                    c.codewritein("if flag < " + label + ":")
                     c.indentInc()
-                    c.codewrite "break"
+                    c.codewritein "break"
                     c.indentDec()
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoPy (c:program) (cond:expr) = fun code ->
-                c.codewrite("while(" + cond.evalPy c + ")")
+                c.codewritein("while(" + cond.evalPy c + ")")
                 c.indentInc()
                 code()
                 c.indentDec()
@@ -70,7 +70,7 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
-                    c.codewrite("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    c.codewritein("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
                     code i
                     c.indentDec()
@@ -100,35 +100,35 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label)
-                    c.codewrite("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    let exit() = c.codewritein("goto "+label)
+                    c.codewritein("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
                     if label = "10" then
                         gotoLabel.exit_reset()
                     else 
-                        c.codewrite("if flag < "+label+":")
+                        c.codewritein("if flag < "+label+":")
                         c.indentInc()
-                        c.codewrite "break"
+                        c.codewritein "break"
                         c.indentDec()
                     returnVar()
                     
             static member branchPy (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPy c
-                    c.codewrite("if " + cond + ":")
+                    c.codewritein("if " + cond + ":")
                     c.indentInc()
                     code()
                     c.indentDec()
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalPy c
-                    c.codewrite("elif " + cond + ":")
+                    c.codewritein("elif " + cond + ":")
                     c.indentInc()
                     code()
                     c.indentDec()
                 let elsecode code =
-                    c.codewrite "else:"
+                    c.codewritein "else:"
                     c.indentInc()
                     code()
                     c.indentDec()

@@ -172,6 +172,9 @@ namespace Aqualis
         member _.comment(s:string) = cwriter.comment s
         
         member _.codewrite(s:string) = cwriter.codewrite s
+        member _.codewritei(s:string) = cwriter.codewritei s
+        member _.codewriten(s:string) = cwriter.codewriten s
+        member _.codewritein(s:string) = cwriter.codewritein s
         member _.indentInc() = cwriter.indent.inc()
         member _.indentDec() = cwriter.indent.dec()
         member _.appendOpen() = cwriter.appendOpen()
@@ -226,6 +229,9 @@ namespace Aqualis
             result
             
         let codewrite(s:string) = programList[prIndex].codewrite s
+        let codewritei(s:string) = programList[prIndex].codewritei s
+        let codewriten(s:string) = programList[prIndex].codewriten s
+        let codewritein(s:string) = programList[prIndex].codewritein s
         let comment(s:string) = programList[prIndex].comment s
         let language() = programList[prIndex].language
         
@@ -275,17 +281,17 @@ namespace Aqualis
         static member abort() =
             match language() with 
             |Fortran ->
-                codewrite "stop" 
+                codewritein "stop" 
             |C99 ->
-                codewrite "return 1;" 
+                codewritein "return 1;" 
             |LaTeX ->
-                codewrite "stop"
+                codewritein "stop"
             |HTML ->
-                codewrite "stop"
+                codewritein "stop"
             |HTMLSequenceDiagram ->
-                codewrite "stop"
+                codewritein "stop"
             |Python ->
-                codewrite "sys.exit(1)"
+                codewritein "sys.exit(1)"
             |JavaScript ->
                 ()
             |PHP ->
@@ -297,17 +303,17 @@ namespace Aqualis
         static member stop() =
             match language() with
             |Fortran ->
-                codewrite "read *, \n"
+                codewritein "read *, \n"
             |C99 ->
-                codewrite "getchar();\n"
+                codewritein "getchar();\n"
             |LaTeX ->
-                codewrite "stop\n"
+                codewritein "stop\n"
             |HTML ->
-                codewrite "stop\n"
+                codewritein "stop\n"
             |HTMLSequenceDiagram ->
-                codewrite "stop\n"
+                codewritein "stop\n"
             |Python ->
-                codewrite "input()"
+                codewritein "input()"
             |JavaScript ->
                 ()
             |PHP ->

@@ -159,75 +159,75 @@ namespace Aqualis
                         |A2(0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
-                            codewrite("allocate("+name+"(1:"+this.size1.Expr.eval (programList[prIndex])+",1:"+this.size2.Expr.eval (programList[prIndex])+")"+")"+"\n")
+                            codewritein("allocate("+name+"(1:"+this.size1.Expr.eval (programList[prIndex])+",1:"+this.size2.Expr.eval (programList[prIndex])+")"+")"+"\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |C99 ->
                         match size with
                         |A2(0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
-                            codewrite(name+" = "+"("+typ.tostring(language())+" *)"+"malloc("+"sizeof("+typ.tostring(language())+")*"+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+");\n")
+                            codewritein(name+" = "+"("+typ.tostring(language())+" *)"+"malloc("+"sizeof("+typ.tostring(language())+")*"+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+");\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |LaTeX ->
                         match size,typ with
                         |A2(0,0),It _ ->
-                            codewrite("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            codewritein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |A2(0,0),Dt   ->
-                            codewrite("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            codewritein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |A2(0,0),Zt   ->
-                            codewrite("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            codewritein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}$\\\\\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |HTML ->
                         match size,typ with
                         |A2(0,0),It _ ->
-                            codewrite("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewritein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A2(0,0),Dt   ->
-                            codewrite("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewritein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A2(0,0),Zt   ->
-                            codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewritein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |HTMLSequenceDiagram ->
                         match size,typ with
                         |A2(0,0),It _ ->
-                            codewrite("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewritein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A2(0,0),Dt   ->
-                            codewrite("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewritein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |A2(0,0),Zt   ->
-                            codewrite("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            codewritein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"}\\)<br>\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |Python ->
                         match size with
                         |A2(0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
                             match typ with
-                            |Structure sname -> codewrite(name+" = numpy.array([["+sname+"() for _ in range(int("+this.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))\n")
-                            |It _ |It 1      -> codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+", dtype=int).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))"+"\n")
-                            |Zt              -> codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+", dtype=numpy.complex128).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))"+"\n")
-                            |_               -> codewrite(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+").reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))"+"\n")
+                            |Structure sname -> codewritein(name+" = numpy.array([["+sname+"() for _ in range(int("+this.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))\n")
+                            |It _ |It 1      -> codewritein(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+", dtype=int).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))"+"\n")
+                            |Zt              -> codewritein(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+", dtype=numpy.complex128).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))"+"\n")
+                            |_               -> codewritein(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+").reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"))"+"\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |JavaScript ->
                         match size with
                         |A2(0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
-                            codewrite(name+" = "+"Array("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+");\n")
+                            codewritein(name+" = "+"Array("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+");\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |PHP ->
                         match size with
                         |A2(0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
-                            codewrite(name+" = [];\n")
+                            codewritein(name+" = [];\n")
                         |_ -> 
-                            codewrite("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
+                            codewritein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |Numeric ->
                         ()
                 |_ -> ()
@@ -256,48 +256,48 @@ namespace Aqualis
                     |A2(0,0) ->
                         this.size1 <== -1
                         this.size2 <== -1
-                        codewrite("deallocate("+name+")"+"\n")
+                        codewritein("deallocate("+name+")"+"\n")
                     |_ -> ()
                 |C99 ->
                     match size with
                     |A2(0,0) ->
                         this.size1 <== -1
                         this.size2 <== -1
-                        codewrite("free("+name+");"+"\n")
+                        codewritein("free("+name+");"+"\n")
                     |_ -> ()
                 |LaTeX ->
                     match size with
                     |A2(0,0) ->
-                        codewrite("$"+name+"$: deallocate\\\\\n")
+                        codewritein("$"+name+"$: deallocate\\\\\n")
                     |_ -> ()
                 |HTML ->
                     match size with
                     |A2(0,0) ->
-                        codewrite("\\("+name+"\\): deallocate<br/>\n")
+                        codewritein("\\("+name+"\\): deallocate<br/>\n")
                     |_ -> ()
                 |HTMLSequenceDiagram ->
                     match size with
                     |A2(0,0) ->
-                        codewrite("\\("+name+"\\): deallocate<br/>\n")
+                        codewritein("\\("+name+"\\): deallocate<br/>\n")
                     |_ -> ()
                 |Python ->
                     match size with
                     |A2(0,0) ->
                         this.size1 <== -1
                         this.size2 <== -1
-                        codewrite("del "+name+""+"\n")
+                        codewritein("del "+name+""+"\n")
                     |_ -> ()
                 |JavaScript ->
                     match size with
                     |A2(0,0) ->
                         this.size1 <== -1
-                        codewrite(name+"= null;"+"\n")
+                        codewritein(name+"= null;"+"\n")
                     |_ -> ()
                 |PHP ->
                     match size with
                     |A2(0,0) ->
                         this.size1 <== -1
-                        codewrite("unset("+name+");"+"\n")
+                        codewritein("unset("+name+");"+"\n")
                     |_ -> ()
                 |Numeric ->
                     ()
@@ -550,15 +550,15 @@ namespace Aqualis
             |Var2(_,x),Var2(_,y) ->
                 match programList[prIndex].language with
                 |Fortran|LaTeX ->
-                    codewrite(x + "=" + y)
+                    codewritein(x + "=" + y)
                 |C99 ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
                 |HTML ->
-                    codewrite(x + " \\leftarrow " + y)
+                    codewritein(x + " \\leftarrow " + y)
                 |HTMLSequenceDiagram ->
-                    codewrite(x + " \\leftarrow " + y)
+                    codewritein(x + " \\leftarrow " + y)
                 |Python ->
-                    codewrite(x + " = copy.deepcopy("+y+")")
+                    codewritein(x + " = copy.deepcopy("+y+")")
                 |JavaScript ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
                 |PHP ->
@@ -578,17 +578,17 @@ namespace Aqualis
             |Var2(_,x) ->
                 match programList[prIndex].language with
                 |Fortran|LaTeX ->
-                    codewrite(x + "=" + v2.Expr.eval (programList[prIndex]))
+                    codewritein(x + "=" + v2.Expr.eval (programList[prIndex]))
                 |C99 ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
                 |HTML ->
-                    codewrite(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
+                    codewritein(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
                 |HTMLSequenceDiagram ->
-                    codewrite(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
+                    codewritein(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
                 |Python ->
                     match v1.etype with
-                    |Structure sname -> codewrite(x+" = numpy.array([["+sname+"() for _ in range(int("+v1.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+v1.size1.Expr.eval (programList[prIndex])+"),int("+v1.size2.Expr.eval (programList[prIndex])+"))\n")
-                    |_               -> codewrite(x+"[:,:]="+v2.Expr.eval (programList[prIndex])+"\n")
+                    |Structure sname -> codewritein(x+" = numpy.array([["+sname+"() for _ in range(int("+v1.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+v1.size1.Expr.eval (programList[prIndex])+"),int("+v1.size2.Expr.eval (programList[prIndex])+"))\n")
+                    |_               -> codewritein(x+"[:,:]="+v2.Expr.eval (programList[prIndex])+"\n")
                 |JavaScript ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2
                 |PHP ->

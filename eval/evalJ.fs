@@ -8,7 +8,7 @@ namespace Aqualis
         type expr with
             
             static member substJ (x:expr) (y:expr) (c:program) =
-                c.codewrite (x.evalJ c  + " = " + y.evalJ c + ";")
+                c.codewritein (x.evalJ c  + " = " + y.evalJ c + ";")
                 
             static member equivJ (x:expr) (y:expr) (c:program) =
                 printfn "JavaScriptでこの文は使用できません"
@@ -22,12 +22,12 @@ namespace Aqualis
                 let n1_ = n1.evalJ c
                 let n2_ = n2.evalJ c
                 if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
-                c.codewrite("for(" + i.evalJ c + " = " + n1_ + "; " + i.evalJ c + " <= " + n2_ + "; " + i.evalJ c + "++)")
-                c.codewrite "{"
+                c.codewritein("for(" + i.evalJ c + " = " + n1_ + "; " + i.evalJ c + " <= " + n2_ + "; " + i.evalJ c + "++)")
+                c.codewritein "{"
                 c.indentInc()
                 code i
                 c.indentDec()
-                c.codewrite "}"
+                c.codewritein "}"
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -35,27 +35,27 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = "_" + gotoLabel.nextGotoLabel()
-                let exit() = c.codewrite("goto "+label+";")
+                let exit() = c.codewritein("goto "+label+";")
                 expr.substJ i (Int 1) c
                 if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
-                c.codewrite "for(;;)"
-                c.codewrite "{"
+                c.codewritein "for(;;)"
+                c.codewritein "{"
                 c.indentInc()
                 code(exit,i)
                 expr.substJ i (Add(It 4, i, Int 1)) c
                 c.indentDec()
-                c.codewrite "}"
-                c.codewrite(label+":;")
+                c.codewritein "}"
+                c.codewritein(label+":;")
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoJ (c:program) (cond:expr) = fun code ->
-                c.codewrite("while(" + cond.evalJ c + ")")
-                c.codewrite "{"
+                c.codewritein("while(" + cond.evalJ c + ")")
+                c.codewritein "{"
                 c.indentInc()
                 code()
                 c.indentDec()
-                c.codewrite "}"
+                c.codewritein "}"
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangeJ (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
@@ -75,12 +75,12 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewrite("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
-                    c.codewrite "{"
+                    c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
+                    c.codewritein "{"
                     c.indentInc()
                     code i
                     c.indentDec()
-                    c.codewrite "}"
+                    c.codewritein "}"
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
@@ -90,7 +90,7 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label+"")
+                    let exit() = c.codewritein("goto "+label+"")
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
                     c.comment "{"
@@ -104,41 +104,41 @@ namespace Aqualis
                     let iname,returnVar = c.i0.getVar()
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
-                    let exit() = c.codewrite("goto "+label+"")
+                    let exit() = c.codewritein("goto "+label+"")
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewrite("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
-                    c.codewrite "{"
+                    c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
+                    c.codewritein "{"
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.codewrite "}"
-                    c.codewrite(label+":;")
+                    c.codewritein "}"
+                    c.codewritein(label+":;")
                     returnVar()
                     
             static member branchJ (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalJ c
-                    c.codewrite("if(" + cond + ")")
-                    c.codewrite "{"
+                    c.codewritein("if(" + cond + ")")
+                    c.codewritein "{"
                     c.indentInc()
                     code()
                     c.indentDec()
-                    c.codewrite "}"
+                    c.codewritein "}"
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalJ c
-                    c.codewrite("else if(" + cond + ")")
-                    c.codewrite "{"
+                    c.codewritein("else if(" + cond + ")")
+                    c.codewritein "{"
                     c.indentInc()
                     code()
                     c.indentDec()
-                    c.codewrite "}"
+                    c.codewritein "}"
                 let elsecode code =
-                    c.codewrite "else"
-                    c.codewrite "{"
+                    c.codewritein "else"
+                    c.codewritein "{"
                     c.indentInc()
                     code()
                     c.indentDec()
-                    c.codewrite "}"
+                    c.codewritein "}"
                 code(ifcode,elseifcode,elsecode)
                 
             member this.evalJ(c:program) =
