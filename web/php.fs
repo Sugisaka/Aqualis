@@ -34,16 +34,43 @@ type PHPdata(x:list<reduceExprString>) =
     static member f(s:string) = PHPdata [RNvr(Var(Nt,s,NaN))]
     static member str (x:num0) = "\"" ++ x ++ "\""
     
+    /// 配列を生成
+    static member array() = PHPdata.f "array()"
+
+    static member array(arrayname:string) = 
+        let c = PHPdata.v arrayname
+        codewritein ("<?php $"+arrayname+" = array(); ?>")
+        c
+        
+    static member array(arrayname:string,data:list<string*string>) = 
+        let c = PHPdata.v arrayname
+        codewritein ("<?php "+arrayname+" = array(); ?>")
+        codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
+        c
+
+    static member array(arrayname:string,data:list<string*PHPdata>) = 
+        let c = PHPdata.v arrayname
+        codewritein ("<?php "+arrayname+" = array(); ?>")
+        codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
+        c
+    // static member array(arrayname:string,data:list<string*PHPdata>) = 
+    //     let c = PHPdata.var arrayname
+    //     codewritein ("<?php "+arrayname+" = array(); ?>")
+    //     codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
+    //     c
+
+    // /// 配列に要素を追加
+    // static member array_push(a:PHPdata,el:PHPdata) = php.phpcode <| fun () -> codewrite("array_push("+a.code+","+el.code+")")
+    // static member array_push(a:PHPdata,el:num0) = php.array_push(a,PHPdata el)
+    
+    member this.push (x:list<PHPdata>) = codewritein ("<?php array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:PHPdata) -> q.code) x) + "); ?>")
+    member this.push (x:PHPdata) = this.push [x]
+    // member this.push (x:num0) = this.push [PHPdata x]
+    // member this.push (x:list<exprString>) = codewritein ("<?php array_push(" + this.code + ", " + String.Join(",",x |> List.map(fun q -> q.toString("",Direct))) + "); ?>")
     ///配列に要素を複数追加
-    member this.push (x:list<exprString>) = 
-        codewritein (
-            "<?php array_push(" + 
-            this.code + ", " + 
-            String.Join(",",x |> List.map(fun q -> q.toString("",Direct))) + 
-            "); ?>")
     member this.push (x:list<num0>) = codewritein ("<?php array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:num0) -> q.code) x) + "); ?>")
     ///配列に文字列要素を複数追加
-    member this.push (x:list<string>) = this.push (List.map(fun (q:string) -> Str q) x)
+    member this.push (x:list<string>) = this.push (List.map(fun (q:string) -> PHPdata q) x)
     ///配列に要素を追加
     member this.push (x:num0) = this.push [x]
     ///配列に文字列要素を追加
@@ -63,14 +90,13 @@ type PHPdata(x:list<reduceExprString>) =
     member this.Item(i:string) = this[PHPdata [RStr i]]
     member this.Item(i:num0) = this[PHPdata[RNvr i.Expr]]
     member this.code with get() = this.toString(" . ",StrQuotation)
-    // member this.num0 with get() = this.toString(" . ",StrQuotation)
+    member this.phpcode with get() = "<?php echo " + this.code + " ?>"
     static member (++) (a:PHPdata,b:PHPdata) = PHPdata(a.data@b.data)
     static member (++) (a:string,b:PHPdata) = PHPdata a ++ b
     static member (++) (a:PHPdata,b:string) = a ++ PHPdata b
     static member (++) (a:PHPdata,b:num0) = a ++ PHPdata b
     
-    member this.push (x:list<PHPdata>) = codewritein ("<?php array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:PHPdata) -> q.code) x) + "); ?>")
-    member this.push (x:PHPdata) = this.push [x]
+
     member this.foreach code =
         ch.i <| fun i ->
             php.phpcode <| fun () -> codewrite("for("+i.code+"=0; "+i.code+"<count("+this.code+"); "+i.code+"++):")
@@ -83,7 +109,7 @@ type PHPdata(x:list<reduceExprString>) =
             php.phpcode <| fun () -> codewrite("foreach("+this.code+" as "+key.code+" => "+value.code+"):")
             code()
             php.phpcode <| fun () -> codewrite "endforeach;"
-    static member (<==) (a:PHPdata,b:PHPdata) = codewritein ("<?php " + a.code + " = " + b.code + " ?>")
+    static member (<==) (a:PHPdata,b:PHPdata) = codewritein ("<?php " + a.code + " = " + b.code + "; ?>")
     static member (<==) (a:PHPdata,b:string) = a <== PHPdata b
     static member (<==) (a:PHPdata,b:num0) = a <== PHPdata b
     static member (<==) (a:PHPdata,b:int) = a <== PHPdata (I b)
@@ -127,17 +153,17 @@ and php =
     /// 指定された変数がPOST送信されたか判定
     static member isset (x:PHPdata) = bool0(Var(Nt, "isset(" + x.code + ")",NaN))
     static member echo (x:PHPdata) = php.phpcode <| fun () -> codewrite("echo " + x.code + ";")
-    static member echo (x:exprString) = php.phpcode <| fun () -> codewrite("echo " + x.toString(" . ",StrQuotation) + ";")
+    // static member echo (x:exprString) = php.phpcode <| fun () -> codewrite("echo " + x.toString(" . ",StrQuotation) + ";")
     /// 文字列を表示
-    static member echo (x:string) = php.echo (Str x)
+    static member echo (x:string) = php.echo (PHPdata x)
     /// 変数を表示
-    static member echo (x:num0) = php.echo (Nvr x.Expr)
+    static member echo (x:num0) = php.echo (PHPdata x)
     /// ファイル内のテキストを取得
     static member file_get_contents (filename:PHPdata) = PHPdata.f("file_get_contents(" + filename.code + ")")
     /// ファイルにテキストを書き込み
     static member file_put_contents (filename:PHPdata,x:PHPdata) = php.phpcode <| fun () -> codewrite("file_put_contents("+filename.code+","+x.code+");")
     /// JSONファイルをデコード
-    static member json_decode (x:PHPdata,p:bool) = PHPdata.f("json_decode("+x.code+","+p.ToString()+");")
+    static member json_decode (x:PHPdata,p:bool) = PHPdata.f("json_decode("+x.code+","+p.ToString()+")")
     /// JSONファイルをエンコード
     static member json_encode (x:PHPdata) = PHPdata.f("json_encode("+x.code+", JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES )")
     /// 指定したキーの値の配列を生成
@@ -147,11 +173,6 @@ and php =
     static member in_array_strict(s:num0, idArray:PHPdata) = php.in_array_strict(PHPdata s, idArray)
     /// 指定した要素の配列内でのインデックス（キー）を検索
     static member array_search(s:PHPdata, idArray:PHPdata) = PHPdata.f("array_search("+s.code+", "+idArray.code+")")
-    /// 配列を生成
-    static member array() = PHPdata.f "array()"
-    /// 配列に要素を追加
-    static member array_push(a:PHPdata,el:PHPdata) = php.phpcode <| fun () -> codewrite("array_push("+a.code+","+el.code+")")
-    static member array_push(a:PHPdata,el:num0) = php.array_push(a,PHPdata el)
     /// ファイル内のテキストを配列に格納
     static member file(filename:PHPdata, flag:list<FileFlag>) = 
         PHPdata.f("file("+filename.code+", "+(flag |> List.map (fun s -> s.str) |> (fun p -> String.Join(" | ",p)) )+")")
@@ -187,7 +208,7 @@ and php =
     ///<summary>送信データをキャッシュしない（Firefoxでフォームの選択肢がリロード前から保持される現象を回避）</summary>
     static member set_nocache() = php.phpcode <| fun () -> codewrite "header( 'Cache-Control: no-store, no-cache, must-revalidate' );"
     /// HTTPヘッダを取得
-    static member header(data:PHPdata) = php.phpcode <| fun () -> codewrite("header("+data.code+")")
+    static member header(data:PHPdata) = php.phpcode <| fun () -> codewrite("header("+data.code+");")
     // 小数に変換
     // static member float(data:num0) = Var("(float)"+data.code)
     // 絶対値
@@ -219,7 +240,7 @@ and php =
     /// 文字列分割
     static member explode(x:string,y:PHPdata) = PHPdata.f("explode('"+x+"',"+y.code+")")
     /// 配列のソート
-    static member sort(data:PHPdata) = php.phpcode <| fun () -> codewrite("sort("+data.code+")")
+    static member sort(data:PHPdata) = php.phpcode <| fun () -> codewrite("sort("+data.code+");")
     /// 整数に変換
     static member toint(x:PHPdata) = PHPdata.f("(int)"+x.code)
     /// 配列要素数
@@ -227,16 +248,16 @@ and php =
     /// 拡張子を除いたファイル名
     static member filename_withoutExtension(x:PHPdata) = PHPdata.f("pathinfo("+x.code+", PATHINFO_FILENAME)")
     /// ファイル削除
-    static member unlink(data:PHPdata) = php.phpcode <| fun () -> codewrite("unlink("+data.code+")")
+    static member unlink(data:PHPdata) = php.phpcode <| fun () -> codewrite("unlink("+data.code+");")
     /// 配列要素をランダムに入れ替え
-    static member shuffle(data:num1) = php.phpcode <| fun () -> codewrite("shuffle("+data.code+")")
+    static member shuffle(data:PHPdata) = php.phpcode <| fun () -> codewrite("shuffle("+data.code+");")
     /// タイムゾーン設定
     static member setTimeZone(location:string) = php.phpcode <| fun () -> codewrite("date_default_timezone_set('"+location+"');")
     /// メール送信
     static member sendMail(body:PHPdata,subject:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
         php.phpcode <| fun () -> codewrite "mb_language(\"ja\");"
         php.phpcode <| fun () -> codewrite "mb_internal_encoding(\"UTF-8\");"
-        php.phpcode <| fun () -> codewrite("mb_send_mail("+toAddress.code+","+subject.code+","+body.toString(" . ",StrQuotation)+","+"\"From: "+fromAddress.code+"\");")
+        php.phpcode <| fun () -> codewrite("mb_send_mail("+toAddress.code+","+subject.code+","+body.code+","+("From: "++fromAddress).code+");")
     // /// メール送信
     // static member sendMail(body:exprString,subject:exprString,fromAddress:string,toAddress:PHPdata) =
     //     php.phpcode <| fun () -> codewrite("mb_language(\"ja\");")
@@ -250,8 +271,6 @@ and php =
     /// メール送信
     static member sendMail(body:PHPdata,subject:PHPdata,smtp:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
         let cmd = PHPdata.v "cmd"
-        let ddd = "echo \\\"" ++ body ++ "\\\" | mail -s \\\""
-        let rrr = ddd ++ subject ++ "\\\" -S smtp=smtp://" ++ smtp ++ ":25 -r "
         cmd <== "echo \\\"" ++ body ++ "\\\" | mail -s \\\"" ++ subject ++ "\\\" -S smtp=smtp://" ++ smtp ++ ":25 -r " ++ fromAddress ++ " " ++ toAddress
         php.phpcode <| fun () -> codewrite("exec("+cmd.code+");")
     // /// メール送信
@@ -267,7 +286,7 @@ and php =
     /// Discordへメッセージ送信
     static member sendDiscord(body:PHPdata,webhookURL:PHPdata) =
         let cmd = PHPdata.v "cmd"
-        cmd <== "curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\""++body++"\\\\\\\"}\\\" " ++ webhookURL.code
+        cmd <== "curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\""++body++"\\\\\\\"}\\\" " ++ webhookURL
         php.phpcode <| fun () -> codewrite("exec("+cmd.code+");")
     // /// Discordへメッセージ送信
     // static member sendDiscord(body:string,webhookURL:string) =
@@ -302,42 +321,43 @@ and php =
     static member tb = "\\t"
 
 [<AutoOpen>]
-module num1ForPHP =
+module num0ForPHP =
         
     type num0 with
         member this.phpdata with get() = PHPdata [RNvr this.Expr]
         
-    type num1 with
-        member this.extcode(pr:program) = "<?php echo " + this.code + "; ?>"
-        static member var x = num1(Nt,Var1(A1 0,"$"+x))
+    // type num1 with
+    //     member this.phpdata with get() = PHPdata [RNvr this.Expr]
+        // // member this.phpcode(pr:program) = "<?php echo " + this.code + "; ?>"
+        // static member var x = num1(Nt,Var1(A1 0,"$"+x))
         
-        static member array(arrayname:string) = 
-            let c = num1.var arrayname
-            codewritein ("<?php "+arrayname+" = array(); ?>")
-            c
+        // static member array(arrayname:string) = 
+        //     let c = num1.var arrayname
+        //     codewritein ("<?php "+arrayname+" = array(); ?>")
+        //     c
             
-        static member array(arrayname:string,data:list<string*string>) = 
-            let c = num1.var arrayname
-            codewritein ("<?php "+arrayname+" = array(); ?>")
-            codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
-            c
+        // static member array(arrayname:string,data:list<string*string>) = 
+        //     let c = num1.var arrayname
+        //     codewritein ("<?php "+arrayname+" = array(); ?>")
+        //     codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
+        //     c
 
-        static member array(arrayname:string,data:list<string*PHPdata>) = 
-            let c = PHPdata arrayname
-            codewritein ("<?php "+arrayname+" = array(); ?>")
-            codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
-            c
         // static member array(arrayname:string,data:list<string*PHPdata>) = 
-        //     let c = PHPdata.var arrayname
+        //     let c = PHPdata arrayname
         //     codewritein ("<?php "+arrayname+" = array(); ?>")
         //     codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
         //     c
-        member this.push (x:list<PHPdata>) = codewritein ("<?php array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:PHPdata) -> q.code) x) + "); ?>")
-        member this.push (x:PHPdata) = this.push [x]
-        member this.push (x:num0) = this.push [PHPdata x]
+        // // static member array(arrayname:string,data:list<string*PHPdata>) = 
+        // //     let c = PHPdata.var arrayname
+        // //     codewritein ("<?php "+arrayname+" = array(); ?>")
+        // //     codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
+        // //     c
+        // member this.push (x:list<PHPdata>) = codewritein ("<?php array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:PHPdata) -> q.code) x) + "); ?>")
+        // member this.push (x:PHPdata) = this.push [x]
+        // member this.push (x:num0) = this.push [PHPdata x]
         
     type html with
-        static member h1 (t:PHPdata) = html.h1 t.code
-        static member h2 (t:PHPdata) = html.h2 t.code
-        static member h3 (t:PHPdata) = html.h3 t.code
-        static member h4 (t:PHPdata) = html.h4 t.code
+        static member h1 (t:PHPdata) = html.h1 t.phpcode
+        static member h2 (t:PHPdata) = html.h2 t.phpcode
+        static member h3 (t:PHPdata) = html.h3 t.phpcode
+        static member h4 (t:PHPdata) = html.h4 t.phpcode

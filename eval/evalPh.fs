@@ -134,7 +134,7 @@ namespace Aqualis
                 |False -> "false"
                 |True -> "true"
                 |Eq(x,y) -> x.evalPh c + " == " + y.evalPh c
-                |NEq(x,y) -> x.evalPh c + " =/ " + y.evalPh c
+                |NEq(x,y) -> x.evalPh c + " != " + y.evalPh c
                 |Greater(x,y) -> x.evalPh c + " > " + y.evalPh c
                 |GreaterEq(x,y) -> x.evalPh c + " >= " + y.evalPh c
                 |Less(x,y) -> x.evalPh c + " < " + y.evalPh c
