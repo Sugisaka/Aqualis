@@ -241,7 +241,7 @@ namespace Aqualis
                             ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
                                 codewritein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
-                                br.if1 (info .=/ 0) <| fun () -> print.w <| "InvMatrix Info: "++info
+                                br.if1 (info .=/ 0) <| fun () -> print.s <| "InvMatrix Info: "++info
                     |C99 -> 
                         ch.ii <| fun (npre,info) ->
                             npre<==mat1.size1
@@ -249,7 +249,7 @@ namespace Aqualis
                                 ipiv.clear()
                                 programList[prIndex].elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
                                 codewritein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
-                                br.if1 (info .=/ 0) <| fun () -> print.w <| "InvMatrix Info: "++info
+                                br.if1 (info .=/ 0) <| fun () -> print.s <| "InvMatrix Info: "++info
                     |LaTeX -> 
                         codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                     |HTML -> 
@@ -292,7 +292,7 @@ namespace Aqualis
                                         rwork.code + ","   + 
                                         iwork.code + ", "  + 
                                         info.code + ")")
-                                    br.if1 (info .=/ 0) <| fun () -> print.w <| "rank Info: "++info
+                                    br.if1 (info .=/ 0) <| fun () -> print.s <| "rank Info: "++info
                         |C99 -> 
                             ch.iii <| fun (npre,info,lwork) ->
                                 npre<==mat.size1
@@ -319,7 +319,7 @@ namespace Aqualis
                                         "*" + rwork.code + ", " +
                                         "*" + iwork.code + ", " +
                                         "&" + info.code + ");")
-                                    br.if1 (info .=/ 0) <| fun () -> print.w <| "rank Info: "++info
+                                    br.if1 (info .=/ 0) <| fun () -> print.s <| "rank Info: "++info
                         |LaTeX -> 
                             codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                         |HTML -> 
@@ -356,7 +356,7 @@ namespace Aqualis
                                         rwork.code + ","   + 
                                         iwork.code + ", "  + 
                                         info.code + ")")
-                                    br.if1 (info .=/ 0) <| fun () -> print.w <| "rank Info: "++info
+                                    br.if1 (info .=/ 0) <| fun () -> print.s <| "rank Info: "++info
                         |C99 -> 
                             ch.iii <| fun (npre,info,lwork) ->
                                 npre<==mat.size1
@@ -383,7 +383,7 @@ namespace Aqualis
                                         "*" + rwork.code + ", " +
                                         "*" + iwork.code + ", " +
                                         "&" + info.code + ");")
-                                    br.if1 (info .=/ 0) <| fun () -> print.w <| "rank Info: "++info
+                                    br.if1 (info .=/ 0) <| fun () -> print.s <| "rank Info: "++info
                         |LaTeX -> 
                             codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                         |HTML -> 
@@ -483,7 +483,7 @@ namespace Aqualis
                                                     lwork.code + ", "  + 
                                                     rwork.code + ", "  + 
                                                     info.code + ")")
-                                                br.if1 (info .=/ 0) <| fun () -> print.w <| "Eigenvalue Info: "++info
+                                                br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                     |C99 -> 
                         ch.iii <| fun (npre,ldvldummy,info) ->
                                 npre<==mat1.size1
@@ -514,7 +514,7 @@ namespace Aqualis
                                                     "&" + lwork.code + ", " + 
                                                     rwork.code + ", " +
                                                     "&" + info.code + ");")
-                                                br.if1 (info .=/ 0) <| fun () -> print.w <| "Eigenvalue Info: "++info
+                                                br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                     |LaTeX -> 
                         codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
                     |HTML -> 
@@ -550,7 +550,7 @@ namespace Aqualis
                                                     work.code + ", "  + 
                                                     lwork.code + ", " + 
                                                     info.code + ")")
-                                                br.if1 (info .=/ 0) <| fun () -> print.w <| "Eigenvalue Info: "++info
+                                                br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                                                 eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
                     |C99 -> 
                         ch.d1 eigenvectors.size1 <| fun eigenvalues_re ->
@@ -583,7 +583,7 @@ namespace Aqualis
                                                     work.code + ", " +
                                                     "&" + lwork.code + ", " +
                                                     "&" + info.code + ");")
-                                                br.if1 (info .=/ 0) <| fun () -> print.w <| "Eigenvalue Info: "++info
+                                                br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                                                 eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
                     |LaTeX -> 
                         codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
@@ -675,7 +675,7 @@ namespace Aqualis
                                             codewritein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
                                             codewritein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
                                         |_ -> ()
-                                        br.if1 (info .=/ 0) <| fun () -> print.w <| "Eigenvalue Info: "++info
+                                        br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
             tbinder.d mat1 <| fun () ->
                 codestr.section "非対称複素行列の一般化固有値" <| fun () ->
                     programList[prIndex].olist.add "-llapack"
@@ -713,7 +713,7 @@ namespace Aqualis
                                             work.code + ", "  + 
                                             lwork.code + ", "  + 
                                             info.code + ")")
-                                        br.if1 (info .=/ 0) <| fun () -> print.w <| "Eigenvalue Info: "++info
+                                        br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                                         iter.num eigenvalues1.size1 <| fun i ->
                                             eigenvalues1[i] <== eigenvalues1re[i] + asm.uj + eigenvalues1im[i]
                     |C99 -> 
@@ -752,7 +752,7 @@ namespace Aqualis
                                             work.code + ", " +
                                             "&" + lwork.code + ", " +
                                             "&" + info.code + ");")
-                                        br.if1 (info .=/ 0) <| fun () -> print.w <| "Eigenvalue Info: "++info
+                                        br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                                         iter.num eigenvalues1.size1 <| fun i ->
                                             eigenvalues1[i] <== eigenvalues1re[i] + asm.uj + eigenvalues1im[i]
                     |LaTeX -> 
@@ -1231,6 +1231,6 @@ namespace Aqualis
                 ch.z2 mat.size1 mat.size2 <| fun vt ->
                     La.svd mat (u,s,vt)
                     !"0に近いほど正確な解"
-                    print.w <| "solve_homogeneq"++s[mat.size1]
+                    print.s <| "solve_homogeneq"++s[mat.size1]
                     iter.num mat.size1 <| fun i ->
                         f[i] <== asm.conj(vt[mat.size1,i])

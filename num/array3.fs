@@ -113,11 +113,11 @@ namespace Aqualis
                     br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () -> 
                         print.t ("ERROR"+error.ID+" array "+name+" is not allocated")
                     br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                        print.w <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                        print.s <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                     br.if1 (Or [j .< _0; this.size2 .<= j]) <| fun () ->
-                        print.w <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
+                        print.s <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
                     br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
-                        print.w <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
+                        print.s <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
                     comment "****************************************************"
                 |_ -> ()
             match x,language() with

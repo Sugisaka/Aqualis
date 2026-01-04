@@ -62,8 +62,8 @@ group.section 2 step <| fun () ->
                     print.ccc x y z
                     print.t <| "aaa"
                     print.n [x; y; z]
-                    print.w <| x++y++z
-                    print.w <| x++"aaa"++y++"bbb"++z
+                    print.s <| x++y++z
+                    print.s <| x++"aaa"++y++"bbb"++z
                     
         io.fileOutput "test.dat" <| fun wr ->
             ch.z <| fun z ->

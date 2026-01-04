@@ -16,45 +16,27 @@ namespace Aqualis
             |Fortran ->
                 ch.f <| fun fp ->
                     let f = 
-                        match filename with
-                        |Str _ ->
-                            "A"
-                        |Nvr x when x.etype = It 4 ->
-                            "I" + programList[prIndex].numFormat.iFormat.ToString()
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s -> 
-                                match s with
-                                |Str _ -> 
-                                    "A"
-                                |Nvr x when x.etype = It 4 -> 
-                                    "I" + programList[prIndex].numFormat.iFormat.ToString()
-                                |_ -> 
-                                    "")
-                            |> fun s -> String.Join(",",s)
+                        filename.data 
+                        |> List.map (fun s -> 
+                            match s with
+                            |RStr _ -> 
+                                "A"
+                            |RNvr x when x.etype = It 4 -> 
+                                "I" + programList[prIndex].numFormat.iFormat.ToString()
+                            |_ -> 
+                                "")
+                        |> fun s -> String.Join(",",s)
                     let s = 
-                        match filename with
-                        |Str t ->
-                            "\""+t+"\""
-                        |Nvr x when x.etype = It 4 ->
-                            x.eval (programList[prIndex])
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s -> 
-                                match s with 
-                                |Str t -> 
-                                    "\""+t+"\""
-                                |Nvr x when x.etype = It 4 -> 
-                                    x.eval (programList[prIndex])
-                                |_ -> 
-                                    "")
-                            |> fun s -> String.Join(",",s)
+                        filename.data 
+                        |> List.map (fun s -> 
+                            match s with 
+                            |RStr t -> 
+                                "\""+t+"\""
+                            |RNvr x when x.etype = It 4 -> 
+                                x.eval (programList[prIndex])
+                            |_ -> 
+                                "")
+                        |> fun s -> String.Join(",",s)
                     ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
@@ -74,47 +56,29 @@ namespace Aqualis
             |C99 ->
                 ch.f <| fun fp ->
                     let f = 
-                        match filename with
-                        |Str t ->
-                            t
-                        |Nvr x when x.etype = It 4 ->
-                            "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s -> 
-                                match s with
-                                |Str t ->
-                                    t
-                                |Nvr x when x.etype = It 4 ->
-                                    "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
-                                |_ ->
-                                    "")
-                            |> List.filter (fun s -> s<>"")
-                            |> fun s -> String.Join("",s)
+                        filename.data 
+                        |> List.map (fun s -> 
+                            match s with
+                            |RStr t ->
+                                t
+                            |RNvr x when x.etype = It 4 ->
+                                "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
+                            |_ ->
+                                "")
+                        |> List.filter (fun s -> s<>"")
+                        |> fun s -> String.Join("",s)
                     let s = 
-                        match filename with
-                        |Str t ->
-                            ""
-                        |Nvr x when x.etype = It 4 ->
-                            x.eval (programList[prIndex])
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s -> 
-                                match s with
-                                |Str _ ->
-                                    ""
-                                |Nvr x when x.etype = It 4 ->
-                                    x.eval (programList[prIndex])
-                                |_ ->
-                                    "")
-                            |> List.filter (fun s -> s<>"")
-                            |> fun s -> String.Join(",",s)
+                        filename.data
+                        |> List.map (fun s -> 
+                            match s with
+                            |RStr _ ->
+                                ""
+                            |RNvr x when x.etype = It 4 ->
+                                x.eval (programList[prIndex])
+                            |_ ->
+                                "")
+                        |> List.filter (fun s -> s<>"")
+                        |> fun s -> String.Join(",",s)
                     ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
@@ -129,26 +93,17 @@ namespace Aqualis
             |LaTeX ->
                 ch.f <| fun fp ->
                     let s = 
-                        match filename with
-                        |Str t ->
-                            "\""+t+"\""
-                        |Nvr x when x.etype = It 4 ->
-                            x.eval (programList[prIndex])
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s -> 
-                                match s with
-                                |Str t ->
-                                    "\""+t+"\""
-                                |Nvr x when x.etype = It 4 ->
-                                    x.eval (programList[prIndex])
-                                |_ ->
-                                    "")
-                            |> List.filter (fun s -> s<>"")
-                            |> fun s -> String.Join("+",s)
+                        filename.data 
+                        |> List.map (fun s -> 
+                            match s with
+                            |RStr t ->
+                                "\""+t+"\""
+                            |RNvr x when x.etype = It 4 ->
+                                x.eval (programList[prIndex])
+                            |_ ->
+                                "")
+                        |> List.filter (fun s -> s<>"")
+                        |> fun s -> String.Join("+",s)
                     ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         if isbinary then
@@ -160,26 +115,17 @@ namespace Aqualis
             |HTML ->
                 ch.f <| fun fp ->
                     let s = 
-                        match filename with
-                        |Str t ->
-                            "\""+t+"\""
-                        |Nvr x when x.etype = It 4 ->
-                            x.eval (programList[prIndex])
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s -> 
-                                match s with
-                                |Str t ->
-                                    "\""+t+"\""
-                                |Nvr x when x.etype = It 4 ->
-                                    x.eval (programList[prIndex])
-                                |_ ->
-                                    "")
-                            |> List.filter (fun s -> s<>"")
-                            |> fun s -> String.Join("+",s)
+                        filename.data
+                        |> List.map (fun s -> 
+                            match s with
+                            |RStr t ->
+                                "\""+t+"\""
+                            |RNvr x when x.etype = It 4 ->
+                                x.eval (programList[prIndex])
+                            |_ ->
+                                "")
+                        |> List.filter (fun s -> s<>"")
+                        |> fun s -> String.Join("+",s)
                     ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         if isbinary then
@@ -191,47 +137,29 @@ namespace Aqualis
             |Python ->
                 ch.f <| fun fp ->
                     let f = 
-                        match filename with
-                        |Str t ->
-                            t
-                        |Nvr x when x.etype = It 4 ->
-                            "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s -> 
-                                match s with
-                                |Str t ->
-                                    t
-                                |Nvr x when x.etype = It 4 ->
-                                    "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
-                                |_ ->
-                                    "")
-                            |> List.filter (fun s -> s<>"")
-                            |> fun s -> String.Join("",s)
+                        filename.data
+                        |> List.map (fun s -> 
+                            match s with
+                            |RStr t ->
+                                t
+                            |RNvr x when x.etype = It 4 ->
+                                "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
+                            |_ ->
+                                "")
+                        |> List.filter (fun s -> s<>"")
+                        |> fun s -> String.Join("",s)
                     let s = 
-                        match filename with
-                        |Str t ->
-                            ""
-                        |Nvr x when x.etype = It 4 ->
-                            x.eval (programList[prIndex])
-                        |Nvr _ ->
-                            printfn "ファイル名に指定できない型の変数が入っています"
-                            ""
-                        |NSL x -> 
-                            x 
-                            |> List.map (fun s ->
-                                match s with
-                                |Str _ ->
-                                    ""
-                                |Nvr x when x.etype = It 4 ->
-                                    x.eval (programList[prIndex])
-                                |_ ->
-                                    "")
-                            |> List.filter (fun s -> s<>"")
-                            |> fun s -> String.Join(",",s)
+                        filename.data
+                        |> List.map (fun s ->
+                            match s with
+                            |RStr _ ->
+                                ""
+                            |RNvr x when x.etype = It 4 ->
+                                x.eval (programList[prIndex])
+                            |_ ->
+                                "")
+                        |> List.filter (fun s -> s<>"")
+                        |> fun s -> String.Join(",",s)
                     ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
@@ -419,7 +347,6 @@ namespace Aqualis
             |_ -> ()
             
         static member private Write2 (fp:string) (lst:exprString) =
-            let lst = lst.reduce
             match programList[prIndex].language with
             |Fortran ->
                 let tab = var.ip0_noWarning("tab",2313)
@@ -431,7 +358,7 @@ namespace Aqualis
                     // "E"+a.ToString()+"."+b.ToString()+"e3"
                     "F0.3"
                 let format = 
-                    lst
+                    lst.data
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
                             match b[n],b[n].etype with
@@ -448,7 +375,7 @@ namespace Aqualis
                         ])
                     |> fun s -> String.Join(",",s)
                 let code =
-                    lst
+                    lst.data
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
                             match b[n],b[n].etype with 
@@ -470,7 +397,7 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
-                    lst
+                    lst.data
                     |> (fun b -> 
                         [for n in 0..(b.Length-1) do
                             match b[n],b[n].etype with
@@ -487,7 +414,7 @@ namespace Aqualis
                         ])
                     |> fun s -> String.Join("",s)
                 let code =
-                    [for b in lst do
+                    [for b in lst.data do
                         match b.etype,b with 
                         |It _,RNvr(Int v) ->
                             yield programList[prIndex].numFormat.ItoS v
@@ -510,7 +437,7 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
-                    lst
+                    lst.data
                     |> List.map (fun b -> 
                         match b,b.etype with
                           |_,It _ -> int0string_format_L
@@ -520,7 +447,7 @@ namespace Aqualis
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 let code =
-                    lst
+                    lst.data
                     |> List.map (fun b ->
                         match b,b.etype with 
                           |RNvr(Int v),It _ -> programList[prIndex].numFormat.ItoS v
@@ -539,7 +466,7 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
-                    lst
+                    lst.data
                     |> List.map (fun b -> 
                         match b,b.etype with
                           |_,It _ -> int0string_format_H
@@ -549,7 +476,7 @@ namespace Aqualis
                           |_ -> "")
                     |> fun s -> String.Join("",s)
                 let code =
-                    lst
+                    lst.data
                     |> List.map (fun b ->
                         match b,b.etype with 
                           |RNvr(Int v),It _ -> programList[prIndex].numFormat.ItoS v
@@ -568,7 +495,7 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
-                    lst
+                    lst.data
                     |> (fun b -> 
                         [for n in 0..(b.Length-1) do
                             match b.[n],b.[n].etype with
@@ -590,7 +517,7 @@ namespace Aqualis
                           ])
                     |> fun s -> String.Join("",s)
                 let code =
-                    [for b in lst do
+                    [for b in lst.data do
                         match b.etype,b with 
                         |It _,RNvr(Int v) -> yield programList[prIndex].numFormat.ItoS v
                         |Dt,RNvr(Int v) -> yield programList[prIndex].numFormat.DtoS(double v)
@@ -971,10 +898,10 @@ namespace Aqualis
                 code(io.Write2 fp)
                 
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
-        static member fileOutput (filename:string) = fun code -> io.fileOutput (Str filename) code
+        static member fileOutput (filename:string) = fun code -> io.fileOutput (st filename) code
         
         ///<summary>ファイル出力（コード出力）</summary>
-        static member codeOutput (filename:string) = fun code -> io.codeOutput (Str filename) code
+        static member codeOutput (filename:string) = fun code -> io.codeOutput (st filename) code
         
         ///<summary>バイナリファイル出力</summary>
         static member binfileOutput (filename:exprString) = fun code ->
@@ -982,7 +909,7 @@ namespace Aqualis
                 code(io.Write_bin fp)
 
         ///<summary>バイナリファイル出力</summary>
-        static member binfileOutput (filename:string) = fun code -> io.binfileOutput (Str filename) code
+        static member binfileOutput (filename:string) = fun code -> io.binfileOutput (st filename) code
 
         ///<summary>ファイル読み込み</summary>
         static member fileInput (filename:exprString) = fun code ->
@@ -991,7 +918,7 @@ namespace Aqualis
                     code(io.Read fp iostat)
                     
         ///<summary>ファイル読み込み</summary>
-        static member fileInput (filename:string) = fun code -> io.fileInput (Str filename) code
+        static member fileInput (filename:string) = fun code -> io.fileInput (st filename) code
 
         ///<summary>バイナリファイルの読み込み</summary>
         static member binfileInput (filename:exprString) = fun code ->
@@ -1000,7 +927,7 @@ namespace Aqualis
                     code(io.Read_bin fp iostat)
                     
         ///<summary>バイナリファイルの読み込み</summary>
-        static member binfileInput (filename:string) = fun code -> io.binfileInput (Str filename) code
+        static member binfileInput (filename:string) = fun code -> io.binfileInput (st filename) code
                 
         ///<summary>テキストファイルの行数をカウント</summary>
         static member file_LineCount (counter:num0) (filename:exprString) varlist =
@@ -1049,10 +976,10 @@ namespace Aqualis
                 w [f]
                 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:num3,filename:string) = io.save_text(f,Str filename)
-        static member save_text (f:num2,filename:string) = io.save_text(f,Str filename)
-        static member save_text (f:num1,filename:string) = io.save_text(f,Str filename)
-        static member save_text (f:num0,filename:string) = io.save_text(f,Str filename)
+        static member save_text (f:num3,filename:string) = io.save_text(f,st filename)
+        static member save_text (f:num2,filename:string) = io.save_text(f,st filename)
+        static member save_text (f:num1,filename:string) = io.save_text(f,st filename)
+        static member save_text (f:num0,filename:string) = io.save_text(f,st filename)
         
         ///<summary>数値をファイルに保存</summary>
         static member save (f:num0,filename:exprString) =
@@ -1155,10 +1082,10 @@ namespace Aqualis
                             |_ ->
                                 w f[i,j,k]
                                 
-        static member save (f:num3,filename:string) = io.save(f,Str filename)
-        static member save (f:num2,filename:string) = io.save(f,Str filename)
-        static member save (f:num1,filename:string) = io.save(f,Str filename)
-        static member save (f:num0,filename:string) = io.save(f,Str filename)
+        static member save (f:num3,filename:string) = io.save(f,st filename)
+        static member save (f:num2,filename:string) = io.save(f,st filename)
+        static member save (f:num1,filename:string) = io.save(f,st filename)
+        static member save (f:num0,filename:string) = io.save(f,st filename)
         
         ///<summary>数値をファイルから読み込み</summary>
         static member load (f:num0,filename:exprString) =
@@ -1385,10 +1312,10 @@ namespace Aqualis
                         |_ -> 
                             print.t "invalid data type"
                             
-        static member load (f:num3,filename:string) = io.load(f,Str filename)
-        static member load (f:num2,filename:string) = io.load(f,Str filename)
-        static member load (f:num1,filename:string) = io.load(f,Str filename)
-        static member load (f:num0,filename:string) = io.load(f,Str filename)
+        static member load (f:num3,filename:string) = io.load(f,st filename)
+        static member load (f:num2,filename:string) = io.load(f,st filename)
+        static member load (f:num1,filename:string) = io.load(f,st filename)
+        static member load (f:num0,filename:string) = io.load(f,st filename)
         
     ///<summary>ファイル入出力（処理スキップ）</summary>
     type dummy_io () =

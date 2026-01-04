@@ -11,20 +11,19 @@ namespace Aqualis
     ///<summary>画面表示</summary>
     type print () =
         ///<summary>変数リストを画面表示</summary>
-        static member s (lst:exprString list)  = 
+        static member s (lst:exprString)  = 
             match programList[prIndex].language with
             |Fortran ->
                 let clist = 
-                    [for q in lst do
+                    [for q in lst.data do
                         match q with
-                        |Str x ->
+                        |RStr x ->
                             yield "\""+x+"\""
-                        |Nvr x when x.etype = Zt ->
+                        |RNvr x when x.etype = Zt ->
                             yield (Re x).eval (programList[prIndex])
                             yield (Im x).eval (programList[prIndex])
-                        |Nvr x ->
-                            yield x.eval (programList[prIndex])
-                        |_ -> () ]
+                        |RNvr x ->
+                            yield x.eval (programList[prIndex]) ]
                 codewritein("print *, " + String.concat "," clist + "\n")
             |C99 ->
                 let int0string_format_C =
@@ -33,58 +32,54 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
-                    lst 
-                    |> List.map( fun (q:exprString) ->
+                    lst.data 
+                    |> List.map( fun (q:reduceExprString) ->
                         match q with
-                        |Str x -> x
-                        |Nvr x when x.etype = It 4 -> int0string_format_C
-                        |Nvr x when x.etype = Dt -> double0string_format_C
-                        |Nvr x when x.etype = Zt -> double0string_format_C + double0string_format_C
+                        |RStr x -> x
+                        |RNvr x when x.etype = It 4 -> int0string_format_C
+                        |RNvr x when x.etype = Dt -> double0string_format_C
+                        |RNvr x when x.etype = Zt -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
                 let code =
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Str _ -> ""
-                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
-                        |Nvr x -> x.eval (programList[prIndex])
-                        |_ -> "")
+                        |RStr _ -> ""
+                        |RNvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |RNvr x -> x.eval (programList[prIndex]))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 codewritein("printf(\""+format+"\\n\","+code+");\n")
             |LaTeX ->
                 let code = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Str x -> x
-                        |Nvr x -> x.eval (programList[prIndex])
-                        |_ -> "")
+                        |RStr x -> x
+                        |RNvr x -> x.eval (programList[prIndex]))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 codewritein("print, " + code + "\n")
             |HTML ->
                 let code = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Str x -> x
-                        |Nvr x -> x.eval (programList[prIndex])
-                        |_ -> "")
+                        |RStr x -> x
+                        |RNvr x -> x.eval (programList[prIndex]))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 codewritein("Print \\("+code+"\\)\n")
                 codewritein "<br/>\n"
             |HTMLSequenceDiagram ->
                 let code = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Str x -> x
-                        |Nvr x -> x.eval (programList[prIndex])
-                        |_ -> "")
+                        |RStr x -> x
+                        |RNvr x -> x.eval (programList[prIndex]))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 codewritein("Print \\("+code+"\\)\n")
@@ -96,22 +91,22 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Str x -> x
-                        |Nvr x when x.etype = It 4 -> int0string_format_C
-                        |Nvr x when x.etype = Dt  -> double0string_format_C
-                        |Nvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |RStr x -> x
+                        |RNvr x when x.etype = It 4 -> int0string_format_C
+                        |RNvr x when x.etype = Dt  -> double0string_format_C
+                        |RNvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
                 let code = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
-                        |Nvr x -> x.eval (programList[prIndex])
+                        |RNvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |RNvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
@@ -123,22 +118,22 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Str x -> x
-                        |Nvr x when x.etype = It 4 -> int0string_format_C
-                        |Nvr x when x.etype = Dt  -> double0string_format_C
-                        |Nvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |RStr x -> x
+                        |RNvr x when x.etype = It 4 -> int0string_format_C
+                        |RNvr x when x.etype = Dt  -> double0string_format_C
+                        |RNvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
                 let code = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
-                        |Nvr x -> x.eval (programList[prIndex])
+                        |RNvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |RNvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
@@ -150,32 +145,32 @@ namespace Aqualis
                     let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Str x -> x
-                        |Nvr x when x.etype = It 4 -> int0string_format_C
-                        |Nvr x when x.etype = Dt  -> double0string_format_C
-                        |Nvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |RStr x -> x
+                        |RNvr x when x.etype = It 4 -> int0string_format_C
+                        |RNvr x when x.etype = Dt  -> double0string_format_C
+                        |RNvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
                 let code = 
-                    lst
-                    |> List.map (fun q ->
+                    lst.data
+                    |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |Nvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
-                        |Nvr x -> x.eval (programList[prIndex])
+                        |RNvr x when x.etype = Zt -> (Re x).eval (programList[prIndex]) + "," + (Im x).eval (programList[prIndex])
+                        |RNvr x -> x.eval (programList[prIndex])
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 codewritein("print(" + code + ");\n")
             |Numeric ->
-                for v in lst do
+                for v in lst.data do
                     match v with
-                    |Nvr (Int x) -> printf "%d " x
-                    |Nvr (Dbl x) -> printf "%e " x
-                    |Nvr (Cpx (re,im)) -> printf "%e %e " re im
+                    |RNvr (Int x) -> printf "%d " x
+                    |RNvr (Dbl x) -> printf "%e " x
+                    |RNvr (Cpx (re,im)) -> printf "%e %e " re im
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
         static member t (str:string) =
@@ -200,8 +195,7 @@ namespace Aqualis
                 codewritein("print(\""+str+"\")\n")
             |Numeric ->
                 printfn "%s" str
-        static member w (ss:exprString) = print.s (match ss with |Str _ |Nvr _ -> [ss] |NSL lst -> lst)
-        static member n (ss:list<num0>) = print.s (ss |> List.map (fun x -> Nvr x.Expr))
+        static member n (ss:list<num0>) = print.s <| exprString (ss |> List.map (fun x -> RNvr x.Expr))
         ///<summary>1個の項目を画面表示</summary>
         static member c (ss:num0) = print.n [ss]
         ///<summary>2個の項目を画面表示</summary>

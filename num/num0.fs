@@ -31,52 +31,7 @@ namespace Aqualis
             |RStr t -> Structure "string"
             |RNvr t -> t.etype
             
-    ///<summary>数値と文字列の結合</summary>
-    type exprString = 
-        |Str of string
-        |Nvr of expr
-        |NSL of list<exprString>
-        
-        static member ( ++ ) (x:exprString,y:string) = 
-            match x with
-            |Str x -> NSL[Str x; Str y]
-            |Nvr x -> NSL[Nvr x; Str y]
-            |NSL x -> NSL(x@[Str y])
-            
-        static member ( ++ ) (x:string,y:exprString) = 
-            match y with
-            |Str y -> NSL[Str x; Str y]
-            |Nvr y -> NSL[Str x; Nvr y]
-            |NSL y -> NSL([Str x]@y)
-            
-        static member ( ++ ) (x:exprString,y:exprString) = 
-            match x,y with
-            |NSL x,NSL y -> NSL(x@y)
-            |NSL x,y -> NSL(x@[y])
-            |x,NSL y -> NSL([x]@y)
-            |_ -> NSL[x;y]
-            
-        member this.reduce =
-            let rec rd (r:list<exprString>) =
-                r
-                |> List.collect (fun s ->
-                    match s with
-                    | Str t -> [RStr t]
-                    | Nvr t -> [RNvr t]
-                    | NSL y -> rd y
-                )
-            rd [this]
-            
-        member this.toString(c:string,op:ExprConcatOption) =
-            this.reduce
-            |> List.map (function
-                |RStr x ->
-                    match op with
-                    |Direct -> x
-                    |StrQuotation -> "\""+x+"\""
-                    |CodeStrQuotation -> "\\\""+x+"\\\""
-                |RNvr x -> x.eval (programList[prIndex]))
-            |> fun s -> String.Join(c,s)
+
             
     ///<summary>変数（数値データ）クラス</summary>
     type num0(x:expr) =
@@ -97,26 +52,11 @@ namespace Aqualis
             |It a,It b -> It (if a>b then a else b)
             |_ -> Nt
             
-        static member ( ++ ) (x:string,y:num0) = NSL[Str x; Nvr y.Expr]
-        static member ( ++ ) (x:num0,y:string) = NSL[Nvr x.Expr; Str y]
-        static member ( ++ ) (x:num0,y:num0) = NSL[Nvr x.Expr; Nvr y.Expr]
-        static member ( ++ ) (x:exprString,y:num0) = 
-            match x with
-            |Str x -> NSL[Str x; Nvr y.Expr]
-            |Nvr x -> NSL[Nvr x; Nvr y.Expr]
-            |NSL x -> NSL(x@[Nvr y.Expr])
+        static member ( ++ ) (x:string,y:num0) = exprString x ++ exprString y
+        static member ( ++ ) (x:num0,y:string) = exprString x ++ exprString y
+        static member ( ++ ) (x:num0,y:num0) = exprString x ++ exprString y
             
-        static member ( ++ ) (x:string,y:exprString) = 
-            match y with
-            |Str y -> NSL[Str x; Str y]
-            |Nvr y -> NSL[Str x; Nvr y]
-            |NSL y -> NSL([Str x]@y)
-            
-        static member ( ++ ) (x:num0,y:exprString) = 
-            match y with
-            |Str y -> NSL[Nvr x.Expr; Str y]
-            |Nvr y -> NSL[Nvr x.Expr; Nvr y]
-            |NSL y -> NSL([Nvr x.Expr]@y)
+        static member ( ++ ) (x:num0,y:exprString) = exprString x ++ y
         
         ///<summary>負号</summary>
         static member ( ~- ) (x:num0) = num0(Inv(x.etype,x.Expr))
@@ -276,7 +216,7 @@ namespace Aqualis
                 expr.subst x.Expr (Var(Nt,y.toString(" . ",StrQuotation),NaN)) (programList[prIndex])
             |_ ->
                 printfn "この言語では文字列を含む値を代入できません"
-        static member (<==) (x:num0,y:string) = x <== Str y
+        static member (<==) (x:num0,y:string) = x <== exprString y
         member this.clear() = this <== 0
         
         ///<summary>等式(TeX、HTMLのみ)</summary>
@@ -288,3 +228,30 @@ namespace Aqualis
         static member (=|=) (x:num0,y:num0) = expr.equivAlign x.Expr y.Expr (programList[prIndex])
         static member (=|=) (x:num0,y:int) = x =|= num0(Int y)
         static member (=|=) (x:num0,y:double) = x =|= num0(Dbl y)
+        
+    ///<summary>数値と文字列の結合</summary>
+    and exprString(x:list<reduceExprString>) = 
+        new(x:string) = exprString [RStr x]
+        new(x:num0) = exprString [RNvr x.Expr]
+        
+        member _.data with get() = x
+        
+        member this.toString(c:string,op:ExprConcatOption) =
+            x
+            |> List.map (function
+                |RStr x ->
+                    match op with
+                    |Direct -> x
+                    |StrQuotation -> "\""+x+"\""
+                    |CodeStrQuotation -> "\\\""+x+"\\\""
+                |RNvr x -> x.eval (programList[prIndex]))
+            |> fun s -> String.Join(c,s)
+        static member (++) (a:exprString,b:exprString) : exprString = exprString(a.data@b.data)
+        static member (++) (a:string,b:exprString) = exprString a ++ b
+        static member (++) (a:exprString,b:string) = a ++ exprString b
+        static member (++) (a:exprString,b:num0) = a ++ exprString b
+        
+    [<AutoOpen>]
+    module strExpr =
+        let st (x:string) = exprString x
+        let nv (x:num0) = exprString x
