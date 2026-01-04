@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
 
 type optimization() =
@@ -47,7 +53,6 @@ type optimization() =
                         //xb: 新規計算
                         xb.foreach <| fun i -> xb.[i] <== xa.[i] + (x1.[i]-xa.[i])*(1.0+r)
                         f fb xb
-                        //print.s [!."A"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
                     b.IF (And [f1.>f2; fa.>f2;]) <| fun () ->
                         counter.inc()
                         xa <== x1
@@ -58,7 +63,6 @@ type optimization() =
                         //x2: 新規計算
                         x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
                         f f2 x2
-                        //print.s [!."B"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
                     b.IF (Or [And [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
                         counter.inc()
                         //xa: そのまま
@@ -69,7 +73,6 @@ type optimization() =
                         //x1: 新規計算
                         x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
                         f f1 x1
-                        //print.s [!."C"; counter; (xa.[1]-x0_.[1])/df.[1]; (xb.[1]-x0_.[1])/df.[1]; !."|"; fa; f1; f2; fb]
                     b.EL <| fun () ->
                         print.t "error: findmin"
             xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])

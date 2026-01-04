@@ -1,11 +1,11 @@
 ﻿// 
-// Copyright (c) 2025 Jun-ichiro Sugisaka
+// Copyright (c) 2026 Jun-ichiro Sugisaka
 // 
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-namespace gengraphics
+// 
+namespace Aqualis
 
-open Aqualis
 open System
 open System.IO
 open System.Text
@@ -426,12 +426,17 @@ type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
         let rec write (x:exprString) =
             match x with
             |Str s -> wr.Write s
-            |Nvr(Int s) -> wr.Write(s.ToString())
-            |Nvr(Dbl s) -> wr.Write(s.ToString "0.000")
-            |Nvr s -> printfn "出力できない値です：%s" <| s.ToString()
+            |Nvr s -> 
+                let p = s.simp
+                match p with
+                |Inv(_,Int s) -> wr.Write((-s).ToString())
+                |Inv(_,Dbl s) -> wr.Write((-s).ToString "0.000")
+                |Int s -> wr.Write(s.ToString())
+                |Dbl s -> wr.Write(s.ToString "0.000")
+                |_ -> printfn "出力できない値です：%s" <| p.ToString()
             |NSL lst -> for x in lst do write x
-            wr.Write "\n"
         write x
+        wr.Write "\n"
     member internal this.header code = gensvg.header (cvx,cvy) wr this code
     /// <summary>
     /// レイヤーを追加
@@ -1018,7 +1023,7 @@ type svgfile =
     /// SVGファイルを作成
     /// </summary>
     /// <param name="dir">出力先ディレクトリ</param>
-    static member make (dir:string) = fun filename (cvx,cvy) (scale:double) code ->
+    static member make (dir:string,filename:string) = fun (cvx,cvy) (scale:double) code ->
         let wr = new StreamWriter(dir+"\\"+filename,false,Encoding.Default)
         let sv = svgfilemaker(cvx,cvy,wr,scale)
         sv.header <| fun sv ->
@@ -1030,6 +1035,16 @@ type svgfile =
     /// </summary>
     /// <param name="filename">ファイル名</param>
     static member make (filename:exprString) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
+        io.codeOutput filename <| fun wr ->
+            let sv = svgfilemaker_aq(cvx,cvy,wr,scale)
+            sv.header <| fun sv ->
+                code sv
+
+    /// <summary>
+    /// SVGファイルを作成
+    /// </summary>
+    /// <param name="filename">ファイル名</param>
+    static member make (filename:string) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
         io.codeOutput filename <| fun wr ->
             let sv = svgfilemaker_aq(cvx,cvy,wr,scale)
             sv.header <| fun sv ->

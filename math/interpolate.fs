@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
     
     ///<summary>データ補間</summary>
@@ -111,9 +117,6 @@ namespace Aqualis
                         f.[3*N-3-1,a(N-1)-1] <== 6*dx
                         f.[3*N-3-1,b(N-1)-1] <== 2
                         g.[3*N-3-1] <== 0
-                        
-                    //io.array f [!."f.dat"]
-                    //io.array g [!."g.dat"]
                     La.solve_simuleq(f,g)
                     
             /// <summary>

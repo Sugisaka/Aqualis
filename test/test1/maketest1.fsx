@@ -3,12 +3,11 @@
 open System
 open System.IO
 
-let r = Random 5562
+let r = Random 8201
 let wr = new StreamWriter(__SOURCE_DIRECTORY__ + @"\test1.fsx")
 
 wr.WriteLine "//#############################################################################"
-wr.WriteLine "// Aqualisテスト"
-wr.WriteLine "// 実行後removeNaNを実行し非数値数式をコメントアウト"
+wr.WriteLine "// Aqualis数式処理テスト"
 wr.WriteLine "let projectname = \"test1\""
 wr.WriteLine "let version = \"1.0.0\""
 wr.WriteLine "//#############################################################################"

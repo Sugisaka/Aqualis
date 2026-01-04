@@ -1,5 +1,5 @@
 //#############################################################################
-// project title
+// プレゼンテーションHTMLテストB
 let projectname = "test7B"
 let version = "1.0.0"
 //#############################################################################
@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-freeCanvas outputdir "sampleB" <| fun cv ->
+freeCanvas  HTML outputdir projectname <| fun cv ->
     //ページ左上角
     let p0 = position.Origin
     //ソースコードボックス1段目
@@ -45,22 +45,22 @@ freeCanvas outputdir "sampleB" <| fun cv ->
     let grid_y2c = grid_y2-gap1
     
     //見出しテキスト
-    cv.text 
+    html.textA 
         <| Style[font.size 14; font.color "black"; font.weight "bold"]
         <| p0
         <| "見出し1"
     //F#コードキャプション
-    cv.text 
+    html.textB 
         <| Style[font.size 12; font.color "black"; font.weight "normal"]
         <| p0.shift(grid_x1,grid_y1c)
         <| "ソースコード"
     //Cコード(1)キャプション
-    cv.text 
+    html.textB
         <| Style[font.size 12; font.color "black"; font.weight "normal"]
         <| p0.shift(grid_x1,grid_y2c)
         <| "ソースコード"
     //F#コード
-    let a1f = cv.blockTextcode style_codeFS
+    let a1f = html.blockTextcode style_codeFS
             <| p0.shift(grid_x1,grid_y1)
             <| (codeBoxWidth,codeBoxHeight)
             <| ["let f x = x + 1"
@@ -72,12 +72,12 @@ freeCanvas outputdir "sampleB" <| fun cv ->
                 "for i in c do"
                 "&nbsp;&nbsp;&nbsp;&nbsp;printfn \"%d\" i"]
     //F#コードラベル
-    let _ = cv.blockText style_labelFS
+    let _ = html.blockText style_labelFS
             <| p0.shift(grid_x1+codeBoxWidth-labelWidth,grid_y1)
             <| (labelWidth,labelHeight)
             <| ["F#"]
     //Cコード(1)
-    let a1c = cv.blockTextcode style_codeC
+    let a1c = html.blockTextcode style_codeC
             <| p0.shift(grid_x2,grid_y1)
             <| (codeBoxWidth,codeBoxHeight)
             <| ["#include<stdio.h>"
@@ -88,12 +88,12 @@ freeCanvas outputdir "sampleB" <| fun cv ->
                 "&nbsp;return 0;"
                 "}"]
     //Cコード(1)ラベル
-    let _ = cv.blockText style_labelC
+    let _ = html.blockText style_labelC
             <| p0.shift(grid_x2+codeBoxWidth-labelWidth,grid_y1)
             <| (labelWidth,labelHeight)
             <| ["C言語"]
     //Cコード(2)
-    let a1r = cv.blockTextcode style_codeC
+    let a1r = html.blockTextcode style_codeC
             <| p0.shift(grid_x1,grid_y2)
             <| (codeBoxWidth,codeBoxHeight)
             <| ["#include<stdio.h>"
@@ -104,7 +104,7 @@ freeCanvas outputdir "sampleB" <| fun cv ->
                 "&nbsp;return 0;"
                 "}"]
     //Cコード(2)ラベル
-    let _ = cv.blockText style_labelC
+    let _ = html.blockText style_labelC
             <| p0.shift(grid_x1+codeBoxWidth-labelWidth,grid_y2)
             <| (labelWidth,labelHeight)
             <| ["C言語"]

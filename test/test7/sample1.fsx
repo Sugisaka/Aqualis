@@ -1,5 +1,5 @@
 //#############################################################################
-// project title
+// プレゼンテーションHTMLテストA
 let projectname = "test7A"
 let version = "1.0.0"
 //#############################################################################
@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-freePage outputdir projectname <| fun () ->
+freePage HTML outputdir projectname <| fun () ->
     let styleh1 =
         Style [
             {Key = "color"; Value="#ffffff";}

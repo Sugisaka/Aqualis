@@ -1,9 +1,10 @@
 // 
-// Copyright (c) 2025 Jun-ichiro Sugisaka
+// Copyright (c) 2026 Jun-ichiro Sugisaka
 // 
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-namespace gengraphics
+// 
+namespace Aqualis
 
 open System
 
@@ -333,7 +334,7 @@ module graph =
     
     /// 指定したレイアウトでグラフ作成
     let make (L:Layout) (outputdir:string) filename (nX:int,nY:int) code =
-        gengraphics.svgfile.make outputdir filename (L.sizeX,L.sizeY) 1.0 <| fun sv ->
+        svgfile.make (outputdir,filename) (L.sizeX,L.sizeY) 1.0 <| fun sv ->
             //グラフの描画領域
             let sx = (L.sizeX-double(nX-1)*L.dX-L.marginXl-L.marginXr)/double nX
             let sy = (L.sizeY-double(nY-1)*L.dY-L.marginYb-L.marginYt)/double nY

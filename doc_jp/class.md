@@ -29,7 +29,7 @@ type classAAA(sname_,name) =
     /// <summary>このクラスのインスタンスを別クラスのフィールドとする場合は、このメソッドを必ず実装</summary>
     static member str_mem(psname, vname, name, size1) =
         str.addmember(psname, (Structure classAAA.sname, size1, name))
-        classAAA(classAAA.sname, structure.mem(vname, name))
+        classAAA(classAAA.sname, str.mem(vname, name))
     /// <summary>このクラスのインスタンスを非インライン関数の引数にする場合は、このメソッドを必ず実装</summary>
     member __.farg code =
         fn.addarg (Structure classAAA.sname,A0,name) <| fun (t,n) -> code(classAAA(classAAA.sname,n))
@@ -54,7 +54,7 @@ type classAAA_1(sname_, name, size1) =
     /// <summary>このクラスのインスタンスを別クラスのフィールドとする場合は、このメソッドを必ず実装</summary>
     static member str_mem(psname, vname, name, size1) =
         str.addmember(psname, (Structure classAAA.sname, size1, name))
-        classAAA_1(classAAA.sname,structure.mem(vname,name), size1)
+        classAAA_1(classAAA.sname,str.mem(vname,name), size1)
     /// <summary>このクラスのインスタンスを非インライン関数の引数にする場合は、このメソッドを必ず実装)</summary>
     member __.farg code = 
         fn.addarg (classAAA.sname, size1, name) <| fun (v,n) -> code(classAAA_1(classAAA.sname, n, v))

@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
     
     ///<summary>関数定義の引数</summary>

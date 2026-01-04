@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
     
     [<AutoOpen>]
@@ -188,31 +194,19 @@ namespace Aqualis
                     |_,(Add _|Sub _|Mul _|Div _) -> x.evalJ c + "/(" + y.evalJ c + ")"
                     |_ -> x.evalJ c + "/" + y.evalJ c
                 |Mod(_,x,y) -> x.evalJ c + "%" + y.evalJ c
-                |Pow(Zt,x,y) -> "cpow(" + x.evalJ c + "," + y.evalJ c + ")"
-                |Pow(_,x,y) -> "pow(" + x.evalJ c + "," + y.evalJ c + ")"
-                |Exp(Zt,x) -> "cexp(" + x.evalJ c + ")"
-                |Exp(_,x) -> "exp(" + x.evalJ c + ")"
-                |Sin(Zt,x) -> "csin(" + x.evalJ c + ")"
-                |Sin(_,x) -> "sin(" + x.evalJ c + ")"
-                |Cos(Zt,x) -> "ccos(" + x.evalJ c + ")"
-                |Cos(_,x) -> "cos(" + x.evalJ c + ")"
-                |Tan(Zt,x) -> "ctan(" + x.evalJ c + ")"
-                |Tan(_,x) -> "tan(" + x.evalJ c + ")"
-                |Asin(Zt,x) -> "casin(" + x.evalJ c + ")"
-                |Asin(_,x) -> "asin(" + x.evalJ c + ")"
-                |Acos(Zt,x) -> "cacos(" + x.evalJ c + ")"
-                |Acos(_,x) -> "acos(" + x.evalJ c + ")"
-                |Atan(Zt,x) -> "catan(" + x.evalJ c + ")"
-                |Atan(_,x) -> "atan(" + x.evalJ c + ")"
-                |Atan2(x,y) -> "atan2(" + x.evalJ c + "," + y.evalJ c + ")"
-                |Abs(Dt,x) when x.etype=Zt -> "cabs(" + x.evalJ c + ")"
-                |Abs(Dt,x) -> "fabs(" + x.evalJ c + ")"
-                |Abs(_,x) -> "abs(" + x.evalJ c + ")"
-                |Log(Zt,x) -> "clog(" + x.evalJ c + ")"
-                |Log(_,x) -> "log(" + x.evalJ c + ")"
-                |Log10(_,x) -> "log10(" + x.evalJ c + ")"
-                |Sqrt(Zt,x) -> "csqrt(" + x.evalJ c + ")"
-                |Sqrt(_,x) -> "sqrt(" + x.evalJ c + ")"
+                |Pow(_,x,y) -> "Math.pow(" + x.evalJ c + "," + y.evalJ c + ")"
+                |Exp(_,x) -> "Math.exp(" + x.evalJ c + ")"
+                |Sin(_,x) -> "Math.sin(" + x.evalJ c + ")"
+                |Cos(_,x) -> "Math.cos(" + x.evalJ c + ")"
+                |Tan(_,x) -> "Math.tan(" + x.evalJ c + ")"
+                |Asin(_,x) -> "Math.asin(" + x.evalJ c + ")"
+                |Acos(_,x) -> "Math.acos(" + x.evalJ c + ")"
+                |Atan(_,x) -> "Math.atan(" + x.evalJ c + ")"
+                |Atan2(x,y) -> "Math.atan2(" + x.evalJ c + "," + y.evalJ c + ")"
+                |Abs(_,x) -> "Math.abs(" + x.evalJ c + ")"
+                |Log(_,x) -> "Math.log(" + x.evalJ c + ")"
+                |Log10(_,x) -> "Math.log10(" + x.evalJ c + ")"
+                |Sqrt(_,x) -> "Math.sqrt(" + x.evalJ c + ")"
                 |ToInt x -> 
                     match x with
                     |Add _|Sub _ |Mul _ |Div _ ->
@@ -225,11 +219,11 @@ namespace Aqualis
                         "(double)(" + x.evalJ c + ")"
                     |_ ->
                         "(double)" + x.evalJ c
-                |Floor x -> "floor(" + x.evalJ c + ")"
-                |Ceil x -> "ceil(" + x.evalJ c + ")"
-                |Re x -> "creal(" + x.evalJ c + ")"
-                |Im x -> "cimag(" + x.evalJ c + ")"
-                |Conj x -> "conj(" + x.evalJ c + ")"
+                |Floor x -> "Math.floor(" + x.evalJ c + ")"
+                |Ceil x -> "Math.ceil(" + x.evalJ c + ")"
+                |Re x -> "Math.creal(" + x.evalJ c + ")"
+                |Im x -> "Math.cimag(" + x.evalJ c + ")"
+                |Conj x -> "Math.conj(" + x.evalJ c + ")"
                 |Idx1 (_,name,i) -> name + "[" + i.evalJ c + "]"
                 |Idx2 (_,name,i,j) ->
                     printfn "JavaScriptでは2次元配列の代わりに1次元配列を使用します"

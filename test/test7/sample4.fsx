@@ -1,5 +1,5 @@
 //#############################################################################
-// project title
+// プレゼンテーションHTMLテストD
 let projectname = "test7D"
 let version = "1.0.0"
 //#############################################################################
@@ -12,48 +12,46 @@ let outputdir = __SOURCE_DIRECTORY__
 open System
 open Aqualis
 
-fixedPage outputdir "sampleD" 1920 1080 <| fun wr ->
-    let t = num0(Var(Nt, "t", NaN))
-    let ft = num0(Var(Nt, "f(t)", NaN))
+fixedPage HTML outputdir projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voice=OFF} <| fun () ->
     html.page
         [Tale, @"C:\home\contents\テール右斜AAA-.png";
          Dang, @"C:\home\contents\dango.png";]
         {Speaker = Dang;
          Source = AudioFile @"C:\home\contents\008-scripts_台詞_D.wav"
-         Subtitle = Serif "す…すうがく。ぼく数学きらいなんだよね。数学使わずに授業やってよ"}
+         Subtitle = Serif "だんごのセリフ"}
         <| fun p -> html.image (Style [size.width "100%";],p) @"C:\home\contents/title.PNG"
     html.page
-        [Tale, @"C:\home\contents\テール右斜AAA-.png"; 
-         Armi, @"C:\home\contents\アルミAA-.png";]
-        {Speaker=Tale;
-         Source = AudioFile @"C:\home\contents\0076-scripts_台詞_T.wav";
-         Subtitle = Serif "ですが、" + Serif (ft .= asm.sin t) + Serif "のように数式で書くと、周期関数であることは疑いようがないですよね"}
+        [Tale, @"C:\home\contents\テール右斜AAA-.png";
+         Dang, @"C:\home\contents\dango.png";]
+        {Speaker = Tale;
+         Source = AudioFile @"C:\home\contents\0076-scripts_台詞_T.wav"
+         Subtitle = Serif ""}
         <| fun p ->
-            html.fig p <| fun (f,p) ->
-                f.line Style[stroke.width 1.0; stroke.color "#ff0000"] <| position(100,100) <| position(100+100,100+100)
-                f.line Style[stroke.width 1.0; stroke.color "#ff0000"] <| position(300,100) <| position(300+100,100+100)
-    html.page
-        [Tale, @"C:\home\contents\テール右斜AAA-.png"; 
-         Armi, @"C:\home\contents\アルミAA-.png";]
-        {Speaker = Armi;
-         Source = AudioFile @"C:\home\contents\04-scripts_台詞_A.wav"
-         Subtitle = Serif "だんご君がビーチで団子フェスティバルがあるから買いに来たって"}
-        <| fun p ->
-            html.animation {sX=400; sY=200; mX=100; mY=100; backgroundColor="#aaaaff"} p <| fun (f,p) ->
-                // 曲線のグラフを40点サンプリングして短い線分の集合（折れ線）で表す
-                for i in 0..40 do
-                    f.line Style[stroke.width 1.0; stroke.color "#ff0000"] 
-                    // 線分の始点
-                    <| {
-                        //x座標：時間に依存しないのでtは不要
-                        X = fun _ -> I 10*i; 
-                        //y座標：時間に依存するのでtの関数として表す
-                        Y = fun t -> 100+100*asm.sin(D 0.4*i-2.0*Math.PI*t/100)
-                       }
-                    // 線分の終点
-                    <| {
-                        //x座標：時間に依存しないのでtは不要
-                        X = fun _ -> I 10*(i+1); 
-                        //y座標：時間に依存するのでtの関数として表す
-                        Y = fun t -> 100+100*asm.sin(D 0.4*(i+1)-2.0*Math.PI*t/100)
-                       }
+            html.textB Style[] (p+position(1860,10)) "10"
+            html.contents Style[] (p+position(50,50)) "アニメーション制御の実装"
+            html.subtitle1 Style[] (p+position(80,150)) "図形のアニメーション"
+            html.subtitle2 Style[] (p+position(100,250)) "描画スタイル・座標等の指定"
+            html.subtitle2 Style[] (p+position(100,520)) "破線描画"
+            html.subtitle2 Style[] (p+position(100,750)) "円弧描画"
+            html.animation outputdir "PresentationSlide_nishimura" {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
+                let line1 = f.animationLine Style[stroke.width 3.0; stroke.dash "4,4"; stroke.color "#000000"]
+                let elps1 = f.animationArc Style[stroke.width 3.0; stroke.color "#000000"; stroke.fill "none";]
+                /// 中心座標
+                let cx,cy = I 350, I 390
+                let constCenter = { X = (fun _ -> cx); Y = fun _ -> cy }
+                /// 円弧の半径
+                let R = D 198.0
+                // 中心から右に破線描画
+                f.seq {FrameTime=6; FrameNumber=100} <| fun s ->
+                    line1.P {
+                        Start = constCenter
+                        End = {
+                            X = fun t -> cx + R*t/(s.FrameNumber-1)
+                            Y = fun _ -> cy }}
+                // 円弧描画
+                f.seq {FrameTime=6; FrameNumber=100} <| fun s ->
+                    elps1.P {
+                        center = constCenter
+                        angle1 = fun _ -> I 0
+                        angle2 = fun t -> 360*t/(s.FrameNumber-1)
+                        radius = fun _ -> R }

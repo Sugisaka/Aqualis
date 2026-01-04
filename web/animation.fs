@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
 
 open System
@@ -378,6 +384,18 @@ module htmlexpr =
                 codewritein(a + " = <?php echo \"\\\"\" . " + s.code + " . \"\\\"\"; ?>")
             programList[prIndex].indentDec()
             codewritein " />"
+        /// 内部要素が空のタグ
+        static member tagb0 (t:string,lst:list<string*PHPdata>) =
+            if lst.Length=0 then
+                codewritein("<"+t+">")
+            else
+                codewritein("<"+t+" ")
+                programList[prIndex].indentInc()
+                for a,s in lst do
+                    codewritein(a + " = <?php echo \"\\\"\" . " + s.code + " . \"\\\"\"; ?>")
+                programList[prIndex].indentDec()
+                codewritei ">"
+            codewriten ("</"+t+">")
         /// 内部要素のあるタグ
         static member tagb (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
@@ -598,8 +616,8 @@ module htmlexpr =
                     audioList <- audioList@[""]
                     
                 // メインコンテンツ
-                html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
-                    code2 p
+                // html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
+                //     code2 p
                 // 字幕枠
                 html.tag "div" ("id = \"sb"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
@@ -968,7 +986,8 @@ module dochtml =
                     codewritein "const animationStartMap = {"
                 switchJSAnimationReset <| fun () ->
                     codewritein "const animationResetMap = {"
-                code()
+                switchBody <| fun () ->
+                    code()
                 if isPageAnimation then
                     SlideAnimation.writeAudioList()
                     SlideAnimation.jsSetCharacter()
@@ -1068,9 +1087,7 @@ module dochtml =
                 programList[1].delete()
                 // draw関数一時コード削除
                 programList[3].delete()
-                    
-    let group (t:string) d code = code d
-    
+                
     /// 全体がキャンバスの無制限レイアウト
     let freeCanvas lang outputdir filename code =
         htmlpresentation outputdir filename lang (None, None) false <| fun () ->

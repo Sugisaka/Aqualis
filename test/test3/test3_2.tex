@@ -16,22 +16,88 @@
 \subsection{testClass1}
 \begin{itemize}
   \item int $n1$
+  \item double $x1$
+  \item complex $z1$
 \end{itemize}
 \subsection{testClass2}
 \begin{itemize}
+  \item testClass1 $s2$
   \item testClass1 (allocatable) $t2$ (:)
   \item int $t2_size$ (1)
 \end{itemize}
 \section{subroutines}
 \section{global variables}
 \begin{itemize}
+\item complex $\mathrm{j}$=(0d0,1d0)
 \item testClass2 (allocatable) $q$ (:)
+\item testClass2 $p$
+\item int (allocatable) $xx$ (:)
+\item testClass1 (allocatable) $d$ (:)
+\item Cache variables (integer): \(i_m (m = 1)\)
+\item Cache array (integer,1d): \(\dot{i}_m (m = 1)\)
 \end{itemize}
 \section{main code}
+(Error:055-001 「d」は可変長1次元配列ではありません
+$xx \in \mathbb{Z}^{8}$\\
+\begin{align}
+p.s2.n1 \leftarrow 100
+\end{align}
+\begin{align}
+p.s2.x1 \leftarrow 200
+\end{align}
+\begin{align}
+p.s2.z1 \leftarrow 300+\mathrm{j}400
+\end{align}
+(Error:055-001 「p.t2」は可変長1次元配列ではありません
 (Error:055-001 「q」は可変長1次元配列ではありません
 (Error:055-001 「q_{0}.t2」は可変長1次元配列ではありません
 \begin{align}
 q_{0}.t2_{1}.n1 \leftarrow 2000
 \end{align}
 print, q_{0}.t2_{1}.n1
+\begin{align}
+p.t2_{0}.n1 \leftarrow 1000
+\end{align}
+for $i^{(1)}=0\cdots \mathcal{S}_1[d]-1$\\
+  \begin{align}
+  d_{i^{(1)}}.n1 \leftarrow 1
+  \end{align}
+  \begin{align}
+  d_{i^{(1)}}.x1 \leftarrow 2
+  \end{align}
+  \begin{align}
+  d_{i^{(1)}}.z1 \leftarrow 3+\mathrm{j}4
+  \end{align}
+end\\
+$\dot{i}^{(1)} \in \mathbb{Z}^{10}$\\
+\begin{align}
+\dot{i}^{(1)}_{0} \leftarrow 0
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{1} \leftarrow 1
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{2} \leftarrow 2
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{3} \leftarrow 3
+\end{align}
+$\dot{i}^{(1)}$: deallocate\\
+$\dot{i}^{(1)} \in \mathbb{Z}^{20}$\\
+\begin{align}
+\dot{i}^{(1)}_{0} \leftarrow 0
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{1} \leftarrow 1
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{2} \leftarrow 2
+\end{align}
+\begin{align}
+\dot{i}^{(1)}_{3} \leftarrow 3
+\end{align}
+$\dot{i}^{(1)}$: deallocate\\
+print, p.s2.n1
+print, p.s2.x1
+print, p.s2.z1
 \end{document}

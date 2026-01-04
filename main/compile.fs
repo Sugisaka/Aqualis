@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
     
     open System
@@ -42,42 +48,42 @@ namespace Aqualis
                         writer.codewritein "contains\n"
                         writer.codewritein "\n"
                         for funname in programList[prIndex].flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname))
-                            File.Delete(dir + "\\" + funname)
+                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
+                            File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
                         writer.codewritein("end program " + projectname + "\n")
                         writer.close()
                         //beeファイル削除
                         programList[prIndex].delete()
-                    //コンパイル・実行用スクリプト生成
-                    let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_F.sh")
-                    if isOaccUsed then
-                        wr.Write "#!/bin/bash\n"
-                        wr.Write("\n")
-                        let source = String.Join(" ", programList[prIndex].slist.list)
-                        let option = String.Join(" ", programList[prIndex].olist.list)
-                        wr.Write("pgfortran -acc -Minfo=accel " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
-                        wr.Write("./" + projectname + ".exe\n")
+                        //コンパイル・実行用スクリプト生成
+                        let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_F.sh")
+                        if isOaccUsed then
+                            wr.Write "#!/bin/bash\n"
+                            wr.Write("\n")
+                            let source = String.Join(" ", programList[prIndex].slist.list)
+                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            wr.Write("pgfortran -acc -Minfo=accel " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
+                            wr.Write("./" + projectname + ".exe\n")
+                            wr.Close()
+                        else if isOmpUsed then
+                            wr.Write "#!/bin/bash\n"
+                            wr.Write "\n"
+                            wr.Write "FC='/usr/bin/gfortran'\n"
+                            wr.Write "\n"
+                            let source = String.Join(" ", programList[prIndex].slist.list)
+                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            wr.Write("$FC" + " -fopenmp " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
+                            wr.Write("./" + projectname + ".exe\n")
+                        else
+                            wr.Write "#!/bin/bash\n"
+                            wr.Write "\n"
+                            wr.Write "FC='/usr/bin/gfortran'\n"
+                            wr.Write "\n"
+                            let source = String.Join(" ", programList[prIndex].slist.list)
+                            let option = "-ffree-line-length-none " + String.Join(" ", programList[prIndex].olist.list)
+                            wr.Write("$FC " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
+                            wr.Write("./" + projectname + ".exe\n")
                         wr.Close()
-                    else if isOmpUsed then
-                        wr.Write "#!/bin/bash\n"
-                        wr.Write "\n"
-                        wr.Write "FC='/usr/bin/gfortran'\n"
-                        wr.Write "\n"
-                        let source = String.Join(" ", programList[prIndex].slist.list)
-                        let option = String.Join(" ", programList[prIndex].olist.list)
-                        wr.Write("$FC" + " -fopenmp " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
-                        wr.Write("./" + projectname + ".exe\n")
-                    else
-                        wr.Write "#!/bin/bash\n"
-                        wr.Write "\n"
-                        wr.Write "FC='/usr/bin/gfortran'\n"
-                        wr.Write "\n"
-                        let source = String.Join(" ", programList[prIndex].slist.list)
-                        let option = "-ffree-line-length-none " + String.Join(" ", programList[prIndex].olist.list)
-                        wr.Write("$FC " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
-                        wr.Write("./" + projectname + ".exe\n")
-                    wr.Close()
                 |C99 ->
                     makeProgram [dir,projectname,C99] <| fun () ->
                         //メインコード生成
@@ -113,8 +119,8 @@ namespace Aqualis
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewritein (File.ReadAllText(dir + "\\" + funname))
-                            File.Delete(dir + "\\" + funname)
+                            writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
+                            File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein ("\n")
                         //Main関数
                         writer.codewritein "int main()\n"
@@ -125,30 +131,30 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         programList[prIndex].delete()
-                    //コンパイル・実行用スクリプト生成
-                    let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_C.sh")
-                    if isOmpUsed then
-                        wr.Write "#!/bin/bash\n"
-                        wr.Write "\n"
-                        let source = String.Join(" ", programList[prIndex].slist.list)
-                        let option = String.Join(" ", programList[prIndex].olist.list)
-                        wr.Write("gcc" + " -fopenmp " + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
-                        wr.Write("./" + projectname + ".exe\n")
-                    else if isOaccUsed then
-                        wr.Write "#!/bin/bash"
-                        wr.Write "\n"
-                        let source = String.Join(" ", programList[prIndex].slist.list)
-                        let option = String.Join(" ", programList[prIndex].olist.list)
-                        wr.Write("pgcc -acc -Minfo=accel" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
-                        wr.Write("./" + projectname + ".exe\n")
-                    else
-                        wr.Write "#!/bin/bash\n"
-                        wr.Write "\n"
-                        let source = String.Join(" ", programList[prIndex].slist.list)
-                        let option = String.Join(" ", programList[prIndex].olist.list)
-                        wr.Write("gcc" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
-                        wr.Write("./" + projectname + ".exe\n")
-                    wr.Close()
+                        //コンパイル・実行用スクリプト生成
+                        let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_C.sh")
+                        if isOmpUsed then
+                            wr.Write "#!/bin/bash\n"
+                            wr.Write "\n"
+                            let source = String.Join(" ", programList[prIndex].slist.list)
+                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            wr.Write("gcc" + " -fopenmp " + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
+                            wr.Write("./" + projectname + ".exe\n")
+                        else if isOaccUsed then
+                            wr.Write "#!/bin/bash"
+                            wr.Write "\n"
+                            let source = String.Join(" ", programList[prIndex].slist.list)
+                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            wr.Write("pgcc -acc -Minfo=accel" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
+                            wr.Write("./" + projectname + ".exe\n")
+                        else
+                            wr.Write "#!/bin/bash\n"
+                            wr.Write "\n"
+                            let source = String.Join(" ", programList[prIndex].slist.list)
+                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            wr.Write("gcc" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
+                            wr.Write("./" + projectname + ".exe\n")
+                        wr.Close()
                 |LaTeX ->
                     makeProgram [dir,projectname,LaTeX] <| fun () ->
                         //メインコード生成
@@ -177,8 +183,8 @@ namespace Aqualis
                         //関数定義
                         writer.codewritein "\\section{subroutines}\n"
                         for funname in programList[prIndex].flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname))
-                            File.Delete(dir + "\\" + funname)
+                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
+                            File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein("\n")
                         //グローバル変数の定義
                         writer.codewritein "\\section{global variables}\n"
@@ -334,8 +340,8 @@ namespace Aqualis
                         writer.codewritein "\t\t<div id=\"deffunc\">\n"
                         writer.codewritein "\t\t<h2>関数定義</h2>\n"
                         for funname in programList[prIndex].flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname))
-                            File.Delete(dir + "\\" + funname)
+                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
+                            File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
                         writer.codewritein "\t\t</div>\n"
                         //グローバル変数の定義
@@ -395,23 +401,19 @@ namespace Aqualis
                         declareall writer
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname))
-                            File.Delete(dir + "\\" + funname)
+                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
+                            File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein("\n")
                         //メインコード
                         writer.codewritein(programList[prIndex].allCodes)
                         writer.close()
                         //beeファイル削除
                         programList[prIndex].delete()
-                    //コンパイル・実行用スクリプト生成
-                    //.pyファイルをexeファイルに変換する。pyinstaller --onefile your_script.py
-                    //PyInstallerをインストールする必要がある
-                    //コマンドラインで「pip install pyinstaller」を実行
-                    let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_P.sh")
-                    wr.Write "#!/bin/bash\n"
-                    wr.Write "\n"
-                    wr.Write("python3 " + projectname + ".py\n")
-                    wr.Close()
+                        let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_P.sh")
+                        wr.Write "#!/bin/bash\n"
+                        wr.Write "\n"
+                        wr.Write("python3 " + projectname + ".py\n")
+                        wr.Close()
                 |JavaScript ->
                     makeProgram [dir,projectname,JavaScript] <| fun () ->
                         //メインコード生成
@@ -446,8 +448,8 @@ namespace Aqualis
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewritein (File.ReadAllText(dir + "\\" + funname))
-                            File.Delete(dir + "\\" + funname)
+                            writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
+                            File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein ("\n")
                         //Main
                         writer.codewritein (programList[prIndex].allCodes)
@@ -488,8 +490,8 @@ namespace Aqualis
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
                         for funname in programList[prIndex].flist.list do
-                            writer.codewritein (File.ReadAllText(dir + "\\" + funname))
-                            File.Delete(dir + "\\" + funname)
+                            writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
+                            File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
                         //Main
                         writer.codewritein (programList[prIndex].allCodes)

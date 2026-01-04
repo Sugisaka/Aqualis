@@ -39,10 +39,10 @@ Compile [Fortran] outputdir projectname fullversion <| fun () ->
   - LaTeX
   - HTML
 
-以下のコードでは、「`print.c !."aaa"`」と「`print.c !."bbb"`」がFortranのコードに変換される。「`print.c !."ccc"`」はインデントが戻っているので出力の対象外となる。
+以下のコードでは、「`print.t "aaa"`」と「`print.t "bbb"`」がFortranのコードに変換される。「`print.t "ccc"`」はインデントが戻っているので出力の対象外となる。
 ```fsharp
 Compile [Fortran] outputdir projectname fullversion <| fun () ->
-    print.c !."aaa"
-    print.c !."bbb"
-print.c !."ccc"
+    print.t "aaa"
+    print.t "bbb"
+print.t "ccc"
 ```

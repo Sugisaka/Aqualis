@@ -8,23 +8,32 @@
 iter.range 1 10 <| fun i ->
 ```
 
-以下の例では`aaa`が画面に10回表示される。「`print.c !."bbb"`」の行はインデントが戻っているため10回の反復処理の後に1度だけ実行される
+以下の例では`aaa`が画面に10回表示される。「`print.t "bbb"`」の行はインデントが戻っているため10回の反復処理の後に1度だけ実行される
 ```fsharp
-iter.range 1 10 <| fun i ->
-    print.c !."aaa"
-print.c !."bbb"
+iter.range (0, 9) <| fun i ->
+    print.t "aaa"
+print.t "bbb"
 ```
-以下のコードでは配列`a`の第`n`要素に`n`を代入する
+以下の二つのコードは同じ動作になる。
 ```fsharp
-iter.range 1 a.size1 <| fun n ->
-    a[n] <== n
+iter.range (0, n-1) <| fun i ->
+    print.c i
 ```
-ループ変数の開始値が1の時は以下のようにも記述できる
+```fsharp
+iter.num n <| fun i ->
+    print.c i
+```
+
+以下のコードでは配列`a`の全要素に1を代入する
+```fsharp
+iter.range (0, a.size1-1) <| fun n ->
+    a[n] <== 1
+```
 ```fsharp
 iter.num a.size1 <| fun n ->
-    a[n] <== n
+    a[n] <== 1
 ```
-配列の全要素にアクセスする場合など、反復処理の範囲が1から`a.size1`のような場合は以下のように記述できる。
+配列の全要素にアクセスする場合など、反復処理の範囲が0から`a.size1-1`のような場合は以下のように記述できる。
 ```fsharp
 a.foreach <| fun n ->
     a[n] <== n

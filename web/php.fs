@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
 
 open System
@@ -14,21 +20,21 @@ type PHPdata(x:list<reduceExprString>) =
     new(x:num0) = PHPdata [RNvr x.Expr]
     member _.data with get() = x
     member this.extcode(pr:program) = "<?php echo " + this.code + "; ?>"
-    static member v x = PHPdata [RNvr(Var(Nt,"$"+x,NaN))]
+    static member var x = PHPdata [RNvr(Var(Nt,"$"+x,NaN))]
     static member v (x,init:PHPdata) = 
-        let v = PHPdata.v x
+        let v = PHPdata.var x
         v <== init
         v
-    static member v (x,init:num0) = 
-        let v = PHPdata.v x
+    static member var (x,init:num0) = 
+        let v = PHPdata.var x
         v <== init
         v
-    static member v (x,init:int) = 
-        let v = PHPdata.v x
+    static member var (x,init:int) = 
+        let v = PHPdata.var x
         v <== I init
         v
-    static member v (x,init:double) = 
-        let v = PHPdata.v x
+    static member var (x,init:double) = 
+        let v = PHPdata.var x
         v <== D init
         v
     static member f(s:string) = PHPdata [RNvr(Var(Nt,s,NaN))]
@@ -38,20 +44,20 @@ type PHPdata(x:list<reduceExprString>) =
     static member array() = PHPdata.f "array()"
 
     static member array(arrayname:string) = 
-        let c = PHPdata.v arrayname
+        let c = PHPdata.var arrayname
         codewritein ("<?php $"+arrayname+" = array(); ?>")
         c
         
     static member array(arrayname:string,data:list<string*string>) = 
-        let c = PHPdata.v arrayname
-        codewritein ("<?php "+arrayname+" = array(); ?>")
-        codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
+        let c = PHPdata.var arrayname
+        codewritein ("<?php $"+arrayname+" = array(); ?>")
+        codewritein ("<?php $"+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
         c
 
     static member array(arrayname:string,data:list<string*PHPdata>) = 
-        let c = PHPdata.v arrayname
-        codewritein ("<?php "+arrayname+" = array(); ?>")
-        codewritein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
+        let c = PHPdata.var arrayname
+        codewritein ("<?php $"+arrayname+" = array(); ?>")
+        codewritein ("<?php $"+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
         c
     // static member array(arrayname:string,data:list<string*PHPdata>) = 
     //     let c = PHPdata.var arrayname
@@ -160,6 +166,7 @@ and php =
     static member echo (x:num0) = php.echo (PHPdata x)
     /// ファイル内のテキストを取得
     static member file_get_contents (filename:PHPdata) = PHPdata.f("file_get_contents(" + filename.code + ")")
+    static member file_get_contents (filename:string) = php.file_get_contents (PHPdata filename)
     /// ファイルにテキストを書き込み
     static member file_put_contents (filename:PHPdata,x:PHPdata) = php.phpcode <| fun () -> codewrite("file_put_contents("+filename.code+","+x.code+");")
     /// JSONファイルをデコード
@@ -270,7 +277,7 @@ and php =
     //     php.phpcode <| fun () -> codewrite("mb_send_mail("+toAddress.code+","+subject.code+","+body.code+","+"\"From: "+fromAddress+"\");")
     /// メール送信
     static member sendMail(body:PHPdata,subject:PHPdata,smtp:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
-        let cmd = PHPdata.v "cmd"
+        let cmd = PHPdata.var "cmd"
         cmd <== "echo \\\"" ++ body ++ "\\\" | mail -s \\\"" ++ subject ++ "\\\" -S smtp=smtp://" ++ smtp ++ ":25 -r " ++ fromAddress ++ " " ++ toAddress
         php.phpcode <| fun () -> codewrite("exec("+cmd.code+");")
     // /// メール送信
@@ -285,7 +292,7 @@ and php =
     //     php.phpcode <| fun () -> codewrite("mb_send_mail(\""+toAddress+"\",\""+subject+"\",\""+body+"\","+"\"From: "+fromAddress+"\");")
     /// Discordへメッセージ送信
     static member sendDiscord(body:PHPdata,webhookURL:PHPdata) =
-        let cmd = PHPdata.v "cmd"
+        let cmd = PHPdata.var "cmd"
         cmd <== "curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\""++body++"\\\\\\\"}\\\" " ++ webhookURL
         php.phpcode <| fun () -> codewrite("exec("+cmd.code+");")
     // /// Discordへメッセージ送信

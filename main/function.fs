@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
     
     open System
@@ -36,7 +42,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, programList[prIndex].language)
                     writer.codewritein "!=============================================================================================\n"
                     writer.codewritein("! Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -60,7 +66,7 @@ namespace Aqualis
                     writer.indent.dec()
                     writer.codewritein("end subroutine " + projectname + "\n")
                     writer.close()
-                    programList[prIndex].delete()
+                    File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map(fun (n,(_,_,_)) -> n))
                 codewritein("call" + " " + projectname + "(" + args + ")\n")
@@ -70,7 +76,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, programList[prIndex].language)
                     writer.codewritein "/*==========================================================================================*/\n"
                     writer.codewritein("/* Subroutine name: " + projectname + " */\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -94,7 +100,7 @@ namespace Aqualis
                     writer.indent.dec()
                     writer.codewritein "}\n"
                     writer.close()
-                    programList[prIndex].delete()
+                    File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
                     programList[prIndex].arg.list
                     |> List.map (fun (n,(typ,vtp,_)) ->
@@ -110,7 +116,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, programList[prIndex].language)
                     writer.codewritein "%=============================================================================================\n"
                     writer.codewritein("% Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -134,7 +140,7 @@ namespace Aqualis
                     writer.indent.dec()
                     writer.codewritein("end subroutine " + projectname + "\n")
                     writer.close()
-                    programList[prIndex].delete()
+                    File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
                 codewritein("call" + " " + projectname + "(" + args + ")\n")
@@ -144,7 +150,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, programList[prIndex].language)
                     writer.codewritein("<h3>" + projectname + "</h3>\n")
                     writer.codewritein "<ul>\n"
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -170,7 +176,7 @@ namespace Aqualis
                     writer.codewritein "</details>\n"
                     writer.codewritein "</div>\n"
                     writer.close()
-                    programList[prIndex].delete()
+                    File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
                 codewritein("\\(" + projectname + "(" + args + ")\\)<br/>\n")
@@ -180,7 +186,7 @@ namespace Aqualis
                     code()
                     programList[prIndex].close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname, 2, programList[prIndex].language)
+                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, programList[prIndex].language)
                     writer.codewritein "#==========================================================================================\n"
                     writer.codewritein("# Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in programList[prIndex].arg.list do
@@ -224,7 +230,7 @@ namespace Aqualis
                     writer.codewritein("return " + re_argvar + "\n")
                     writer.indent.dec()
                     writer.close()
-                    programList[prIndex].delete()
+                    File.Delete(dir + "\\" + projectname)
                     re_args,args
                 codewritein(re_args + " = " + projectname + "(" + args + ")\n")
             |_ -> ()

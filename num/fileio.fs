@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
     
     open System
@@ -417,21 +423,27 @@ namespace Aqualis
             match programList[prIndex].language with
             |Fortran ->
                 let tab = var.ip0_noWarning("tab",2313)
+                let int0string_format_F =
+                    // "I"+programList[prIndex].numFormat.iFormat.ToString()
+                    "I0"
                 let double0string_format_F = 
                     let a,b = programList[prIndex].numFormat.dFormat
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                    // "E"+a.ToString()+"."+b.ToString()+"e3"
+                    "F0.3"
                 let format = 
                     lst
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
-                            match b[n].etype with
-                            |It _ -> 
-                                yield "I"+programList[prIndex].numFormat.iFormat.ToString()
-                            |Dt ->
+                            match b[n],b[n].etype with
+                            |_,It _ -> 
+                                yield int0string_format_F
+                            |_,Dt ->
                                 yield double0string_format_F
-                            |Zt ->
+                            |_,Zt ->
                                 yield double0string_format_F
                                 yield double0string_format_F 
+                            |RStr _,_ ->
+                                yield "A"
                             |_ -> ()
                         ])
                     |> fun s -> String.Join(",",s)
@@ -439,14 +451,15 @@ namespace Aqualis
                     lst
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
-                            match b[n].etype,b[n] with 
-                            |It _,RNvr(Int v) -> yield programList[prIndex].numFormat.ItoS(v)
-                            |Dt  ,RNvr(Int v) -> yield programList[prIndex].numFormat.DtoS(double v)
-                            |_   ,RNvr(Dbl v) -> yield programList[prIndex].numFormat.DtoS v
-                            |Zt  ,RNvr v ->
+                            match b[n],b[n].etype with 
+                            |RNvr(Int v), It _ -> yield programList[prIndex].numFormat.ItoS(v)
+                            |RNvr(Int v), Dt   -> yield programList[prIndex].numFormat.DtoS(double v)
+                            |RNvr(Dbl v), _    -> yield programList[prIndex].numFormat.DtoS v
+                            |RNvr v, Zt   ->
                                 yield (Re v).eval (programList[prIndex])
                                 yield (Im v).eval (programList[prIndex])
-                            |(It _|Dt),RNvr v -> yield v.eval (programList[prIndex])
+                            |RNvr v,(It _|Dt) -> yield v.eval (programList[prIndex])
+                            |RStr v,_ -> yield "\"" + v.Replace("\"","\"\"") + "\""
                             |_ -> ()])
                     |> fun s -> String.Join(",",s)
                 codewritein("write("+fp+",\"("+format+")\") "+code+"\n")
@@ -468,6 +481,8 @@ namespace Aqualis
                             |_,Zt ->
                                 yield double0string_format_C
                                 yield double0string_format_C
+                            |RStr v,_ ->
+                                yield v.Replace("\"","\\\"")
                             |_ -> ()
                         ])
                     |> fun s -> String.Join("",s)
@@ -489,59 +504,67 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 codewritein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
             |LaTeX ->
-                let double0string_format_F = 
+                let int0string_format_L =
+                    "I"+programList[prIndex].numFormat.iFormat.ToString()
+                let double0string_format_L = 
                     let a,b = programList[prIndex].numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
                     |> List.map (fun b -> 
-                        match b.etype with
-                          |It _ ->"I"+programList[prIndex].numFormat.iFormat.ToString()
-                          |Dt -> double0string_format_F
-                          |Zt -> double0string_format_F+","+double0string_format_F 
+                        match b,b.etype with
+                          |_,It _ -> int0string_format_L
+                          |_,Dt -> double0string_format_L
+                          |_,Zt -> double0string_format_L + "," + double0string_format_L 
+                          |RStr _,_ -> "A"
                           |_ -> "")
-                    |> fun s -> String.Join("",s)
+                    |> fun s -> String.Join(",",s)
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.etype,b with 
-                          |It _,RNvr(Int v) -> programList[prIndex].numFormat.ItoS v
-                          |Dt,RNvr(Int v) -> programList[prIndex].numFormat.DtoS (double v)
-                          |_,RNvr(Dbl v) -> programList[prIndex].numFormat.DtoS v
-                          |Zt,RNvr v -> (Re v).eval (programList[prIndex])+","+(Im v).eval (programList[prIndex])
-                          |(It _|Dt),RNvr v -> v.eval (programList[prIndex])
+                        match b,b.etype with 
+                          |RNvr(Int v),It _ -> programList[prIndex].numFormat.ItoS v
+                          |RNvr(Int v),Dt -> programList[prIndex].numFormat.DtoS (double v)
+                          |RNvr(Dbl v),_ -> programList[prIndex].numFormat.DtoS v
+                          |RNvr v,Zt -> (Re v).eval (programList[prIndex])+","+(Im v).eval (programList[prIndex])
+                          |RNvr v,(It _|Dt) -> v.eval (programList[prIndex])
+                          |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 codewritein("write("+fp+",\"("+format+")\") "+code+"\n")
             |HTML ->
-                let double0string_format_F = 
+                let int0string_format_H =
+                    "I"+programList[prIndex].numFormat.iFormat.ToString()
+                let double0string_format_H = 
                     let a,b = programList[prIndex].numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format = 
                     lst
                     |> List.map (fun b -> 
-                        match b.etype with
-                          |It _ ->"I"+programList[prIndex].numFormat.iFormat.ToString()
-                          |Dt -> double0string_format_F
-                          |Zt -> double0string_format_F+","+double0string_format_F 
+                        match b,b.etype with
+                          |_,It _ -> int0string_format_H
+                          |_,Dt -> double0string_format_H
+                          |_,Zt -> double0string_format_H+","+double0string_format_H 
+                          |RStr _,_ -> "A"
                           |_ -> "")
                     |> fun s -> String.Join("",s)
                 let code =
                     lst
                     |> List.map (fun b ->
-                        match b.etype,b with 
-                          |It _,RNvr(Int v) -> programList[prIndex].numFormat.ItoS v
-                          |Dt,RNvr(Int v) -> programList[prIndex].numFormat.DtoS(double v)
-                          |_,RNvr(Dbl v) -> programList[prIndex].numFormat.DtoS v
-                          |Zt,RNvr v -> (Re v).eval (programList[prIndex])+","+(Im v).eval (programList[prIndex])
-                          |(It _ |Dt),RNvr v -> v.eval (programList[prIndex])
+                        match b,b.etype with 
+                          |RNvr(Int v),It _ -> programList[prIndex].numFormat.ItoS v
+                          |RNvr(Int v),Dt -> programList[prIndex].numFormat.DtoS(double v)
+                          |RNvr(Dbl v),_ -> programList[prIndex].numFormat.DtoS v
+                          |RNvr v,Zt -> (Re v).eval (programList[prIndex])+","+(Im v).eval (programList[prIndex])
+                          |RNvr v,(It _ |Dt) -> v.eval (programList[prIndex])
+                          |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 codewritein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
             |Python ->
-                let int0string_format_C =
+                let int0string_format_P =
                     "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
-                let double0string_format_C = 
+                let double0string_format_P = 
                     let a,b = programList[prIndex].numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format = 
@@ -550,12 +573,14 @@ namespace Aqualis
                         [for n in 0..(b.Length-1) do
                             match b.[n],b.[n].etype with
                             |_,It _ ->
-                                yield int0string_format_C
+                                yield int0string_format_P
                             |_,Dt ->
-                                yield double0string_format_C
+                                yield double0string_format_P
                             |_,Zt ->
-                                yield double0string_format_C
-                                yield double0string_format_C
+                                yield double0string_format_P
+                                yield double0string_format_P
+                            |RStr v,_ ->
+                                yield v.Replace("\"","\\\"")
                             |_ -> ()
                         ])
                     |> (fun b ->

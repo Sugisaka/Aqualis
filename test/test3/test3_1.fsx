@@ -1,5 +1,5 @@
 //#############################################################################
-// project title
+// 構造体・構造体配列テスト
 let projectname = "test3_1"
 let version = "1.0.0"
 //#############################################################################
@@ -12,7 +12,7 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
     /// <summary>
-    /// 境界要素：幾何学情報
+    /// testClass1
     /// </summary>
     type testClass1(sname_,name) =
         static member sname = "testClass1"
@@ -30,7 +30,7 @@ open Aqualis
         member __.farg code = fn.addarg (Structure testClass1.sname,A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
         
     /// <summary>
-    /// 行列インデックスを持たない境界要素の配列
+    /// testClass1の配列
     /// </summary>
     type testClass1_1(sname_,name,size1) =
         inherit base1(Structure testClass1.sname,Var1(size1,name))
@@ -44,7 +44,7 @@ open Aqualis
         member public this.allocate(n:int) = this.allocate(I n)
         static member str_mem(psname, vname, name, size1) =
             str.addmember(psname,(Structure(testClass1.sname),size1,name))
-            testClass1_1(testClass1.sname,structure.mem(vname,name), size1)
+            testClass1_1(testClass1.sname,str.mem(vname,name), size1)
         /// <summary>
         /// この変数を関数内変数に変換
         /// </summary>

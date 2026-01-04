@@ -16,26 +16,77 @@
 \section{subroutines}
 \section{global variables}
 \begin{itemize}
+\item char $t^{(2)}$
+\item file $f^{(1)}$
+\item char $t^{(1)}$
+\item file $f^{(0)}$
+\item complex $\mathrm{j}$=(0d0,1d0)
 \item double $\pi$=3.14159265358979
+\item complex $z$
 \item double $y$
-\item double $x$
-\item Cache variables (double): \(d_m (m = 1)\)
-\item Cache array (double,1d): \(\dot{d}_m (m = 1)\)
-\item Cache array (complex,2d): \(\ddot{z}_m (m = 1)\)
+\item int $x$
+\item Cache variables (integer): \(i_m (m = 1 \cdots [i; i^{(1)}; i^{(2)}; ... ])\)
+\item Cache variables (complex): \(z_m (m = 1)\)
+\item Cache array (integer,1d): \(\dot{i}_m (m = 1)\)
 \end{itemize}
 \section{main code}
 \begin{align}
-x \leftarrow \pi
+x \leftarrow 1
 \end{align}
-%test
 \begin{align}
-y \leftarrow 1
+y \leftarrow \pi
 \end{align}
-$\dot{d}^{(1)} \in \mathbb{R}^{10}$\\
-$\ddot{z}^{(1)} \in \mathbb{C}^{10\times20}$\\
 \begin{align}
-d^{(1)} \leftarrow 1.234
+z \leftarrow \mathrm{j}
 \end{align}
-$\ddot{z}^{(1)}$: deallocate\\
-$\dot{d}^{(1)}$: deallocate\\
+for $i^{(3)}=0\cdots 10-1$\\
+  \begin{align}
+  i \leftarrow i^{(1)}+i+i^{(2)}
+  \end{align}
+end\\
+for $i^{(3)}=0\cdots 10-1$\\
+  \begin{align}
+  i \leftarrow i^{(1)}+i+i^{(2)}
+  \end{align}
+end\\
+for $i^{(3)}=0\cdots 10-1$\\
+  \begin{align}
+  i \leftarrow i^{(1)}+i+i^{(2)}
+  \end{align}
+end\\
+\begin{align}
+i^{(1)} \leftarrow 1
+\end{align}
+if \left[i^{(1)} < i^{(2)} \cap i^{(2)} < i^{(3)}\right] \cup i^{(3)} < 1
+  \begin{align}
+  i^{(1)} \leftarrow 0
+  \end{align}
+endif
+\begin{align}
+i^{(2)} \leftarrow 2
+\end{align}
+\begin{align}
+i^{(3)} \leftarrow 3
+\end{align}
+print, i^{(1)}
+print, i^{(1)},i^{(2)},i^{(3)}
+print, "aaa"
+print, i^{(1)},i^{(2)},i^{(3)}
+print, i^{(1)},i^{(2)},i^{(3)}
+print, i^{(1)},aaa,i^{(2)},bbb,i^{(3)}
+f^{(0)} = open text file(t^{(1)},"w");
+\begin{align}
+z^{(1)} \leftarrow 1+\mathrm{j}2
+\end{align}
+write(f^{(0)},"(E27.12e3,E27.12e3)") \mathrm{Re}\left(z^{(1)}\right),\mathrm{Im}\left(z^{(1)}\right)
+close(f^{(0)});
+f^{(1)} = open text file(t^{(2)},"r");
+read(f^{(1)},"()",iostat=i^{(1)}) z^{(1)}
+print, z^{(1)}
+close(f^{(1)});
+$\dot{i}^{(1)} \in \mathbb{Z}^{10}$\\
+\begin{align}
+\dot{i}^{(1)}_{0} \leftarrow 0
+\end{align}
+$\dot{i}^{(1)}$: deallocate\\
 \end{document}

@@ -1,11 +1,11 @@
 ﻿// 
-// Copyright (c) 2025 Jun-ichiro Sugisaka
+// Copyright (c) 2026 Jun-ichiro Sugisaka
 // 
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-namespace gengraphics
+// 
+namespace Aqualis
 
-open Aqualis
 open System.IO
 open System.Text
 
@@ -482,9 +482,14 @@ type aiscriptmaker(writer:StreamWriter) =
         let rec write (x:exprString) =
             match x with
             |Str s -> writer.Write s
-            |Nvr(Int s) -> writer.Write(s.ToString())
-            |Nvr(Dbl s) -> writer.Write(s.ToString "0.000")
-            |Nvr s -> printfn "出力できない値です：%s" <| s.ToString()
+            |Nvr s -> 
+                let p = s.simp
+                match p with
+                |Inv(_,Int s) -> writer.Write((-s).ToString())
+                |Inv(_,Dbl s) -> writer.Write((-s).ToString "0.000")
+                |Int s -> writer.Write(s.ToString())
+                |Dbl s -> writer.Write(s.ToString "0.000")
+                |_ -> printfn "出力できない値です：%s" <| p.ToString()
             |NSL lst -> for x in lst do write x
             writer.Write "\n"
         write x

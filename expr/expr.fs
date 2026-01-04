@@ -1,3 +1,9 @@
+// 
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+// 
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+// 
 namespace Aqualis
     
     open System
@@ -149,51 +155,52 @@ namespace Aqualis
             
         override this.ToString() =
             let rec str (xx:expr,indent:int) =
+                let indentStep = 0
                 let ss0 = String(' ', 4*indent)
                 match xx with
                 |False -> ss0 + "False"
                 |True -> ss0 + "True"
-                |Eq(a,b) -> ss0 + "Eq(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |NEq(a,b) -> ss0 + "NEq(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Greater(a,b) -> ss0 + "Greater(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |GreaterEq(a,b) -> ss0 + "GreaterEq(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Less(a,b) -> ss0 + "Less(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |LessEq(a,b) -> ss0 + "LessEq(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |AND lst -> ss0 + "AND(" + String.Join(", ", lst |> List.map (fun p -> str(p, indent+1))) + ") "
-                |OR lst -> ss0 + "OR(" + String.Join(", ", lst |> List.map (fun p -> str(p, indent+1))) + ") "
+                |Eq(a,b) -> ss0 + "Eq(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |NEq(a,b) -> ss0 + "NEq(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Greater(a,b) -> ss0 + "Greater(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |GreaterEq(a,b) -> ss0 + "GreaterEq(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Less(a,b) -> ss0 + "Less(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |LessEq(a,b) -> ss0 + "LessEq(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |AND lst -> ss0 + "AND(" + String.Join(", ", lst |> List.map (fun p -> str(p, indent+indentStep))) + ") "
+                |OR lst -> ss0 + "OR(" + String.Join(", ", lst |> List.map (fun p -> str(p, indent+indentStep))) + ") "
                 |Int x -> ss0 + x.ToString()
                 |Dbl x -> ss0 + x.ToString()
                 |Cpx (re,im) -> ss0 + re.ToString() + "," + re.ToString() + ") "
                 |Var (t,n,_) -> ss0 + n
-                |Inv (t,x) -> ss0 + "Inv(" + str(x, indent+1) + ") "
-                |Add (t,a,b) -> ss0 + "Add(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Sub (t,a,b) -> ss0 + "Sub(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Mul (t,a,b) -> ss0 + "Mul(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Div (t,a,b) -> ss0 + "Div(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Mod (t,a,b) -> ss0 + "Mod(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Pow (t,a,b) -> ss0 + "Pow(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Exp (t,x) -> ss0 + "Exp(" + str(x, indent+1) + ") "
-                |Sin (t,x) -> ss0 + "Sin(" + str(x, indent+1) + ") "
-                |Cos (t,x) -> ss0 + "Cos(" + str(x, indent+1) + ") "
-                |Tan (t,x) -> ss0 + "Tan(" + str(x, indent+1) + ") "
-                |Asin (t,x) -> ss0 + "Asin(" + str(x, indent+1) + ") "
-                |Acos (t,x) -> ss0 + "Acos(" + str(x, indent+1) + ") "
-                |Atan (t,x) -> ss0 + "Atan(" + str(x, indent+1) + ") "
-                |Atan2 (a,b) -> ss0 + "Atan2(" + str(a, indent+1) + ", " + str(b, indent+1) + ") "
-                |Abs (t,x) -> ss0 + "Abs(" + str(x, indent+1) + ") "
-                |Log (t,x) -> ss0 + "Log(" + str(x, indent+1) + ") "
-                |Log10 (t,x) -> ss0 + "Log10(" + str(x, indent+1) + ") "
-                |Sqrt (t,x) -> ss0 + "Sqrt(" + str(x, indent+1) + ") "
-                |ToInt x -> ss0 + "ToInt(" + str(x, indent+1) + ") "
-                |ToDbl x -> ss0 + "ToDbl(" + str(x, indent+1) + ") "
-                |Floor x -> ss0 + "Floor(" + str(x, indent+1) + ") "
-                |Ceil x -> ss0 + "Ceil(" + str(x, indent+1) + ") "
-                |Re x -> ss0 + "Re(" + str(x, indent+1) + ") "
-                |Im x -> ss0 + "Im(" + str(x, indent+1) + ") "
-                |Conj x -> ss0 + "Conj(" + str(x, indent+1) + ") "
-                |Idx1 (t,x,i) -> ss0 + "Idx1(" + x + ", " + str(i, indent+1) + ") "
-                |Idx2 (t,x,i,j) -> ss0 + "Idx2(" + x + ", " + str(i, indent+1) + ", " + str(j, indent+1) + ") "
-                |Idx3 (t,x,i,j,k) -> ss0 + "Idx3(" + x + ", " + str(i, indent+1) + ", " + str(j, indent+1) + ", " + str(k, indent+1) + ") "
+                |Inv (t,x) -> ss0 + "Inv(" + str(x, indent+indentStep) + ") "
+                |Add (t,a,b) -> ss0 + "Add(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Sub (t,a,b) -> ss0 + "Sub(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Mul (t,a,b) -> ss0 + "Mul(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Div (t,a,b) -> ss0 + "Div(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Mod (t,a,b) -> ss0 + "Mod(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Pow (t,a,b) -> ss0 + "Pow(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Exp (t,x) -> ss0 + "Exp(" + str(x, indent+indentStep) + ") "
+                |Sin (t,x) -> ss0 + "Sin(" + str(x, indent+indentStep) + ") "
+                |Cos (t,x) -> ss0 + "Cos(" + str(x, indent+indentStep) + ") "
+                |Tan (t,x) -> ss0 + "Tan(" + str(x, indent+indentStep) + ") "
+                |Asin (t,x) -> ss0 + "Asin(" + str(x, indent+indentStep) + ") "
+                |Acos (t,x) -> ss0 + "Acos(" + str(x, indent+indentStep) + ") "
+                |Atan (t,x) -> ss0 + "Atan(" + str(x, indent+indentStep) + ") "
+                |Atan2 (a,b) -> ss0 + "Atan2(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
+                |Abs (t,x) -> ss0 + "Abs(" + str(x, indent+indentStep) + ") "
+                |Log (t,x) -> ss0 + "Log(" + str(x, indent+indentStep) + ") "
+                |Log10 (t,x) -> ss0 + "Log10(" + str(x, indent+indentStep) + ") "
+                |Sqrt (t,x) -> ss0 + "Sqrt(" + str(x, indent+indentStep) + ") "
+                |ToInt x -> ss0 + "ToInt(" + str(x, indent+indentStep) + ") "
+                |ToDbl x -> ss0 + "ToDbl(" + str(x, indent+indentStep) + ") "
+                |Floor x -> ss0 + "Floor(" + str(x, indent+indentStep) + ") "
+                |Ceil x -> ss0 + "Ceil(" + str(x, indent+indentStep) + ") "
+                |Re x -> ss0 + "Re(" + str(x, indent+indentStep) + ") "
+                |Im x -> ss0 + "Im(" + str(x, indent+indentStep) + ") "
+                |Conj x -> ss0 + "Conj(" + str(x, indent+indentStep) + ") "
+                |Idx1 (t,x,i) -> ss0 + "Idx1(" + x + ", " + str(i, indent+indentStep) + ") "
+                |Idx2 (t,x,i,j) -> ss0 + "Idx2(" + x + ", " + str(i, indent+indentStep) + ", " + str(j, indent+indentStep) + ") "
+                |Idx3 (t,x,i,j,k) -> ss0 + "Idx3(" + x + ", " + str(i, indent+indentStep) + ", " + str(j, indent+indentStep) + ", " + str(k, indent+indentStep) + ") "
                 |Let (t,_,_) -> ss0 + "Let"
                 |Sum (_,_,_,_) -> ss0 + "Sum"
                 |IfEl (_,a,b) -> ss0 + "IfEl"

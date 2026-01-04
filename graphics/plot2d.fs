@@ -1,9 +1,10 @@
 ﻿// 
-// Copyright (c) 2025 Jun-ichiro Sugisaka
+// Copyright (c) 2026 Jun-ichiro Sugisaka
 // 
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-namespace gengraphics
+// 
+namespace Aqualis
     
     open System
     open System.IO

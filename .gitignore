@@ -1,5 +1,6 @@
 obj/
 bin/
+*.exe
 *.out
 *.dat
 *.bin
@@ -10,5 +11,6 @@ bin/
 *.log
 *.png
 *.PNG
+*.svg
 *.wav
 .fake

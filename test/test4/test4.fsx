@@ -1,5 +1,5 @@
 //#############################################################################
-// project title
+// 関数テスト
 let projectname = "test4"
 let version = "1.0.0"
 //#############################################################################
@@ -20,9 +20,9 @@ type testClass1(sname_,name) =
     member public __.x1   = str.d0(sname_,name,"x1")
     member public __.z1   = str.z0(sname_,name,"z1")
     static member str_mem(psname, vname, name, size1) =
-        str.addmember(psname,(Structure(testClass1.sname),size1,name))
-        testClass1(testClass1.sname,structure.mem(vname,name))
-    member __.farg cm code = fn.addarg (Structure(testClass1.sname),A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
+        str.addmember(psname,(Structure testClass1.sname,size1,name))
+        testClass1(testClass1.sname,str.mem(vname,name))
+    member __.farg cm code = fn.addarg (Structure testClass1.sname,A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
     
 Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
     let f(y:num0,x:num0,n:num0,n1:num1,s:testClass1) =
@@ -44,4 +44,3 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         s.x1 <== 100.0
         f(z,x,n,n1,s)
         print.c z
-        
