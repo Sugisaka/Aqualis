@@ -375,13 +375,15 @@ module movieSetting =
 module htmlexpr =
     type html with
         static member htmlfile (dir:string,filename:string) code =
-            makeProgram [dir,filename,HTML] code
+            makeProgram [dir,filename,HTML] <| fun () ->
+                code()
+                programList[prIndex].close()
         /// 内部要素のないタグ
         static member taga (t:string,lst:list<string*PHPdata>) =
             codewritein("<"+t+" ")
             programList[prIndex].indentInc()
             for a,s in lst do
-                codewritein(a + " = <?php echo \"\\\"\" . " + s.code + " . \"\\\"\"; ?>")
+                codewritein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
             programList[prIndex].indentDec()
             codewritein " />"
         /// 内部要素が空のタグ
@@ -392,7 +394,7 @@ module htmlexpr =
                 codewritein("<"+t+" ")
                 programList[prIndex].indentInc()
                 for a,s in lst do
-                    codewritein(a + " = <?php echo \"\\\"\" . " + s.code + " . \"\\\"\"; ?>")
+                    codewritein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
                 programList[prIndex].indentDec()
                 codewritei ">"
             codewriten ("</"+t+">")
@@ -404,7 +406,7 @@ module htmlexpr =
                 codewritein("<"+t+" ")
                 programList[prIndex].indentInc()
                 for a,s in lst do
-                    codewritein(a + " = <?php echo \"\\\"\" . " + s.code + " . \"\\\"\"; ?>")
+                    codewritein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
                 programList[prIndex].indentDec()
                 codewritein ">"
             code()
@@ -445,8 +447,9 @@ module htmlexpr =
             html.tagb ("h5",atr) <| fun () -> php.echo t.code
             code()
             
-        static member submit(name:string,value:num0) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value",(value.code)])
+        static member submit(name:string,value:PHPdata) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value",(value.code)])
         static member submit(name:PHPdata,value:string) = html.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value])
+        static member submit(name:string,value:string) = html.taga("input",["type","\"submit\""; "name","\""+name+"\""; "value","\""+value+"\""])
         static member submit(url:string,name:PHPdata,value:string) = html.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "formaction",PHPdata url])
         static member submit_disabled(name:PHPdata,value:PHPdata) = html.taga("input",["type",PHPdata "submit"; "name", name; "value",value; "disabled",PHPdata "disabled"])
         static member submit_disabled(name:string,value:PHPdata) = html.taga("input",["type",PHPdata "submit"; "name",PHPdata name; "value",value; "disabled",PHPdata "disabled"])
@@ -457,7 +460,7 @@ module htmlexpr =
         static member select(x:PHPdata) = fun code -> html.tagb ("select",["name",x;]) code
         static member select_disabled(x:PHPdata) = fun code -> html.tagb ("select",["name",x; "disabled",PHPdata "disabled"]) code
         static member splitTag t code = 
-            let b (lst:list<string*num0>) =
+            let b (lst:list<string*PHPdata>) =
                 if lst.Length=0 then
                     codewritein ("<"+t+">")
                 else
@@ -495,10 +498,10 @@ module htmlexpr =
         static member image (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (outputDir + "\\" + contentsDir) then
-                    File.Copy(filename, outputDir + "\\" + contentsDir + "\\" + f, true)
+                if Directory.Exists (contentsDir) then
+                    File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                    printfn "directory not exist: %s" (contentsDir)
             else
                 printfn "image file not exist: %s" filename
             let st = Style [{Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
@@ -506,30 +509,30 @@ module htmlexpr =
         static member image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (outputDir + "\\" + contentsDir) then
-                    File.Copy(filename, outputDir + "\\" + contentsDir + "\\" + f, true)
+                if Directory.Exists (contentsDir) then
+                    File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                    printfn "directory not exist: %s" (contentsDir)
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [Atr("id",id); s.atr;Atr("src",contentsDir + "\\" + f)])
         static member image (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (outputDir + "\\" + contentsDir) then
-                    File.Copy(filename, outputDir + "\\" + contentsDir + "\\" + f, true)
+                if Directory.Exists (contentsDir) then
+                    File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                    printfn "directory not exist: %s" (contentsDir)
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [s.atr;Atr("src",contentsDir + "\\" + f)])
         static member video (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (outputDir + "\\" + contentsDir) then
-                    File.Copy(filename, outputDir + "\\" + contentsDir + "\\" + f, true)
+                if Directory.Exists (contentsDir) then
+                    File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                    printfn "directory not exist: %s" (contentsDir)
             else
                 printfn "video file not exist: %s" filename
             let st = Style [{Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
@@ -538,10 +541,10 @@ module htmlexpr =
         static member video (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (outputDir + "\\" + contentsDir) then
-                    File.Copy(filename, outputDir + "\\" + contentsDir + "\\" + f, true)
+                if Directory.Exists (contentsDir) then
+                    File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                    printfn "directory not exist: %s" (contentsDir)
             else
                 printfn "video file not exist: %s" filename
             html.tagv ("video", [s.atr;Atr("src", contentsDir + "\\" + f); Atr("controls", "")])
@@ -569,10 +572,10 @@ module htmlexpr =
                 |AudioFile f ->
                     audioList <- audioList@[contentsDir+"/"+Path.GetFileName f]
                     if File.Exists f then
-                        if Directory.Exists (outputDir + "\\" + contentsDir) then
-                            File.Copy(f, outputDir + "\\" + contentsDir+"\\"+Path.GetFileName f, true)
+                        if Directory.Exists (contentsDir) then
+                            File.Copy(f, contentsDir+"\\"+Path.GetFileName f, true)
                         else
-                            printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                            printfn "directory not exist: %s" (contentsDir)
                     else
                         printfn "audio file not exist: %s" f
                 // 指定されたファイルが存在し、それらが現在書き込み中のファイルでない場合
@@ -601,8 +604,8 @@ module htmlexpr =
                             elif File.Exists f then
                                 // ファイルが見つかった場合の処理
                                 audioList <- audioList@[contentsDir+"/"+Path.GetFileName f]
-                                File.Copy(f, outputDir + "\\" + contentsDir+"\\"+Path.GetFileName f, true)
-                                printfn "Copy: %s -> %s" f <| outputDir + "\\" + contentsDir+"\\"+Path.GetFileName f
+                                File.Copy(f, contentsDir+"\\"+Path.GetFileName f, true)
+                                printfn "Copy: %s -> %s" f <| contentsDir+"\\"+Path.GetFileName f
                             else
                                 // ファイルが見つからなかった場合は音声ファイルの番号桁数を上げる
                                 find (p+"0")
@@ -625,19 +628,19 @@ module htmlexpr =
                 html.tag "div" ("id = \"c"+anicounter.ToString()+"\"" + "style=\"" + (if character then "display: block; " else "display: none; ") + "\"") <| fun () ->
                     for c,file in c do
                         if File.Exists file then
-                            if Directory.Exists (outputDir + "\\" + contentsDir) then
+                            if Directory.Exists (contentsDir) then
                                 match c with
                                 |Tale ->
-                                    File.Copy(file, outputDir + "\\" + contentsDir+"\\"+Path.GetFileName file, true)
+                                    File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
                                     html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName file+"\" style=\"position: absolute; margin-left: 0px; margin-top: -122px; width: 850px; object-position: right 204px top 426px; z-index: 2;\""
                                 |Dang ->
-                                    File.Copy(file, outputDir + "\\" + contentsDir+"\\"+Path.GetFileName file, true)
+                                    File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
                                     html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName file+"\" style=\"position: absolute; margin-left: 1462px; margin-top: 727px; width: 450px; z-index: 3;\""
                                 |Armi ->
-                                    File.Copy(file, outputDir + "\\" + contentsDir+"\\"+Path.GetFileName file, true)
+                                    File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
                                     html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName file+"\" style=\"position: absolute; margin-left: 1503px; margin-top: 638px; width: 360px; z-index: 4;\""
                             else
-                                printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                                printfn "directory not exist: %s" (contentsDir)
                         else
                             printfn "character image file not exist: %s" file
                 // 字幕
@@ -696,10 +699,10 @@ module htmlexpr =
                             {Key = "position"; Value = "absolute";}]
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (outputDir + "\\" + contentsDir) then
-                    File.Copy(filename, outputDir + "\\" + contentsDir + "\\" + f, true)
+                if Directory.Exists (contentsDir) then
+                    File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (outputDir + "\\" + contentsDir)
+                    printfn "directory not exist: %s" (contentsDir)
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", s1+s)
@@ -960,10 +963,8 @@ module dochtml =
             ignore <| Directory.CreateDirectory(dir + "\\" + filename)
         if not <| Directory.Exists (dir + "\\" + filename + "\\" + "contents_" + filename) then
             ignore <| Directory.CreateDirectory(dir + "\\" + filename + "\\" + "contents_" + filename)
-        // 出力先ディレクトリ
-        outputDir <- dir + "\\" + filename
         // コンテンツディレクトリ
-        contentsDir <- "contents_" + filename
+        contentsDir <- dir + "\\" + filename + "\\" + "contents_" + filename
         makeProgram
             [
                 // メインファイル

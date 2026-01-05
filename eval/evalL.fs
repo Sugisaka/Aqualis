@@ -240,7 +240,7 @@ namespace Aqualis
                         |_ ->
                             let x,nx = eval x pl
                             let y,ny = eval y pl
-                            x + y, max nx ny
+                            x + " " + y, max nx ny
                     |Div(It 4,x,y) ->
                         eval (Floor(x/y)) pl
                     |Div(_,x,y) ->

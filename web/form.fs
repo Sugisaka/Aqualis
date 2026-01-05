@@ -92,67 +92,67 @@ type TextBox(name:PHPdata) =
     
 type TextBoxVar() =
     /// テキストが送信されたか判定
-    member _.isset(id:num0) = php.isset (post id).get
+    member _.isset(id:PHPdata) = php.isset (post id).get
     /// テキストが送信されたか判定
     member _.isset(id:string) = php.isset (post id).get
     /// 送信されたテキスト
-    member _.text(id:num0) = (post id).get
+    member _.text(id:PHPdata) = (post id).get
     /// 送信されたテキスト
     member _.text(id:string) = (post id).get
     /// テキストボックスの表示
-    member _.show(id:num0) = (post id).input()
+    member _.show(id:PHPdata) = (post id).input()
     /// テキストボックスの表示
     member _.show(id:string) = (post id).input()
     /// テキストボックスの表示(送信テキストを表示)
-    member _.show_copy(id:num0) = (post id).input_copy()
+    member _.show_copy(id:PHPdata) = (post id).input_copy()
     /// テキストボックスの表示(送信テキストを表示)
     member _.show_copy(id:string) = (post id).input_copy()
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:num0,s:string) = (post id).input s
+    member _.show(id:PHPdata,s:string) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
     member _.show(id:string,s:string) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:num0,s:num0) = (post id).input s
+    member _.show(id:PHPdata,s:PHPdata) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:string,s:num0) = (post id).input s
+    member _.show(id:string,s:PHPdata) = (post id).input s
     /// テキストボックスの表示(スタイル指定)
-    member _.show(id:num0,atr:list<string*string>) = (post id).input atr
+    member _.show(id:PHPdata,atr:list<string*string>) = (post id).input atr
     /// テキストボックスの表示(スタイル指定)
     member _.show(id:string,atr:list<string*string>) = (post id).input atr
     /// テキストボックスの表示(表示テキストとスタイル指定)
-    member _.show(id:num0,text:string,atr:list<string*string>) = (post id).input(text,atr)
+    member _.show(id:PHPdata,text:string,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
     member _.show(id:string,text:string,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
-    member _.show(id:num0,text:num0,atr:list<string*string>) = (post id).input(text,atr)
+    member _.show(id:PHPdata,text:PHPdata,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
-    member _.show(id:string,text:num0,atr:list<string*string>) = (post id).input(text,atr)
+    member _.show(id:string,text:PHPdata,atr:list<string*string>) = (post id).input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
-    member _.show_lock(id:num0,v:num0) = (post id).input_lock v
+    member _.show_lock(id:PHPdata,v:PHPdata) = (post id).input_lock v
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
-    member _.show_lock(id:string,v:num0) = (post id).input_lock v
+    member _.show_lock(id:string,v:PHPdata) = (post id).input_lock v
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
-    member _.show_lock(id:num0,v:string) = (post id).input_lock v
+    member _.show_lock(id:PHPdata,v:string) = (post id).input_lock v
     /// テキストボックスの表示(表示テキストとスタイル指定、編集不可)
     member _.show_lock(id:string,v:string) = (post id).input_lock v
     /// テキストボックスの表示(送信テキストを表示)
-    member _.show_copy(id:num0,atr:list<string*string>) = (post id).input_copy atr
+    member _.show_copy(id:PHPdata,atr:list<string*string>) = (post id).input_copy atr
     /// テキストボックスの表示(送信テキストを表示)
     member _.show_copy(id:string,atr:list<string*string>) = (post id).input_copy atr
     /// テキストボックスの表示(送信テキストを表示、編集不可)
-    member _.show_copy_lock(id:num0) = (post id).input_copy_lock()
+    member _.show_copy_lock(id:PHPdata) = (post id).input_copy_lock()
     /// テキストボックスの表示(送信テキストを表示、編集不可)
     member _.show_copy_lock(id:string) = (post id).input_copy_lock()
     /// テキストボックスの表示(パスワード入力用)
-    member _.show_password(id:num0) = (post id).password()
+    member _.show_password(id:PHPdata) = (post id).password()
     /// テキストボックスの表示(パスワード入力用)
     member _.show_password(id:string) = (post id).password()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示)
-    member _.show_password_copy(id:num0) = (post id).password_copy()
+    member _.show_password_copy(id:PHPdata) = (post id).password_copy()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示)
     member _.show_password_copy(id:string) = (post id).password_copy()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示、編集不可)
-    member _.show_password_copy_lock(id:num0) = (post id).password_copy_lock()
+    member _.show_password_copy_lock(id:PHPdata) = (post id).password_copy_lock()
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示、編集不可)
     member _.show_password_copy_lock(id:string) = (post id).password_copy_lock()
     
@@ -252,7 +252,7 @@ type ComboBoxVar() =
                 <| fun () ->
                     html.option i.Tag <| fun () -> codewritein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selectedTag(id:PHPdata,items:list<ComboBoxItem>,tag:num0) =
+    member this.show_selectedTag(id:PHPdata,items:list<ComboBoxItem>,tag:PHPdata) =
         //c.select <| fun () ->
         html.select id <| fun () ->
             for i in items do
@@ -262,7 +262,7 @@ type ComboBoxVar() =
                 <| fun () ->
                     html.option i.Tag <| fun () -> codewritein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
-    member this.show_selectedTag_disabled(id:PHPdata,items:list<ComboBoxItem>,tag:num0) =
+    member this.show_selectedTag_disabled(id:PHPdata,items:list<ComboBoxItem>,tag:PHPdata) =
         //c.select <| fun () ->
         html.select_disabled id <| fun () ->
             for i in items do

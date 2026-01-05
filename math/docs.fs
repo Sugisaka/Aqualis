@@ -143,9 +143,9 @@ namespace Aqualis
                 let ti = i.code
                 let tb = b.code
                 let tc = c.code
-                Var(c.etype,"\\sum_{"+ta+"="+ti+"}^{"+tb+"} "+tc,NaN)
+                num0(Var(c.etype,"\\sum_{"+ta+"="+ti+"}^{"+tb+"} "+tc,NaN))
             |_ ->
-                NaN
+                num0 NaN
                 
         ///<summary>総和</summary>
         static member sum (a:num0,i:int) = fun (b:num0) (c:num0) ->
@@ -158,9 +158,9 @@ namespace Aqualis
                 let ta = a.code
                 let tb = b.code
                 let tc = c.code
-                Var(c.etype,"\\sum_{"+ta+"}^{"+tb+"} "+tc,NaN)
+                num0(Var(c.etype,"\\sum_{"+ta+"}^{"+tb+"} "+tc,NaN))
             |_ ->
-                NaN
+                num0 NaN
                 
         ///<summary>積分</summary>
         static member integral (a:num0,b:num0) = fun (eq:num0) (x:num0) ->
@@ -170,9 +170,9 @@ namespace Aqualis
                 let tb = b.code
                 let te = eq.code
                 let tx = x.code
-                Var(x.etype,"\\int_{"+ta+"}^{"+tb+"} "+te+"\\mathrm{d}"+tx,NaN)
+                num0(Var(x.etype,"\\int_{"+ta+"}^{"+tb+"} "+te+"\\mathrm{d}"+tx,NaN))
             |_ ->
-                NaN
+                num0 NaN
                 
         ///<summary>積分</summary>
         static member integral (a:int,b:num0) = fun (eq:num0) (x:num0) ->
@@ -192,9 +192,9 @@ namespace Aqualis
             |LaTeX ->
                 let tf = f.code
                 let tx = x.code
-                Var(f.etype,"\\frac{\\mathrm{d}"+tf+"}^{\\mathrm{d}"+tx+"}",NaN)
+                num0(Var(f.etype,"\\frac{\\mathrm{d}"+tf+"}^{\\mathrm{d}"+tx+"}",NaN))
             |_ ->
-                NaN
+                num0 NaN
                 
         ///<summary>偏微分</summary>
         static member pdiff (f:num0) (x:num0) =
@@ -202,9 +202,9 @@ namespace Aqualis
             |LaTeX ->
                 let tf = f.code
                 let tx = x.code
-                Var(f.etype,"\\frac{\\partial "+tf+"}^{\\partial "+tx+"}",NaN)
+                num0(Var(f.etype,"\\frac{\\partial "+tf+"}^{\\partial "+tx+"}",NaN))
             |_ ->
-                NaN
+                num0 NaN
                 
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*string)list) =
@@ -214,9 +214,9 @@ namespace Aqualis
                     lst
                     |> List.map (fun (f,x) -> f.code + " & \\left(" + x + "\\right)\n")
                     |> fun s -> String.Join ("\\\\",s)
-                Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN)
+                num0(Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN))
             |_ ->
-                NaN
+                num0 NaN
                 
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*num0)list) =
@@ -226,9 +226,9 @@ namespace Aqualis
                     lst
                     |> List.map (fun (f,x) -> f.code + " & " + x.code + "\n")
                     |> fun s -> String.Join ("\\\\",s)
-                Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN)
+                num0(Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN))
             |_ ->
-                NaN
+                num0 NaN
                 
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*bool0)list) =
@@ -238,6 +238,30 @@ namespace Aqualis
                     lst
                     |> List.map (fun (f,x) -> f.code + " & \\left(" + x.code + "\\right)\n")
                     |> fun s -> String.Join ("\\\\",s)
-                Var(Nt,"\\begin{dcases}"+"\n"+c+"\\end{dcases}",NaN)
+                num0(Var(Nt,"\\begin{dcases}"+"\n"+c+"\\end{dcases}",NaN))
             |_ ->
-                NaN
+                num0 NaN
+              
+        ///<summary>括弧「()」</summary>
+        static member par1 (v:num0) = num0(Var(v.etype,"\\left("+v.code+"\\right)",NaN))
+        
+        ///<summary>括弧「[]」</summary>
+        static member par2 (v:num0) = num0(Var(v.etype,"\\left["+v.code+"\\right]",NaN))
+        
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:num0,b:num0) = num0(Var(v.etype,"\\left["+v.code+"\\right]_{"+a.code+"}^{"+b.code+"}",NaN))
+        
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:int,b:num0) = 
+            doc.par2 (v,I a,b)
+        
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:num0,b:int) = 
+            doc.par2 (v,a,I b)
+        
+        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        static member par2 (v:num0,a:int,b:int) = 
+            doc.par2 (v,I a,I b)
+        
+        ///<summary>括弧「{}」</summary>
+        static member par3 (v:num0) = num0(Var(v.etype,"\\left\\{"+v.code+"\\right\\}",NaN))

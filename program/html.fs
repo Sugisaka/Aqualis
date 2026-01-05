@@ -497,6 +497,17 @@ namespace Aqualis
         static member submit(url:string,name:string,value:string) = html.taga("input",["type","submit"; "name",name; "value",value; "formaction",url])
         static member table_ code = html.tagb "table" code
         static member table (a:list<string*string>) = fun code -> html.tagb ("table",a) code
+        static member tableData (lst:list<list<string>>) = fun (p:position) (size:int) ->
+            codewritein ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
+            for m in 0..lst.Length-1 do
+                codewritein "<tr>"
+                for s in lst[m] do
+                    codewritein "<td>"
+                    codewritein s
+                    codewritein "</td>"
+                codewritein "</tr>"
+            codewritein "</table>"
+            codewritein "</div>"
         static member tr_ = fun code -> html.tagb "tr" code
         static member tr (a:list<string*string>) = fun code -> html.tagb ("tr",a) code
         static member th = fun code -> html.tagb "th" code
@@ -692,17 +703,7 @@ namespace Aqualis
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding;}
             
-        static member table (lst:list<list<string>>) = fun (p:position) (size:int) ->
-            codewritein ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
-            for m in 0..lst.Length-1 do
-                codewritein "<tr>"
-                for s in lst[m] do
-                    codewritein "<td>"
-                    codewritein s
-                    codewritein "</td>"
-                codewritein "</tr>"
-            codewritein "</table>"
-            codewritein "</div>"
+
             
     and figure() =
         let padding = 10.0

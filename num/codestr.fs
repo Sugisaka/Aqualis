@@ -23,7 +23,7 @@ namespace Aqualis
         /// <param name="sw">実行切り替えスイッチ</param>
         /// <param name="code">内部処理</param>
         static member section (sw:bool) = fun code -> match sw with |true -> code() |false -> ()
-
+        
         /// <summary>
         /// swがONの時のみcodeを実行
         /// </summary>
@@ -37,18 +37,9 @@ namespace Aqualis
         /// <param name="step">IDに等しいときのみ内部を実行</param>
         /// <param name="id">グループID</param>
         /// <param name="code">内部処理</param>
-        static member section (step:int) = fun (id:int) -> group.section (step.Equals id)
-        
-    ///<summary>コードの階層構造を作成。codestr→dummy_codestrで内部コード無効化</summary>
-    type codestr () =
-        
-        static member fsection (s:string) = fun (code:unit->unit) -> 
-            code()
-
-        static member fsection (onoff:Switch) = fun (s:string) (code:unit->unit) ->
-            code()
+        static member section (step:int) = fun (id:int) -> group.section ((step = id))
               
-        static member section (s:string) (code:unit->unit) = 
+        static member Section (s:string) (code:unit->unit) = 
             let (!===) (s:string) = 
                 match programList[prIndex].language with
                 |LaTeX ->
@@ -79,8 +70,8 @@ namespace Aqualis
                 codewritein "</div>"
                 codewritein "</details>"
             |_  -> ()
-              
-        static member subsection (s:string) (code:unit->unit) = 
+            
+        static member subSection (s:string) (code:unit->unit) = 
             let (!===) (s:string) = 
                 match programList[prIndex].language with
                 |LaTeX ->
@@ -113,8 +104,8 @@ namespace Aqualis
                 codewritein "</div>"
                 codewritein "</details>"
             |_  -> ()
-              
-        static member private header (c:char) (s:string) = 
+            
+        static member private Header (c:char) (s:string) = 
             match programList[prIndex].language with
             |Fortran ->
                 comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
@@ -137,8 +128,8 @@ namespace Aqualis
                 codewritein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
                 codewritein "<div class=\"insidecode-section\">"
             |Numeric -> ()
-
-        static member private footer (c:char) (s:string) = 
+            
+        static member private Footer (c:char) (s:string) = 
             match programList[prIndex].language with
             |Fortran   -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |C99 -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
@@ -150,12 +141,12 @@ namespace Aqualis
                 codewritein "</div>"
                 codewritein "</details>"
             |_   -> ()
-
+            
         static member private blank () = 
             codewritein "\n"
             
         static member h1 (s:string) (code:unit->unit) = 
-            codestr.header '#' s
+            group.Header '#' s
             if displaySection then print.t ("### "+s+" #########################")
             match programList[prIndex].language with
             |Python ->
@@ -165,11 +156,11 @@ namespace Aqualis
                 code()
                 programList[prIndex].indentDec()
             if displaySection then print.t ("### END "+s+" #####################")
-            codestr.footer '#' s
-            codestr.blank()
-              
+            group.Footer '#' s
+            group.blank()
+            
         static member h2 (s:string) (code:unit->unit) = 
-            codestr.header '%' s
+            group.Header '%' s
             if displaySection then print.t ("=== "+s+" ===================")
             match programList[prIndex].language with
             |Python ->
@@ -179,11 +170,11 @@ namespace Aqualis
                 code()
                 programList[prIndex].indentDec()
             if displaySection then print.t ("=== END "+s+" ===============")
-            codestr.footer '%' s
-            codestr.blank()
-              
+            group.Footer '%' s
+            group.blank()
+            
         static member h3 (s:string) (code:unit->unit) = 
-            codestr.header '=' s
+            group.Header '=' s
             if displaySection then print.t ("--- "+s+" --------------")
             match programList[prIndex].language with
             |Python ->
@@ -193,11 +184,11 @@ namespace Aqualis
                 code()
                 programList[prIndex].indentDec()
             if displaySection then print.t ("--- END "+s+" ----------")
-            codestr.footer '=' s
-            codestr.blank()
-              
+            group.Footer '=' s
+            group.blank()
+            
         static member h4 (s:string) (code:unit->unit) = 
-            codestr.header '+' s
+            group.Header '+' s
             if displaySection then print.t ("... "+s+" ...........")
             match programList[prIndex].language with
             |Python ->
@@ -207,11 +198,11 @@ namespace Aqualis
                 code()
                 programList[prIndex].indentDec()
             if displaySection then print.t ("... END "+s+" .......")
-            codestr.footer '+' s
-            codestr.blank()
-              
+            group.Footer '+' s
+            group.blank()
+            
         static member h5 (s:string) (code:unit->unit) = 
-            codestr.header '-' s
+            group.Header '-' s
             if displaySection then print.t s
             match programList[prIndex].language with
             |Python ->
@@ -221,21 +212,36 @@ namespace Aqualis
                 code()
                 programList[prIndex].indentDec()
             if displaySection then print.t ("END "+s)
-            codestr.footer '-' s
-            codestr.blank()
+            group.Footer '-' s
+            group.blank()
             
     ///<summary>コードの階層構造を作成。dummy_codestr→codestrで内部コード有効化</summary>
-    type dummy_codestr () =
+    type dummy_group () =
         
-        static member h1 (s:string) (code:unit->unit) =  ()
+        static member section (label:string) = fun code -> ()
         
-        static member h2 (s:string) (code:unit->unit) =  ()
+        static member section (sw:bool) = fun code -> ()
         
-        static member h3 (s:string) (code:unit->unit) =  ()
+        static member section (sw:Switch) = ()
         
-        static member h4 (s:string) (code:unit->unit) =  ()
+        static member section (step:int) = fun (id:int) -> ()
         
-        static member h5 (s:string) (code:unit->unit) =  ()
-
-        static member section (s:string) (code:unit->unit) =  ()
+        static member Section (s:string) (code:unit->unit) = ()
         
+        static member subSection (s:string) (code:unit->unit) = ()
+        
+        static member private Header (c:char) (s:string) = ()
+        
+        static member private Footer (c:char) (s:string) = ()
+        
+        static member private blank () = ()
+        
+        static member h1 (s:string) (code:unit->unit) = ()
+        
+        static member h2 (s:string) (code:unit->unit) = ()
+        
+        static member h3 (s:string) (code:unit->unit) = ()
+        
+        static member h4 (s:string) (code:unit->unit) = ()
+        
+        static member h5 (s:string) (code:unit->unit) = ()

@@ -23,8 +23,6 @@ module htmlio =
     let mutable filename_JSAnimationReset = ""
     /// コンテンツディレクトリ
     let mutable contentsDir = ""
-    /// 出力先ディレクトリ
-    let mutable outputDir = ""
     let mutable private contentsCounter = -1
     let mutable private animtionSeqCounter = -1
     let mutable private animationGroupCounter = -1

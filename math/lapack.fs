@@ -104,7 +104,7 @@ namespace Aqualis
         static member solve_simuleq (matrix:num2,y:num1) =
             programList[prIndex].olist.add "-llapack"
             programList[prIndex].olist.add "-lblas"
-            codestr.section "連立方程式の求解" <| fun () ->
+            group.section "連立方程式の求解" <| fun () ->
                 tbinder.z matrix <| fun () ->
                     match programList[prIndex].language with
                     |Fortran -> 
@@ -156,7 +156,7 @@ namespace Aqualis
         static member solve_simuleqs (matrix:num2,y:num2) =
             programList[prIndex].olist.add "-llapack"
             programList[prIndex].olist.add "-lblas"
-            codestr.section "連立方程式の求解" <| fun () ->
+            group.section "連立方程式の求解" <| fun () ->
                 tbinder.z matrix <| fun () ->
                     match programList[prIndex].language with
                     |Fortran -> 
@@ -208,7 +208,7 @@ namespace Aqualis
         static member inverse_matrix (mat2:num2) (mat1:num2) =
             programList[prIndex].olist.add "-llapack"
             programList[prIndex].olist.add "-lblas"
-            codestr.section "逆行列の計算" <| fun () ->
+            group.section "逆行列の計算" <| fun () ->
                 mat2.clear()
                 iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
                 tbinder.z mat2 <| fun () ->
@@ -265,7 +265,7 @@ namespace Aqualis
         static member rank (rank:num0) (mat:num2) (cond:num0) =
             programList[prIndex].olist.add "-llapack"
             programList[prIndex].olist.add "-lblas"
-            codestr.section "行列の階数" <| fun () ->
+            group.section "行列の階数" <| fun () ->
                 ch.d1 mat.size1 <| fun s -> ch.z2 mat.size1 mat.size1 <| fun u -> ch.z2 mat.size1 mat.size1 <| fun vt ->
                     tbinder.z mat <| fun () ->
                         //特異値分解を利用
@@ -404,7 +404,7 @@ namespace Aqualis
         ///<param name="mat">行列</param>
         ///<param name="cond">特異値を0とみなす上限値</param>
         static member inverse_matrix2 (mat2:num2) (mat:num2) (cond:num0) =
-            codestr.section "疑似逆行列" <| fun () ->
+            group.section "疑似逆行列" <| fun () ->
                 ch.i <| fun ns ->
                     br.if2  (mat.size1.<mat.size2) 
                     <| fun () -> 
@@ -457,7 +457,7 @@ namespace Aqualis
             programList[prIndex].olist.add "-llapack"
             programList[prIndex].olist.add "-lblas"
             tbinder.z mat1 <| fun () ->
-                codestr.section "非対称複素行列の固有値" <| fun () ->
+                group.section "非対称複素行列の固有値" <| fun () ->
                     eigenvectors.clear()
                     match programList[prIndex].language with
                     |Fortran -> 
@@ -523,7 +523,7 @@ namespace Aqualis
                         codewritein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
                     |_ -> ()
             tbinder.d mat1 <| fun () ->
-                codestr.section "非対称実行列の固有値" <| fun () ->
+                group.section "非対称実行列の固有値" <| fun () ->
                     eigenvectors.clear()
                     match programList[prIndex].language with
                     |Fortran -> 
@@ -603,7 +603,7 @@ namespace Aqualis
         /// <param name="mat2">行列B</param>
         static member eigen_matrix2 (eigenvalues1:num1,eigenvalues2:num1,eigenvectors:num2) (mat1:num2) (mat2:num2) =
             tbinder.z mat1 <| fun () ->
-                codestr.section "非対称複素行列の一般化固有値" <| fun () ->
+                group.section "非対称複素行列の一般化固有値" <| fun () ->
                     programList[prIndex].olist.add "-llapack"
                     programList[prIndex].olist.add "-lblas"
                     eigenvectors.clear()
@@ -677,7 +677,7 @@ namespace Aqualis
                                         |_ -> ()
                                         br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
             tbinder.d mat1 <| fun () ->
-                codestr.section "非対称複素行列の一般化固有値" <| fun () ->
+                group.section "非対称複素行列の一般化固有値" <| fun () ->
                     programList[prIndex].olist.add "-llapack"
                     programList[prIndex].olist.add "-lblas"
                     eigenvectors.clear()
@@ -771,7 +771,7 @@ namespace Aqualis
         /// <param name="fu_cst">定数項ベクトル</param>
         /// <param name="code">解に対して行う処理</param>
         static member solve_simuleq_t(fu_mat:num2,fu_cst:num1) code =
-            codestr.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
+            group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                 ch.d2 fu_mat.size2 fu_mat.size2 <| fun FF ->
                 ch.d1 fu_mat.size2 <| fun bb ->
                     let lambda = 1E-6 //正則化パラメータ
@@ -807,7 +807,7 @@ namespace Aqualis
         /// <param name="lambda">正則化パラメータ</param>
         /// <param name="code">解に対して行う処理</param>
         static member solve_simuleq_tt(fu_mat:num2,fu_cst:num1,lambda:double) code =
-            codestr.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
+            group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                 match fu_mat.etype with
                 |Zt ->
                     ch.z2 fu_mat.size2 fu_mat.size2 <| fun FF ->
@@ -870,7 +870,7 @@ namespace Aqualis
         /// <param name="lambda">正則化パラメータ</param>
         /// <param name="code">解に対して行う処理</param>
         static member solve_simuleq_tt2(fu_mat:num2,fu_cst:num2,lambda:num0) code =
-            codestr.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
+            group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                 ch.z2 fu_mat.size2 fu_mat.size2 <| fun FF ->
                 ch.z1 fu_mat.size2 <| fun bb ->
                     FF.clear()
@@ -905,7 +905,7 @@ namespace Aqualis
             programList[prIndex].olist.add "-llapack"
             programList[prIndex].olist.add "-lblas"
             tbinder.z matrix <| fun () ->
-                codestr.section "行列式の常用対数を計算" <| fun () ->
+                group.section "行列式の常用対数を計算" <| fun () ->
                     ch.d <| fun d ->
                         match programList[prIndex].language with
                         |Fortran -> 
@@ -940,7 +940,7 @@ namespace Aqualis
                             d <== d + asm.log10(asm.abs(matrix[i,i]))
                         code d
             tbinder.d matrix <| fun () ->
-                codestr.section "行列式の常用対数を計算" <| fun () ->
+                group.section "行列式の常用対数を計算" <| fun () ->
                     ch.d <| fun d ->
                         match programList[prIndex].language with
                         |Fortran -> 
@@ -995,7 +995,7 @@ namespace Aqualis
                 codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
             |_ ->
                 tbinder.z mat1 <| fun () ->
-                    codestr.section "非対称複素行列の特異値分解" <| fun () ->
+                    group.section "非対称複素行列の特異値分解" <| fun () ->
                         s.clear()
                         u.clear()
                         vt.clear()
@@ -1112,7 +1112,7 @@ namespace Aqualis
                         |_ -> 
                             ()
                 tbinder.d mat1 <| fun () ->
-                    codestr.section "非対称実行列の特異値分解" <| fun () ->
+                    group.section "非対称実行列の特異値分解" <| fun () ->
                         s.clear()
                         u.clear()
                         vt.clear()

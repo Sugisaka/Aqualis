@@ -21,7 +21,7 @@ type PHPdata(x:list<reduceExprString>) =
     member _.data with get() = x
     member this.extcode(pr:program) = "<?php echo " + this.code + "; ?>"
     static member var x = PHPdata [RNvr(Var(Nt,"$"+x,NaN))]
-    static member v (x,init:PHPdata) = 
+    static member var (x,init:PHPdata) = 
         let v = PHPdata.var x
         v <== init
         v
@@ -38,7 +38,12 @@ type PHPdata(x:list<reduceExprString>) =
         v <== D init
         v
     static member f(s:string) = PHPdata [RNvr(Var(Nt,s,NaN))]
-    static member str (x:num0) = "\"" ++ x ++ "\""
+    member this.num0 with get() = 
+        match x with 
+        |[RNvr c] -> num0 c
+        |_ -> 
+            printfn "num0に変換できません：%s" <| this.toString(".",StrQuotation)
+            num0 NaN 
     
     /// 配列を生成
     static member array() = PHPdata.f "array()"
@@ -91,11 +96,11 @@ type PHPdata(x:list<reduceExprString>) =
                 |CodeStrQuotation -> "\\\""+x+"\\\""
             |RNvr x -> x.eval (programList[prIndex]))
         |> fun s -> String.Join(c,s)
-    member this.Item(i:PHPdata) = PHPdata [RNvr(Var(Nt,this.toString(" . ",StrQuotation) + "[" + i.toString(" . ",StrQuotation) + "]",NaN))]
+    member this.Item(i:PHPdata) = PHPdata [RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN))]
     member this.Item(i:int) = this[PHPdata [RNvr(Int i)]]
     member this.Item(i:string) = this[PHPdata [RStr i]]
     member this.Item(i:num0) = this[PHPdata[RNvr i.Expr]]
-    member this.code with get() = this.toString(" . ",StrQuotation)
+    member this.code with get() = this.toString(".",StrQuotation)
     member this.phpcode with get() = "<?php echo " + this.code + " ?>"
     static member (++) (a:PHPdata,b:PHPdata) = PHPdata(a.data@b.data)
     static member (++) (a:string,b:PHPdata) = PHPdata a ++ b
@@ -119,6 +124,7 @@ type PHPdata(x:list<reduceExprString>) =
     static member (<==) (a:PHPdata,b:string) = a <== PHPdata b
     static member (<==) (a:PHPdata,b:num0) = a <== PHPdata b
     static member (<==) (a:PHPdata,b:int) = a <== PHPdata (I b)
+    static member (<==) (a:num0,b:PHPdata) = PHPdata a <== b
     static member (.=) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .= num0(Var(Nt,b.code,NaN))
     static member (.=) (a:PHPdata,b:num0) = a .= PHPdata b
     static member (.=) (a:PHPdata,b:int) = a .= PHPdata (I b)
@@ -159,7 +165,7 @@ and php =
     /// 指定された変数がPOST送信されたか判定
     static member isset (x:PHPdata) = bool0(Var(Nt, "isset(" + x.code + ")",NaN))
     static member echo (x:PHPdata) = php.phpcode <| fun () -> codewrite("echo " + x.code + ";")
-    // static member echo (x:exprString) = php.phpcode <| fun () -> codewrite("echo " + x.toString(" . ",StrQuotation) + ";")
+    // static member echo (x:exprString) = php.phpcode <| fun () -> codewrite("echo " + x.toString(".",StrQuotation) + ";")
     /// 文字列を表示
     static member echo (x:string) = php.echo (PHPdata x)
     /// 変数を表示
@@ -169,6 +175,8 @@ and php =
     static member file_get_contents (filename:string) = php.file_get_contents (PHPdata filename)
     /// ファイルにテキストを書き込み
     static member file_put_contents (filename:PHPdata,x:PHPdata) = php.phpcode <| fun () -> codewrite("file_put_contents("+filename.code+","+x.code+");")
+    /// ファイルにテキストを書き込み
+    static member file_put_contents (filename:string,x:PHPdata) = php.file_put_contents(PHPdata filename, x)
     /// JSONファイルをデコード
     static member json_decode (x:PHPdata,p:bool) = PHPdata.f("json_decode("+x.code+","+p.ToString()+")")
     /// JSONファイルをエンコード
@@ -185,10 +193,18 @@ and php =
         PHPdata.f("file("+filename.code+", "+(flag |> List.map (fun s -> s.str) |> (fun p -> String.Join(" | ",p)) )+")")
     /// ファイルを開く
     static member fopen(filename:PHPdata,rw:FileOpenMode) = PHPdata.f("fopen("+filename.code+", "+rw.str+")")
+    /// ファイルを開く
+    static member fopen(filename:string,rw:FileOpenMode) = php.fopen(PHPdata filename, rw)
     /// ファイルに書き込み
     static member fwrite(fp:PHPdata,t:PHPdata) = php.phpcode <| fun () -> codewrite("fwrite("+fp.code+", "+t.code+");")
     /// ファイルに書き込み
+    static member fwrite(fp:PHPdata,t:num0) = php.fwrite(fp, PHPdata t)
+    /// ファイルに書き込み
+    static member fwrite(fp:PHPdata,t:string) = php.fwrite(fp, PHPdata t)
+    /// ファイルに書き込み
     static member fwrite(fp:PHPdata,t:int) = php.phpcode <| fun () -> codewrite("fwrite("+fp.code+", "+t.ToString()+");")
+    /// ファイルにShift-JISで書き込み
+    static member fwrite_SJIS(fp:PHPdata,t:PHPdata) = php.phpcode <| fun () -> codewrite("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
     /// ファイルにShift-JISで書き込み
     static member fwrite_SJIS(fp:PHPdata,t:string) = php.phpcode <| fun () -> codewrite("fwrite("+fp.code+", mb_convert_encoding(\""+t+"\", 'SJIS-win', 'UTF-8'));")
     /// ファイルを閉じる
@@ -216,6 +232,8 @@ and php =
     static member set_nocache() = php.phpcode <| fun () -> codewrite "header( 'Cache-Control: no-store, no-cache, must-revalidate' );"
     /// HTTPヘッダを取得
     static member header(data:PHPdata) = php.phpcode <| fun () -> codewrite("header("+data.code+");")
+    /// HTTPヘッダを取得
+    static member header(data:string) = php.header(PHPdata data)
     // 小数に変換
     // static member float(data:num0) = Var("(float)"+data.code)
     // 絶対値
@@ -224,6 +242,8 @@ and php =
     static member date(fmt:string) = PHPdata.f("date(\""+fmt+"\")")
     /// 整数に丸め
     static member round(x:PHPdata) = PHPdata.f("round("+x.code+")")
+    /// 整数に丸め
+    static member round(x:num0) = php.round(PHPdata x)
     /// 文字列切り出し
     static member substr(x:PHPdata,n:PHPdata) = PHPdata.f("substr("+x.code+","+n.code+")")
     /// 文字列切り出し
@@ -249,7 +269,7 @@ and php =
     /// 配列のソート
     static member sort(data:PHPdata) = php.phpcode <| fun () -> codewrite("sort("+data.code+");")
     /// 整数に変換
-    static member toint(x:PHPdata) = PHPdata.f("(int)"+x.code)
+    static member toint(x:PHPdata) = num0(Var(It 4, "(int)"+x.code, NaN))
     /// 配列要素数
     static member count(x:PHPdata) = num0(Var(It 4, "count("+x.code+")", NaN))
     /// 拡張子を除いたファイル名
@@ -269,7 +289,7 @@ and php =
     // static member sendMail(body:exprString,subject:exprString,fromAddress:string,toAddress:PHPdata) =
     //     php.phpcode <| fun () -> codewrite("mb_language(\"ja\");")
     //     php.phpcode <| fun () -> codewrite("mb_internal_encoding(\"UTF-8\");")
-    //     php.phpcode <| fun () -> codewrite("mb_send_mail("+toAddress.code+","+subject.toString(" . ",StrQuotation)+","+body.toString(" . ",StrQuotation)+","+"\"From: "+fromAddress+"\");")
+    //     php.phpcode <| fun () -> codewrite("mb_send_mail("+toAddress.code+","+subject.toString(".",StrQuotation)+","+body.toString(".",StrQuotation)+","+"\"From: "+fromAddress+"\");")
     // /// メール送信
     // static member sendMail(body:PHPdata,subject:PHPdata,fromAddress:string,toAddress:PHPdata) =
     //     php.phpcode <| fun () -> codewrite("mb_language(\"ja\");")

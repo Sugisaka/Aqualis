@@ -17,9 +17,7 @@ namespace Aqualis
         ///<summary>文字列をダブルクォーテーションの文字列で囲んで連結</summary>
         |CodeStrQuotation
         
-    type bool0(x:expr) =
-        member this.Expr with get() = x
-        member this.code with get() = x.eval (programList[prIndex])
+
         
     ///<summary>数値と文字列の結合</summary>
     type reduceExprString = 
@@ -32,9 +30,84 @@ namespace Aqualis
             |RNvr t -> t.etype
             
 
-            
+    type bool0(x:expr) =
+        member _.Expr with get() = x
+        member _.code with get() = x.eval (programList[prIndex])
+        static member (.<) (v1:bool0,v2:num0) = 
+            match v1.Expr with
+            |Less(u1,u2) -> bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
+            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
+            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
+            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
+            |AND lst ->
+                match lst with
+                |[] -> bool0 NaN
+                |_ ->
+                    match lst[lst.Length-1] with
+                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
+                        bool0(AND <| lst@[Less(u2,v2.Expr)])
+                    |_ -> bool0 NaN
+            |_ ->
+                bool0 NaN
+        static member (.<) (v1:bool0,v2:double) = v1 .< num0(Dbl v2)
+        static member (.<) (v1:bool0,v2:int) = v1 .< num0(Int v2)
+        static member (.<=) (v1:bool0,v2:num0) = 
+            match v1.Expr with
+            |Less(u1,u2) -> bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
+            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
+            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
+            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
+            |AND lst ->
+                match lst with
+                |[] -> bool0 NaN
+                |_ ->
+                    match lst[lst.Length-1] with
+                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
+                        bool0(AND <| lst@[LessEq(u2,v2.Expr)])
+                    |_ -> bool0 NaN
+            |_ ->
+                bool0 NaN
+        static member (.<=) (v1:bool0,v2:double) = v1 .<= num0(Dbl v2)
+        static member (.<=) (v1:bool0,v2:int) = v1 .<= num0(Int v2)
+        static member (.>) (v1:bool0,v2:num0) = 
+            match v1.Expr with
+            |Less(u1,u2) -> bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
+            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
+            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
+            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
+            |AND lst ->
+                match lst with
+                |[] -> bool0 NaN
+                |_ ->
+                    match lst[lst.Length-1] with
+                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
+                        bool0(AND <| lst@[Greater(u2,v2.Expr)])
+                    |_ -> bool0 NaN
+            |_ ->
+                bool0 NaN
+        static member (.>) (v1:bool0,v2:double) = v1 .> num0(Dbl v2)
+        static member (.>) (v1:bool0,v2:int) = v1 .> num0(Int v2)
+        static member (.>=) (v1:bool0,v2:num0) = 
+            match v1.Expr with
+            |Less(u1,u2) -> bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
+            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
+            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
+            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
+            |AND lst ->
+                match lst with
+                |[] -> bool0 NaN
+                |_ ->
+                    match lst[lst.Length-1] with
+                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
+                        bool0(AND <| lst@[GreaterEq(u2,v2.Expr)])
+                    |_ -> bool0 NaN
+            |_ ->
+                bool0 NaN
+        static member (.>=) (v1:bool0,v2:double) = v1 .>= num0(Dbl v2)
+        static member (.>=) (v1:bool0,v2:int) = v1 .>= num0(Int v2)
+        
     ///<summary>変数（数値データ）クラス</summary>
-    type num0(x:expr) =
+    and num0(x:expr) =
         
         member this.Expr with get() = x
         
@@ -121,91 +194,31 @@ namespace Aqualis
         static member (.<) (x:double,y:num0) = num0(Dbl x) .< y
         static member (.<) (x:num0,y:int) = x .< num0(Int y)
         static member (.<) (x:num0,y:double) = x .< num0(Dbl y)
-        static member (.<) (v1:bool0,v2:num0) = 
-            match v1.Expr with
-            |Less(u1,u2) -> bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> bool0 NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
-                        bool0(AND <| lst@[Less(u2,v2.Expr)])
-                    |_ -> bool0 NaN
-            |_ ->
-                bool0 NaN
-                
+        
         ///<summary>比較（以下）</summary>
         static member (.<=) (x:num0,y:num0) = bool0(LessEq(x.Expr,y.Expr))
         static member (.<=) (x:int,y:num0) = num0(Int x) .<= y
         static member (.<=) (x:double,y:num0) = num0(Dbl x) .<= y
         static member (.<=) (x:num0,y:int) = x .<= num0(Int y)
         static member (.<=) (x:num0,y:double) = x .<= num0(Dbl y)
-        static member (.<=) (v1:bool0,v2:num0) = 
-            match v1.Expr with
-            |Less(u1,u2) -> bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> bool0 NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
-                        bool0(AND <| lst@[LessEq(u2,v2.Expr)])
-                    |_ -> bool0 NaN
-            |_ ->
-                bool0 NaN
                 
+        static member (.<=) (v1:bool0,v2:double) = v1 .<= num0(Dbl v2) 
+        static member (.<=) (v1:bool0,v2:int) = v1 .<= num0(Int v2) 
+        
         ///<summary>比較（より大）</summary>
         static member (.>) (x:num0,y:num0) = bool0(Greater(x.Expr,y.Expr))
         static member (.>) (x:int,y:num0) = num0(Int x) .> y
         static member (.>) (x:double,y:num0) = num0(Dbl x) .> y
         static member (.>) (x:num0,y:int) = x .> num0(Int y)
         static member (.>) (x:num0,y:double) = x .> num0(Dbl y)
-        static member (.>) (v1:bool0,v2:num0) = 
-            match v1.Expr with
-            |Less(u1,u2) -> bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> bool0 NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
-                        bool0(AND <| lst@[Greater(u2,v2.Expr)])
-                    |_ -> bool0 NaN
-            |_ ->
-                bool0 NaN
+        
         ///<summary>比較（以上）</summary>
         static member (.>=) (x:num0,y:num0) = bool0(GreaterEq(x.Expr,y.Expr))
         static member (.>=) (x:int,y:num0) = num0(Int x) .>= y
         static member (.>=) (x:double,y:num0) = num0(Dbl x) .>= y
         static member (.>=) (x:num0,y:int) = x .>= num0(Int y)
         static member (.>=) (x:num0,y:double) = x .>= num0(Dbl y)
-        static member (.>=) (v1:bool0,v2:num0) = 
-            match v1.Expr with
-            |Less(u1,u2) -> bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |LessEq(u1,u2) -> bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |Greater(u1,u2) ->bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->bool0(AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> bool0 NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) -> 
-                        bool0(AND <| lst@[GreaterEq(u2,v2.Expr)])
-                    |_ -> bool0 NaN
-            |_ ->
-                bool0 NaN
-                
+        
         ///<summary>代入</summary>
         static member (<==) (x:num0,y:num0) = expr.subst x.Expr y.Expr (programList[prIndex])
         static member (<==) (x:num0,y:int) = x <== num0(Int y)
@@ -213,7 +226,7 @@ namespace Aqualis
         static member (<==) (x:num0,y:exprString) = 
             match programList[prIndex].language with 
             |PHP ->
-                expr.subst x.Expr (Var(Nt,y.toString(" . ",StrQuotation),NaN)) (programList[prIndex])
+                expr.subst x.Expr (Var(Nt,y.toString(".",StrQuotation),NaN)) (programList[prIndex])
             |_ ->
                 printfn "この言語では文字列を含む値を代入できません"
         static member (<==) (x:num0,y:string) = x <== exprString y

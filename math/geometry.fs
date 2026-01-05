@@ -143,7 +143,7 @@ namespace Aqualis
                     b.IF (x.>0.0) <| fun () -> t <== asm.atan(y/x)
                     b.EL <| fun () -> t <== asm.atan(y/x)+asm.pi
                 t
-            codestr.section ("中心("+x.Expr.eval (programList[prIndex])+","+y.Expr.eval (programList[prIndex])+")、サイズ"+d.Expr.eval (programList[prIndex])+"の正方形領域に、"+"中心("+center_x.Expr.eval (programList[prIndex])+","+center_y.Expr.eval (programList[prIndex])+")、半径"+radius.Expr.eval (programList[prIndex])+"の円が占める割合を計算→結果は"+f.Expr.eval (programList[prIndex])) <| fun () ->
+            group.section ("中心("+x.Expr.eval (programList[prIndex])+","+y.Expr.eval (programList[prIndex])+")、サイズ"+d.Expr.eval (programList[prIndex])+"の正方形領域に、"+"中心("+center_x.Expr.eval (programList[prIndex])+","+center_y.Expr.eval (programList[prIndex])+")、半径"+radius.Expr.eval (programList[prIndex])+"の円が占める割合を計算→結果は"+f.Expr.eval (programList[prIndex])) <| fun () ->
                 ch.dddd <| fun (c_x,c_y,r,rr) ->
                 ch.dddd <| fun (pAx,pBx,pCx,pDx) ->
                 ch.dddd <| fun (pAy,pBy,pCy,pDy) ->

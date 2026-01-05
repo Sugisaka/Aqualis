@@ -16,7 +16,7 @@ namespace Aqualis
         /// <param name="integralequation_matmul">行列－ベクトル積実行関数</param>
         /// <param name="prec">前処理行列</param>
         let BiCGSTAB (b:num1) (x:num1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(num1->num1->unit)option) =
-            codestr.section "Bi-CGSTAB法" <| fun () ->
+            group.Section "Bi-CGSTAB法" <| fun () ->
                 //ベクトルのノルム
                 let norm(norm_:num0,b:num1) =
                   norm_ <== 0.0

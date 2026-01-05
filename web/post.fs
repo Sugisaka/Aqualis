@@ -9,7 +9,7 @@ namespace Aqualis
 type post(id:PHPdata) =
     new(x:string) = post (PHPdata [RStr x])
     new(x:num0) = post (PHPdata [RNvr x.Expr])
-    member _.get with get() = PHPdata.f("$_POST["+id.toString(" . ",StrQuotation)+"]")
+    member _.get with get() = PHPdata.f("$_POST["+id.toString(".",StrQuotation)+"]")
     member this.get_html with get() = PHPdata.f("htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")
     ///テキストボックス
     member _.input() =
@@ -38,6 +38,16 @@ type post(id:PHPdata) =
             [
                 "type", PHPdata "password"
                 "name", id
+            ]
+        )
+    ///テキストボックス
+    member _.input(value:PHPdata) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "text"
+                "name", id
+                "value", value
             ]
         )
     ///テキストボックス
@@ -317,27 +327,27 @@ type post(id:PHPdata) =
     
 type postFile(id:PHPdata) =
     new(x:string) = postFile (PHPdata x)
-    member _.files with get() = PHPdata.f("$_FILES["+id.toString(" . ",StrQuotation)+"][\"name\"]")
-    member _.err with get() = PHPdata.f("$_FILES["+id.toString(" . ",StrQuotation)+"][\"error\"]")
+    member _.files with get() = PHPdata.f("$_FILES["+id.toString(".",StrQuotation)+"][\"name\"]")
+    member _.err with get() = PHPdata.f("$_FILES["+id.toString(".",StrQuotation)+"][\"error\"]")
     member this.file_upload dir =
-        let upload = PHPdata(id.toString(" . ",StrQuotation)+"_file_upload")
+        let upload = PHPdata(id.toString(".",StrQuotation)+"_file_upload")
         let file = PHPdata.var "_FILES"
         let aaa = file.[id].["name"]
         upload <== "./"++file.[id].["name"]
         php.phpcode <| fun () -> codewrite("move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ");")
     member this.file_upload_check dir =
-        let upload = PHPdata(id.toString(" . ",StrQuotation)+"_file_upload")
+        let upload = PHPdata(id.toString(".",StrQuotation)+"_file_upload")
         let file = PHPdata.var "_FILES"
         upload <== "./"++file.[id].["name"]
         br.if1(bool0(Var(Nt, "move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ")", NaN))) <| fun () ->
             php.echo "アップロード完了"
     member this.file_select() =
         html.tagb ("form", ["enctype","multipart/form-data"; "method","post";]) <| fun () ->
-            html.taga ("input", ["input name",id.toString(" . ",StrQuotation); "type","file";])
+            html.taga ("input", ["input name",id.toString(".",StrQuotation); "type","file";])
             html.taga ("input", ["type","submit"; "value","アップロード";])
     member this.file_select(action_phpfile:string) =
         html.tagb ("form", ["action",action_phpfile; "enctype","multipart/form-data"; "method","post";]) <| fun () ->
-            html.taga ("input", ["input name",id.toString(" . ",StrQuotation); "type","file";])
+            html.taga ("input", ["input name",id.toString(".",StrQuotation); "type","file";])
             html.taga ("input", ["type","submit"; "value","アップロード";])
     member this.files_upload(dir) =
         let file = PHPdata.var "_FILES"

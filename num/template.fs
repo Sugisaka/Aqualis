@@ -637,7 +637,10 @@ namespace Aqualis
                         codewritein "</html>"
                         programList[prIndex].close()
                 |LaTeX ->
-                    makeProgram [outputdir,filename+".tex",LaTeX] <| fun () ->
+                    makeProgram [outputdir,filename+".tex",LaTeX; outputdir,filename+"_temp.tex",LaTeX] <| fun () ->
+                        prIndex <- 1
+                        code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir))
+                        prIndex <- 0
                         codewritein "\\documentclass[a4paper]{ltjsarticle}"
                         codewritein ""
                         codewritein "\\usepackage{luatexja}"
@@ -650,6 +653,8 @@ namespace Aqualis
                         codewritein "\\usepackage{upgreek}"
                         codewritein "\\usepackage[no-math]{luatexja-fontspec}"
                         codewritein "\\usepackage[haranoaji,deluxe,match,nfssonly]{luatexja-preset}"
+                        for p in programList[1].hlist.list do
+                            codewritein p
                         codewritein ""
                         codewritein "\\newcommand{\\inputfigure}[2]{"
                         codewritein "\\begin{figure}[ht]"
@@ -705,7 +710,7 @@ namespace Aqualis
                         codewritein "\\renewcommand{\\lstlistingname}{ソースコード}"
                         codewritein ""
                         codewritein "\\begin{document}"
-                        code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir))
+                        codewritein(programList[1].allCodes)
                         codewritein "\\end{document}"
                         programList[prIndex].close()
                 |_ -> ()

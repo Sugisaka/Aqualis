@@ -182,30 +182,18 @@ namespace Aqualis
                     |_,(Add _|Sub _|Mul _|Div _) -> x.evalPh c + "/(" + y.evalPh c + ")"
                     |_ -> x.evalPh c + "/" + y.evalPh c
                 |Mod(_,x,y) -> x.evalPh c + "%" + y.evalPh c
-                |Pow(Zt,x,y) -> "cpow(" + x.evalPh c + "," + y.evalPh c + ")"
                 |Pow(_,x,y) -> "pow(" + x.evalPh c + "," + y.evalPh c + ")"
-                |Exp(Zt,x) -> "cexp(" + x.evalPh c + ")"
                 |Exp(_,x) -> "exp(" + x.evalPh c + ")"
-                |Sin(Zt,x) -> "csin(" + x.evalPh c + ")"
                 |Sin(_,x) -> "sin(" + x.evalPh c + ")"
-                |Cos(Zt,x) -> "ccos(" + x.evalPh c + ")"
                 |Cos(_,x) -> "cos(" + x.evalPh c + ")"
-                |Tan(Zt,x) -> "ctan(" + x.evalPh c + ")"
                 |Tan(_,x) -> "tan(" + x.evalPh c + ")"
-                |Asin(Zt,x) -> "casin(" + x.evalPh c + ")"
                 |Asin(_,x) -> "asin(" + x.evalPh c + ")"
-                |Acos(Zt,x) -> "cacos(" + x.evalPh c + ")"
                 |Acos(_,x) -> "acos(" + x.evalPh c + ")"
-                |Atan(Zt,x) -> "catan(" + x.evalPh c + ")"
                 |Atan(_,x) -> "atan(" + x.evalPh c + ")"
                 |Atan2(x,y) -> "atan2(" + x.evalPh c + "," + y.evalPh c + ")"
-                |Abs(Dt,x) when x.etype=Zt -> "cabs(" + x.evalPh c + ")"
-                |Abs(Dt,x) -> "fabs(" + x.evalPh c + ")"
                 |Abs(_,x) -> "abs(" + x.evalPh c + ")"
-                |Log(Zt,x) -> "clog(" + x.evalPh c + ")"
                 |Log(_,x) -> "log(" + x.evalPh c + ")"
                 |Log10(_,x) -> "log10(" + x.evalPh c + ")"
-                |Sqrt(Zt,x) -> "csqrt(" + x.evalPh c + ")"
                 |Sqrt(_,x) -> "sqrt(" + x.evalPh c + ")"
                 |ToInt x -> 
                     match x with
@@ -216,9 +204,9 @@ namespace Aqualis
                 |ToDbl x -> 
                     match x with
                     |Add _|Sub _ |Mul _ |Div _ ->
-                        "(double)(" + x.evalPh c + ")"
+                        "(float)(" + x.evalPh c + ")"
                     |_ ->
-                        "(double)" + x.evalPh c
+                        "(float)" + x.evalPh c
                 |Floor x -> "floor(" + x.evalPh c + ")"
                 |Ceil x -> "ceil(" + x.evalPh c + ")"
                 |Re x -> "creal(" + x.evalPh c + ")"
