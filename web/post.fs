@@ -104,9 +104,9 @@ type post(id:PHPdata) =
                 "type", PHPdata "text"
                 "name", id
             ]@(a |> List.map (fun (r,s) -> r,PHPdata s))
-        )
+        ) <| fun () -> ()
     member _.textArea_contents(a:list<string*string>) = fun code ->
-        html.tagb(
+        html.tagb0(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -120,7 +120,7 @@ type post(id:PHPdata) =
                 "type", PHPdata "text"
                 "name", id
             ]
-        ) <| fun () -> codewritein this.get_html.phpcode
+        ) <| fun () -> writein this.get_html.phpcode
     member this.textArea_copy(a:list<string*string>) =
         html.tagb(
             "textarea",
@@ -128,7 +128,7 @@ type post(id:PHPdata) =
                 "type", PHPdata "text"
                 "name", id
             ]@(a |> List.map (fun (r,s) -> r,PHPdata s))
-        ) <| fun () -> codewritein this.get_html.phpcode
+        ) <| fun () -> writein this.get_html.phpcode
     member _.textArea(value:string) =
         html.tagb(
             "textarea",
@@ -136,7 +136,7 @@ type post(id:PHPdata) =
                 "type", PHPdata "text"
                 "name", id
             ]
-        ) <| fun () -> codewritein value
+        ) <| fun () -> writein value
     member _.input_lock(value:PHPdata) =
         html.taga(
             "input",
@@ -156,6 +156,16 @@ type post(id:PHPdata) =
                 "readonly", PHPdata "readonly"
                 "value", PHPdata value
             ]
+        )
+    member _.input_lock(value:PHPdata,a:list<string*string>) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "text"
+                "name", id
+                "readonly",PHPdata "readonly"
+                "value", value
+            ]@(a |> List.map (fun (r,s) -> r,PHPdata s))
         )
     member _.input_lock(value:string,a:list<string*string>) =
         html.taga(
@@ -334,7 +344,7 @@ type postFile(id:PHPdata) =
         let file = PHPdata.var "_FILES"
         let aaa = file.[id].["name"]
         upload <== "./"++file.[id].["name"]
-        php.phpcode <| fun () -> codewrite("move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ");")
+        php.phpcode <| fun () -> write("move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ");")
     member this.file_upload_check dir =
         let upload = PHPdata(id.toString(".",StrQuotation)+"_file_upload")
         let file = PHPdata.var "_FILES"
@@ -354,7 +364,7 @@ type postFile(id:PHPdata) =
         br.if1(php.isset(file[id])) <| fun () ->
             file.[id].["name"].foreach <| fun i ->
                 br.if1(bool0(Var(Nt, "is_uploaded_file(" + file.[id].["tmp_name"].[i].code + ")",NaN))) <| fun () ->
-                    php.phpcode <| fun () -> codewrite("move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./"+dir+"\"."+file.[id].["name"].[i].code + ");")
+                    php.phpcode <| fun () -> write("move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./"+dir+"\"."+file.[id].["name"].[i].code + ");")
     member this.files_upload_check(dir) =
         let file = PHPdata.var "_FILES"
         br.if1(php.isset(file[id])) <| fun () ->

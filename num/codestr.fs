@@ -43,13 +43,13 @@ namespace Aqualis
             let (!===) (s:string) = 
                 match programList[prIndex].language with
                 |LaTeX ->
-                    codewritein("\\section{"+s+"}")
+                    writein("\\section{"+s+"}")
                 |HTML -> 
-                    codewritein "<details open>"
-                    codewritein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                    codewritein "<div class=\"insidecode-section\">"
+                    writein "<details open>"
+                    writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                    writein "<div class=\"insidecode-section\">"
                 |_ ->
-                    comment ("===" + s.PadRight(76,'='))
+                    ! ("===" + s.PadRight(76,'='))
             (!===)s
             match programList[prIndex].language with
             |Python ->
@@ -65,23 +65,23 @@ namespace Aqualis
             match programList[prIndex].language with 
             |Fortran |C99 |Python -> 
                 (!===)("end "+s) 
-                codewritein "\n"
+                writein "\n"
             |HTML ->
-                codewritein "</div>"
-                codewritein "</details>"
+                writein "</div>"
+                writein "</details>"
             |_  -> ()
             
         static member subSection (s:string) (code:unit->unit) = 
             let (!===) (s:string) = 
                 match programList[prIndex].language with
                 |LaTeX ->
-                    codewritein("\\subsection{"+s+"}")
+                    writein("\\subsection{"+s+"}")
                 |HTML -> 
-                    codewritein "<details open>"
-                    codewritein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                    codewritein "<div class=\"insidecode-section\">"
+                    writein "<details open>"
+                    writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                    writein "<div class=\"insidecode-section\">"
                 |_ ->
-                    comment ("---" + s.PadRight(76,'-'))
+                    ! ("---" + s.PadRight(76,'-'))
             (!===)s
             match programList[prIndex].language with
             |Python ->
@@ -97,53 +97,53 @@ namespace Aqualis
             match programList[prIndex].language with 
             |Fortran |C99 -> 
                 (!===)("end "+s) 
-                codewritein "\n"
+                writein "\n"
             |Python -> 
                 (!===)("end "+s) 
             |HTML   ->
-                codewritein "</div>"
-                codewritein "</details>"
+                writein "</div>"
+                writein "</details>"
             |_  -> ()
             
         static member private Header (c:char) (s:string) = 
             match programList[prIndex].language with
             |Fortran ->
-                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |C99 ->
-                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |Python ->
-                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |JavaScript ->
-                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |PHP ->
-                comment (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
+                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
             |LaTeX ->
-                codewritein("\\section{"+s+"}")
+                writein("\\section{"+s+"}")
             |HTML -> 
-                codewritein "<details open>"
-                codewritein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                codewritein "<div class=\"insidecode-section\">"
+                writein "<details open>"
+                writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                writein "<div class=\"insidecode-section\">"
             |HTMLSequenceDiagram -> 
-                codewritein "<details open>"
-                codewritein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                codewritein "<div class=\"insidecode-section\">"
+                writein "<details open>"
+                writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                writein "<div class=\"insidecode-section\">"
             |Numeric -> ()
             
         static member private Footer (c:char) (s:string) = 
             match programList[prIndex].language with
-            |Fortran   -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |C99 -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |Python -> comment (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |Fortran   -> ! (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |C99 -> ! (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
+            |Python -> ! (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
             |HTML   ->
-                codewritein "</div>"
-                codewritein "</details>"
+                writein "</div>"
+                writein "</details>"
             |HTMLSequenceDiagram   ->
-                codewritein "</div>"
-                codewritein "</details>"
+                writein "</div>"
+                writein "</details>"
             |_   -> ()
             
         static member private blank () = 
-            codewritein "\n"
+            writein "\n"
             
         static member h1 (s:string) (code:unit->unit) = 
             group.Header '#' s

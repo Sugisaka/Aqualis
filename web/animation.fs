@@ -73,19 +73,19 @@ type AnimationLine(s:Style,canvasX:int,canvasY:int) =
     member this.P (f:Line) = 
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein("    var e = document.getElementById(\""+id+"\");")
-            codewritein("    var x1 = " + (f.Start.X t).code + ";")
-            codewritein("    var y1 = " + (canvasY - f.Start.Y t).code + ";")
-            codewritein("    var x2 = " + (f.End.X t).code + ";")
-            codewritein("    var y2 = " + (canvasY - f.End.Y t).code + ";")
-            codewritein("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            codewritein "    e.setAttribute(\"x1\", x1);"
-            codewritein "    e.setAttribute(\"y1\", y1);"
-            codewritein "    e.setAttribute(\"x2\", x2);"
-            codewritein "    e.setAttribute(\"y2\", y2);"
+            writein("    var e = document.getElementById(\""+id+"\");")
+            writein("    var x1 = " + (f.Start.X t).code + ";")
+            writein("    var y1 = " + (canvasY - f.Start.Y t).code + ";")
+            writein("    var x2 = " + (f.End.X t).code + ";")
+            writein("    var y2 = " + (canvasY - f.End.Y t).code + ";")
+            writein("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            writein "    e.setAttribute(\"x1\", x1);"
+            writein "    e.setAttribute(\"y1\", y1);"
+            writein "    e.setAttribute(\"x2\", x2);"
+            writein "    e.setAttribute(\"y2\", y2);"
         switchJSAnimationSeqReset <| fun () ->
-            codewritein("    var e = document.getElementById(\""+id+"\");")
-            codewritein("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+            writein("    var e = document.getElementById(\""+id+"\");")
+            writein("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
             
 type AnimationEllipse(s:Style,canvasX:int,canvasY:int) =
     let id = nextContentsID()
@@ -97,19 +97,19 @@ type AnimationEllipse(s:Style,canvasX:int,canvasY:int) =
     member this.P (e:Ellipse) = 
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    var cx = " + (e.center.X t).code + ";")
-            codewritein ("    var cy = " + (canvasY - e.center.Y t).code + ";")
-            codewritein ("    var rx = " + (e.radiusX t).code + ";")
-            codewritein ("    var ry = " + (e.radiusY t).code + ";")
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            codewritein "    e.setAttribute(\"cx\", cx);"
-            codewritein "    e.setAttribute(\"cy\", cy);"
-            codewritein "    e.setAttribute(\"rx\", rx);"
-            codewritein "    e.setAttribute(\"ry\", ry);"
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    var cx = " + (e.center.X t).code + ";")
+            writein ("    var cy = " + (canvasY - e.center.Y t).code + ";")
+            writein ("    var rx = " + (e.radiusX t).code + ";")
+            writein ("    var ry = " + (e.radiusY t).code + ";")
+            writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            writein "    e.setAttribute(\"cx\", cx);"
+            writein "    e.setAttribute(\"cy\", cy);"
+            writein "    e.setAttribute(\"rx\", rx);"
+            writein "    e.setAttribute(\"ry\", ry);"
         switchJSAnimationSeqReset <| fun () ->
-            codewritein("    var e = document.getElementById(\""+id+"\");")
-            codewritein("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+            writein("    var e = document.getElementById(\""+id+"\");")
+            writein("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
             
 type AnimationArc(s:Style,canvasX:int,canvasY:int) =
     let id = nextContentsID()
@@ -121,31 +121,31 @@ type AnimationArc(s:Style,canvasX:int,canvasY:int) =
     member this.P (e:Arc) = 
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
             let a1 = Math.PI * e.angle1 t / 180
             let x1 = e.center.X t + e.radius t * asm.cos a1
             let y1 = e.center.Y t + e.radius t * asm.sin a1
-            codewritein("    var x1 = " + x1.code+";")
-            codewritein("    var y1 = " + (canvasY - y1).code+";")
+            writein("    var x1 = " + x1.code+";")
+            writein("    var y1 = " + (canvasY - y1).code+";")
             let a2 = Math.PI * e.angle2 t / 180 - 1E-4
             let x2 = e.center.X t + e.radius t * asm.cos a2
             let y2 = e.center.Y t + e.radius t * asm.sin a2
-            codewritein("    var x2 = " + x2.code+";")
-            codewritein("    var y2 = " + (canvasY - y2).code+";")
-            codewritein("    var a1 = " + (e.angle1 t).code+";")
-            codewritein("    var a2 = " + (e.angle2 t).code+";")
-            codewritein("    var radiusX = " + (e.radius t).code + ";")
-            codewritein("    var radiusY = " + (e.radius t).code + ";")
-            codewritein "    var da = a2 - a1;"
-            codewritein "    if(da < 0.0) {da = a2 + 360 - a1;}"
-            codewritein "    var largerOrSmaller = 0;"
-            codewritein "    if(da > 180.0) {largerOrSmaller = 1;}"
-            codewritein("    d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + largerOrSmaller + \" 0 \" + x2 + \" \" + y2 " + ";")
-            codewritein("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            codewritein("    e.setAttribute(\"d\", " + "d" + ");")
+            writein("    var x2 = " + x2.code+";")
+            writein("    var y2 = " + (canvasY - y2).code+";")
+            writein("    var a1 = " + (e.angle1 t).code+";")
+            writein("    var a2 = " + (e.angle2 t).code+";")
+            writein("    var radiusX = " + (e.radius t).code + ";")
+            writein("    var radiusY = " + (e.radius t).code + ";")
+            writein "    var da = a2 - a1;"
+            writein "    if(da < 0.0) {da = a2 + 360 - a1;}"
+            writein "    var largerOrSmaller = 0;"
+            writein "    if(da > 180.0) {largerOrSmaller = 1;}"
+            writein("    d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + largerOrSmaller + \" 0 \" + x2 + \" \" + y2 " + ";")
+            writein("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            writein("    e.setAttribute(\"d\", " + "d" + ");")
         switchJSAnimationSeqReset <| fun () ->
-            codewritein("    var e = document.getElementById(\""+id+"\");")
-            codewritein("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+            writein("    var e = document.getElementById(\""+id+"\");")
+            writein("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
             
 type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     let id = nextContentsID()
@@ -158,33 +158,33 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     member this.P (e:Text) = 
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
-            codewritein ("    e.innerHTML = \"" + e.str + "\";")
-            codewritein ("    var x = " + (originX + e.center.X t).code+ ";")
-            codewritein ("    var y = " + (originY + canvasY - e.center.Y t).code+ ";")
-            codewritein  "    x = x - e.offsetWidth/2;"
-            codewritein  "    y = y - e.offsetHeight/2;"
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
+            writein ("    e.innerHTML = \"" + e.str + "\";")
+            writein ("    var x = " + (originX + e.center.X t).code+ ";")
+            writein ("    var y = " + (originY + canvasY - e.center.Y t).code+ ";")
+            writein  "    x = x - e.offsetWidth/2;"
+            writein  "    y = y - e.offsetHeight/2;"
+            writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
         switchJSAnimationSeqReset <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
             
     member this.P (e:MathText) = 
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
-            codewritein ("    e.innerHTML = \"\\\\(" + e.eq.code + "\\\\)\";")
-            codewritein  "    MathJax.typeset();"
-            codewritein ("    var x =" + (originX + e.center.X t).code+ ";")
-            codewritein ("    var y =" + (originY + canvasY - e.center.Y t).code+ ";")
-            codewritein  "    x = x - e.offsetWidth/2;"
-            codewritein  "    y = y - e.offsetHeight/2;"
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
+            writein ("    e.innerHTML = \"\\\\(" + e.eq.code + "\\\\)\";")
+            writein  "    MathJax.typeset();"
+            writein ("    var x =" + (originX + e.center.X t).code+ ";")
+            writein ("    var y =" + (originY + canvasY - e.center.Y t).code+ ";")
+            writein  "    x = x - e.offsetWidth/2;"
+            writein  "    y = y - e.offsetHeight/2;"
+            writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
         switchJSAnimationSeqReset <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
             
 type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
     let id = nextContentsID()
@@ -196,166 +196,166 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
     member this.P (apex:list<tposition>) = 
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\"" + id + "\");")
-            codewritein  "    var p = \"\";"
+            writein ("    var e = document.getElementById(\"" + id + "\");")
+            writein  "    var p = \"\";"
             for p in apex do
-                codewritein ("    var x = " + (p.X t).code + ";")
-                codewritein ("    var y = " + (canvasY - p.Y t).code + ";")
-                codewritein  "    p = p + String(x) + \",\" + String(y) + \" \";"
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            codewritein "    e.setAttribute(\"points\", p);"
+                writein ("    var x = " + (p.X t).code + ";")
+                writein ("    var y = " + (canvasY - p.Y t).code + ";")
+                writein  "    p = p + String(x) + \",\" + String(y) + \" \";"
+            writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            writein "    e.setAttribute(\"points\", p);"
         switchJSAnimationSeqReset <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
             
 type SlideAnimation =
     static member writeAudioList() =
         switchDraw <| fun () ->
-            codewritein "const audioList = ["
+            writein "const audioList = ["
             for i in 0..audioList.Length-1 do
-                codewritein ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
-            codewritein "];"
+                writein ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
+            writein "];"
     static member jsSetCharacter() =
         switchDraw <| fun () ->
-            codewritein "let pagecount = 1;"
-            codewritein"function setCharacter()"
-            codewritein"{"
-            codewritein"        const swc = document.getElementById(\"switchCharacter\");"
-            codewritein"        const c = document.getElementById(\"c\"+pagecount);"
-            codewritein"        if(swc.checked)"
-            codewritein"        {"
-            codewritein"            c.style.display = \"block\";"
-            codewritein"        }"
-            codewritein"        else"
-            codewritein"        {"
-            codewritein"            c.style.display = \"none\";"
-            codewritein"        }"
-            codewritein"}"
+            writein "let pagecount = 1;"
+            writein"function setCharacter()"
+            writein"{"
+            writein"        const swc = document.getElementById(\"switchCharacter\");"
+            writein"        const c = document.getElementById(\"c\"+pagecount);"
+            writein"        if(swc.checked)"
+            writein"        {"
+            writein"            c.style.display = \"block\";"
+            writein"        }"
+            writein"        else"
+            writein"        {"
+            writein"            c.style.display = \"none\";"
+            writein"        }"
+            writein"}"
     static member jsSetSubtitle() =
         switchDraw <| fun () ->
-            codewritein "function setSubtitle()"
-            codewritein "{"
-            codewritein "        const sws = document.getElementById(\"switchSubtitle\");"
-            codewritein "        const b2 = document.getElementById(\"sb\"+pagecount);"
-            codewritein "        const s2 = document.getElementById(\"s\"+pagecount);"
-            codewritein "        if(sws.checked)"
-            codewritein "        {"
-            codewritein "            b2.style.display = \"block\";"
-            codewritein "            s2.style.display = \"block\";"
-            codewritein "        }"
-            codewritein "        else"
-            codewritein "        {"
-            codewritein "            b2.style.display = \"none\";"
-            codewritein "            s2.style.display = \"none\";"
-            codewritein "        }"
-            codewritein "}"
+            writein "function setSubtitle()"
+            writein "{"
+            writein "        const sws = document.getElementById(\"switchSubtitle\");"
+            writein "        const b2 = document.getElementById(\"sb\"+pagecount);"
+            writein "        const s2 = document.getElementById(\"s\"+pagecount);"
+            writein "        if(sws.checked)"
+            writein "        {"
+            writein "            b2.style.display = \"block\";"
+            writein "            s2.style.display = \"block\";"
+            writein "        }"
+            writein "        else"
+            writein "        {"
+            writein "            b2.style.display = \"none\";"
+            writein "            s2.style.display = \"none\";"
+            writein "        }"
+            writein "}"
     static member jsDrawNext() =
         switchDraw <| fun () ->
-            codewritein "function drawNext()"
-            codewritein "{"
-            codewritein "    resetAll();"
-            codewritein("    if(pagecount<"+anicounter.ToString()+")")
-            codewritein "    {"
-            codewritein "        const swc = document.getElementById(\"switchCharacter\");"
-            codewritein "        const sws = document.getElementById(\"switchSubtitle\");"
-            codewritein "        const swa = document.getElementById(\"switchAudio\");"
-            codewritein "        "
-            codewritein "        const p1 = document.getElementById(\"p\"+pagecount);"
-            codewritein "        p1.style.display = \"none\";"
-            codewritein "        const b1 = document.getElementById(\"sb\"+pagecount);"
-            codewritein "        b1.style.display = \"none\";"
-            codewritein "        const s1 = document.getElementById(\"s\"+pagecount);"
-            codewritein "        s1.style.display = \"none\";"
-            codewritein "        const c1 = document.getElementById(\"c\"+pagecount);"
-            codewritein "        c1.style.display = \"none\";"
-            codewritein "        pagecount++;"
-            codewritein "        const p2 = document.getElementById(\"p\"+pagecount);"
-            codewritein "        p2.style.display = \"block\";"
-            codewritein "        if(sws.checked)"
-            codewritein "        {"
-            codewritein "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            codewritein "            b2.style.display = \"block\";"
-            codewritein "            const s2 = document.getElementById(\"s\"+pagecount);"
-            codewritein "            s2.style.display = \"block\";"
-            codewritein "        }"
-            codewritein "        else"
-            codewritein "        {"
-            codewritein "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            codewritein "            b2.style.display = \"none\";"
-            codewritein "            const s2 = document.getElementById(\"s\"+pagecount);"
-            codewritein "            s2.style.display = \"none\";"
-            codewritein "        }"
-            codewritein "        if(swc.checked)"
-            codewritein "        {"
-            codewritein "            const c2 = document.getElementById(\"c\"+pagecount);"
-            codewritein "            c2.style.display = \"block\";"
-            codewritein "        }"
-            codewritein "        else"
-            codewritein "        {"
-            codewritein "            const c2 = document.getElementById(\"c\"+pagecount);"
-            codewritein "            c2.style.display = \"none\";"
-            codewritein "        }"
-            codewritein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
-            codewritein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
-            codewritein "        {"
-            codewritein "            audioPlayer.src = audioList[pagecount-1];"
-            codewritein "            audioPlayer.play();"
-            codewritein "        }"
-            codewritein "    }"
-            codewritein "}"
+            writein "function drawNext()"
+            writein "{"
+            writein "    resetAll();"
+            writein("    if(pagecount<"+anicounter.ToString()+")")
+            writein "    {"
+            writein "        const swc = document.getElementById(\"switchCharacter\");"
+            writein "        const sws = document.getElementById(\"switchSubtitle\");"
+            writein "        const swa = document.getElementById(\"switchAudio\");"
+            writein "        "
+            writein "        const p1 = document.getElementById(\"p\"+pagecount);"
+            writein "        p1.style.display = \"none\";"
+            writein "        const b1 = document.getElementById(\"sb\"+pagecount);"
+            writein "        b1.style.display = \"none\";"
+            writein "        const s1 = document.getElementById(\"s\"+pagecount);"
+            writein "        s1.style.display = \"none\";"
+            writein "        const c1 = document.getElementById(\"c\"+pagecount);"
+            writein "        c1.style.display = \"none\";"
+            writein "        pagecount++;"
+            writein "        const p2 = document.getElementById(\"p\"+pagecount);"
+            writein "        p2.style.display = \"block\";"
+            writein "        if(sws.checked)"
+            writein "        {"
+            writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            writein "            b2.style.display = \"block\";"
+            writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            writein "            s2.style.display = \"block\";"
+            writein "        }"
+            writein "        else"
+            writein "        {"
+            writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            writein "            b2.style.display = \"none\";"
+            writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            writein "            s2.style.display = \"none\";"
+            writein "        }"
+            writein "        if(swc.checked)"
+            writein "        {"
+            writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            writein "            c2.style.display = \"block\";"
+            writein "        }"
+            writein "        else"
+            writein "        {"
+            writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            writein "            c2.style.display = \"none\";"
+            writein "        }"
+            writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
+            writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
+            writein "        {"
+            writein "            audioPlayer.src = audioList[pagecount-1];"
+            writein "            audioPlayer.play();"
+            writein "        }"
+            writein "    }"
+            writein "}"
     static member jsDrawPrev() =
         switchDraw <| fun () ->
-            codewritein "function drawPrev()"
-            codewritein "{"
-            codewritein "    resetAll();"
-            codewritein "    if(pagecount>1)"
-            codewritein "    {"
-            codewritein "        const swc = document.getElementById(\"switchCharacter\");"
-            codewritein "        const sws = document.getElementById(\"switchSubtitle\");"
-            codewritein "        const swa = document.getElementById(\"switchAudio\");"
-            codewritein "        const p1 = document.getElementById(\"p\"+pagecount);"
-            codewritein "        p1.style.display = \"none\";"
-            codewritein "        const b1 = document.getElementById(\"sb\"+pagecount);"
-            codewritein "        b1.style.display = \"none\";"
-            codewritein "        const s1 = document.getElementById(\"s\"+pagecount);"
-            codewritein "        s1.style.display = \"none\";"
-            codewritein "        const c1 = document.getElementById(\"c\"+pagecount);"
-            codewritein "        c1.style.display = \"none\";"
-            codewritein "        pagecount--;"
-            codewritein "        const p2 = document.getElementById(\"p\"+pagecount);"
-            codewritein "        p2.style.display = \"block\";"
-            codewritein "        if(sws.checked)"
-            codewritein "        {"
-            codewritein "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            codewritein "            b2.style.display = \"block\";"
-            codewritein "            const s2 = document.getElementById(\"s\"+pagecount);"
-            codewritein "            s2.style.display = \"block\";"
-            codewritein "        }"
-            codewritein "        else"
-            codewritein "        {"
-            codewritein "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            codewritein "            b2.style.display = \"none\";"
-            codewritein "            const s2 = document.getElementById(\"s\"+pagecount);"
-            codewritein "            s2.style.display = \"none\";"
-            codewritein "        }"
-            codewritein "        if(swc.checked)"
-            codewritein "        {"
-            codewritein "            const c2 = document.getElementById(\"c\"+pagecount);"
-            codewritein "            c2.style.display = \"block\";"
-            codewritein "        }"
-            codewritein "        else"
-            codewritein "        {"
-            codewritein "            const c2 = document.getElementById(\"c\"+pagecount);"
-            codewritein "            c2.style.display = \"none\";"
-            codewritein "        }"
-            codewritein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
-            codewritein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
-            codewritein "        {"
-            codewritein "            audioPlayer.src = audioList[pagecount-1];"
-            codewritein "            audioPlayer.play();"
-            codewritein "        }"
-            codewritein "    }"
-            codewritein "}"
+            writein "function drawPrev()"
+            writein "{"
+            writein "    resetAll();"
+            writein "    if(pagecount>1)"
+            writein "    {"
+            writein "        const swc = document.getElementById(\"switchCharacter\");"
+            writein "        const sws = document.getElementById(\"switchSubtitle\");"
+            writein "        const swa = document.getElementById(\"switchAudio\");"
+            writein "        const p1 = document.getElementById(\"p\"+pagecount);"
+            writein "        p1.style.display = \"none\";"
+            writein "        const b1 = document.getElementById(\"sb\"+pagecount);"
+            writein "        b1.style.display = \"none\";"
+            writein "        const s1 = document.getElementById(\"s\"+pagecount);"
+            writein "        s1.style.display = \"none\";"
+            writein "        const c1 = document.getElementById(\"c\"+pagecount);"
+            writein "        c1.style.display = \"none\";"
+            writein "        pagecount--;"
+            writein "        const p2 = document.getElementById(\"p\"+pagecount);"
+            writein "        p2.style.display = \"block\";"
+            writein "        if(sws.checked)"
+            writein "        {"
+            writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            writein "            b2.style.display = \"block\";"
+            writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            writein "            s2.style.display = \"block\";"
+            writein "        }"
+            writein "        else"
+            writein "        {"
+            writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            writein "            b2.style.display = \"none\";"
+            writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            writein "            s2.style.display = \"none\";"
+            writein "        }"
+            writein "        if(swc.checked)"
+            writein "        {"
+            writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            writein "            c2.style.display = \"block\";"
+            writein "        }"
+            writein "        else"
+            writein "        {"
+            writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            writein "            c2.style.display = \"none\";"
+            writein "        }"
+            writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
+            writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
+            writein "        {"
+            writein "            audioPlayer.src = audioList[pagecount-1];"
+            writein "            audioPlayer.play();"
+            writein "        }"
+            writein "    }"
+            writein "}"
             
 [<AutoOpen>]
 module movieSetting =
@@ -380,37 +380,38 @@ module htmlexpr =
                 programList[prIndex].close()
         /// 内部要素のないタグ
         static member taga (t:string,lst:list<string*PHPdata>) =
-            codewritein("<"+t+" ")
+            writein("<"+t+" ")
             programList[prIndex].indentInc()
             for a,s in lst do
-                codewritein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
+                writein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
             programList[prIndex].indentDec()
-            codewritein " />"
-        /// 内部要素が空のタグ
-        static member tagb0 (t:string,lst:list<string*PHPdata>) =
+            writein " />"
+        /// 内部要素のあるタグ
+        static member tagb0 (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
-                codewritein("<"+t+">")
+                write("<"+t+">")
             else
-                codewritein("<"+t+" ")
+                writen("<"+t+" ")
                 programList[prIndex].indentInc()
                 for a,s in lst do
-                    codewritein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
+                    writen(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
                 programList[prIndex].indentDec()
-                codewritei ">"
-            codewriten ("</"+t+">")
+                write ">"
+            code()
+            writen ("</"+t+">")
         /// 内部要素のあるタグ
         static member tagb (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
-                codewritein("<"+t+">")
+                writein("<"+t+">")
             else
-                codewritein("<"+t+" ")
+                writein("<"+t+" ")
                 programList[prIndex].indentInc()
                 for a,s in lst do
-                    codewritein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
+                    writein(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?>")
                 programList[prIndex].indentDec()
-                codewritein ">"
+                writein ">"
             code()
-            codewritein ("</"+t+">")
+            writein ("</"+t+">")
             
         static member h1 (t:num0) = fun code ->
             html.tagb "h1" <| fun () -> php.echo t.code
@@ -462,14 +463,14 @@ module htmlexpr =
         static member splitTag t code = 
             let b (lst:list<string*PHPdata>) =
                 if lst.Length=0 then
-                    codewritein ("<"+t+">")
+                    writein ("<"+t+">")
                 else
-                    codewritein("<"+t+" ")
+                    writein("<"+t+" ")
                     for a,s in lst do
-                        codewritein(a + "=" + s.code + " ")
-                    codewritein ">"
+                        writein(a + "=" + s.code + " ")
+                    writein ">"
             code b 
-            codewritein ("</"+t+">")
+            writein ("</"+t+">")
         static member Select = html.splitTag "select" 
         static member Tr = html.splitTag "tr" 
         static member div (a:list<string*PHPdata>) = fun code -> html.tagb ("div",a) code
@@ -494,7 +495,7 @@ module htmlexpr =
                             {Key = "margin-top"; Value=p.y.ToString()+"px"}
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", s1+s) <| fun () ->
-                codewritein ("\\(" + text.code + "\\)")
+                writein ("\\(" + text.code + "\\)")
         static member image (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -519,20 +520,20 @@ module htmlexpr =
         static member image (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (contentsDir) then
+                if Directory.Exists contentsDir then
                     File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (contentsDir)
+                    printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [s.atr;Atr("src",contentsDir + "\\" + f)])
         static member video (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (contentsDir) then
+                if Directory.Exists contentsDir then
                     File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (contentsDir)
+                    printfn "directory not exist: %s" contentsDir
             else
                 printfn "video file not exist: %s" filename
             let st = Style [{Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
@@ -541,26 +542,43 @@ module htmlexpr =
         static member video (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (contentsDir) then
+                if Directory.Exists contentsDir then
                     File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (contentsDir)
+                    printfn "directory not exist: %s" contentsDir
             else
                 printfn "video file not exist: %s" filename
             html.tagv ("video", [s.atr;Atr("src", contentsDir + "\\" + f); Atr("controls", "")])
             html.tage "video"
+
+        static member code (style:list<string*PHPdata>) = fun cd ->
+            html.tagb0 ("pre",style) <| fun () ->
+                html.tagb0 ("code",[]) <| fun () ->
+                    cd()
+
+        static member code (style:list<string*PHPdata>, cd:PHPdata) =
+            html.tagb0 ("pre",style) <| fun () ->
+                html.tagb0 ("code",[]) <| fun () ->
+                    write cd.phpcode
+                    
+        static member code (style:list<string*string>) = html.code (style |> List.map (fun (a,b) -> a,PHPdata b))
+        
+        static member code (style:list<string*string>, cd:PHPdata) = html.code (style |> List.map (fun (a,b) -> a,PHPdata b),cd)
+        
+        static member code (cd:PHPdata) = html.code ([],cd)
+        
         static member listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
             html.tagb("div",["class","\"fig\""]) <| fun () ->
                 html.tagb ("span",["class","\"caption\""]) <| fun () ->
-                    codewritein(caption)
+                    writein(caption)
                 html.tagb("table",["class","\"tab\""]) <| fun () ->
                     for j in 0..tlist.Length-1 do
                         html.tagb ("tr",["class",match borderV[j] with |TB -> "\"trtb\"" |T -> "\"trt\"" |B -> "\"trb\"" |N -> "\"trn\""]) <| fun () ->
                             for i in 0..tlist[j].Length-1 do
                                 html.tagb ("td",["class",match borderH[i] with |L -> "\"tdl\"" |BorderH.C -> "\"tdc\"" |BorderH.R -> "\"tdr\"" |J -> "\"tdj\"" |Ll -> "\"tdlL\"" |Cl -> "\"tdcL\"" |Rl -> "\"tdrL\"" |Jl -> "\"tdjL\"" |Lr -> "\"tdlR\"" |Cr -> "\"tdcR\"" |Rr -> "\"tdrR\"" |Jr -> "\"tdjR\"" |Llr -> "\"tdlLR\"" |Clr -> "\"tdcLR\"" |Rlr -> "\"tdrLR\"" |Jlr -> "\"tdjLR\""]) <| fun () ->
-                                    codewritein <| tlist[j][i]
+                                    writein <| tlist[j][i]
         static member eq(text:num0) =
-            codewritein ("\\("+text.Expr.evalL programList[prIndex] + "\\)")
+            writein ("\\("+text.Expr.evalL programList[prIndex] + "\\)")
             
         /// キャラクター付き解説ページ
         static member page (c:list<Character*string>) (audio:Audio) code2 =
@@ -647,13 +665,13 @@ module htmlexpr =
                 match audio.Speaker with
                 |Character.Tale -> 
                     html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #d11aff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                        <| fun () -> codewritein audio.Subtitle.Subtitle
+                        <| fun () -> writein audio.Subtitle.Subtitle
                 |Character.Dang -> 
                     html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #455eff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                        <| fun () -> codewritein audio.Subtitle.Subtitle
+                        <| fun () -> writein audio.Subtitle.Subtitle
                 |Character.Armi -> 
                     html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #ff8800; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                        <| fun () -> codewritein audio.Subtitle.Subtitle
+                        <| fun () -> writein audio.Subtitle.Subtitle
                 // メインコンテンツ
                 html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
                     code2 p
@@ -669,28 +687,28 @@ module htmlexpr =
                     code p
         static member prevButton() =
                 html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
-                    codewritein "前へ"
+                    writein "前へ"
         static member nextButton() =
                 html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
-                    codewritein "次へ"
+                    writein "次へ"
         static member startButton2(id:string) (s:Style) (c:string) =
                 html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                    codewritein "Start"
+                    writein "Start"
         static member resetButton2(id:string) (s:Style) (c:string) =
                 html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                    codewritein "Reset"
+                    writein "Reset"
         static member switchCharacter() =
             html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if character then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
-                codewritein "キャラクター"
+                writein "キャラクター"
         static member switchSubtitle() =
             html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if subtitle then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
-                codewritein "字幕"
+                writein "字幕"
         static member switchAudio() =
             html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if voice then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
-                codewritein "音声"
+                writein "音声"
         static member audioPlayer() =
                 html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
         static member imageA (s:Style) = fun (p:position) (filename:string) ->
@@ -715,8 +733,8 @@ module htmlexpr =
                             {Key = "position"; Value = "absolute";}
                             {Key = "overflow-wrap"; Value = "break-word";}]
             html.tagb ("div", s1+s) <| fun () ->
-                text |> List.iter (fun s -> codewritein (s+"<br>"))
-                codewritein("\r\n")
+                text |> List.iter (fun s -> writein (s+"<br>"))
+                writein("\r\n")
             {Left = p.x;
             Right = p.x+double width+2.0*double padding;
             Top = p.y;
@@ -733,14 +751,14 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         // アニメーションシーケンスIDを発行
         let idstart,idreset = nextAnimationSeqID()
         switchJS <| fun () ->
-            codewritein ("function "+idstart+"(t){")
+            writein ("function "+idstart+"(t){")
         switchJSAnimationSeqReset <| fun () ->
-            codewritein ("function "+idreset+"(){")
+            writein ("function "+idreset+"(){")
         setFigure setting
         switchJS <| fun () ->
-            codewritein "}"
+            writein "}"
         switchJSAnimationSeqReset <| fun () ->
-            codewritein "}"
+            writein "}"
         animeFlow <- animeFlow@[idstart,idreset,setting]
         
     member this.animationEllipse s = AnimationEllipse(s,canvasX,canvasY)
@@ -754,22 +772,22 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("line", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    e.setAttribute(\"x1\", " + (startP.X t).code + ");")
-            codewritein ("    e.setAttribute(\"y1\", " + (startP.Y t).code + ");")
-            codewritein ("    e.setAttribute(\"x2\", " + (endP.X t).code + ");")
-            codewritein ("    e.setAttribute(\"y2\", " + (endP.Y t).code + ");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    e.setAttribute(\"x1\", " + (startP.X t).code + ");")
+            writein ("    e.setAttribute(\"y1\", " + (startP.Y t).code + ");")
+            writein ("    e.setAttribute(\"x2\", " + (endP.X t).code + ");")
+            writein ("    e.setAttribute(\"y2\", " + (endP.Y t).code + ");")
     member this.ellipse1 (s:Style) (center:tposition) (radiusX:int) (radiusY:int) =
         // コンテンツIDを発行
         let id = nextContentsID()
         html.taga ("ellipse", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    e.setAttribute(\"cx\", " + (center.X t).code + ");")
-            codewritein ("    e.setAttribute(\"cy\", " + (center.Y t).code + ");")
-            codewritein ("    e.setAttribute(\"rx\", \"" + radiusX.ToString() + "\");")
-            codewritein ("    e.setAttribute(\"ry\", \"" + radiusY.ToString() + "\");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    e.setAttribute(\"cx\", " + (center.X t).code + ");")
+            writein ("    e.setAttribute(\"cy\", " + (center.Y t).code + ");")
+            writein ("    e.setAttribute(\"rx\", \"" + radiusX.ToString() + "\");")
+            writein ("    e.setAttribute(\"ry\", \"" + radiusY.ToString() + "\");")
             
     member this.ellipse2 (s:Style) (startP:tposition) (center:tposition) (radiusX:int) (radiusY:int) (theta:num0->num0) (sweep:int) (interval:int) =
         // コンテンツIDを発行
@@ -777,21 +795,21 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("path", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("    var e = document.getElementById(\""+id+"\");")
-            codewritein ("    var x1 = " + (startP.X t).code + ";")
-            codewritein ("    var y1 = " + (startP.Y t).code + ";")
-            codewritein ("    var radiusX = " + radiusX.ToString() + ";")
-            codewritein ("    var radiusY = " + radiusY.ToString() + ";")
-            codewritein ("    var theta = " + (theta t).code + " / (" + interval.ToString() + " - 0.99);")
-            codewritein ("    var x2 = " + (center.X t).code + "+" + radiusX.ToString() + "*" + "Math.cos(theta);")
-            codewritein ("    var y2 = " + (center.Y t).code + "+"  + radiusY.ToString() +  "*" + "Math.sin(theta);")
-            codewritein "    var d = \"\" ;"
-            codewritein ("    if (6.283185307179586*t/" + interval.ToString() + "< Math.PI) {" )
-            codewritein ("       d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + 0 + \" \" + " + sweep.ToString() + " + \" \" + x2 + \" \" + y2 " + ";")
-            codewritein "    } else {"
-            codewritein ("       d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + 1 + \" \" + " + sweep.ToString() + " + \" \" + x2 + \" \" + y2 " + ";")
-            codewritein "    }"
-            codewritein ("    e.setAttribute(\"d\", " + "d" + ");")
+            writein ("    var e = document.getElementById(\""+id+"\");")
+            writein ("    var x1 = " + (startP.X t).code + ";")
+            writein ("    var y1 = " + (startP.Y t).code + ";")
+            writein ("    var radiusX = " + radiusX.ToString() + ";")
+            writein ("    var radiusY = " + radiusY.ToString() + ";")
+            writein ("    var theta = " + (theta t).code + " / (" + interval.ToString() + " - 0.99);")
+            writein ("    var x2 = " + (center.X t).code + "+" + radiusX.ToString() + "*" + "Math.cos(theta);")
+            writein ("    var y2 = " + (center.Y t).code + "+"  + radiusY.ToString() +  "*" + "Math.sin(theta);")
+            writein "    var d = \"\" ;"
+            writein ("    if (6.283185307179586*t/" + interval.ToString() + "< Math.PI) {" )
+            writein ("       d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + 0 + \" \" + " + sweep.ToString() + " + \" \" + x2 + \" \" + y2 " + ";")
+            writein "    } else {"
+            writein ("       d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + 1 + \" \" + " + sweep.ToString() + " + \" \" + x2 + \" \" + y2 " + ";")
+            writein "    }"
+            writein ("    e.setAttribute(\"d\", " + "d" + ");")
             
     member this.polygon1 (s:Style) (apex:list<tposition>) =
         // コンテンツIDを発行
@@ -799,7 +817,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("polygon", [Atr("id", id)] @ [s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("var e = document.getElementById(\"" + id + "\");")
+            writein ("var e = document.getElementById(\"" + id + "\");")
         let pp =
             apex
             |> List.map (fun (p:tposition) ->
@@ -808,7 +826,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
             )
         let pointsJS = String.concat " + \" \" + " pp
         switchJS <| fun () ->
-            codewritein ("e.setAttribute(\"points\", " + pointsJS + ");")
+            writein ("e.setAttribute(\"points\", " + pointsJS + ");")
             
     member this.text (s:Style) (center:tposition) (radius:tposition) (angleS:int) (angleE:int) (str:string) (interval:int) =
         // コンテンツIDを発行
@@ -817,21 +835,21 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         let t = num0(Var(Dt,"t",NaN))
         let lines = str.Split "\n" |> Array.toList
         switchJS <| fun () ->
-            codewritein("var e = document.getElementById(\""+id+"\");")
-            codewritein("var cx =" + (center.X t).code+ ";")
-            codewritein("var cy =" + (center.Y t).code+ ";")
-            codewritein("var theta1 = " + angleS.ToString() + "* Math.PI / 180.0;")
-            codewritein("var theta2 = " + angleE.ToString() + "* Math.PI / 180.0;")
-            codewritein "var delta = theta2 - theta1;"
-            codewritein "if (delta < 0) {delta += 2*Math.PI}"
-            codewritein "if (delta > Math.PI) {delta -= 2*Math.PI}"
-            codewritein("if (delta != 0) {var theta = theta1 + delta * (t / " + interval.ToString() + ")}")
-            codewritein "if (delta == 0) {var theta = theta1}"
-            codewritein("var x = cx + " + (radius.X t).code + "* Math.cos(theta);")
-            codewritein("var y = cy - " + (radius.Y t).code + "* Math.sin(theta);")
-            codewritein "e.setAttribute(\"x\", x);"
-            codewritein "e.setAttribute(\"y\", y);"
-            codewritein("e.innerHTML = " + (String.concat " + " (lines |> List.mapi (fun i s -> "\"<tspan dy='" + string (if i=0 then 0.0 else 1.2) + "em'>" + s + "</tspan>\""))) + ";")
+            writein("var e = document.getElementById(\""+id+"\");")
+            writein("var cx =" + (center.X t).code+ ";")
+            writein("var cy =" + (center.Y t).code+ ";")
+            writein("var theta1 = " + angleS.ToString() + "* Math.PI / 180.0;")
+            writein("var theta2 = " + angleE.ToString() + "* Math.PI / 180.0;")
+            writein "var delta = theta2 - theta1;"
+            writein "if (delta < 0) {delta += 2*Math.PI}"
+            writein "if (delta > Math.PI) {delta -= 2*Math.PI}"
+            writein("if (delta != 0) {var theta = theta1 + delta * (t / " + interval.ToString() + ")}")
+            writein "if (delta == 0) {var theta = theta1}"
+            writein("var x = cx + " + (radius.X t).code + "* Math.cos(theta);")
+            writein("var y = cy - " + (radius.Y t).code + "* Math.sin(theta);")
+            writein "e.setAttribute(\"x\", x);"
+            writein "e.setAttribute(\"y\", y);"
+            writein("e.innerHTML = " + (String.concat " + " (lines |> List.mapi (fun i s -> "\"<tspan dy='" + string (if i=0 then 0.0 else 1.2) + "em'>" + s + "</tspan>\""))) + ";")
             
     member this.rect (s:Style) (startP:tposition) (sx:int) (sy:int) =
         // コンテンツIDを発行
@@ -839,11 +857,11 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("rect", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("var e = document.getElementById(\""+id+"\");")
-            codewritein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            codewritein ("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
-            codewritein ("e.setAttribute(\"width\", \"" + sx.ToString() + "\");")
-            codewritein ("e.setAttribute(\"height\", \"" + sy.ToString() + "\");")
+            writein ("var e = document.getElementById(\""+id+"\");")
+            writein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
+            writein ("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
+            writein ("e.setAttribute(\"width\", \"" + sx.ToString() + "\");")
+            writein ("e.setAttribute(\"height\", \"" + sy.ToString() + "\");")
             
     member this.image1 (s:Style) (filename:string) (startP:tposition) (endP:tposition) (interval:int) =
         // コンテンツIDを発行
@@ -854,65 +872,65 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein ("var e = document.getElementById(\""+id+"\");")
-            codewritein "if (t == 0) e.style.visibility = 'visible';"
-            codewritein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            codewritein ("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
+            writein ("var e = document.getElementById(\""+id+"\");")
+            writein "if (t == 0) e.style.visibility = 'visible';"
+            writein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
+            writein ("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
             
     member this.jsStartControll(buttonIndex:string) =
         let fname = "start" + buttonIndex
         switchJSAnimationStart <| fun () ->
-            codewritein(fname+": () => {")
+            writein(fname+": () => {")
             for idstart,idreset,setting in animeFlow do
-                codewritein("    repeatSeq(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ", () => {")
+                writein("    repeatSeq(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ", () => {")
             for _ in animeFlow do
-                codewritein "    });"
-            codewritein "},"
+                writein "    });"
+            writein "},"
         fname
         
     member this.jsResetControll(buttonIndex:string) =
         let fname = "reset" + buttonIndex
         switchJSAnimationReset <| fun () ->
-            codewritein(fname+": () => {")
+            writein(fname+": () => {")
             for idstart,idreset,setting in animeFlow do
-                codewritein("    " + idreset + "();")
-            codewritein "},"
+                writein("    " + idreset + "();")
+            writein "},"
         fname
         
     static member jsAnimation codejs =
         switchBody <| fun () ->
-            codewritein "var t = 0;"
-            codewritein "var dt = 1;"
-            codewritein "window.onload=function(){"
-            codewritein "    var timer;"
-            codewritein "    var delay = 33;"
-            codewritein "    var loop = function(){"
-            codewritein "        t = t + dt;"
-            codewritein "        if(t >= 100){t = 0;}"
-            codewritein "        clearTimeout(timer);"
-            codewritein "        timer=setTimeout(loop,delay);"
-            codewritein "    }"
-            codewritein "    loop();"
-            codewritein "}"
-            codewritein codejs
+            writein "var t = 0;"
+            writein "var dt = 1;"
+            writein "window.onload=function(){"
+            writein "    var timer;"
+            writein "    var delay = 33;"
+            writein "    var loop = function(){"
+            writein "        t = t + dt;"
+            writein "        if(t >= 100){t = 0;}"
+            writein "        clearTimeout(timer);"
+            writein "        timer=setTimeout(loop,delay);"
+            writein "    }"
+            writein "    loop();"
+            writein "}"
+            writein codejs
             
     member this.Rect (s:Style) = fun (startP:tposition) (sx:int) (sy:int) ->
         counter <- counter + 1
         html.taga ("rect", [Atr("id",this.id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein("var e = document.getElementById(\""+this.id+"\");")
-            codewritein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            codewritein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
-            codewritein("e.setAttribute(\"width\", \"" + sx.ToString() + "\");")
-            codewritein("e.setAttribute(\"height\", \"" + sy.ToString() + "\");")
+            writein("var e = document.getElementById(\""+this.id+"\");")
+            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
+            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
+            writein("e.setAttribute(\"width\", \"" + sx.ToString() + "\");")
+            writein("e.setAttribute(\"height\", \"" + sy.ToString() + "\");")
             
     member this.polygon (s:Style) = fun (apex:list<tposition>) ->
         counter <- counter + 1
         html.taga ("polygon", [Atr("id", this.id)] @ [s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein("var e = document.getElementById(\"" + this.id + "\");")
+            writein("var e = document.getElementById(\"" + this.id + "\");")
             let pp =
                 apex
                 |> List.map (fun (p:tposition) ->
@@ -920,7 +938,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
                     "(" + (p.X t).code + ") + \",\" + (" + (p.Y t).code + ")"
                 )
             let pointsJS = String.concat " + \" \" + " pp
-            codewritein("e.setAttribute(\"points\", " + pointsJS + ");")
+            writein("e.setAttribute(\"points\", " + pointsJS + ");")
             
     member this.image (s:Style) = fun (startP:tposition) (endP:tposition) (filename:string) ->
         let f = Path.GetFileName filename
@@ -929,9 +947,9 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein("var e = document.getElementById(\""+this.id+"\");")
-            codewritein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            codewritein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
+            writein("var e = document.getElementById(\""+this.id+"\");")
+            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
+            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
             
     member this.image2 (id:string) (s:Style) (startP:tposition) (endP:tposition) (filename:string) =
         let f = Path.GetFileName filename
@@ -940,9 +958,9 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein("var e = document.getElementById(\""+id+"\");")
-            codewritein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            codewritein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
+            writein("var e = document.getElementById(\""+id+"\");")
+            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
+            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
             
     member this.image3 (s:Style) (startP:tposition) (filename:string) =
         let f = Path.GetFileName filename
@@ -951,9 +969,9 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
         switchJS <| fun () ->
-            codewritein("var e = document.getElementById(\""+this.id+"\");")
-            codewritein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            codewritein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
+            writein("var e = document.getElementById(\""+this.id+"\");")
+            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
+            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
             
 [<AutoOpen>]
 module dochtml =
@@ -984,9 +1002,9 @@ module dochtml =
             ]
             <| fun () ->
                 switchJSAnimationStart <| fun () ->
-                    codewritein "const animationStartMap = {"
+                    writein "const animationStartMap = {"
                 switchJSAnimationReset <| fun () ->
-                    codewritein "const animationResetMap = {"
+                    writein "const animationResetMap = {"
                 switchBody <| fun () ->
                     code()
                 if isPageAnimation then
@@ -1002,18 +1020,18 @@ module dochtml =
                     programList[prIndex].allCodes
                 // html書き込みストリーム作成
                 switchMain <| fun () ->
-                    codewritein "<!DOCTYPE html>"
+                    writein "<!DOCTYPE html>"
                     // html要素
                     html.tagb ("html", "lang=\"ja\"") <| fun () ->
                         // head要素
                         html.tagb ("head", "") <| fun () ->
                             // metaタグ
-                            codewritein "<meta charset=\"UTF-8\">"    
+                            writein "<meta charset=\"UTF-8\">"    
                             //追加（5/29）viewportタブ
-                            codewritein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                            writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
                             // titleタグ
                             html.tagb ("title", "") <| fun () ->
-                                codewritein filename
+                                writein filename
                             // MathJax
                             html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
                             html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeq.js\"") <| fun () -> ()
@@ -1022,13 +1040,13 @@ module dochtml =
                             html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationReset.js\"") <| fun () -> ()
                             // scriptタグ
                             html.tagb ("script", "") <| fun () ->
-                                codewritein codeDraw
+                                writein codeDraw
                                 // if codejs <> "" then
                                 //     FigureAnimation.jsAnimation codejs
                             // webフォント取得
-                            codewritein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                            codewritein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                            codewritein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                            writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                            writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                            writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
                         // body要素
                         let s0 = Style [area.backGroundColor "#aaaaaa"]
                         match pagesizeX,pagesizeY with
@@ -1038,7 +1056,7 @@ module dochtml =
                                 font.weight "500"
                                 font.size 16]
                             html.tagb ("body", [Atr("onload","draw()");s.atr]) <| fun () ->
-                                codewritein codeBody
+                                writein codeBody
                         |Some x,None ->
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
@@ -1047,7 +1065,7 @@ module dochtml =
                                     margin.right "auto"
                                     size.width (x.ToString()+"px")]
                                 html.tagb ("div", s1) <| fun () ->
-                                    codewritein codeBody
+                                    writein codeBody
                         |None,Some y->
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
@@ -1056,7 +1074,7 @@ module dochtml =
                                     margin.right "auto"
                                     size.height (y.ToString()+"px")]
                                 html.tagb ("div", s1) <| fun () ->
-                                    codewritein codeBody
+                                    writein codeBody
                         |Some x,Some y ->
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
@@ -1066,22 +1084,22 @@ module dochtml =
                                     size.width (x.ToString()+"px")
                                     size.height (y.ToString()+"px")]
                                 html.tagb ("div", s1) <| fun () ->
-                                    codewritein codeBody
+                                    writein codeBody
                                     
                 switchJSAnimationStart <| fun () ->
-                    codewritein "test: () => {}"
-                    codewritein "};"
+                    writein "test: () => {}"
+                    writein "};"
                 switchJSAnimationReset <| fun () ->
-                    codewritein "test: () => {}"
-                    codewritein "};"
-                    codewritein ""
-                    codewritein "function resetAll(){"
-                    codewritein "    for (const key in animationResetMap) {"
-                    codewritein "        if (typeof animationResetMap[key] === \"function\") {"
-                    codewritein "            animationResetMap[key]();"
-                    codewritein "        }"
-                    codewritein "    }"
-                    codewritein "}"
+                    writein "test: () => {}"
+                    writein "};"
+                    writein ""
+                    writein "function resetAll(){"
+                    writein "    for (const key in animationResetMap) {"
+                    writein "        if (typeof animationResetMap[key] === \"function\") {"
+                    writein "            animationResetMap[key]();"
+                    writein "        }"
+                    writein "    }"
+                    writein "}"
                 for i in 0..6 do
                     programList[i].close()
                 // bodyタグ一時コード削除
@@ -1120,36 +1138,36 @@ module htmlexpr2 =
             figcounter <- figcounter + 1
             let f = FigureAnimation(figcounter,outputdir,projectname,s.mX,s.mY,s.sX,s.sY)
             switchJS <| fun () ->
-                codewritein "function repeatSeq(fn, interval, Nt, onComplete)"
-                codewritein "{"
-                codewritein "    let t = 0;"
-                codewritein "    function run()"
-                codewritein "    {"
-                codewritein "        if (t < Nt)"
-                codewritein "        {"
-                codewritein "            fn(t);"
-                codewritein "            t++;"
-                codewritein "            setTimeout(run, interval);"
-                codewritein "        }"
-                codewritein "        else"
-                codewritein "        {"
-                codewritein "            onComplete();"
-                codewritein "        }"
-                codewritein "    }"
-                codewritein "    run();"
-                codewritein "}"
+                writein "function repeatSeq(fn, interval, Nt, onComplete)"
+                writein "{"
+                writein "    let t = 0;"
+                writein "    function run()"
+                writein "    {"
+                writein "        if (t < Nt)"
+                writein "        {"
+                writein "            fn(t);"
+                writein "            t++;"
+                writein "            setTimeout(run, interval);"
+                writein "        }"
+                writein "        else"
+                writein "        {"
+                writein "            onComplete();"
+                writein "        }"
+                writein "    }"
+                writein "    run();"
+                writein "}"
             switchBody <| fun () ->
-                codewritein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
-                codewritein ("width=\""+s.sX.ToString()+"px\" ")
-                codewritein ("heigth=\""+s.sY.ToString()+"px\" ")
-                codewritein "xmlns=\"http://www.w3.org/2000/svg\" "
-                codewritein ("style=\"margin-left: "+s.mX.ToString()+"; ")
-                codewritein ("margin-top: "+s.mY.ToString()+"; ")
-                codewritein "position: absolute;"
-                codewritein ("background-color: "+s.backgroundColor+";")
-                codewritein "\">"
+                writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
+                writein ("width=\""+s.sX.ToString()+"px\" ")
+                writein ("heigth=\""+s.sY.ToString()+"px\" ")
+                writein "xmlns=\"http://www.w3.org/2000/svg\" "
+                writein ("style=\"margin-left: "+s.mX.ToString()+"; ")
+                writein ("margin-top: "+s.mY.ToString()+"; ")
+                writein "position: absolute;"
+                writein ("background-color: "+s.backgroundColor+";")
+                writein "\">"
                 code(f,p)
-                codewritein "</svg>"
+                writein "</svg>"
             let asc = nextAnimationGroup()
             let fnameStart = f.jsStartControll asc
             let fnameReset = f.jsResetControll asc

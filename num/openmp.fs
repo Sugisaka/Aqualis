@@ -26,21 +26,21 @@ namespace Aqualis
                     match list,counter with
                     |[],_ ->
                         if counter>0 && n=0 then
-                            codewritein("!$omp parallel do private("+s+")"+"\n")
+                            writein("!$omp parallel do private("+s+")"+"\n")
                         elif (counter>0) then
-                            codewritein("!$omp private("+s+")"+"\n")
+                            writein("!$omp private("+s+")"+"\n")
                         else
                             ()
                     |(_,_,pp,_)::lst,7 ->
                         if n=0 then
-                            codewritein("!$omp parallel do private("+s+") &"+"\n")
+                            writein("!$omp parallel do private("+s+") &"+"\n")
                         else
-                            codewritein("!$omp private("+s+") &"+"\n")
+                            writein("!$omp private("+s+") &"+"\n")
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
                 printplist programList[prIndex].varPrivate.list 0 0 ""
-                codewritein "!$omp end parallel do\n"
+                writein "!$omp end parallel do\n"
                 programList[prIndex].varPrivate.clear()
             |C99 ->
                 isOmpUsed <- true
@@ -52,9 +52,9 @@ namespace Aqualis
                 programList[prIndex].appendOpen()
                 if programList[prIndex].varPrivate.list.Length > 0 then
                     let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
-                    codewritein("#pragma omp parallel for private("+s+")\n")
+                    writein("#pragma omp parallel for private("+s+")\n")
                 else
-                    codewritein "#pragma omp parallel for\n"
+                    writein "#pragma omp parallel for\n"
                 programList[prIndex].varPrivate.clear()
             |_ ->
                 ()
@@ -74,21 +74,21 @@ namespace Aqualis
                     match list,counter with
                     |[],_ ->
                         if counter>0 && n=0 then
-                            codewritein("!$omp parallel do private("+s+") num_threads("+(string th)+")"+"\n")
+                            writein("!$omp parallel do private("+s+") num_threads("+(string th)+")"+"\n")
                         elif counter>0 then
-                            codewritein("!$omp private("+s+")"+"\n")
+                            writein("!$omp private("+s+")"+"\n")
                         else
                             ()
                     |(_,_,pp,_)::lst,7 ->
                         if n=0 then
-                            codewritein("!$omp parallel do private("+s+") num_threads("+(string th)+") &"+"\n")
+                            writein("!$omp parallel do private("+s+") num_threads("+(string th)+") &"+"\n")
                         else
-                            codewritein("!$omp private("+s+") &"+"\n")
+                            writein("!$omp private("+s+") &"+"\n")
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
                 printplist programList[prIndex].varPrivate.list 0 0 ""
-                codewritein "!$omp end parallel do\n"
+                writein "!$omp end parallel do\n"
                 programList[prIndex].varPrivate.clear()
             |C99 ->
                 isOmpUsed <- true
@@ -100,9 +100,9 @@ namespace Aqualis
                 programList[prIndex].appendOpen()
                 if programList[prIndex].varPrivate.list.Length > 0 then
                     let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
-                    codewritein("#pragma omp parallel for private("+s+") num_threads("+(string th)+")\n")
+                    writein("#pragma omp parallel for private("+s+") num_threads("+(string th)+")\n")
                 else
-                    codewritein("#pragma omp parallel for num_threads("+(string th)+")\n")
+                    writein("#pragma omp parallel for num_threads("+(string th)+")\n")
                 programList[prIndex].varPrivate.clear()
             |_ ->
                 ()
@@ -122,21 +122,21 @@ namespace Aqualis
                     match list,counter with
                     |[],_ ->
                         if counter>0 && n=0 then
-                            codewritein("!$omp parallel do private("+s+") reduction("+ope+":"+var.code+")"+"\n")
+                            writein("!$omp parallel do private("+s+") reduction("+ope+":"+var.code+")"+"\n")
                         elif counter>0 then
-                            codewritein("!$omp private("+s+")"+"\n")
+                            writein("!$omp private("+s+")"+"\n")
                         else
                             ()
                     |(_,_,pp,_)::lst,7 ->
                         if n=0 then
-                            codewritein("!$omp parallel do private("+s+") reduction("+ope+":"+var.code+") &"+"\n")
+                            writein("!$omp parallel do private("+s+") reduction("+ope+":"+var.code+") &"+"\n")
                         else
-                            codewritein("!$omp private("+s+") &"+"\n")
+                            writein("!$omp private("+s+") &"+"\n")
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
                 printplist programList[prIndex].varPrivate.list 0 0 ""
-                codewritein "!$omp end parallel do\n"
+                writein "!$omp end parallel do\n"
                 programList[prIndex].varPrivate.clear()
             |C99 ->
                 isOmpUsed <- true
@@ -150,13 +150,13 @@ namespace Aqualis
                     let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
                     match ope with
                     |"+" |"-" |"*" ->
-                        codewritein("#pragma omp parallel for private("+s+") reduction("+ope+":"+var.code+")\n")
+                        writein("#pragma omp parallel for private("+s+") reduction("+ope+":"+var.code+")\n")
                     |_ ->
                         ()
                 else
                     match ope with
                     |"+" |"-" |"*" ->
-                        codewritein("#pragma omp parallel for reduction("+ope+":"+var.code+")\n")
+                        writein("#pragma omp parallel for reduction("+ope+":"+var.code+")\n")
                     |_ ->
                         ()
                 programList[prIndex].varPrivate.clear()
@@ -178,21 +178,21 @@ namespace Aqualis
                     match list,counter with
                     |[],_ ->
                         if counter>0 && n=0 then
-                            codewritein("!$omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+")"+"\n")
+                            writein("!$omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+")"+"\n")
                         elif counter>0 then
-                            codewritein("!$omp private("+s+")"+"\n")
+                            writein("!$omp private("+s+")"+"\n")
                         else
                             ()
                     |(_,_,pp,_)::lst,7 ->
                         if n=0 then
-                            codewritein("!$omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+") &"+"\n")
+                            writein("!$omp parallel do private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+") &"+"\n")
                         else
-                            codewritein("!$omp private("+s+") &"+"\n")
+                            writein("!$omp private("+s+") &"+"\n")
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
                 printplist programList[prIndex].varPrivate.list 0 0 ""
-                codewritein "!$omp end parallel do\n"
+                writein "!$omp end parallel do\n"
                 programList[prIndex].varPrivate.clear()
             |C99 ->
                 isOmpUsed <- true
@@ -206,13 +206,13 @@ namespace Aqualis
                     let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
                     match ope with
                     |"+" |"-" |"*" ->
-                        codewritein("#pragma omp parallel for private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+")\n")
+                        writein("#pragma omp parallel for private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+")\n")
                     |_ ->
                         ()
                 else
                     match ope with
                     |"+" |"-" |"*" ->
-                        codewritein("#pragma omp parallel for num_threads("+(string th)+") reduction("+ope+":"+var.code+")\n")
+                        writein("#pragma omp parallel for num_threads("+(string th)+") reduction("+ope+":"+var.code+")\n")
                     |_ ->
                         ()
                 programList[prIndex].varPrivate.clear()
@@ -232,16 +232,16 @@ namespace Aqualis
                 programList[prIndex].appendOpen()
                 if programList[prIndex].varPrivate.list.Length>0 then
                     let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
-                    codewritein("!$omp parallel private(" + s + ") num_threads(" + string th + ")\n")
+                    writein("!$omp parallel private(" + s + ") num_threads(" + string th + ")\n")
                 else
-                    codewritein("!$omp parallel num_threads(" + string th + ")\n")
+                    writein("!$omp parallel num_threads(" + string th + ")\n")
                 programList[prIndex].indentInc()
-                codewritein("!$omp sections"+"\n")
+                writein("!$omp sections"+"\n")
                 programList[prIndex].indentInc()
                 programList[prIndex].indentDec()
-                codewritein("!$omp end sections"+"\n")
+                writein("!$omp end sections"+"\n")
                 programList[prIndex].indentDec()
-                codewritein "!$omp end parallel\n"
+                writein "!$omp end parallel\n"
                 programList[prIndex].varPrivate.clear()
             |C99 ->
                 isOmpUsed <- true
@@ -253,18 +253,18 @@ namespace Aqualis
                 programList[prIndex].appendOpen()
                 if programList[prIndex].varPrivate.list.Length > 0 then
                     let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
-                    codewritein("#pragma omp parallel private(" + s + ") num_threads(" + string th + ")\n")
+                    writein("#pragma omp parallel private(" + s + ") num_threads(" + string th + ")\n")
                 else
-                    codewritein("#pragma omp parallel num_threads(" + string th + ")\n")
-                codewritein("{"+"\n")
+                    writein("#pragma omp parallel num_threads(" + string th + ")\n")
+                writein("{"+"\n")
                 programList[prIndex].indentInc()
-                codewritein("#pragma omp sections"+"\n")
-                codewritein("{"+"\n")
+                writein("#pragma omp sections"+"\n")
+                writein("{"+"\n")
                 programList[prIndex].indentInc()
                 programList[prIndex].indentDec()
-                codewritein("}"+"\n")
+                writein("}"+"\n")
                 programList[prIndex].indentDec()
-                codewritein("}"+"\n")
+                writein("}"+"\n")
                 programList[prIndex].varPrivate.clear()
             |_ ->
                 ()
@@ -273,13 +273,13 @@ namespace Aqualis
         static member section code =
             match programList[prIndex].language with
             |Fortran ->
-                codewritein("!$omp section"+"\n")
+                writein("!$omp section"+"\n")
                 code()
             |C99 ->
-                codewritein("#pragma omp section"+"\n")
-                codewritein("{"+"\n")
+                writein("#pragma omp section"+"\n")
+                writein("{"+"\n")
                 code()
-                codewritein("}"+"\n")
+                writein("}"+"\n")
             |_ ->
                 ()
 

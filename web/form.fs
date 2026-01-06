@@ -77,8 +77,14 @@ type TextBox(name:PHPdata) =
     member _.show(text:string,atr:list<string*string>) = t.input(text,atr)
     /// テキストボックスの表示(表示テキストとスタイル指定)
     member _.show(text:PHPdata,atr:list<string*string>) = t.input(text,atr)
+    /// テキストボックスの表示(表示テキストとスタイル指定)
+    member _.show(text:num0,atr:list<string*string>) = t.input(PHPdata text,atr)
     member _.show_lock(v:PHPdata) = t.input_lock v
+    member _.show_lock(v:num0) = t.input_lock v
     member _.show_lock(v:string) = t.input_lock v
+    member _.show_lock(v:PHPdata,atr:list<string*string>) = t.input_lock (v,atr)
+    member _.show_lock(v:num0,atr:list<string*string>) = t.input_lock (v,atr)
+    member _.show_lock(v:string,atr:list<string*string>) = t.input_lock (v,atr)
     /// テキストボックスの表示(送信テキストを表示)
     member _.show_copy(atr:list<string*string>) = t.input_copy atr
     /// テキストボックスの表示(送信テキストを表示、編集不可)
@@ -183,9 +189,9 @@ type ComboBox(name:PHPdata,items:list<ComboBoxItem>) =
             for i in items do
                 //指定された選択肢を選択中とする
                 if items[selectedIndex].Text = i.Text then
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 else
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem() =
         //c.select <| fun () ->
@@ -193,9 +199,9 @@ type ComboBox(name:PHPdata,items:list<ComboBoxItem>) =
             for i in items do
                 br.if2(this.selectedTag .= PHPdata i.Tag)
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem(text:num0) =
         //c.select <| fun () ->
@@ -203,9 +209,9 @@ type ComboBox(name:PHPdata,items:list<ComboBoxItem>) =
             for i in items do
                 br.if2(text .= num0(Var(Nt,i.Text,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem(text:PHPdata) =
         //c.select <| fun () ->
@@ -213,15 +219,15 @@ type ComboBox(name:PHPdata,items:list<ComboBoxItem>) =
             for i in items do
                 br.if2(text .= PHPdata i.Text)
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示
     member _.show() =
         //c.select <| fun () ->
         html.select name <| fun () ->
             for i in items do
-                html.option i.Tag <| fun () -> codewritein i.Text
+                html.option i.Tag <| fun () -> writein i.Text
     member _.foreach code =
         for i in items do code i
         
@@ -237,9 +243,9 @@ type ComboBoxVar() =
             for i in items do
                 //指定された選択肢を選択中とする
                 if items[selectedIndex].Text = i.Text then
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 else
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selected(id:PHPdata,items:list<ComboBoxItem>) =
         let c = post id
@@ -248,9 +254,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(this.selectedTag id .= PHPdata i.Tag)
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedTag(id:PHPdata,items:list<ComboBoxItem>,tag:PHPdata) =
         //c.select <| fun () ->
@@ -258,9 +264,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(tag .= num0(Var(Nt,i.Tag,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedTag_disabled(id:PHPdata,items:list<ComboBoxItem>,tag:PHPdata) =
         //c.select <| fun () ->
@@ -268,9 +274,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(tag .= num0(Var(Nt,i.Tag,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem(id:PHPdata,items:list<ComboBoxItem>,text:num0) =
         //c.select <| fun () ->
@@ -278,9 +284,9 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(text .= num0(Var(Nt,i.Text,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem_disabled(id:PHPdata,items:list<ComboBoxItem>,text:num0) =
         //c.select <| fun () ->
@@ -288,16 +294,16 @@ type ComboBoxVar() =
             for i in items do
                 br.if2(text .= num0(Var(Nt,i.Text,NaN)))
                 <| fun () ->
-                    html.option_selected i.Tag <| fun () -> codewritein i.Text
+                    html.option_selected i.Tag <| fun () -> writein i.Text
                 <| fun () ->
-                    html.option i.Tag <| fun () -> codewritein i.Text
+                    html.option i.Tag <| fun () -> writein i.Text
 
     /// コンボボックスを表示
     member _.show(id:PHPdata,items:list<ComboBoxItem>) =
         //c.select <| fun () ->
         html.select id <| fun () ->
             for i in items do
-                html.option i.Tag <| fun () -> codewritein i.Text
+                html.option i.Tag <| fun () -> writein i.Text
     member _.foreach (items:list<ComboBoxItem>) code =
         for i in items do code i
         

@@ -15,84 +15,84 @@ namespace Aqualis
                 |Fortran ->
                     ch.i <| fun seedsize ->
                     ch.i01 <| fun seed ->
-                        codewritein("call random_seed(size="+seedsize.Expr.eval (programList[prIndex])+")")
+                        writein("call random_seed(size="+seedsize.Expr.eval (programList[prIndex])+")")
                         seed.allocate seedsize
                         iter.num seedsize <| fun i ->
-                            codewritein("call system_clock(count="+seed.code+"("+(i+1).Expr.eval (programList[prIndex])+"))")
-                            codewritein("call random_seed(put="+seed.code+"(:))")
+                            writein("call system_clock(count="+seed.code+"("+(i+1).Expr.eval (programList[prIndex])+"))")
+                            writein("call random_seed(put="+seed.code+"(:))")
                         let setseed code =
                             code seed
-                            codewritein("call random_seed(put="+seed.code+"(:))")
+                            writein("call random_seed(put="+seed.code+"(:))")
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein("call random_number("+n+")")
+                                writein("call random_number("+n+")")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                         seed.deallocate()
                 |C99 ->
                     programList[prIndex].hlist.add "<time.h>"
-                    codewritein "srand((unsigned) time(NULL));"
+                    writein "srand((unsigned) time(NULL));"
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
-                            codewritein("srand("+seed.code+"[0]);")
+                            writein("srand("+seed.code+"[0]);")
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein(n + " = (double)rand()/RAND_MAX;")
+                                writein(n + " = (double)rand()/RAND_MAX;")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |LaTeX ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
-                            codewritein("random_seed="+seed.code+"[0])")
+                            writein("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein(n + " = (random number: 0->1);")
+                                writein(n + " = (random number: 0->1);")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |HTML ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
-                            codewritein("random_seed="+seed.code+"[0])")
+                            writein("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein(n + " = (random number: 0->1);")
+                                writein(n + " = (random number: 0->1);")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |HTMLSequenceDiagram ->
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
-                            codewritein("random_seed="+seed.code+"[0])")
+                            writein("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein(n + " = (random number: 0->1);")
+                                writein(n + " = (random number: 0->1);")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |Python ->
-                    codewritein "random_seed = numpy.random.default_rng()"
+                    writein "random_seed = numpy.random.default_rng()"
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
                             code seed
-                            codewritein("random_seed = numpy.random.default_rng("+seed.code+"[0])")
+                            writein("random_seed = numpy.random.default_rng("+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein(n + " = random_seed.uniform(0.0, 1.0)")
+                                writein(n + " = random_seed.uniform(0.0, 1.0)")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |JavaScript ->
                     ch.i1 1 <| fun seed ->
@@ -101,9 +101,9 @@ namespace Aqualis
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein(n + " = Math.random();")
+                                writein(n + " = Math.random();")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                         seed.deallocate()
                 |PHP ->
@@ -113,9 +113,9 @@ namespace Aqualis
                         let getrand (x:num0) =
                             match x.Expr with
                             |Var(_,n,_) -> 
-                                codewritein(n + " = random_int(0, PHP_INT_MAX) / PHP_INT_MAX;")
+                                writein(n + " = random_int(0, PHP_INT_MAX) / PHP_INT_MAX;")
                             |_ -> 
-                                codewritein "Error:double型以外の変数に乱数値を代入できません"
+                                writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                         seed.deallocate()
                 |Numeric ->

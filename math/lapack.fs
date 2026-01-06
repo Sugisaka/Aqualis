@@ -112,20 +112,20 @@ namespace Aqualis
                             N <== matrix.size1
                             b <== 1
                             ch.i1 N <| fun ipiv ->
-                                codewritein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                writein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
                     |C99 -> 
                         ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
                             b <== 1
                             ch.i1 N <| fun ipiv ->
                                 programList[prIndex].elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
-                                codewritein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                writein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
                     |LaTeX -> 
-                        codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$$\\\\\n")
+                        writein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$$\\\\\n")
                     |HTML -> 
-                        codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                        writein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
-                        codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        writein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                 tbinder.d matrix <| fun () ->
                     match programList[prIndex].language with
@@ -134,20 +134,20 @@ namespace Aqualis
                             N <== matrix.size1
                             b <== 1
                             ch.i1 N <| fun ipiv ->
-                                codewritein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                writein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
                     |C99 -> 
                         ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
                             b <== 1
                             ch.i1 N <| fun ipiv ->
                                 programList[prIndex].elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
-                                codewritein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                writein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
                     |LaTeX -> 
-                        codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
+                        writein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                     |HTML -> 
-                        codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                        writein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
-                        codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        writein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                     
         ///<summary>連立方程式の求解</summary>
@@ -164,20 +164,20 @@ namespace Aqualis
                             N <== matrix.size1
                             b <== y.size2
                             ch.i1 N <| fun ipiv ->
-                                codewritein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                writein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
                     |C99 -> 
                         ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
                             b <== y.size2
                             ch.i1 N <| fun ipiv ->
                                 programList[prIndex].elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
-                                codewritein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                writein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
                     |LaTeX -> 
-                        codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
+                        writein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                     |HTML -> 
-                        codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                        writein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
-                        codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        writein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                 tbinder.d matrix <| fun () ->
                     match programList[prIndex].language with
@@ -186,20 +186,20 @@ namespace Aqualis
                             N <== matrix.size1
                             b <== y.size2
                             ch.i1 N <| fun ipiv ->
-                                codewritein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                writein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
                     |C99 -> 
                         ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
                             b <== y.size2
                             ch.i1 N <| fun ipiv ->
                                 programList[prIndex].elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
-                                codewritein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                writein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
                     |LaTeX -> 
-                        codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
+                        writein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                     |HTML -> 
-                        codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                        writein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
-                        codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        writein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                     
         ///<summary>逆行列の計算</summary>
@@ -218,20 +218,20 @@ namespace Aqualis
                             npre<==mat1.size1
                             ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
-                                codewritein("call zgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
+                                writein("call zgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
                     |C99 -> 
                         ch.ii <| fun (npre,info) ->
                             npre<==mat1.size1
                             ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
                                 programList[prIndex].elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
-                                codewritein("zgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
+                                writein("zgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
                     |LaTeX -> 
-                        codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
+                        writein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                     |HTML -> 
-                        codewritein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
+                        writein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
                     |Python ->
-                        codewritein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
+                        writein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
                     |_ -> ()
                 tbinder.d mat2 <| fun () ->
                     match programList[prIndex].language with
@@ -240,7 +240,7 @@ namespace Aqualis
                             npre<==mat1.size1
                             ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
-                                codewritein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
+                                writein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
                                 br.if1 (info .=/ 0) <| fun () -> print.s <| "InvMatrix Info: "++info
                     |C99 -> 
                         ch.ii <| fun (npre,info) ->
@@ -248,14 +248,14 @@ namespace Aqualis
                             ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
                                 programList[prIndex].elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
-                                codewritein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
+                                writein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
                                 br.if1 (info .=/ 0) <| fun () -> print.s <| "InvMatrix Info: "++info
                     |LaTeX -> 
-                        codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
+                        writein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                     |HTML -> 
-                        codewritein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
+                        writein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
                     |Python ->
-                        codewritein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
+                        writein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
                     |_ -> ()
                     
         ///<summary>行列の階数</summary>
@@ -277,7 +277,7 @@ namespace Aqualis
                                 ch.z1 lwork <| fun work ->
                                     ipiv.clear()
                                     lwork <== 2*npre+npre
-                                    codewritein("call zgesdd('N', " + 
+                                    writein("call zgesdd('N', " + 
                                         npre.code + "," + " " + 
                                         npre.code + ","  + 
                                         mat.code+", "  + 
@@ -302,8 +302,8 @@ namespace Aqualis
                                     ipiv.clear()
                                     lwork <== 2*npre+npre
                                     programList[prIndex].elist.add "void zgesdd_(char jobz, int m, int n, double complex *a, int lda, double *s, double complex *u, int ldu, double complex *vt, int ldvt, double complex *work, int lwork, double *rwork, int *iwork, int info)"
-                                    codewritein(jobz.code + " = 'N';")
-                                    codewritein("zgesdd_(" +
+                                    writein(jobz.code + " = 'N';")
+                                    writein("zgesdd_(" +
                                         "&" + jobz.code + ", " +
                                         "&" + npre.code + "," +
                                         "&" + npre.code + ", " + 
@@ -321,15 +321,15 @@ namespace Aqualis
                                         "&" + info.code + ");")
                                     br.if1 (info .=/ 0) <| fun () -> print.s <| "rank Info: "++info
                         |LaTeX -> 
-                            codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
+                            writein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                         |HTML -> 
-                            codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
+                            writein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                         |Python -> 
                             //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                            codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
-                            codewritein "threshold = 1e-10  # ゼロの閾値\n"
+                            writein(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
+                            writein "threshold = 1e-10  # ゼロの閾値\n"
                             //行列の階級rank.codeを求める
-                            codewritein(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
+                            writein(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
                         |_ -> ()
                     tbinder.d mat <| fun () ->
                         //特異値分解を利用
@@ -341,7 +341,7 @@ namespace Aqualis
                                 ch.d1 lwork <| fun work ->
                                     ipiv.clear()
                                     lwork <== 2*npre+npre
-                                    codewritein("call dgesdd('N', " + 
+                                    writein("call dgesdd('N', " + 
                                         npre.code + "," + " " + 
                                         npre.code + ","  + 
                                         mat.code+", "  + 
@@ -366,8 +366,8 @@ namespace Aqualis
                                     ipiv.clear()
                                     lwork <== 2*npre+npre
                                     programList[prIndex].elist.add "void dgesdd_(char jobz, int m, int n, double *a, int lda, double *s, double *u, int ldu, double *vt, int ldvt, double *work, int lwork, int *iwork, int info)"
-                                    codewritein(jobz.code + " = 'N';")
-                                    codewritein("dgesdd_(" +
+                                    writein(jobz.code + " = 'N';")
+                                    writein("dgesdd_(" +
                                         "&" + jobz.code + ", " +
                                         "&" + npre.code + "," +
                                         "&" + npre.code + ", " + 
@@ -385,15 +385,15 @@ namespace Aqualis
                                         "&" + info.code + ");")
                                     br.if1 (info .=/ 0) <| fun () -> print.s <| "rank Info: "++info
                         |LaTeX -> 
-                            codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
+                            writein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                         |HTML -> 
-                            codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
+                            writein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                         |Python -> 
                             //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                            codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
-                            codewritein "threshold = 1e-10  # ゼロの閾値\n"
+                            writein(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
+                            writein "threshold = 1e-10  # ゼロの閾値\n"
                             //行列の階級rank.codeを求める
-                            codewritein(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
+                            writein(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
                         |_ -> ()
                     rank.clear()
                     s.foreach <| fun i -> 
@@ -470,7 +470,7 @@ namespace Aqualis
                                             ch.d1 (2*npre) <| fun rwork ->
                                                 eigenvalues.clear()
                                                 ldvldummy <== 1
-                                                codewritein("call zgeev('No left vectors', 'Vectors (right)', "    + 
+                                                writein("call zgeev('No left vectors', 'Vectors (right)', "    + 
                                                     npre.code + ", "   + 
                                                     mat1.code + ", "  + 
                                                     npre.code + ", "  + 
@@ -497,9 +497,9 @@ namespace Aqualis
                                                 eigenvalues.clear()
                                                 ldvldummy <== 1
                                                 programList[prIndex].elist.add "void zgeev_(char *, char *, int *, double complex *, int *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
-                                                codewritein(jobvl.code + " = 'N';")
-                                                codewritein(jobvr.code + " = 'V';")
-                                                codewritein("zgeev_(" +
+                                                writein(jobvl.code + " = 'N';")
+                                                writein(jobvr.code + " = 'V';")
+                                                writein("zgeev_(" +
                                                     "&" + jobvl.code + ", " +
                                                     "&" + jobvr.code + ", " +
                                                     "&" + npre.code + ", "  + 
@@ -516,11 +516,11 @@ namespace Aqualis
                                                     "&" + info.code + ");")
                                                 br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                     |LaTeX -> 
-                        codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
+                        writein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
                     |HTML -> 
-                        codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
+                        writein("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
                     |Python -> 
-                        codewritein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
+                        writein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
                     |_ -> ()
             tbinder.d mat1 <| fun () ->
                 group.section "非対称実行列の固有値" <| fun () ->
@@ -537,7 +537,7 @@ namespace Aqualis
                                         ch.d1 lwork <| fun work ->
                                                 eigenvalues.clear()
                                                 ldvldummy <== 1
-                                                codewritein("call dgeev('No left vectors', 'Vectors (right)', "    + 
+                                                writein("call dgeev('No left vectors', 'Vectors (right)', "    + 
                                                     npre.code + ", "   + 
                                                     mat1.code + ", "  + 
                                                     npre.code + ", "  + 
@@ -566,9 +566,9 @@ namespace Aqualis
                                                 eigenvalues.clear()
                                                 ldvldummy <== 1
                                                 programList[prIndex].elist.add "void dgeev_(char *, char *, int *, double *, int *, double *, double *, int *, double *, int *, double *, int *, double *, int *)"
-                                                codewritein(jobvl.code + " = 'N';")
-                                                codewritein(jobvr.code + " = 'V';")
-                                                codewritein("dgeev_("+
+                                                writein(jobvl.code + " = 'N';")
+                                                writein(jobvr.code + " = 'V';")
+                                                writein("dgeev_("+
                                                     "&" + jobvl.code + ", " +
                                                     "&" + jobvr.code + ", " +
                                                     "&" + npre.code + ", "  + 
@@ -586,11 +586,11 @@ namespace Aqualis
                                                 br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
                                                 eigenvalues.foreach <| fun i -> eigenvalues[i] <== eigenvalues_re[i] + asm.uj * eigenvalues_im[i]
                     |LaTeX -> 
-                        codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
+                        writein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
                     |HTML -> 
-                        codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
+                        writein("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
                     |Python -> 
-                        codewritein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
+                        writein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
                     |_ -> ()
                     
         /// <summary>
@@ -619,7 +619,7 @@ namespace Aqualis
                                         ldvldummy <== 1
                                         match programList[prIndex].language with
                                         |Fortran -> 
-                                            codewritein("call zggev("+
+                                            writein("call zggev("+
                                                 "'N'" + ", " +
                                                 "'V'" + ", " + 
                                                 npre.code + ", " + 
@@ -641,9 +641,9 @@ namespace Aqualis
                                             ch.c <| fun jobvl ->
                                             ch.c <| fun jobvr ->
                                                 programList[prIndex].elist.add "void zggev_(char *, char *, int *, double complex *, int *, double complex *, int *, double complex *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
-                                                codewritein(jobvl.code + " = 'N';")
-                                                codewritein(jobvr.code + " = 'V';")
-                                                codewritein("zggev_(" +
+                                                writein(jobvl.code + " = 'N';")
+                                                writein(jobvr.code + " = 'V';")
+                                                writein("zggev_(" +
                                                     "&" + jobvl.code + ", " +
                                                     "&" + jobvr.code + ", " +
                                                     "&" + npre.code + ", " +
@@ -662,9 +662,9 @@ namespace Aqualis
                                                     rwork.code + ", " +
                                                     "&" + info.code + ");")
                                         |LaTeX -> 
-                                            codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
+                                            writein("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                                         |HTML -> 
-                                            codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
+                                            writein("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
                                         //Pythonのscipy.linalg.eigは、一般化固有値問題を単独の出力で処理することが可能
                                         //Pythonでは、一般化固有値の計算が単一の出力で提供されるため、ユーザーは結果を手軽に利用できる。これにより、計算過程や出力の管理がシンプルになる。
                                         //Fortranでは、二つの固有値配列を出力することで、行列 AとB の関係性を明示的に示している。この設計は、行列間の相互作用をより詳細に理解するためのもの
@@ -672,8 +672,8 @@ namespace Aqualis
                                         //ちなみに一般化固有ベクトルは二つも出す必要はないので、二行目で出しているeigenvectors.code_dasokuはおまけだと思っていい。理由は以下。
                                         //一般化固有値問題 Ax=λBx の形式では、行列 B に対して左固有ベクトルが計算されることはない。したがって、一般化固有ベクトルは一意に定まることが多い。
                                         |Python -> 
-                                            codewritein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
-                                            codewritein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
+                                            writein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
+                                            writein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
                                         |_ -> ()
                                         br.if1 (info .=/ 0) <| fun () -> print.s <| "Eigenvalue Info: "++info
             tbinder.d mat1 <| fun () ->
@@ -695,7 +695,7 @@ namespace Aqualis
                                         eigenvalues1im.clear()
                                         eigenvalues2.clear()
                                         ldvldummy <== 1
-                                        codewritein("call dggev("+
+                                        writein("call dggev("+
                                             "'N'" + ", " +
                                             "'V'" + ", " + 
                                             npre.code + ", " + 
@@ -732,9 +732,9 @@ namespace Aqualis
                                         eigenvalues2.clear()
                                         ldvldummy <== 1
                                         programList[prIndex].elist.add "void dggev_(char *, char *, int *, double complex *, int *, double complex *, int *, double complex *, double complex *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
-                                        codewritein(jobvl.code + " = 'N';")
-                                        codewritein(jobvr.code + " = 'V';")
-                                        codewritein("dggev_(" +
+                                        writein(jobvl.code + " = 'N';")
+                                        writein(jobvr.code + " = 'V';")
+                                        writein("dggev_(" +
                                             "&" + jobvl.code + ", " +
                                             "&" + jobvr.code + ", " +
                                             "&" + npre.code + ", " +
@@ -756,12 +756,12 @@ namespace Aqualis
                                         iter.num eigenvalues1.size1 <| fun i ->
                                             eigenvalues1[i] <== eigenvalues1re[i] + asm.uj + eigenvalues1im[i]
                     |LaTeX -> 
-                        codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
+                        writein("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                     |HTML -> 
-                        codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
+                        writein("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
                     |Python -> 
-                            codewritein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
-                            codewritein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
+                            writein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
+                            writein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
                     |_ -> ()
                     
         /// <summary>
@@ -912,28 +912,28 @@ namespace Aqualis
                             ch.iid <| fun (N,info,d) ->
                                 N <== matrix.size1
                                 ch.i1 N <| fun ipiv ->
-                                    codewritein("call zgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
+                                    writein("call zgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
                         |C99 -> 
                             ch.iid <| fun (N,info,d) ->
                                 N <== matrix.size1
                                 ch.i1 N <| fun ipiv ->
                                     programList[prIndex].elist.add "void zgetrf_(int *, int *, double complex *, int *, int *, int *)"
-                                    codewritein("zgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
+                                    writein("zgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
                         |LaTeX -> 
-                            codewritein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
+                            writein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
                         |HTML -> 
-                            codewritein("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
+                            writein("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
                         |Python -> 
                             //LU分解
-                            codewritein("P ,L ,U = lu("+matrix.code+")"+"\n")
+                            writein("P ,L ,U = lu("+matrix.code+")"+"\n")
                             //上三角行列 U の対角成分の積を計算
-                            codewritein("det_U = numpy.prod(numpy.diag(U))"+"\n")
+                            writein("det_U = numpy.prod(numpy.diag(U))"+"\n")
                             //行列式を計算
                             //pの行列式は、ピボット行列の行交換の回数で符号が決まる
-                            codewritein("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
-                            codewritein("det_"+matrix.code+" = sign * det_U"+"\n")
+                            writein("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
+                            writein("det_"+matrix.code+" = sign * det_U"+"\n")
                             //行列式の常用対数を計算
-                            codewritein(d.code+" = numpy.log10(det_"+matrix.code+")"+"\n")
+                            writein(d.code+" = numpy.log10(det_"+matrix.code+")"+"\n")
                         |_ -> ()
                         d.clear()
                         iter.num matrix.size1 <| fun i ->
@@ -947,28 +947,28 @@ namespace Aqualis
                             ch.iid <| fun (N,info,d) ->
                                 N <== matrix.size1
                                 ch.i1 N <| fun ipiv ->
-                                    codewritein("call dgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
+                                    writein("call dgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
                         |C99 -> 
                             ch.iid <| fun (N,info,d) ->
                                 N <== matrix.size1
                                 ch.i1 N <| fun ipiv ->
                                     programList[prIndex].elist.add "void dgetrf_(int *, int *, double complex *, int *, int *, int *)"
-                                    codewritein("dgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
+                                    writein("dgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
                         |LaTeX -> 
-                            codewritein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
+                            writein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
                         |HTML -> 
-                            codewritein("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
+                            writein("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
                         |Python -> 
                             //LU分解
-                            codewritein("P ,L ,U = lu("+matrix.code+")"+"\n")
+                            writein("P ,L ,U = lu("+matrix.code+")"+"\n")
                             //上三角行列 U の対角成分の積を計算
-                            codewritein("det_U = numpy.prod(numpy.diag(U))"+"\n")
+                            writein("det_U = numpy.prod(numpy.diag(U))"+"\n")
                             //行列式を計算
                             //pの行列式は、ピボット行列の行交換の回数で符号が決まる
-                            codewritein("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
-                            codewritein("det_"+matrix.code+" = sign * det_U"+"\n")
+                            writein("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
+                            writein("det_"+matrix.code+" = sign * det_U"+"\n")
                             //行列式の常用対数を計算
-                            codewritein(d.code+" = np.log10(np.abs(det_"+matrix.code+"))"+"\n")
+                            writein(d.code+" = np.log10(np.abs(det_"+matrix.code+"))"+"\n")
                         |_ -> ()
                         d.clear()
                         iter.num matrix.size1 <| fun i ->
@@ -987,12 +987,12 @@ namespace Aqualis
             programList[prIndex].olist.add "-lblas"
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein("$"+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"$\\\\\n")
+                writein("$"+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"$\\\\\n")
             |HTML ->
-                codewritein("\\("+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"\\)<br/>\n")
+                writein("\\("+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"\\)<br/>\n")
             |Python -> 
                 //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
+                writein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
             |_ ->
                 tbinder.z mat1 <| fun () ->
                     group.section "非対称複素行列の特異値分解" <| fun () ->
@@ -1015,7 +1015,7 @@ namespace Aqualis
                                         ldvt <== vt.size2
                                         lwork <== -1
                                         work.allocate 1
-                                        codewritein("call zgesvd("+
+                                        writein("call zgesvd("+
                                             "'A', "+
                                             "'A', " + 
                                             m.code + ", " + 
@@ -1034,7 +1034,7 @@ namespace Aqualis
                                         lwork <== asm.toint work[0].re
                                         work.deallocate()
                                         work.allocate lwork
-                                        codewritein("call zgesvd("+
+                                        writein("call zgesvd("+
                                             "'A', "+
                                             "'A', " + 
                                             m.code + ", " + 
@@ -1069,9 +1069,9 @@ namespace Aqualis
                                         ldvt <== vt.size2
                                         lwork <== -1
                                         programList[prIndex].elist.add "void zgesvd_(char *, char *, int *, int *, double complex *, int *, double *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
-                                        codewritein(jobu.code + " = 'A';")
-                                        codewritein(jobv.code + " = 'A';")
-                                        codewritein("zgesvd_(" + 
+                                        writein(jobu.code + " = 'A';")
+                                        writein(jobv.code + " = 'A';")
+                                        writein("zgesvd_(" + 
                                             "&" + jobu.code + ", " + 
                                             "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
@@ -1089,7 +1089,7 @@ namespace Aqualis
                                             "&" + info.code + ");")
                                         lwork <== asm.toint wkopt.re
                                         work.allocate lwork
-                                        codewritein("zgesvd_(" + 
+                                        writein("zgesvd_(" + 
                                             "&" + jobu.code + ", " + 
                                             "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
@@ -1108,7 +1108,7 @@ namespace Aqualis
                                         work.deallocate()
                         |Python -> 
                             //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                            codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
+                            writein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
                         |_ -> 
                             ()
                 tbinder.d mat1 <| fun () ->
@@ -1129,7 +1129,7 @@ namespace Aqualis
                                         ldvt <== vt.size2
                                         lwork <== -1
                                         work.allocate 1
-                                        codewritein("call dgesvd("+
+                                        writein("call dgesvd("+
                                             "'A', "+
                                             "'A', " + 
                                             m.code + ", " + 
@@ -1147,7 +1147,7 @@ namespace Aqualis
                                         lwork <== asm.toint work[0]
                                         work.deallocate()
                                         work.allocate lwork
-                                        codewritein("call dgesvd("+
+                                        writein("call dgesvd("+
                                             "'A', "+
                                             "'A', " + 
                                             m.code + ", " + 
@@ -1176,11 +1176,11 @@ namespace Aqualis
                                         ldu <== u.size1
                                         ldvt <== vt.size2
                                         programList[prIndex].elist.add "void dgesvd_(char *, char *, int *, int *, double *, int *, double *, double *, int *, double *, int *, double *, int *, int *)"
-                                        codewritein(jobu.code + " = 'A';")
-                                        codewritein(jobv.code + " = 'A';")
+                                        writein(jobu.code + " = 'A';")
+                                        writein(jobv.code + " = 'A';")
                                         lwork <== -1
                                         work.allocate 1
-                                        codewritein("dgesvd_(" + 
+                                        writein("dgesvd_(" + 
                                             "&" + jobu.code + ", " + 
                                             "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
@@ -1198,7 +1198,7 @@ namespace Aqualis
                                         lwork <== asm.toint work[0]
                                         work.deallocate()
                                         work.allocate lwork
-                                        codewritein("dgesvd_(" + 
+                                        writein("dgesvd_(" + 
                                             "&" + jobu.code + ", " + 
                                             "&" + jobv.code + ", " + 
                                             "&" + m.code + ", " + 
@@ -1216,7 +1216,7 @@ namespace Aqualis
                                         work.deallocate()
                         |Python -> 
                             //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                            codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
+                            writein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
                         |_ -> 
                             ()
                             

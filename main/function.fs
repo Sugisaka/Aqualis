@@ -69,7 +69,7 @@ namespace Aqualis
                     File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map(fun (n,(_,_,_)) -> n))
-                codewritein("call" + " " + projectname + "(" + args + ")\n")
+                writein("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,C99] <| fun () ->
@@ -109,7 +109,7 @@ namespace Aqualis
                         |(It _|Dt|Zt|Structure _),A0,true  -> n.Substring(2,n.Length-3)
                         |_ -> n)
                     |> fun s -> String.Join(", ", s)
-                codewritein(projectname + "(" + args + ");\n")
+                writein(projectname + "(" + args + ");\n")
             |LaTeX ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,LaTeX] <| fun () ->
@@ -143,7 +143,7 @@ namespace Aqualis
                     File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                codewritein("call" + " " + projectname + "(" + args + ")\n")
+                writein("call" + " " + projectname + "(" + args + ")\n")
             |HTML ->
                 programList[prIndex].flist.add projectname
                 let args = makeProgram [dir,projectname,HTML] <| fun () ->
@@ -179,7 +179,7 @@ namespace Aqualis
                     File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
                     String.Join(", ", programList[prIndex].arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                codewritein("\\(" + projectname + "(" + args + ")\\)<br/>\n")
+                writein("\\(" + projectname + "(" + args + ")\\)<br/>\n")
             |Python ->
                 programList[prIndex].flist.add projectname
                 let re_args,args = makeProgram [dir,projectname,Python] <| fun () ->
@@ -232,5 +232,5 @@ namespace Aqualis
                     writer.close()
                     File.Delete(dir + "\\" + projectname)
                     re_args,args
-                codewritein(re_args + " = " + projectname + "(" + args + ")\n")
+                writein(re_args + " = " + projectname + "(" + args + ")\n")
             |_ -> ()

@@ -220,10 +220,6 @@ namespace Aqualis
                     
         let mutable prIndex = 0
         
-        // let mutable pr = 
-        //     if prIndex >= programList.Length then printfn "%d %d" prIndex programList.Length
-        //     programList[prIndex]
-        
         let makeProgram(programInfo:list<string*string*Language>) code =
             let programList_temp = programList
             let prIndex_temp = prIndex
@@ -234,15 +230,14 @@ namespace Aqualis
             prIndex <- prIndex_temp
             result
             
-        let codewrite(s:string) = programList[prIndex].codewrite s
-        let codewritei(s:string) = programList[prIndex].codewritei s
-        let codewriten(s:string) = programList[prIndex].codewriten s
-        let codewritein(s:string) = programList[prIndex].codewritein s
-        let comment(s:string) = programList[prIndex].comment s
+        let write(s:string) = programList[prIndex].codewrite s
+        let writei(s:string) = programList[prIndex].codewritei s
+        let writen(s:string) = programList[prIndex].codewriten s
+        let writein(s:string) = programList[prIndex].codewritein s
         let language() = programList[prIndex].language
         
         ///<summary>コメント文を生成</summary>
-        let (!) s = comment s
+        let (!) s = programList[prIndex].comment s
         
     ///<summary>コード生成の設定</summary>
     type AqualisCompiler () =
@@ -287,17 +282,17 @@ namespace Aqualis
         static member abort() =
             match language() with 
             |Fortran ->
-                codewritein "stop" 
+                writein "stop" 
             |C99 ->
-                codewritein "return 1;" 
+                writein "return 1;" 
             |LaTeX ->
-                codewritein "stop"
+                writein "stop"
             |HTML ->
-                codewritein "stop"
+                writein "stop"
             |HTMLSequenceDiagram ->
-                codewritein "stop"
+                writein "stop"
             |Python ->
-                codewritein "sys.exit(1)"
+                writein "sys.exit(1)"
             |JavaScript ->
                 ()
             |PHP ->
@@ -309,17 +304,17 @@ namespace Aqualis
         static member stop() =
             match language() with
             |Fortran ->
-                codewritein "read *, \n"
+                writein "read *, \n"
             |C99 ->
-                codewritein "getchar();\n"
+                writein "getchar();\n"
             |LaTeX ->
-                codewritein "stop\n"
+                writein "stop\n"
             |HTML ->
-                codewritein "stop\n"
+                writein "stop\n"
             |HTMLSequenceDiagram ->
-                codewritein "stop\n"
+                writein "stop\n"
             |Python ->
-                codewritein "input()"
+                writein "input()"
             |JavaScript ->
                 ()
             |PHP ->

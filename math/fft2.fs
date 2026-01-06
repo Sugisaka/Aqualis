@@ -60,61 +60,61 @@ namespace Aqualis
                     programList[prIndex].hlist.add "'fftw3.f'"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
-                        codewritein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
+                        writein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
                         fftshift2 data1
                         !"FFTを実行"
-                        codewritein("call dfftw_execute(" + plan.code + ")")
+                        writein("call dfftw_execute(" + plan.code + ")")
                         fftshift2 data2
-                        codewritein("call dfftw_destroy_plan(" + plan.code + ")")
+                        writein("call dfftw_destroy_plan(" + plan.code + ")")
                     else
-                        codewritein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
+                        writein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
                         ifftshift2 data1
                         !"FFTを実行"
-                        codewritein("call dfftw_execute(" + plan.code + ")")
+                        writein("call dfftw_execute(" + plan.code + ")")
                         ifftshift2 data2
-                        codewritein("call dfftw_destroy_plan(" + plan.code + ")")
+                        writein("call dfftw_destroy_plan(" + plan.code + ")")
                 |C99 ->
                     programList[prIndex].hlist.add "<fftw3.h>"
                     let plan = fftw_plan2 planname
                     if fftdir=1 then
-                        codewritein(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
+                        writein(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
                         fftshift2 data1
                         !"FFTを実行"
-                        codewritein("call dfftw_execute(" + plan.code + ");")
+                        writein("call dfftw_execute(" + plan.code + ");")
                         fftshift2 data2
-                        codewritein("call dfftw_destroy_plan(" + plan.code + ");")
+                        writein("call dfftw_destroy_plan(" + plan.code + ");")
                     else
-                        codewritein(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
+                        writein(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
                         ifftshift2 data1
                         !"FFTを実行"
-                        codewritein("dfftw_execute(" + plan.code + ");")
+                        writein("dfftw_execute(" + plan.code + ");")
                         ifftshift2 data2
-                        codewritein("dfftw_destroy_plan(" + plan.code + ");")
+                        writein("dfftw_destroy_plan(" + plan.code + ");")
                 |LaTeX ->
-                    codewritein(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
+                    writein(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                 |HTML ->
-                    codewritein(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
+                    writein(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
                 |Python ->
                     programList[prIndex].hlist.add "pyfftw"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
-                        codewritein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
-                        codewritein(plan.code+" = pyfftw.builders.fft2("+data1.code+"_empty)")
+                        writein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
+                        writein(plan.code+" = pyfftw.builders.fft2("+data1.code+"_empty)")
                         fftshift2 data1
-                        codewritein(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        writein(data1.code+"_empty[:] = "+data1.code+"[:]")
                         !"FFTを実行"
-                        codewritein(data2.code+" = "+plan.code+"()")
+                        writein(data2.code+" = "+plan.code+"()")
                         fftshift2 data2
-                        codewritein("del "+plan.code+"")
+                        writein("del "+plan.code+"")
                     else
-                        codewritein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
-                        codewritein(plan.code+" = pyfftw.builders.ifft2("+data1.code+"_empty)")
+                        writein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
+                        writein(plan.code+" = pyfftw.builders.ifft2("+data1.code+"_empty)")
                         ifftshift2 data1
-                        codewritein(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        writein(data1.code+"_empty[:] = "+data1.code+"[:]")
                         !"FFTを実行"
-                        codewritein(data2.code+" = "+plan.code+"()")
+                        writein(data2.code+" = "+plan.code+"()")
                         ifftshift2 data2
-                        codewritein("del "+plan.code+"")
+                        writein("del "+plan.code+"")
                 |_ -> ()
                 if fftdir=1 then
                     !"規格化"

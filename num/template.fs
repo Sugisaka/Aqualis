@@ -23,50 +23,50 @@ namespace Aqualis
         let mutable sssecnum = 0
         let mutable licheck = 0
         
-        member _.write s = codewritein s
+        member _.write s = writein s
         
         member this.tag (tagname:string) code =
             match lang with
             |HTML ->
-                codewritein("<"+tagname+">")
+                writein("<"+tagname+">")
                 code()
-                codewritein("</"+tagname+">")
+                writein("</"+tagname+">")
             |LaTeX ->
-                codewritein("\\begin{"+tagname+"}")
+                writein("\\begin{"+tagname+"}")
                 code()
-                codewritein("\\end{"+tagname+"}")
+                writein("\\end{"+tagname+"}")
             |_ -> ()
             
         member this.block lst code =
             match lang with
             |HTML ->
-                codewritein "<div "
+                writein "<div "
                 for a,name in lst do
-                    codewritein(a+"=\""+name+"\" ")
-                codewritein ">"
+                    writein(a+"=\""+name+"\" ")
+                writein ">"
                 code()
-                codewritein "</div>"
+                writein "</div>"
             |_ -> ()
         member this.form (name:string) code =
             match lang with
             |HTML ->
-                codewritein("<form name=\""+name+"\">")
+                writein("<form name=\""+name+"\">")
                 code()
-                codewritein "</form>"
+                writein "</form>"
             |_ -> ()
         member this.radioButton (name:string) lst =
             match lang with
             |HTML ->
                 this.form ("f_"+name) <| fun () ->
                     for (a,b,c,d) in lst do
-                        codewritein("<input type=\"radio\" name=\""+name+"\" value=\""+a+"\""+(if c then " checked" else "")+" "+d+">"+b)
+                        writein("<input type=\"radio\" name=\""+name+"\" value=\""+a+"\""+(if c then " checked" else "")+" "+d+">"+b)
             |_ -> ()
         member this.title txt =
             match lang with
             |HTML ->
-                codewritein("<h1>"+txt+"</h1>")
+                writein("<h1>"+txt+"</h1>")
             |LaTeX ->
-                codewritein("\\MyTitle{"+txt+"}")
+                writein("\\MyTitle{"+txt+"}")
             |_ -> ()
         member this.section title code =
             secnum <- secnum + 1
@@ -74,9 +74,9 @@ namespace Aqualis
             sssecnum <- 0
             match lang with
             |HTML ->
-                codewritein("<h2>" + secnum.ToString() + " "+title+"</h2>")
+                writein("<h2>" + secnum.ToString() + " "+title+"</h2>")
             |LaTeX ->
-                codewritein("\\section{"+title+"}")
+                writein("\\section{"+title+"}")
             |_ -> ()
             code()
         member this.subsection title code =
@@ -84,34 +84,34 @@ namespace Aqualis
             sssecnum <- 0
             match lang with
             |HTML ->
-                codewritein("<h3>" + secnum.ToString() + "." + ssecnum.ToString() + " " + title+"</h3>")
+                writein("<h3>" + secnum.ToString() + "." + ssecnum.ToString() + " " + title+"</h3>")
             |LaTeX ->
-                codewritein("\\subsection{"+title+"}")
+                writein("\\subsection{"+title+"}")
             |_ -> ()
             code()
         member this.subsection_ title code =
             match lang with
             |HTML ->
-                codewritein("<h3>" + title + "</h3>")
+                writein("<h3>" + title + "</h3>")
             |LaTeX ->
-                codewritein("\\subsection*{"+title+"}")
+                writein("\\subsection*{"+title+"}")
             |_ -> ()
             code()
         member this.subsubsection title code =
             sssecnum <- sssecnum + 1
             match lang with
             |HTML ->
-                codewritein("<h4>" + secnum.ToString() + "." + ssecnum.ToString() + "." + sssecnum.ToString() + " " + title+"</h4>")
+                writein("<h4>" + secnum.ToString() + "." + ssecnum.ToString() + "." + sssecnum.ToString() + " " + title+"</h4>")
             |LaTeX ->
-                codewritein("\\subsubsection{"+title+"}")
+                writein("\\subsubsection{"+title+"}")
             |_ -> ()
             code()
         member this.subsubsection_ title code =
             match lang with
             |HTML ->
-                codewritein("<h4>" + title + "</h4>")
+                writein("<h4>" + title + "</h4>")
             |LaTeX ->
-                codewritein("\\subsubsection*{"+title+"}")
+                writein("\\subsubsection*{"+title+"}")
             |_ -> ()
             code()
         member this.para code =
@@ -122,23 +122,23 @@ namespace Aqualis
                 let wr = new StreamWriter(filename)
                 let addfootnote(txt:string) =
                     ftnnum <- ftnnum + 1
-                    codewritein("<sup><a name=\"xft"+ftnnum.ToString()+"\"><a href=\"#ft"+ftnnum.ToString()+"\">"+ftnnum.ToString()+")</a></a></sup>")
+                    writein("<sup><a name=\"xft"+ftnnum.ToString()+"\"><a href=\"#ft"+ftnnum.ToString()+"\">"+ftnnum.ToString()+")</a></a></sup>")
                     wr.WriteLine("<a name=\"ft"+ftnnum.ToString()+"\">"+ftnnum.ToString()+") <a href=\"#xft"+ftnnum.ToString()+"\">↑</a>　"+txt+"</a><br/>")
-                codewritein "<p>"
+                writein "<p>"
                 code addfootnote
-                codewritein "</p>"
+                writein "</p>"
                 wr.Close()
-                codewritein "<div class=\"footnote\">"
-                codewritein(File.ReadAllText filename)
-                codewritein "</div>"
+                writein "<div class=\"footnote\">"
+                writein(File.ReadAllText filename)
+                writein "</div>"
                 File.Delete filename
             |LaTeX ->
-                codewritein "\\par"
+                writein "\\par"
                 code this.footnote
             |_ -> 
                 ()
         member this.footnote(txt:string) =
-            codewritein("\\footnote{"+txt+"}")
+            writein("\\footnote{"+txt+"}")
         member this.url(txt:string) =
             match lang with
             |LaTeX -> txt.Replace("_","\\_")
@@ -146,33 +146,33 @@ namespace Aqualis
         member this.table label tbalign elalign caption (lst:list<list<string>>) =
             match lang with
             |HTML ->
-                codewritein "<div class=\"fig\">"
-                codewritein("<span class=\"caption\">"+this.tabref(label)+"&emsp;"+caption+"</span>")
-                codewritein "<table class=\"tab\">"
+                writein "<div class=\"fig\">"
+                writein("<span class=\"caption\">"+this.tabref(label)+"&emsp;"+caption+"</span>")
+                writein "<table class=\"tab\">"
                 for m in 0..lst.Length-1 do
-                    codewritein "<tr>"
+                    writein "<tr>"
                     for s in lst[m] do
-                        codewritein "<td>"
-                        codewritein s
-                        codewritein "</td>"
-                    codewritein "</tr>"
-                codewritein "</table>"
-                codewritein "</div>"
+                        writein "<td>"
+                        writein s
+                        writein "</td>"
+                    writein "</tr>"
+                writein "</table>"
+                writein "</div>"
             |LaTeX ->
-                codewritein("\\begin{table}["+tbalign+"]")
-                codewritein(" \\caption{"+caption+"}")
-                codewritein(" \\label{"+label+"}")
-                codewritein " \\centering"
-                codewritein("  \\begin{tabular}{"+elalign+"}")
+                writein("\\begin{table}["+tbalign+"]")
+                writein(" \\caption{"+caption+"}")
+                writein(" \\label{"+label+"}")
+                writein " \\centering"
+                writein("  \\begin{tabular}{"+elalign+"}")
                 for m in 0..lst.Length-1 do
-                    if m=0 || m=1 then codewritein "\\hline "
+                    if m=0 || m=1 then writein "\\hline "
                     for n in 0..lst[m].Length-1 do
-                        codewritein(lst[m][n])
-                        if n<lst[m].Length-1 then codewritein "&"
-                    codewritein "\\\\"
-                    if m=lst.Length-1 then codewritein "\\hline "
-                codewritein "  \\end{tabular}"
-                codewritein "\\end{table}"
+                        writein(lst[m][n])
+                        if n<lst[m].Length-1 then writein "&"
+                    writein "\\\\"
+                    if m=lst.Length-1 then writein "\\hline "
+                writein "  \\end{tabular}"
+                writein "\\end{table}"
             |_ -> ()
             match tablabel with
             |WriteLabel wr ->
@@ -253,14 +253,14 @@ namespace Aqualis
         member this.figure (filename:string) (caption:string) =
             match lang with
             |HTML ->
-                codewritein "<div class=\"fig\">"
-                codewritein("  <a name=\""+filename+"\">")
-                codewritein("    <img src =\""+figdir+"/"+filename+".svg\" alt=\""+caption+"\">")
-                codewritein("  </a>")
-                codewritein("  <div class=\"caption\">"+this.figref_nolink filename+"&emsp;"+caption+"</div>")
-                codewritein "</div>"
+                writein "<div class=\"fig\">"
+                writein("  <a name=\""+filename+"\">")
+                writein("    <img src =\""+figdir+"/"+filename+".svg\" alt=\""+caption+"\">")
+                writein("  </a>")
+                writein("  <div class=\"caption\">"+this.figref_nolink filename+"&emsp;"+caption+"</div>")
+                writein "</div>"
             |LaTeX ->
-                codewritein("\\inputfigure{"+filename+"}{"+caption+"}")
+                writein("\\inputfigure{"+filename+"}{"+caption+"}")
             |_ -> ()
             match figlabel with
             |WriteLabel wr ->
@@ -271,13 +271,13 @@ namespace Aqualis
         member this.graphics (filename:string) =
             match lang with
             |HTML ->
-                codewritein "<div class=\"fig\">"
-                codewritein("<img src =\""+figdir+"/"+filename+".svg\">")
-                codewritein "</div>"
+                writein "<div class=\"fig\">"
+                writein("<img src =\""+figdir+"/"+filename+".svg\">")
+                writein "</div>"
             |LaTeX ->
-                codewritein "\\begin{center}"
-                codewritein("   \\includegraphics{"+figdir+"/"+filename+"}")
-                codewritein "\\end{center}"
+                writein "\\begin{center}"
+                writein("   \\includegraphics{"+figdir+"/"+filename+"}")
+                writein "\\end{center}"
             |_ -> ()
             match figlabel with
             |WriteLabel wr ->
@@ -288,34 +288,34 @@ namespace Aqualis
         member this.enumerate code =
             match lang with
             |HTML ->
-                codewritein "<ol>"
+                writein "<ol>"
                 code()
-                codewritein "</ol>"
+                writein "</ol>"
             |LaTeX ->
-                codewritein "\\begin{enumerate}"
+                writein "\\begin{enumerate}"
                 code()
-                codewritein "\\end{enumerate}"
+                writein "\\end{enumerate}"
             |_ -> ()
         member this.itemize code =
             match lang with
             |HTML ->
-                codewritein "<ul>"
+                writein "<ul>"
                 code()
-                codewritein "</ul>"
+                writein "</ul>"
             |LaTeX ->
-                codewritein "\\begin{itemize}"
+                writein "\\begin{itemize}"
                 code()
-                codewritein "\\end{itemize}"
+                writein "\\end{itemize}"
             |_ -> ()
         member this.item code =
             match lang with
             |HTML ->
-                codewritein "<li>"
+                writein "<li>"
                 let c = code()
-                codewritein "</li>"
+                writein "</li>"
                 c
             |LaTeX ->
-                codewritein "\\item"
+                writein "\\item"
                 let c = code()
                 c
             |_ -> code()
@@ -323,12 +323,12 @@ namespace Aqualis
             licheck <- licheck + 1
             match lang with
             |HTML ->
-                codewritein("<li><input type=\"checkbox\" id=\"lichk"+licheck.ToString()+"\" onchange=\"switchCheck('lichk"+licheck.ToString()+"','txtlichk"+licheck.ToString()+"');\"><span id=\"txtlichk"+licheck.ToString()+"\">")
+                writein("<li><input type=\"checkbox\" id=\"lichk"+licheck.ToString()+"\" onchange=\"switchCheck('lichk"+licheck.ToString()+"','txtlichk"+licheck.ToString()+"');\"><span id=\"txtlichk"+licheck.ToString()+"\">")
                 let c = code()
-                codewritein "</span></li>"
+                writein "</span></li>"
                 c
             |LaTeX ->
-                codewritein "\\item"
+                writein "\\item"
                 let c = code()
                 c
             |_ -> code()
@@ -340,19 +340,19 @@ namespace Aqualis
                 "$"+txt+"$"
             |_ -> ""
         member this.eqwr(txt:string) =
-            codewritein(this.eq txt)
+            writein(this.eq txt)
         member this.align (code:unit->unit) =
             match lang with
             |HTML ->
-                codewritein "\\["
-                codewritein "\\begin{align}"
+                writein "\\["
+                writein "\\begin{align}"
                 code()
-                codewritein "\\end{align}"
-                codewritein "\\]"
+                writein "\\end{align}"
+                writein "\\]"
             |LaTeX ->
-                codewritein "\\begin{align}"
+                writein "\\begin{align}"
                 code()
-                codewritein "\\end{align}"
+                writein "\\end{align}"
             |_ -> ()
         member this.code (caption,label) (c:unit->unit) =
             match lang with
@@ -363,23 +363,23 @@ namespace Aqualis
                     if label<>"" then wr.WriteLine(label + "," + codenum.ToString())
                 |ReadLabel lst ->
                     ()
-                codewritein "<div class=\"fig\">"
-                codewritein("<span class=\"caption\">ソースコード"+codenum.ToString()+"&emsp;"+caption+"</span>")
-                codewritein "<div class=\"sourcecode\">"
+                writein "<div class=\"fig\">"
+                writein("<span class=\"caption\">ソースコード"+codenum.ToString()+"&emsp;"+caption+"</span>")
+                writein "<div class=\"sourcecode\">"
                 c()
-                codewritein "</div>"
-                codewritein "</div>"
+                writein "</div>"
+                writein "</div>"
             |LaTeX ->
-                codewritein("\\begin{lstlisting} [caption="+caption+",label="+label+"]")
+                writein("\\begin{lstlisting} [caption="+caption+",label="+label+"]")
                 c()
-                codewritein "\\end{lstlisting}"
+                writein "\\end{lstlisting}"
             |_ -> ()
         member this.equation (label:string) = fun (code:unit->unit) ->
             match lang with
             |HTML ->
                 code()
                 equnum <- equnum + 1
-                codewritein("\\tag{"+equnum.ToString()+"}")
+                writein("\\tag{"+equnum.ToString()+"}")
                 match equlabel with
                 |WriteLabel wr ->
                     if label<>"" then wr.WriteLine(label + "," + equnum.ToString())
@@ -387,42 +387,42 @@ namespace Aqualis
                     ()
             |LaTeX ->
                 code()
-                if label<>"" then codewritein("\\label{"+label+"}")
+                if label<>"" then writein("\\label{"+label+"}")
             |_ -> ()
         member this.equation_nonumber (code:unit->unit) =
             match lang with
             |HTML ->
                 code()
-                codewritein "\\nonumber"
+                writein "\\nonumber"
             |LaTeX ->
                 code()
-                codewritein "\\nonumber"
+                writein "\\nonumber"
             |_ -> ()
         member this.eqbr() =
-            codewritein "\\\\"
+            writein "\\\\"
         member this.br with get() =
             match lang with
             |LaTeX ->
-                codewritein "\\\\"
+                writein "\\\\"
             |HTML ->
-                codewritein "<br/>"
+                writein "<br/>"
             |_ ->
                 ()
         /// code内部で使用する改行
         member this.codebr with get() =
             match lang with
             |LaTeX ->
-                codewritein ""
+                writein ""
             |HTML ->
-                codewritein "<br/>"
+                writein "<br/>"
             |_ ->
                 ()
         member this.bf(txt:string) =
             match lang with
             |LaTeX ->
-                codewritein("\\textbf{"+txt+"}")
+                writein("\\textbf{"+txt+"}")
             |HTML ->
-                codewritein("<strong>"+txt+"</strong>")
+                writein("<strong>"+txt+"</strong>")
             |_ ->
                 ()
         member this.numunit (n:int) = fun (u:string) ->
@@ -471,7 +471,7 @@ namespace Aqualis
         member this.pdflink(text,filename) =
             match lang with
             |HTML ->
-                codewritein("    <div class='pdflink'><a href='"+filename+".pdf' target='_blank'>"+text+"</a></div>")
+                writein("    <div class='pdflink'><a href='"+filename+".pdf' target='_blank'>"+text+"</a></div>")
             |_ -> 
                 ()
         member this.bold(txt:string) = match lang with |LaTeX -> "\\boldsymbol{"+txt+"}" |HTML -> "\\boldsymbol{"+txt+"}" |_ -> ""
@@ -587,131 +587,131 @@ namespace Aqualis
                 match lang with
                 |HTML ->
                     makeProgram [outputdir,filename+".html",HTML] <| fun () ->
-                        codewritein "<!DOCTYPE html>"
-                        codewritein "<html lang='ja'>"
-                        codewritein "    <head>"
-                        codewritein "        <meta charset='utf-8'>"
-                        codewritein "        <script type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"></script>"
-                        codewritein "        <script src=\"animation.js\"></script>"
-                        codewritein "        <script>"
-                        codewritein "        function switchCheck(chkid,txtid)"
-                        codewritein "        {"
-                        codewritein "            let chk = document.getElementById(chkid);"
-                        codewritein "            let txt = document.getElementById(txtid);"
-                        codewritein "            if (chk.checked)"
-                        codewritein "            {"
-                        codewritein "                txt.style.color = '#B2D5E6';"
-                        codewritein "            }"
-                        codewritein "            else"
-                        codewritein "            {"
-                        codewritein "                txt.style.color = 'black';"
-                        codewritein "            }"
-                        codewritein "        }"
-                        codewritein "        function switchDisplay(f1,f2)"
-                        codewritein "        {"
-                        codewritein "            let el1 = document.getElementById(f1);"
-                        codewritein "            let el2 = document.getElementById(f2);"
-                        codewritein "            if (el1.style.display == \"block\")"
-                        codewritein "            {"
-                        codewritein "                el1.style.display =\"none\";"
-                        codewritein "                el2.style.display =\"block\";"
-                        codewritein "            }"
-                        codewritein "            else"
-                        codewritein "            {"
-                        codewritein "                el1.style.display =\"block\";"
-                        codewritein "                el2.style.display =\"none\";"
-                        codewritein "            }"
-                        codewritein "        }"
-                        codewritein "        </script>"
-                        codewritein("        <title>"+title+"</title>")
-                        codewritein "        <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-                        codewritein "        <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                        codewritein "        <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                        codewritein "        <link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap\" rel=\"stylesheet\">"
-                        codewritein "        <link rel='stylesheet' href='style.css' />"
-                        codewritein "    </head>"
-                        codewritein "    <body>"
-                        codewritein("    <span class='headtitle'>"+titlelong+"</span>")
+                        writein "<!DOCTYPE html>"
+                        writein "<html lang='ja'>"
+                        writein "    <head>"
+                        writein "        <meta charset='utf-8'>"
+                        writein "        <script type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"></script>"
+                        writein "        <script src=\"animation.js\"></script>"
+                        writein "        <script>"
+                        writein "        function switchCheck(chkid,txtid)"
+                        writein "        {"
+                        writein "            let chk = document.getElementById(chkid);"
+                        writein "            let txt = document.getElementById(txtid);"
+                        writein "            if (chk.checked)"
+                        writein "            {"
+                        writein "                txt.style.color = '#B2D5E6';"
+                        writein "            }"
+                        writein "            else"
+                        writein "            {"
+                        writein "                txt.style.color = 'black';"
+                        writein "            }"
+                        writein "        }"
+                        writein "        function switchDisplay(f1,f2)"
+                        writein "        {"
+                        writein "            let el1 = document.getElementById(f1);"
+                        writein "            let el2 = document.getElementById(f2);"
+                        writein "            if (el1.style.display == \"block\")"
+                        writein "            {"
+                        writein "                el1.style.display =\"none\";"
+                        writein "                el2.style.display =\"block\";"
+                        writein "            }"
+                        writein "            else"
+                        writein "            {"
+                        writein "                el1.style.display =\"block\";"
+                        writein "                el2.style.display =\"none\";"
+                        writein "            }"
+                        writein "        }"
+                        writein "        </script>"
+                        writein("        <title>"+title+"</title>")
+                        writein "        <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+                        writein "        <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                        writein "        <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                        writein "        <link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap\" rel=\"stylesheet\">"
+                        writein "        <link rel='stylesheet' href='style.css' />"
+                        writein "    </head>"
+                        writein "    <body>"
+                        writein("    <span class='headtitle'>"+titlelong+"</span>")
                         code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir))
-                        codewritein "    </body>"
-                        codewritein "</html>"
+                        writein "    </body>"
+                        writein "</html>"
                         programList[prIndex].close()
                 |LaTeX ->
                     makeProgram [outputdir,filename+".tex",LaTeX; outputdir,filename+"_temp.tex",LaTeX] <| fun () ->
                         prIndex <- 1
                         code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir))
                         prIndex <- 0
-                        codewritein "\\documentclass[a4paper]{ltjsarticle}"
-                        codewritein ""
-                        codewritein "\\usepackage{luatexja}"
-                        codewritein "\\usepackage{graphicx}"
-                        codewritein "\\usepackage{amsmath}"
-                        codewritein "\\usepackage{amssymb}"
-                        codewritein "\\usepackage{siunitx}"
-                        codewritein "\\usepackage{listings,jvlisting}"
-                        codewritein "\\usepackage{url}"
-                        codewritein "\\usepackage{upgreek}"
-                        codewritein "\\usepackage[no-math]{luatexja-fontspec}"
-                        codewritein "\\usepackage[haranoaji,deluxe,match,nfssonly]{luatexja-preset}"
+                        writein "\\documentclass[a4paper]{ltjsarticle}"
+                        writein ""
+                        writein "\\usepackage{luatexja}"
+                        writein "\\usepackage{graphicx}"
+                        writein "\\usepackage{amsmath}"
+                        writein "\\usepackage{amssymb}"
+                        writein "\\usepackage{siunitx}"
+                        writein "\\usepackage{listings,jvlisting}"
+                        writein "\\usepackage{url}"
+                        writein "\\usepackage{upgreek}"
+                        writein "\\usepackage[no-math]{luatexja-fontspec}"
+                        writein "\\usepackage[haranoaji,deluxe,match,nfssonly]{luatexja-preset}"
                         for p in programList[1].hlist.list do
-                            codewritein p
-                        codewritein ""
-                        codewritein "\\newcommand{\\inputfigure}[2]{"
-                        codewritein "\\begin{figure}[ht]"
-                        codewritein "\\begin{center}"
-                        codewritein("\\includegraphics{"+figdir+"/#1}")
-                        codewritein "\\end{center}"
-                        codewritein "\\caption{#2}"
-                        codewritein "\\label{#1}"
-                        codewritein "\\end{figure}"
-                        codewritein "}"
-                        codewritein ""
-                        codewritein "\\makeatletter"
-                        codewritein "\\def\\thesection{\\arabic{section}.}"
-                        codewritein "\\def\\thesubsection{\\thesection\\arabic{subsection}}"
-                        codewritein "\\def\\thesubsubsection{\\thesubsection.\\arabic{subsubsection}}"
-                        codewritein "\\def\\section{\\@startsection {section}{1}{\\z@}{2.8ex plus .5ex minus .2ex}{1.2ex plus.5ex}{\\reset@font\\Large\\textbf}}"
-                        codewritein "\\def\\subsection{\\@startsection {subsection}{1}{\\z@}{1.9ex plus .3ex minus .1ex}{0.5ex plus.2ex}{\\reset@font\\large\\textbf}}"
-                        codewritein "\\def\\subsubsection{\\@startsection {subsubsection}{1}{\\z@}{1.3ex plus .3ex minus .1ex}{0.2ex plus .1ex}{\\reset@font\\normalsize\\textbf}}"
-                        codewritein "\\makeatother"
-                        codewritein ""
-                        codewritein "%%paper WxH=210x297"
-                        codewritein "\\oddsidemargin=-0.4mm"
-                        codewritein "\\topmargin=4.6mm"
-                        codewritein "\\headheight=0mm"
-                        codewritein "\\headsep=0mm"
-                        codewritein "\\footskip=15mm"
-                        codewritein "\\textwidth=160mm"
-                        codewritein "\\textheight=237mm"
-                        codewritein "\\topsep=6pt"
-                        codewritein "\\parindent=0mm"
-                        codewritein "\\unitlength=1.00mm"
-                        codewritein ""
-                        codewritein "\\newcommand{\\MyTitle}[1]{\\begin{center} {\\Huge\\textbf{#1}} \\end{center}}"
-                        codewritein "\\newcommand{\\MyChapter}[1]{\\vskip 5mm \\noindent {\\Large\\textbf{#1}} \\vskip 2mm}"
-                        codewritein "\\newcommand{\\MySection}[1]{\\vskip 3mm \\noindent {\\large\\textbf{#1}} \\vskip 1mm}"
-                        codewritein ""
-                        codewritein "\\pagestyle{empty}"
-                        codewritein ""
-                        codewritein "\\lstset{"
-                        codewritein "  basicstyle={\\ttfamily},"
-                        codewritein "  identifierstyle={\\small},"
-                        codewritein "  commentstyle={\\smallitshape},"
-                        codewritein "  keywordstyle={\\small\\bfseries},"
-                        codewritein "  ndkeywordstyle={\\small},"
-                        codewritein "  stringstyle={\\small\\ttfamily},"
-                        codewritein "  frame={tb},"
-                        codewritein "  breaklines=true,"
-                        codewritein "  columns=[l]{fullflexible},"
-                        codewritein "  numbers=left,"
-                        codewritein "  numberstyle={\\scriptsize},"
-                        codewritein "}"
-                        codewritein ""
-                        codewritein "\\renewcommand{\\lstlistingname}{ソースコード}"
-                        codewritein ""
-                        codewritein "\\begin{document}"
-                        codewritein(programList[1].allCodes)
-                        codewritein "\\end{document}"
+                            writein p
+                        writein ""
+                        writein "\\newcommand{\\inputfigure}[2]{"
+                        writein "\\begin{figure}[ht]"
+                        writein "\\begin{center}"
+                        writein("\\includegraphics{"+figdir+"/#1}")
+                        writein "\\end{center}"
+                        writein "\\caption{#2}"
+                        writein "\\label{#1}"
+                        writein "\\end{figure}"
+                        writein "}"
+                        writein ""
+                        writein "\\makeatletter"
+                        writein "\\def\\thesection{\\arabic{section}.}"
+                        writein "\\def\\thesubsection{\\thesection\\arabic{subsection}}"
+                        writein "\\def\\thesubsubsection{\\thesubsection.\\arabic{subsubsection}}"
+                        writein "\\def\\section{\\@startsection {section}{1}{\\z@}{2.8ex plus .5ex minus .2ex}{1.2ex plus.5ex}{\\reset@font\\Large\\textbf}}"
+                        writein "\\def\\subsection{\\@startsection {subsection}{1}{\\z@}{1.9ex plus .3ex minus .1ex}{0.5ex plus.2ex}{\\reset@font\\large\\textbf}}"
+                        writein "\\def\\subsubsection{\\@startsection {subsubsection}{1}{\\z@}{1.3ex plus .3ex minus .1ex}{0.2ex plus .1ex}{\\reset@font\\normalsize\\textbf}}"
+                        writein "\\makeatother"
+                        writein ""
+                        writein "%%paper WxH=210x297"
+                        writein "\\oddsidemargin=-0.4mm"
+                        writein "\\topmargin=4.6mm"
+                        writein "\\headheight=0mm"
+                        writein "\\headsep=0mm"
+                        writein "\\footskip=15mm"
+                        writein "\\textwidth=160mm"
+                        writein "\\textheight=237mm"
+                        writein "\\topsep=6pt"
+                        writein "\\parindent=0mm"
+                        writein "\\unitlength=1.00mm"
+                        writein ""
+                        writein "\\newcommand{\\MyTitle}[1]{\\begin{center} {\\Huge\\textbf{#1}} \\end{center}}"
+                        writein "\\newcommand{\\MyChapter}[1]{\\vskip 5mm \\noindent {\\Large\\textbf{#1}} \\vskip 2mm}"
+                        writein "\\newcommand{\\MySection}[1]{\\vskip 3mm \\noindent {\\large\\textbf{#1}} \\vskip 1mm}"
+                        writein ""
+                        writein "\\pagestyle{empty}"
+                        writein ""
+                        writein "\\lstset{"
+                        writein "  basicstyle={\\ttfamily},"
+                        writein "  identifierstyle={\\small},"
+                        writein "  commentstyle={\\smallitshape},"
+                        writein "  keywordstyle={\\small\\bfseries},"
+                        writein "  ndkeywordstyle={\\small},"
+                        writein "  stringstyle={\\small\\ttfamily},"
+                        writein "  frame={tb},"
+                        writein "  breaklines=true,"
+                        writein "  columns=[l]{fullflexible},"
+                        writein "  numbers=left,"
+                        writein "  numberstyle={\\scriptsize},"
+                        writein "}"
+                        writein ""
+                        writein "\\renewcommand{\\lstlistingname}{ソースコード}"
+                        writein ""
+                        writein "\\begin{document}"
+                        writein(programList[1].allCodes)
+                        writein "\\end{document}"
                         programList[prIndex].close()
                 |_ -> ()
                 match figlabel with

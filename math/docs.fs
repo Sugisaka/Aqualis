@@ -13,7 +13,7 @@ namespace Aqualis
         member _.eqReturn() =
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein "\\\\"
+                writein "\\\\"
             |_ ->
                 ()
                 
@@ -21,7 +21,7 @@ namespace Aqualis
         member _.eqNonumber() =
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein "\\nonumber"
+                writein "\\nonumber"
             |_ ->
                 ()
                 
@@ -29,7 +29,7 @@ namespace Aqualis
         member _.eqLabel(lb:string) =
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein("\\label{"+lb+"}")
+                writein("\\label{"+lb+"}")
             |_ ->
                 ()
                 
@@ -48,7 +48,7 @@ namespace Aqualis
         static member para code =
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein "\\par"
+                writein "\\par"
                 code()
             |_ ->
                 code()
@@ -57,7 +57,7 @@ namespace Aqualis
         static member text (s:string) =
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein s
+                writein s
             |_ ->
                 ! s
                 
@@ -66,13 +66,13 @@ namespace Aqualis
             programList[prIndex].hlist.add "\\usepackage{graphicx}"
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein "\\begin{figure}[htbp]"
-                codewritein "\\begin{center}"
-                codewritein("\\includegraphics{"+filename+"}")
-                codewritein "\\end{center}"
-                codewritein("\\caption{"+caption+"}")
-                codewritein("\\label{"+filename+"}")
-                codewritein "\\end{figure}"
+                writein "\\begin{figure}[htbp]"
+                writein "\\begin{center}"
+                writein("\\includegraphics{"+filename+"}")
+                writein "\\end{center}"
+                writein("\\caption{"+caption+"}")
+                writein("\\label{"+filename+"}")
+                writein "\\end{figure}"
             |_ ->
                 ! (filename+": "+caption)
                 
@@ -80,11 +80,11 @@ namespace Aqualis
         static member enumerate (slst:(unit->unit)list) =
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein "\\begin{enumerate}"
+                writein "\\begin{enumerate}"
                 for s in slst do
-                    codewritein "\\item"
+                    writein "\\item"
                     s()
-                codewritein "\\end{enumerate}"
+                writein "\\end{enumerate}"
             |_ ->
                 for s in slst do
                     s()
@@ -93,11 +93,11 @@ namespace Aqualis
         static member itemize (slst:(unit->unit)list) =
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein "\\begin{itemize}"
+                writein "\\begin{itemize}"
                 for s in slst do
-                    codewritein "\\item"
+                    writein "\\item"
                     s()
-                codewritein "\\end{itemize}"
+                writein "\\end{itemize}"
             |_ ->
                 for s in slst do
                     s()
@@ -107,15 +107,15 @@ namespace Aqualis
             let e = eqmode()
             match programList[prIndex].language with
             |LaTeX ->
-                codewritein "\\begin{align}"
+                writein "\\begin{align}"
                 code e
-                codewritein "\\end{align}"
+                writein "\\end{align}"
             |HTML ->
-                codewritein "\\["
-                codewritein "\\begin{align}"
+                writein "\\["
+                writein "\\begin{align}"
                 code e
-                codewritein "\\end{align}"
-                codewritein "\\]"
+                writein "\\end{align}"
+                writein "\\]"
             |_ ->
                 code e
                 

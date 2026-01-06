@@ -225,7 +225,7 @@ namespace Aqualis
                 let f = figure()
                 code(f,p)
                 let sx,sy,mx,my = f.setWriteMode()
-                codewritein (
+                writein (
                     "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
                     "width=\""+sx.ToString()+"px\" "+
                     "heigth=\""+sy.ToString()+"px\" "+
@@ -235,7 +235,7 @@ namespace Aqualis
                     "position: absolute;"+
                     "\">")
                 code(f,p)
-                codewritein "</svg>"
+                writein "</svg>"
                 
             //破線(縦線)
             static member drawDasharray(x:float,y1:float,y2:float) =
@@ -353,7 +353,7 @@ namespace Aqualis
                                 {Key = "margin-top"; Value = p.y.ToString()+"px";}
                                 {Key = "position"; Value = "absolute";}]
                 html.tagb ("div", s1+s) <| fun () ->
-                    codewritein text
+                    writein text
                     
             /// テキスト
             static member drawText(size:int,color:string,weight:string,x:float,y:float,text:string) =
