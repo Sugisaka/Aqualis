@@ -546,7 +546,7 @@ namespace Aqualis
             writein("\\begin{"+tagname+"}")
             code()
             writein("\\end{"+tagname+"}")
-        static member eq q = "\\("+q+"\\)"
+        static member eq (q:string) = "\\("+q+"\\)"
         static member align code =
             writein "\\[\\begin{align}"
             code()
@@ -619,37 +619,33 @@ namespace Aqualis
             html.tagb ("div",s1+s) <| fun () ->
                 writein text
                 
-
-                
-        static member textA (s:Style) = fun (p:position) (text:string) ->
-            // html.writeTag "div" ("style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                            {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = "30px";}]
-            html.tagb ("div", s1+s) <| fun () ->
-                writein text
-
-        static member textB (s:Style) = fun (p:position) (text:string) ->
-            // html.writeTag "div" ("style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                            {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = "40px";}]
-            html.tagb ("div", s1+s) <| fun () ->
-                writein text
-        static member textC (s:Style) = fun (p:position) (size:string) (c:string) (text:string) ->
-            // html.writeTag "div" ("style = \"font-size:"+s.size.ToString()+ "px; margin-left:"+p.x.ToString()+"px; margin-top:"+p.y.ToString()+"px; color: "+s.color+"; white-space: nowrap; position: absolute;\"") <| fun () ->
+        static member textA (s:Style) = fun (p:position) (size:int) (color:string) (text:string) ->
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-size"; Value = size.ToString()+"px";}
-                            {Key = "color"; Value = c.ToString();}]
+                            {Key = "color"; Value = color.ToString();}]
             html.tagb ("div", s1+s) <| fun () ->
                 writein text
                 
-
-            
+        static member eqA (s:Style) = fun (p:position) (size:int) (color:string) (text:string) ->
+            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
+                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+                            {Key = "position"; Value = "absolute";}
+                            {Key = "font-size"; Value = size.ToString()+"px";}
+                            {Key = "color"; Value = color.ToString();}]
+            html.tagb ("div", s1+s) <| fun () ->
+                writein ("\\("+text+"\\)")
+                
+        static member eqC (s:Style) = fun (p:position) (size:int) (color:string) (text:list<string>) ->
+            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
+                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+                            {Key = "position"; Value = "absolute";}
+                            {Key = "font-size"; Value = size.ToString()+"px";}
+                            {Key = "color"; Value = color.ToString();}]
+            html.tagb ("div", s1+s) <| fun () ->
+                writein ("\\(\\begin{align}"+String.Join("\\\\",text)+"\\end{align}\\)")
+                
         static member para code =
             html.tagb "p" code
             
@@ -668,7 +664,7 @@ namespace Aqualis
             
         static member tag_ (tagname:string) (s:string) =
             html.taga (tagname, s)
-
+            
         static member fig (p:position) code =
             let f = figure()
             code(f,p)
@@ -703,8 +699,6 @@ namespace Aqualis
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding;}
             
-
-            
     and figure() =
         let padding = 10.0
         let mutable xmin:option<double> = None
@@ -724,7 +718,7 @@ namespace Aqualis
             let marginX = this.Xmin-padding
             let marginY = this.Ymin-padding
             sizeX,sizeY,marginX,marginY
-
+            
         member private _.updateRange(p:position) =
             match xmin with
             |None ->
@@ -762,7 +756,7 @@ namespace Aqualis
             else
                 this.updateRange startP
                 this.updateRange endP
-
+                
         member this.line (id:string) = fun (s:Style) (startP:position) (endP:position) ->
             if writeMode then
                 html.taga ("line", [
@@ -774,6 +768,7 @@ namespace Aqualis
             else
                 this.updateRange startP
                 this.updateRange endP
+                
         member this.Rect (s:Style) (startP:position) (sx:int) (sy:int) =
             if writeMode then
                 html.taga ("rect", [
@@ -784,7 +779,7 @@ namespace Aqualis
             else
                 this.updateRange startP
                 this.updateRange(startP.shift(sx,sy))
-
+                
         member this.ellipse (s:Style) (center:position) (radiusX:int) (radiusY:int) =
             if writeMode then
                 html.taga ("circle", [
@@ -793,11 +788,11 @@ namespace Aqualis
                     Atr("rx", radiusX.ToString());
                     Atr("ry", radiusY.ToString());]@[s.atr])
             else
-                this.updateRange(center.shiftX(-radiusX))
-                this.updateRange(center.shiftX(radiusX))
-                this.updateRange(center.shiftY(-radiusY))
-                this.updateRange(center.shiftY(radiusY))
-
+                this.updateRange(center.shiftX -radiusX)
+                this.updateRange(center.shiftX radiusX)
+                this.updateRange(center.shiftY -radiusY)
+                this.updateRange(center.shiftY radiusY)
+                
         member this.polygon (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
@@ -805,6 +800,7 @@ namespace Aqualis
             else
                 for q in apex do
                     this.updateRange q
+                    
         member this.polyline (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
@@ -812,6 +808,7 @@ namespace Aqualis
             else
                 for q in apex do
                     this.updateRange q
+                    
         member this.trianglearrow (s:Style) (lineWidth:float) (startP:position) (endP:position) =
             let r = 30.0
             let pi = 3.14159265358979
@@ -827,11 +824,12 @@ namespace Aqualis
             if writeMode then
                 this.line s startP (position(ux,uy))
             else
-                this.updateRange(startP)
-                this.updateRange(endP)
+                this.updateRange startP
+                this.updateRange endP
                 this.updateRange(position(q1x,q1y))
                 this.updateRange(position(q2x,q2y))
             this.polygon s [position(q1x,q1y);endP;position(q2x,q2y)]
+            
         member this.linearrow (s:Style) (startP:position) (endP:position) (lineWidth:float) =
             let r = 12.0
             let pi = 3.14159265358979
@@ -847,8 +845,8 @@ namespace Aqualis
             if writeMode then
                 this.line (s+Style[stroke.width lineWidth]) startP (position(ux,uy))
             else
-                this.updateRange(startP)
-                this.updateRange(endP)
+                this.updateRange startP
+                this.updateRange endP
                 this.updateRange(position(q1x,q1y))
                 this.updateRange(position(q2x,q2y))
             this.polyline s [position(q1x,q1y);endP;position(q2x,q2y)]

@@ -499,10 +499,10 @@ module htmlexpr =
         static member image (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (contentsDir) then
+                if Directory.Exists contentsDir then
                     File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (contentsDir)
+                    printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
             let st = Style [{Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
@@ -510,10 +510,10 @@ module htmlexpr =
         static member image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (contentsDir) then
+                if Directory.Exists contentsDir then
                     File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (contentsDir)
+                    printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [Atr("id",id); s.atr;Atr("src",contentsDir + "\\" + f)])
@@ -580,6 +580,24 @@ module htmlexpr =
         static member eq(text:num0) =
             writein ("\\("+text.Expr.evalL programList[prIndex] + "\\)")
             
+        static member eqB (s:Style) = fun (p:position) (size:int) (color:string) (text:num0) ->
+            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
+                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+                            {Key = "position"; Value = "absolute";}
+                            {Key = "font-size"; Value = size.ToString()+"px";}
+                            {Key = "color"; Value = color.ToString();}]
+            html.tagb ("div", s1+s) <| fun () ->
+                writein ("\\("+text.Expr.evalL programList[prIndex]+"\\)")
+                
+        static member eqD (s:Style) = fun (p:position) (size:int) (color:string) (text:list<num0>) ->
+            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
+                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+                            {Key = "position"; Value = "absolute";}
+                            {Key = "font-size"; Value = size.ToString()+"px";}
+                            {Key = "color"; Value = color.ToString();}]
+            html.tagb ("div", s1+s) <| fun () ->
+                writein ("\\(\\begin{align}"+String.Join("\\\\",text |> List.map(fun t -> t.Expr.evalL programList[prIndex]))+"\\end{align}\\)")
+                
         /// キャラクター付き解説ページ
         static member page (c:list<Character*string>) (audio:Audio) code2 =
             html.slide position.Origin <| fun p ->
@@ -588,12 +606,12 @@ module htmlexpr =
                 |Silent ->
                     audioList <- audioList@[""]
                 |AudioFile f ->
-                    audioList <- audioList@[contentsDir+"/"+Path.GetFileName f]
+                    audioList <- audioList@[DirectoryInfo(contentsDir).Name+"/"+Path.GetFileName f]
                     if File.Exists f then
-                        if Directory.Exists (contentsDir) then
+                        if Directory.Exists contentsDir then
                             File.Copy(f, contentsDir+"\\"+Path.GetFileName f, true)
                         else
-                            printfn "directory not exist: %s" (contentsDir)
+                            printfn "directory not exist: %s" contentsDir
                     else
                         printfn "audio file not exist: %s" f
                 // 指定されたファイルが存在し、それらが現在書き込み中のファイルでない場合
@@ -621,7 +639,7 @@ module htmlexpr =
                                 printfn "Error: audio file not exist: %s" <| audiodir+"\\"+m.ToString()+"-"+scriptfile+".wav"
                             elif File.Exists f then
                                 // ファイルが見つかった場合の処理
-                                audioList <- audioList@[contentsDir+"/"+Path.GetFileName f]
+                                audioList <- audioList@[DirectoryInfo(contentsDir).Name+"/"+Path.GetFileName f]
                                 File.Copy(f, contentsDir+"\\"+Path.GetFileName f, true)
                                 printfn "Copy: %s -> %s" f <| contentsDir+"\\"+Path.GetFileName f
                             else
@@ -646,7 +664,7 @@ module htmlexpr =
                 html.tag "div" ("id = \"c"+anicounter.ToString()+"\"" + "style=\"" + (if character then "display: block; " else "display: none; ") + "\"") <| fun () ->
                     for c,file in c do
                         if File.Exists file then
-                            if Directory.Exists (contentsDir) then
+                            if Directory.Exists contentsDir then
                                 match c with
                                 |Tale ->
                                     File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
@@ -658,7 +676,7 @@ module htmlexpr =
                                     File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
                                     html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName file+"\" style=\"position: absolute; margin-left: 1503px; margin-top: 638px; width: 360px; z-index: 4;\""
                             else
-                                printfn "directory not exist: %s" (contentsDir)
+                                printfn "directory not exist: %s" contentsDir
                         else
                             printfn "character image file not exist: %s" file
                 // 字幕
@@ -717,10 +735,10 @@ module htmlexpr =
                             {Key = "position"; Value = "absolute";}]
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (contentsDir) then
+                if Directory.Exists contentsDir then
                     File.Copy(filename, contentsDir + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (contentsDir)
+                    printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", s1+s)
@@ -740,7 +758,7 @@ module htmlexpr =
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding;}
             
-type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:int,originY:int,canvasX:int,canvasY:int) =
+type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
     let mutable animeFlow:list<string*string*AnimationSetting> = []
     let mutable counter = 0
@@ -849,7 +867,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
             writein("var y = cy - " + (radius.Y t).code + "* Math.sin(theta);")
             writein "e.setAttribute(\"x\", x);"
             writein "e.setAttribute(\"y\", y);"
-            writein("e.innerHTML = " + (String.concat " + " (lines |> List.mapi (fun i s -> "\"<tspan dy='" + string (if i=0 then 0.0 else 1.2) + "em'>" + s + "</tspan>\""))) + ";")
+            writein("e.innerHTML = " + String.concat " + " (lines |> List.mapi (fun i s -> "\"<tspan dy='" + string (if i=0 then 0.0 else 1.2) + "em'>" + s + "</tspan>\"")) + ";")
             
     member this.rect (s:Style) (startP:tposition) (sx:int) (sy:int) =
         // コンテンツIDを発行
@@ -867,7 +885,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
         // コンテンツIDを発行
         let id = nextContentsID()
         let f = Path.GetFileName filename
-        File.Copy(filename,outputdir+"\\"+projectname+"\\"+contentsDir+"\\"+f, true)
+        File.Copy(filename, contentsDir + "\\" + f, true)
         counter <- counter + 1
         html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
@@ -942,7 +960,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
             
     member this.image (s:Style) = fun (startP:tposition) (endP:tposition) (filename:string) ->
         let f = Path.GetFileName filename
-        File.Copy(filename,outputdir+"\\"+projectname+"\\"+contentsDir+"\\"+f, true)
+        File.Copy(filename, contentsDir + "\\" + f, true)
         counter <- counter + 1
         html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
@@ -953,7 +971,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
             
     member this.image2 (id:string) (s:Style) (startP:tposition) (endP:tposition) (filename:string) =
         let f = Path.GetFileName filename
-        File.Copy(filename,outputdir+"\\"+projectname+"\\"+contentsDir+"\\"+f)
+        File.Copy(filename, contentsDir + "\\"+f)
         counter <- counter + 1
         html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
@@ -964,7 +982,7 @@ type FigureAnimation(figcounter:int,outputdir:string,projectname:string,originX:
             
     member this.image3 (s:Style) (startP:tposition) (filename:string) =
         let f = Path.GetFileName filename
-        File.Copy(filename,outputdir+"\\"+projectname+"\\"+contentsDir+"\\"+f)
+        File.Copy(filename, contentsDir + "\\" + f)
         counter <- counter + 1
         html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
@@ -1134,9 +1152,9 @@ module dochtml =
 [<AutoOpen>]
 module htmlexpr2 =
     type html with
-        static member animation (outputdir:string) (projectname:string) (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
+        static member animation (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
             figcounter <- figcounter + 1
-            let f = FigureAnimation(figcounter,outputdir,projectname,s.mX,s.mY,s.sX,s.sY)
+            let f = FigureAnimation(figcounter,s.mX,s.mY,s.sX,s.sY)
             switchJS <| fun () ->
                 writein "function repeatSeq(fn, interval, Nt, onComplete)"
                 writein "{"

@@ -12,19 +12,19 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
 fixedWidthPage HTML outputdir projectname 1920 <| fun () ->
-    codewritein "AAA"
+    writein "AAA"
     html.br()
-    codewritein "AAA"
+    writein "AAA"
     html.br()
-    codewritein "AAA"
+    writein "AAA"
     html.br()
-    codewritein "AAA"
+    writein "AAA"
     html.br()
-    codewritein "AAA"
+    writein "AAA"
     html.br()
-    codewritein "AAA"
+    writein "AAA"
     html.br()
-    codewritein "AAA"
+    writein "AAA"
     html.br()
     html.canvas Style[size.width "1920px"; size.height "500px";] <| fun cv ->
         
@@ -137,17 +137,17 @@ fixedWidthPage HTML outputdir projectname 1920 <| fun () ->
                 <| position(grid_x1+codeBoxWidth/2.0, a1f.Bottom)
                 <| position(grid_x1+codeBoxWidth/2.0, a1r.Top)
                 <| 2
-    codewritein "BBB"
+    writein "BBB"
     html.br()
-    codewritein "BBB"
+    writein "BBB"
     html.br()
-    codewritein "BBB"
+    writein "BBB"
     html.br()
-    codewritein "BBB"
+    writein "BBB"
     html.br()
-    codewritein "BBB"
+    writein "BBB"
     html.br()
-    codewritein "BBB"
+    writein "BBB"
     html.br()
-    codewritein "BBB"
+    writein "BBB"
     html.br()

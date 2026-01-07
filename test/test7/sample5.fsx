@@ -91,34 +91,34 @@ let mainPage() =
                     br.branch <| fun b ->
                         // ユーザーが存在しない
                         b.IF (loginState .= 0) <| fun () ->
-                            codewritein "ユーザーが存在しません<br>"
-                            codewritein "ID:"
+                            writein "ユーザーが存在しません<br>"
+                            writein "ID:"
                             textBoxUserID.show_copy()
-                            codewritein "パスワード:"
+                            writein "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ユーザーが存在しない
                         b.IF (loginState .= 1) <| fun () ->
-                            codewritein "パスワードが誤りです<br>"
-                            codewritein "ID:"
+                            writein "パスワードが誤りです<br>"
+                            writein "ID:"
                             textBoxUserID.show_copy()
-                            codewritein "パスワード:"
+                            writein "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ログイン成功
                         b.EL <| fun () ->
-                            codewritein "ID:"
+                            writein "ID:"
                             textBoxUserID.show_copy_lock()
-                            codewritein "パスワード:"
+                            writein "パスワード:"
                             textBoxUserPW.show_password_copy_lock()
                             buttonLogin.show_disabled "ログイン"
-                            codewritein "<br>"
-                            codewritein "ログイン後のコンテンツ"
+                            writein "<br>"
+                            writein "ログイン後のコンテンツ"
                 <| fun () ->
                     // ログインボタンを押していないとき
-                    codewritein "ID:"
+                    writein "ID:"
                     textBoxUserID.show()
-                    codewritein "パスワード:"
+                    writein "パスワード:"
                     textBoxUserPW.show_password()
                     buttonLogin.show "ログイン"
                 ()
