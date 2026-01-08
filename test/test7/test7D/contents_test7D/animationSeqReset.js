@@ -6,3 +6,11 @@ function animationSeqResetID1(){
     var e = document.getElementById("contentsID1");
     e.setAttribute("style","visibility: hidden; stroke-width: 3px; stroke: #000000; fill: none;");
 }
+function animationSeqResetID2(){
+    var e = document.getElementById("contentsID2");
+    e.setAttribute("style","visibility: hidden; stroke-width: 3px; stroke-dasharray: 4,4; stroke: #000000;");
+}
+function animationSeqResetID3(){
+    var e = document.getElementById("contentsID3");
+    e.setAttribute("style","visibility: hidden; stroke-width: 3px; stroke: #000000; fill: none;");
+}

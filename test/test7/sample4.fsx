@@ -32,16 +32,19 @@ fixedPage HTML outputdir projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voi
             html.subtitle1 Style[] (p+position(80,150)) "図形のアニメーション"
             html.subtitle2 Style[] (p+position(100,250)) "描画スタイル・座標等の指定"
             html.textA Style[] (p+position(100,320)) 30 "#000000" "AAA"
-            html.eqA Style[] (p+position(180,320)) 30 "#000000" "x+y"
-            let x = var.i0 "x"
-            let y = var.i0 "y"
-            html.eqB Style[] (p+position(280,320)) 30 "#FF0000" <| x-y
-            html.eqD Style[] (p+position(180,390)) 30 "#000000" 
-                [asm.sin(x+y);
-                 x-y]
+            ch.D "x" <| fun x ->
+                ch.D "y" <| fun y ->
+                    html.eqA Style[] (p+position(180,320)) 30 "#000000" "x+y"
+                    let x = var.i0 "x"
+                    let y = var.i0 "y"
+                    html.eqB Style[] (p+position(280,320)) 30 "#FF0000" <| x-y
+                    html.eqD Style[] (p+position(180,390)) 30 "#000000" 
+                        [asm.sin(x+y);
+                        x-y]
             html.subtitle2 Style[] (p+position(100,520)) "破線描画"
             html.subtitle2 Style[] (p+position(100,750)) "円弧描画"
-            html.animation {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
+            //html.animationAuto {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p <| fun (f,p) ->
+            html.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
                 let line1 = f.animationLine Style[stroke.width 3.0; stroke.dash "4,4"; stroke.color "#000000"]
                 let elps1 = f.animationArc Style[stroke.width 3.0; stroke.color "#000000"; stroke.fill "none";]
                 /// 中心座標

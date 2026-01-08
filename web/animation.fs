@@ -301,6 +301,7 @@ type SlideAnimation =
             writein "            audioPlayer.src = audioList[pagecount-1];"
             writein "            audioPlayer.play();"
             writein "        }"
+            writein "        autoAnimationMap['page'+pagecount]();"
             writein "    }"
             writein "}"
     static member jsDrawPrev() =
@@ -690,9 +691,13 @@ module htmlexpr =
                 |Character.Armi -> 
                     html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #ff8800; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
                         <| fun () -> writein audio.Subtitle.Subtitle
+                switchAutoAnimation <| fun () ->
+                    writein("page"+anicounter.ToString()+": () => {")
                 // メインコンテンツ
                 html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
                     code2 p
+                switchAutoAnimation <| fun () ->
+                    writein "},"
                 if animationButtonList.Length > 0 then
                     let fStartName,fResetName,btnx,btny = animationButtonList[animationButtonList.Length-1]
                     html.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
@@ -1017,12 +1022,35 @@ module dochtml =
                 filename  + "\\" + "contents_" + filename, "animationSeqReset.js", JavaScript
                 // スライドアニメーション(アニメーションリセット)用javascript
                 filename  + "\\" + "contents_" + filename, "animationReset.js", JavaScript
+                // オートアニメーション実行用javascript
+                filename  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
             ]
             <| fun () ->
                 switchJSAnimationStart <| fun () ->
                     writein "const animationStartMap = {"
                 switchJSAnimationReset <| fun () ->
                     writein "const animationResetMap = {"
+                switchAutoAnimation <| fun () ->
+                    writein "const autoAnimationMap = {"
+                switchJS <| fun () ->
+                    writein "function repeatSeq(fn, interval, Nt, onComplete)"
+                    writein "{"
+                    writein "    let t = 0;"
+                    writein "    function run()"
+                    writein "    {"
+                    writein "        if (t < Nt)"
+                    writein "        {"
+                    writein "            fn(t);"
+                    writein "            t++;"
+                    writein "            setTimeout(run, interval);"
+                    writein "        }"
+                    writein "        else"
+                    writein "        {"
+                    writein "            onComplete();"
+                    writein "        }"
+                    writein "    }"
+                    writein "    run();"
+                    writein "}"
                 switchBody <| fun () ->
                     code()
                 if isPageAnimation then
@@ -1056,6 +1084,7 @@ module dochtml =
                             html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeqReset.js\"") <| fun () -> ()
                             html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationStart.js\"") <| fun () -> ()
                             html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationReset.js\"") <| fun () -> ()
+                            html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/autoAnimation.js\"") <| fun () -> ()
                             // scriptタグ
                             html.tagb ("script", "") <| fun () ->
                                 writein codeDraw
@@ -1118,7 +1147,10 @@ module dochtml =
                     writein "        }"
                     writein "    }"
                     writein "}"
-                for i in 0..6 do
+                switchAutoAnimation <| fun () ->
+                    writein "test: () => {}"
+                    writein "};"
+                for i in 0..7 do
                     programList[i].close()
                 // bodyタグ一時コード削除
                 programList[1].delete()
@@ -1152,28 +1184,9 @@ module dochtml =
 [<AutoOpen>]
 module htmlexpr2 =
     type html with
-        static member animation (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
+        static member animationManual (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
             figcounter <- figcounter + 1
             let f = FigureAnimation(figcounter,s.mX,s.mY,s.sX,s.sY)
-            switchJS <| fun () ->
-                writein "function repeatSeq(fn, interval, Nt, onComplete)"
-                writein "{"
-                writein "    let t = 0;"
-                writein "    function run()"
-                writein "    {"
-                writein "        if (t < Nt)"
-                writein "        {"
-                writein "            fn(t);"
-                writein "            t++;"
-                writein "            setTimeout(run, interval);"
-                writein "        }"
-                writein "        else"
-                writein "        {"
-                writein "            onComplete();"
-                writein "        }"
-                writein "    }"
-                writein "    run();"
-                writein "}"
             switchBody <| fun () ->
                 writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 writein ("width=\""+s.sX.ToString()+"px\" ")
@@ -1190,3 +1203,23 @@ module htmlexpr2 =
             let fnameStart = f.jsStartControll asc
             let fnameReset = f.jsResetControll asc
             addAnimationButton (fnameStart,fnameReset,buttonX,buttonY)
+            
+        static member animationAuto (s:ViewBoxStyle) (p:position) code =
+            figcounter <- figcounter + 1
+            let f = FigureAnimation(figcounter,s.mX,s.mY,s.sX,s.sY)
+            switchBody <| fun () ->
+                writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
+                writein ("width=\""+s.sX.ToString()+"px\" ")
+                writein ("heigth=\""+s.sY.ToString()+"px\" ")
+                writein "xmlns=\"http://www.w3.org/2000/svg\" "
+                writein ("style=\"margin-left: "+s.mX.ToString()+"; ")
+                writein ("margin-top: "+s.mY.ToString()+"; ")
+                writein "position: absolute;"
+                writein ("background-color: "+s.backgroundColor+";")
+                writein "\">"
+                code(f,p)
+                writein "</svg>"
+            let asc = nextAnimationGroup()
+            let fnameStart = f.jsStartControll asc
+            let fnameReset = f.jsResetControll asc
+            addAutoAnimation(fnameStart,fnameReset)

@@ -81,6 +81,13 @@ module htmlio =
         let p = code()
         prIndex <- prIndex_temp
         p
+    /// 自動開始アニメーション実行コードの書き込み
+    let switchAutoAnimation code =
+        let prIndex_temp = prIndex
+        prIndex <- 7
+        let p = code()
+        prIndex <- prIndex_temp
+        p
         
     let mutable animationButtonList:list<string*string*int*int> = []
     let mutable audioList:string list = []
@@ -104,9 +111,13 @@ module htmlio =
     let animationButtonReset() =
         animationButtonList <- []
         
-    let addAnimationButton(s) =
-       animationButtonList <- animationButtonList@[s]
+    let addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
+       animationButtonList <- animationButtonList@[fnameStart,fnameReset,buttonX,buttonY]
        
+    let addAutoAnimation(fnameStart,fnameReset) =
+        switchAutoAnimation <| fun () ->
+            writein("animationStartMap['"+fnameStart+"']();")
+            
     // /// ファイル書き込み
     // let write (t:string) = wrBody.Write t
     // let fileOpen (t:string) = wrBody.FileSet t
