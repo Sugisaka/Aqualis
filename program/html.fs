@@ -76,7 +76,7 @@ namespace Aqualis
         module stroke = 
             let color (s:string) = {Key="stroke"; Value=s}
             let width (s:float) = {Key="stroke-width"; Value=s.ToString()+"px"}
-            let dasharray (s:float) = {Key="stroke-dasharray"; Value=s.ToString()+"px"}
+            let dasharray (s:list<int>) = {Key="stroke-dasharray"; Value=String.Join(" ",s |> List.map (fun i -> i.ToString()))}
             let strokeOpacity(s:float) = {Key="stroke-opacity"; Value=s.ToString()}
             let fill (s:string) = {Key="fill"; Value=s}
             let fillOpacity(s:float) = {Key="fill-opacity"; Value=s.ToString()}
@@ -681,23 +681,26 @@ namespace Aqualis
             code(f,p)
             writein "</svg>"
             
-        static member blockTextcode (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
+        static member blockTextcode (s:Style) (p:position) (width:float,height:float) (borderWidth:float,borderStyle:string,borderColor:string) (text:list<string>) =
             let padding = 5
             let s1 = Style [size.width (width.ToString()+"px")
                             size.height (height.ToString()+"px")
                             font.family "'Noto Sans Mono',monospace"
-                            {Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+                            {Key = "margin-left"; Value = p.x.ToString() + "px";}
+                            {Key = "margin-top"; Value = p.y.ToString() + "px";}
                             {Key = "position"; Value = "absolute";}
-                            {Key = "overflow-wrap"; Value = "break-word";}]
+                            {Key = "overflow-wrap"; Value = "break-word";}
+                            {Key = "border-width"; Value = borderWidth.ToString() + "px";}
+                            {Key = "border-style"; Value = borderStyle;}
+                            {Key = "border-width"; Value = borderColor;}]
             html.tagb ("div", s1+s)
                 <| fun () ->
                     text |> List.iter (fun s -> writein (s+"<br>"))
                     writein ""
             {Left = p.x;
-            Right = p.x+double width+2.0*double padding;
+            Right = p.x+double width+2.0*double padding+2.0*double borderWidth;
             Top = p.y;
-            Bottom = p.y+double height+2.0*double padding;}
+            Bottom = p.y+double height+2.0*double padding+2.0*double borderWidth;}
             
     and figure() =
         let padding = 10.0

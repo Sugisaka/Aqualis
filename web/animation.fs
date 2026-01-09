@@ -1095,16 +1095,13 @@ module dochtml =
                             writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
                             writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
                         // body要素
-                        let s0 = Style [area.backGroundColor "#aaaaaa"]
                         match pagesizeX,pagesizeY with
                         |None,None ->
-                            let s = Style [
-                                font.family "'Noto Sans JP', sans-serif"
-                                font.weight "500"
-                                font.size 16]
-                            html.tagb ("body", [Atr("onload","draw()");s.atr]) <| fun () ->
+                            let s0 = Style [area.backGroundColor "#ffffff"]
+                            html.tagb ("body", s0) <| fun () ->
                                 writein codeBody
                         |Some x,None ->
+                            let s0 = Style [area.backGroundColor "#aaaaaa"]
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
                                     area.backGroundColor "#ffffff"
@@ -1114,6 +1111,7 @@ module dochtml =
                                 html.tagb ("div", s1) <| fun () ->
                                     writein codeBody
                         |None,Some y->
+                            let s0 = Style [area.backGroundColor "#aaaaaa"]
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
                                     area.backGroundColor "#ffffff"
@@ -1123,6 +1121,7 @@ module dochtml =
                                 html.tagb ("div", s1) <| fun () ->
                                     writein codeBody
                         |Some x,Some y ->
+                            let s0 = Style [area.backGroundColor "#aaaaaa"]
                             html.tagb ("body", s0) <| fun () ->
                                 let s1 = Style [
                                     area.backGroundColor "#ffffff"

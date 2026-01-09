@@ -36,7 +36,7 @@ namespace Aqualis
         ///<summary>整数型変数リスト</summary>
         member val i0 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "i^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "i^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i0"+n.ToString "000"
             |_ -> fun n -> "i0"+n.ToString "000"
             ) with get
@@ -44,7 +44,7 @@ namespace Aqualis
         ///<summary>倍精度浮動小数点型変数リスト</summary>
         member val d0 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "d^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "d^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d0"+n.ToString "000"
             |_ -> fun n -> "d0"+n.ToString "000"
             ) with get
@@ -52,7 +52,7 @@ namespace Aqualis
         ///<summary>複素数型変数リスト</summary>
         member val z0 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "z^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "z^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z0"+n.ToString "000"
             |_ -> fun n -> "z0"+n.ToString "000"
             ) with get
@@ -60,7 +60,7 @@ namespace Aqualis
         ///<summary>文字変数リスト</summary>
         member val c0 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "c^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "c^{("+n.ToString()+")}"
             |PHP -> fun n -> "$c0"+n.ToString "000"
             |_ -> fun n -> "c0"+n.ToString "000"
             ) with get
@@ -68,7 +68,7 @@ namespace Aqualis
         ///<summary>文字列変数リスト</summary>
         member val t0 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "t^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "t^{("+n.ToString()+")}"
             |PHP -> fun n -> "$t0"+n.ToString "000"
             |_ -> fun n -> "t0"+n.ToString "000"
             ) with get
@@ -76,7 +76,7 @@ namespace Aqualis
         ///<summary>ファイルポインタリスト</summary>
         member val f0 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "f^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "f^{("+n.ToString()+")}"
             |PHP -> fun n -> "$f0"+n.ToString "000"
             |_ -> fun n -> "f0"+n.ToString "000"
             ) with get
@@ -84,7 +84,7 @@ namespace Aqualis
         ///<summary>整数型1次元配列リスト</summary>
         member val i1 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "\\dot{i}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i1"+n.ToString "000"
             |_ -> fun n -> "i1"+n.ToString "000"
             ) with get
@@ -92,7 +92,7 @@ namespace Aqualis
         ///<summary>倍精度浮動小数点型1次元配列リスト</summary>
         member val d1 = varGenerator (
             match lang with 
-            |LaTeX|HTML -> fun n -> "\\dot{d}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d1"+n.ToString "000"
             |_ -> fun n -> "d1"+n.ToString "000"
             ) with get
@@ -100,7 +100,7 @@ namespace Aqualis
         ///<summary>複素数型1次元配列リスト</summary>
         member val z1 = varGenerator (
             match lang with 
-            |LaTeX|HTML -> fun n -> "\\dot{z}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z1"+n.ToString "000"
             |_ -> fun n -> "z1"+n.ToString "000"
             ) with get
@@ -108,7 +108,7 @@ namespace Aqualis
         ///<summary>整数型2次元配列リスト</summary>
         member val i2 = varGenerator (
             match lang with 
-            |LaTeX|HTML -> fun n -> "\\ddot{i}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i2"+n.ToString "000"
             |_ -> fun n -> "i2"+n.ToString "000"
             ) with get
@@ -116,7 +116,7 @@ namespace Aqualis
         ///<summary>倍精度浮動小数点型2次元配列リスト</summary>
         member val d2 = varGenerator (
             match lang with
-            |LaTeX|HTML -> fun n -> "\\ddot{d}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d2"+n.ToString "000"
             |_ -> fun n -> "d2"+n.ToString "000"
             ) with get
@@ -124,7 +124,7 @@ namespace Aqualis
         ///<summary>複素数型2次元配列リスト</summary>
         member val z2 = varGenerator (
             match lang with 
-            |LaTeX|HTML -> fun n -> "\\ddot{z}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z2"+n.ToString "000"
             |_ -> fun n -> "z2"+n.ToString "000"
             ) with get
@@ -132,7 +132,7 @@ namespace Aqualis
         ///<summary>整数型3次元配列リスト</summary>
         member val i3 = varGenerator (
             match lang with 
-            |LaTeX|HTML -> fun n -> "\\dddot{i}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i3"+n.ToString "000"
             |_ -> fun n -> "i3"+n.ToString "000"
             ) with get
@@ -140,7 +140,7 @@ namespace Aqualis
         ///<summary>倍精度浮動小数点型3次元配列リスト</summary>
         member val d3 = varGenerator (
             match lang with 
-            |LaTeX|HTML -> fun n -> "\\dddot{d}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d3"+n.ToString "000"
             |_ -> fun n -> "d3"+n.ToString "000"
             ) with get
@@ -148,7 +148,7 @@ namespace Aqualis
         ///<summary>複素数型3次元配列リスト</summary>
         member val z3 = varGenerator (
             match lang with 
-            |LaTeX|HTML -> fun n -> "\\dddot{z}^{("+n.ToString()+")}"
+            |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z3"+n.ToString "000"
             |_ -> fun n -> "z3"+n.ToString "000"
             ) with get

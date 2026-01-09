@@ -40,36 +40,34 @@ namespace Aqualis
         static member section (step:int) = fun (id:int) -> group.section ((step = id))
               
         static member Section (s:string) (code:unit->unit) = 
-            let (!===) (s:string) = 
-                match programList[prIndex].language with
-                |LaTeX ->
-                    writein("\\section{"+s+"}")
-                |HTML -> 
-                    writein "<details open>"
-                    writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                    writein "<div class=\"insidecode-section\">"
-                |_ ->
-                    ! ("===" + s.PadRight(76,'='))
-            (!===)s
             match programList[prIndex].language with
-            |Python ->
-                ()
-            |_ ->
+            |Fortran |C99 |JavaScript ->
+                ! ("===" + s.PadRight(76,'='))
                 programList[prIndex].indentInc()
-            code()
-            match programList[prIndex].language with
-            |Python ->
-                ()
-            |_ ->
+                code()
                 programList[prIndex].indentDec()
-            match programList[prIndex].language with 
-            |Fortran |C99 |Python -> 
-                (!===)("end "+s) 
+                ! ("=== end " + s.PadRight(76,'=')) 
                 writein "\n"
-            |HTML ->
+            |Python ->
+                ! ("===" + s.PadRight(76,'='))
+                code()
+                ! ("=== end " + s.PadRight(76,'=')) 
+                writein "\n"
+            |LaTeX ->
+                writein("\\section{"+s+"}")
+                code()
+            |HTML -> 
+                writein "<details open>"
+                writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
+                writein "<div class=\"insidecode-section\">"
+                programList[prIndex].indentInc()
+                code()
+                programList[prIndex].indentDec()
                 writein "</div>"
                 writein "</details>"
-            |_  -> ()
+            |HTMLSequenceDiagram ->
+                expr.sectionHS s code
+            |Numeric |PHP -> code()
             
         static member subSection (s:string) (code:unit->unit) = 
             let (!===) (s:string) = 

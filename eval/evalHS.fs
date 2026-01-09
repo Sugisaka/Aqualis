@@ -8,188 +8,172 @@ namespace Aqualis
     
     open System
     
+    type SequenceDiagramStyle = 
+        {
+            /// ダイアグラム上マージン
+            TopMargin:float;
+            /// ダイアグラム左マージン
+            LeftMargin:float;
+            /// 変数間の間隔
+            VarInterval:float;
+            /// 単一代入文の矢印、基準線から代入先までの矢印の長さ
+            SingleArrowLength:float;
+            /// 変数ヘッダーの横幅
+            VarHeaderWidth:float;
+            /// 変数ヘッダーの高さ
+            VarHeaderHeight:float;
+            /// 線の太さ
+            LineWidth:float;
+            /// 実効線の太さ
+            ActiveLineWidth:float;
+            // 枠のマージン
+            FrameMargin:float;
+            /// 図形描画の時間方向間隔
+            TimeStep:float;
+            // 枠線の太さ
+            FrameBorder:float;
+            /// ライフライン（実効状態）の色
+            ColorActiveLine:string;
+            /// ループフレームの色
+            ColorLoopFrame:string;
+            /// ブランチフレームの色
+            ColorBranchFrame:string;
+            /// セクションフレームの色
+            ColorSectionFrame:string;
+        }
+        
     [<AutoOpen>]
     module value =
-        
+        /// 上側マージン
+        let mutable topMargin = 40.0
+        /// 左側マージン
+        let mutable leftMargin = 40.0
+        /// 変数間の間隔
+        let mutable varInterval = 150.0
+        /// 単一代入文の矢印、基準線から代入先までの矢印の長さ
+        let mutable singleArrowLength = varInterval/4.0
+        /// 変数ヘッダーの横幅
+        let mutable varHeaderWidth = 50.0
+        /// 変数ヘッダーの高さ
+        let mutable varHeaderHeight = 20.0
+        /// 線の太さ
+        let mutable lineWidth = 2.0
+        /// 実効線の太さ
+        let mutable activeLineWidth = 10.0
+        // 枠のマージン
+        let mutable frameMargin = 10.0
+        /// 図形描画の時間方向間隔
+        let mutable timeStep = 10.0 
+        // 枠線の太さ
+        let mutable frameBorder = 2.0
+        /// 現在のライフライン終端座標
+        let mutable colorActiveLine = "rgba(0, 191, 255, 0.5)"
+        let mutable colorLoopFrame = "rgb(255, 0, 0)"
+        let mutable colorBranchFrame = "rgb(0, 180, 0)"
+        let mutable colorSectionFrame = "rgb(127,0,255)"
+        let setSequenceDiagramStyle(s:SequenceDiagramStyle) =
+            topMargin <- s.TopMargin
+            leftMargin <- s.LeftMargin
+            varInterval <- s.VarInterval
+            singleArrowLength <- s.SingleArrowLength
+            varHeaderWidth <- s.VarHeaderWidth
+            varHeaderHeight <- s.VarHeaderHeight
+            lineWidth <- s.LineWidth
+            activeLineWidth <- s.ActiveLineWidth
+            frameMargin <- s.FrameMargin
+            timeStep <- s.TimeStep
+            frameBorder <- s.FrameBorder
+            colorActiveLine <- s.ColorActiveLine
+            colorLoopFrame <- s.ColorLoopFrame
+            colorBranchFrame <- s.ColorBranchFrame
+            colorSectionFrame <- s.ColorSectionFrame
+            
+        let styleVarHead = 
+            Style[
+                font.size 12;
+                font.color "black";
+                font.weight "normal";
+                area.backGroundColor "#ffffff";
+                font.lineHeight 14;
+                padding.top 5;
+                padding.bottom 5;
+                {Key="text-align"; Value="center"}]
+                
+    [<AutoOpen>]
+    module sequenceDiagramData =
         let p0 = position.Origin
+        let mutable terminalLifeLine = 100.0
+        /// シーケンス図に描画済み変数リスト
+        let mutable varList:list<string*int*float> = []
+        /// フレーム枠座標スタックリスト
+        let mutable frameStack:list<float*float*float*float> = []
+        /// 条件分岐枠スタックリスト
+        let mutable branchStack:list<list<string*float>> = []
+        /// 第n変数ライフラインのx座標
+        let lifeLineX(n:int) = leftMargin + varHeaderWidth / 2.0 + float n * varInterval
 
-        /// classのy軸の位置
-        let headerTopMargin = 40.0
-        /// classーキャプション間
-        let gap20 = 20.0
-        /// class2
-        let varIntervalX = 250.0
-
-        /// classのサイズ
-        let varHeaderWidth = 90.0 //横幅 (100.0)
-        let varHeaderHeight = 40.0 //高さ (50.0)
-
-        /// 時間軸
-        let dashed_x50 = (varHeaderWidth+10.0)/2.0 //50.0
-
-        /// 実行中
-        /// 実行中のx座標の調整
-        let gap15 = 15.0 
-        /// 実行中のx座標 (35.0)
-        let x35 = dashed_x50-gap15 
-        let text_x160 = (x35+varIntervalX+x35)/2.0
-        /// 代入先の実行中の間隔調整
-        let gap5 = 5.0
-        let run_width = 10.0
-        //線,テキスト
-        /// 横線のy座標と繰り返しのテキストのx座標の調整
-        let gap10 = 10.0 
-        let mutable frame_top_list  :list<float> = []
-        let mutable frame_bottom = 0.0
-        // let mutable class_number = -1.0
-        let mutable count = -1.0
-        let mutable sectionCount2 = 0.0
-        let mutable dic:list<string*float*float> = []
-        let mutable parameters:list<string*float*float> = []
-        let mutable count2 = -1.0
-        let mutable run_top = 190.0
-        let mutable stack  :list<float*float*float*float*int> = []
-        let mutable for_check = 0.0
-        let mutable branch_elifCheck = 0.0
-        let mutable branch_text_yPoint_list:list<float> = []
-        let mutable branch_text_name_list:list<string> = []
-        let mutable branch_IFELSE_IFELSE_check = 0.0
-        let mutable count_branch = 0.0
-        let mutable count_branch_memory_list:list<float> = []
-        let mutable boundaryLine = 0.0
-        let mutable branch_frame_top_list:list<float> = []
-        let mutable boundaryY:list<float> = []
-        let mutable branch_frame_top = 0.0
-        let styleVarHead = Style[font.size 10; font.color "black"; font.weight "normal"; border.style "1px solid"; area.backGroundColor "#BBEEFF"; font.lineHeight 14; padding.all 5; {Key="text-align"; Value="center"}]
-        
     [<AutoOpen>]
     module exprEvalHS =
         
         type expr with
             
             /// 変数用
-            static member varList (e:expr,c:program) = 
-                let rec makeList (e:expr) =
+            static member addVarList (e:expr,c:program) = 
+                let rec makeList (e:expr) (lst:list<string*int*float>) =
                     match e with
-                    |Int _ -> []
-                    |Dbl _ -> []
-                    |Var (t,v,p) -> 
-                        expr.drawVarHeader (Var (t,v,p),c)
-                        match List.tryFind (fun (label,x,y) -> label=v) parameters with
-                        |Some (_,x,y) ->
-                            [(v,x,y)]
+                    |Int _ -> lst
+                    |Dbl _ -> lst
+                    |Var (_,vname,_) -> 
+                        match List.tryFind (fun (label,_,_) -> label=vname) lst with
+                        |Some _ ->
+                            // すでにlstに同じ変数が含まれていればこの変数は追加不要
+                            lst
                         |None ->
-                            []
-                    |Add (_,a,b) ->
-                        makeList a @ makeList b
-                    |Sub (_,a,b) ->
-                        makeList a @ makeList b
-                    |Mul (_,a,b) ->
-                        makeList a @ makeList b
-                    |Div (_,a,b) ->
-                        makeList a @ makeList b
-                    |Pow (_,a,b) ->
-                        makeList a @ makeList b
-                    |Sin (_,a) ->
-                        makeList a
-                    |Cos (_,a) ->
-                        makeList a
-                    |Tan (_,a) ->
-                        makeList a
-                    |Asin (_,a) ->
-                        makeList a
-                    |Acos (_,a) ->
-                        makeList a
-                    |Atan (_,a) ->
-                        makeList a
-                    |Atan2 (a,b) ->
-                        makeList a @ makeList b
-                    |Exp (_,a) ->
-                        makeList a
-                    |Log (_,a) ->
-                        makeList a
-                    |Log10 (_,a) ->
-                        makeList a
-                    |Sqrt (_,a) ->
-                        makeList a
-                    |Abs (_,a) ->
-                        makeList a
-                    |Eq (a,b) ->
-                        makeList a @ makeList b
-                    |NEq (a,b) ->
-                        makeList a @ makeList b
-                    |Greater (a,b) ->
-                        makeList a @ makeList b
-                    |Less (a,b) ->
-                        makeList a @ makeList b
-                    |GreaterEq (a,b) ->
-                        makeList a @ makeList b
-                    |LessEq (a,b) ->
-                        makeList a @ makeList b
-                    |_ -> []
-                    
-                e
-                |> makeList
-                |> List.distinct
-                
-            /// 定数用
-            static member numList (e:expr) = 
-                let rec makeList (e:expr) =
-                    match e with
-                    |Int n -> [(float n,0.0)]
-                    |Dbl x -> [(x,0.0)]
-                    |Var _ -> []
-                    |Add (_,a,b) ->
-                        makeList a @ makeList b
-                    |Sub (_,a,b) ->
-                        makeList a @ makeList b
-                    |Mul (_,a,b) ->
-                        makeList a @ makeList b
-                    |Div (_,a,b) ->
-                        makeList a @ makeList b
-                    |Pow (_,a,b) ->
-                        makeList a @ makeList b
-                    |Sin (_,a) ->
-                        makeList a
-                    |Cos (_,a) ->
-                        makeList a
-                    |Tan (_,a) ->
-                        makeList a
-                    |Asin (_,a) ->
-                        makeList a
-                    |Acos (_,a) ->
-                        makeList a
-                    |Atan (_,a) ->
-                        makeList a
-                    |Atan2 (a,b) ->
-                        makeList a @ makeList b
-                    |Exp (_,a) ->
-                        makeList a
-                    |Log (_,a) ->
-                        makeList a
-                    |Log10 (_,a) ->
-                        makeList a
-                    |Sqrt (_,a) ->
-                        makeList a
-                    |Abs (_,a) ->
-                        makeList a
-                    |Eq (a,b) ->
-                        makeList a @ makeList b
-                    |NEq (a,b) ->
-                        makeList a @ makeList b
-                    |Greater (a,b) ->
-                        makeList a @ makeList b
-                    |Less (a,b) ->
-                        makeList a @ makeList b
-                    |GreaterEq (a,b) ->
-                        makeList a @ makeList b
-                    |LessEq (a,b) ->
-                        makeList a @ makeList b
-                    |_ -> []
-                    
-                e
-                |> makeList
-                |> List.distinct
+                            match List.tryFind (fun (label,_,_) -> label=vname) varList with
+                            |Some d -> 
+                                // lstに追加
+                                lst@[d]
+                            |None ->
+                                let varCount = varList.Length
+                                // dicにも未登録のためここで追加する
+                                varList <- varList@[vname,varCount,terminalLifeLine]
+                                // シーケンス図に追加
+                                let x = 
+                                    html.blockTextcode 
+                                        <| styleVarHead
+                                        <| p0.shift(leftMargin+varInterval*float varCount,topMargin)
+                                        <| (varHeaderWidth,varHeaderHeight)
+                                        <| (frameBorder,"solid","#000000")
+                                        <| ["\\(" + e.evalHS c + "\\)"]
+                                //現在位置までライフライン描画
+                                expr.drawLifeLine(lifeLineX varCount,x.Bottom,terminalLifeLine)
+                                // lstに追加
+                                lst@[vname,varCount,terminalLifeLine]
+                    |Add (_,a,b) -> makeList b (makeList a lst)
+                    |Sub (_,a,b) -> makeList b (makeList a lst)
+                    |Mul (_,a,b) -> makeList b (makeList a lst)
+                    |Div (_,a,b) -> makeList b (makeList a lst)
+                    |Pow (_,a,b) -> makeList b (makeList a lst)
+                    |Sin (_,a) -> makeList a lst
+                    |Cos (_,a) -> makeList a lst
+                    |Tan (_,a) -> makeList a lst
+                    |Asin (_,a) -> makeList a lst
+                    |Acos (_,a) -> makeList a lst
+                    |Atan (_,a) -> makeList a lst
+                    |Atan2 (a,b) -> makeList b (makeList a lst)
+                    |Exp (_,a) -> makeList a lst
+                    |Log (_,a) -> makeList a lst
+                    |Log10 (_,a) -> makeList a lst
+                    |Sqrt (_,a) -> makeList a lst
+                    |Abs (_,a) -> makeList a lst
+                    |Eq (a,b) -> makeList b (makeList a lst)
+                    |NEq (a,b) -> makeList b (makeList a lst)
+                    |Greater (a,b) -> makeList b (makeList a lst)
+                    |Less (a,b) -> makeList b (makeList a lst)
+                    |GreaterEq (a,b) -> makeList b (makeList a lst)
+                    |LessEq (a,b) -> makeList b (makeList a lst)
+                    |_ -> lst
+                makeList e []
                 
             static member fig (p:position) code =
                 let f = figure()
@@ -211,22 +195,14 @@ namespace Aqualis
             static member drawLifeLine(x:float,y1:float,y2:float) =
                 expr.fig p0 <| fun (f,_) ->
                     //破線：classの縦線
-                    f.line Style[stroke.color "black"; stroke.dasharray 5.0]
+                    f.line Style[stroke.color "black"; stroke.width 1.0; stroke.dasharray [5; 3]]
                         <| position(x,y1)
                         <| position(x,y2)
-                        
-            /// 条件分岐の境界線を描画
-            static member drawIfBorder(x1:float,x2:float,y1:float) =
-                html.fig p0 <| fun (f,_) ->
-                    //破線：条件分岐の横線
-                    f.line Style[stroke.color "green"; stroke.dasharray 10.0]
-                        <| position(x1,y1)
-                        <| position(x2,y1)
                         
             /// 水平線を描画
             static member drawHorizontalLine(x1:float, x2:float, y:float) =
                 html.fig p0 <| fun (f,_) ->
-                    f.line Style[stroke.color "black";]
+                    f.line Style[stroke.color "black"; stroke.width lineWidth]
                         <| position(x1, y)
                         <| position(x2, y)
                         
@@ -242,51 +218,19 @@ namespace Aqualis
             static member drawVerticalLine(x:float,y1:float,y2:float) =
                 html.fig p0 <| fun (f,p) ->
                     //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                    f.line Style[stroke.color "black"; stroke.width 2.0]
+                    f.line Style[stroke.color "black"; stroke.width lineWidth]
                         <| position(x, y1)
                         <| position(x, y2)
                         
-            /// 変数名
-            static member drawVarHeader(v:expr,c:program) =
-                let class_nameText = "\\(" + v.evalHS c + "\\)"
-                match v with
-                |Var (_,vname,_) ->
-                    let varX,varY =
-                        match List.tryFind (fun (label,_,_) -> label=vname) dic with
-                        |Some (_,x,y) ->
-                            x,y
-                        |None ->
-                            count <- count + 1.0
-                            // class_nameを辞書に追加
-                            dic <- dic@[vname,count,run_top]
-                            let y = if for_check = 0.0 then 0.0 else run_top
-                            let x = 
-                                html.blockTextcode 
-                                    <| styleVarHead
-                                    <| p0.shift(varIntervalX*count,headerTopMargin)
-                                    <| (varHeaderWidth,varHeaderHeight)
-                                    <| [class_nameText]
-                            //現在位置までライフライン描画
-                            expr.drawLifeLine(varIntervalX*count+dashed_x50,x.Bottom,run_top)
-                            count,y
-                    match List.tryFind (fun (label,_,_) -> label=vname) parameters with
-                    |Some _ ->
-                        ()
-                    |None ->
-                        // 変数をリストに追加
-                        parameters <- parameters@[vname, varX, varY]
-                |_ ->
-                    ()
-                    
             /// ライフライン(アクティブ)を描画
             static member drawActiveLine(x:float, y1:float, y2:float, color:string) =
                 html.fig p0 <| fun (f,p) ->
                     //実行線
-                    f.line Style[stroke.color color; stroke.width run_width]
+                    f.line Style[stroke.color color; stroke.width activeLineWidth]
                         <| position(x, y1)
                         <| position(x, y2)
-                        
-                let updateRange(xMin,xMax,yMin,yMax,insideSection) =
+                // フレーム枠(左、右、下)更新
+                frameStack <- frameStack |> List.map (fun (xMin,xMax,yMin,yMax) ->
                     let xMin' = 
                         if xMin = 0.0 then x 
                         elif x < xMin then x 
@@ -295,20 +239,13 @@ namespace Aqualis
                         if xMax = 0.0 then x 
                         elif x > xMax then x 
                         else xMax
-                    let yMin' =  
-                        if yMin = 0.0 then y1 
-                        elif y1 < yMin && y1 < y2 then y1 
-                        elif y2 < yMin && y2 < y1 then y2 
-                        else yMin
                     let yMax' = 
                         if yMax = 0.0 then y2 
                         elif y1 > yMax && y1 > y2 then y1 
                         elif y2 > yMax && y2 > y1 then y2 
                         else yMax
-                    xMin',xMax',yMin',yMax',insideSection
+                    xMin',xMax',yMin,yMax')
                     
-                stack <- List.map (fun xxyy -> updateRange xxyy) stack
-                
             /// テキストを描画
             static member drawText(size:int,color:string,weight:string,x:float,y:float,text:string) =
                 let p = p0.shift(x,y)
@@ -322,200 +259,160 @@ namespace Aqualis
                 
             /// 代入式を描画
             static member substHS (x:expr) (eq:expr) (c:program) =
-                let start = expr.varList(eq,c)
+                let start = expr.addVarList(eq,c)
                 // 代入元に変数があるか
-                let distinction = if start = [] then false else true
-                let goal = expr.varList(x,c)
+                let goal = expr.addVarList(x,c)
                 let getName = fun (name,_,_) -> name
-                if start.Length=1 && goal.Length=1 && getName start[0] = getName goal[0] then
-                    // 代入式
+                let mutable stepCount = 0
+                match start.Length with
+                |1 when getName start[0] = getName goal[0] ->
+                    // 自身への代入（他の変数無し）の場合
                     let equText = "\\(" + eq.evalHS c + "\\)"
                     //存在する変数すべてにライフライン継ぎ足し
-                    for _,number,_ in dic do
-                        expr.drawLifeLine(dashed_x50+varIntervalX*number,run_top,run_top+gap10*(float start.Length+float goal.Length+2.0))
-                    
-                    for goalName, goalX, goalY in goal do
-                        //代入先の実行線
-                        expr.drawActiveLine(varIntervalX*goalX+dashed_x50, goalY, run_top+gap10,"rgba(0, 191, 255, 0.5)")
-                        expr.drawActiveLine(varIntervalX*goalX+dashed_x50, run_top+2.0*gap10, run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-                        // 辞書を更新
-                        dic <- dic |> List.map 
-                            (fun (name, number, yData) -> 
-                                if name=goalName then 
-                                    name, number, run_top+gap10*(float start.Length+float goal.Length+1.0) 
-                                else 
-                                    name, number, yData)
-                        //代入元に変数があるとき
-                        if distinction then
-                            let left,right = 
-                                start 
-                                |> List.fold (fun (l,r) (_,x,_) -> 
-                                    if goalX > x then l+1.0,r 
-                                    elif goalX < x then l,r+1.0 
-                                    else l,r) (0.0,0.0)
-                            //基準線が左側の場合(右矢印)
-                            if left > right then
-                                let baseline = varIntervalX*goalX
-                                let arrow_goal = varIntervalX*goalX+dashed_x50-run_width/2.0
-                                let text_position = varIntervalX*(goalX-1.0)+text_x160
-                                //代入元の変数の数だけ矢印を引く
-                                for label,s,y in start do
-                                    //次の変数の矢印のために1つ下にずらす
-                                    count2 <- count2 + 1.0
-                                    // 代入元から基準線までの矢印
-                                    if goalX > s then
-                                        //右矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50+run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    elif goalX = s then
-                                        //左矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    else //goalX < s then
-                                        //左矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                                expr.drawVerticalLine(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
-                                //右矢印：基準線から代入先まで(x軸)
-                                expr.drawHorizontalArrowLine(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
-                                // テキスト（実行内容）
-                                expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-                            //基準線が右側の場合(左矢印)
-                            else
-                                let baseline = 130.0 + varIntervalX*goalX
-                                let arrow_goal = varIntervalX*goalX+dashed_x50+run_width/2.0
-                                let text_position = varIntervalX*goalX+text_x160
-                                //代入元の変数の数だけ矢印を引く
-                                for label,s,y in start do
-                                    //次の変数の矢印のために1つ下にずらす
-                                    count2 <- count2 + 1.0
-                                    // 代入元から基準線までの矢印
-                                    if goalX > s then
-                                        //右矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50+run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    elif goalX = s then
-                                        //右矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50+run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    else //goalX < s then
-                                        //左矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                                expr.drawVerticalLine(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
-                                //左矢印：基準線から代入先まで(x軸)
-                                expr.drawHorizontalArrowLine(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
-                                // テキスト（実行内容）
-                                expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-                        //定数を代入(変数なし)
-                        else
-                            //左矢印：基準線から代入先まで(x軸)
-                            expr.drawHorizontalArrowLine(varIntervalX*goalX+text_x160-5.0,varIntervalX*goalX+dashed_x50+run_width/2.0,run_top+gap10*(float start.Length+1.0))
-                            // テキスト（実行内容）
-                            expr.drawText(12,"black","normal",varIntervalX*goalX+text_x160,run_top-gap10,equText)
+                    for _,number,_ in varList do
+                        expr.drawLifeLine(lifeLineX number, terminalLifeLine, terminalLifeLine+timeStep*float(start.Length+goal.Length+2))
+                    let goalName, goalX, goalY = goal[0]
+                    //代入先の実行線
+                    expr.drawActiveLine(lifeLineX goalX, goalY, terminalLifeLine+timeStep,colorActiveLine)
+                    expr.drawActiveLine(lifeLineX goalX, terminalLifeLine+2.0*timeStep, terminalLifeLine+timeStep*float(start.Length+goal.Length+1),colorActiveLine)
+                    // 変数リストのライフラインを更新
+                    varList <- varList |> List.map 
+                        (fun (name, number, yData) -> 
+                            if name=goalName then 
+                                name, number, terminalLifeLine+timeStep*float(start.Length+goal.Length+1) 
+                            else 
+                                name, number, yData)
+                    let baseline = lifeLineX goalX + singleArrowLength
+                    let arrow_goal = lifeLineX goalX + activeLineWidth/2.0
+                    //代入元の変数の数だけ矢印を引く
+                    let _,s,_ = start[0]
+                    // 代入元から基準線までの矢印
+                    if goalX > s then
+                        //右矢印：実行中→縦線
+                        expr.drawHorizontalLine(lifeLineX s + activeLineWidth/2.0, baseline, terminalLifeLine+timeStep*float(stepCount+1))
+                    elif goalX = s then
+                        //右矢印：実行中→縦線
+                        expr.drawHorizontalLine(lifeLineX s + activeLineWidth/2.0, baseline, terminalLifeLine+timeStep*float(stepCount+1))
+                    else
+                        //左矢印：実行中→縦線
+                        expr.drawHorizontalLine(lifeLineX s - activeLineWidth/2.0, baseline, terminalLifeLine+timeStep*float(stepCount+1))
+                    //次の変数の矢印のために1つ下にずらす
+                    stepCount <- stepCount + 1
+                    //基準線(縦線)：代入元の1番目から代入先まで(y軸)
+                    expr.drawVerticalLine(baseline, terminalLifeLine+timeStep, terminalLifeLine+timeStep*float(start.Length+1))
+                    //左矢印：基準線から代入先まで(x軸)
+                    expr.drawHorizontalArrowLine(baseline, arrow_goal, terminalLifeLine+timeStep*float(start.Length+1))
+                    // テキスト（実行内容）
+                    expr.drawText(12, "black", "normal", baseline, terminalLifeLine-timeStep, equText)
                     //実行線の下辺からさらに10.0下を描き始めとする
-                    run_top <- run_top+gap10*(float start.Length+float goal.Length+2.0)
-                    parameters <- []
-                    count2 <- -1.0
-                else
+                    terminalLifeLine <- terminalLifeLine+timeStep*float(start.Length+goal.Length+2)
+                |0 ->
+                    // 定数の代入の場合
                     let equText = "\\(" + eq.evalHS c + "\\)"
                     //存在する変数すべてに破線を引く
-                    for name, number, yData in dic do
+                    for _,number,_ in varList do
                         //破線：classの縦線
-                        expr.drawLifeLine(dashed_x50+varIntervalX*number,run_top,run_top+gap10*(float start.Length+float goal.Length+2.0))
-                    for goalName, goalX, goalY in goal do
+                        expr.drawLifeLine(lifeLineX number,terminalLifeLine,terminalLifeLine+timeStep*float(start.Length+goal.Length+2))
+                    let goalName,goalX,_ = goal[0]
+                    //代入先の実行線
+                    expr.drawActiveLine(lifeLineX goalX, terminalLifeLine, terminalLifeLine+timeStep*float(start.Length+goal.Length+1),colorActiveLine)
+                    varList <- varList |> List.map 
+                        (fun (name, number, yData) -> 
+                            if name=goalName then 
+                                name, number, terminalLifeLine+timeStep*float(start.Length+goal.Length+1) 
+                            else 
+                                name, number, yData)
+                    //左矢印：基準線から代入先まで(x軸)
+                    expr.drawHorizontalArrowLine(lifeLineX goalX + singleArrowLength, lifeLineX goalX + activeLineWidth/2.0, terminalLifeLine+timeStep*float(start.Length+1))
+                    // テキスト（実行内容）
+                    expr.drawText(12,"black","normal", lifeLineX goalX + singleArrowLength, terminalLifeLine-timeStep,equText)
+                    //実行線の下辺からさらに10.0下を描き始めとする
+                    terminalLifeLine <- terminalLifeLine+timeStep*float(start.Length+goal.Length+2)
+                |_ ->
+                    let equText = "\\(" + eq.evalHS c + "\\)"
+                    //存在する変数すべてに破線を引く
+                    for _,number,_ in varList do
+                        //破線：classの縦線
+                        expr.drawLifeLine(lifeLineX number, terminalLifeLine, terminalLifeLine+timeStep*float(start.Length+goal.Length+2))
+                    for goalName,goalX,_ in goal do
                         //代入先の実行線
-                        expr.drawActiveLine(varIntervalX*goalX+dashed_x50, run_top, run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-                        dic <- dic |> List.map 
+                        expr.drawActiveLine(lifeLineX goalX, terminalLifeLine, terminalLifeLine+timeStep*float(start.Length+goal.Length+1), colorActiveLine)
+                        varList <- varList |> List.map 
                             (fun (name, number, yData) -> 
                                 if name=goalName then 
-                                    name, number, run_top+gap10*(float start.Length+float goal.Length+1.0) 
+                                    name, number, terminalLifeLine+timeStep*float(start.Length+goal.Length+1) 
                                 else 
                                     name, number, yData)
-                        //代入元に変数があるとき
-                        if distinction then
-                            let left,right = 
-                                start 
-                                |> List.fold (fun (l,r) (_,x,_) -> 
-                                    if goalX > x then l+1.0,r 
-                                    elif goalX < x then l,r+1.0 
-                                    else l,r) (0.0,0.0)
-                            //基準線が左側の場合(右矢印)
-                            if left > right then
-                                let baseline = varIntervalX*goalX
-                                let arrow_goal = varIntervalX*goalX+dashed_x50-run_width/2.0
-                                let text_position = varIntervalX*(goalX-1.0)+text_x160
-                                //代入元の変数の数だけ実行線を引く
-                                for label,s,y in start do
-                                    //代入元の実行線
-                                    expr.drawActiveLine(varIntervalX*s+dashed_x50,y,run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-                                    dic <- dic |> List.map 
-                                        (fun (name, number, yData) -> 
-                                            if name=label then 
-                                                name, number, run_top+gap10*(float start.Length+float goal.Length+1.0)
-                                            else 
-                                                name, number, yData)
-                                //代入元の変数の数だけ矢印を引く
-                                for label,s,y in start do
-                                    //次の変数の矢印のために1つ下にずらす
-                                    count2 <- count2 + 1.0
-                                    // 代入元から基準線までの矢印
-                                    if goalX > s then
-                                        //右矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50+run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    elif goalX = s then
-                                        //左矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    else //goalX < s then
-                                        //左矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                                expr.drawVerticalLine(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
-                                //右矢印：基準線から代入先まで(x軸)
-                                expr.drawHorizontalArrowLine(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
-                                // テキスト（実行内容）
-                                expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-                            //基準線が右側の場合(左矢印)
-                            else //left <= right then
-                                let baseline = 130.0 + varIntervalX*goalX
-                                let arrow_goal = varIntervalX*goalX+dashed_x50+run_width/2.0
-                                let text_position = varIntervalX*goalX+text_x160
-                                //代入元の変数の数だけ実行線を引く
-                                for label,s,y in start do
-                                    //代入元の実行線
-                                    expr.drawActiveLine(varIntervalX*s+dashed_x50, y, run_top+gap10*(float start.Length+float goal.Length+1.0),"rgba(0, 191, 255, 0.5)")
-                                    dic <- dic |> List.map 
-                                        (fun (name, number, yData) -> 
-                                            if name=label then 
-                                                name, number, run_top+gap10*(float start.Length+float goal.Length+1.0)
-                                            else 
-                                                name, number, yData)
-                                //代入元の変数の数だけ矢印を引く
-                                for label,s,y in start do
-                                    //次の変数の矢印のために1つ下にずらす
-                                    count2 <- count2 + 1.0
-                                    // 代入元から基準線までの矢印
-                                    if goalX > s then
-                                        //右矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50+run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    elif goalX = s then
-                                        //右矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50+run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                    else //goalX < s then
-                                        //左矢印：実行中→縦線
-                                        expr.drawHorizontalArrowLine(varIntervalX*s+dashed_x50-run_width/2.0,baseline,run_top+gap10*(count2+1.0))
-                                //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                                expr.drawVerticalLine(baseline,run_top+gap10,run_top+gap10*(float start.Length+1.0))
-                                //左矢印：基準線から代入先まで(x軸)
-                                expr.drawHorizontalArrowLine(baseline,arrow_goal,run_top+gap10*(float start.Length+1.0))
-                                // テキスト（実行内容）
-                                expr.drawText(12,"black","normal",text_position,run_top-gap10,equText)
-                        //定数を代入(変数なし)
-                        else
-                            //左矢印：基準線から代入先まで(x軸)
-                            expr.drawHorizontalArrowLine(varIntervalX*goalX+text_x160-5.0,varIntervalX*goalX+dashed_x50+run_width/2.0,run_top+gap10*(float start.Length+1.0))
+                        let left,right = 
+                            start 
+                            |> List.fold (fun (l,r) (_,x,_) -> 
+                                if goalX > x then l+1,r 
+                                elif goalX < x then l,r+1
+                                else l,r) (0,0)
+                        //基準線が左側の場合(右矢印)
+                        if left > right then
+                            let baseline = lifeLineX goalX - singleArrowLength
+                            let arrow_goal = lifeLineX goalX - activeLineWidth/2.0
+                            //代入元の変数の数だけ実行線を引く
+                            for label,s,y in start do
+                                //代入元の実行線
+                                expr.drawActiveLine(lifeLineX s,y,terminalLifeLine+timeStep*float(start.Length+goal.Length+1),colorActiveLine)
+                                varList <- varList |> List.map 
+                                    (fun (name, number, yData) -> 
+                                        if name=label then 
+                                            name, number, terminalLifeLine+timeStep*float(start.Length+goal.Length+1)
+                                        else 
+                                            name, number, yData)
+                            //代入元の変数の数だけ矢印を引く
+                            for _,s,_ in start do
+                                // 代入元から基準線までの矢印
+                                if goalX > s then
+                                    //右矢印：実行中→縦線
+                                    expr.drawHorizontalLine(lifeLineX s + activeLineWidth/2.0, baseline, terminalLifeLine+timeStep*float(stepCount+1))
+                                else
+                                    //左矢印：実行中→縦線
+                                    expr.drawHorizontalLine(lifeLineX s - activeLineWidth/2.0, baseline, terminalLifeLine+timeStep*float(stepCount+1))
+                                //次の変数の矢印のために1つ下にずらす
+                                stepCount <- stepCount + 1
+                            //基準線(縦線)：代入元の1番目から代入先まで(y軸)
+                            expr.drawVerticalLine(baseline, terminalLifeLine+timeStep,terminalLifeLine+timeStep*float(start.Length+1))
+                            //右矢印：基準線から代入先まで(x軸)
+                            expr.drawHorizontalArrowLine(baseline,arrow_goal,terminalLifeLine+timeStep*float(start.Length+1))
                             // テキスト（実行内容）
-                            expr.drawText(12,"black","normal",varIntervalX*goalX+text_x160,run_top-gap10,equText)
-                    //実行線の下辺からさらに10.0下を描き始めとする
-                    run_top <- run_top+gap10*(float start.Length+float goal.Length+2.0)
-                    parameters <- []
-                    count2 <- -1.0
+                            expr.drawText(12,"black","normal",baseline,terminalLifeLine-timeStep,equText)
+                        //基準線が右側の場合(左矢印)
+                        else
+                            let baseline = lifeLineX goalX + singleArrowLength
+                            let arrow_goal = lifeLineX goalX + activeLineWidth/2.0
+                            //代入元の変数の数だけ実行線を引く
+                            for label,s,y in start do
+                                //代入元の実行線
+                                expr.drawActiveLine(lifeLineX s, y, terminalLifeLine+timeStep*float(start.Length+goal.Length+1),colorActiveLine)
+                                varList <- varList |> List.map 
+                                    (fun (name, number, yData) -> 
+                                        if name=label then 
+                                            name, number, terminalLifeLine+timeStep*float(start.Length+goal.Length+1)
+                                        else 
+                                            name, number, yData)
+                            //代入元の変数の数だけ矢印を引く
+                            for label,s,y in start do
+                                // 代入元から基準線までの矢印
+                                if goalX >= s then
+                                    //右矢印：実行中→縦線
+                                    expr.drawHorizontalLine(lifeLineX s + activeLineWidth/2.0,baseline,terminalLifeLine+timeStep*float(stepCount+1))
+                                else //goalX < s then
+                                    //左矢印：実行中→縦線
+                                    expr.drawHorizontalLine(lifeLineX s - activeLineWidth/2.0,baseline,terminalLifeLine+timeStep*float(stepCount+1))
+                                //次の変数の矢印のために1つ下にずらす
+                                stepCount <- stepCount + 1
+                            //基準線(縦線)：代入元の1番目から代入先まで(y軸)
+                            expr.drawVerticalLine(baseline,terminalLifeLine+timeStep,terminalLifeLine+timeStep*float(start.Length+1))
+                            //左矢印：基準線から代入先まで(x軸)
+                            expr.drawHorizontalArrowLine(baseline,arrow_goal,terminalLifeLine+timeStep*float(start.Length+1))
+                            // テキスト（実行内容）
+                            expr.drawText(12,"black","normal",baseline,terminalLifeLine-timeStep,equText)
+                    //実行線の下辺からさらにtimeStep分延ばす
+                    terminalLifeLine <- terminalLifeLine+timeStep*float(start.Length+goal.Length+2)
                     
             static member equivHS (x:expr) (y:expr) (c:program) =
                 c.codewritein (x.evalHS c  + " = " + y.evalHS c)
@@ -524,17 +421,17 @@ namespace Aqualis
                 c.codewritein (x.evalHS c  + " =& " + y.evalHS c)
                 
             //破線(実行線や枠との(y座標の)隙間をつくるため)
-            static member space_dasharray(gap:float) =
+            static member extendLifeLine(gap:float) =
                 //存在する変数すべてに破線を引く
-                for _,number,_ in dic do
+                for _,number,_ in varList do
                     //破線：classの縦線
-                    expr.drawLifeLine(dashed_x50+varIntervalX*number,run_top,run_top+gap)
-                run_top <- run_top + gap
+                    expr.drawLifeLine(lifeLineX number,terminalLifeLine,terminalLifeLine+gap)
+                terminalLifeLine <- terminalLifeLine + gap
                 
             //色線(枠用)
             static member colorLine(x1:float,y1:float,x2:float,y2:float,color:string) =
-                html.fig p0 <| fun (f,p) ->
-                    f.line Style[stroke.color color; stroke.width 2.0]
+                html.fig p0 <| fun (f,_) ->
+                    f.line Style[stroke.color color; stroke.width frameBorder]
                         <| position(x1,y1)
                         <| position(x2,y2)
                         
@@ -549,54 +446,37 @@ namespace Aqualis
                 //左辺:左下から左上
                 expr.colorLine(startPoint_x,endPoint_y,startPoint_x,startPoint_y,color)
                 
-            static member reset_frame_bottom() =
-                frame_bottom <- 0.0
-                
-            //code()の上記
-            static member aboveTheCode() =
-                //枠の上辺のy座標をリスト(frame_top_list)に追加(実行線の描き始めの5.0上)
-                frame_top_list <- value.run_top - 5.0 :: frame_top_list
-                //枠の下辺のずらす単位を0.0にリセットする
-                expr.reset_frame_bottom()
-                //枠の座標を決める4つの変数を定義
-                let xMin,xMax,yMin,yMax = 0.0, 0.0, 0.0, 0.0
-                //枠の座標と枠の深さをセットでリストにする(stack2)
-                let stack2 = 
-                    [
-                        for i in 0..(value.stack.Length-1) do
-                            let x1,x2,y1,y2,insideSection = value.stack[i]
-                            // インデックスi→内側にi個のセクションが存在することを表す
-                            yield x1, x2, y1, y2, if insideSection<i+1 then i+1 else insideSection
-                    ]
-                //stack2をstackに乗っける(追加)
-                value.stack <- (xMin,xMax,yMin,yMax,0)::stack2
-                
-            /// code()の下記
-            static member belowTheCode() =
-                //下に10.0破線のスペースを作る
-                expr.space_dasharray 10.0
-                //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
-                frame_top_list <- frame_top_list.Tail
-                //枠の下辺のずらす単位を1.0(1個分)増やす
-                frame_bottom <- frame_bottom + 1.0
+            static member sectionHS (label:string) = fun code -> 
+                //上に20.0破線のスペースを作る
+                expr.extendLifeLine 20.0
+                frameStack <- (0.0, 0.0, terminalLifeLine - 5.0, terminalLifeLine)::frameStack
+                //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
+                let sectionCount = frameStack.Length-1
+                code()
+                //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
+                let xMin,xMax,yMin,yMax = frameStack.Head
+                // ループの枠
+                expr.rectangle(xMin-50.0+frameMargin*float sectionCount,yMin,xMax+50.0-frameMargin*float sectionCount,yMax+5.0,colorSectionFrame)
+                // テキスト（グループ名）
+                expr.drawText(12,colorSectionFrame,"normal",xMin-50.0+frameMargin*float sectionCount,yMin-15.0,label)
+                //下にframeMargin分のスペースを作る
+                expr.extendLifeLine frameMargin
                 //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
-                value.stack <- value.stack.Tail
+                frameStack <- frameStack.Tail
+                // 外側のループ枠をframeMargin分広げる
+                frameStack <- frameStack |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+frameMargin)
                 
             static member forLoopHS (c:program) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalHS c
                 let n2_ = n2.evalHS c
-                // c.codewritein "<div class=\"codeblock\">"
-                // c.codewritein "<details open>"
                 c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalHS c + "=" + n1_ + "," + n2_ + "\\)</summary>")
                 c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code i
                 c.indentDec()
                 c.codewritein "</div>"
-                // c.codewritein "</details>"
-                // c.codewritein "</div>"
                 returnVar()
                 
             ///<summary>無限ループ</summary>
@@ -606,8 +486,6 @@ namespace Aqualis
                 let label = gotoLabel.nextGotoLabel()
                 let exit() = c.codewritein("goto " + label)
                 expr.substH i (Int 1) c
-                // c.codewritein "<div class=\"codeblock\">"
-                // c.codewritein "<details open>"
                 c.codewritein "<summary><span class=\"op-loop\">repeat</span></summary>"
                 c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
@@ -616,67 +494,47 @@ namespace Aqualis
                 c.indentDec()
                 c.codewritein "</div>"
                 c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
-                // c.codewritein "</details>"
-                // c.codewritein "</div>"
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoHS (c:program) (cond:expr) = fun code ->
-                // c.codewritein "<div class=\"codeblock\">"
-                // c.codewritein "<details open>"
                 c.codewritein("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalHS c + "\\)</summary>")
                 c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
                 code()
                 c.indentDec()
                 c.codewritein "</div>"
-                // c.codewritein "</details>"
-                // c.codewritein "</div>"
                 
             ///<summary>指定した範囲でループ</summary>
             static member rangeHS (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
+                //カウンター変数の取得
                 let iname,returnVar = c.i0.getVar()
+                let i = Var(It 4, iname, NaN)
                 //上に20.0破線のスペースを作る
-                expr.space_dasharray 20.0
-                //枠の上辺のy座標をリスト(frame_top_list)に追加(実行線の描き始めの5.0上)
-                //枠の下辺のずらす単位を0.0にリセットする
-                //枠の座標を決める4つの変数を定義
-                //枠の座標と枠の深さをセットでリストにする(stack2)
-                //stack2をstackに乗っける(追加)
-                expr.aboveTheCode()
+                expr.extendLifeLine 20.0
+                frameStack <- (0.0, 0.0, terminalLifeLine - 5.0, terminalLifeLine)::frameStack
                 //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
-                let sectionCount = float <| value.stack.Length-1
-                //カウンター変数の処理
-                let i = "i" + string (int sectionCount + 1 - int sectionCount2)
-                let i0 = Var(It 4, i, NaN)
-                value.for_check <- 1.0
-                let counter_Var = expr.varList(i0,c)
-                value.for_check <- 0.0
+                let sectionCount = frameStack.Length-1
+                let counter_Var = expr.addVarList(i,c)
                 for countName, count_number, y in counter_Var do
                     //実行線
-                    expr.drawActiveLine(varIntervalX*count_number+dashed_x50, value.run_top-gap10, value.run_top,"red")
-                    //白線(ループ範囲のスペースのために破線を消すため)
-                    expr.colorLine(varIntervalX*count_number+dashed_x50, value.run_top-gap20,varIntervalX*count_number+dashed_x50, value.run_top-gap10,"white")
+                    expr.drawActiveLine(lifeLineX count_number, terminalLifeLine-timeStep, terminalLifeLine, colorLoopFrame)
                     // テキスト（ループ範囲）
-                    expr.drawText(12,"red","normal",varIntervalX*count_number+dashed_x50-gap10,value.run_top-25.0,string i1+"~"+string i2)
-                code i0
+                    expr.drawText(12,colorLoopFrame,"normal",lifeLineX count_number + timeStep, terminalLifeLine - 25.0,"\\(" + i1.evalHS c + " \\rightarrow " + i2.evalHS c + "\\)")
+                code i
                 //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                let xMin,xMax,yMin,yMax,insideSection = value.stack.Head
-                //最後に入れた枠の上辺のy座標の数値をframe_topとする
-                let frame_top = frame_top_list.Head
-                for a, b, c, d, e in value.stack do
-                    printfn "check: (%f, %f, %f, %f, %d)" a b c d e
-                printfn "xMin %f,xMax %f,yMin %f,yMax %f" xMin xMax yMin yMax
-                printfn "sectionCount %f,insideSection %d" sectionCount insideSection
+                let xMin,xMax,yMin,yMax = frameStack.Head
                 // ループの枠
-                expr.rectangle(xMin-50.0+10.0*sectionCount,frame_top,xMax+50.0-10.0*sectionCount,yMax+5.0+10.0*frame_bottom,"red")
+                expr.rectangle(xMin-50.0+frameMargin*float sectionCount,yMin,xMax+50.0-frameMargin*float sectionCount,yMax+5.0,colorLoopFrame)
                 // テキスト（グループ名）
-                expr.drawText(12,"red","normal",xMin-50.0+10.0*sectionCount,frame_top-20.0,"\\(\\mathrm{For}\\)"+" "+"\\(" + i0.evalHS c + "\\)")
-                //下に10.0破線のスペースを作る
-                //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
-                //枠の下辺のずらす単位を1.0(1個分)増やす
+                expr.drawText(12,colorLoopFrame,"normal",xMin-50.0+frameMargin*float sectionCount,yMin-15.0,"\\(\\mathrm{For}\\)")
+                //下にframeMargin分のスペースを作る
+                expr.extendLifeLine frameMargin
                 //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
-                expr.belowTheCode()
+                frameStack <- frameStack.Tail
+                // 外側のループ枠をframeMargin分広げる
+                frameStack <- frameStack |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+frameMargin)
+                // 使用済みカウンタ変数を返却し再利用可能にする
                 returnVar()
                 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
@@ -687,8 +545,6 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
-                    // c.comment "<div class=\"codeblock\">"
-                    // c.comment "<details open>"
                     c.comment("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
                     c.comment "<div class=\"insidecode-loop\">"
                     c.indentInc()
@@ -696,8 +552,6 @@ namespace Aqualis
                     c.indentDec()
                     c.comment "</div>"
                     c.comment("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
-                    // c.comment "</details>"
-                    // c.comment "</div>"
                     c.comment(label+" continue")
                     returnVar()
                 |_ ->
@@ -705,8 +559,6 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
-                    // c.codewritein "<div class=\"codeblock\">"
-                    // c.codewritein "<details open>"
                     c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
                     c.codewritein "<div class=\"insidecode-loop\">"
                     c.indentInc()
@@ -714,122 +566,61 @@ namespace Aqualis
                     c.indentDec()
                     c.codewritein "</div>"
                     c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
-                    // c.codewritein "</details>"
-                    // c.codewritein "</div>"
                     c.codewritein(label+" continue")
                     returnVar()
                     
             static member branchHS (c:program) code =
-                // c.codewritein "<div class=\"codeblock\">"
-                // c.codewritein "<details open>"
+                //新しい分岐処理枠を追加
+                branchStack <- []::branchStack
                 let ifcode (cond:expr) code =
-                    let cond = cond.evalHS c
-                    if branch_elifCheck = 0.0 then
-                        //カウンター変数名の数字を増やした分戻す変数
-                        sectionCount2 <- sectionCount2 + 1.0
-                        //上に30.0破線のスペースを作る
-                        expr.space_dasharray 30.0
-                        //枠の上辺のy座標(run_top - 5.0)をリスト(frame_top_list)に追加(実行線の描き始めの5.0上)
-                        //枠の下辺のずらす単位(frame_bottom)を0.0にリセットする
-                        //枠の座標を決める4つの変数(xMin,xMax,yMin,yMax)を定義
-                        //枠の座標(xMin,xMax,yMin,yMax)と枠の深さ(insideSection)をセットでリストにする(stack2)
-                        //stack2をstackに乗っける(追加)
-                        expr.aboveTheCode()
-                    //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
-                    let sectionCount = float <| value.stack.Length-1
-                    branch_text_name_list <- ("\\(" + cond + "\\)")::branch_text_name_list
-                    if branch_elifCheck =0.0 then
-                        branch_text_yPoint_list <- value.run_top-5.0-20.0::branch_text_yPoint_list
-                    if branch_IFELSE_IFELSE_check = 0.0 then
-                        if branch_elifCheck = 0.0 then
-                            if count_branch = 0.0 then
-                                count_branch <- 1.0
-                            else
-                                count_branch <- count_branch_memory_list.Head
-                                count_branch_memory_list <- count_branch_memory_list.Tail
-                        else //branch_elifCheck = 1.0
-                            if count_branch = 0.0 then
-                                count_branch <- count_branch_memory_list.Head
-                                count_branch_memory_list <- count_branch_memory_list.Tail
-                            else
-                                ()
-                            count_branch <- count_branch + 1.0
-                    else //branch_IFELSE_IFELSE_check = 1.0
-                        count_branch_memory_list <- count_branch::count_branch_memory_list
-                        count_branch <- 1.0
-                    branch_IFELSE_IFELSE_check <- 1.0
+                    //上に30.0破線のスペースを作る
+                    expr.extendLifeLine 30.0
+                    // 現在の分岐処理枠に条件式とy座標追加
+                    branchStack <- (branchStack.Head@["\\(" + cond.evalHS c + "\\)",terminalLifeLine])::branchStack.Tail
+                    frameStack <- (0.0, 0.0, terminalLifeLine - 5.0, terminalLifeLine)::frameStack
                     code()
-                    //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                    let xMin,xMax,yMin,yMax,insideSection = value.stack.Head
-                    // 境界線のy座標を決定
-                    boundaryLine <- yMax+5.0+10.0*frame_bottom
-                    if branch_elifCheck = 0.0 then
-                        branch_frame_top_list <- frame_top_list.Head :: branch_frame_top_list
                     //中に20.0破線のスペースを作る
-                    expr.space_dasharray 20.0
-                    branch_text_yPoint_list <- boundaryLine::branch_text_yPoint_list
+                    expr.extendLifeLine 20.0
                     //境界線のy座標をスタック用のリストに入れる
-                    boundaryY <- boundaryLine::boundaryY
-                    branch_IFELSE_IFELSE_check <- 0.0
-                    branch_elifCheck <- 1.0
                 let elseifcode (cond:expr) code =
-                    ifcode cond code
-                let elsecode code =
-                    branch_text_name_list <- "\\(\\mathrm{Else}\\)"::branch_text_name_list
-                    if branch_elifCheck = 0.0 then //ELの後のELのとき
-                        count_branch <- count_branch_memory_list.Head
-                        count_branch_memory_list <- count_branch_memory_list.Tail
-                    else //branch_elifCheck = 1.0、elifの続きのとき
-                        count_branch <- count_branch + 1.0
-                    branch_IFELSE_IFELSE_check <- 1.0
-                    branch_elifCheck <- 0.0
+                    //中に20.0破線のスペースを作る
+                    expr.extendLifeLine 20.0
+                    // 現在の分岐処理枠に条件式とy座標追加
+                    branchStack <- (branchStack.Head@["\\(" + cond.evalHS c + "\\)",terminalLifeLine])::branchStack.Tail
                     code()
-                    //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                    let xMin,xMax,yMin,yMax,insideSection = value.stack.Head
-                    //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
-                    let sectionCount = float <| value.stack.Length-1
-                    for a, b, c, d, e in value.stack do
-                        printfn "check: (%f, %f, %f, %f, %d)" a b c d e
-                    printfn "xMin %f,xMax %f,yMin %f,yMax %f" xMin xMax yMin yMax
-                    printfn "sectionCount %f,insideSection %d" sectionCount insideSection
-                    branch_frame_top <- branch_frame_top_list.Head
-                    // 条件分岐の枠(全体を囲む大きい枠)
-                    expr.rectangle(xMin-50.0+10.0*sectionCount,branch_frame_top-20.0,xMax+50.0-10.0*sectionCount,yMax+5.0+10.0*frame_bottom,"green")
-                    branch_frame_top_list <- branch_frame_top_list.Tail
-                    if count_branch = 0.0 then
-                        count_branch <- count_branch_memory_list.Head
-                        count_branch_memory_list <- count_branch_memory_list.Tail
-                    let text_times = int count_branch
-                    printfn "count_branch_memory_list %A" count_branch_memory_list
-                    printfn "text_times %i" text_times
-                    let boundary_times = int (count_branch - 1.0)
-                    count_branch <- 0.0
-                    for i in 1..text_times do
-                        printfn "name %A" branch_text_name_list
-                        printfn "yPoint %A" branch_text_yPoint_list
-                        let branch_text_name = branch_text_name_list.Head
-                        let branch_text_yPoint = branch_text_yPoint_list.Head
-                        // テキスト（条件式）
-                        expr.drawText(12,"green","normal",5.0+xMin-50.0+10.0*sectionCount,branch_text_yPoint,string branch_text_name)
-                        branch_text_name_list <- branch_text_name_list.Tail
-                        branch_text_yPoint_list <- branch_text_yPoint_list.Tail
-                    branch_IFELSE_IFELSE_check <- 0.0
-                    for i in 1..boundary_times do
-                        printfn "boundaryY %A" boundaryY
-                        //最後に入れた枠の上辺のy座標の数値をboundaryとする
-                        let boundary = boundaryY.Head
-                        //破線：境界線(間の仕切り)
-                        expr.drawIfBorder(xMin-50.0+10.0*sectionCount,xMax+50.0-10.0*sectionCount,boundary)
-                        //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
-                        boundaryY <- boundaryY.Tail
-                    //下に10.0破線のスペースを作る
-                    //枠の上辺のリストから使った要素以外を残す(使った分を取り除く)
-                    //枠の下辺のずらす単位を1.0(1個分)増やす
-                    //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
-                    expr.belowTheCode()
-                    //カウンター変数名の数字を増やした分戻す変数
-                    sectionCount2 <- sectionCount2 - 1.0
+                let elsecode code =
+                    // 現在の分岐処理枠に条件式とy座標追加
+                    branchStack <- (branchStack.Head@["\\(\\mathrm{Else}\\)",terminalLifeLine])::branchStack.Tail
+                    code()
+                    
                 code(ifcode,elseifcode,elsecode)
+                
+                //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
+                let xMin,xMax,yMin,yMax = frameStack.Head
+                //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
+                let sectionCount = frameStack.Length-1
+                expr.rectangle(xMin-50.0+frameMargin*float sectionCount,yMin-20.0,xMax+50.0-frameMargin*float sectionCount,yMax+5.0,colorBranchFrame)
+                for cond,y in branchStack.Head do
+                    // テキスト（条件式）
+                    expr.drawText(12,colorBranchFrame,"normal",5.0+xMin-50.0+frameMargin*float sectionCount,y-25.0,cond)
+                for _,y in branchStack.Head.Tail do
+                    //破線：境界線(間の仕切り)
+                    let x1 = xMin-50.0+frameMargin*float sectionCount
+                    let x2 = xMax+50.0-frameMargin*float sectionCount
+                    let y1 = y-25.0
+                    html.fig p0 <| fun (f,_) ->
+                        //破線：条件分岐の横線
+                        f.line Style[stroke.color colorBranchFrame; stroke.width frameBorder; stroke.dasharray [2]]
+                            <| position(x1,y1)
+                            <| position(x2,y1)
+                //下にframeMargin分のスペースを作る
+                expr.extendLifeLine frameMargin
+                //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
+                frameStack <- frameStack.Tail
+                // 外側のループ枠をマージン分広げる
+                frameStack <- frameStack |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+frameMargin)
+                //先頭の分岐処理枠を削除
+                branchStack <- branchStack.Tail
                 
             member this.evalHS(c:program) =
                 let par (s:string) (pl:int) =
