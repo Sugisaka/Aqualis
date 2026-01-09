@@ -1013,17 +1013,17 @@ module dochtml =
                 // HTML本体のコード
                 dir + "\\" + filename, filename+"_body", lang
                 // スライドアニメーション用javascriptファイル名
-                filename  + "\\" + "contents_" + filename, "animationSeq.js", JavaScript
+                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationSeq.js", JavaScript
                 // draw関数のコード
                 dir + "\\" + filename, filename+"_draw", JavaScript
                 // スライドアニメーション(アニメーション開始)用javascript
-                filename  + "\\" + "contents_" + filename, "animationStart.js", JavaScript
+                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationStart.js", JavaScript
                 // スライドアニメーション(アニメーションリセット)用javascript
-                filename  + "\\" + "contents_" + filename, "animationSeqReset.js", JavaScript
+                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationSeqReset.js", JavaScript
                 // スライドアニメーション(アニメーションリセット)用javascript
-                filename  + "\\" + "contents_" + filename, "animationReset.js", JavaScript
+                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationReset.js", JavaScript
                 // オートアニメーション実行用javascript
-                filename  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
+                dir + "\\" + filename  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
             ]
             <| fun () ->
                 switchJSAnimationStart <| fun () ->
