@@ -43,7 +43,7 @@ namespace Aqualis
         }
         
     [<AutoOpen>]
-    module value =
+    module sequenceDiagramParam =
         /// 上側マージン
         let mutable topMargin = 40.0
         /// 左側マージン
@@ -64,7 +64,7 @@ namespace Aqualis
         let mutable frameMargin = 10.0
         /// 図形描画の時間方向間隔
         let mutable timeStep = 10.0 
-        // 枠線の太さ
+        /// 枠線の太さ
         let mutable frameBorder = 2.0
         /// 現在のライフライン終端座標
         let mutable colorActiveLine = "rgba(0, 191, 255, 0.5)"
