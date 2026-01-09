@@ -35,39 +35,53 @@ namespace Aqualis
             
         ///<summary>条件分岐式(if式)</summary>
         static member if1 (cond:bool0) code =
-            match programList[prIndex].language with
-            |LaTeX|HTML ->
-                br.branch <| fun b ->
-                    b.IF cond <| fun () ->
-                        code()
-            |_ ->
-                match cond.Expr.simp with
+            if programList.Length = 0 then
+                let c = cond.Expr.simp
+                match c with
                 |True -> code()
                 |False -> ()
-                |_ ->
+                |_ -> printfn "条件式 %s を評価できません" <| c.ToString()
+            else
+                match programList[prIndex].language with
+                |LaTeX|HTML ->
                     br.branch <| fun b ->
                         b.IF cond <| fun () ->
                             code()
+                |_ ->
+                    match cond.Expr.simp with
+                    |True -> code()
+                    |False -> ()
+                    |_ ->
+                        br.branch <| fun b ->
+                            b.IF cond <| fun () ->
+                                code()
                         
         ///<summary>条件分岐式(if...else...式)</summary>
         static member if2 (cond:bool0) code1 code2 =
-            match programList[prIndex].language with
-            |LaTeX|HTML ->
-                br.branch <| fun b ->
-                    b.IF cond <| fun () ->
-                        code1()
-                    b.EL <| fun () ->
-                        code2()
-            |_ ->
-                match cond.Expr.simp with
+            if programList.Length = 0 then
+                let c = cond.Expr.simp
+                match c with
                 |True -> code1()
                 |False -> code2()
-                |_ ->
+                |_ -> printfn "条件式 %s を評価できません" <| c.ToString()
+            else
+                match programList[prIndex].language with
+                |LaTeX|HTML ->
                     br.branch <| fun b ->
                         b.IF cond <| fun () ->
                             code1()
                         b.EL <| fun () ->
                             code2()
+                |_ ->
+                    match cond.Expr.simp with
+                    |True -> code1()
+                    |False -> code2()
+                    |_ ->
+                        br.branch <| fun b ->
+                            b.IF cond <| fun () ->
+                                code1()
+                            b.EL <| fun () ->
+                                code2()
                             
     ///<summary>条件分岐（処理スキップ）</summary>
     type dummy_br () =

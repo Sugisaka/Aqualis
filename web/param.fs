@@ -7,10 +7,10 @@
 namespace Aqualis
 
 /// 水平方向アライメント
-type BorderH = |L |C |R |J |Ll |Cl |Rl |Jl |Lr |Cr |Rr |Jr |Llr |Clr |Rlr |Jlr
+type BorderH = |TdL |TdC |TdR |TdJ |TdLL |TdCL |TdRL |TdJL |TdLR |TdCR |TdRR |TdJR |TdLLR |TdCLR |TdRLR |TdJLR
 
 /// 垂直方向アライメント
-type BorderV = |TB |T |B |N
+type BorderV = |TrTB |TrT |TrB |TrN
 
 /// ファイル読み込みのオプション
 type FileFlag =

@@ -574,9 +574,26 @@ module htmlexpr =
                     writein(caption)
                 html.tagb("table",["class","\"tab\""]) <| fun () ->
                     for j in 0..tlist.Length-1 do
-                        html.tagb ("tr",["class",match borderV[j] with |TB -> "\"trtb\"" |T -> "\"trt\"" |B -> "\"trb\"" |N -> "\"trn\""]) <| fun () ->
+                        html.tagb ("tr",["class",match borderV[j] with |TrTB -> "\"trtb\"" |TrT -> "\"trt\"" |TrB -> "\"trb\"" |TrN -> "\"trn\""]) <| fun () ->
                             for i in 0..tlist[j].Length-1 do
-                                html.tagb ("td",["class",match borderH[i] with |L -> "\"tdl\"" |BorderH.C -> "\"tdc\"" |BorderH.R -> "\"tdr\"" |J -> "\"tdj\"" |Ll -> "\"tdlL\"" |Cl -> "\"tdcL\"" |Rl -> "\"tdrL\"" |Jl -> "\"tdjL\"" |Lr -> "\"tdlR\"" |Cr -> "\"tdcR\"" |Rr -> "\"tdrR\"" |Jr -> "\"tdjR\"" |Llr -> "\"tdlLR\"" |Clr -> "\"tdcLR\"" |Rlr -> "\"tdrLR\"" |Jlr -> "\"tdjLR\""]) <| fun () ->
+                                html.tagb ("td",["class",
+                                    match borderH[i] with
+                                    |TdL -> "\"tdl\""
+                                    |TdC -> "\"tdc\""
+                                    |TdR -> "\"tdr\""
+                                    |TdJ -> "\"tdj\""
+                                    |TdLL -> "\"tdlL\""
+                                    |TdCL -> "\"tdcL\""
+                                    |TdRL -> "\"tdrL\""
+                                    |TdJL -> "\"tdjL\""
+                                    |TdLR -> "\"tdlR\""
+                                    |TdCR -> "\"tdcR\""
+                                    |TdRR -> "\"tdrR\""
+                                    |TdJR -> "\"tdjR\""
+                                    |TdLLR -> "\"tdlLR\""
+                                    |TdCLR -> "\"tdcLR\""
+                                    |TdRLR -> "\"tdrLR\""
+                                    |TdJLR -> "\"tdjLR\""]) <| fun () ->
                                     writein <| tlist[j][i]
         static member eq(text:num0) =
             writein ("\\("+text.Expr.evalL programList[prIndex] + "\\)")

@@ -11,6 +11,16 @@ namespace Aqualis
         
         type expr with
             
+            ///<summary>指定した範囲でループ</summary>
+            static member rangeN (i1:expr) = fun (i2:expr) -> fun code -> 
+                let ii1 = i1.simp
+                let ii2 = i2.simp
+                match ii1,ii2 with
+                |Int a, Int b ->
+                    for i in a..b do
+                        code (Int i)
+                |_ ->
+                    printfn "ループ範囲「%s → %s」を評価できません。" <| ii1.ToString() <| ii2.simp.ToString()
             member this.eval() =
                 match this with
                 |True -> 

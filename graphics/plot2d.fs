@@ -187,7 +187,7 @@ namespace Aqualis
         /// <param name="izre">実部のデータ列</param>
         /// <param name="izim">虚部のデータ列</param>
         /// <param name="eval">複素数→プロット値</param>
-        member public this.FileRead(filename:string,ix:int,iy:int,izre:int,izim:int,eval:(double*double)->double) =
+        member public this.FileRead(filename:string,ix:int,iy:int,izre:int,izim:int) =
             isDataLoaded <- false
             error <- "";
             if not <| File.Exists filename then
@@ -380,7 +380,7 @@ namespace Aqualis
         /// </summary>
         /// <param name="filename">入力ファイル名</param>
         /// <param name="eval">複素数→プロット値</param>
-        member public this.FileRead(filename:string, searchMinMax:(double*double)->double) =
+        member public this.FileRead(filename:string) =
             isDataLoaded <- false
             error <- "";
             if not <| File.Exists filename then
@@ -630,7 +630,7 @@ namespace Aqualis
         /// <param name="eval">複素数→プロット値</param>
         static member public Plot(inputFilename:string,outputFilename:string,ix:int,iy:int,izre:int,izim:int,autoscale,phaseshift,enlarge,gradation,eval:(double*double)->double) =
             let x = plot2d()
-            x.FileRead(inputFilename,ix,iy,izre,izim,eval)
+            x.FileRead(inputFilename,ix,iy,izre,izim)
             x.writeBMP24(outputFilename, gradation, autoscale, eval, phaseshift,enlarge)
             if x.Error <> "" then printfn "%s" x.Error
             x
@@ -650,7 +650,7 @@ namespace Aqualis
         /// <param name="eval">複素数→プロット値</param>
         static member public Plot(inputFilename:string,outputFilename:string,ix:int,iy:int,izre:int,autoscale,phaseshift,enlarge,gradation,eval:(double*double)->double) =
             let x = plot2d()
-            x.FileRead(inputFilename,ix,iy,izre,0,eval)
+            x.FileRead(inputFilename,ix,iy,izre,0)
             x.writeBMP24(outputFilename, gradation, autoscale, eval, phaseshift,enlarge)
             if x.Error <> "" then printfn "%s" x.Error
             x
@@ -667,7 +667,7 @@ namespace Aqualis
         /// <param name="eval">複素数→プロット値</param>
         static member public Plot(inputFilename:string,outputFilename:string,autoscale,phaseshift,enlarge,gradation,eval:(double*double)->double) =
             let x = plot2d()
-            x.FileRead(inputFilename,eval)
+            x.FileRead inputFilename
             x.writeBMP24(outputFilename, gradation, autoscale, eval, phaseshift,enlarge)
             if x.Error <> "" then printfn "%s" x.Error
             x

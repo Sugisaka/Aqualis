@@ -96,7 +96,7 @@ namespace Aqualis
                 |LaTeX -> expr.rangeL c i1 i2 code
                 |HTML -> expr.rangeH c i1 i2 code
                 |HTMLSequenceDiagram -> expr.rangeHS c i1 i2 code
-                |Numeric -> ()
+                |Numeric -> expr.rangeN i1 i2 code
                 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
             static member range_exit (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 

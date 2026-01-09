@@ -12,59 +12,65 @@ namespace Aqualis
     type asm =
         ///<summary>虚数単位</summary>
         static member uj with get() =
-            match programList[prIndex].language with
-            |Fortran -> 
-                programList[prIndex].var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
-                num0(Var(Zt,"uj",NaN))
-            |C99 -> 
-                //#defineで定義済み
-                num0(Var(Zt,"uj",NaN))
-            |LaTeX ->
-                programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                num0(Var(Zt,"\\mathrm{j}",NaN))
-            |HTML ->
-                programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                num0(Var(Zt,"\\mathrm{j}",NaN))
-            |HTMLSequenceDiagram ->
-                programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                num0(Var(Zt,"\\mathrm{j}",NaN))
-            |Python -> 
-                num0(Var(Zt,"1.0j",NaN))
-            |JavaScript -> 
+            if programList.Length=0 then
                 num0(Cpx(0.0,1.0))
-            |PHP -> 
-                num0(Cpx(0.0,1.0))
-            |Numeric -> 
-                num0(Cpx(0.0,1.0))
+            else
+                match programList[prIndex].language with
+                |Fortran -> 
+                    programList[prIndex].var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
+                    num0(Var(Zt,"uj",NaN))
+                |C99 -> 
+                    //#defineで定義済み
+                    num0(Var(Zt,"uj",NaN))
+                |LaTeX ->
+                    programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                    num0(Var(Zt,"\\mathrm{j}",NaN))
+                |HTML ->
+                    programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                    num0(Var(Zt,"\\mathrm{j}",NaN))
+                |HTMLSequenceDiagram ->
+                    programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                    num0(Var(Zt,"\\mathrm{j}",NaN))
+                |Python -> 
+                    num0(Var(Zt,"1.0j",NaN))
+                |JavaScript -> 
+                    num0(Cpx(0.0,1.0))
+                |PHP -> 
+                    num0(Cpx(0.0,1.0))
+                |Numeric -> 
+                    num0(Cpx(0.0,1.0))
         ///<summary>円周率</summary>
         static member pi with get() = 
-            match programList[prIndex].language with
-            |Fortran ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
-                num0(Var(Dt,"pi",NaN))
-            |C99 ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                num0(Var(Dt,"pi",NaN))
-            |LaTeX ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                num0(Var(Dt,"\\pi",NaN))
-            |HTML ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                num0(Var(Dt,"\\pi",NaN))
-            |HTMLSequenceDiagram ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                num0(Var(Dt,"\\pi",NaN))
-            |Python ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                num0(Var(Dt,"pi",NaN))
-            |JavaScript ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                num0(Var(Dt,"pi",NaN))
-            |PHP ->
-                programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                num0(Var(Dt,"pi",NaN))
-            |Numeric -> 
+            if programList.Length=0 then
                 num0(Dbl Math.PI)
+            else
+                match programList[prIndex].language with
+                |Fortran ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
+                    num0(Var(Dt,"pi",NaN))
+                |C99 ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    num0(Var(Dt,"pi",NaN))
+                |LaTeX ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                    num0(Var(Dt,"\\pi",NaN))
+                |HTML ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                    num0(Var(Dt,"\\pi",NaN))
+                |HTMLSequenceDiagram ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                    num0(Var(Dt,"\\pi",NaN))
+                |Python ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    num0(Var(Dt,"pi",NaN))
+                |JavaScript ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    num0(Var(Dt,"pi",NaN))
+                |PHP ->
+                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    num0(Var(Dt,"pi",NaN))
+                |Numeric -> 
+                    num0(Dbl Math.PI)
         ///<summary>2πj</summary>
         static member j2p with get() = 2*asm.pi*asm.uj
         static member todouble(x:num0) = num0(ToDbl x.Expr)

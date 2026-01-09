@@ -16,7 +16,11 @@ namespace Aqualis
         static member whiledo (cond:bool0) = fun code -> expr.whiledo programList[prIndex] cond.Expr code
                 
         ///<summary>指定した範囲でループ</summary>
-        static member range (i1:num0) = fun (i2:num0) -> fun code -> expr.range programList[prIndex] i1.Expr i2.Expr (fun (i:expr) -> code (num0 i))
+        static member range (i1:num0) = fun (i2:num0) -> fun code -> 
+            if programList.Length = 0 then
+                expr.rangeN i1.Expr i2.Expr (fun (i:expr) -> code (num0 i))
+            else
+                expr.range programList[prIndex] i1.Expr i2.Expr (fun (i:expr) -> code (num0 i))
                 
         ///<summary>指定した範囲でループ(途中脱出可)</summary>
         static member range_exit (i1:num0) = fun (i2:num0) -> fun code -> expr.range_exit programList[prIndex] i1.Expr i2.Expr (fun (ex,i:expr) -> code (ex,num0 i))
