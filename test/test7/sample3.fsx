@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-fixedWidthPage HTML outputdir projectname 1920 <| fun () ->
+fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
     writein "AAA"
     html.br()
     writein "AAA"
@@ -63,21 +63,28 @@ fixedWidthPage HTML outputdir projectname 1920 <| fun () ->
         html.textA
             <| Style[font.size 14; font.color "black"; font.weight "bold"]
             <| p0
+            <| 30
+            <| "#000000"
             <| "見出し1"
         //F#コードキャプション
-        html.textB
+        html.textA
             <| Style[font.size 12; font.color "black"; font.weight "normal"]
             <| p0.shift(grid_x1,grid_y1c)
+            <| 40
+            <| "#000000"
             <| "ソースコード"
         //Cコード(1)キャプション
-        html.textB
+        html.textA
             <| Style[font.size 12; font.color "black"; font.weight "normal"]
             <| p0.shift(grid_x1,grid_y2c)
+            <| 40
+            <| "#000000"
             <| "ソースコード"
         //F#コード
         let a1f = html.blockTextcode style_codeFS
                 <| p0.shift(grid_x1,grid_y1)
                 <| (codeBoxWidth,codeBoxHeight)
+                <| (1.0,"solid","#000000")
                 <| ["let f x = x + 1"
                     "let g x y = x + y"
                     "printfn \"%d\" <| (g 1 2)"
@@ -95,6 +102,7 @@ fixedWidthPage HTML outputdir projectname 1920 <| fun () ->
         let a1c = html.blockTextcode style_codeC
                 <| p0.shift(grid_x2,grid_y1)
                 <| (codeBoxWidth,codeBoxHeight)
+                <| (1.0,"solid","#000000")
                 <| ["#include<stdio.h>"
                     "int main()"
                     "{"
@@ -111,6 +119,7 @@ fixedWidthPage HTML outputdir projectname 1920 <| fun () ->
         let a1r = html.blockTextcode style_codeC
                 <| p0.shift(grid_x1,grid_y2)
                 <| (codeBoxWidth,codeBoxHeight)
+                <| (1.0,"solid","#000000")
                 <| ["#include<stdio.h>"
                     "int main()"
                     "{"

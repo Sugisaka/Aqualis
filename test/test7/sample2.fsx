@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-freeCanvas  HTML outputdir projectname <| fun cv ->
+freeCanvas outputdir projectname projectname None <| fun cv ->
     //ページ左上角
     let p0 = position.Origin
     //ソースコードボックス1段目
@@ -48,21 +48,28 @@ freeCanvas  HTML outputdir projectname <| fun cv ->
     html.textA 
         <| Style[font.size 14; font.color "black"; font.weight "bold"]
         <| p0
+        <| 30
+        <| "#000000"
         <| "見出し1"
     //F#コードキャプション
-    html.textB 
+    html.textA 
         <| Style[font.size 12; font.color "black"; font.weight "normal"]
         <| p0.shift(grid_x1,grid_y1c)
+        <| 40
+        <| "#000000"
         <| "ソースコード"
     //Cコード(1)キャプション
-    html.textB
+    html.textA
         <| Style[font.size 12; font.color "black"; font.weight "normal"]
         <| p0.shift(grid_x1,grid_y2c)
+        <| 40
+        <| "#000000"
         <| "ソースコード"
     //F#コード
     let a1f = html.blockTextcode style_codeFS
             <| p0.shift(grid_x1,grid_y1)
             <| (codeBoxWidth,codeBoxHeight)
+            <| (1.0,"solid","#000000")
             <| ["let f x = x + 1"
                 "let g x y = x + y"
                 "printfn \"%d\" <| (g 1 2)"
@@ -80,6 +87,7 @@ freeCanvas  HTML outputdir projectname <| fun cv ->
     let a1c = html.blockTextcode style_codeC
             <| p0.shift(grid_x2,grid_y1)
             <| (codeBoxWidth,codeBoxHeight)
+            <| (1.0,"solid","#000000")
             <| ["#include<stdio.h>"
                 "int main()"
                 "{"
@@ -96,6 +104,7 @@ freeCanvas  HTML outputdir projectname <| fun cv ->
     let a1r = html.blockTextcode style_codeC
             <| p0.shift(grid_x1,grid_y2)
             <| (codeBoxWidth,codeBoxHeight)
+            <| (1.0,"solid","#000000")
             <| ["#include<stdio.h>"
                 "int main()"
                 "{"

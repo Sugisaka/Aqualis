@@ -365,7 +365,7 @@ namespace Aqualis
                         //beeファイル削除
                         programList[prIndex].delete()
                 |HTMLSequenceDiagram ->
-                    htmlpresentation dir projectname lang (None, None) false <| fun () ->
+                    htmlpresentation dir projectname projectname None (None, None) false <| fun () ->
                         html.canvas <| Style [size.width "0px"; size.height "0px"] <| code
                 |Python ->
                     makeProgram [dir,projectname,Python] <| fun () ->

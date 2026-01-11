@@ -5,7 +5,6 @@ bin/
 *.dat
 *.bin
 *.pdf
-*.html
 *.gz
 *.aux
 *.log

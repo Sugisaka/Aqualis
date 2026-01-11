@@ -16,7 +16,11 @@ namespace Aqualis
             let h:string = s.code
             Atr h
         member _.code with get() = s
-        static member list(s:list<Atr>) = String.concat " " (List.map (fun (s:Atr) -> s.code) s) 
+        static member list(s:list<Atr>) = 
+            String.concat " " (
+                s 
+                |> List.map (fun (s:Atr) -> s.code)
+                |> List.filter (fun s -> s<>"")) 
 
     and Style(s:list<CSS>) =
         member _.list with get() = s
@@ -28,7 +32,7 @@ namespace Aqualis
             s 
             |> List.map (fun s -> s.Key+": "+s.Value) 
             |> fun s -> String.concat "; " s
-            |> fun s -> "style = \""+s+"\""
+            |> fun s -> if s = "" then "" else "style = \""+s+"\""
         member this.atr with get() = Atr this.code
         static member (+) (a:Style,b:Style) = Style(a.list@b.list)
         static member blank = Style []
@@ -269,7 +273,7 @@ namespace Aqualis
                 writein("<"+t+" ")
                 for a,s in lst do
                     writein(a + "=\"" + s + "\" ")
-                writein(">")
+                writein ">"
             code()
             writein ("</"+t+">")
         /// 内部要素のあるタグ
@@ -285,6 +289,20 @@ namespace Aqualis
             writein("<"+t+">")
             code()
             writein ("</"+t+">")
+
+        /// 内部要素のあるタグ
+        static member tagb0 (t:string,lst:list<string*string>) = fun code ->
+            if lst.Length=0 then
+                write("<"+t+">")
+            else
+                writen("<"+t+" ")
+                programList[prIndex].indentInc()
+                for a,s in lst do
+                    writen(a + " = \"" + s + "\"")
+                programList[prIndex].indentDec()
+                write ">"
+            code()
+            writen ("</"+t+">")
             
         static member tagv (t:string,atr:list<Atr>) =
             writein("<" + t + " " + Atr.list atr + ">")
@@ -325,173 +343,6 @@ namespace Aqualis
         static member h5 (t:string,atr:Style) = fun code ->
             html.tagb ("h5",atr) <| fun () -> writein t
             code()
-        static member linkstyle1 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle1",atr) <| fun () -> writein t
-            code()
-
-        static member linkstyle2 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle2",atr) <| fun () -> writein t
-            code()
-
-        static member linkstyle3 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle3",atr) <| fun () -> writein t
-            code()
-
-        static member linkstyle4 (t:string,atr:Style) = fun code ->
-            html.tagb ("linkstyle4",atr) <| fun () -> writein t
-            code()
-
-        static member boxA (atr:Style) = fun code ->
-            html.tagb ("boxA",atr) <| fun () ->
-            code()
-
-        static member boxA_inner (atr:Style) = fun code ->
-            html.tagb ("boxA_inner",atr) <| fun () ->
-            code()
-
-        static member box4 (atr:Style) = fun code ->
-            html.tagb ("box4",atr) <| fun () ->
-            code()
-
-        static member box5 (atr:Style) = fun code ->
-            html.tagb ("box5",atr) <| fun () ->
-            code()
-
-        static member box6_1 (atr:Style) = fun code ->
-            html.tagb ("box6_1",atr) <| fun () ->
-            code()
-
-        static member box6_2 (atr:Style) = fun code ->
-            html.tagb ("box6_2",atr) <| fun () ->
-            code()
-
-        static member box6_3 (atr:Style) = fun code ->
-            html.tagb ("box6_3",atr) <| fun () ->
-            code()
-
-        static member box6_4 (atr:Style) = fun code ->
-            html.tagb ("box6_4",atr) <| fun () ->
-            code()
-
-        static member box7 (atr:Style) = fun code ->
-            html.tagb ("box7",atr) <| fun () ->
-            code()
-
-        static member box7_1 (atr:Style) = fun code ->
-            html.tagb ("box7_1",atr) <| fun () ->
-            code()
-
-        static member box7_2 (atr:Style) = fun code ->
-            html.tagb ("box7_2",atr) <| fun () ->
-            code()
-
-        static member box8 (atr:Style) = fun code ->
-            html.tagb ("box8",atr) <| fun () ->
-            code()
-
-        static member p (atr:Style) = fun code ->
-            html.tagb ("p",atr) <| fun () ->
-            code()
-
-        static member text (atr:Style) = fun code ->
-            html.tagb ("text",atr) <| fun () ->
-            code()
-
-        static member tag_style1 (atr:Style) = fun code ->
-            html.tagb ("tag_style1",atr) <| fun () ->
-            code()
-
-        static member tag_style2 (atr:Style) = fun code ->
-            html.tagb ("tag_style2",atr) <| fun () ->
-            code()
-
-        static member img_style (atr:Style) = fun code ->
-            html.tagb ("img_style",atr) <| fun () ->
-            code()
-
-        static member img_style2 (atr:Style) = fun code ->
-            html.tagb ("img_style2",atr) <| fun () ->
-            code()
-
-        static member video_style (atr:Style) = fun code ->
-            html.tagb ("video_style",atr) <| fun () ->
-            code()
-
-        static member news (atr:Style) = fun code ->
-            html.tagb ("news",atr) <| fun () ->
-            code()
-
-        static member time (atr:Style) = fun code ->
-            html.tagb ("time",atr) <| fun () ->
-            code()
-
-        static member menu (atr:Style) = fun code ->
-            html.tagb ("menu",atr) <| fun () ->
-            code()
-
-        static member ul_style (atr:Style) = fun code ->
-            html.tagb ("ul_style",atr) <| fun () ->
-            code()
-
-        static member ul_style2 (atr:Style) = fun code ->
-            html.tagb ("ul_style2",atr) <| fun () ->
-            code()
-
-        static member li_style1 (atr:Style) = fun code ->
-            html.tagb ("li_style1",atr) <| fun () ->
-            code()
-
-        static member li_style2 (atr:Style) = fun code ->
-            html.tagb ("li_style2",atr) <| fun () ->
-            code()
-
-        static member bread (atr:Style) = fun code ->
-            html.tagb ("bread",atr) <| fun () ->
-            code()
-
-        static member bread_ol (atr:Style) = fun code ->
-            html.tagb ("bread_ol",atr) <| fun () ->
-            code()
-
-        static member bread_li (atr:Style) = fun code ->
-            html.tagb ("bread_li",atr) <| fun () ->
-            code()
-
-        static member author (atr:Style) = fun code ->
-            html.tagb ("author",atr) <| fun () ->
-            code()
-
-        static member p_style1 (atr:Style) = fun code ->
-            html.tagb ("p_style1",atr) <| fun () ->
-            code()
-
-        static member p_style2 (atr:Style) = fun code ->
-            html.tagb ("p_style2",atr) <| fun () ->
-            code()
-
-        static member p_style3 (atr:Style) = fun code ->
-            html.tagb ("p_style3",atr) <| fun () ->
-            code()
-
-        static member ul (atr:Style) = fun code ->
-            html.tagb ("ul",atr) <| fun () ->
-            code()
-
-        static member li (atr:Style) = fun code ->
-            html.tagb ("li",atr) <| fun () ->
-            code()
-
-        static member card (atr:Style) = fun code ->
-            html.tagb ("card",atr) <| fun () ->
-            code()
-
-        static member card_box (atr:Style) = fun code ->
-            html.tagb ("card_box",atr) <| fun () ->
-            code()
-        static member card_box_wrap (atr:Style) = fun code ->
-            html.tagb ("card_box_wrap",atr) <| fun () ->
-            code()
-
         static member form (action:string) = fun code -> html.tagb ("form",["method","post"; "action",action;]) code
         static member form_fileUpload (action:string) = fun code -> html.tagb ("form",["method","post"; "enctype","multipart/form-data"; "action",action;]) code
         static member submit(url:string,name:string,value:string) = html.taga("input",["type","submit"; "name",name; "value",value; "formaction",url])
@@ -508,20 +359,30 @@ namespace Aqualis
                 writein "</tr>"
             writein "</table>"
             writein "</div>"
-        static member tr_ = fun code -> html.tagb "tr" code
+        static member tr code = html.tagb "tr" code
         static member tr (a:list<string*string>) = fun code -> html.tagb ("tr",a) code
-        static member th = fun code -> html.tagb "th" code
-        static member td_ = fun code -> html.tagb "td" code
+        static member th code = html.tagb "th" code
+        static member td code = html.tagb "td" code
         static member td (a:list<string*string>) = fun code -> html.tagb ("td",a) code
         static member strong(t:string) = html.tagb "strong" <| fun () -> writein t
-        static member enumerate_ code = html.tagb "ol" code
-        static member ol (atr:Style) = fun code -> html.tagb ("ol",atr) code
-        static member itemize_ code = html.tagb "ul" code
+        static member enumerate code = html.tagb "ol" code
+        static member enumerate (a:list<string*string>) = fun code -> html.tagb ("ol",a) code
+        static member enumerate (a:Style) = fun code -> html.tagb ("ol",a) code
+        static member enumerateList (c:list<unit->unit>) = 
+            html.tagb "ol" <| fun () ->
+                for x in c do 
+                    html.item x
+        static member itemize code = html.tagb "ul" code
         static member itemize (a:list<string*string>) = fun code -> html.tagb ("ul",a) code
+        static member itemize (a:Style) = fun code -> html.tagb ("ul",a) code
+        static member itemizeList (c:list<unit->unit>) = 
+            html.tagb "ul" <| fun () ->
+                for x in c do 
+                    html.item x
         static member item code = html.tagb "li" code
-        static member item_ code = html.tagb "li" code
+        static member item (a:Style) = fun code -> html.tagb ("li",a) code
         static member item (a:list<string*string>) = fun code -> html.tagb ("li",a) code
-        static member para_ code = html.tagb "p" code
+        static member para code = html.tagb "p" code
         static member para (a:list<string*string>) = html.tagb ("p",a)
         static member para (t:string) = html.tagb "p" <| fun () -> writein(t)
         static member span(cls:string,t) = html.tagb ("span",["class",cls]) <| fun () -> writein(t)
@@ -536,7 +397,6 @@ namespace Aqualis
         static member aside (cls:string, s:Style) = fun code -> html.tagb ("aside", [s.atr; Atr("class", cls)]) code
         static member aside (a:list<string*string>) = fun code -> html.tagb ("aside",a) code
         static member section(cls:string, s:Style) = fun code -> html.tagb ("section", [s.atr; Atr("class", cls)]) code
-
         static member option(value:string) = fun code -> html.tagb ("option",["value",value;]) code
         static member option_selected(value:string) = fun code -> html.tagb ("option",["value",value;"selected","selected";]) code
         static member div (a:list<string*string>) = fun code -> html.tagb ("div",a) code
@@ -557,7 +417,6 @@ namespace Aqualis
         static member hr() = writein "<hr>"
         static member setjs filename =
             html.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
-
         static member title (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -569,7 +428,6 @@ namespace Aqualis
                             {Key = "font-size"; Value = "90px";}]
             html.tagb ("div",s1+s) <| fun () ->
                 writein text
-
         static member contents (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -584,7 +442,6 @@ namespace Aqualis
                             {Key = "padding-left"; Value="10px";}]
             html.tagb ("div",s1+s) <| fun () ->
                 writein text
-
         static member subtitle1 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -599,7 +456,6 @@ namespace Aqualis
                             {Key = "padding-left"; Value="10px";}]
             html.tagb ("div",s1+s) <| fun () ->
                 writein text
-
         static member subtitle2 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -618,7 +474,6 @@ namespace Aqualis
                             {Key = "display"; Value="inline-block";}]
             html.tagb ("div",s1+s) <| fun () ->
                 writein text
-                
         static member textA (s:Style) = fun (p:position) (size:int) (color:string) (text:string) ->
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -646,9 +501,6 @@ namespace Aqualis
             html.tagb ("div", s1+s) <| fun () ->
                 writein ("\\(\\begin{align}"+String.Join("\\\\",text)+"\\end{align}\\)")
                 
-        static member para code =
-            html.tagb "p" code
-            
         static member canvas (s:Style) code =
             html.tagb ("div", s) <| fun () ->
                 code ()

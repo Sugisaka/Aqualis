@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<title>
+test7D
+</title>
+<script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<script type="text/javascript" src="contents_test7D/animationSeq.js">
+</script>
+<script type="text/javascript" src="contents_test7D/animationSeqReset.js">
+</script>
+<script type="text/javascript" src="contents_test7D/animationStart.js">
+</script>
+<script type="text/javascript" src="contents_test7D/animationReset.js">
+</script>
+<script type="text/javascript" src="contents_test7D/autoAnimation.js">
+</script>
+<script>
+const audioList = [
+    "contents_test7D/008-scripts_台詞_D.wav",
+    "contents_test7D/0076-scripts_台詞_T.wav"
+];
+let pagecount = 1;
+function setCharacter()
+{
+        const swc = document.getElementById("switchCharacter");
+        const c = document.getElementById("c"+pagecount);
+        if(swc.checked)
+        {
+            c.style.display = "block";
+        }
+        else
+        {
+            c.style.display = "none";
+        }
+}
+function setSubtitle()
+{
+        const sws = document.getElementById("switchSubtitle");
+        const b2 = document.getElementById("sb"+pagecount);
+        const s2 = document.getElementById("s"+pagecount);
+        if(sws.checked)
+        {
+            b2.style.display = "block";
+            s2.style.display = "block";
+        }
+        else
+        {
+            b2.style.display = "none";
+            s2.style.display = "none";
+        }
+}
+function drawNext()
+{
+    resetAll();
+    if(pagecount<2)
+    {
+        const swc = document.getElementById("switchCharacter");
+        const sws = document.getElementById("switchSubtitle");
+        const swa = document.getElementById("switchAudio");
+        
+        const p1 = document.getElementById("p"+pagecount);
+        p1.style.display = "none";
+        const b1 = document.getElementById("sb"+pagecount);
+        b1.style.display = "none";
+        const s1 = document.getElementById("s"+pagecount);
+        s1.style.display = "none";
+        const c1 = document.getElementById("c"+pagecount);
+        c1.style.display = "none";
+        pagecount++;
+        const p2 = document.getElementById("p"+pagecount);
+        p2.style.display = "block";
+        if(sws.checked)
+        {
+            const b2 = document.getElementById("sb"+pagecount);
+            b2.style.display = "block";
+            const s2 = document.getElementById("s"+pagecount);
+            s2.style.display = "block";
+        }
+        else
+        {
+            const b2 = document.getElementById("sb"+pagecount);
+            b2.style.display = "none";
+            const s2 = document.getElementById("s"+pagecount);
+            s2.style.display = "none";
+        }
+        if(swc.checked)
+        {
+            const c2 = document.getElementById("c"+pagecount);
+            c2.style.display = "block";
+        }
+        else
+        {
+            const c2 = document.getElementById("c"+pagecount);
+            c2.style.display = "none";
+        }
+        const audioPlayer = document.getElementById("audioPlayer");
+        if(audioList[pagecount-1] != "" && swa.checked)
+        {
+            audioPlayer.src = audioList[pagecount-1];
+            audioPlayer.play();
+        }
+        autoAnimationMap['page'+pagecount]();
+    }
+}
+function drawPrev()
+{
+    resetAll();
+    if(pagecount>1)
+    {
+        const swc = document.getElementById("switchCharacter");
+        const sws = document.getElementById("switchSubtitle");
+        const swa = document.getElementById("switchAudio");
+        const p1 = document.getElementById("p"+pagecount);
+        p1.style.display = "none";
+        const b1 = document.getElementById("sb"+pagecount);
+        b1.style.display = "none";
+        const s1 = document.getElementById("s"+pagecount);
+        s1.style.display = "none";
+        const c1 = document.getElementById("c"+pagecount);
+        c1.style.display = "none";
+        pagecount--;
+        const p2 = document.getElementById("p"+pagecount);
+        p2.style.display = "block";
+        if(sws.checked)
+        {
+            const b2 = document.getElementById("sb"+pagecount);
+            b2.style.display = "block";
+            const s2 = document.getElementById("s"+pagecount);
+            s2.style.display = "block";
+        }
+        else
+        {
+            const b2 = document.getElementById("sb"+pagecount);
+            b2.style.display = "none";
+            const s2 = document.getElementById("s"+pagecount);
+            s2.style.display = "none";
+        }
+        if(swc.checked)
+        {
+            const c2 = document.getElementById("c"+pagecount);
+            c2.style.display = "block";
+        }
+        else
+        {
+            const c2 = document.getElementById("c"+pagecount);
+            c2.style.display = "none";
+        }
+        const audioPlayer = document.getElementById("audioPlayer");
+        if(audioList[pagecount-1] != "" && swa.checked)
+        {
+            audioPlayer.src = audioList[pagecount-1];
+            audioPlayer.play();
+        }
+    }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body style = "background-color: #aaaaaa" >
+<div style = "background-color: #ffffff; margin-left: auto; margin-right: auto; width: 1920px; height: 1080px" >
+<div id="p1" style="display: block; position: absolute;">
+<div id = "sb1" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ";>
+</div>
+<div id = "c1"style="display: none; ">
+</div>
+<div id = "s1" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #455eff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;">
+だんごのセリフ
+</div>
+<div style="width: 1920px; height: 880px; position: absolute; z-index: 0;">
+<img style = "margin-left: 0px; margin-top: 0px; width: 100%" src = "c:\home\Aqualis\test\test7\test7D\contents_test7D\title.PNG" />
+</div>
+</div>
+<div id="p2" style="display: none; position: absolute;">
+<div id = "sb2" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ";>
+</div>
+<div id = "c2"style="display: none; ">
+</div>
+<div id = "s2" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #d11aff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;">
+テールのセリフ
+</div>
+<div style="width: 1920px; height: 880px; position: absolute; z-index: 0;">
+<div style = "margin-left: 1860px; margin-top: 10px; position: absolute; font-size: 48px; color: #000000" >
+10
+</div>
+<div style = "margin-left: 50px; margin-top: 50px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 25px; border-left-color: #1e6eff; padding-left: 10px" >
+アニメーション制御の実装
+</div>
+<div style = "margin-left: 80px; margin-top: 150px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; padding-left: 10px" >
+図形のアニメーション
+</div>
+<div style = "margin-left: 100px; margin-top: 250px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 30px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #1e6eff; padding-left: 10px; display: inline-block" >
+描画スタイル・座標等の指定
+</div>
+<div style = "margin-left: 100px; margin-top: 320px; position: absolute; font-size: 30px; color: #000000" >
+AAA
+</div>
+<div style = "margin-left: 180px; margin-top: 320px; position: absolute; font-size: 30px; color: #000000" >
+\(x+y\)
+</div>
+<div style = "margin-left: 280px; margin-top: 320px; position: absolute; font-size: 30px; color: #FF0000" >
+\(x-y\)
+</div>
+<div style = "margin-left: 180px; margin-top: 390px; position: absolute; font-size: 30px; color: #000000" >
+\(\begin{align}\sin\left(x+y\right)\\x-y\end{align}\)
+</div>
+<div style = "margin-left: 100px; margin-top: 520px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 30px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #1e6eff; padding-left: 10px; display: inline-block" >
+破線描画
+</div>
+<div style = "margin-left: 100px; margin-top: 750px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 30px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #1e6eff; padding-left: 10px; display: inline-block" >
+円弧描画
+</div>
+<svg viewBox="0 0 700 780" 
+width="700px" 
+heigth="780px" 
+xmlns="http://www.w3.org/2000/svg" 
+style="margin-left: 1140; 
+margin-top: 250; 
+position: absolute;
+background-color: #bbeeff;
+">
+<line id = "contentsID0" style = "visibility: hidden; stroke-width: 3px; stroke-dasharray: 4,4; stroke: #000000" />
+<path id = "contentsID1" style = "visibility: hidden; stroke-width: 3px; stroke: #000000; fill: none" />
+</svg>
+</div>
+<button id = "startButtonstart0" onclick = "animationStartMap['start0']()" style = "position: absolute; margin-left: 1080px; margin-top: 250px; z-index: 1000" >
+Start
+</button>
+<button id = "resetButtonstart0" onclick = "animationResetMap['reset0']()" style = "position: absolute; margin-left: 1080px; margin-top: 275px; z-index: 1000" >
+Reset
+</button>
+</div>
+<button id="prevButton" style="position: absolute; z-index: 100;" onclick="drawPrev()">
+前へ
+</button>
+<button id="nextButton" style="position: absolute; margin-left: 75px; z-index: 100;" onclick="drawNext()">
+次へ
+</button>
+<input type="checkbox" id="switchCharacter" style="position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;"  onclick="setCharacter()"  />
+<label style="position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;">
+キャラクター
+</label>
+<input type="checkbox" id="switchSubtitle" style="position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;" onclick="setSubtitle()"  />
+<label style="position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;">
+字幕
+</label>
+<input type="checkbox" id="switchAudio" style="position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;" onclick="setSubtitle()"  />
+<label style="position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;">
+音声
+</label>
+<audio id="audioPlayer">
+</audio>
+</div>
+</body>
+</html>

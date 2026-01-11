@@ -72,7 +72,7 @@ type AnimationLine(s:Style,canvasX:int,canvasY:int) =
     member this.ID with get() = id
     member this.P (f:Line) = 
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein("    var e = document.getElementById(\""+id+"\");")
             writein("    var x1 = " + (f.Start.X t).code + ";")
             writein("    var y1 = " + (canvasY - f.Start.Y t).code + ";")
@@ -96,7 +96,7 @@ type AnimationEllipse(s:Style,canvasX:int,canvasY:int) =
     member this.ID with get() = id
     member this.P (e:Ellipse) = 
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    var cx = " + (e.center.X t).code + ";")
             writein ("    var cy = " + (canvasY - e.center.Y t).code + ";")
@@ -120,7 +120,7 @@ type AnimationArc(s:Style,canvasX:int,canvasY:int) =
     member this.ID with get() = id
     member this.P (e:Arc) = 
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             let a1 = Math.PI * e.angle1 t / 180
             let x1 = e.center.X t + e.radius t * asm.cos a1
@@ -157,7 +157,7 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     member this.ID with get() = id
     member this.P (e:Text) = 
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
             writein ("    e.innerHTML = \"" + e.str + "\";")
@@ -172,7 +172,7 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
             
     member this.P (e:MathText) = 
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
             writein ("    e.innerHTML = \"\\\\(" + e.eq.code + "\\\\)\";")
@@ -195,7 +195,7 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
     member this.ID with get() = id
     member this.P (apex:list<tposition>) = 
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\"" + id + "\");")
             writein  "    var p = \"\";"
             for p in apex do
@@ -210,13 +210,13 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
             
 type SlideAnimation =
     static member writeAudioList() =
-        switchDraw <| fun () ->
+        switchJSMain <| fun () ->
             writein "const audioList = ["
             for i in 0..audioList.Length-1 do
                 writein ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
             writein "];"
     static member jsSetCharacter() =
-        switchDraw <| fun () ->
+        switchJSMain <| fun () ->
             writein "let pagecount = 1;"
             writein"function setCharacter()"
             writein"{"
@@ -232,7 +232,7 @@ type SlideAnimation =
             writein"        }"
             writein"}"
     static member jsSetSubtitle() =
-        switchDraw <| fun () ->
+        switchJSMain <| fun () ->
             writein "function setSubtitle()"
             writein "{"
             writein "        const sws = document.getElementById(\"switchSubtitle\");"
@@ -250,7 +250,7 @@ type SlideAnimation =
             writein "        }"
             writein "}"
     static member jsDrawNext() =
-        switchDraw <| fun () ->
+        switchJSMain <| fun () ->
             writein "function drawNext()"
             writein "{"
             writein "    resetAll();"
@@ -305,7 +305,7 @@ type SlideAnimation =
             writein "    }"
             writein "}"
     static member jsDrawPrev() =
-        switchDraw <| fun () ->
+        switchJSMain <| fun () ->
             writein "function drawPrev()"
             writein "{"
             writein "    resetAll();"
@@ -475,6 +475,49 @@ module htmlexpr =
         static member Select = html.splitTag "select" 
         static member Tr = html.splitTag "tr" 
         static member div (a:list<string*PHPdata>) = fun code -> html.tagb ("div",a) code
+        static member div (a:CSSdata) = fun code -> 
+            match a.label with
+            |HTMLTag s -> html.tagb s code
+            |CSSClass s -> html.tagb ("div",["class",s]) code
+            |CSSID s -> html.tagb ("div",["id",s]) code
+            |_ -> ()
+        static member div (a:CSSdata,atr:list<string*string>) = fun code -> 
+            match a.label with
+            |HTMLTag s -> html.tagb s code
+            |CSSClass s -> html.tagb ("div",["class",s]@atr) code
+            |CSSID s -> html.tagb ("div",["id",s]@atr) code
+            |_ -> ()
+            
+        static member article (a:CSSdata) = fun code -> 
+            match a.label with
+            |CSSClass s -> html.tagb ("article",["class",s]) code
+            |CSSID s -> html.tagb ("article",["id",s]) code
+            |_ -> ()
+            
+        static member aside (a:CSSdata) = fun code -> 
+            match a.label with
+            |CSSClass s -> html.tagb ("aside",["class",s]) code
+            |CSSID s -> html.tagb ("aside",["id",s]) code
+            |_ -> ()
+            
+        static member para (a:CSSdata) = fun code -> 
+            match a.label with
+            |CSSClass s -> html.tagb ("p",["class",s]) code
+            |CSSID s -> html.tagb ("p",["id",s]) code
+            |_ -> ()
+            
+        static member section (a:CSSdata) = fun code -> 
+            match a.label with
+            |CSSClass s -> html.tagb ("section",["class",s]) code
+            |CSSID s -> html.tagb ("section",["id",s]) code
+            |_ -> ()
+            
+        static member span (a:CSSdata) = fun code -> 
+            match a.label with
+            |CSSClass s -> html.tagb0 ("span",["class",s]) code
+            |CSSID s -> html.tagb0 ("span",["id",s]) code
+            |_ -> ()
+            
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
         static member checkbox(name:PHPdata) = 
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
@@ -528,6 +571,16 @@ module htmlexpr =
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [s.atr;Atr("src",contentsDir + "\\" + f)])
+        static member image (filename:string) =
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists contentsDir then
+                    File.Copy(filename, contentsDir + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" contentsDir
+            else
+                printfn "image file not exist: %s" filename
+            html.taga ("img", [Atr("src",contentsDir + "\\" + f)])
         static member video (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -790,12 +843,12 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     member this.seq (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
         // アニメーションシーケンスIDを発行
         let idstart,idreset = nextAnimationSeqID()
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("function "+idstart+"(t){")
         switchJSAnimationSeqReset <| fun () ->
             writein ("function "+idreset+"(){")
         setFigure setting
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein "}"
         switchJSAnimationSeqReset <| fun () ->
             writein "}"
@@ -811,7 +864,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let id = nextContentsID()
         html.taga ("line", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"x1\", " + (startP.X t).code + ");")
             writein ("    e.setAttribute(\"y1\", " + (startP.Y t).code + ");")
@@ -822,7 +875,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let id = nextContentsID()
         html.taga ("ellipse", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"cx\", " + (center.X t).code + ");")
             writein ("    e.setAttribute(\"cy\", " + (center.Y t).code + ");")
@@ -834,7 +887,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let id = nextContentsID()
         html.taga ("path", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    var x1 = " + (startP.X t).code + ";")
             writein ("    var y1 = " + (startP.Y t).code + ";")
@@ -856,7 +909,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let id = nextContentsID()
         html.taga ("polygon", [Atr("id", id)] @ [s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("var e = document.getElementById(\"" + id + "\");")
         let pp =
             apex
@@ -865,7 +918,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
                 "(" + (p.X t).code + ") + \",\" + (" + (p.Y t).code + ")"
             )
         let pointsJS = String.concat " + \" \" + " pp
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("e.setAttribute(\"points\", " + pointsJS + ");")
             
     member this.text (s:Style) (center:tposition) (radius:tposition) (angleS:int) (angleE:int) (str:string) (interval:int) =
@@ -874,7 +927,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         html.taga ("text", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
         let lines = str.Split "\n" |> Array.toList
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein("var e = document.getElementById(\""+id+"\");")
             writein("var cx =" + (center.X t).code+ ";")
             writein("var cy =" + (center.Y t).code+ ";")
@@ -896,7 +949,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let id = nextContentsID()
         html.taga ("rect", [Atr("id",id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("var e = document.getElementById(\""+id+"\");")
             writein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
             writein ("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
@@ -911,7 +964,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         counter <- counter + 1
         html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein ("var e = document.getElementById(\""+id+"\");")
             writein "if (t == 0) e.style.visibility = 'visible';"
             writein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
@@ -958,7 +1011,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         counter <- counter + 1
         html.taga ("rect", [Atr("id",this.id)]@[s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein("var e = document.getElementById(\""+this.id+"\");")
             writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
             writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
@@ -969,7 +1022,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         counter <- counter + 1
         html.taga ("polygon", [Atr("id", this.id)] @ [s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein("var e = document.getElementById(\"" + this.id + "\");")
             let pp =
                 apex
@@ -986,7 +1039,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         counter <- counter + 1
         html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein("var e = document.getElementById(\""+this.id+"\");")
             writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
             writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
@@ -997,7 +1050,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         counter <- counter + 1
         html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein("var e = document.getElementById(\""+id+"\");")
             writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
             writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
@@ -1008,39 +1061,37 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         counter <- counter + 1
         html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
         let t = num0(Var(Dt,"t",NaN))
-        switchJS <| fun () ->
+        switchAnimationSeq <| fun () ->
             writein("var e = document.getElementById(\""+this.id+"\");")
             writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
             writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
             
 [<AutoOpen>]
 module dochtml =
-    let htmlpresentation dir filename (lang:Language) (pagesizeX:option<int>,pagesizeY:option<int>) isPageAnimation code =
+    let htmlpresentation (dir:string) (filename:string) (title:string) (cssfile:option<string>) (pagesizeX:option<int>,pagesizeY:option<int>) isPageAnimation code =
         // ディレクトリ作成
-        if not <| Directory.Exists (dir + "\\" + filename) then
-            ignore <| Directory.CreateDirectory(dir + "\\" + filename)
-        if not <| Directory.Exists (dir + "\\" + filename + "\\" + "contents_" + filename) then
-            ignore <| Directory.CreateDirectory(dir + "\\" + filename + "\\" + "contents_" + filename)
+        if not <| Directory.Exists (dir + "\\" + "contents_" + filename) then
+            ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + filename)
         // コンテンツディレクトリ
-        contentsDir <- dir + "\\" + filename + "\\" + "contents_" + filename
+        contentsDir <- dir + "\\" + "contents_" + filename
         makeProgram
             [
                 // メインファイル
-                dir + "\\" + filename, filename + ".html", lang
+                dir, filename + ".html", HTML
                 // HTML本体のコード
-                dir + "\\" + filename, filename+"_body", lang
+                dir, filename+"_body", HTML
+                // JavaScriptのコード
+                dir, filename+"_js", JavaScript
                 // スライドアニメーション用javascriptファイル名
-                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationSeq.js", JavaScript
-                // draw関数のコード
-                dir + "\\" + filename, filename+"_draw", JavaScript
+                dir  + "\\" + "contents_" + filename, "animationSeq.js", JavaScript
                 // スライドアニメーション(アニメーション開始)用javascript
-                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationStart.js", JavaScript
+                dir  + "\\" + "contents_" + filename, "animationStart.js", JavaScript
                 // スライドアニメーション(アニメーションリセット)用javascript
-                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationSeqReset.js", JavaScript
+                dir  + "\\" + "contents_" + filename, "animationSeqReset.js", JavaScript
                 // スライドアニメーション(アニメーションリセット)用javascript
-                dir + "\\" + filename  + "\\" + "contents_" + filename, "animationReset.js", JavaScript
+                dir  + "\\" + "contents_" + filename, "animationReset.js", JavaScript
                 // オートアニメーション実行用javascript
-                dir + "\\" + filename  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
+                dir  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
             ]
             <| fun () ->
                 switchJSAnimationStart <| fun () ->
@@ -1049,7 +1100,7 @@ module dochtml =
                     writein "const animationResetMap = {"
                 switchAutoAnimation <| fun () ->
                     writein "const autoAnimationMap = {"
-                switchJS <| fun () ->
+                switchAnimationSeq <| fun () ->
                     writein "function repeatSeq(fn, interval, Nt, onComplete)"
                     writein "{"
                     writein "    let t = 0;"
@@ -1077,7 +1128,7 @@ module dochtml =
                     SlideAnimation.jsDrawNext()
                     SlideAnimation.jsDrawPrev()
                 // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
-                let codeDraw = switchDraw <| fun () ->
+                let codeDraw = switchJSMain <| fun () ->
                     programList[prIndex].allCodes
                 let codeBody = switchBody <| fun () ->
                     programList[prIndex].allCodes
@@ -1088,6 +1139,8 @@ module dochtml =
                     html.tagb ("html", "lang=\"ja\"") <| fun () ->
                         // head要素
                         html.tagb ("head", "") <| fun () ->
+                            // titleタグ
+                            writein("<title>"+title+"</title>")
                             // metaタグ
                             writein "<meta charset=\"UTF-8\">"    
                             //追加（5/29）viewportタブ
@@ -1105,12 +1158,11 @@ module dochtml =
                             // scriptタグ
                             html.tagb ("script", "") <| fun () ->
                                 writein codeDraw
-                                // if codejs <> "" then
-                                //     FigureAnimation.jsAnimation codejs
                             // webフォント取得
                             writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
                             writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
                             writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                            match cssfile with |Some x -> writein ("<link rel=\"stylesheet\" href=\""+x+"\" />") |None -> ()
                         // body要素
                         match pagesizeX,pagesizeY with
                         |None,None ->
@@ -1170,25 +1222,25 @@ module dochtml =
                     programList[i].close()
                 // bodyタグ一時コード削除
                 programList[1].delete()
-                // draw関数一時コード削除
-                programList[3].delete()
+                // JavaScript関数一時コード削除
+                programList[2].delete()
                 
     /// 全体がキャンバスの無制限レイアウト
-    let freeCanvas lang outputdir filename code =
-        htmlpresentation outputdir filename lang (None, None) false <| fun () ->
+    let freeCanvas outputdir filename (title:string) cssfile code =
+        htmlpresentation outputdir filename title cssfile (None, None) false <| fun () ->
             html.canvas <| Style [size.width "0px"; size.height "0px"] <| code
             
     /// 全体がキャンバスの無制限レイアウト
-    let freePage lang outputdir filename code =
-        htmlpresentation outputdir filename lang (None, None) false code
+    let freePage outputdir filename (title:string) cssfile code =
+        htmlpresentation outputdir filename title cssfile (None, None) false code
         
     /// 固定幅レイアウト
-    let fixedWidthPage lang outputdir filename pageWidth code =
-        htmlpresentation outputdir filename lang (Some pageWidth, None) false code
+    let fixedWidthPage outputdir filename (title:string) pageWidth cssfile code =
+        htmlpresentation outputdir filename title cssfile (Some pageWidth, None) false code
         
-    let fixedPage lang outputdir filename pageWidth pageHeight setting code =
+    let fixedPage outputdir filename (title:string) pageWidth pageHeight setting cssfile code =
         setDefault setting
-        htmlpresentation outputdir filename lang (Some pageWidth, Some pageHeight) true <| fun () ->
+        htmlpresentation outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun () ->
             code()
             html.prevButton()
             html.nextButton()

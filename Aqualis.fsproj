@@ -69,6 +69,7 @@
     <Compile Include="graphics\mathgraph.fs" />
     <Compile Include="graphics\graph1d.fs" />
     <Compile Include="graphics\plot2d.fs" />
+    <Compile Include="web\css.fs" />
     <Compile Include="web\htmlio.fs" />
     <Compile Include="web\greek.fs" />
     <Compile Include="web\style.fs" />

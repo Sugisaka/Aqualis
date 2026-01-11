@@ -12,7 +12,7 @@ let outputdir = __SOURCE_DIRECTORY__
 open System
 open Aqualis
 
-fixedPage HTML outputdir projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voice=OFF} <| fun () ->
+fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voice=OFF} None <| fun () ->
     html.page
         [Tale, @"C:\home\contents\テール右斜AAA-.png";
          Dang, @"C:\home\contents\dango.png";]

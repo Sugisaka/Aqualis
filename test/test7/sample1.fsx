@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-freePage HTML outputdir projectname <| fun () ->
+freePage outputdir projectname projectname None <| fun () ->
     let styleh1 =
         Style [
             {Key = "color"; Value="#ffffff";}

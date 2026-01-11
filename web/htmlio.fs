@@ -46,15 +46,15 @@ module htmlio =
         let p = code()
         prIndex <- prIndex_temp
         p
-    /// HTMLファイルJavaScriptコードの書き込み
-    let switchJS code =
+    /// HTMLファイルdraw関数への書き込み
+    let switchJSMain code =
         let prIndex_temp = prIndex
         prIndex <- 2
         let p = code()
         prIndex <- prIndex_temp
         p
-    /// HTMLファイルdraw関数への書き込み
-    let switchDraw code =
+    /// HTMLファイルJavaScriptコードの書き込み
+    let switchAnimationSeq code =
         let prIndex_temp = prIndex
         prIndex <- 3
         let p = code()
