@@ -97,12 +97,12 @@ type AnimationEllipse(s:Style,canvasX:int,canvasY:int) =
     member this.P (e:Ellipse) = 
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
-            writein ("    var e = document.getElementById(\""+id+"\");")
-            writein ("    var cx = " + (e.center.X t).code + ";")
-            writein ("    var cy = " + (canvasY - e.center.Y t).code + ";")
-            writein ("    var rx = " + (e.radiusX t).code + ";")
-            writein ("    var ry = " + (e.radiusY t).code + ";")
-            writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            writein("    var e = document.getElementById(\""+id+"\");")
+            writein("    var cx = " + (e.center.X t).code + ";")
+            writein("    var cy = " + (canvasY - e.center.Y t).code + ";")
+            writein("    var rx = " + (e.radiusX t).code + ";")
+            writein("    var ry = " + (e.radiusY t).code + ";")
+            writein("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
             writein "    e.setAttribute(\"cx\", cx);"
             writein "    e.setAttribute(\"cy\", cy);"
             writein "    e.setAttribute(\"rx\", rx);"
@@ -835,7 +835,7 @@ module htmlexpr =
             
 type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
-    let mutable animeFlow:list<string*string*AnimationSetting> = []
+    let mutable animeFlow:list<string*string*AnimationSetting*bool> = []
     let mutable counter = 0
     member _.Padding with get() = padding
     member _.id with get() = "fa"+figcounter.ToString()+"_"+counter.ToString()
@@ -852,144 +852,124 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             writein "}"
         switchJSAnimationSeqReset <| fun () ->
             writein "}"
-        animeFlow <- animeFlow@[idstart,idreset,setting]
+        animeFlow <- animeFlow@[idstart,idreset,setting,false]
+    member this.loop (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
+        // アニメーションシーケンスIDを発行
+        let idstart,idreset = nextAnimationSeqID()
+        switchAnimationSeq <| fun () ->
+            writein ("function "+idstart+"(t){")
+        switchJSAnimationSeqReset <| fun () ->
+            writein ("function "+idreset+"(){")
+        setFigure setting
+        switchAnimationSeq <| fun () ->
+            writein "}"
+        switchJSAnimationSeqReset <| fun () ->
+            writein "}"
+        animeFlow <- animeFlow@[idstart,idreset,setting,true]
         
     member this.animationEllipse s = AnimationEllipse(s,canvasX,canvasY)
     member this.animationLine s = AnimationLine(s,canvasX,canvasY)
     member this.animationArc s = AnimationArc(s,canvasX,canvasY)
     member this.animationText s = AnimationText(s,originX,originY,canvasX,canvasY)
     member this.animationPolygon s = AnimationPolygon(s,canvasX,canvasY)
-    member this.line (s:Style) (startP:tposition) (endP:tposition) =
-        // コンテンツIDを発行
-        let id = nextContentsID()
-        html.taga ("line", [Atr("id",id)]@[s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein ("    var e = document.getElementById(\""+id+"\");")
-            writein ("    e.setAttribute(\"x1\", " + (startP.X t).code + ");")
-            writein ("    e.setAttribute(\"y1\", " + (startP.Y t).code + ");")
-            writein ("    e.setAttribute(\"x2\", " + (endP.X t).code + ");")
-            writein ("    e.setAttribute(\"y2\", " + (endP.Y t).code + ");")
-    member this.ellipse1 (s:Style) (center:tposition) (radiusX:int) (radiusY:int) =
-        // コンテンツIDを発行
-        let id = nextContentsID()
-        html.taga ("ellipse", [Atr("id",id)]@[s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein ("    var e = document.getElementById(\""+id+"\");")
-            writein ("    e.setAttribute(\"cx\", " + (center.X t).code + ");")
-            writein ("    e.setAttribute(\"cy\", " + (center.Y t).code + ");")
-            writein ("    e.setAttribute(\"rx\", \"" + radiusX.ToString() + "\");")
-            writein ("    e.setAttribute(\"ry\", \"" + radiusY.ToString() + "\");")
-            
-    member this.ellipse2 (s:Style) (startP:tposition) (center:tposition) (radiusX:int) (radiusY:int) (theta:num0->num0) (sweep:int) (interval:int) =
-        // コンテンツIDを発行
-        let id = nextContentsID()
-        html.taga ("path", [Atr("id",id)]@[s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein ("    var e = document.getElementById(\""+id+"\");")
-            writein ("    var x1 = " + (startP.X t).code + ";")
-            writein ("    var y1 = " + (startP.Y t).code + ";")
-            writein ("    var radiusX = " + radiusX.ToString() + ";")
-            writein ("    var radiusY = " + radiusY.ToString() + ";")
-            writein ("    var theta = " + (theta t).code + " / (" + interval.ToString() + " - 0.99);")
-            writein ("    var x2 = " + (center.X t).code + "+" + radiusX.ToString() + "*" + "Math.cos(theta);")
-            writein ("    var y2 = " + (center.Y t).code + "+"  + radiusY.ToString() +  "*" + "Math.sin(theta);")
-            writein "    var d = \"\" ;"
-            writein ("    if (6.283185307179586*t/" + interval.ToString() + "< Math.PI) {" )
-            writein ("       d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + 0 + \" \" + " + sweep.ToString() + " + \" \" + x2 + \" \" + y2 " + ";")
-            writein "    } else {"
-            writein ("       d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + 1 + \" \" + " + sweep.ToString() + " + \" \" + x2 + \" \" + y2 " + ";")
-            writein "    }"
-            writein ("    e.setAttribute(\"d\", " + "d" + ");")
-            
-    member this.polygon1 (s:Style) (apex:list<tposition>) =
-        // コンテンツIDを発行
-        let id = nextContentsID()
-        html.taga ("polygon", [Atr("id", id)] @ [s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein ("var e = document.getElementById(\"" + id + "\");")
+    member this.line (s:Style) (startP:position) (endP:position) =
+        let c = [
+            Atr("x1",startP.x.ToString())
+            Atr("y1",(double canvasY-startP.y).ToString())
+            Atr("x2",endP.x.ToString())
+            Atr("y2",(double canvasY-endP.y).ToString())]
+        html.taga ("line", [s.atr]@c)
+    member this.ellipse (s:Style) (center:position) (radiusX:float,radiusY:float) =
+        let c = [
+            Atr("cx",center.x.ToString())
+            Atr("cy",(double canvasY-center.y).ToString())
+            Atr("rx",radiusX.ToString())
+            Atr("ry",radiusY.ToString())]
+        html.taga ("ellipse", [s.atr]@c)
+    member this.circle (s:Style) (center:position) (radius:float) =
+        this.ellipse s center (radius,radius)
+    member this.ellipseArc (s:Style) (center:position) (radiusX:float,radiusY:float) (theta1:float,theta2:float) =
+        let x1 = center.x + radiusX * cos theta1
+        let y1 = center.y + radiusY * sin theta1
+        let x2 = center.x + radiusX * cos theta2
+        let y2 = center.y + radiusY * sin theta2
+        let d = 
+            if theta2-theta1 < Math.PI then
+                "M " + x1.ToString() + " " + (float canvasY-y1).ToString() + " A " + radiusX.ToString() + " " + radiusY.ToString() + " 0 0 0 " + x2.ToString() + " " + (float canvasY-y2).ToString()
+            else
+                "M " + x1.ToString() + " " + (float canvasY-y1).ToString() + " A " + radiusX.ToString() + " " + radiusY.ToString() + " 0 1 0 " + x2.ToString() + " " + (float canvasY-y2).ToString()
+        html.taga ("path", [s.atr]@[Atr("d",d)])
+    member this.polygon (s:Style) (apex:list<position>) =
         let pp =
             apex
-            |> List.map (fun (p:tposition) ->
-
-                "(" + (p.X t).code + ") + \",\" + (" + (p.Y t).code + ")"
-            )
-        let pointsJS = String.concat " + \" \" + " pp
-        switchAnimationSeq <| fun () ->
-            writein ("e.setAttribute(\"points\", " + pointsJS + ");")
-            
-    member this.text (s:Style) (center:tposition) (radius:tposition) (angleS:int) (angleE:int) (str:string) (interval:int) =
-        // コンテンツIDを発行
-        let id = nextContentsID()
-        html.taga ("text", [Atr("id",id)]@[s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        let lines = str.Split "\n" |> Array.toList
-        switchAnimationSeq <| fun () ->
-            writein("var e = document.getElementById(\""+id+"\");")
-            writein("var cx =" + (center.X t).code+ ";")
-            writein("var cy =" + (center.Y t).code+ ";")
-            writein("var theta1 = " + angleS.ToString() + "* Math.PI / 180.0;")
-            writein("var theta2 = " + angleE.ToString() + "* Math.PI / 180.0;")
-            writein "var delta = theta2 - theta1;"
-            writein "if (delta < 0) {delta += 2*Math.PI}"
-            writein "if (delta > Math.PI) {delta -= 2*Math.PI}"
-            writein("if (delta != 0) {var theta = theta1 + delta * (t / " + interval.ToString() + ")}")
-            writein "if (delta == 0) {var theta = theta1}"
-            writein("var x = cx + " + (radius.X t).code + "* Math.cos(theta);")
-            writein("var y = cy - " + (radius.Y t).code + "* Math.sin(theta);")
-            writein "e.setAttribute(\"x\", x);"
-            writein "e.setAttribute(\"y\", y);"
-            writein("e.innerHTML = " + String.concat " + " (lines |> List.mapi (fun i s -> "\"<tspan dy='" + string (if i=0 then 0.0 else 1.2) + "em'>" + s + "</tspan>\"")) + ";")
-            
-    member this.rect (s:Style) (startP:tposition) (sx:int) (sy:int) =
-        // コンテンツIDを発行
-        let id = nextContentsID()
-        html.taga ("rect", [Atr("id",id)]@[s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein ("var e = document.getElementById(\""+id+"\");")
-            writein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            writein ("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
-            writein ("e.setAttribute(\"width\", \"" + sx.ToString() + "\");")
-            writein ("e.setAttribute(\"height\", \"" + sy.ToString() + "\");")
-            
-    member this.image1 (s:Style) (filename:string) (startP:tposition) (endP:tposition) (interval:int) =
-        // コンテンツIDを発行
-        let id = nextContentsID()
+            |> List.map (fun p -> p.x.ToString() + "," + (double canvasY-p.y).ToString())
+            |> fun s -> String.Join(",",s)
+        html.taga ("polygon", [s.atr]@[Atr("points",pp)])
+    member this.polyline (s:Style) (apex:list<position>) =
+        let pp =
+            apex
+            |> List.map (fun p -> p.x.ToString() + "," + (double canvasY-p.y).ToString())
+            |> fun s -> String.Join(",",s)
+        html.taga ("polyline", [s.atr]@[Atr("points",pp)])
+    member this.rect (s:Style) (center:position) (sx:float,sy:float) =
+        let c = [
+            Atr("x",(center.x-0.5*sx).ToString())
+            Atr("y",(double canvasY-center.y-0.5*sy).ToString())
+            Atr("width",sx.ToString())
+            Atr("height",sy.ToString())]
+        html.taga ("rect", [s.atr]@c)
+    member this.text (s:Style) (center:position) (str:string) =
+        let c = [
+            {Key="display";Value="block"}
+            {Key="position";Value="absolute"}
+            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
+            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+        let ss = Style (s.list@c)
+        html.tagb ("div", ss.code) <| fun () ->
+            writein str
+    member this.eq (s:Style) (center:position) (e:num0) =
+        let c = [
+            {Key="display";Value="block"}
+            {Key="position";Value="absolute"}
+            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
+            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+        let ss = Style (s.list@c)
+        html.tagb ("div", ss.code) <| fun () ->
+            writein ("\\(" + e.Expr.evalH programList[prIndex] + "\\)")
+    member this.image (s:Style) (center:position) (filename:string) =
         let f = Path.GetFileName filename
         File.Copy(filename, contentsDir + "\\" + f, true)
-        counter <- counter + 1
-        html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein ("var e = document.getElementById(\""+id+"\");")
-            writein "if (t == 0) e.style.visibility = 'visible';"
-            writein ("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            writein ("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
-            
+        let c = [
+            {Key="display";Value="block"}
+            {Key="position";Value="absolute"}
+            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
+            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+        let ss = Style (s.list@c)
+        html.taga ("img", [Atr ss.code; Atr("src",contentsDir + "\\" + f)])
     member this.jsStartControll(buttonIndex:string) =
         let fname = "start" + buttonIndex
         switchJSAnimationStart <| fun () ->
             writein(fname+": () => {")
-            for idstart,idreset,setting in animeFlow do
-                writein("    repeatSeq(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ", () => {")
-            for _ in animeFlow do
-                writein "    });"
+            for idstart,_,setting,isLoop in animeFlow do
+                if isLoop then
+                    writein("    repeat(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ");")
+                else
+                    writein("    repeatSeq(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ", () => {")
+            for _,_,_,isLoop in animeFlow do
+                if isLoop then
+                    ()
+                else
+                    writein "    });"
             writein "},"
         fname
-        
     member this.jsResetControll(buttonIndex:string) =
         let fname = "reset" + buttonIndex
         switchJSAnimationReset <| fun () ->
             writein(fname+": () => {")
-            for idstart,idreset,setting in animeFlow do
+            for _,idreset,_,_ in animeFlow do
                 writein("    " + idreset + "();")
             writein "},"
         fname
-        
     static member jsAnimation codejs =
         switchBody <| fun () ->
             writein "var t = 0;"
@@ -1006,65 +986,6 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             writein "    loop();"
             writein "}"
             writein codejs
-            
-    member this.Rect (s:Style) = fun (startP:tposition) (sx:int) (sy:int) ->
-        counter <- counter + 1
-        html.taga ("rect", [Atr("id",this.id)]@[s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein("var e = document.getElementById(\""+this.id+"\");")
-            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
-            writein("e.setAttribute(\"width\", \"" + sx.ToString() + "\");")
-            writein("e.setAttribute(\"height\", \"" + sy.ToString() + "\");")
-            
-    member this.polygon (s:Style) = fun (apex:list<tposition>) ->
-        counter <- counter + 1
-        html.taga ("polygon", [Atr("id", this.id)] @ [s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein("var e = document.getElementById(\"" + this.id + "\");")
-            let pp =
-                apex
-                |> List.map (fun (p:tposition) ->
-                
-                    "(" + (p.X t).code + ") + \",\" + (" + (p.Y t).code + ")"
-                )
-            let pointsJS = String.concat " + \" \" + " pp
-            writein("e.setAttribute(\"points\", " + pointsJS + ");")
-            
-    member this.image (s:Style) = fun (startP:tposition) (endP:tposition) (filename:string) ->
-        let f = Path.GetFileName filename
-        File.Copy(filename, contentsDir + "\\" + f, true)
-        counter <- counter + 1
-        html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein("var e = document.getElementById(\""+this.id+"\");")
-            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
-            
-    member this.image2 (id:string) (s:Style) (startP:tposition) (endP:tposition) (filename:string) =
-        let f = Path.GetFileName filename
-        File.Copy(filename, contentsDir + "\\"+f)
-        counter <- counter + 1
-        html.taga ("image", [Atr("id", id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein("var e = document.getElementById(\""+id+"\");")
-            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
-            
-    member this.image3 (s:Style) (startP:tposition) (filename:string) =
-        let f = Path.GetFileName filename
-        File.Copy(filename, contentsDir + "\\" + f)
-        counter <- counter + 1
-        html.taga ("image", [Atr("id", this.id); Atr("xlink:href", contentsDir + "/" + f); s.atr])
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein("var e = document.getElementById(\""+this.id+"\");")
-            writein("e.setAttribute(\"x\", " + (startP.X t).code + ");")
-            writein("e.setAttribute(\"y\", " + (startP.Y t).code + ");")
             
 [<AutoOpen>]
 module dochtml =
@@ -1116,6 +1037,21 @@ module dochtml =
                     writein "        {"
                     writein "            onComplete();"
                     writein "        }"
+                    writein "    }"
+                    writein "    run();"
+                    writein "}"
+                    writein "function repeat(fn, interval, Nt)"
+                    writein "{"
+                    writein "    let t = 0;"
+                    writein "    function run()"
+                    writein "    {"
+                    writein "        if(t == Nt)"
+                    writein "        {"
+                    writein "            t = 0;"
+                    writein "        }"
+                    writein "        fn(t);"
+                    writein "        t++;"
+                    writein "        setTimeout(run, interval);"
                     writein "    }"
                     writein "    run();"
                     writein "}"

@@ -3,6 +3,12 @@ reset0: () => {
     animationSeqResetID0();
     animationSeqResetID1();
 },
+reset1: () => {
+    animationSeqResetID2();
+},
+reset2: () => {
+    animationSeqResetID3();
+},
 test: () => {}
 };
 function resetAll(){

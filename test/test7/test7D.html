@@ -22,6 +22,8 @@ test7D
 <script>
 const audioList = [
     "contents_test7D/008-scripts_台詞_D.wav",
+    "contents_test7D/0076-scripts_台詞_T.wav",
+    "contents_test7D/0076-scripts_台詞_T.wav",
     "contents_test7D/0076-scripts_台詞_T.wav"
 ];
 let pagecount = 1;
@@ -57,7 +59,7 @@ function setSubtitle()
 function drawNext()
 {
     resetAll();
-    if(pagecount<2)
+    if(pagecount<4)
     {
         const swc = document.getElementById("switchCharacter");
         const sws = document.getElementById("switchSubtitle");
@@ -194,13 +196,13 @@ function drawPrev()
 10
 </div>
 <div style = "margin-left: 50px; margin-top: 50px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 25px; border-left-color: #1e6eff; padding-left: 10px" >
-アニメーション制御の実装
+アニメーション制御の実装1
 </div>
 <div style = "margin-left: 80px; margin-top: 150px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; padding-left: 10px" >
-図形のアニメーション
+サンプルページ1
 </div>
 <div style = "margin-left: 100px; margin-top: 250px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 30px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #1e6eff; padding-left: 10px; display: inline-block" >
-描画スタイル・座標等の指定
+テキストと数式の表示
 </div>
 <div style = "margin-left: 100px; margin-top: 320px; position: absolute; font-size: 30px; color: #000000" >
 AAA
@@ -215,10 +217,10 @@ AAA
 \(\begin{align}\sin\left(x+y\right)\\x-y\end{align}\)
 </div>
 <div style = "margin-left: 100px; margin-top: 520px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 30px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #1e6eff; padding-left: 10px; display: inline-block" >
-破線描画
+アニメーション1
 </div>
-<div style = "margin-left: 100px; margin-top: 750px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 30px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #1e6eff; padding-left: 10px; display: inline-block" >
-円弧描画
+<div style = "margin-left: 100px; margin-top: 590px; position: absolute; font-size: 30px; color: #000000" >
+startボタンを押すとアニメーションが開始する
 </div>
 <svg viewBox="0 0 700 780" 
 width="700px" 
@@ -231,6 +233,18 @@ background-color: #bbeeff;
 ">
 <line id = "contentsID0" style = "visibility: hidden; stroke-width: 3px; stroke-dasharray: 4,4; stroke: #000000" />
 <path id = "contentsID1" style = "visibility: hidden; stroke-width: 3px; stroke: #000000; fill: none" />
+<ellipse style = "stroke-width: 3px; stroke: #ff0000; fill: none" cx = "200" cy = "380" rx = "200" ry = "100" />
+<ellipse style = "stroke-width: 3px; stroke: #ff8800; fill: none" cx = "400" cy = "380" rx = "50" ry = "50" />
+<rect style = "stroke-width: 3px; stroke: #0088ff; fill: none" x = "375" y = "530" width = "50" height = "100" />
+<path style = "stroke-width: 3px; stroke: #00bb00; fill: none" d = "M 200 780 A 200 200 0 1 0 38.19660112501052 697.5570504584946" />
+<polygon style = "stroke-width: 3px; stroke: #ff00ff; fill: none" points = "200,580,300,480,300,580" />
+<polyline style = "stroke-width: 3px; stroke: #aa00ff; fill: none" points = "200,180,300,80,300,180" />
+<div style = "display: block; position: absolute; margin-left: 1140px; margin-top: 990px">
+\(\sin\left(t\right)\)
+</div>
+<div style = "display: block; position: absolute; margin-left: 1140px; margin-top: 950px">
+ABC
+</div>
 </svg>
 </div>
 <button id = "startButtonstart0" onclick = "animationStartMap['start0']()" style = "position: absolute; margin-left: 1080px; margin-top: 250px; z-index: 1000" >
@@ -239,6 +253,87 @@ Start
 <button id = "resetButtonstart0" onclick = "animationResetMap['reset0']()" style = "position: absolute; margin-left: 1080px; margin-top: 275px; z-index: 1000" >
 Reset
 </button>
+</div>
+<div id="p3" style="display: none; position: absolute;">
+<div id = "sb3" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ";>
+</div>
+<div id = "c3"style="display: none; ">
+<img src="c:\home\LightwaveLaboratory\Aqualis\test\test7\contents_test7D/テール右斜AAA-.png" style="position: absolute; margin-left: 0px; margin-top: -122px; width: 850px; object-position: right 204px top 426px; z-index: 2;" />
+<img src="c:\home\LightwaveLaboratory\Aqualis\test\test7\contents_test7D/dango.png" style="position: absolute; margin-left: 1462px; margin-top: 727px; width: 450px; z-index: 3;" />
+</div>
+<div id = "s3" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #d11aff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;">
+テールのセリフ
+</div>
+<div style="width: 1920px; height: 880px; position: absolute; z-index: 0;">
+<div style = "margin-left: 1860px; margin-top: 10px; position: absolute; font-size: 48px; color: #000000" >
+10
+</div>
+<div style = "margin-left: 50px; margin-top: 50px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 25px; border-left-color: #1e6eff; padding-left: 10px" >
+アニメーション制御の実装2
+</div>
+<div style = "margin-left: 80px; margin-top: 150px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; padding-left: 10px" >
+アニメーション2
+</div>
+<div style = "margin-left: 100px; margin-top: 320px; position: absolute; font-size: 30px; color: #000000" >
+startボタンを押すとアニメーションが無限ループする
+</div>
+<svg viewBox="0 0 700 780" 
+width="700px" 
+heigth="780px" 
+xmlns="http://www.w3.org/2000/svg" 
+style="margin-left: 1140; 
+margin-top: 250; 
+position: absolute;
+background-color: #bbeeff;
+">
+<ellipse style = "stroke-width: 3px; stroke: #ff8800; fill: none" cx = "350" cy = "390" rx = "198" ry = "198" />
+<ellipse id = "contentsID2" style = "visibility: hidden; stroke-width: 3px; stroke: none; fill: #00aa00" />
+</svg>
+</div>
+<button id = "startButtonstart1" onclick = "animationStartMap['start1']()" style = "position: absolute; margin-left: 1080px; margin-top: 250px; z-index: 1000" >
+Start
+</button>
+<button id = "resetButtonstart1" onclick = "animationResetMap['reset1']()" style = "position: absolute; margin-left: 1080px; margin-top: 275px; z-index: 1000" >
+Reset
+</button>
+</div>
+<div id="p4" style="display: none; position: absolute;">
+<div id = "sb4" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ";>
+</div>
+<div id = "c4"style="display: none; ">
+<img src="c:\home\LightwaveLaboratory\Aqualis\test\test7\contents_test7D/テール右斜AAA-.png" style="position: absolute; margin-left: 0px; margin-top: -122px; width: 850px; object-position: right 204px top 426px; z-index: 2;" />
+<img src="c:\home\LightwaveLaboratory\Aqualis\test\test7\contents_test7D/dango.png" style="position: absolute; margin-left: 1462px; margin-top: 727px; width: 450px; z-index: 3;" />
+</div>
+<div id = "s4" style="width: 1880px; height: 160px; display: none; position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #d11aff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;">
+テールのセリフ
+</div>
+<div style="width: 1920px; height: 880px; position: absolute; z-index: 0;">
+<div style = "margin-left: 1860px; margin-top: 10px; position: absolute; font-size: 48px; color: #000000" >
+10
+</div>
+<div style = "margin-left: 50px; margin-top: 50px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 25px; border-left-color: #1e6eff; padding-left: 10px" >
+アニメーション制御の実装3
+</div>
+<div style = "margin-left: 80px; margin-top: 150px; position: absolute; font-family: 'Noto Sans JP'; color: black; white-space: nowrap; font-size: 40px; border-left-style: solid; border-left-width: 15px; border-left-color: #1e6eff; padding-left: 10px" >
+アニメーション3
+</div>
+<div style = "margin-left: 100px; margin-top: 320px; position: absolute; font-size: 30px; color: #000000" >
+ページの表示直後にアニメーションが始まる
+</div>
+<svg viewBox="0 0 700 780" 
+width="700px" 
+heigth="780px" 
+xmlns="http://www.w3.org/2000/svg" 
+style="margin-left: 1140; 
+margin-top: 250; 
+position: absolute;
+background-color: #bbeeff;
+">
+<ellipse style = "stroke-width: 3px; stroke: #ff8800; fill: none" cx = "350" cy = "390" rx = "198" ry = "198" />
+<line id = "contentsID3" style = "visibility: hidden; stroke-width: 3px; stroke: #ff0000; fill: none" />
+<line id = "contentsID4" style = "visibility: hidden; stroke-width: 3px; stroke: #0000ff; fill: none" />
+</svg>
+</div>
 </div>
 <button id="prevButton" style="position: absolute; z-index: 100;" onclick="drawPrev()">
 前へ

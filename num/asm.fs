@@ -64,8 +64,7 @@ namespace Aqualis
                     programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                     num0(Var(Dt,"pi",NaN))
                 |JavaScript ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                    num0(Var(Dt,"pi",NaN))
+                    num0(Dbl Math.PI)
                 |PHP ->
                     programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                     num0(Var(Dt,"pi",NaN))

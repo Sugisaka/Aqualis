@@ -16,6 +16,21 @@ function repeatSeq(fn, interval, Nt, onComplete)
     }
     run();
 }
+function repeat(fn, interval, Nt)
+{
+    let t = 0;
+    function run()
+    {
+        if(t == Nt)
+        {
+            t = 0;
+        }
+        fn(t);
+        t++;
+        setTimeout(run, interval);
+    }
+    run();
+}
 function animationSeqID0(t){
     var e = document.getElementById("contentsID0");
     var x1 = 350;
@@ -45,4 +60,38 @@ function animationSeqID1(t){
     d = "M " + x1 + " " + y1 + " A " + radiusX + " " + radiusY + " 0 " + largerOrSmaller + " 0 " + x2 + " " + y2 ;
     e.setAttribute("style","visibility: visible; stroke-width: 3px; stroke: #000000; fill: none;");
     e.setAttribute("d", d);
+}
+function animationSeqID2(t){
+    var e = document.getElementById("contentsID2");
+    var cx = 350+198*Math.cos(0.06283185307179587*t);
+    var cy = 390-198*Math.sin(0.06283185307179587*t);
+    var rx = 10;
+    var ry = 10;
+    e.setAttribute("style","visibility: visible; stroke-width: 3px; stroke: none; fill: #00aa00;");
+    e.setAttribute("cx", cx);
+    e.setAttribute("cy", cy);
+    e.setAttribute("rx", rx);
+    e.setAttribute("ry", ry);
+}
+function animationSeqID3(t){
+    var e = document.getElementById("contentsID3");
+    var x1 = 350+198*Math.cos(0.020943951023931952*t);
+    var y1 = 390-198*Math.sin(0.020943951023931952*t);
+    var x2 = 350+198*Math.cos(0.020943951023931952*t+3.141592653589793);
+    var y2 = 390-198*Math.sin(0.020943951023931952*t+3.141592653589793);
+    e.setAttribute("style","visibility: visible; stroke-width: 3px; stroke: #ff0000; fill: none;");
+    e.setAttribute("x1", x1);
+    e.setAttribute("y1", y1);
+    e.setAttribute("x2", x2);
+    e.setAttribute("y2", y2);
+    var e = document.getElementById("contentsID4");
+    var x1 = 350+198*Math.cos(0.020943951023931952*t+1.5707963267948966);
+    var y1 = 390-198*Math.sin(0.020943951023931952*t+1.5707963267948966);
+    var x2 = 350+198*Math.cos(4.71238898038469+0.020943951023931952*t);
+    var y2 = 390-198*Math.sin(4.71238898038469+0.020943951023931952*t);
+    e.setAttribute("style","visibility: visible; stroke-width: 3px; stroke: #0000ff; fill: none;");
+    e.setAttribute("x1", x1);
+    e.setAttribute("y1", y1);
+    e.setAttribute("x2", x2);
+    e.setAttribute("y2", y2);
 }
