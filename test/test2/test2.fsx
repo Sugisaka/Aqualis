@@ -13,7 +13,7 @@ open Aqualis
  
 Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","aaa") <| fun () ->
     AqualisCompiler.set_DebugMode OFF
-    codestr.h2 "testA" <| fun () ->
+    group.h2 "testA" <| fun () ->
         ch.i <| fun m ->
         ch.i <| fun n ->
         ch.d <| fun x ->
@@ -81,7 +81,7 @@ Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","aaa") <| f
             y <== asm.atan2(x,y)
             y <== asm.floor x
             y <== asm.ceil x
-    codestr.h2 "testB" <| fun () ->
+    group.h2 "testB" <| fun () ->
         ch.d1 10 <| fun x1 ->
         ch.d1 10 <| fun y1 ->
         ch.d1 10 <| fun z1 ->
@@ -114,7 +114,7 @@ Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","aaa") <| f
             m <== 4*n./2
             !"ccc"
             //m <== 4*n/2
-    codestr.h2 "testC" <| fun () ->
+    group.h2 "testC" <| fun () ->
         ch.id <| fun (p,q) ->
             !"001"
             p <== p+p
@@ -138,7 +138,7 @@ Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","aaa") <| f
             q <== (p+p)/(p+p)
             !"011"
             q <== (p+p)./(p+p)
-    codestr.h2 "testD" <| fun () ->
+    group.h2 "testD" <| fun () ->
         ch.dd <| fun (x,y) ->
             !"001"
             print.t "001"

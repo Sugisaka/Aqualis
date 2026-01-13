@@ -365,8 +365,58 @@ namespace Aqualis
                         //beeファイル削除
                         programList[prIndex].delete()
                 |HTMLSequenceDiagram ->
-                    htmlpresentation dir projectname projectname None (None, None) false <| fun () ->
-                        html.canvas <| Style [size.width "0px"; size.height "0px"] <| code
+                    // ディレクトリ作成
+                    if not <| Directory.Exists (dir + "\\" + "contents_" + projectname) then
+                        ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + projectname)
+                    // コンテンツディレクトリ
+                    contentsDir <- dir + "\\" + "contents_" + projectname
+                    makeProgram
+                        [
+                            // メインファイル
+                            dir, projectname + ".html", HTMLSequenceDiagram
+                            // HTML本体のコード
+                            dir, projectname + "_body", HTMLSequenceDiagram
+                        ]
+                        <| fun () ->
+                            switchBody <| fun () ->
+                                code()
+                            let codeBody = switchBody <| fun () ->
+                                programList[prIndex].allCodes
+                            // html書き込みストリーム作成
+                            switchMain <| fun () ->
+                                writein "<!DOCTYPE html>"
+                                // html要素
+                                html.tagb ("html", "lang=\"ja\"") <| fun () ->
+                                    // head要素
+                                    html.tagb ("head", "") <| fun () ->
+                                        // titleタグ
+                                        writein("<title>"+projectname+"</title>")
+                                        // metaタグ
+                                        writein "<meta charset=\"UTF-8\">"    
+                                        //追加（5/29）viewportタブ
+                                        writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                                        // titleタグ
+                                        html.tagb ("title", "") <| fun () ->
+                                            writein projectname
+                                        // MathJax
+                                        html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
+                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeq.js\"") <| fun () -> ()
+                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeqReset.js\"") <| fun () -> ()
+                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationStart.js\"") <| fun () -> ()
+                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationReset.js\"") <| fun () -> ()
+                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/autoAnimation.js\"") <| fun () -> ()
+                                        // webフォント取得
+                                        writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                                        writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                                        writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                                    // body要素
+                                    let s0 = Style [area.backGroundColor "#ffffff"]
+                                    html.tagb ("body", s0) <| fun () ->
+                                        writein codeBody
+                            for i in 0..1 do
+                                programList[i].close()
+                            // bodyタグ一時コード削除
+                            programList[1].delete()
                 |Python ->
                     makeProgram [dir,projectname,Python] <| fun () ->
                         //メインコード生成

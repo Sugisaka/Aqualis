@@ -1,10 +1,5 @@
 //#############################################################################
-// 自動採点webページ生成
-// outputdirの生成ファイル
-// ファイルアップロード先：
-//     core009/sgproc → core009:/var/www/html/
-//     Xserver/sgproc → Xserver:/kit-cwslab.org/public_html/sgproc
-//     log → /kit-cwslab.org/log
+// PHPログインページサンプル
 //#############################################################################
 
 let outputdir = __SOURCE_DIRECTORY__
