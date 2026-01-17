@@ -6,50 +6,87 @@ let version = "1.0.0"
 
 let outputdir = __SOURCE_DIRECTORY__
 
-#I @"..\..\bin\Debug\net10.0"
+#I @"..\..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open System
+open System.IO
 open Aqualis
 
-type AnimationLine0(s:Style,canvasX:int,canvasY:int) =
-    let id = nextContentsID()
-    let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
-    let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
-    do
-        html.taga ("line", [Atr("id",id);]@[s0.atr])
-    member this.ID with get() = id
-    member this.P (f:Line) = 
-        let t = num0(Var(Dt,"t",NaN))
-        switchAnimationSeq <| fun () ->
-            writein("    var e = document.getElementById(\""+id+"\");")
-            writein("    var x1 = " + (f.Start.X t).code + ";")
-            writein("    var y1 = " + (canvasY - f.Start.Y t).code + ";")
-            writein("    var x2 = " + (f.End.X t).code + ";")
-            writein("    var y2 = " + (canvasY - f.End.Y t).code + ";")
-            writein("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            writein "    e.setAttribute(\"x1\", x1);"
-            writein "    e.setAttribute(\"y1\", y1);"
-            writein "    e.setAttribute(\"x2\", x2);"
-            writein "    e.setAttribute(\"y2\", y2);"
-        switchJSAnimationSeqReset <| fun () ->
-            writein("    var e = document.getElementById(\""+id+"\");")
-            writein("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+type Tale(name:string) =
+    inherit Character(name)
+    let st = "position: absolute; margin-left: 0px; margin-top: -122px; width: 850px; object-position: right 204px top 426px; z-index: 2;"
+    override _.scriptColor with get() = "#d11aff"
+    override _.audioFile(a:Audio) = 
+        let rec waveFile (fmt:string) = 
+            match a.AudioSourceNumber, a.AudioFileNumber with
+            |Some n, Some m ->
+                let f = n.ToString fmt + name + m.ToString() + ".wav" 
+                match File.Exists f,fmt with
+                |true,_ -> Some f
+                |_,"0000" -> None
+                |_ -> waveFile (fmt+"0")
+            |_ -> None
+        waveFile "0"
+    override _.scriptFile(n:int) = name + n.ToString() + ".txt"
+    member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\テール右斜AAA-.png"; CharacterImageStyle = st}
+
+type Dango(name:string) =
+    inherit Character(name)
+    let st = "position: absolute; margin-left: 1462px; margin-top: 727px; width: 450px; z-index: 3;"
+    override _.scriptColor with get() = "#455eff"
+    override _.audioFile(a:Audio) = 
+        let rec waveFile (fmt:string) = 
+            match a.AudioSourceNumber, a.AudioFileNumber with
+            |Some n, Some m ->
+                let f = n.ToString fmt + name + m.ToString() + ".wav" 
+                match File.Exists f,fmt with
+                |true,_ -> Some f
+                |_,"0000" -> None
+                |_ -> waveFile (fmt+"0")
+            |_ -> None
+        waveFile "0"
+    override _.scriptFile(n:int) = name + n.ToString() + ".txt"
+    member _.D00 with get() = {CharacterImageFile = @"C:\home\contents\dango.png"; CharacterImageStyle = st}
+    
+type Armillaris(name:string) =
+    inherit Character(name)
+    let st = "position: absolute; margin-left: 1503px; margin-top: 638px; width: 360px; z-index: 4;"
+    override _.scriptColor with get() = "#ff8800"
+    override _.audioFile(a:Audio) = 
+        let rec waveFile (fmt:string) = 
+            match a.AudioSourceNumber, a.AudioFileNumber with
+            |Some n, Some m ->
+                let f = n.ToString fmt + name + m.ToString() + ".wav" 
+                match File.Exists f,fmt with
+                |true,_ -> Some f
+                |_,"0000" -> None
+                |_ -> waveFile (fmt+"0")
+            |_ -> None
+        waveFile "0"
+    override _.scriptFile(n:int) = name + n.ToString() + ".txt"
+    member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\armi.png"; CharacterImageStyle = st}
+    
+let tale = Tale "tale"
+let dang = Dango "dango"
+let armi = Armillaris "armi"
+
+tale.loadScriptData()
+dang.loadScriptData()
+armi.loadScriptData()
 
 fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voice=OFF} None <| fun () ->
+    let f(x:num0) = num0(Var(Dt,"f("+x.code+")",NaN))
+    let t = num0(Var(Dt,"t",NaN))
     html.page
-        [Tale, @"C:\home\contents\テール右斜AAA-.png";
-         Dang, @"C:\home\contents\dango.png";]
-        {Speaker = Dang;
-         Source = AudioFile @"C:\home\contents\008-scripts_台詞_D.wav"
-         Subtitle = Serif "だんごのセリフ"}
+        [tale.AAA;
+         dang.D00;]
+        <| dang.script "だんごのセリフ"
         <| fun p -> html.image (Style [size.width "100%";],p) @"C:\home\contents/title.PNG"
     html.page
-        [Tale, @"C:\home\contents\テール右斜AAA-.png";
-         Dang, @"C:\home\contents\dango.png";]
-        {Speaker = Tale;
-         Source = AudioFile @"C:\home\contents\0076-scripts_台詞_T.wav"
-         Subtitle = Serif "テールのセリフ"}
+        [tale.AAA;
+         dang.D00;]
+        <| tale.script "テールのセリフ"
         <| fun p ->
             html.textA Style[] (p+position(1860,10)) 48 "#000000" "10"
             html.contents Style[] (p+position(50,50)) "アニメーション制御の実装1"
@@ -65,6 +102,33 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                         x-y]
             html.subtitle2 Style[] (p+position(100,520)) "アニメーション1"
             html.textA Style[] (p+position(100,590)) 30 "#000000" "startボタンを押すとアニメーションが開始する"
+            
+            let graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
+                html.fig (p+position(px0,py0)) <| fun (f,p) ->
+                    if x1*x2<0.0 then
+                        let x0 = -x1/(x2-x1)*sizeX
+                        f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
+                    if y1*y2<0.0 then
+                        let y0 = -y1/(y2-y1)*sizeY
+                        f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
+                    code(f,p)
+            let graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
+                graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
+                    for s,fc in fn do
+                        let pol =
+                            [
+                                for i in 0..N do
+                                    let x = x1 + (x2-x1)*double i/double N
+                                    let y = fc x
+                                    let X = (x-x1)/(x2-x1)*sizeX
+                                    let Y = sizeY-(y-y1)/(y2-y1)*sizeY
+                                    p+position(X,Y)
+                            ]
+                        f.polyline s pol
+            graphEq (100,650) (800,400) (-10,10,100) (-1.2,1.2) [
+                Style[stroke.width 3.0; stroke.color "#ff0000"; stroke.fill "none";], fun x -> sin(x)
+                Style[stroke.width 3.0; stroke.color "#0000ff"; stroke.fill "none";], fun x -> cos(x)
+            ]
             html.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
                 let line1 = f.animationLine Style[stroke.width 3.0; stroke.dash "4,4"; stroke.color "#000000"]
                 let elps1 = f.animationArc Style[stroke.width 3.0; stroke.color "#000000"; stroke.fill "none";]
@@ -74,6 +138,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                 f.ellipseArc Style[stroke.width 3.0; stroke.color "#00bb00"; stroke.fill "none";] (position(200.0,200.0)) (200, 200) (-Math.PI*0.5, Math.PI*1.2)
                 f.polygon Style[stroke.width 3.0; stroke.color "#ff00ff"; stroke.fill "none";] [position(200.0,200.0);position(300.0,300.0);position(300.0,200.0)]
                 f.polyline Style[stroke.width 3.0; stroke.color "#aa00ff"; stroke.fill "none";] [position(200.0,600.0);position(300.0,700.0);position(300.0,600.0)]
+
                 //f.image Style[] (position(0.0,0.0)) @"C:\home\contents\アルミAAA.png"
                 ch.D "t" <| fun t ->
                     f.eq Style[] (position(0.0,40.0)) (asm.sin t)
@@ -98,11 +163,9 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                         angle2 = fun t -> 360*t/(s.FrameNumber-1)
                         radius = fun _ -> R }
     html.page
-        [Tale, @"C:\home\contents\テール右斜AAA-.png";
-         Dang, @"C:\home\contents\dango.png";]
-        {Speaker = Tale;
-         Source = AudioFile @"C:\home\contents\0076-scripts_台詞_T.wav"
-         Subtitle = Serif "テールのセリフ"}
+        [tale.AAA;
+         dang.D00;]
+        <| tale.script "テールのセリフ"
         <| fun p ->
             html.textA Style[] (p+position(1860,10)) 48 "#000000" "10"
             html.contents Style[] (p+position(50,50)) "アニメーション制御の実装2"
@@ -124,11 +187,9 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                         radiusX = fun _ -> I 10
                         radiusY = fun _ -> I 10}
     html.page
-        [Tale, @"C:\home\contents\テール右斜AAA-.png";
-         Dang, @"C:\home\contents\dango.png";]
-        {Speaker = Tale;
-         Source = AudioFile @"C:\home\contents\0076-scripts_台詞_T.wav"
-         Subtitle = Serif "テールのセリフ"}
+        [tale.AAA;
+         dang.D00;]
+        <| tale.script ("テールのセリフ："++asm.sin(t))
         <| fun p ->
             html.textA Style[] (p+position(1860,10)) 48 "#000000" "10"
             html.contents Style[] (p+position(50,50)) "アニメーション制御の実装3"
@@ -158,3 +219,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                         End = {
                             X = fun t -> cx + R*asm.cos(2*asm.pi*t/s.FrameNumber+asm.pi/2+asm.pi)
                             Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber+asm.pi/2+asm.pi)}}
+
+tale.saveScriptData()
+dang.saveScriptData()
+armi.saveScriptData()

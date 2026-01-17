@@ -670,97 +670,27 @@ module htmlexpr =
                 writein ("\\(\\begin{align}"+String.Join("\\\\",text |> List.map(fun t -> t.Expr.evalL programList[prIndex]))+"\\end{align}\\)")
                 
         /// キャラクター付き解説ページ
-        static member page (c:list<Character*string>) (audio:Audio) code2 =
+        static member page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
             html.slide position.Origin <| fun p ->
                 // 音声ファイル追加
-                match audio.Source with
-                |Silent ->
-                    audioList <- audioList@[""]
-                |AudioFile f ->
-                    audioList <- audioList@[DirectoryInfo(contentsDir).Name+"/"+Path.GetFileName f]
-                    if File.Exists f then
-                        if Directory.Exists contentsDir then
-                            File.Copy(f, contentsDir+"\\"+Path.GetFileName f, true)
-                        else
-                            printfn "directory not exist: %s" contentsDir
-                    else
-                        printfn "audio file not exist: %s" f
-                // 指定されたファイルが存在し、それらが現在書き込み中のファイルでない場合
-                |AudioDir f when File.Exists f ->
-                    let audiodir = Path.GetDirectoryName f
-                    let scriptfile = Path.GetFileNameWithoutExtension f
-                    let scripts = File.ReadAllLines f
-                    // 目的の台詞が何行目に書かれているかで音声ファイル番号を特定
-                    let n = Array.tryFindIndex (fun s -> s=audio.Subtitle.Hatsuon) scripts
-                    match n with
-                    |None ->
-                        // 指定した台詞がファイルに書かれていない場合
-                        printfn "Append script \"%s\" to %s" audio.Subtitle.Hatsuon f
-                        // 台詞テキストファイルに追記
-                        let wr = new StreamWriter(f,true)
-                        wr.Write audio.Subtitle.Hatsuon
-                        wr.Close()
-                        audioList <- audioList@[""]
-                    |Some m ->
-                        //ファイル番号先頭数字はゼロ埋め
-                        let rec find (p:string) =
-                            let f = audiodir+"\\"+m.ToString(p)+"-"+scriptfile+".wav"
-                            if p="0000" then
-                                // ファイル数が4桁以上はあり得ない→音声ファイルがないと判断
-                                printfn "Error: audio file not exist: %s" <| audiodir+"\\"+m.ToString()+"-"+scriptfile+".wav"
-                            elif File.Exists f then
-                                // ファイルが見つかった場合の処理
-                                audioList <- audioList@[DirectoryInfo(contentsDir).Name+"/"+Path.GetFileName f]
-                                File.Copy(f, contentsDir+"\\"+Path.GetFileName f, true)
-                                printfn "Copy: %s -> %s" f <| contentsDir+"\\"+Path.GetFileName f
-                            else
-                                // ファイルが見つからなかった場合は音声ファイルの番号桁数を上げる
-                                find (p+"0")
-                        find "0"
-                // 指定されたファイルが存在しない場合
-                |AudioDir f ->
-                    // 台詞テキストファイルに書き込み
-                    let wr = new StreamWriter(f)
-                    wr.Write audio.Subtitle.Hatsuon
-                    wr.Close()
-                    audioList <- audioList@[""]
-                    
-                // メインコンテンツ
-                // html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
-                //     code2 p
+                audioList <- audioList@[match audioFile with |Some t -> t |None -> ""]
                 // 字幕枠
                 html.tag "div" ("id = \"sb"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
                 // キャラクター画像
                 html.tag "div" ("id = \"c"+anicounter.ToString()+"\"" + "style=\"" + (if character then "display: block; " else "display: none; ") + "\"") <| fun () ->
-                    for c,file in c do
-                        if File.Exists file then
+                    for ci in c do
+                        if File.Exists ci.CharacterImageFile then
                             if Directory.Exists contentsDir then
-                                match c with
-                                |Tale ->
-                                    File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
-                                    html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName file+"\" style=\"position: absolute; margin-left: 0px; margin-top: -122px; width: 850px; object-position: right 204px top 426px; z-index: 2;\""
-                                |Dang ->
-                                    File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
-                                    html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName file+"\" style=\"position: absolute; margin-left: 1462px; margin-top: 727px; width: 450px; z-index: 3;\""
-                                |Armi ->
-                                    File.Copy(file, contentsDir+"\\"+Path.GetFileName file, true)
-                                    html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName file+"\" style=\"position: absolute; margin-left: 1503px; margin-top: 638px; width: 360px; z-index: 4;\""
+                                File.Copy(ci.CharacterImageFile, contentsDir+"\\"+Path.GetFileName ci.CharacterImageFile, true)
+                                html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName ci.CharacterImageFile+"\" style=\""+ci.CharacterImageStyle+"\""
                             else
                                 printfn "directory not exist: %s" contentsDir
                         else
-                            printfn "character image file not exist: %s" file
+                            printfn "character image file not exist: %s" ci.CharacterImageFile
                 // 字幕
-                match audio.Speaker with
-                |Character.Tale -> 
-                    html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #d11aff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                        <| fun () -> writein audio.Subtitle.Subtitle
-                |Character.Dang -> 
-                    html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #455eff; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                        <| fun () -> writein audio.Subtitle.Subtitle
-                |Character.Armi -> 
-                    html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: #ff8800; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                        <| fun () -> writein audio.Subtitle.Subtitle
+                html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                    <| fun () -> writein audio.Subtitle
                 switchAutoAnimation <| fun () ->
                     writein("page"+anicounter.ToString()+": () => {")
                 // メインコンテンツ
@@ -911,6 +841,20 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             |> List.map (fun p -> p.x.ToString() + "," + (double canvasY-p.y).ToString())
             |> fun s -> String.Join(",",s)
         html.taga ("polyline", [s.atr]@[Atr("points",pp)])
+    member this.linearrow (s:Style) (lineWidth:float) (startP:position) (endP:position) =
+        let r = 12.0
+        let pi = 3.14159265358979
+        let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
+        let q1x = endP.x + r*cos(t0-15.0*pi/180.0)
+        let q1y = endP.y + r*sin(t0-15.0*pi/180.0)
+        let q2x = endP.x + r*cos(t0+15.0*pi/180.0)
+        let q2y = endP.y + r*sin(t0+15.0*pi/180.0)
+        let ux,uy = 
+            let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
+            endP.x + (startP.x-endP.x)*c,
+            endP.y + (startP.y-endP.y)*c
+        this.line (s+Style[stroke.width lineWidth]) startP (position(ux,uy))
+        this.polygon s [position(q1x,q1y);endP;position(q2x,q2y)]
     member this.rect (s:Style) (center:position) (sx:float,sy:float) =
         let c = [
             Atr("x",(center.x-0.5*sx).ToString())

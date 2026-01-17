@@ -5,7 +5,7 @@
 let outputdir = __SOURCE_DIRECTORY__
 //let outputdir = @"C:\xampp\htdocs\test_sgproc"
 
-#I @"..\..\bin\Debug\net10.0"
+#I @"..\..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open System

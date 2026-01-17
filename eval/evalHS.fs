@@ -210,9 +210,9 @@ namespace Aqualis
             static member drawHorizontalArrowLine(x1:float, x2:float, y:float) =
                 html.fig p0 <| fun (f,_) ->
                     f.linearrow Style[stroke.color "black";]
+                        <| (2,12)
                         <| position(x1, y)
                         <| position(x2, y)
-                        <| 2
                         
             //基準線
             static member drawVerticalLine(x:float,y1:float,y2:float) =

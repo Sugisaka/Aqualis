@@ -18,7 +18,7 @@ namespace Aqualis
                 |Int x -> x.ToString()
                 |Dbl x -> x.ToString()
                 |Var(_,x,_) ->
-                    "ベクトル" + x
+                    x
                 |Eq(x,y) ->
                     x.evalT() + "イコール" + y.evalT()
                 |NEq(x,y) ->
@@ -48,7 +48,7 @@ namespace Aqualis
                 |Tan(_,x) -> 
                     "タンジェント" + x.evalT()
                 |Exp(_,x) ->
-                    "Eの" + x.evalT() + "乗"
+                    "エクスポネンシャル" + x.evalT()
                 |Log(_,x) -> 
                     "ログ" + x.evalT()
                 |Log10(_,x) -> 

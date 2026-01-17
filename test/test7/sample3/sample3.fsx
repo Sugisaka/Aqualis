@@ -6,7 +6,7 @@ let version = "1.0.0"
 
 let outputdir = __SOURCE_DIRECTORY__
 
-#I @"..\..\bin\Debug\net10.0"
+#I @"..\..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open Aqualis
@@ -137,15 +137,15 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
             //矢印：Cコード(1)→F#コード
             f.linearrow
                 <| Style[stroke.color "black";]
+                <| (2,20)
                 <| position(a1c.Left, grid_y1+codeBoxHeight/2.0)
                 <| position(a1f.Right, grid_y1+codeBoxHeight/2.0)
-                <| 2
             //矢印：F#コード→Cコード(2)
             f.linearrow
                 <| Style[stroke.color "black";]
+                <| (2,20)
                 <| position(grid_x1+codeBoxWidth/2.0, a1f.Bottom)
                 <| position(grid_x1+codeBoxWidth/2.0, a1r.Top)
-                <| 2
     writein "BBB"
     html.br()
     writein "BBB"

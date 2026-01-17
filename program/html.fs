@@ -659,25 +659,24 @@ namespace Aqualis
         member this.polyline (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
-                html.taga ("polygon", [Atr("points", pp)]@[s.atr])
+                html.taga ("polyline", [Atr("points", pp)]@[s.atr])
             else
                 for q in apex do
                     this.updateRange q
                     
-        member this.trianglearrow (s:Style) (lineWidth:float) (startP:position) (endP:position) =
-            let r = 30.0
+        member this.trianglearrow (s:Style) (lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
             let pi = 3.14159265358979
             let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
-            let q1x = endP.x + r*cos(t0-15.0*pi/180.0)
-            let q1y = endP.y + r*sin(t0-15.0*pi/180.0)
-            let q2x = endP.x + r*cos(t0+15.0*pi/180.0)
-            let q2y = endP.y + r*sin(t0+15.0*pi/180.0)
+            let q1x = endP.x + arrowSize*cos(t0-15.0*pi/180.0)
+            let q1y = endP.y + arrowSize*sin(t0-15.0*pi/180.0)
+            let q2x = endP.x + arrowSize*cos(t0+15.0*pi/180.0)
+            let q2y = endP.y + arrowSize*sin(t0+15.0*pi/180.0)
             let ux,uy = 
                 let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
                 endP.x + (startP.x-endP.x)*c,
                 endP.y + (startP.y-endP.y)*c
             if writeMode then
-                this.line s startP (position(ux,uy))
+                this.line (s+Style[stroke.width lineWidth]) startP (position(ux,uy))
             else
                 this.updateRange startP
                 this.updateRange endP
@@ -685,14 +684,13 @@ namespace Aqualis
                 this.updateRange(position(q2x,q2y))
             this.polygon s [position(q1x,q1y);endP;position(q2x,q2y)]
             
-        member this.linearrow (s:Style) (startP:position) (endP:position) (lineWidth:float) =
-            let r = 12.0
+        member this.linearrow (s:Style) (lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
             let pi = 3.14159265358979
             let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
-            let q1x = endP.x + r*cos(t0-15.0*pi/180.0)
-            let q1y = endP.y + r*sin(t0-15.0*pi/180.0)
-            let q2x = endP.x + r*cos(t0+15.0*pi/180.0)
-            let q2y = endP.y + r*sin(t0+15.0*pi/180.0)
+            let q1x = endP.x + arrowSize*cos(t0-15.0*pi/180.0)
+            let q1y = endP.y + arrowSize*sin(t0-15.0*pi/180.0)
+            let q2x = endP.x + arrowSize*cos(t0+15.0*pi/180.0)
+            let q2y = endP.y + arrowSize*sin(t0+15.0*pi/180.0)
             let ux,uy = 
                 let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
                 endP.x + (startP.x-endP.x)*c,
