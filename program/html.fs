@@ -39,6 +39,7 @@ namespace Aqualis
         
     [<AutoOpen>]
     module style =
+        let zindex(n:int) = {Key="z-index"; Value=n.ToString()}
         module area = 
             let backGroundColor (s:string) = {Key="background-color"; Value=s}
             let backGroundSize (s:string) = {Key="background-size"; Value=s}
@@ -554,6 +555,53 @@ namespace Aqualis
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding+2.0*double borderWidth;}
             
+        static member textFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
+            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
+                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+                            {Key = "position"; Value = "absolute";}
+                            {Key = "font-size"; Value = size.ToString()+"px";}
+                            {Key = "color"; Value = color.ToString();}]
+            html.tagb ("div", s1+s) <| fun () ->
+                code()
+                
+        static member equationFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
+            html.textFrame s p size color <| fun () ->
+                writein "\\("
+                code()
+                writein "\\)"
+                
+        static member alignFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
+            html.textFrame s p size color <| fun () ->
+                writein "\\["
+                writein "\\begin{align}"
+                code()
+                writein "\\end{align}"
+                writein "\\]"
+                
+        static member graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
+            html.fig (position(px0,py0)) <| fun (f,p) ->
+                if x1*x2<0.0 then
+                    let x0 = -x1/(x2-x1)*sizeX
+                    f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
+                if y1*y2<0.0 then
+                    let y0 = -y1/(y2-y1)*sizeY
+                    f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
+                code(f,p)
+                
+        static member graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
+            html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
+                for s,fc in fn do
+                    let pol =
+                        [
+                            for i in 0..N do
+                                let x = x1 + (x2-x1)*double i/double N
+                                let y = fc x
+                                let X = (x-x1)/(x2-x1)*sizeX
+                                let Y = sizeY-(y-y1)/(y2-y1)*sizeY
+                                p+position(X,Y)
+                        ]
+                    f.polyline s pol
+                    
     and figure() =
         let padding = 10.0
         let mutable xmin:option<double> = None

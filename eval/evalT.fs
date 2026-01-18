@@ -18,7 +18,7 @@ namespace Aqualis
                 |Int x -> x.ToString()
                 |Dbl x -> x.ToString()
                 |Var(_,x,_) ->
-                    x
+                    x.Replace("\\infty","無限大")
                 |Eq(x,y) ->
                     x.evalT() + "イコール" + y.evalT()
                 |NEq(x,y) ->

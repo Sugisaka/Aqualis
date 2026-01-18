@@ -138,7 +138,7 @@ namespace Aqualis
         ///<summary>総和</summary>
         static member sum (a:num0,i:num0) = fun (b:num0) (c:num0) ->
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let ti = i.code
                 let tb = b.code
@@ -154,7 +154,7 @@ namespace Aqualis
         ///<summary>総和</summary>
         static member sum (a:num0) = fun (b:num0) (c:num0) ->
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let tb = b.code
                 let tc = c.code
@@ -165,7 +165,7 @@ namespace Aqualis
         ///<summary>積分</summary>
         static member integral (a:num0,b:num0) = fun (eq:num0) (x:num0) ->
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let tb = b.code
                 let te = eq.code
@@ -189,7 +189,7 @@ namespace Aqualis
         ///<summary>微分</summary>
         static member diff (f:num0) (x:num0) =
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let tf = f.code
                 let tx = x.code
                 num0(Var(f.etype,"\\frac{\\mathrm{d}"+tf+"}^{\\mathrm{d}"+tx+"}",NaN))
@@ -199,7 +199,7 @@ namespace Aqualis
         ///<summary>偏微分</summary>
         static member pdiff (f:num0) (x:num0) =
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let tf = f.code
                 let tx = x.code
                 num0(Var(f.etype,"\\frac{\\partial "+tf+"}^{\\partial "+tx+"}",NaN))
@@ -209,7 +209,7 @@ namespace Aqualis
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*string)list) =
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c = 
                     lst
                     |> List.map (fun (f,x) -> f.code + " & \\left(" + x + "\\right)\n")
@@ -221,7 +221,7 @@ namespace Aqualis
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*num0)list) =
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c = 
                     lst
                     |> List.map (fun (f,x) -> f.code + " & " + x.code + "\n")
@@ -233,7 +233,7 @@ namespace Aqualis
         ///<summary>場合分け</summary>
         static member cases (lst:(num0*bool0)list) =
             match programList[prIndex].language with
-            |LaTeX ->
+            |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c = 
                     lst
                     |> List.map (fun (f,x) -> f.code + " & \\left(" + x.code + "\\right)\n")

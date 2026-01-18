@@ -79,9 +79,7 @@ type Character(name:string) =
             let json = File.ReadAllText this.scriptDataFile
             serif <- JsonSerializer.Deserialize<list<Audio>>(json, jsonOptions)
             audioFileCounter <- (-1::(serif |> List.map (fun a -> match a.AudioFileNumber with |None -> -1 |Some n -> n)) |> List.max) + 1
-    member this.script(text:exprString) =
-        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+"\\("+x.evalH programList[prIndex]+"\\)") ""
-        let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+x.evalT()) ""
+    member this.script(subtitle:string,script:string) =
         match serif |> List.tryFind (fun a -> a.Subtitle=subtitle && a.Script=script) with
         |None ->
             let a = {Subtitle=subtitle; Script=script; AudioFileNumber=Some audioFileCounter; AudioSourceNumber=Some newScriptCounter}
@@ -90,5 +88,9 @@ type Character(name:string) =
             a, None, this.scriptColor
         |Some x -> 
             x, this.audioFile x, this.scriptColor
+    member this.script(text:exprString) =
+        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+"\\("+x.evalH programList[prIndex]+"\\)") ""
+        let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+x.evalT()) ""
+        this.script(subtitle,script)
     member this.script(text:string) = this.script (exprString text)
     member this.script(text:num0) = this.script (exprString text)

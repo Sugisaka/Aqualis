@@ -103,29 +103,8 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             html.subtitle2 Style[] (p+position(100,520)) "アニメーション1"
             html.textA Style[] (p+position(100,590)) 30 "#000000" "startボタンを押すとアニメーションが開始する"
             
-            let graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
-                html.fig (p+position(px0,py0)) <| fun (f,p) ->
-                    if x1*x2<0.0 then
-                        let x0 = -x1/(x2-x1)*sizeX
-                        f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
-                    if y1*y2<0.0 then
-                        let y0 = -y1/(y2-y1)*sizeY
-                        f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
-                    code(f,p)
-            let graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
-                graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
-                    for s,fc in fn do
-                        let pol =
-                            [
-                                for i in 0..N do
-                                    let x = x1 + (x2-x1)*double i/double N
-                                    let y = fc x
-                                    let X = (x-x1)/(x2-x1)*sizeX
-                                    let Y = sizeY-(y-y1)/(y2-y1)*sizeY
-                                    p+position(X,Y)
-                            ]
-                        f.polyline s pol
-            graphEq (100,650) (800,400) (-10,10,100) (-1.2,1.2) [
+
+            html.graphEq (100,650) (800,400) (-10,10,100) (-1.2,1.2) [
                 Style[stroke.width 3.0; stroke.color "#ff0000"; stroke.fill "none";], fun x -> sin(x)
                 Style[stroke.width 3.0; stroke.color "#0000ff"; stroke.fill "none";], fun x -> cos(x)
             ]
@@ -194,6 +173,16 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             html.textA Style[] (p+position(1860,10)) 48 "#000000" "10"
             html.contents Style[] (p+position(50,50)) "アニメーション制御の実装3"
             html.subtitle1 Style[] (p+position(80,150)) "アニメーション3"
+            ch.D "x" <| fun x ->
+                ch.D "y" <| fun y ->
+                    html.equationFrame Style[] (position(80,400)) 48 "#ff00ff" <| fun () -> 
+                        y === x + 1
+                    html.alignFrame Style[] (position(80,500)) 48 "#00ddaa" <| fun () -> 
+                        y  =|= x + 1
+                        eqbr()
+                        (|=) (x + 2)
+                        eqbr()
+                        (|=) (x + 3)
             html.textA Style[] (p+position(100,320)) 30 "#000000" "ページの表示直後にアニメーションが始まる"
             html.animationAuto {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p <| fun (f,p) ->
                 /// 中心座標

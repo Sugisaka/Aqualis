@@ -234,6 +234,7 @@ namespace Aqualis
         let writei(s:string) = programList[prIndex].codewritei s
         let writen(s:string) = programList[prIndex].codewriten s
         let writein(s:string) = programList[prIndex].codewritein s
+        let eqbr() = writein "\\\\"
         let language() = programList[prIndex].language
         
         ///<summary>コメント文を生成</summary>

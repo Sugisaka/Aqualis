@@ -549,7 +549,7 @@ module htmlexpr =
                     printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
-            let st = Style [{Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
+            let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
             html.taga ("img", [st.atr;Atr("src",contentsDir + "\\" + f)])
         static member image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename

@@ -43,3 +43,5 @@ module num0Const =
     let _1d = num0(Dbl 1.0)
     let And (s:list<bool0>) = bool0(AND(s |> List.map (fun p -> p.Expr)))
     let Or (s:list<bool0>) = bool0(OR(s |> List.map (fun p -> p.Expr)))
+    let inf = num0(Var(Dt,"\\infty",NaN))
+    let (|=) (x:num0) = expr.equivAlign (Var(Nt,"",NaN)) x.Expr (programList[prIndex])

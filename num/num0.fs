@@ -33,6 +33,11 @@ namespace Aqualis
     type bool0(x:expr) =
         member _.Expr with get() = x
         member _.code with get() = x.eval (programList[prIndex])
+        static member (++) (x:string,y:bool0) = exprString x ++ exprString y
+        static member (++) (x:bool0,y:string) = exprString x ++ exprString y
+        static member (++) (x:bool0,y:bool0) = exprString x ++ exprString y
+            
+        static member (++) (x:bool0,y:exprString) = exprString x ++ y
         static member (.<) (v1:bool0,v2:num0) = 
             match v1.Expr with
             |Less(u1,u2) -> bool0(AND[Less(u1,u2);Less(u2,v2.Expr)])
@@ -125,11 +130,11 @@ namespace Aqualis
             |It a,It b -> It (if a>b then a else b)
             |_ -> Nt
             
-        static member ( ++ ) (x:string,y:num0) = exprString x ++ exprString y
-        static member ( ++ ) (x:num0,y:string) = exprString x ++ exprString y
-        static member ( ++ ) (x:num0,y:num0) = exprString x ++ exprString y
+        static member (++) (x:string,y:num0) = exprString x ++ exprString y
+        static member (++) (x:num0,y:string) = exprString x ++ exprString y
+        static member (++) (x:num0,y:num0) = exprString x ++ exprString y
             
-        static member ( ++ ) (x:num0,y:exprString) = exprString x ++ y
+        static member (++) (x:num0,y:exprString) = exprString x ++ y
         
         ///<summary>負号</summary>
         static member ( ~- ) (x:num0) = num0(Inv(x.etype,x.Expr))
@@ -246,6 +251,7 @@ namespace Aqualis
     and exprString(x:list<reduceExprString>) = 
         new(x:string) = exprString [RStr x]
         new(x:num0) = exprString [RNvr x.Expr]
+        new(x:bool0) = exprString [RNvr x.Expr]
         
         member _.data with get() = x
         
@@ -263,6 +269,7 @@ namespace Aqualis
         static member (++) (a:string,b:exprString) = exprString a ++ b
         static member (++) (a:exprString,b:string) = a ++ exprString b
         static member (++) (a:exprString,b:num0) = a ++ exprString b
+        static member (++) (a:exprString,b:bool0) = a ++ exprString b
         
     [<AutoOpen>]
     module strExpr =
