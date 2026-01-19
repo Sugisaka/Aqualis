@@ -578,16 +578,19 @@ namespace Aqualis
                 writein "\\end{align}"
                 writein "\\]"
                 
+        static member arrow (strokeColor:string) (fillColor:string) (width,arrowsize) (x1:int,y1:int) (x2:int,y2:int) =
+            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+                f.trianglearrow Style[stroke.color strokeColor; stroke.fill fillColor;] (width,arrowsize) (position(x1,y1)) (p+position(x2,y2))
+                
         static member graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
             html.fig (position(px0,py0)) <| fun (f,p) ->
                 if x1*x2<0.0 then
-                    let x0 = -x1/(x2-x1)*sizeX
+                    let x0 = (0.0-x1)/(x2-x1)*sizeX
                     f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
                 if y1*y2<0.0 then
-                    let y0 = -y1/(y2-y1)*sizeY
+                    let y0 = sizeY-(0.0-y1)/(y2-y1)*sizeY
                     f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
                 code(f,p)
-                
         static member graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
             html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
                 for s,fc in fn do
@@ -601,7 +604,31 @@ namespace Aqualis
                                 p+position(X,Y)
                         ]
                     f.polyline s pol
-                    
+        static member graphEqs (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) code =
+            html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
+                for s,fc in fn do
+                    let pol =
+                        [
+                            for i in 0..N do
+                                let x = x1 + (x2-x1)*double i/double N
+                                let y = fc x
+                                let X = (x-x1)/(x2-x1)*sizeX
+                                let Y = sizeY-(y-y1)/(y2-y1)*sizeY
+                                p+position(X,Y)
+                        ]
+                    f.polyline s pol
+                let line (s:Style) (xs,ys) (xe,ye) =
+                    let Xs = (xs-x1)/(x2-x1)*sizeX
+                    let Ys = sizeY-(ys-y1)/(y2-y1)*sizeY
+                    let Xe = (xe-x1)/(x2-x1)*sizeX
+                    let Ye = sizeY-(ye-y1)/(y2-y1)*sizeY
+                    f.line (Style(s.list@[stroke.width 3.0; stroke.color "#000000";])) (p+position(Xs,Ys)) (p+position(Xe,Ye))
+                let circle (s:Style) (xs,ys) (r:int) =
+                    let Xs = (xs-x1)/(x2-x1)*sizeX
+                    let Ys = sizeY-(ys-y1)/(y2-y1)*sizeY
+                    f.ellipse (Style(s.list@[stroke.fill "#000000";])) (p+position(Xs,Ys)) r r
+                code(line,circle)
+                
     and figure() =
         let padding = 10.0
         let mutable xmin:option<double> = None
@@ -685,7 +712,7 @@ namespace Aqualis
                 
         member this.ellipse (s:Style) (center:position) (radiusX:int) (radiusY:int) =
             if writeMode then
-                html.taga ("circle", [
+                html.taga ("ellipse", [
                     Atr("cx", (center.x-this.Xmin+this.Padding).ToString());
                     Atr("cy", (center.y-this.Ymin+this.Padding).ToString());
                     Atr("rx", radiusX.ToString());
