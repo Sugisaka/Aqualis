@@ -314,6 +314,8 @@ namespace Aqualis
                 
             static member simpExp(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpExp(Int -x)
+                |Inv(_,Dbl x) -> expr.simpExp(Dbl -x)
                 |Int x -> Dbl (exp x)
                 |Dbl x -> Dbl (exp x)
                 |Cpx (re,im) -> let a = exp re in Cpx (a*cos im,a*sin im)
@@ -322,6 +324,8 @@ namespace Aqualis
                     
             static member simpSin(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpSin(Int -x)
+                |Inv(_,Dbl x) -> expr.simpSin(Dbl -x)
                 |Int x -> if sin (double x) < 0.0 then Inv(Dt,Dbl -(sin (double x))) else Dbl (sin (double x))
                 |Dbl x -> if sin x < 0.0 then Inv(Dt,Dbl -(sin x)) else Dbl (sin x)
                 |Cpx (re,im) -> 
@@ -333,6 +337,8 @@ namespace Aqualis
                     
             static member simpCos(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpCos(Int -x)
+                |Inv(_,Dbl x) -> expr.simpCos(Dbl -x)
                 |Int x -> if cos (double x) < 0.0 then Inv(Dt,Dbl -(cos (double x))) else Dbl (cos (double x))
                 |Dbl x -> if cos x < 0.0 then Inv(Dt,Dbl -(cos x)) else Dbl (cos x)
                 |Cpx (re,im) -> 
@@ -344,6 +350,8 @@ namespace Aqualis
                     
             static member simpTan(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpTan(Int -x)
+                |Inv(_,Dbl x) -> expr.simpTan(Dbl -x)
                 |Int x -> if tan (double x) < 0.0 then Inv(Dt,Dbl -(tan (double x))) else Dbl (tan (double x))
                 |Dbl x -> if tan x < 0.0 then Inv(Dt,Dbl -(tan x)) else Dbl (tan x)
                 |Cpx _ -> expr.simpDiv(expr.simpSin x, expr.simpCos x)
@@ -352,6 +360,8 @@ namespace Aqualis
                     
             static member simpAsin(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpAsin(Int -x)
+                |Inv(_,Dbl x) -> expr.simpAsin(Dbl -x)
                 |Int x -> if asin (double x) < 0.0 then Inv(Dt,Dbl -(asin (double x))) else Dbl (asin (double x))
                 |Dbl x -> if asin x < 0.0 then Inv(Dt,Dbl -(asin x)) else Dbl (asin x)
                 |Cpx _ -> 
@@ -361,6 +371,8 @@ namespace Aqualis
                 
             static member simpAcos(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpAcos(Int -x)
+                |Inv(_,Dbl x) -> expr.simpAcos(Dbl -x)
                 |Int x -> if acos (double x) < 0.0 then Inv(Dt,Dbl -(acos (double x))) else Dbl (acos (double x))
                 |Dbl x -> if acos x < 0.0 then Inv(Dt,Dbl -(acos x)) else Dbl (acos x)
                 |Cpx _ -> 
@@ -370,6 +382,8 @@ namespace Aqualis
                 
             static member simpAtan(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpAtan(Int -x)
+                |Inv(_,Dbl x) -> expr.simpAtan(Dbl -x)
                 |Int x -> if atan (double x) < 0.0 then Inv(Dt,Dbl -(atan (double x))) else Dbl (atan (double x))
                 |Dbl x -> if atan x < 0.0 then Inv(Dt,Dbl -(atan x)) else Dbl (atan x)
                 |Cpx _ -> 
@@ -379,6 +393,10 @@ namespace Aqualis
                 
             static member simpAtan2(x:expr,y:expr) =
                 match x,y with
+                |Inv(_,Int x),_ -> expr.simpAtan2(Int -x,y)
+                |Inv(_,Dbl x),_ -> expr.simpAtan2(Dbl -x,y)
+                |_,Inv(_,Int y) -> expr.simpAtan2(x,Int -y)
+                |_,Inv(_,Dbl y) -> expr.simpAtan2(x,Dbl -y)
                 |Int x,Int y -> if atan2 (double x) y < 0.0 then Inv(Dt,Dbl -(atan2 (double x) y)) else Dbl (atan2 (double x) y)
                 |Int x,Dbl y -> if atan2 (double x) y < 0.0 then Inv(Dt,Dbl -(atan2 (double x) y)) else Dbl (atan2 (double x) y)
                 |Dbl x,Int y -> if atan2 x y < 0.0 then Inv(Dt,Dbl -(atan2 x y)) else Dbl (atan2 x y)
@@ -392,6 +410,8 @@ namespace Aqualis
                 
             static member simpAbs(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpAbs(Int -x)
+                |Inv(_,Dbl x) -> expr.simpAbs(Dbl -x)
                 |Int x -> Dbl (abs x)
                 |Dbl x -> Dbl (abs x)
                 |Cpx (re,im) -> 
@@ -400,6 +420,8 @@ namespace Aqualis
                 
             static member simpLog(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpLog(Int -x)
+                |Inv(_,Dbl x) -> expr.simpLog(Dbl -x)
                 |Int x -> if log (double x) < 0.0 then Inv(Dt,Dbl -(log (double x))) else Dbl (log (double x))
                 |Dbl x -> if log x < 0.0 then Inv(Dt,Dbl -(log x)) else Dbl (log x)
                 |Cpx (re,im) ->
@@ -409,6 +431,8 @@ namespace Aqualis
                 
             static member simpLog10(x:expr) =
                 match x with
+                |Inv(_,Int x) -> expr.simpLog10(Int -x)
+                |Inv(_,Dbl x) -> expr.simpLog10(Dbl -x)
                 |Int x -> if log10 (double x) < 0.0 then Inv(Dt,Dbl -(log10 (double x))) else Dbl (log10 (double x))
                 |Dbl x -> if log10 x < 0.0 then Inv(Dt,Dbl -(log10 x)) else Dbl (log10 x)
                 |Cpx _ -> 
