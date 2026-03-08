@@ -75,10 +75,14 @@ type AnimationLine(s:Style,canvasX:int,canvasY:int) =
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
         html.taga ("line", [Atr("id",id);]@[s0.atr])
+    /// <summary>
     /// 割り当てられたidを取得する
+    /// </summary>
     member this.ID with get() = id
+    /// <summary>
     /// 指定したLineオブジェクトをキャンパスに追加する
-    /// f：描画対象となる線分
+    /// </summary>
+    /// <param name="f">描画対象となる線分</param>
     member this.P (f:Line) = 
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
@@ -108,10 +112,14 @@ type AnimationEllipse(s:Style,canvasX:int,canvasY:int) =
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
         html.taga ("ellipse", [Atr("id",id);]@[s0.atr])
-    /// 割り当てられたidを取得
+    /// <summary>
+    /// 割り当てられたidを取得する
+    /// </summary>
     member this.ID with get() = id
+    /// <summary>
     /// 指定したEllipseオブジェクトをキャンパスに追加する
-    /// e：描画対象となる円
+    /// </summary>
+    /// <param name="e">描画対象となる円</param>
     member this.P (e:Ellipse) = 
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
@@ -141,10 +149,14 @@ type AnimationArc(s:Style,canvasX:int,canvasY:int) =
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
         html.taga ("path", [Atr("id",id);]@[s0.atr])
-    /// 割り当てられたidを取得
+    /// <summary>
+    /// 割り当てられたidを取得する
+    /// </summary>
     member this.ID with get() = id
+    /// <summary>
     /// 指定したArcオブジェクトをキャンパスに追加する
-    /// e：描画対象となる円弧
+    /// </summary>
+    /// <param name="e">描画対象となる円弧</param>
     member this.P (e:Arc) = 
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
@@ -187,10 +199,14 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     let ss1 = Style ([{Key="display";Value="block"}]@ss.list)
     do
         html.tagb ("div", [Atr("id",id); ss0.atr]) <| fun () -> ()
+    /// <summary>
     /// 割り当てられたidを取得
+    /// </summary>
     member this.ID with get() = id
+    /// <summary>
     /// 指定したTextオブジェクトをキャンパスに追加する
-    /// e：対象となるテキスト
+    /// </summary>
+    /// <param name="e">対象となるテキスト</param>
     member this.P (e:Text) = 
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
@@ -205,8 +221,10 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
         switchJSAnimationSeqReset <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
+    /// <summary>
     /// 指定したMathTextオブジェクトをキャンパスに追加する
-    /// e：対象となる数式      
+    /// </summary>
+    /// <param name="e">対象となる数式</param>      
     member this.P (e:MathText) = 
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
@@ -235,10 +253,14 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
         html.taga ("polygon", [Atr("id", id);] @ [s.atr])
-    /// 割り当てられたidを取得
+    /// <summary>
+    /// 割り当てられたidを取得する
+    /// </summary>
     member this.ID with get() = id
+    /// <summary>
     /// 指定した頂点座標のリストを多角形としてキャンパスに追加する
-    /// apex：多角形を構成する頂点座標のリスト
+    /// </summary>
+    /// <param name="apex">多角形を構成する頂点座標のリスト</param>
     member this.P (apex:list<tposition>) = 
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
@@ -254,16 +276,22 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
+/// <summary>
 /// スライドアニメーション全体を管轄するクラス 
+/// </summary>
 type SlideAnimation =
+    /// <summary>
     /// 登録された音声ファイルの一覧を書きだす
+    /// </summary>
     static member writeAudioList() =
         switchJSMain <| fun () ->
             writein "const audioList = ["
             for i in 0..audioList.Length-1 do
                 writein ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
             writein "];"
+    /// <summary>
     /// キャラクター表示を制御するJavaScriptコードの生成
+    /// </summary>
     static member jsSetCharacter() =
         switchJSMain <| fun () ->
             writein "let pagecount = 1;"
@@ -280,7 +308,9 @@ type SlideAnimation =
             writein"            c.style.display = \"none\";"
             writein"        }"
             writein"}"
+    /// <summary>
     /// 字幕表示を制御するJavaScriptコードの生成
+    /// </summary>
     static member jsSetSubtitle() =
         switchJSMain <| fun () ->
             writein "function setSubtitle()"
@@ -299,7 +329,9 @@ type SlideAnimation =
             writein "            s2.style.display = \"none\";"
             writein "        }"
             writein "}"
+    /// <summary>
     /// 次のページへの遷移を制御するJavaScriptコードの生成
+    /// </summary>
     static member jsDrawNext() =
         switchJSMain <| fun () ->
             writein "function drawNext()"
@@ -355,7 +387,9 @@ type SlideAnimation =
             writein "        autoAnimationMap['page'+pagecount]();"
             writein "    }"
             writein "}"
+    /// <summary>
     /// 前のページへの遷移を制御するJavaScriptコードの生成
+    /// </summary>
     static member jsDrawPrev() =
         switchJSMain <| fun () ->
             writein "function drawPrev()"
@@ -427,14 +461,18 @@ module movieSetting =
 [<AutoOpen>]
 module htmlexpr =
     type html with
+        /// <summary>
         /// 指定したディレクトリにHTMLファイルを生成する
-        /// dir：出力先ディレクトリ
-        /// filename：生成するHTMLファイル名
+        /// </summary>
+        /// <param name="dir">出力先ディレクトリ</param>
+        /// <param name="filename">生成するHTMLファイル名</param>
         static member htmlfile (dir:string,filename:string) code =
             makeProgram [dir,filename,HTML] <| fun () ->
                 code()
                 programList[prIndex].close()
+        /// <summary>
         /// 内部要素のないタグ
+        /// </summary>
         static member taga (t:string,lst:list<string*PHPdata>) =
             writei("<"+t+" ")
             programList[prIndex].indentInc()
@@ -442,7 +480,9 @@ module htmlexpr =
                 write(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
             programList[prIndex].indentDec()
             writen " />"
+        /// <summary>
         /// 内部要素のあるタグ
+        /// </summary>
         static member tagb0 (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
                 write("<"+t+">")
@@ -455,7 +495,9 @@ module htmlexpr =
                 write ">"
             code()
             writen ("</"+t+">")
+        /// <summary>
         /// 内部要素のあるタグ
+        /// </summary>
         static member tagb (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
                 writein("<"+t+">")
@@ -468,14 +510,18 @@ module htmlexpr =
                 writen ">"
             code()
             writein ("</"+t+">")
+        /// <summary>
         /// 見出し（h1）要素を生成する
-        /// t：見出しに表示する内容
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
         static member h1 (t:num0) = fun code ->
             html.tagb "h1" <| fun () -> php.echo t.code
             code()
+        /// <summary>
         /// 見出し（h1）要素を生成する
-        /// t：見出しに表示する内容
-        /// atr：文字の太さ、色を定義するスタイル情報
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
+        /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
         static member h1 (t:num0,s:Style) = fun code ->
             html.tagb ("h1",[s.atr]) <| fun () -> php.echo t.code
             code()
@@ -507,43 +553,65 @@ module htmlexpr =
         static member h5 (t:num0,s:Style) = fun code ->
             html.tagb ("h5",[s.atr]) <| fun () -> php.echo t.code
             code()
+        /// <summary>
         /// フォーム送信用のsubmitボタンを生成する
+        /// <para>
         /// nameとvalueの型違いに対応したオーバーロードを提供する            
+        /// </para>
+        /// </summary>
         static member submit(name:string,value:PHPdata) = html.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value",value.code)])
         static member submit(name:PHPdata,value:string) = html.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value])
+        /// <summary>
         /// フォーム送信用のsubmitボタンを生成する
-        /// name：name属性に設定する文字列
-        /// value：value属性に設定する文字列
+        /// </summary>
+        /// <param name="name">name属性に設定する文字列</param>
+        /// <param name="value">value属性に設定する文字列</param>
         static member submit(name:string,value:string) = html.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value","\""+value+"\"")])
+        /// <summary>
         /// 送信先URLを指定したsubmitボタンを生成する
-        /// url：formaction属性に設定するURL
-        /// name：name属性に設定するPHPデータ
-        /// value：value属性に設定する文字列
+        /// </summary>
+        /// <param name="url">formaction属性に設定するURL</param>
+        /// <param name="name">name属性に設定するPHPデータ</param>
+        /// <param name="value">value属性に設定する文字列</param>
         static member submit(url:string,name:PHPdata,value:string) = html.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "formaction",PHPdata url])
+        /// <summary>
         /// 無効化されたsubmitボタンを生成する
-        /// name：name属性に設定するPHPデータ
-        /// value：value属性に設定するPHPデータ
+        /// </summary>
+        /// <param name="name">name属性に設定するPHPデータ</param>
+        /// <param name="value">value属性に設定するPHPデータ</param>
         static member submit_disabled(name:PHPdata,value:PHPdata) = html.taga("input",["type",PHPdata "submit"; "name", name; "value",value; "disabled",PHPdata "disabled"])
         static member submit_disabled(name:string,value:PHPdata) = html.taga("input",["type",PHPdata "submit"; "name",PHPdata name; "value",value; "disabled",PHPdata "disabled"])
         static member submit_disabled(name:PHPdata,value:string) = html.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "disabled",PHPdata "disabled"])
+        /// <summary>
         /// li要素を生成する
-        /// a：li要素に設定する属性のリスト
+        /// </summary>
+        /// <param name="a">li要素に設定する属性のリスト</param>
         static member item (a:list<string*PHPdata>) = fun code -> html.tagb ("li",a) code
+        /// <summary>
         /// a要素を生成する
-        /// url：href属性に設定するPHPデータ
+        /// </summary>
+        /// <param name="url">href属性に設定するPHPデータ</param>
         static member link(url:PHPdata) = fun code -> html.tagb ("a",["href",url]) code
+        /// <summary>
         /// a要素を生成する
-        /// url：href属性に設定するPHPデータ
-        /// s：文字の太さ、色を定義するスタイル情報
+        /// </summary>
+        /// <param name="url">href属性に設定するPHPデータ</param>
+        /// <param name="s">文字の太さ、色を定義するスタイル情報</param>
         static member link(url:PHPdata, s:Style) = fun code -> html.tagb ("a",[s.atr; Atr("href","\""+url.code+"\"")]) code
+        /// <summary>
         /// select要素を生成する
-        /// x：name属性に設定するPHPデータ
+        /// </summary>
+        /// <param name="x">name属性に設定するPHPデータ</param>
         static member select(x:PHPdata) = fun code -> html.tagb ("select",["name",x;]) code
+        /// <summary>
         /// 無効化されたselsect要素を生成する
+        /// </summary>
         static member select_disabled(x:PHPdata) = fun code -> html.tagb ("select",["name",x; "disabled",PHPdata "disabled"]) code
+        /// <summary>
         /// 任意のHTMLタグの開始タグと終了タグを生成する
-        /// t：タグ名
-        /// code：タグ内部の内容を生成する関数
+        /// </summary>
+        /// <param name="t">タグ名</param>
+        /// <param name="code">タグ内部の内容を生成する関数</param>
         static member splitTag t code = 
             let b (lst:list<string*PHPdata>) =
                 if lst.Length=0 then
@@ -555,56 +623,76 @@ module htmlexpr =
                     writein ">"
             code b 
             writein ("</"+t+">")
+        /// <summary>
         /// select要素を生成
+        /// </summary>
         static member Select = html.splitTag "select" 
+        /// <summary>
         /// tr要素を生成
+        /// </summary>
         static member Tr = html.splitTag "tr" 
+        /// <summary>
         /// div要素を生成する
-        /// a：属性リスト
+        /// </summary>
+        /// <param name="a">属性リスト</param>
         static member div (a:list<string*PHPdata>) = fun code -> html.tagb ("div",a) code
+        /// <summary>
         /// CSSdataの内容に応じてHTML要素を生成する
-        /// a：生成する要素を指定するCSSデータ
+        /// </summary>
+        /// <param name="a">生成する要素を指定するCSSデータ</param>
         static member div (a:CSSdata) = fun code -> 
             match a.label with
             |HTMLTag s -> html.tagb s code
             |CSSClass s -> html.tagb ("div",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("div",[Atr("id",s)]) code
             |_ -> ()
+        /// <summary>
         /// CSSdataの内容に応じてHTML要素を生成する
-        /// a：生成対象を指定するCSSデータ
-        /// atr：追加する属性のリスト
+        /// </summary>
+        /// <param name="a">生成対象を指定するCSSデータ</param>
+        /// <param name="atr">追加する属性のリスト</param>
         static member div (a:CSSdata,atr:list<Atr>) = fun code -> 
             match a.label with
             |HTMLTag s -> html.tagb s code
             |CSSClass s -> html.tagb ("div",[Atr("class",s)]@atr) code
             |CSSID s -> html.tagb ("div",[Atr("id",s)]@atr) code
             |_ -> ()
+        /// <summary>
         /// CSSdataに基づいてarticle要素を生成する
-        /// a：要素に適用するCSSデータ
+        /// </summary>
+        /// <param name="a">要素に適用するCSSデータ</param>
         static member article (a:CSSdata) = fun code -> 
             match a.label with
             |CSSClass s -> html.tagb ("article",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("article",[Atr("id",s)]) code
             |_ -> ()
+        /// <summary>
         /// CSSdataに基づいてaside要素を生成する
+        /// </summary>
         static member aside (a:CSSdata) = fun code -> 
             match a.label with
             |CSSClass s -> html.tagb ("aside",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("aside",[Atr("id",s)]) code
             |_ -> ()
+        /// <summary>
         /// CSSdataに基づいてpara要素を生成する
+        /// </summary>
         static member para (a:CSSdata) = fun code -> 
             match a.label with
             |CSSClass s -> html.tagb ("p",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("p",[Atr("id",s)]) code
             |_ -> ()
+        /// <summary>
         /// CSSdataに基づいてsection要素を生成する
+        /// </summary>
         static member section (a:CSSdata) = fun code -> 
             match a.label with
             |CSSClass s -> html.tagb ("section",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("section",[Atr("id",s)]) code
             |_ -> ()
+        /// <summary>
         /// CSSdataに基づいてspan要素を生成する
+        /// </summary>
         static member span (a:CSSdata) = fun code -> 
             match a.label with
             // |CSSClass s -> html.tagb0 ("span",["class",s]) code
@@ -612,37 +700,49 @@ module htmlexpr =
             |CSSClass s -> html.tagb ("span",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("span",[Atr("id",s)]) code
             |_ -> ()
-            
+
+        /// <summary>
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary>    
         static member checkbox(name:PHPdata) = 
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
             html.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1";])
+        /// <summary>
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary> 
         static member checkbox_disabled(name:PHPdata) =
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
             html.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "disabled",PHPdata "disabled"])
+        /// <summary>
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary>
         static member checkbox_checked(name:PHPdata) = 
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
             html.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "checked",PHPdata "checked";])
+        /// <summary>
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary>
         static member checkbox_checked_disabled(name:PHPdata) =
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
             html.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "checked",PHPdata "checked"; "disabled",PHPdata "disabled"])
+        /// <summary>
         /// 指定位置に数式テキストを描画する
-        /// s：適用するスタイル
-        /// p：表示位置
-        /// text：表示する数式
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="text">表示する数式</param>
         static member Mathtext (s:Style) (p:position) (text:PHPdata) =
             let s1 = Style [{Key = "margin-left"; Value=p.x.ToString()+"px"}
                             {Key = "margin-top"; Value=p.y.ToString()+"px"}
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
                 writein ("\\(" + text.code + "\\)")
+        /// <summary>
         /// 指定位置に画像を表示する
-        /// s：適用するスタイル
-        /// p：表示位置
-        /// filename：表示する画像のファイル名
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="filename">表示する画像のファイル名</param>
         static member image (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -684,10 +784,12 @@ module htmlexpr =
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [Atr("src",contentsDir + "\\" + f)])
+        /// <summary>
         /// 指定位置に動画を表示する
-        /// s：適用するスタイル
-        /// p：表示位置
-        /// filename：表示する動画のファイル名
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="filename">表示する動画のファイル名</param>
         static member video (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -712,7 +814,9 @@ module htmlexpr =
             html.tagv ("video", [s.atr;Atr("src", contentsDir + "\\" + f); Atr("controls", "")])
             html.tage "video"
 
+        /// <summary>
         /// コードブロックを生成
+        /// </summary>
         static member code (style:list<string*PHPdata>) = fun cd ->
             html.tagb0 ("pre",style) <| fun () ->
                 html.tagb0 ("code",[]) <| fun () ->
@@ -728,11 +832,13 @@ module htmlexpr =
         static member code (style:list<string*string>, cd:PHPdata) = html.code (style |> List.map (fun (a,b) -> a,PHPdata b),cd)
         
         static member code (cd:PHPdata) = html.code ([],cd)
+        /// <summary>
         /// 罫線指定付きの表を生成
-        /// caption：表のタイトル
-        /// borderH：水平罫線の設定
-        /// borderV：垂直罫線の設定
-        /// tlist：表データ
+        /// </summary>
+        /// <param name="caption">表のタイトル</param>
+        /// <param name="borderH">水平罫線の設定</param>
+        /// <param name="borderV">垂直罫線の設定</param>
+        /// <param name="tlist">表データ</param>
         static member listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
             html.tagb("div",[Atr("class","\"fig\"")]) <| fun () ->
                 html.tagb ("span",[Atr("class","\"caption\"")]) <| fun () ->
@@ -760,7 +866,9 @@ module htmlexpr =
                                     |TdRLR -> "\"tdrLR\""
                                     |TdJLR -> "\"tdjLR\"")]) <| fun () ->
                                     writein <| tlist[j][i]
+        /// <summary>
         /// num0式を評価し、MathJax形式で出力する
+        /// </summary>
         static member eq(text:num0) =
             writein ("\\("+text.Expr.evalL programList[prIndex] + "\\)")
             
@@ -782,7 +890,9 @@ module htmlexpr =
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
                 writein ("\\(\\begin{align}"+String.Join("\\\\",text |> List.map(fun t -> t.Expr.evalL programList[prIndex]))+"\\end{align}\\)")
                 
+        /// <summary>
         /// キャラクター付き解説ページ
+        /// </summary>
         static member page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
             html.slide position.Origin <| fun p ->
                 // 音声ファイル追加
@@ -816,46 +926,64 @@ module htmlexpr =
                     html.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
                     html.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
                 animationButtonList <- []
+        /// <summary>
         /// 指定位置にスライドを生成 
-        /// p：スライドの表示位置
+        /// </summary>
+        /// <param name="p">スライドの表示位置</param>
         static member slide (p:position)  code =
                 anicounter <- anicounter + 1
                 html.tagb ("div", "id=\"p"+anicounter.ToString()+"\" style=\"display: "+(if anicounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
                     code p
+        /// <summary>
         /// 前のページへ移動するボタンを生成
+        /// </summary>
         static member prevButton() =
                 html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
                     writein "前へ"
+        /// <summary>
         /// 次のページへ移動するボタンを生成
+        /// </summary>
         static member nextButton() =
                 html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
                     writein "次へ"
+        /// <summary>
         /// アニメーションを開始するボタンを生成
+        /// </summary>
         static member startButton2(id:string) (s:Style) (c:string) =
                 html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
                     writein "Start"
+        /// <summary>
         /// アニメーションをリセットするボタンを生成
+        /// </summary>
         static member resetButton2(id:string) (s:Style) (c:string) =
                 html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
                     writein "Reset"
+        /// <summary>
         /// キャラクター表示を制御するチェックボックスを生成
+        /// </summary>
         static member switchCharacter() =
             html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if character then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
                 writein "キャラクター"
+        /// <summary>
         /// 字幕表示を制御するチェックボックスを生成
+        /// </summary>
         static member switchSubtitle() =
             html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if subtitle then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
                 writein "字幕"
+        /// <summary>
         /// 音声再生を制御するチェックボックスを生成
+        /// </summary>
         static member switchAudio() =
             html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if voice then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
                 writein "音声"
         static member audioPlayer() =
                 html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
+        /// <summary>
         /// 指定位置に画像を表示
+        /// </summary>
         static member imageA (s:Style) = fun (p:position) (filename:string) ->
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -869,11 +997,13 @@ module htmlexpr =
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [(s1+s).atr])
+        /// <summary>
         /// 指定位置・サイズでテキストブロックを生成
-        /// s：適用するスタイル
-        /// p：表示位置
-        /// width, height：ブロックのサイズ
-        /// text：表示する文字列のリスト
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="width, height">ブロックのサイズ</param>
+        /// <param name="text">表示する文字列のリスト</param>
         static member blockText (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
             let padding = 5
             let s1 = Style [size.width (width.ToString()+"px")
@@ -889,11 +1019,12 @@ module htmlexpr =
             Right = p.x+double width+2.0*double padding;
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding;}
-
+/// <summary>
 /// 図形アニメーションを管理するクラス
-/// figcounter:図形の識別番号
-/// originX, originY：描画の基準座標
-/// canvasX, canvasY：キャンパスのサイズ       
+/// </summary>
+/// <param name="figcounter">図形の識別番号</param>
+/// <param name="originX, originY">描画の基準座標</param>
+/// <param name="canvasX, canvasY">キャンパスのサイズ</param>       
 type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
     /// アニメーションの実行順序リスト
@@ -901,9 +1032,11 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     let mutable counter = 0
     member _.Padding with get() = padding
     member _.id with get() = "fa"+figcounter.ToString()+"_"+counter.ToString()
+    /// <summary>
     /// アニメーションの実行順序を返す
-    /// setting：アニメーションの実行時間
-    /// setFigure：図形にアニメーション設定を適用する関数
+    /// </summary>
+    /// <param name="setting">アニメーションの実行時間</param>
+    /// <param name="setFigure">図形にアニメーション設定を適用する関数</param>
     member this.seq (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
         // アニメーションシーケンスIDを発行
         let idstart,idreset = nextAnimationSeqID()
@@ -917,7 +1050,9 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         switchJSAnimationSeqReset <| fun () ->
             writein "}"
         animeFlow <- animeFlow@[idstart,idreset,setting,false]
+    /// <summary>
     /// アニメーションをループする
+    /// </summary>
     member this.loop (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
         // アニメーションシーケンスIDを発行
         let idstart,idreset = nextAnimationSeqID()
@@ -931,16 +1066,20 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         switchJSAnimationSeqReset <| fun () ->
             writein "}"
         animeFlow <- animeFlow@[idstart,idreset,setting,true]
+    /// <summary>
     /// キャンバスアニメーションを指定して図形アニメーションを生成
-    /// s：アニメーション設定
+    /// </summary>
+    /// <param name="s">アニメーション設定</param>
     member this.animationEllipse s = AnimationEllipse(s,canvasX,canvasY)
     member this.animationLine s = AnimationLine(s,canvasX,canvasY)
     member this.animationArc s = AnimationArc(s,canvasX,canvasY)
     member this.animationText s = AnimationText(s,originX,originY,canvasX,canvasY)
     member this.animationPolygon s = AnimationPolygon(s,canvasX,canvasY)
+    /// <summary>
     /// 直線を描画
-    /// s：適用するスタイル
-    /// startP, endP：直線の始点、終点
+    /// </summary>
+    /// <param name="s">適用するスタイル</param>
+    /// <param name="startP, endP">直線の始点、終点</param>
     member this.line (s:Style) (startP:position) (endP:position) =
         let c = [
             Atr("x1",startP.x.ToString())
@@ -948,9 +1087,11 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             Atr("x2",endP.x.ToString())
             Atr("y2",(double canvasY-endP.y).ToString())]
         html.taga ("line", [s.atr]@c)
+    /// <summary>
     /// 楕円を描画
-    /// center：楕円の中心座標
-    /// radiusX, radiusY：x軸、Y軸方向の半径
+    /// </summary>
+    /// <param name="center">楕円の中心座標</param>
+    /// <param name="radiusX, radiusY">x軸、Y軸方向の半径</param>
     member this.ellipse (s:Style) (center:position) (radiusX:float,radiusY:float) =
         let c = [
             Atr("cx",center.x.ToString())
@@ -958,13 +1099,17 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             Atr("rx",radiusX.ToString())
             Atr("ry",radiusY.ToString())]
         html.taga ("ellipse", [s.atr]@c)
+    /// <summary>
     /// 円を描画
+    /// </summary>
     member this.circle (s:Style) (center:position) (radius:float) =
         this.ellipse s center (radius,radius)
+    /// <summary>
     /// 円弧を描画
-    /// center：円弧の中心座標
-    /// radiusX, radiusY：x軸、Y軸方向の半径
-    /// theta1, theta2：円弧の開始角、終了角
+    /// </summary>
+    /// <param name="center">円弧の中心座標</param>
+    /// <param name="radiusX, radiusY">x軸、Y軸方向の半径</param>
+    /// <param name="theta1, theta2">円弧の開始角、終了角</param>
     member this.ellipseArc (s:Style) (center:position) (radiusX:float,radiusY:float) (theta1:float,theta2:float) =
         let x1 = center.x + radiusX * cos theta1
         let y1 = center.y + radiusY * sin theta1
@@ -976,25 +1121,31 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             else
                 "M " + x1.ToString() + " " + (float canvasY-y1).ToString() + " A " + radiusX.ToString() + " " + radiusY.ToString() + " 0 1 0 " + x2.ToString() + " " + (float canvasY-y2).ToString()
         html.taga ("path", [s.atr]@[Atr("d",d)])
+    /// <summary>
     /// 多角形を描画
-    /// apex：多角形を構成する頂点のリスト
+    /// </summary>
+    /// <param name="apex">多角形を構成する頂点のリスト</param>
     member this.polygon (s:Style) (apex:list<position>) =
         let pp =
             apex
             |> List.map (fun p -> p.x.ToString() + "," + (double canvasY-p.y).ToString())
             |> fun s -> String.Join(",",s)
         html.taga ("polygon", [s.atr]@[Atr("points",pp)])
+    /// <summary>
     /// 折れ線を描画
-    /// apex：折れ線を構成する頂点のリスト
+    /// </summary>
+    /// <param name="apex">折れ線を構成する頂点のリスト</param>
     member this.polyline (s:Style) (apex:list<position>) =
         let pp =
             apex
             |> List.map (fun p -> p.x.ToString() + "," + (double canvasY-p.y).ToString())
             |> fun s -> String.Join(",",s)
         html.taga ("polyline", [s.atr]@[Atr("points",pp)])
+    /// <summary>
     /// 始点から終点に向かう矢印付き直線を描画
-    /// lineWidth：線の太さ
-    /// startP, endP：直線の始点、終点
+    /// </summary>
+    /// <param name="lineWidth">線の太さ</param>
+    /// <param name="startP, endP">直線の始点、終点</param>
     member this.linearrow (s:Style) (lineWidth:float) (startP:position) (endP:position) =
         let r = 12.0
         let pi = 3.14159265358979
@@ -1009,9 +1160,11 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             endP.y + (startP.y-endP.y)*c
         this.line (s+Style[stroke.width lineWidth]) startP (position(ux,uy))
         this.polygon s [position(q1x,q1y);endP;position(q2x,q2y)]
+    /// <summary>
     /// 四角形を描画
-    /// center：四角形の中心座標
-    /// sx, sy：四角形の横幅、縦幅
+    /// </summary>
+    /// <param name="center">四角形の中心座標</param>
+    /// <param name="sx, sy">四角形の横幅、縦幅</param>
     member this.rect (s:Style) (center:position) (sx:float,sy:float) =
         let c = [
             Atr("x",(center.x-0.5*sx).ToString())
@@ -1019,9 +1172,11 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             Atr("width",sx.ToString())
             Atr("height",sy.ToString())]
         html.taga ("rect", [s.atr]@c)
+    /// <summary>
     /// テキストを表示
-    /// center：テキスト表示位置
-    /// str：表示するテキスト
+    /// </summary>
+    /// <param name="center">テキスト表示位置</param>
+    /// <param name="str">表示するテキスト</param>
     member this.text (s:Style) (center:position) (str:string) =
         let c = [
             {Key="display";Value="block"}
@@ -1031,8 +1186,10 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let ss = Style (s.list@c)
         html.tagb ("div", [ss.atr]) <| fun () ->
             writein str
+    /// <summary>
     /// 数式を描画
-    /// e：表示する数式
+    /// </summary>
+    /// <param name="e">表示する数式</param>
     member this.eq (s:Style) (center:position) (e:num0) =
         let c = [
             {Key="display";Value="block"}
@@ -1042,8 +1199,10 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let ss = Style (s.list@c)
         html.tagb ("div", [ss.atr]) <| fun () ->
             writein ("\\(" + e.Expr.evalH programList[prIndex] + "\\)")
+    /// <summary>
     /// 画像を表示
-    /// filename：画像のファイル名
+    /// </summary>
+    /// <param name="filename">画像のファイル名</param>
     member this.image (s:Style) (center:position) (filename:string) =
         let f = Path.GetFileName filename
         File.Copy(filename, contentsDir + "\\" + f, true)
@@ -1054,8 +1213,10 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
         let ss = Style (s.list@c)
         html.taga ("img", [ss.atr; Atr("src",contentsDir + "\\" + f)])
+    /// <summary>
     /// 開始ボタンの制御用JavaScriptコードを生成
-    /// buttonIndex：対象となるボタンの識別子
+    /// </summary>
+    /// <param name="buttonIndex">対象となるボタンの識別子</param>
     member this.jsStartControll(buttonIndex:string) =
         let fname = "start" + buttonIndex
         switchJSAnimationStart <| fun () ->
@@ -1072,7 +1233,9 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
                     writein "    });"
             writein "},"
         fname
+    /// <summary>
     /// リセットボタンの制御用JavaScriptコードを生成
+    /// </summary>
     member this.jsResetControll(buttonIndex:string) =
         let fname = "reset" + buttonIndex
         switchJSAnimationReset <| fun () ->
@@ -1081,7 +1244,9 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
                 writein("    " + idreset + "();")
             writein "},"
         fname
+    /// <summary>
     /// アニメーション用のJavaScriptコードを生成
+    /// </summary>
     static member jsAnimation codejs =
         switchBody <| fun () ->
             writein "var t = 0;"
@@ -1300,10 +1465,12 @@ module dochtml =
 [<AutoOpen>]
 module htmlexpr2 =
     type html with
+        /// <summary>
         /// 手動操作型のアニメーション領域を生成
-        /// s：アニメーションの領域設定
-        /// p：表示位置
-        /// buttonX, buttonY：操作ボタンの配置座標
+        /// </summary>
+        /// <param name="s">アニメーションの領域設定</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="buttonX, buttonY">操作ボタンの配置座標</param>
         static member animationManual (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
             figcounter <- figcounter + 1
             let f = FigureAnimation(figcounter,s.mX,s.mY,s.sX,s.sY)
@@ -1323,8 +1490,10 @@ module htmlexpr2 =
             let fnameStart = f.jsStartControll asc
             let fnameReset = f.jsResetControll asc
             addAnimationButton (fnameStart,fnameReset,buttonX,buttonY)
-        
+
+        /// <summary>
         /// 自動再生型のアニメーション領域を生成する
+        /// </summary>
         static member animationAuto (s:ViewBoxStyle) (p:position) code =
             figcounter <- figcounter + 1
             let f = FigureAnimation(figcounter,s.mX,s.mY,s.sX,s.sY)
