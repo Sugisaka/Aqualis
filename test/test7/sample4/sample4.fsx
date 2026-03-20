@@ -105,18 +105,18 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             
 
             html.graphEq (100,650) (800,400) (-10,10,100) (-1.2,1.2) [
-                Style[stroke.width 3.0; stroke.color "#ff0000"; stroke.fill "none";], fun x -> sin(x)
-                Style[stroke.width 3.0; stroke.color "#0000ff"; stroke.fill "none";], fun x -> cos(x)
+                Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";], fun x -> sin(x)
+                Style[stroke.width 3.0; stroke.color "#0000ff"; fill.color "none";], fun x -> cos(x)
             ]
             html.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
-                let line1 = f.animationLine Style[stroke.width 3.0; stroke.dash "4,4"; stroke.color "#000000"]
-                let elps1 = f.animationArc Style[stroke.width 3.0; stroke.color "#000000"; stroke.fill "none";]
-                f.ellipse Style[stroke.width 3.0; stroke.color "#ff0000"; stroke.fill "none";] (position(200.0,400.0)) (200, 100)
-                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; stroke.fill "none";] (position(400.0,400.0)) 50
-                f.rect Style[stroke.width 3.0; stroke.color "#0088ff"; stroke.fill "none";] (position(400.0,200.0)) (50,100)
-                f.ellipseArc Style[stroke.width 3.0; stroke.color "#00bb00"; stroke.fill "none";] (position(200.0,200.0)) (200, 200) (-Math.PI*0.5, Math.PI*1.2)
-                f.polygon Style[stroke.width 3.0; stroke.color "#ff00ff"; stroke.fill "none";] [position(200.0,200.0);position(300.0,300.0);position(300.0,200.0)]
-                f.polyline Style[stroke.width 3.0; stroke.color "#aa00ff"; stroke.fill "none";] [position(200.0,600.0);position(300.0,700.0);position(300.0,600.0)]
+                let line1 = f.animationLine Style[stroke.width 3.0; stroke.dasharray [4;4]; stroke.color "#000000"]
+                let elps1 = f.animationArc Style[stroke.width 3.0; stroke.color "#000000"; fill.color "none";]
+                f.ellipse Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";] (position(200.0,400.0)) (200, 100)
+                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; fill.color "none";] (position(400.0,400.0)) 50
+                f.rect Style[stroke.width 3.0; stroke.color "#0088ff"; fill.color "none";] (position(400.0,200.0)) (50,100)
+                f.ellipseArc Style[stroke.width 3.0; stroke.color "#00bb00"; fill.color "none";] (position(200.0,200.0)) (200, 200) (-Math.PI*0.5, Math.PI*1.2)
+                f.polygon Style[stroke.width 3.0; stroke.color "#ff00ff"; fill.color "none";] [position(200.0,200.0);position(300.0,300.0);position(300.0,200.0)]
+                f.polyline Style[stroke.width 3.0; stroke.color "#aa00ff"; fill.color "none";] [position(200.0,600.0);position(300.0,700.0);position(300.0,600.0)]
 
                 //f.image Style[] (position(0.0,0.0)) @"C:\home\contents\アルミAAA.png"
                 ch.D "t" <| fun t ->
@@ -155,8 +155,8 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                 let cx,cy = 350.0, 390.0
                 /// 円弧の半径
                 let R = 198.0
-                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; stroke.fill "none";] (position(cx,cy)) R
-                let circ1 = f.animationEllipse Style[stroke.width 3.0; stroke.color "none"; stroke.fill "#00aa00";]
+                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; fill.color "none";] (position(cx,cy)) R
+                let circ1 = f.animationEllipse Style[stroke.width 3.0; stroke.color "none"; fill.color "#00aa00";]
                 // 円軌道上を移動
                 f.loop {FrameTime=20; FrameNumber=100} <| fun s ->
                     circ1.P {
@@ -189,9 +189,9 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                 let cx,cy = 350.0, 390.0
                 /// 円弧の半径
                 let R = 198.0
-                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; stroke.fill "none";] (position(cx,cy)) R
-                let line1 = f.animationLine Style[stroke.width 3.0; stroke.color "#ff0000"; stroke.fill "none";]
-                let line2 = f.animationLine Style[stroke.width 3.0; stroke.color "#0000ff"; stroke.fill "none";]
+                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; fill.color "none";] (position(cx,cy)) R
+                let line1 = f.animationLine Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";]
+                let line2 = f.animationLine Style[stroke.width 3.0; stroke.color "#0000ff"; fill.color "none";]
                 // 円軌道上を移動
                 f.loop {FrameTime=60; FrameNumber=300} <| fun s ->
                     line1.P {

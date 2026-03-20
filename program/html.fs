@@ -87,10 +87,10 @@ namespace Aqualis
             let color (s:string) = {Key="stroke"; Value=s}
             let width (s:float) = {Key="stroke-width"; Value=s.ToString()+"px"}
             let dasharray (s:list<int>) = {Key="stroke-dasharray"; Value=String.Join(" ",s |> List.map (fun i -> i.ToString()))}
-            let strokeOpacity(s:float) = {Key="stroke-opacity"; Value=s.ToString()}
-            let fill (s:string) = {Key="fill"; Value=s}
-            let fillOpacity(s:float) = {Key="fill-opacity"; Value=s.ToString()}
-            let dash (pattern:string) = {Key="stroke-dasharray"; Value=pattern}
+            let opacity(s:float) = {Key="stroke-opacity"; Value=s.ToString()}
+        module fill = 
+            let color (s:string) = {Key="fill"; Value=s}
+            let opacity(s:float) = {Key="fill-opacity"; Value=s.ToString()}
         module align = 
             module items = 
                 let center = {Key="align-items"; Value="center"}
@@ -585,16 +585,16 @@ namespace Aqualis
                 
         static member arrow (strokeColor:string) (fillColor:string) (width,arrowsize) (x1:int,y1:int) (x2:int,y2:int) =
             html.fig (position(0.0,0.0)) <| fun (f,p) ->
-                f.trianglearrow Style[stroke.color strokeColor; stroke.fill fillColor;] (width,arrowsize) (position(x1,y1)) (p+position(x2,y2))
+                f.trianglearrow Style[stroke.color strokeColor; fill.color fillColor;] (width,arrowsize) (position(x1,y1)) (p+position(x2,y2))
                 
         static member graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
             html.fig (position(px0,py0)) <| fun (f,p) ->
                 if x1*x2<0.0 then
                     let x0 = (0.0-x1)/(x2-x1)*sizeX
-                    f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
+                    f.trianglearrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
                 if y1*y2<0.0 then
                     let y0 = sizeY-(0.0-y1)/(y2-y1)*sizeY
-                    f.trianglearrow Style[stroke.color "#000000"; stroke.fill "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
+                    f.trianglearrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
                 code(f,p)
         static member graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
             html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
@@ -627,11 +627,11 @@ namespace Aqualis
                     let Ys = sizeY-(ys-y1)/(y2-y1)*sizeY
                     let Xe = (xe-x1)/(x2-x1)*sizeX
                     let Ye = sizeY-(ye-y1)/(y2-y1)*sizeY
-                    f.line (Style(s.list@[stroke.width 3.0; stroke.color "#000000";])) (p+position(Xs,Ys)) (p+position(Xe,Ye))
+                    f.line (Style([stroke.width 3.0; stroke.color "#000000";]@s.list)) (p+position(Xs,Ys)) (p+position(Xe,Ye))
                 let circle (s:Style) (xs,ys) (r:int) =
                     let Xs = (xs-x1)/(x2-x1)*sizeX
                     let Ys = sizeY-(ys-y1)/(y2-y1)*sizeY
-                    f.ellipse (Style(s.list@[stroke.fill "#000000";])) (p+position(Xs,Ys)) r r
+                    f.ellipse (Style([fill.color "#000000";]@s.list)) (p+position(Xs,Ys)) r r
                 code(line,circle)
                 
     and figure() =
@@ -704,7 +704,7 @@ namespace Aqualis
                 this.updateRange startP
                 this.updateRange endP
                 
-        member this.Rect (s:Style) (startP:position) (sx:int) (sy:int) =
+        member this.rect (s:Style) (startP:position) (sx:int) (sy:int) =
             if writeMode then
                 html.taga ("rect", [
                     Atr("x", (startP.x-this.Xmin+this.Padding).ToString());
