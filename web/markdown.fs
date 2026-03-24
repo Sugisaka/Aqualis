@@ -52,10 +52,8 @@ type MarkDown<'a> =
 [<AutoOpen>]
 module markDown =
     let rec readmd (md:MarkDown<'a>) (rd:StreamReader) (stack:list<MarkDownContents>) (data:list<'a>) =
-        match rd.ReadLine() with
-        |null -> 
-            rd.Close()
-            //閉じていないタグをすべて閉じる
+        /// 閉じていないタグをすべて閉じる
+        let closeAllStack data stack =
             List.fold (fun d (x:MarkDownContents) -> 
                 match x with
                 |UL _ -> md.CloseUL d
@@ -63,6 +61,11 @@ module markDown =
                 |Math -> md.CloseMath d
                 |Table -> md.CloseTable d
                 |CodeBlock _ -> md.CloseCodeBlock d ) data stack
+                
+        match rd.ReadLine() with
+        |null -> 
+            rd.Close()
+            closeAllStack data stack
         |code ->
             let convertedCode =
                 match stack with
@@ -110,57 +113,72 @@ module markDown =
                             s
                     |> fun s -> 
                         // リンク
-                        let pattern = @"\[(.*?)\]\((.*?)\)"
+                        let pattern = @"(?<!!)\[(.*?)\]\((.*?)\)"
                         let m = Regex.Match(s, pattern)
                         let p = Regex.Match(s, @"!\[([^\]]*)\]\(([^)]+)\)")
-                        if m.Success && not p.Success then
-                            let lab = m.Groups.[1].Value
-                            let url = m.Groups.[2].Value
-                            md.Link (Some lab) url None
-                        else
-                            s
+                        Regex.Replace(
+                            s,
+                            pattern,
+                            MatchEvaluator(fun m ->
+                                let lab = m.Groups.[1].Value
+                                let url = m.Groups.[2].Value
+                                md.Link (Some lab) url None
+                            )
+                        )
                     |> fun s -> 
                         // リンク（表示テキスト指定）
-                        let pattern = @"\[\[([^#\|]+)\|([^\]]+)\]\]"
+                        let pattern = @"(?<!!)\[\[([^#\|]+)\|([^\]]+)\]\]"
                         let m = Regex.Match(s, pattern)
-                        if m.Success then
-                            let url = m.Groups.[1].Value
-                            let lab = m.Groups.[2].Value
-                            md.Link (Some lab) url None
-                        else
-                            s
+                        Regex.Replace(
+                            s,
+                            pattern,
+                            MatchEvaluator(fun m ->
+                                let url = m.Groups.[1].Value
+                                let lab = m.Groups.[2].Value
+                                md.Link (Some lab) url None
+                            )
+                        )
                     |> fun s -> 
                         // リンク（セクション、表示テキスト指定）
-                        let pattern = @"\[\[([^#\|]+)#([^|\]]+)\|([^\]]+)\]\]"
+                        let pattern = @"(?<!!)\[\[([^#\|]+)#([^|\]]+)\|([^\]]+)\]\]"
                         let m = Regex.Match(s, pattern)
-                        if m.Success then
-                            let url = m.Groups.[1].Value
-                            let sec = m.Groups.[2].Value
-                            let lab = m.Groups.[3].Value
-                            md.Link (Some lab) url (Some sec)
-                        else
-                            s
+                        Regex.Replace(
+                            s,
+                            pattern,
+                            MatchEvaluator(fun m ->
+                                let url = m.Groups.[1].Value
+                                let sec = m.Groups.[2].Value
+                                let lab = m.Groups.[3].Value
+                                md.Link (Some lab) url (Some sec)
+                            )
+                        )
                     |> fun s -> 
                         // リンク（セクション）
-                        let pattern = @"\[\[([^#\|]+)#([^\]]+)\]\]"
+                        let pattern = @"(?<!!)\[\[([^#\|]+)#([^\]]+)\]\]"
                         let m = Regex.Match(s, pattern)
-                        if m.Success then
-                            let url = m.Groups.[1].Value
-                            let sec = m.Groups.[2].Value
-                            md.Link None url (Some sec)
-                        else
-                            s
+                        Regex.Replace(
+                            s,
+                            pattern,
+                            MatchEvaluator(fun m ->
+                                let url = m.Groups.[1].Value
+                                let sec = m.Groups.[2].Value
+                                md.Link None url (Some sec)
+                            )
+                        )
                     |> fun s -> 
                         // リンク
-                        let pattern = @"\[\[([^\]]+)\]\]"
+                        let pattern = @"(?<!!)\[\[([^\]]+)\]\]"
                         let m = Regex.Match(s, pattern)
                         let p = Regex.Match(s, @"!\[\[([^\]]+)\]\]")
-                        if m.Success && not p.Success then
-                            let url = m.Groups.[1].Value
-                            let lab = m.Groups.[1].Value
-                            md.Link (Some lab) url None
-                        else
-                            s
+                        Regex.Replace(
+                            s,
+                            pattern,
+                            MatchEvaluator(fun m ->
+                                let url = m.Groups.[1].Value
+                                let lab = m.Groups.[1].Value
+                                md.Link (Some lab) url None
+                            )
+                        )
             let mh1 = Regex.Match(convertedCode, @"^#(?!#)\s+(.+)$")
             let mh2 = Regex.Match(convertedCode, @"^##(?!#)\s+(.+)$")
             let mh3 = Regex.Match(convertedCode, @"^###(?!#)\s+(.+)$")
@@ -199,15 +217,15 @@ module markDown =
                     |CodeBlock _ -> md.CloseCodeBlock d ) data stack
                 readmd md rd [] data2
             |_ when mh1.Success ->
-                readmd md rd stack (md.Section1 mh1.Groups.[1].Value data)
+                readmd md rd [] (md.Section1 mh1.Groups.[1].Value (closeAllStack data stack))
             |_ when mh2.Success ->
-                readmd md rd stack (md.Section2 mh2.Groups.[1].Value data)
+                readmd md rd [] (md.Section2 mh2.Groups.[1].Value (closeAllStack data stack))
             |_ when mh3.Success ->
-                readmd md rd stack (md.Section3 mh3.Groups.[1].Value data)
+                readmd md rd [] (md.Section3 mh3.Groups.[1].Value (closeAllStack data stack))
             |_ when mh4.Success ->
-                readmd md rd stack (md.Section4 mh4.Groups.[1].Value data)
+                readmd md rd [] (md.Section4 mh4.Groups.[1].Value (closeAllStack data stack))
             |_ when mh5.Success ->
-                readmd md rd stack (md.Section5 mh5.Groups.[1].Value data)
+                readmd md rd [] (md.Section5 mh5.Groups.[1].Value (closeAllStack data stack))
             |_ when mi1.Success ->
                 readmd md rd stack (md.Image mi1.Groups.[1].Value data)
             |_ when mi2.Success ->
