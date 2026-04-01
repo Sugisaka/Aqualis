@@ -86,29 +86,29 @@ namespace Aqualis
                 |Numeric -> ()
                 
             ///<summary>指定した範囲でループ</summary>
-            static member range (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member range (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 match c.language with
-                |Fortran -> expr.rangeF c i1 i2 code
-                |C99 -> expr.rangeC c i1 i2 code
-                |Python -> expr.rangePy c i1 i2 code
-                |JavaScript -> expr.rangeJ c i1 i2 code
-                |PHP -> expr.rangePh c i1 i2 code
-                |LaTeX -> expr.rangeL c i1 i2 code
-                |HTML -> expr.rangeH c i1 i2 code
-                |HTMLSequenceDiagram -> expr.rangeHS c i1 i2 code
+                |Fortran -> expr.rangeF c counter i1 i2 code
+                |C99 -> expr.rangeC c counter i1 i2 code
+                |Python -> expr.rangePy c counter i1 i2 code
+                |JavaScript -> expr.rangeJ c counter i1 i2 code
+                |PHP -> expr.rangePh c counter i1 i2 code
+                |LaTeX -> expr.rangeL c counter i1 i2 code
+                |HTML -> expr.rangeH c counter i1 i2 code
+                |HTMLSequenceDiagram -> expr.rangeHS c counter i1 i2 code
                 |Numeric -> expr.rangeN i1 i2 code
                 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exit (c:program) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member range_exit (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 match c.language with
-                |Fortran -> expr.range_exitF c i1 i2 code
-                |C99 -> expr.range_exitC c i1 i2 code
-                |Python -> expr.range_exitPy c i1 i2 code
-                |JavaScript -> expr.range_exitJ c i1 i2 code
-                |PHP -> expr.range_exitPh c i1 i2 code
-                |LaTeX -> expr.range_exitL c i1 i2 code
-                |HTML -> expr.range_exitH c i1 i2 code
-                |HTMLSequenceDiagram -> expr.range_exitHS c i1 i2 code
+                |Fortran -> expr.range_exitF c counter i1 i2 code
+                |C99 -> expr.range_exitC c counter i1 i2 code
+                |Python -> expr.range_exitPy c counter i1 i2 code
+                |JavaScript -> expr.range_exitJ c counter i1 i2 code
+                |PHP -> expr.range_exitPh c counter i1 i2 code
+                |LaTeX -> expr.range_exitL c counter i1 i2 code
+                |HTML -> expr.range_exitH c counter i1 i2 code
+                |HTMLSequenceDiagram -> expr.range_exitHS c counter i1 i2 code
                 |Numeric -> ()
                 
             static member branch (c:program) code =

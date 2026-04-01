@@ -48,13 +48,37 @@ namespace Aqualis
                 offlineNumList <- num::offlineNumList
             varname,num,returnVar
         member this.getVar(v:string) =
-            match List.tryFind (fun x -> x=v) onlineStrList, List.tryFind (fun (x:int) -> h x = v) onlineNumList with
-            |None, None -> 
-                onlineStrList <- v::onlineStrList
-                let returnVar() =
-                    onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
-                    offlineStrList <- v::offlineStrList
-                v,returnVar
+            match List.tryFind (fun x -> x=v) onlineStrList, List.tryFind (fun (x:int) -> h x = v) onlineNumList, List.tryFind (fun (x:int) -> h x = v) offlineNumList with
+            |None, None, None -> 
+                match List.tryFind (fun x -> x=v) offlineStrList, List.tryFind (fun (x:int) -> h x = v) offlineNumList with
+                |None,None ->
+                    onlineStrList <- v::onlineStrList
+                    let returnVar() =
+                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
+                        offlineStrList <- v::offlineStrList
+                    v,returnVar
+                |None,Some n ->
+                    offlineNumList <- offlineNumList |> List.filter (fun i -> i<>n)
+                    onlineStrList <- v::onlineStrList
+                    let returnVar() =
+                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
+                        offlineStrList <- v::offlineStrList
+                    v,returnVar
+                |Some n, None ->
+                    offlineStrList <- offlineStrList |> List.filter (fun i -> i<>n)
+                    onlineStrList <- v::onlineStrList
+                    let returnVar() =
+                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
+                        offlineStrList <- v::offlineStrList
+                    v,returnVar
+                |Some n, Some m ->
+                    offlineNumList <- offlineNumList |> List.filter (fun i -> i<>m)
+                    offlineStrList <- offlineStrList |> List.filter (fun i -> i<>n)
+                    onlineStrList <- v::onlineStrList
+                    let returnVar() =
+                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
+                        offlineStrList <- v::offlineStrList
+                    v,returnVar
             |_ ->
                 let u,f = this.getVar()
                 printfn "変数%sは使用中のため、ここで使用できません。代わりに%sを使用します" v u
