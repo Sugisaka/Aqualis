@@ -324,13 +324,25 @@ namespace Aqualis
             iter.num this.size1 <| fun i -> 
                 iter.num this.size2 <| fun j -> 
                     code(i,j)
-                
+                    
+        ///<summary>配列の全要素に対する処理</summary>
+        member this.Foreach (counterName1:string,counterName2:string) code =
+            iter.num (this.size1,counterName1) <| fun i -> 
+                iter.num (this.size2,counterName2) <| fun j -> 
+                    code(i,j)
+                    
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach_exit code =
             iter.num_exit this.size1 <| fun (ext1,i) -> 
                 iter.num_exit this.size2 <| fun (ext2,j) -> 
                     code(ext1,ext2,i,j)
-                
+                    
+        ///<summary>配列の全要素に対する処理</summary>
+        member this.Foreach_exit (counterName1:string,counterName2:string) code =
+            iter.num_exit (this.size1,counterName1) <| fun (ext1,i) -> 
+                iter.num_exit (this.size2,counterName1) <| fun (ext2,j) -> 
+                    code(ext1,ext2,i,j)
+                    
         static member sizeMismatchError(x:base2,y:base2) =
             if debug.debugMode then
                 error.inc()
