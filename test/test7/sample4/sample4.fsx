@@ -96,7 +96,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             ch.D "x" <| fun x ->
                 ch.D "y" <| fun y ->
                     html.eqA Style[] (p+position(180,320)) 30 "#000000" "x+y"
-                    html.eqB Style[] (p+position(280,320)) 30 "#FF0000" <| x-y
+                    html.eqB Style[] (p+position(280,320)) 30 "#FF0000" <| 2*x*(-y)*asm.pow(-y,x+1)
                     html.eqD Style[] (p+position(180,390)) 30 "#000000" 
                         [asm.sin(x+y);
                         x-y]

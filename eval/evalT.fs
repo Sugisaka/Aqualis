@@ -32,9 +32,9 @@ namespace Aqualis
                 |LessEq(x,y) ->
                     x.evalT() + "小なりイコール" + y.evalT()
                 |Mul(_,x,y) -> 
-                    x.evalT() + "×" + y.evalT()
+                    x.evalT() + "掛ける" + y.evalT()
                 |Div(_,x,y) -> 
-                    x.evalT() + "÷" + y.evalT() 
+                    y.evalT() + "分の" + x.evalT() 
                 |Add(_,x,y) -> 
                     x.evalT() + "プラス" + y.evalT() 
                 |Sub(_,x,y) -> 

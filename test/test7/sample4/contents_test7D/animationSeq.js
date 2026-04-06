@@ -37,7 +37,7 @@ function animationSeqID0(t){
     var y1 = 390;
     var x2 = 350+2*t;
     var y2 = 390;
-    e.setAttribute("style","visibility: visible; stroke-width: 3px; stroke-dasharray: 4,4; stroke: #000000;");
+    e.setAttribute("style","visibility: visible; stroke-width: 3px; stroke-dasharray: 4 4; stroke: #000000;");
     e.setAttribute("x1", x1);
     e.setAttribute("y1", y1);
     e.setAttribute("x2", x2);

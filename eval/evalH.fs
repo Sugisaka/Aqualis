@@ -264,30 +264,52 @@ namespace Aqualis
                             x + "-" + y, max nx ny
                     |Mul(_,x,y) ->
                         match x,y with
-                        |(Add _|Sub _),(Int _| Dbl _) ->
+                        |(Int _|Dbl _),(Int _|Dbl _) ->
+                            let xx,nx =
+                                match x with
+                                |Int n when n<0 ->
+                                    let x,nx = eval x pl
+                                    par x nx,nx+1
+                                |Dbl n when n<0.0 ->
+                                    let x,nx = eval x pl
+                                    par x nx,nx+1
+                                |_ -> 
+                                    eval x pl
+                            let yy,ny =
+                                match y with
+                                |Int n when n<0 ->
+                                    let y,ny = eval y pl
+                                    par y ny,ny+1
+                                |Dbl n when n<0.0 ->
+                                    let y,ny = eval y pl
+                                    par y ny,ny+1
+                                |_ -> 
+                                    eval y pl
+                            xx + " \\times " + yy, max nx ny
+                        |(Add _|Sub _),(Add _|Sub _|Inv _) ->
                             let x,nx = eval x pl
                             let y,ny = eval y pl
-                            y + par x (nx+1), max (nx+1) ny
+                            par x nx + " " + par y ny, max (nx+1) (ny+1)
+                        |(Add _|Sub _|Inv _),(Int _| Dbl _) ->
+                            let x,nx = eval x pl
+                            let y,ny = eval y pl
+                            y + " " +  par x (nx+1), max (nx+1) ny
                         |_,(Int _| Dbl _) ->
                             let x,nx = eval x pl
                             let y,ny = eval y pl
-                            x + y, max nx ny
-                        |(Add _|Sub _),(Add _|Sub _) ->
-                            let x,nx = eval x pl
-                            let y,ny = eval y pl
-                            par x nx + par y ny, max (nx+1) (ny+1)
+                            x + " " +  y, max nx ny
                         |(Add _|Sub _),_ ->
                             let x,nx = eval x pl
                             let y,ny = eval y pl
-                            par x nx + y, max (nx+1) ny
-                        |_,(Add _|Sub _) ->
+                            par x nx + " " +  y, max (nx+1) ny
+                        |_,(Add _|Sub _|Inv _) ->
                             let x,nx = eval x pl
                             let y,ny = eval y pl
-                            x + par y ny, max nx (ny+1)
+                            x + " " +  par y ny, max nx (ny+1)
                         |_ ->
                             let x,nx = eval x pl
                             let y,ny = eval y pl
-                            x + y, max nx ny
+                            x + " " + y, max nx ny
                     |Div(It 4,x,y) ->
                         eval (Floor(x/y)) pl
                     |Div(_,x,y) ->
@@ -299,9 +321,18 @@ namespace Aqualis
                         let y,ny = eval y 0
                         "\\bmod(" + x + "," + y + ")", pl
                     |Pow(_,x,y) ->
-                        let x,nx = eval x pl
-                        let y,ny = eval y pl
-                        x + " ** " + y, pl
+                        let xx,nx =
+                            let xx,nx = eval x pl
+                            match x with
+                            |Int n when n<0 ->
+                                par xx nx, nx+1
+                            |Dbl n when n<0.0 ->
+                                par xx nx, nx+1
+                            |Add _ |Sub _ |Mul _ |Div _ |Inv _|Pow _ ->
+                                par xx nx, nx+1
+                            |_ -> xx, nx
+                        let yy,ny = eval y pl
+                        "{" + xx + "}^{" + yy + "}", max nx ny
                     |Exp(_,x) ->
                         let x,nx = eval x pl
                         "\\exp" + par x nx, nx+1
