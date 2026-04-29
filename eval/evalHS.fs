@@ -209,8 +209,7 @@ namespace Aqualis
             /// 水平矢印線を描画
             static member drawHorizontalArrowLine(x1:float, x2:float, y:float) =
                 html.fig p0 <| fun (f,_) ->
-                    f.linearrow Style[stroke.color "black";]
-                        <| (2,12)
+                    f.lineArrow (Style[stroke.color "black";],2,12)
                         <| position(x1, y)
                         <| position(x2, y)
                         

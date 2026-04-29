@@ -238,14 +238,19 @@ namespace Aqualis
         member this.clear() = this <== 0
         
         ///<summary>等式(TeX、HTMLのみ)</summary>
-        static member (===) (x:num0,y:num0) = expr.equiv x.Expr y.Expr (programList[prIndex])
+        static member (===) (x:num0,y:num0) = num0(Var(Nt,x.code+" = "+y.code,NaN)) //expr.equiv x.Expr y.Expr (programList[prIndex])
         static member (===) (x:num0,y:int) = x === num0(Int y)
         static member (===) (x:num0,y:double) = x === num0(Dbl y)
         
         ///<summary>等号揃等式(TeX、HTMLのみ)</summary>
-        static member (=|=) (x:num0,y:num0) = expr.equivAlign x.Expr y.Expr (programList[prIndex])
+        static member (=|=) (x:num0,y:num0) = num0(Var(Nt,x.code+" =& "+y.code,NaN)) //expr.equivAlign x.Expr y.Expr (programList[prIndex])
         static member (=|=) (x:num0,y:int) = x =|= num0(Int y)
         static member (=|=) (x:num0,y:double) = x =|= num0(Dbl y)
+        ///<summary>数式揃位置(TeX、HTMLのみ)</summary>
+        static member (.|) (x:num0,y:num0) = num0(Var(Nt,x.code+" & "+y.code,NaN))
+        static member html (e:num0) = "\\("+e.code+"\\)"
+        static member html (e:exprString) = e.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+"\\("+x.evalH programList[prIndex]+"\\)") ""
+        static member html (e:list<num0>) = "\\[\\begin{align}"+String.Join("\\\\",e |> List.map (fun f -> f.code))+"\\end{align}\\]"
         
     ///<summary>数値と文字列の結合</summary>
     and exprString(x:list<reduceExprString>) = 

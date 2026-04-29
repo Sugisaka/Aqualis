@@ -872,24 +872,6 @@ module htmlexpr =
         static member eq(text:num0) =
             writein ("\\("+text.Expr.evalL programList[prIndex] + "\\)")
             
-        static member eqB (s:Style) = fun (p:position) (size:int) (color:string) (text:num0) ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                            {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = size.ToString()+"px";}
-                            {Key = "color"; Value = color.ToString();}]
-            html.tagb ("div", [(s1+s).atr]) <| fun () ->
-                writein ("\\("+text.Expr.evalL programList[prIndex]+"\\)")
-                
-        static member eqD (s:Style) = fun (p:position) (size:int) (color:string) (text:list<num0>) ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                            {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = size.ToString()+"px";}
-                            {Key = "color"; Value = color.ToString();}]
-            html.tagb ("div", [(s1+s).atr]) <| fun () ->
-                writein ("\\(\\begin{align}"+String.Join("\\\\",text |> List.map(fun t -> t.Expr.evalL programList[prIndex]))+"\\end{align}\\)")
-                
         /// <summary>
         /// キャラクター付き解説ページ
         /// </summary>

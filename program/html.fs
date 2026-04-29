@@ -480,32 +480,12 @@ namespace Aqualis
                             {Key = "display"; Value="inline-block";}]
             html.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
-        static member textA (s:Style) = fun (p:position) (size:int) (color:string) (text:string) ->
+        static member text (s:Style) = fun (p:position) (text:string) ->
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                            {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = size.ToString()+"px";}
-                            {Key = "color"; Value = color.ToString();}]
+                            {Key = "position"; Value = "absolute";}]
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
                 writein text
-                
-        static member eqA (s:Style) = fun (p:position) (size:int) (color:string) (text:string) ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                            {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = size.ToString()+"px";}
-                            {Key = "color"; Value = color.ToString();}]
-            html.tagb ("div", [(s1+s).atr]) <| fun () ->
-                writein ("\\("+text+"\\)")
-                
-        static member eqC (s:Style) = fun (p:position) (size:int) (color:string) (text:list<string>) ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
-                            {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = size.ToString()+"px";}
-                            {Key = "color"; Value = color.ToString();}]
-            html.tagb ("div", [(s1+s).atr]) <| fun () ->
-                writein ("\\(\\begin{align}"+String.Join("\\\\",text)+"\\end{align}\\)")
                 
         static member canvas (s:Style) code =
             html.tagb ("div", [s.atr]) <| fun () ->
@@ -583,18 +563,30 @@ namespace Aqualis
                 writein "\\end{align}"
                 writein "\\]"
                 
-        static member arrow (strokeColor:string) (fillColor:string) (width,arrowsize) (x1:int,y1:int) (x2:int,y2:int) =
+        static member line (s:Style) (pp:list<position>) =
             html.fig (position(0.0,0.0)) <| fun (f,p) ->
-                f.trianglearrow Style[stroke.color strokeColor; fill.color fillColor;] (width,arrowsize) (position(x1,y1)) (p+position(x2,y2))
+                f.polyLine s pp
+        static member polyLine (s:Style) (pp:list<position>) =
+            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+                f.polyLine s pp
+        static member arrow (lineStyle:Style,arrowStyle:Style,width,arrowsize) (pp:list<position>) =
+            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+                f.polyLineTriangleArrow (lineStyle,arrowStyle,width,arrowsize) pp
+        static member circle (s:Style) (ps:position) (r:int) =
+            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+                f.ellipse s (p + ps) r r
+        static member rectangle (s:Style) (ps:position) (w:int,h:int) =
+            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+                f.rect s (p + ps) w h
                 
         static member graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
             html.fig (position(px0,py0)) <| fun (f,p) ->
                 if x1*x2<0.0 then
                     let x0 = (0.0-x1)/(x2-x1)*sizeX
-                    f.trianglearrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
+                    f.triangleArrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
                 if y1*y2<0.0 then
                     let y0 = sizeY-(0.0-y1)/(y2-y1)*sizeY
-                    f.trianglearrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
+                    f.triangleArrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
                 code(f,p)
         static member graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
             html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
@@ -608,8 +600,9 @@ namespace Aqualis
                                 let Y = sizeY-(y-y1)/(y2-y1)*sizeY
                                 p+position(X,Y)
                         ]
-                    f.polyline s pol
+                    f.polyLine s pol
         static member graphEqs (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) code =
+            let T (p:position) = position((p.x-x1)/(x2-x1)*sizeX, sizeY-(p.y-y1)/(y2-y1)*sizeY)
             html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
                 for s,fc in fn do
                     let pol =
@@ -617,23 +610,29 @@ namespace Aqualis
                             for i in 0..N do
                                 let x = x1 + (x2-x1)*double i/double N
                                 let y = fc x
-                                let X = (x-x1)/(x2-x1)*sizeX
-                                let Y = sizeY-(y-y1)/(y2-y1)*sizeY
-                                p+position(X,Y)
+                                p + T (position(x,y))
                         ]
-                    f.polyline s pol
-                let line (s:Style) (xs,ys) (xe,ye) =
-                    let Xs = (xs-x1)/(x2-x1)*sizeX
-                    let Ys = sizeY-(ys-y1)/(y2-y1)*sizeY
-                    let Xe = (xe-x1)/(x2-x1)*sizeX
-                    let Ye = sizeY-(ye-y1)/(y2-y1)*sizeY
-                    f.line (Style([stroke.width 3.0; stroke.color "#000000";]@s.list)) (p+position(Xs,Ys)) (p+position(Xe,Ye))
-                let circle (s:Style) (xs,ys) (r:int) =
-                    let Xs = (xs-x1)/(x2-x1)*sizeX
-                    let Ys = sizeY-(ys-y1)/(y2-y1)*sizeY
-                    f.ellipse (Style([fill.color "#000000";]@s.list)) (p+position(Xs,Ys)) r r
-                code(line,circle)
-                
+                    f.polyLine s pol
+                let line (s:Style) (ps:position) (pe:position) =
+                    f.line s (p + T ps) (p + T pe)
+                let arrow (s:Style,lineWidth,arrowSize) (ps:position) (pe:position) =
+                    f.lineArrow (s,lineWidth,arrowSize) (p + T ps) (p + T pe)
+                let circle (s:Style) (ps:position) (r:int) =
+                    f.ellipse s (p + T ps) r r
+                let rectangle (s:Style) (ps:position) (w:float,h:float) =
+                    let Ws = int <| w/(x2-x1)*sizeX
+                    let Hs = int <| h/(y2-y1)*sizeY
+                    f.rect s (p + T ps) Ws Hs
+                let text (s:Style) (ps:position) text = ()
+                code(line,arrow,circle,rectangle,text)
+            let line (s:Style) (ps:position) (pe:position) = ()
+            let arrow (s:Style,lineWidth,arrowSize) (ps:position) (pe:position) = ()
+            let circle (s:Style) (ps:position) (r:int) = ()
+            let rectangle (s:Style) (ps:position) (w:float,h:float) = ()
+            let text (s:Style) (ps:position) text =
+                html.text (Style[font.family "'Noto Sans JP', sans-serif";font.weight "600"; zindex 3]+s) (position(px0,py0) + T ps) text
+            code(line,arrow,circle,rectangle,text)
+            
     and figure() =
         let padding = 10.0
         let mutable xmin:option<double> = None
@@ -736,7 +735,7 @@ namespace Aqualis
                 for q in apex do
                     this.updateRange q
                     
-        member this.polyline (s:Style) (apex:list<position>) =
+        member this.polyLine (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
                 html.taga ("polyline", [Atr("points", pp)]@[s.atr])
@@ -744,7 +743,7 @@ namespace Aqualis
                 for q in apex do
                     this.updateRange q
                     
-        member this.trianglearrow (s:Style) (lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
+        member this.triangleArrow (s:Style) (lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
             let pi = 3.14159265358979
             let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
             let q1x = endP.x + arrowSize*cos(t0-15.0*pi/180.0)
@@ -764,7 +763,29 @@ namespace Aqualis
                 this.updateRange(position(q2x,q2y))
             this.polygon s [position(q1x,q1y);endP;position(q2x,q2y)]
             
-        member this.linearrow (s:Style) (lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
+        member this.polyLineTriangleArrow (lineStyle:Style,arrowStyle:Style,lineWidth:float,arrowSize:float) (pp:list<position>) =
+            let pi = 3.14159265358979
+            let startP = pp[pp.Length-2]
+            let endP = pp[pp.Length-1]
+            let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
+            let q1x = endP.x + arrowSize*cos(t0-15.0*pi/180.0)
+            let q1y = endP.y + arrowSize*sin(t0-15.0*pi/180.0)
+            let q2x = endP.x + arrowSize*cos(t0+15.0*pi/180.0)
+            let q2y = endP.y + arrowSize*sin(t0+15.0*pi/180.0)
+            let ux,uy = 
+                let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
+                endP.x + (startP.x-endP.x)*c,
+                endP.y + (startP.y-endP.y)*c
+            if writeMode then
+                this.polyLine (lineStyle+Style[stroke.width lineWidth]) <| (List.map (fun i -> pp[i]) [0..pp.Length-2])@[position(ux,uy)]
+            else
+                for p in pp do
+                    this.updateRange p
+                this.updateRange(position(q1x,q1y))
+                this.updateRange(position(q2x,q2y))
+            this.polygon arrowStyle [position(q1x,q1y);endP;position(q2x,q2y)]
+            
+        member this.lineArrow (s:Style,lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
             let pi = 3.14159265358979
             let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
             let q1x = endP.x + arrowSize*cos(t0-15.0*pi/180.0)
@@ -782,4 +803,4 @@ namespace Aqualis
                 this.updateRange endP
                 this.updateRange(position(q1x,q1y))
                 this.updateRange(position(q2x,q2y))
-            this.polyline s [position(q1x,q1y);endP;position(q2x,q2y)]
+            this.polyLine s [position(q1x,q1y);endP;position(q2x,q2y)]
