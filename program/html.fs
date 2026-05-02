@@ -32,7 +32,7 @@ namespace Aqualis
         member _.code0 with get() =
             s 
             |> List.map (fun s -> s.Key+": "+s.Value) 
-            |> fun s -> String.concat "; " s + ";"
+            |> fun s -> String.concat "; " s
         // member _.code with get() =
         //     s 
         //     |> List.map (fun s -> s.Key+": "+s.Value) 
@@ -480,6 +480,11 @@ namespace Aqualis
                             {Key = "display"; Value="inline-block";}]
             html.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
+        static member div (s:Style) = fun (p:position) code ->
+            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
+                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+                            {Key = "position"; Value = "absolute";}]
+            html.tagb ("div", [(s1+s).atr]) code
         static member text (s:Style) = fun (p:position) (text:string) ->
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -613,10 +618,10 @@ namespace Aqualis
                                 p + T (position(x,y))
                         ]
                     f.polyLine s pol
-                let line (s:Style) (ps:position) (pe:position) =
-                    f.line s (p + T ps) (p + T pe)
-                let arrow (s:Style,lineWidth,arrowSize) (ps:position) (pe:position) =
-                    f.lineArrow (s,lineWidth,arrowSize) (p + T ps) (p + T pe)
+                let line (s:Style) (pp:list<position>) =
+                    f.polyLine s (pp |> List.map (fun ps -> p + T ps))
+                let arrow (lineStyle:Style,arrowStyle:Style,lineWidth,arrowSize) (pp:list<position>) =
+                    f.polyLineTriangleArrow (lineStyle,arrowStyle,lineWidth,arrowSize) (pp |> List.map (fun ps -> p + T ps))
                 let circle (s:Style) (ps:position) (r:int) =
                     f.ellipse s (p + T ps) r r
                 let rectangle (s:Style) (ps:position) (w:float,h:float) =
@@ -625,8 +630,8 @@ namespace Aqualis
                     f.rect s (p + T ps) Ws Hs
                 let text (s:Style) (ps:position) text = ()
                 code(line,arrow,circle,rectangle,text)
-            let line (s:Style) (ps:position) (pe:position) = ()
-            let arrow (s:Style,lineWidth,arrowSize) (ps:position) (pe:position) = ()
+            let line (s:Style) (pp:list<position>) = ()
+            let arrow (lineStyle:Style,arrowStyle:Style,lineWidth,arrowSize) (pp:list<position>) = ()
             let circle (s:Style) (ps:position) (r:int) = ()
             let rectangle (s:Style) (ps:position) (w:float,h:float) = ()
             let text (s:Style) (ps:position) text =

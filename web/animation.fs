@@ -332,7 +332,7 @@ type SlideAnimation =
     /// <summary>
     /// 次のページへの遷移を制御するJavaScriptコードの生成
     /// </summary>
-    static member jsDrawNext() =
+    static member jsDrawNext(audioDir:string) =
         switchJSMain <| fun () ->
             writein "function drawNext()"
             writein "{"
@@ -381,7 +381,7 @@ type SlideAnimation =
             writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
             writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
             writein "        {"
-            writein "            audioPlayer.src = audioList[pagecount-1];"
+            writein("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
             writein "            audioPlayer.play();"
             writein "        }"
             writein "        autoAnimationMap['page'+pagecount]();"
@@ -390,7 +390,7 @@ type SlideAnimation =
     /// <summary>
     /// 前のページへの遷移を制御するJavaScriptコードの生成
     /// </summary>
-    static member jsDrawPrev() =
+    static member jsDrawPrev(audioDir:string) =
         switchJSMain <| fun () ->
             writein "function drawPrev()"
             writein "{"
@@ -438,7 +438,7 @@ type SlideAnimation =
             writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
             writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
             writein "        {"
-            writein "            audioPlayer.src = audioList[pagecount-1];"
+            writein("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
             writein "            audioPlayer.play();"
             writein "        }"
             writein "    }"
@@ -753,7 +753,7 @@ module htmlexpr =
             else
                 printfn "image file not exist: %s" filename
             let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
-            html.taga ("img", [st.atr;Atr("src",contentsDir + "\\" + f)])
+            html.taga ("img", [st.atr;Atr("src", Path.GetFileName contentsDir + "\\" + f)])
         static member image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -763,7 +763,7 @@ module htmlexpr =
                     printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
-            html.taga ("img", [Atr("id",id); s.atr;Atr("src",contentsDir + "\\" + f)])
+            html.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName contentsDir + "\\" + f)])
         static member image (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -773,7 +773,7 @@ module htmlexpr =
                     printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
-            html.taga ("img", [s.atr;Atr("src",contentsDir + "\\" + f)])
+            html.taga ("img", [s.atr;Atr("src", Path.GetFileName contentsDir + "\\" + f)])
         static member image (filename:string) =
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -783,7 +783,7 @@ module htmlexpr =
                     printfn "directory not exist: %s" contentsDir
             else
                 printfn "image file not exist: %s" filename
-            html.taga ("img", [Atr("src",contentsDir + "\\" + f)])
+            html.taga ("img", [Atr("src", Path.GetFileName contentsDir + "\\" + f)])
         /// <summary>
         /// 指定位置に動画を表示する
         /// </summary>
@@ -888,7 +888,7 @@ module htmlexpr =
                         if File.Exists ci.CharacterImageFile then
                             if Directory.Exists contentsDir then
                                 File.Copy(ci.CharacterImageFile, contentsDir+"\\"+Path.GetFileName ci.CharacterImageFile, true)
-                                html.tag_ "img" <| "src=\""+contentsDir+"/"+Path.GetFileName ci.CharacterImageFile+"\" style=\""+ci.CharacterImageStyle+"\""
+                                html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDir + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
                             else
                                 printfn "directory not exist: %s" contentsDir
                         else
@@ -1320,8 +1320,8 @@ module dochtml =
                     SlideAnimation.writeAudioList()
                     SlideAnimation.jsSetCharacter()
                     SlideAnimation.jsSetSubtitle()
-                    SlideAnimation.jsDrawNext()
-                    SlideAnimation.jsDrawPrev()
+                    SlideAnimation.jsDrawNext("contents_" + filename)
+                    SlideAnimation.jsDrawPrev("contents_" + filename)
                 // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
                 let codeDraw = switchJSMain <| fun () ->
                     programList[prIndex].allCodes
@@ -1339,7 +1339,11 @@ module dochtml =
                             // metaタグ
                             writein "<meta charset=\"UTF-8\">"    
                             //追加（5/29）viewportタブ
-                            writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                            match pagesizeX with
+                            |None ->
+                                writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                            |Some width ->
+                                writein("<meta name=\"viewport\" content=\"width=" + width.ToString() + "\">")
                             // titleタグ
                             html.tagb ("title", "") <| fun () ->
                                 writein filename

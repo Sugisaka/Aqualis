@@ -43,49 +43,56 @@ type AnimationSetting = {
     FrameNumber:int}
 
 [<AbstractClass>]
-type Character(name:string) = 
-    let mutable serif:list<Audio> = []
+type Character(scriptDataDir:string,name:string) = 
+    /// jsonファイル名（フルパス）
+    let scriptDataFileName = scriptDataDir + "\\" + name + ".json"
+    let jsonOptions =
+        JsonSerializerOptions(
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        )
+    /// 既に存在するjsonファイルからスクリプトデータ取得
+    let mutable serif:list<Audio> = 
+        if File.Exists scriptDataFileName then
+            let json = File.ReadAllText scriptDataFileName
+            JsonSerializer.Deserialize<list<Audio>>(json, jsonOptions)
+        else
+            []
     let mutable newScriptCounter:int = 0
-    let mutable audioFileCounter:int = 0
+    let audioFileCounter:int = 
+        serif 
+        |> List.map (fun audio -> match audio.AudioFileNumber with |None -> -1 |Some m -> m) 
+        |> fun s -> match s with |[] -> -1 |_ -> List.max s
     member _.Name with get() = name
-    member _.scriptDataFile with get() = name + ".json"
     abstract member audioFile:Audio->option<string>
     abstract member scriptFile:int->string
     abstract member scriptColor:string
     member this.saveScriptData() =
-        // jsonファイル出力
-        let jsonOptions =
-            JsonSerializerOptions(
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
-        jsonOptions.Encoder <- JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        let json = JsonSerializer.Serialize(serif, jsonOptions)
-        File.WriteAllText(this.scriptDataFile, json)
-        // 音声スクリプトファイル出力（読み上げ用音声合成ソフト入力用）
-        audioFileCounter <- -1::(serif |> List.map (fun a -> match a.AudioFileNumber with |None -> -1 |Some n -> n)) |> List.max
-        let wr = [for i in 0..audioFileCounter -> new StreamWriter(this.scriptFile i,false)]
-        for a in serif do
-            match a.AudioFileNumber with
-            |None -> ()
-            |Some i -> wr[i].WriteLine a.Script
-        wr |> List.iter (fun w -> w.Close())
-    member this.loadScriptData() =
-        let jsonOptions =
-            JsonSerializerOptions(
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
-        jsonOptions.Encoder <- JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        if File.Exists this.scriptDataFile then
-            let json = File.ReadAllText this.scriptDataFile
-            serif <- JsonSerializer.Deserialize<list<Audio>>(json, jsonOptions)
-            audioFileCounter <- (-1::(serif |> List.map (fun a -> match a.AudioFileNumber with |None -> -1 |Some n -> n)) |> List.max) + 1
+        match serif with
+        |[] ->
+            ()
+        |_ ->
+            // jsonファイル出力
+            let json = JsonSerializer.Serialize(serif, jsonOptions)
+            File.WriteAllText(scriptDataFileName, json)
+            // 音声スクリプトファイル出力（読み上げ用音声合成ソフト入力用）
+            serif
+            |> List.filter (fun audio -> audio.AudioFileNumber = Some(audioFileCounter+1))
+            |> List.sortBy (fun audio -> audio.AudioSourceNumber)
+            |> fun lst ->
+                match lst with
+                |[] -> ()
+                |_ ->
+                    let wr = new StreamWriter(this.scriptFile (audioFileCounter+1), false)
+                    lst |> List.iter (fun audio -> wr.WriteLine audio.Script)
+                    wr.Close()
     member this.script(subtitle:string,script:string) =
-        match serif |> List.tryFind (fun a -> a.Subtitle=subtitle && a.Script=script) with
+        match serif |> List.tryFind (fun a -> a.Script=script) with
         |None ->
-            let a = {Subtitle=subtitle; Script=script; AudioFileNumber=Some audioFileCounter; AudioSourceNumber=Some newScriptCounter}
+            let a = {Subtitle=subtitle; Script=script; AudioFileNumber=Some(audioFileCounter+1); AudioSourceNumber=Some newScriptCounter}
             serif <- serif@[a]
             newScriptCounter <- newScriptCounter + 1
-            a, None, this.scriptColor
+            a, this.audioFile a, this.scriptColor
         |Some x -> 
             x, this.audioFile x, this.scriptColor
     member this.script(text:exprString) =
