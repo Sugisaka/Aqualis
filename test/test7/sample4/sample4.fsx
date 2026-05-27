@@ -13,67 +13,55 @@ open System
 open System.IO
 open Aqualis
 
-type Tale(name:string) =
-    inherit Character(name)
+type Tale(dir:string,name:string) =
+    inherit Character(dir,name)
     let st = "position: absolute; margin-left: 0px; margin-top: -122px; width: 850px; object-position: right 204px top 426px; z-index: 2;"
     override _.scriptColor with get() = "#d11aff"
     override _.audioFile(a:Audio) = 
-        let rec waveFile (fmt:string) = 
-            match a.AudioSourceNumber, a.AudioFileNumber with
-            |Some n, Some m ->
-                let f = n.ToString fmt + name + m.ToString() + ".wav" 
-                match File.Exists f,fmt with
-                |true,_ -> Some f
-                |_,"0000" -> None
-                |_ -> waveFile (fmt+"0")
-            |_ -> None
-        waveFile "0"
-    override _.scriptFile(n:int) = name + n.ToString() + ".txt"
+        match a.AudioSourceNumber, a.AudioFileNumber with
+        |Some n, Some m -> Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav") 
+        |_ -> None
+    override _.scriptFile(n:int) = dir + "\\" + name + "_" + n.ToString() + ".txt"
     member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\テール右斜AAA-.png"; CharacterImageStyle = st}
 
-type Dango(name:string) =
-    inherit Character(name)
+type Dango(dir:string,name:string) =
+    inherit Character(dir,name)
     let st = "position: absolute; margin-left: 1462px; margin-top: 727px; width: 450px; z-index: 3;"
     override _.scriptColor with get() = "#455eff"
     override _.audioFile(a:Audio) = 
-        let rec waveFile (fmt:string) = 
-            match a.AudioSourceNumber, a.AudioFileNumber with
-            |Some n, Some m ->
-                let f = n.ToString fmt + name + m.ToString() + ".wav" 
-                match File.Exists f,fmt with
-                |true,_ -> Some f
-                |_,"0000" -> None
-                |_ -> waveFile (fmt+"0")
-            |_ -> None
-        waveFile "0"
-    override _.scriptFile(n:int) = name + n.ToString() + ".txt"
+        match a.AudioSourceNumber, a.AudioFileNumber with
+        |Some n, Some m ->Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav")
+        |_ -> None
+    override _.scriptFile(n:int) = dir + "\\" + name + "_" + n.ToString() + ".txt"
     member _.D00 with get() = {CharacterImageFile = @"C:\home\contents\dango.png"; CharacterImageStyle = st}
     
-type Armillaris(name:string) =
-    inherit Character(name)
+type Armillaris(dir:string,name:string) =
+    inherit Character(dir,name)
     let st = "position: absolute; margin-left: 1503px; margin-top: 638px; width: 360px; z-index: 4;"
     override _.scriptColor with get() = "#ff8800"
     override _.audioFile(a:Audio) = 
-        let rec waveFile (fmt:string) = 
-            match a.AudioSourceNumber, a.AudioFileNumber with
-            |Some n, Some m ->
-                let f = n.ToString fmt + name + m.ToString() + ".wav" 
-                match File.Exists f,fmt with
-                |true,_ -> Some f
-                |_,"0000" -> None
-                |_ -> waveFile (fmt+"0")
-            |_ -> None
-        waveFile "0"
-    override _.scriptFile(n:int) = name + n.ToString() + ".txt"
+        match a.AudioSourceNumber, a.AudioFileNumber with
+        |Some n, Some m ->Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav")
+        |_ -> None
+    override _.scriptFile(n:int) = dir + "\\" + name + "_" + n.ToString() + ".txt"
     member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\armi.png"; CharacterImageStyle = st}
     
-let tale = Tale "tale"
-let dang = Dango "dango"
-let armi = Armillaris "armi"
+let scriptDir = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "script"))
+let tale = Tale(scriptDir, "tale")
+let dang = Dango(scriptDir, "dango")
+let armi = Armillaris(scriptDir, "armi")
 
-tale.loadScriptData()
-dang.loadScriptData()
-armi.loadScriptData()
+let textA = Style[font.size 48]
+let textAM = Style[font.size 48; font.color "#ff00ff"]
+let textAG = Style[font.size 48; font.color "#00ddaa"]
+let textB = Style[font.size 30]
+let textBR = Style[font.size 30; font.color "#ff0000"]
+let lineBlack = Style[stroke.color "#000000";fill.color "none";stroke.width 3.0]
+let arrowBlack = lineBlack,Style[stroke.color "#000000";fill.color "#000000";stroke.width 3.0],3.0,20.0
+let NL = num0(Var(Dt,"",NaN))
+
+let ff t = 0.2+0.2*t+0.01*cos(2.0*System.Math.PI*t/0.6)+0.1*cos(2.0*System.Math.PI*t/3.4)+0.05*sin(2.0*System.Math.PI*t/2.9)
+let gg t = if abs(t) < 0.4 then 1.0 else 0.0
 
 fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voice=OFF} None <| fun () ->
     let f(x:num0) = num0(Var(Dt,"f("+x.code+")",NaN))
@@ -88,21 +76,20 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
          dang.D00;]
         <| tale.script "テールのセリフ"
         <| fun p ->
-            html.textA Style[] (p+position(1860,10)) 48 "#000000" "10"
+            html.text textA (p+position(1860,10)) "10"
             html.contents Style[] (p+position(50,50)) "アニメーション制御の実装1"
             html.subtitle1 Style[] (p+position(80,150)) "サンプルページ1"
             html.subtitle2 Style[] (p+position(100,250)) "テキストと数式の表示"
-            html.textA Style[] (p+position(100,320)) 30 "#000000" "AAA"
+            html.text textB (p+position(100,320)) "AAA"
             ch.D "x" <| fun x ->
                 ch.D "y" <| fun y ->
-                    html.eqA Style[] (p+position(180,320)) 30 "#000000" "x+y"
-                    html.eqB Style[] (p+position(280,320)) 30 "#FF0000" <| 2*x*(-y)*asm.pow(-y,x+1)
-                    html.eqD Style[] (p+position(180,390)) 30 "#000000" 
-                        [asm.sin(x+y);
-                        x-y]
+                    html.text textB  (p+position(180,320)) "x+y"
+                    html.text textBR (p+position(280,320)) <| num0.html (2*x*(-y)*asm.pow(-y,x+1))
+                    html.text textB  (p+position(180,390)) <| num0.html 
+                        [asm.sin(x+y)
+                         x-y]
             html.subtitle2 Style[] (p+position(100,520)) "アニメーション1"
-            html.textA Style[] (p+position(100,590)) 30 "#000000" "startボタンを押すとアニメーションが開始する"
-            
+            html.text textB (p+position(100,590)) "startボタンを押すとアニメーションが開始する"
 
             html.graphEq (100,650) (800,400) (-10,10,100) (-1.2,1.2) [
                 Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";], fun x -> sin(x)
@@ -146,10 +133,19 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
          dang.D00;]
         <| tale.script "テールのセリフ"
         <| fun p ->
-            html.textA Style[] (p+position(1860,10)) 48 "#000000" "10"
+            html.text textA (p+position(1860,10)) "10"
             html.contents Style[] (p+position(50,50)) "アニメーション制御の実装2"
             html.subtitle1 Style[] (p+position(80,150)) "アニメーション2"
-            html.textA Style[] (p+position(100,320)) 30 "#000000" "startボタンを押すとアニメーションが無限ループする"
+            html.text textB (p+position(100,320)) "startボタンを押すとアニメーションが無限ループする"
+
+            html.graphEqs (100,500) (800,300) (-1,1,400) (-0.01,1.0)
+                [
+                    Style[stroke.width 3.0; stroke.color "#0000ff"; fill.color "none";], fun t -> ff t * gg t
+                ]
+                <| fun (line,arrow,circle,rectangle,text) ->
+                    arrow arrowBlack [position(-0.4,-0.04);position(0.4,-0.04)]
+                    text textB (position(-0.1,-0.04)) <| "幅：" + num0.html _1
+
             html.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
                 /// 中心座標
                 let cx,cy = 350.0, 390.0
@@ -170,20 +166,17 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
          dang.D00;]
         <| tale.script ("テールのセリフ："++asm.sin(t))
         <| fun p ->
-            html.textA Style[] (p+position(1860,10)) 48 "#000000" "10"
+            html.text textA (p+position(1860,10)) "10"
             html.contents Style[] (p+position(50,50)) "アニメーション制御の実装3"
             html.subtitle1 Style[] (p+position(80,150)) "アニメーション3"
             ch.D "x" <| fun x ->
                 ch.D "y" <| fun y ->
-                    html.equationFrame Style[] (position(80,400)) 48 "#ff00ff" <| fun () -> 
-                        y === x + 1
-                    html.alignFrame Style[] (position(80,500)) 48 "#00ddaa" <| fun () -> 
-                        y  =|= x + 1
-                        eqbr()
-                        (|=) (x + 2)
-                        eqbr()
-                        (|=) (x + 3)
-            html.textA Style[] (p+position(100,320)) 30 "#000000" "ページの表示直後にアニメーションが始まる"
+                    html.text textAM (position(80,400)) <| num0.html [y === x + 1]
+                    html.text textAG (position(80,500)) <| num0.html 
+                        [y  =|= x + 1
+                         NL =|= (x + 2)
+                         NL =|= (x + 3)]
+            html.text textB (p+position(100,320)) "ページの表示直後にアニメーションが始まる"
             html.animationAuto {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p <| fun (f,p) ->
                 /// 中心座標
                 let cx,cy = 350.0, 390.0
