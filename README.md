@@ -4,17 +4,14 @@ Algorithm and equation analyzer for lightwave simulation
 This library generates C/FORTRAN/Python/LaTeX/HTML source codes for numerical simulation. You can create simple readable and high-performance programs under multiparadigm programming (F#).
 
 ## Installation
-1. Build this project. Aqualis.dll is generated. 
-2. Copy Aqualis.dll to C:\Aqualis\lib
-3. Copy version.fsx to C:\Aqualis\lib
-4. Copy setting.fsx to C:\Aqualis\lib
+1. Install Visual Studio 2026 or the Build Tools for Visual Studio 2026. During installation, be sure to select "F# desktop language support."
+2. Copy `Aqualis.dll` to `C:\Aqualis\lib\(version number)` (`(version number)` refers to the Aqualis version number such as `186_0_0_0`, for example).
 
 ## How to use
 
-See also document file ([English](doc_en/index.md)) or ([Japanese](doc_jp/index.md))
+Run the script file `sample1.fsx` to generate C, Fortran, and Python source files in `C:\home\work`.
 
-1. Edit the F# script file "template.fsx"
-2. Run the script file to generate source files in the output directory.
+See also document file ([English](doc_en/index.md)) or ([Japanese](doc_jp/index.md))
 
 ## License
 [MIT License](license)
