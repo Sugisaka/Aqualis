@@ -65,6 +65,27 @@ namespace Aqualis
                 code y
                 returnVar()
                 
+            ///<summary>整数型1次元配列を生成</summary>
+            static member I01 name code = 
+                let x,returnVar = programList[prIndex].i1.getVar name
+                let y = num1(It 4,Var1(A1 0,x))
+                code y
+                returnVar()
+                
+            ///<summary>実数型1次元配列を生成</summary>
+            static member D01 name code = 
+                let x,returnVar = programList[prIndex].d1.getVar name
+                let y = num1(Dt,Var1(A1 0,x))
+                code y
+                returnVar()
+                
+            ///<summary>複素数型1次元配列を生成</summary>
+            static member Z01 name code = 
+                let x,returnVar = programList[prIndex].z1.getVar name
+                let y = num1(Zt,Var1(A1 0,x))
+                code y
+                returnVar()
+
             ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member i1 (size1:num0) = fun code ->
                 ch.i01 <| fun v ->
@@ -98,6 +119,39 @@ namespace Aqualis
             static member z1 (size1:int) = fun code ->
                 ch.z1 (I size1) code
                 
+            ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member I1 (name:string,size1:num0) = fun code ->
+                ch.I01 name <| fun v ->
+                    v.allocate(size1)
+                    code v
+                    v.deallocate()
+                    
+            ///<summary>整数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member I1 (name:string,size1:int) = fun code ->
+                ch.I1 (name, I size1) code
+                
+            ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member D1 (name:string,size1:num0) = fun code ->
+                ch.D01 name <| fun v ->
+                    v.allocate size1
+                    code v
+                    v.deallocate()
+                    
+            ///<summary>実数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member D1 (name:string,size1:int) = fun code ->
+                ch.D1 (name, I size1) code
+                
+            ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member Z1 (name:string,size1:num0) = fun code ->
+                ch.Z01 name <| fun v ->
+                    v.allocate size1
+                    code v
+                    v.deallocate()
+                    
+            ///<summary>複素数型1次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member Z1 (name:string,size1:int) = fun code ->
+                ch.Z1 (name, I size1) code
+                
             ///<summary>整数型2次元配列を生成</summary>
             static member i02 code = 
                 let x,returnVar = programList[prIndex].i2.getVar()
@@ -119,6 +173,27 @@ namespace Aqualis
                 code y
                 returnVar()
                 
+            ///<summary>整数型2次元配列を生成</summary>
+            static member I02 (name:string) code = 
+                let x,returnVar = programList[prIndex].i2.getVar name
+                let y = num2(It 4,Var2(A2(0,0),x))
+                code y
+                returnVar()
+                
+            ///<summary>実数型2次元配列を生成</summary>
+            static member D02 (name:string) code = 
+                let x,returnVar = programList[prIndex].d2.getVar name
+                let y = num2(Dt,Var2(A2(0,0),x))
+                code y
+                returnVar()
+                
+            ///<summary>複素数型2次元配列を生成</summary>
+            static member Z02 (name:string) code = 
+                let x,returnVar = programList[prIndex].z2.getVar name
+                let y = num2(Zt,Var2(A2(0,0),x))
+                code y
+                returnVar()
+
             ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member i2 (size1:num0) = fun (size2:num0) code -> 
                 ch.i02 <| fun v ->
@@ -152,6 +227,39 @@ namespace Aqualis
             static member z2 (size1:int) = fun (size2:int) code -> 
                 ch.z2 (I size1) (I size2) code
                 
+            ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member I2 (name:string, size1:num0, size2:num0) = fun code -> 
+                ch.I02 name <| fun v ->
+                    v.allocate(size1,size2)
+                    code v
+                    v.deallocate()
+                
+            ///<summary>整数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member I2 (name:string, size1:int, size2:int) = fun code -> 
+                ch.I2 (name, I size1, I size2) code
+                
+            ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member D2 (name:string, size1:num0, size2:num0) = fun code ->
+                ch.D02 name <| fun v ->
+                    v.allocate(size1,size2)
+                    code v
+                    v.deallocate()
+                    
+            ///<summary>実数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member D2 (name:string, size1:int, size2:int) = fun code -> 
+                ch.D2 (name, I size1, I size2) code
+                
+            ///<summary>複素数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member Z2 (name:string, size1:num0, size2:num0) = fun code ->
+                ch.Z02 name <| fun v ->
+                    v.allocate(size1,size2)
+                    code v
+                    v.deallocate()
+                    
+            ///<summary>複素数型2次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member Z2 (name:string, size1:int, size2:int) = fun code -> 
+                ch.Z2 (name, I size1, I size2) code
+                
             ///<summary>整数型3次元配列を生成</summary>
             static member i03 code = 
                 let x,returnVar = programList[prIndex].i3.getVar()
@@ -173,6 +281,27 @@ namespace Aqualis
                 code y
                 returnVar()
                 
+            ///<summary>整数型3次元配列を生成</summary>
+            static member I03 (name:string) code = 
+                let x,returnVar = programList[prIndex].i3.getVar name
+                let y = num3(It 4,Var3(A3(0,0,0),x))
+                code y
+                returnVar()
+                
+            ///<summary>実数型3次元配列を生成</summary>
+            static member D03 (name:string) code = 
+                let x,returnVar = programList[prIndex].d3.getVar name
+                let y = num3(Dt,Var3(A3(0,0,0),x))
+                code y
+                returnVar()
+                
+            ///<summary>複素数型3次元配列を生成</summary>
+            static member Z03 (name:string) code = 
+                let x,returnVar = programList[prIndex].z3.getVar name
+                let y = num3(Zt,Var3(A3(0,0,0),x))
+                code y
+                returnVar()
+
             ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member i3 (size1:num0) = fun (size2:num0) (size3:num0) code ->
                 ch.i03 <| fun v ->
@@ -205,6 +334,39 @@ namespace Aqualis
             ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
             static member z3 (size1:int) = fun (size2:int) (size3:int) code ->
                 ch.z3 (I size1) (I size2) (I size3) code
+                
+            ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member I3 (name:string, size1:num0, size2:num0, size3:num0) = fun code ->
+                ch.I03 name <| fun v ->
+                    v.allocate(size1,size2,size3)
+                    code v
+                    v.deallocate()
+                
+            ///<summary>整数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member I3 (name:string, size1:int, size2:int, size3:int) = fun code ->
+                ch.I3 (name, I size1, I size2, I size3) code
+                
+            ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member D3 (name:string, size1:num0, size2:num0, size3:num0) = fun code ->
+                ch.D03 name <| fun v ->
+                    v.allocate(size1,size2,size3)
+                    code v
+                    v.deallocate()
+                    
+            ///<summary>実数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member D3 (name:string, size1:int, size2:int, size3:int) = fun code ->
+                ch.D3 (name, I size1, I size2, I size3) code
+                
+            ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member Z3 (name:string, size1:num0, size2:num0, size3:num0) = fun code ->
+                ch.Z03 name <| fun v ->
+                    v.allocate(size1,size2,size3)
+                    code v
+                    v.deallocate()
+                    
+            ///<summary>複素数型3次元配列を生成し、指定したサイズでメモリ割り当て→code実行後にメモリ解放</summary>
+            static member Z3 (name:string, size1:int, size2:int, size3:int) = fun code ->
+                ch.Z3 (name, I size1, I size2, I size3) code
                 
             static member ii code = 
                 ch.i <| fun i1 -> 
