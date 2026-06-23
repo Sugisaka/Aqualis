@@ -136,8 +136,8 @@ namespace Aqualis
                 
             member this.evalF(c:program) =
                 match this.simp with
-                |False -> "false"
-                |True -> "true"
+                |False -> ".false."
+                |True -> ".true."
                 |Eq(x,y) -> x.evalF c + " == " + y.evalF c
                 |NEq(x,y) -> x.evalF c + " /= " + y.evalF c
                 |Greater(x,y) -> x.evalF c + " > " + y.evalF c

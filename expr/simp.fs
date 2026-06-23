@@ -569,36 +569,16 @@ namespace Aqualis
                 |_ -> GreaterEq(x,y)
                 
             static member simpAND(x:list<expr>) = 
-                let xx = x |> List.map (fun s -> s.simp) 
-                let res =
-                    xx |> List.fold (fun acc s -> 
-                        match acc,s with
-                        |None,True -> Some True
-                        |Some True,True -> Some True
-                        |Some False,True -> Some False
-                        |_,False -> Some False
-                        |_ -> Some NaN ) None
-                match res with
-                |Some True -> True
-                |Some False -> False
-                |Some _ -> AND xx
-                |None -> AND xx
+                x 
+                |> List.map (fun s -> s.simp) 
+                |> List.filter (fun s -> match s with |True -> false |_ -> true)
+                |> fun g -> match List.tryFind (fun s -> match s with |False -> true |_ -> false) g with |Some _ -> False |None -> AND g
                 
             static member simpOR(x:list<expr>) = 
-                let xx = x |> List.map (fun s -> s.simp) 
-                let res =
-                    xx |> List.fold (fun acc s -> 
-                        match acc,s with
-                        |None,False -> Some False
-                        |Some False,False -> Some False
-                        |Some True,False -> Some True
-                        |_,True -> Some True
-                        |_ -> Some NaN ) None
-                match res with
-                |Some True -> True
-                |Some False -> False
-                |Some _ -> OR xx
-                |None -> OR xx
+                x 
+                |> List.map (fun s -> s.simp) 
+                |> List.filter (fun s -> match s with |False -> false |_ -> true)
+                |> fun g -> match List.tryFind (fun s -> match s with |True -> true |_ -> false) g with |Some _ -> True |None -> OR g
                 
             member this.simp with get() =
                 match this with

@@ -89,9 +89,9 @@ namespace Aqualis
     ///<summary>数値から文字列変換時のフォーマット管理</summary>
     type numericFormatController(lang:Language) =
         
-        let mutable int_string_format = 8
+        let mutable int_string_format = 12
         
-        let mutable double_string_format = 27,12
+        let mutable double_string_format = 27,17
         
         ///<summary>整数型を文字列に変換するときの桁数</summary>
         member this.iFormat with get() = int_string_format
