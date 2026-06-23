@@ -65,7 +65,7 @@ namespace Aqualis
             static member rangeL (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     c.comment("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
                     c.indentInc()
@@ -74,7 +74,7 @@ namespace Aqualis
                     c.comment "end\\\\"
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     c.codewritein("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
                     c.indentInc()
@@ -87,7 +87,7 @@ namespace Aqualis
             static member range_exitL (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto " + label)
@@ -99,7 +99,7 @@ namespace Aqualis
                     c.comment(label + " continue")
                     returnVar()
                 |_ ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto " + label)

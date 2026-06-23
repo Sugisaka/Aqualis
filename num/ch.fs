@@ -21,15 +21,15 @@ namespace Aqualis
             code <| num0(Var(Zt, c, NaN))
             r()
         static member I name = fun code -> 
-            let c,r = programList[prIndex].i0.getVar name
+            let c,r = programList[prIndex].i0.getVar (name,It 4,A0)
             code <| num0(Var(Zt, c, NaN))
             r()
         static member D name = fun code ->
-            let c,r = programList[prIndex].d0.getVar name
+            let c,r = programList[prIndex].d0.getVar (name,Dt,A0)
             code <| num0(Var(Dt, c, NaN))
             r()
         static member Z name = fun code ->
-            let c,r = programList[prIndex].z0.getVar name
+            let c,r = programList[prIndex].z0.getVar (name,Zt,A0)
             code <| num0(Var(Zt, c, NaN))
             r()
         static member ix (n:int) code = 

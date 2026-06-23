@@ -13,6 +13,7 @@
     <Compile Include="program\varControl.fs" />
     <Compile Include="program\structure.fs" />
     <Compile Include="program\programManager.fs" />
+    <Compile Include="program\varControl2.fs" />
     <Compile Include="program\html.fs" />
     <Compile Include="eval\evalN.fs" />
     <Compile Include="eval\evalF.fs" />

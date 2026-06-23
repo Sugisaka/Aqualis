@@ -67,7 +67,7 @@ namespace Aqualis
             static member rangeJ (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b -> 
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
@@ -78,7 +78,7 @@ namespace Aqualis
                     c.comment "}"
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
@@ -93,7 +93,7 @@ namespace Aqualis
             static member range_exitJ (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b -> 
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label+"")
@@ -107,7 +107,7 @@ namespace Aqualis
                     c.comment(label+":;")
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label+"")

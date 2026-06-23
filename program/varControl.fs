@@ -47,45 +47,21 @@ namespace Aqualis
                 onlineNumList <- List.filter (fun x -> x <> num) onlineNumList
                 offlineNumList <- num::offlineNumList
             varname,num,returnVar
-        member this.getVar(v:string) =
-            match List.tryFind (fun x -> x=v) onlineStrList, List.tryFind (fun (x:int) -> h x = v) onlineNumList, List.tryFind (fun (x:int) -> h x = v) offlineNumList with
-            |None, None, None -> 
-                match List.tryFind (fun x -> x=v) offlineStrList, List.tryFind (fun (x:int) -> h x = v) offlineNumList with
-                |None,None ->
-                    onlineStrList <- v::onlineStrList
-                    let returnVar() =
-                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
-                        offlineStrList <- v::offlineStrList
-                    v,returnVar
-                |None,Some n ->
-                    offlineNumList <- offlineNumList |> List.filter (fun i -> i<>n)
-                    onlineStrList <- v::onlineStrList
-                    let returnVar() =
-                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
-                        offlineStrList <- v::offlineStrList
-                    v,returnVar
-                |Some n, None ->
-                    offlineStrList <- offlineStrList |> List.filter (fun i -> i<>n)
-                    onlineStrList <- v::onlineStrList
-                    let returnVar() =
-                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
-                        offlineStrList <- v::offlineStrList
-                    v,returnVar
-                |Some n, Some m ->
-                    offlineNumList <- offlineNumList |> List.filter (fun i -> i<>m)
-                    offlineStrList <- offlineStrList |> List.filter (fun i -> i<>n)
-                    onlineStrList <- v::onlineStrList
-                    let returnVar() =
-                        onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
-                        offlineStrList <- v::offlineStrList
-                    v,returnVar
-            |_ ->
-                let u,f = this.getVar()
-                printfn "変数%sは使用中のため、ここで使用できません。代わりに%sを使用します" v u
-                u,f
+        member this.isVarExist(v:string) =
+            List.tryFind (fun x -> x=v) onlineStrList, List.tryFind (fun x -> x=v) offlineStrList, List.tryFind (fun (x:int) -> h x = v) onlineNumList, List.tryFind (fun (x:int) -> h x = v) offlineNumList
         member this.varName(x:int) = h x
         member this.maxcounter with get() = autoVarCounter
-        member this.varList with get() = offlineStrList@([1..autoVarCounter] |> List.map (fun a -> h a))
+        member this.varList with get() = offlineStrList@([1..autoVarCounter] |> List.map (fun a -> h a))        
+        member this.OfflineNumList with get() = offlineNumList
+        member this.OnlineNumList with get() = onlineNumList
+        member this.OfflineStrList with get() = offlineStrList
+        member this.OnlineStrList with get() = onlineStrList
+        member this.addOfflineStrList(v:string) = offlineStrList <- v::offlineStrList
+        member this.addOnlineStrList(v:string) = onlineStrList <- v::onlineStrList
+        member this.removeOfflineNumList(v:int) = offlineNumList <- List.filter (fun x -> x <> v) offlineNumList
+        member this.removeOnlineNumList(v:int) = onlineNumList <- List.filter (fun x -> x <> v) onlineNumList
+        member this.removeOfflineStrList(v:string) = offlineStrList <- List.filter (fun x -> x <> v) offlineStrList
+        member this.removeOnlineStrList(v:string) = onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
         
     ///<summary>重複なしリスト</summary>
     type UniqueList() =
@@ -539,6 +515,9 @@ namespace Aqualis
         member _.list with get() = vlist
         member _.clear() =
             vlist <- []
+        ///<summary>変数が存在するか検証</summary>
+        member _.exists(name_:string) =
+            List.exists (fun (etyp,atyp,name,cst) -> name_=name) vlist
         ///<summary>変数が存在するか検証</summary>
         member _.exists(etyp_,atyp_,name_,cst_) =
             List.exists (fun (etyp,atyp,name,cst) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist

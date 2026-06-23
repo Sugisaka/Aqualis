@@ -507,7 +507,7 @@ namespace Aqualis
             ///<summary>指定した範囲でループ</summary>
             static member rangeHS (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 //カウンター変数の取得
-                let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                 let i = Var(It 4, iname, NaN)
                 //上に20.0破線のスペースを作る
                 expr.extendLifeLine 20.0
@@ -540,7 +540,7 @@ namespace Aqualis
             static member range_exitHS (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
@@ -554,7 +554,7 @@ namespace Aqualis
                     c.comment(label+" continue")
                     returnVar()
                 |_ ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar s
+                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let label = gotoLabel.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)

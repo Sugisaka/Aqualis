@@ -67,21 +67,21 @@ namespace Aqualis
                 
             ///<summary>整数型1次元配列を生成</summary>
             static member I01 name code = 
-                let x,returnVar = programList[prIndex].i1.getVar name
+                let x,returnVar = programList[prIndex].i1.getVar (name,It 4,A1 0)
                 let y = num1(It 4,Var1(A1 0,x))
                 code y
                 returnVar()
                 
             ///<summary>実数型1次元配列を生成</summary>
             static member D01 name code = 
-                let x,returnVar = programList[prIndex].d1.getVar name
+                let x,returnVar = programList[prIndex].d1.getVar (name,Dt,A1 0)
                 let y = num1(Dt,Var1(A1 0,x))
                 code y
                 returnVar()
                 
             ///<summary>複素数型1次元配列を生成</summary>
             static member Z01 name code = 
-                let x,returnVar = programList[prIndex].z1.getVar name
+                let x,returnVar = programList[prIndex].z1.getVar (name,Zt,A1 0)
                 let y = num1(Zt,Var1(A1 0,x))
                 code y
                 returnVar()
@@ -175,21 +175,21 @@ namespace Aqualis
                 
             ///<summary>整数型2次元配列を生成</summary>
             static member I02 (name:string) code = 
-                let x,returnVar = programList[prIndex].i2.getVar name
+                let x,returnVar = programList[prIndex].i2.getVar (name,It 4,A2(0,0))
                 let y = num2(It 4,Var2(A2(0,0),x))
                 code y
                 returnVar()
                 
             ///<summary>実数型2次元配列を生成</summary>
             static member D02 (name:string) code = 
-                let x,returnVar = programList[prIndex].d2.getVar name
+                let x,returnVar = programList[prIndex].d2.getVar (name,Dt,A2(0,0))
                 let y = num2(Dt,Var2(A2(0,0),x))
                 code y
                 returnVar()
                 
             ///<summary>複素数型2次元配列を生成</summary>
             static member Z02 (name:string) code = 
-                let x,returnVar = programList[prIndex].z2.getVar name
+                let x,returnVar = programList[prIndex].z2.getVar (name,Zt,A2(0,0))
                 let y = num2(Zt,Var2(A2(0,0),x))
                 code y
                 returnVar()
@@ -283,21 +283,21 @@ namespace Aqualis
                 
             ///<summary>整数型3次元配列を生成</summary>
             static member I03 (name:string) code = 
-                let x,returnVar = programList[prIndex].i3.getVar name
+                let x,returnVar = programList[prIndex].i3.getVar (name,It 4,A3(0,0,0))
                 let y = num3(It 4,Var3(A3(0,0,0),x))
                 code y
                 returnVar()
                 
             ///<summary>実数型3次元配列を生成</summary>
             static member D03 (name:string) code = 
-                let x,returnVar = programList[prIndex].d3.getVar name
+                let x,returnVar = programList[prIndex].d3.getVar (name,Dt,A3(0,0,0))
                 let y = num3(Dt,Var3(A3(0,0,0),x))
                 code y
                 returnVar()
                 
             ///<summary>複素数型3次元配列を生成</summary>
             static member Z03 (name:string) code = 
-                let x,returnVar = programList[prIndex].z3.getVar name
+                let x,returnVar = programList[prIndex].z3.getVar (name,Zt,A3(0,0,0))
                 let y = num3(Zt,Var3(A3(0,0,0),x))
                 code y
                 returnVar()
