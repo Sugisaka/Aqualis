@@ -62,7 +62,7 @@ namespace Aqualis
                             |RStr t ->
                                 t
                             |RNvr x when x.etype = It 4 ->
-                                "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
+                                "%0" + programList[prIndex].numFormat.iFormat.ToString() + "d"
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")

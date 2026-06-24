@@ -22,7 +22,7 @@ namespace Aqualis
             r()
         static member I name = fun code -> 
             let c,r = programList[prIndex].i0.getVar (name,It 4,A0)
-            code <| num0(Var(Zt, c, NaN))
+            code <| num0(Var(It 4, c, NaN))
             r()
         static member D name = fun code ->
             let c,r = programList[prIndex].d0.getVar (name,Dt,A0)
