@@ -11,7 +11,7 @@ namespace Aqualis
     ///<summary>ファイル入出力</summary>
     type io () =
         
-        static member private fileAccess (filename:exprString) readmode isbinary code =
+        static member private fileAccess (filename:exprString,intDigit:option<int>) readmode isbinary code =
             match programList[prIndex].language with
             |Fortran ->
                 ch.f <| fun fp ->
@@ -22,7 +22,7 @@ namespace Aqualis
                             |RStr _ -> 
                                 "A"
                             |RNvr x when x.etype = It 4 -> 
-                                "I" + programList[prIndex].numFormat.iFormat.ToString()
+                                "I" + match intDigit with |None -> programList[prIndex].numFormat.iFormat.ToString() |Some n -> n.ToString()
                             |_ -> 
                                 "")
                         |> fun s -> String.Join(",",s)
@@ -62,7 +62,7 @@ namespace Aqualis
                             |RStr t ->
                                 t
                             |RNvr x when x.etype = It 4 ->
-                                "%0" + programList[prIndex].numFormat.iFormat.ToString() + "d"
+                                "%0" + (match intDigit with |None -> programList[prIndex].numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
@@ -143,7 +143,7 @@ namespace Aqualis
                             |RStr t ->
                                 t
                             |RNvr x when x.etype = It 4 ->
-                                "%" + programList[prIndex].numFormat.iFormat.ToString "00" + "d"
+                                "%0" + (match intDigit with |None -> programList[prIndex].numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
@@ -889,12 +889,20 @@ namespace Aqualis
             
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
         static member fileOutput (filename:exprString) = fun code ->
-            io.fileAccess filename false false <| fun fp ->
+            io.fileAccess (filename,None) false false <| fun fp ->
+                code(io.Write1 fp)
+        ///<summary>ファイル出力（タブ区切りデータ）</summary>
+        static member fileOutput (filename:exprString,intDigit:int) = fun code ->
+            io.fileAccess (filename,Some intDigit) false false <| fun fp ->
                 code(io.Write1 fp)
                 
         ///<summary>ファイル出力（コード出力）</summary>
         static member codeOutput (filename:exprString) = fun code ->
-            io.fileAccess filename false false <| fun fp ->
+            io.fileAccess (filename,None) false false <| fun fp ->
+                code(io.Write2 fp)
+        ///<summary>ファイル出力（コード出力）</summary>
+        static member codeOutput (filename:exprString,intDigit:int) = fun code ->
+            io.fileAccess (filename,Some intDigit) false false <| fun fp ->
                 code(io.Write2 fp)
                 
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
@@ -905,7 +913,11 @@ namespace Aqualis
         
         ///<summary>バイナリファイル出力</summary>
         static member binfileOutput (filename:exprString) = fun code ->
-            io.fileAccess filename false true <| fun fp ->
+            io.fileAccess (filename,None) false true <| fun fp ->
+                code(io.Write_bin fp)
+        ///<summary>バイナリファイル出力</summary>
+        static member binfileOutput (filename:exprString,intDigit:int) = fun code ->
+            io.fileAccess (filename,Some intDigit) false true <| fun fp ->
                 code(io.Write_bin fp)
 
         ///<summary>バイナリファイル出力</summary>
@@ -914,7 +926,12 @@ namespace Aqualis
         ///<summary>ファイル読み込み</summary>
         static member fileInput (filename:exprString) = fun code ->
             ch.i <| fun iostat ->
-                io.fileAccess filename true false <| fun fp ->
+                io.fileAccess (filename,None) true false <| fun fp ->
+                    code(io.Read fp iostat)
+        ///<summary>ファイル読み込み</summary>
+        static member fileInput (filename:exprString,intDigit:int) = fun code ->
+            ch.i <| fun iostat ->
+                io.fileAccess (filename,Some intDigit) true false <| fun fp ->
                     code(io.Read fp iostat)
                     
         ///<summary>ファイル読み込み</summary>
@@ -923,27 +940,32 @@ namespace Aqualis
         ///<summary>バイナリファイルの読み込み</summary>
         static member binfileInput (filename:exprString) = fun code ->
             ch.i <| fun iostat ->
-                io.fileAccess filename true true <| fun fp ->
+                io.fileAccess (filename,None) true true <| fun fp ->
+                    code(io.Read_bin fp iostat)
+        ///<summary>バイナリファイルの読み込み</summary>
+        static member binfileInput (filename:exprString,intDigit:int) = fun code ->
+            ch.i <| fun iostat ->
+                io.fileAccess (filename,Some intDigit) true true <| fun fp ->
                     code(io.Read_bin fp iostat)
                     
         ///<summary>バイナリファイルの読み込み</summary>
         static member binfileInput (filename:string) = fun code -> io.binfileInput (st filename) code
-                
-        ///<summary>テキストファイルの行数をカウント</summary>
-        static member file_LineCount (counter:num0) (filename:exprString) varlist =
+        
+        ///<summary>ファイルの読み込み</summary>
+        static member file_Read (filename:exprString) = fun varlist code ->
             ch.i <| fun iostat ->
-                io.fileAccess filename true false <| fun fp ->
+                io.fileAccess (filename,None) true false <| fun fp ->
                     iter.loop <| fun (ext,i) ->
                         io.Read fp iostat varlist
                         br.branch <| fun b ->
                             b.IF (iostat .< 0) <| fun () ->
-                                counter <== i-1
                                 ext()
-                                
+                            b.EL <| fun () ->
+                                code(i)
         ///<summary>ファイルの読み込み</summary>
-        static member file_Read (filename:exprString) varlist code =
+        static member file_Read (filename:exprString,intDigit:int) = fun varlist code ->
             ch.i <| fun iostat ->
-                io.fileAccess filename true false <| fun fp ->
+                io.fileAccess (filename,Some intDigit) true false <| fun fp ->
                     iter.loop <| fun (ext,i) ->
                         io.Read fp iostat varlist
                         br.branch <| fun b ->
