@@ -161,44 +161,6 @@ namespace Aqualis
             |Some w -> 
                 w.Write s
                 
-        ///<summary>適切な位置で改行してコード出力</summary>
-        member this.codefold (s:string,cm:string,writer:string->unit,sp:int) =
-            //文字列に空白文字しか含まれていなければtrue
-            let isallspace (code:string) =
-                let mutable f=true
-                for s in code do if s<>' ' then f<-false else ()
-                f
-            let slist = s.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
-            for str in slist do
-                if str <> "" then
-                    let rec wt (code:string) =
-                        if code.Length>sp then 
-                            //何文字目で改行するか判断
-                            let instring (s:string) = 
-                                let m = Array.fold (fun acc (x:char) -> if x='\"' then acc + 1 else acc) 0 (s.ToCharArray())
-                                m%2=1
-                            let sp2 = 
-                                let rec count c =
-                                    if code[c-1]=' ' || code[c-1]=',' || code[c-1]=')' || code[c-1]='(' || code[c-1]='+' || code[c-1]='*' && (c-2<0 || code[c-2]<>'*') && (c>=code.Length || code[c]<>'*') || code[c-1]='/' && code[c]<>')' && code[c]<>'=' then 
-                                        c
-                                    else 
-                                        count (c-1)
-                                if instring (code.Substring(0,sp)) then sp else count sp
-                            if isallspace(code.Substring(sp2)) then
-                                //残りが空白文字だけなのでこの行で終わり
-                                writer(code.Substring(0,sp2) + cm + "\n")
-                            else
-                                //まだコードが続くので継続文字を入れて改行
-                                if instring (code.Substring(0,sp2)) then
-                                    writer(code.Substring(0,sp2) + "\" &" + "\n")
-                                    wt (this.indent.space + "//\"" + code.Substring(sp2))
-                                else
-                                    writer(code.Substring(0,sp2) + " &" + "\n")
-                                    wt (this.indent.space + code.Substring(sp2))
-                        else
-                            writer(code + cm + "\n")
-                    wt (this.indent.space + str)
-                    
         ///<summary>コード出力(インデントなし・改行なし)</summary>
         member this.codewrite (ss:string) = 
             match lan with

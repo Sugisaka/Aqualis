@@ -32,63 +32,31 @@ module htmlio =
     // let mutable wrBody = OptionWriter()
     // let mutable wrJS = OptionWriter()
     
+    let private withProgramIndex index code =
+        let oldPrIndex = prIndex
+        try
+            prIndex <- index
+            code ()
+        finally
+            prIndex <- oldPrIndex
+            
     /// HTMLファイルへの書き込み
-    let switchMain code =
-        let prIndex_temp = prIndex
-        prIndex <- 0
-        let p = code()
-        prIndex <- prIndex_temp
-        p
+    let switchMain code = withProgramIndex 0 code
     /// HTMLファイルbodyタグ内への書き込み
-    let switchBody code =
-        let prIndex_temp = prIndex
-        prIndex <- 1
-        let p = code()
-        prIndex <- prIndex_temp
-        p
+    let switchBody code = withProgramIndex 1 code
     /// HTMLファイルdraw関数への書き込み
-    let switchJSMain code =
-        let prIndex_temp = prIndex
-        prIndex <- 2
-        let p = code()
-        prIndex <- prIndex_temp
-        p
+    let switchJSMain code = withProgramIndex 2 code
     /// HTMLファイルJavaScriptコードの書き込み
-    let switchAnimationSeq code =
-        let prIndex_temp = prIndex
-        prIndex <- 3
-        let p = code()
-        prIndex <- prIndex_temp
-        p
+    let switchAnimationSeq code = withProgramIndex 3 code
     /// アニメーション開始コードの書き込み
-    let switchJSAnimationStart code =
-        let prIndex_temp = prIndex
-        prIndex <- 4
-        let p = code()
-        prIndex <- prIndex_temp
-        p
+    let switchJSAnimationStart code = withProgramIndex 4 code
     /// アニメーション連結コードの書き込み
-    let switchJSAnimationSeqReset code =
-        let prIndex_temp = prIndex
-        prIndex <- 5
-        let p = code()
-        prIndex <- prIndex_temp
-        p
+    let switchJSAnimationSeqReset code = withProgramIndex 5 code
     /// アニメーション初期化コードの書き込み
-    let switchJSAnimationReset code =
-        let prIndex_temp = prIndex
-        prIndex <- 6
-        let p = code()
-        prIndex <- prIndex_temp
-        p
+    let switchJSAnimationReset code = withProgramIndex 6 code
     /// 自動開始アニメーション実行コードの書き込み
-    let switchAutoAnimation code =
-        let prIndex_temp = prIndex
-        prIndex <- 7
-        let p = code()
-        prIndex <- prIndex_temp
-        p
-        
+    let switchAutoAnimation code = withProgramIndex 7 code
+    
     let mutable animationButtonList:list<string*string*int*int> = []
     let mutable audioList:string list = []
     /// 図面カウンタ

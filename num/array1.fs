@@ -267,11 +267,16 @@ namespace Aqualis
                 ! "****************************************************"
                 
     ///<summary>数値型1次元配列</summary>
-    type num1 (typ:Etype,x:Expr1) =
+    type num1 (typ:Etype,x:Expr1, ?context:GenerationContext) =
         inherit base1(typ,x)
+        let context =
+            match context with
+            |Some value -> Some value
+            |None -> GenerationContext.TryCurrent
         new (typ,size,name,para) =
             programList[prIndex].var.setVar(typ,size,name,para)
-            num1(typ,Var1(size,name))
+            num1(typ,Var1(size,name), ?context=GenerationContext.TryCurrent)
+        member _.Context = context
         member this.etype with get() = typ
         member this.Item with get(i:num0) = this.Idx1 i
         member this.Item with get(i:int) = this.Idx1(I i)
@@ -380,6 +385,17 @@ namespace Aqualis
         static member (./) (x:num1,y:int) = num1(x.etype%%It 4,Arx1(x.size1, fun i -> x[i]./y))
         
         static member (<==) (v1:num1,v2:num1) =
+            let context =
+                match v1.Context with
+                |Some left ->
+                    match v2.Context with
+                    |Some right when not (obj.ReferenceEquals(left, right)) ->
+                        invalidOp "Values from different GenerationContext instances cannot be assigned."
+                    |_ -> left
+                |None -> invalidOp "The assignment target is not associated with a GenerationContext."
+            let programList = [context.CurrentProgram]
+            let prIndex = 0
+            let writein text = context.CurrentProgram.codewritein text
             if debug.debugMode then
                 error.inc()
                 !("***debug array1 access check: "+error.ID+"*****************************")
@@ -417,6 +433,17 @@ namespace Aqualis
                 |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
                 
         static member (<==) (v1:num1,v2:num0) =
+            let context =
+                v1.Context
+                |> Option.defaultWith (fun () ->
+                    invalidOp "The assignment target is not associated with a GenerationContext.")
+            match v2.Context with
+            |Some right when not (obj.ReferenceEquals(context, right)) ->
+                invalidOp "Values from different GenerationContext instances cannot be assigned."
+            |_ -> ()
+            let programList = [context.CurrentProgram]
+            let prIndex = 0
+            let writein text = context.CurrentProgram.codewritein text
             match v1.Expr with
             |Var1(_,x) ->
                 match programList[prIndex].language with

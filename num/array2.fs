@@ -356,11 +356,16 @@ namespace Aqualis
                 ! "****************************************************"
                 
     ///<summary>数値型1次元配列</summary>
-    type num2 (typ:Etype,x:Expr2) =
+    type num2 (typ:Etype,x:Expr2, ?context:GenerationContext) =
         inherit base2(typ,x)
+        let context =
+            match context with
+            |Some value -> Some value
+            |None -> GenerationContext.TryCurrent
         new (typ,size,name,para) =
             programList[prIndex].var.setVar(typ,size,name,para)
-            num2(typ,Var2(size,name))
+            num2(typ,Var2(size,name), ?context=GenerationContext.TryCurrent)
+        member _.Context = context
         member this.etype with get() = typ
         member this.Item with get(i:num0,j:num0) = this.Idx2(i,j)
         member this.Item with get(i:num0,j:int) = this.Idx2(i,I j)
@@ -554,6 +559,17 @@ namespace Aqualis
         static member (./) (x:num2,y:int) = num2(x.etype%%It 4,Arx2(x.size1, x.size2, fun (i,j) -> x[i,j]./y))
         
         static member (<==) (v1:num2,v2:num2) =
+            let context =
+                match v1.Context with
+                |Some left ->
+                    match v2.Context with
+                    |Some right when not (obj.ReferenceEquals(left, right)) ->
+                        invalidOp "Values from different GenerationContext instances cannot be assigned."
+                    |_ -> left
+                |None -> invalidOp "The assignment target is not associated with a GenerationContext."
+            let programList = [context.CurrentProgram]
+            let prIndex = 0
+            let writein text = context.CurrentProgram.codewritein text
             if debug.debugMode then
                 error.inc()
                 !("***debug array1 access check: "+error.ID+"*****************************")
@@ -592,6 +608,17 @@ namespace Aqualis
                 match programList[prIndex].language with
                 |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> v1[i,j] <== v2[i,j]
         static member (<==) (v1:num2,v2:num0) =
+            let context =
+                v1.Context
+                |> Option.defaultWith (fun () ->
+                    invalidOp "The assignment target is not associated with a GenerationContext.")
+            match v2.Context with
+            |Some right when not (obj.ReferenceEquals(context, right)) ->
+                invalidOp "Values from different GenerationContext instances cannot be assigned."
+            |_ -> ()
+            let programList = [context.CurrentProgram]
+            let prIndex = 0
+            let writein text = context.CurrentProgram.codewritein text
             match v1.Expr with
             |Var2(_,x) ->
                 match programList[prIndex].language with

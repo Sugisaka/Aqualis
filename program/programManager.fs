@@ -7,6 +7,7 @@
 namespace Aqualis
     
     open System.IO
+    open System.Threading
     
     type program(outputdir,pjname,lang:Language) =
         
@@ -191,6 +192,73 @@ namespace Aqualis
             File.ReadAllText(outputdir+"\\"+pjname)
         member _.delete() = cwriter.delete()
         member _.str with get() = structData
+
+    /// State owned by one code-generation operation.
+    ///
+    /// The current context is stored in AsyncLocal only to keep the existing DSL
+    /// syntax (for example, x <== y) source-compatible. Values created by the DSL
+    /// capture this instance and assignments use the captured context.
+    type GenerationContext(programs: program list) =
+        static let current = AsyncLocal<GenerationContext option>()
+        let programs = programs |> List.toArray
+        let mutable currentIndex = 0
+        let mutable displaySection = false
+        let mutable isOmpUsed = false
+        let mutable isOaccUsed = false
+        let mutable isParMode = false
+        let functions = ResizeArray<string>()
+
+        do
+            if programs.Length = 0 then
+                invalidArg (nameof programs) "At least one program is required."
+
+        member _.Programs = programs
+
+        member _.CurrentIndex = currentIndex
+
+        member _.CurrentProgram = programs[currentIndex]
+
+        member _.DisplaySection
+            with get () = displaySection
+            and set value = displaySection <- value
+
+        member _.IsOpenMpUsed
+            with get () = isOmpUsed
+            and set value = isOmpUsed <- value
+
+        member _.IsOpenAccUsed
+            with get () = isOaccUsed
+            and set value = isOaccUsed <- value
+
+        member _.IsParallelMode
+            with get () = isParMode
+            and set value = isParMode <- value
+
+        member _.Functions = functions
+
+        member _.DistinctFunctions =
+            functions |> Seq.distinct |> Seq.toList
+
+        member _.WithProgram(index: int, code: unit -> 'T) : 'T =
+            if index < 0 || index >= programs.Length then
+                invalidArg (nameof index) $"Program index {index} is outside the valid range."
+
+            let previousIndex = currentIndex
+            try
+                currentIndex <- index
+                code ()
+            finally
+                currentIndex <- previousIndex
+
+        member this.Activate(code: unit -> 'T) : 'T =
+            let previous = current.Value
+            try
+                current.Value <- Some this
+                code ()
+            finally
+                current.Value <- previous
+
+        static member TryCurrent = current.Value
         
     [<AutoOpen>]
     module aqualisProgram =
@@ -221,15 +289,33 @@ namespace Aqualis
                     
         let mutable prIndex = 0
         
-        let makeProgram(programInfo:list<string*string*Language>) code =
-            let programList_temp = programList
-            let prIndex_temp = prIndex
-            programList <- [for x in programInfo -> program x]
-            prIndex <- 0
-            let result = code()
-            programList <- programList_temp
-            prIndex <- prIndex_temp
-            result
+        let private withProgramState newProgramList newPrIndex code =
+            let oldProgramList = programList
+            let oldPrIndex = prIndex
+            try
+                programList <- newProgramList
+                prIndex <- newPrIndex
+                code ()
+            finally
+                programList <- oldProgramList
+                prIndex <- oldPrIndex
+                
+        let makeProgramWithContext
+            (programInfo: list<string * string * Language>)
+            (code: GenerationContext -> 'T)
+            : 'T =
+            let programs =
+                programInfo
+                |> List.map program
+            let context = GenerationContext programs
+
+            context.Activate(fun () ->
+                withProgramState programs 0 (fun () -> code context))
+
+        /// Backward-compatible entry point. New code should prefer
+        /// makeProgramWithContext when it needs direct access to the context.
+        let makeProgram (programInfo: list<string * string * Language>) (code: unit -> 'T) : 'T =
+            makeProgramWithContext programInfo (fun _ -> code ())
             
         let write(s:string) = programList[prIndex].codewrite s
         let writei(s:string) = programList[prIndex].codewritei s

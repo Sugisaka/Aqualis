@@ -30,9 +30,14 @@ namespace Aqualis
             |RNvr t -> t.etype
             
 
-    type bool0(x:expr) =
+    type bool0(x:expr, ?context:GenerationContext) =
+        let context = defaultArg (context |> Option.map Some) GenerationContext.TryCurrent
         member _.Expr with get() = x
-        member _.code with get() = x.eval (programList[prIndex])
+        member _.Context = context
+        member _.code with get() =
+            match context with
+            |Some ctx -> x.eval ctx.CurrentProgram
+            |None -> x.eval (programList[prIndex])
         static member (++) (x:string,y:bool0) = exprString x ++ exprString y
         static member (++) (x:bool0,y:string) = exprString x ++ exprString y
         static member (++) (x:bool0,y:bool0) = exprString x ++ exprString y
@@ -112,13 +117,19 @@ namespace Aqualis
         static member (.>=) (v1:bool0,v2:int) = v1 .>= num0(Int v2)
         
     ///<summary>変数（数値データ）クラス</summary>
-    and num0(x:expr) =
+    and num0(x:expr, ?context:GenerationContext) =
+        let context = defaultArg (context |> Option.map Some) GenerationContext.TryCurrent
         
         member this.Expr with get() = x
+
+        member _.Context = context
         
         member this.etype with get() = x.etype
         
-        member this.code with get() = x.eval (programList[prIndex])
+        member this.code with get() =
+            match context with
+            |Some ctx -> x.eval ctx.CurrentProgram
+            |None -> x.eval (programList[prIndex])
         
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:num0,y:num0) = 
@@ -225,13 +236,27 @@ namespace Aqualis
         static member (.>=) (x:num0,y:double) = x .>= num0(Dbl y)
         
         ///<summary>代入</summary>
-        static member (<==) (x:num0,y:num0) = expr.subst x.Expr y.Expr (programList[prIndex])
+        static member (<==) (x:num0,y:num0) =
+            let context =
+                match x.Context with
+                |Some left ->
+                    match y.Context with
+                    |Some right when not (obj.ReferenceEquals(left, right)) ->
+                        invalidOp "Values from different GenerationContext instances cannot be assigned."
+                    |_ -> left
+                |None ->
+                    invalidOp "The assignment target is not associated with a GenerationContext."
+            expr.subst x.Expr y.Expr context.CurrentProgram
         static member (<==) (x:num0,y:int) = x <== num0(Int y)
         static member (<==) (x:num0,y:double) = x <== num0(Dbl y)
         static member (<==) (x:num0,y:exprString) = 
-            match programList[prIndex].language with 
+            let context =
+                x.Context
+                |> Option.defaultWith (fun () ->
+                    invalidOp "The assignment target is not associated with a GenerationContext.")
+            match context.CurrentProgram.language with
             |PHP ->
-                expr.subst x.Expr (Var(Nt,y.toString(".",StrQuotation),NaN)) (programList[prIndex])
+                expr.subst x.Expr (Var(Nt,y.toString(".",StrQuotation),NaN)) context.CurrentProgram
             |_ ->
                 printfn "この言語では文字列を含む値を代入できません"
         static member (<==) (x:num0,y:string) = x <== exprString y
