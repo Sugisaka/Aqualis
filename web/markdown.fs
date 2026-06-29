@@ -3,6 +3,39 @@ namespace Aqualis
 open System.IO
 open System.Text.RegularExpressions
 
+module private MarkdownRegex =
+    let private options =
+        RegexOptions.Compiled ||| RegexOptions.CultureInvariant
+
+    let private create pattern =
+        Regex(pattern, options, System.TimeSpan.FromMilliseconds 500.0)
+
+    // Inline constructs are ordered from the most structurally specific to the
+    // least specific. Regex.Replace walks the input once and selects the first
+    // alternative that matches at each position.
+    let inlineSyntax =
+        create (
+            @"(?<code>`(?<codeText>[^`]*)`)" +
+            @"|(?<strong>\*\*(?<strongText>[^*]+)\*\*)" +
+            @"|(?<italic>\*(?<italicText>[^*]+)\*)" +
+            @"|(?<math>\$(?<mathText>.+?)\$)" +
+            @"|(?<markdownLink>(?<!!)\[(?<markdownLabel>.*?)\]\((?<markdownUrl>.*?)\))" +
+            @"|(?<wikiSectionLabel>(?<!!)\[\[(?<wikiSectionLabelUrl>[^#\|]+)#(?<wikiSectionLabelSection>[^|\]]+)\|(?<wikiSectionLabelText>[^\]]+)\]\])" +
+            @"|(?<wikiLabel>(?<!!)\[\[(?<wikiLabelUrl>[^#\|]+)\|(?<wikiLabelText>[^\]]+)\]\])" +
+            @"|(?<wikiSection>(?<!!)\[\[(?<wikiSectionUrl>[^#\|]+)#(?<wikiSectionName>[^\]]+)\]\])" +
+            @"|(?<wiki>(?<!!)\[\[(?<wikiUrl>[^\]]+)\]\])"
+        )
+    let codeBlockStart = create @"^```\s*([A-Za-z0-9_+-]+)\s*$"
+    let codeBlockEnd = create @"^```\s*$"
+    let markdownImage = create @"!\[([^\]]*)\]\(([^)]+)\)"
+    let wikiImage = create @"!\[\[([^\]]+)\]\]"
+    let heading = create @"^(?<marks>#{1,5})\s+(?<text>.+)$"
+    let unorderedList = create @"^(\s*)-\s+(.*)$"
+    let orderedList = create @"^( *)(\d+)\.\s+(.*)$"
+    let tableCell = create @"\|([^|]*)"
+    let tableSeparator = create @"^:?-{3,}:?$"
+    let mathBlockDelimiter = create @"^\$\$\s*$"
+
 type MarkDownContents =
     /// 箇条書き（インデント）
     |UL of int
@@ -51,181 +84,114 @@ type MarkDown<'a> =
 
 [<AutoOpen>]
 module markDown =
+    let private closeAllStack (md:MarkDown<'a>) data stack =
+        List.fold (fun d (x:MarkDownContents) ->
+            match x with
+            |UL _ -> md.CloseUL d
+            |OL _ -> md.CloseOL d
+            |Math -> md.CloseMath d
+            |Table -> md.CloseTable d
+            |CodeBlock _ -> md.CloseCodeBlock d) data stack
+
+    let private renderInlineMatch (md:MarkDown<'a>) (m:Match) =
+        if m.Groups["code"].Success then
+            md.InlineCode m.Groups["codeText"].Value
+        elif m.Groups["strong"].Success then
+            md.Strong m.Groups["strongText"].Value
+        elif m.Groups["italic"].Success then
+            md.Italic m.Groups["italicText"].Value
+        elif m.Groups["math"].Success then
+            md.InlineMath m.Groups["mathText"].Value
+        elif m.Groups["markdownLink"].Success then
+            md.Link (Some m.Groups["markdownLabel"].Value) m.Groups["markdownUrl"].Value None
+        elif m.Groups["wikiSectionLabel"].Success then
+            md.Link
+                (Some m.Groups["wikiSectionLabelText"].Value)
+                m.Groups["wikiSectionLabelUrl"].Value
+                (Some m.Groups["wikiSectionLabelSection"].Value)
+        elif m.Groups["wikiLabel"].Success then
+            md.Link (Some m.Groups["wikiLabelText"].Value) m.Groups["wikiLabelUrl"].Value None
+        elif m.Groups["wikiSection"].Success then
+            md.Link None m.Groups["wikiSectionUrl"].Value (Some m.Groups["wikiSectionName"].Value)
+        elif m.Groups["wiki"].Success then
+            let url = m.Groups["wikiUrl"].Value
+            md.Link (Some url) url None
+        else
+            m.Value
+
+    let private isTableSeparator (cells:string list) =
+        let rec allButLastAreSeparators (remaining:string list) =
+            match remaining with
+            |[]
+            |[_] -> true
+            |cell::rest ->
+                MarkdownRegex.tableSeparator.IsMatch(cell) &&
+                allButLastAreSeparators rest
+        allButLastAreSeparators cells
+
     let rec readmd (md:MarkDown<'a>) (rd:StreamReader) (stack:list<MarkDownContents>) (data:list<'a>) =
         /// 閉じていないタグをすべて閉じる
-        let closeAllStack data stack =
-            List.fold (fun d (x:MarkDownContents) -> 
-                match x with
-                |UL _ -> md.CloseUL d
-                |OL _ -> md.CloseOL d
-                |Math -> md.CloseMath d
-                |Table -> md.CloseTable d
-                |CodeBlock _ -> md.CloseCodeBlock d ) data stack
-                
         match rd.ReadLine() with
         |null -> 
             rd.Close()
-            closeAllStack data stack
+            closeAllStack md data stack
         |code ->
-            let convertedCode =
+            let normalizedCode =
                 match stack with
                 |CodeBlock _ :: _ ->
                     code
                 |_ ->
                     code
-                    |> fun s -> s.Replace("\t", "  ")
-                    |> fun s -> s.Replace("\\]", "]")
-                    |> fun s -> s.Replace("\\[", "[")
-                    |> fun s -> 
+                        .Replace("\t", "  ")
+                        .Replace("\\]", "]")
+                        .Replace("\\[", "[")
                         // 強調
-                        let pattern = @"\*\*([^*]+)\*\*"
-                        let m = Regex.Match(s, pattern)
-                        if m.Success then
-                            Regex.Replace(s, pattern, MatchEvaluator (fun m -> md.Strong m.Groups[1].Value))
-                        else
-                            s
-                    |> fun s -> 
-                        // 斜体
-                        let pattern = @"\*([^*]+)\*"
-                        let m = Regex.Match(s, pattern)
-                        if m.Success then
-                            Regex.Replace(s, pattern, MatchEvaluator (fun m -> md.Italic m.Groups[1].Value))
-                        else
-                            s 
-                    |> fun s -> 
-                        // インライン数式
-                        let pattern = @"\$(.+?)\$"
-                        let m = Regex.Match(s, pattern)
-                        if m.Success then
-                            Regex.Replace(s, pattern, MatchEvaluator (fun m -> md.InlineMath m.Groups[1].Value))
-                        else
-                            s
-                    |> fun s -> 
-                        // インラインコード
-                        if not <| Regex.IsMatch(s, @"^```\s*([A-Za-z0-9_+-]+)\s*$") && not <| Regex.IsMatch(s, @"^```\s*$") then 
-                            let pattern = @"`([^`]*)`"
-                            let m = Regex.Match(s, pattern)
-                            if m.Success then
-                                Regex.Replace(s, pattern, MatchEvaluator (fun m -> md.InlineCode m.Groups[1].Value))
-                            else
-                                s
-                        else
-                            s
-                    |> fun s -> 
-                        // リンク
-                        let pattern = @"(?<!!)\[(.*?)\]\((.*?)\)"
-                        let m = Regex.Match(s, pattern)
-                        let p = Regex.Match(s, @"!\[([^\]]*)\]\(([^)]+)\)")
-                        Regex.Replace(
-                            s,
-                            pattern,
-                            MatchEvaluator(fun m ->
-                                let lab = m.Groups.[1].Value
-                                let url = m.Groups.[2].Value
-                                md.Link (Some lab) url None
-                            )
-                        )
-                    |> fun s -> 
-                        // リンク（表示テキスト指定）
-                        let pattern = @"(?<!!)\[\[([^#\|]+)\|([^\]]+)\]\]"
-                        let m = Regex.Match(s, pattern)
-                        Regex.Replace(
-                            s,
-                            pattern,
-                            MatchEvaluator(fun m ->
-                                let url = m.Groups.[1].Value
-                                let lab = m.Groups.[2].Value
-                                md.Link (Some lab) url None
-                            )
-                        )
-                    |> fun s -> 
-                        // リンク（セクション、表示テキスト指定）
-                        let pattern = @"(?<!!)\[\[([^#\|]+)#([^|\]]+)\|([^\]]+)\]\]"
-                        let m = Regex.Match(s, pattern)
-                        Regex.Replace(
-                            s,
-                            pattern,
-                            MatchEvaluator(fun m ->
-                                let url = m.Groups.[1].Value
-                                let sec = m.Groups.[2].Value
-                                let lab = m.Groups.[3].Value
-                                md.Link (Some lab) url (Some sec)
-                            )
-                        )
-                    |> fun s -> 
-                        // リンク（セクション）
-                        let pattern = @"(?<!!)\[\[([^#\|]+)#([^\]]+)\]\]"
-                        let m = Regex.Match(s, pattern)
-                        Regex.Replace(
-                            s,
-                            pattern,
-                            MatchEvaluator(fun m ->
-                                let url = m.Groups.[1].Value
-                                let sec = m.Groups.[2].Value
-                                md.Link None url (Some sec)
-                            )
-                        )
-                    |> fun s -> 
-                        // リンク
-                        let pattern = @"(?<!!)\[\[([^\]]+)\]\]"
-                        let m = Regex.Match(s, pattern)
-                        let p = Regex.Match(s, @"!\[\[([^\]]+)\]\]")
-                        Regex.Replace(
-                            s,
-                            pattern,
-                            MatchEvaluator(fun m ->
-                                let url = m.Groups.[1].Value
-                                let lab = m.Groups.[1].Value
-                                md.Link (Some lab) url None
-                            )
-                        )
-            let mh1 = Regex.Match(convertedCode, @"^#(?!#)\s+(.+)$")
-            let mh2 = Regex.Match(convertedCode, @"^##(?!#)\s+(.+)$")
-            let mh3 = Regex.Match(convertedCode, @"^###(?!#)\s+(.+)$")
-            let mh4 = Regex.Match(convertedCode, @"^####(?!#)\s+(.+)$")
-            let mh5 = Regex.Match(convertedCode, @"^#####(?!#)\s+(.+)$")
-            let mi1 = Regex.Match(convertedCode, @"!\[\[([^\]]+)\]\]")
-            let mi2 = Regex.Match(convertedCode, @"!\[([^\]]*)\]\(([^)]+)\)")
-            let mul = Regex.Match(convertedCode, @"^(\s*)-\s+(.*)$")
-            let mol = Regex.Match(convertedCode, @"^( *)(\d+)\.\s+(.*)$")
-            let mcb = Regex.Match(convertedCode, @"^```\s*([A-Za-z0-9_+-]+)\s*$")
+            let codeBlockStartMatch =
+                MarkdownRegex.codeBlockStart.Match(normalizedCode)
+            let isCodeBlockEnd =
+                MarkdownRegex.codeBlockEnd.IsMatch(normalizedCode)
+            let convertedCode =
+                match stack with
+                |CodeBlock _::_ -> normalizedCode
+                |_ when codeBlockStartMatch.Success || isCodeBlockEnd -> normalizedCode
+                |_ ->
+                    MarkdownRegex.inlineSyntax.Replace(
+                        normalizedCode,
+                        MatchEvaluator (renderInlineMatch md))
+            let headingMatch = MarkdownRegex.heading.Match(convertedCode)
+            let mi1 = MarkdownRegex.wikiImage.Match(convertedCode)
+            let mi2 = MarkdownRegex.markdownImage.Match(convertedCode)
+            let mul = MarkdownRegex.unorderedList.Match(convertedCode)
+            let mol = MarkdownRegex.orderedList.Match(convertedCode)
             let tableData = 
                 if convertedCode.StartsWith "|" && convertedCode.EndsWith "|" then
-                    Regex.Matches(convertedCode, @"\|([^|]*)")
+                    MarkdownRegex.tableCell.Matches(convertedCode)
                     |> Seq.cast<Match>
                     |> Seq.map (fun m -> m.Groups.[1].Value.Trim())
                     |> Seq.toList
                 else
                     []
-            let isTableSeparator (s:list<string>) =
-                (match s with | [] -> [] | _  -> s |> List.rev |> List.tail |> List.rev)
-                |> List.fold (fun acc cell -> 
-                    acc && Regex.IsMatch(cell, @"^:?-{3,}:?$")) true
             match convertedCode,stack with
-            |s,_ when Regex.IsMatch(s, @"^```\s*$") ->
-                readmd md rd stack.Tail (md.CloseCodeBlock data)
+            |_,CodeBlock _::rest when isCodeBlockEnd ->
+                readmd md rd rest (md.CloseCodeBlock data)
             |s,CodeBlock _::_ ->
                 readmd md rd stack (md.InsideCodeBlock s data)
             |"",_ ->
                 //閉じていないタグをすべて閉じる
-                let data2 = List.fold (fun d (x:MarkDownContents) -> 
-                    match x with
-                    |UL _ -> md.CloseUL d
-                    |OL _ -> md.CloseOL d
-                    |Math -> md.CloseMath d
-                    |Table -> md.CloseTable d
-                    |CodeBlock _ -> md.CloseCodeBlock d ) data stack
-                readmd md rd [] data2
-            |_ when mh1.Success ->
-                readmd md rd [] (md.Section1 mh1.Groups.[1].Value (closeAllStack data stack))
-            |_ when mh2.Success ->
-                readmd md rd [] (md.Section2 mh2.Groups.[1].Value (closeAllStack data stack))
-            |_ when mh3.Success ->
-                readmd md rd [] (md.Section3 mh3.Groups.[1].Value (closeAllStack data stack))
-            |_ when mh4.Success ->
-                readmd md rd [] (md.Section4 mh4.Groups.[1].Value (closeAllStack data stack))
-            |_ when mh5.Success ->
-                readmd md rd [] (md.Section5 mh5.Groups.[1].Value (closeAllStack data stack))
+                readmd md rd [] (closeAllStack md data stack)
+            |_ when headingMatch.Success ->
+                let level = headingMatch.Groups["marks"].Value.Length
+                let text = headingMatch.Groups["text"].Value
+                let closedData = closeAllStack md data stack
+                let sectionData =
+                    match level with
+                    |1 -> md.Section1 text closedData
+                    |2 -> md.Section2 text closedData
+                    |3 -> md.Section3 text closedData
+                    |4 -> md.Section4 text closedData
+                    |5 -> md.Section5 text closedData
+                    |_ -> closedData
+                readmd md rd [] sectionData
             |_ when mi1.Success ->
                 readmd md rd stack (md.Image mi1.Groups.[1].Value data)
             |_ when mi2.Success ->
@@ -236,14 +202,14 @@ module markDown =
                 readmd md rd stack (md.TableData tableData data)
             |_,_ when tableData.Length>0 ->
                 readmd md rd (Table::stack) (md.TableHeader tableData (md.OpenTable data))
-            |_ when mcb.Success ->
-                let lang = mcb.Groups.[1].Value
+            |_ when codeBlockStartMatch.Success ->
+                let lang = codeBlockStartMatch.Groups.[1].Value
                 readmd md rd (CodeBlock lang::stack) (md.OpenCodeBlock lang data)
-            |s,Math ::_ when Regex.IsMatch(s, @"^\$\$\s*$") ->
+            |s,Math ::_ when MarkdownRegex.mathBlockDelimiter.IsMatch(s) ->
                 readmd md rd stack.Tail (md.CloseMath data)
             |s,Math ::_ ->
                 readmd md rd stack (md.InsideMath s data)
-            |s,_ when Regex.IsMatch(s, @"^\$\$\s*$") ->
+            |s,_ when MarkdownRegex.mathBlockDelimiter.IsMatch(s) ->
                 readmd md rd (Math::stack) (md.OpenMath data)
             |_ when mul.Success ->
                 let i = mul.Groups.[1].Value.Length/2

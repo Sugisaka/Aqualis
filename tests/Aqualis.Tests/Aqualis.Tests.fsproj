@@ -22,6 +22,7 @@
     <Compile Include="GenerationContextTests.fs" />
     <Compile Include="AssignmentTests.fs" />
     <Compile Include="GoldenFileTests.fs" />
+    <Compile Include="MarkdownTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
