@@ -259,18 +259,6 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
             |LaTeX ->
-                let double0string_format_F = 
-                    let a,b = programList[prIndex].numFormat.dFormat
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                let format = 
-                    lst
-                    |> List.map (fun b -> 
-                        match b.etype with
-                          |It _ ->"I"+programList[prIndex].numFormat.iFormat.ToString()
-                          |Dt -> double0string_format_F
-                          |Zt -> double0string_format_F+","+double0string_format_F 
-                          |_ -> "")
-                    |> fun s -> String.Join("",s)
                 let code =
                     lst
                     |> List.map (fun b ->
@@ -281,20 +269,8 @@ namespace Aqualis
                           |(It _|Dt),_ -> b.Expr.eval (programList[prIndex])
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
-                writein("write("+fp+",\"("+format+")\") "+code+"\n")
+                writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)\n")
             |HTML ->
-                let double0string_format_F = 
-                    let a,b = programList[prIndex].numFormat.dFormat
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                let format = 
-                    lst
-                    |> List.map (fun b -> 
-                        match b.etype with
-                          |It _ ->"I"+programList[prIndex].numFormat.iFormat.ToString()
-                          |Dt -> double0string_format_F
-                          |Zt -> double0string_format_F+","+double0string_format_F 
-                          |_ -> "")
-                    |> fun s -> String.Join("",s)
                 let code =
                     lst
                     |> List.map (fun b ->
@@ -350,13 +326,8 @@ namespace Aqualis
             match programList[prIndex].language with
             |Fortran ->
                 let tab = var.ip0_noWarning("tab",2313)
-                let int0string_format_F =
-                    // "I"+programList[prIndex].numFormat.iFormat.ToString()
-                    "I0"
-                let double0string_format_F = 
-                    let a,b = programList[prIndex].numFormat.dFormat
-                    // "E"+a.ToString()+"."+b.ToString()+"e3"
-                    "F0.3"
+                let int0string_format_F = "I0"
+                let double0string_format_F = "G0"
                 let format = 
                     lst.data
                     |> (fun b ->
@@ -391,11 +362,8 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 writein("write("+fp+",\"("+format+")\") "+code+"\n")
             |C99 ->
-                let int0string_format_C =
-                    "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
-                let double0string_format_C = 
-                    let a,b = programList[prIndex].numFormat.dFormat
-                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let int0string_format_C = "%d"
+                let double0string_format_C = "%.17g"
                 let format = 
                     lst.data
                     |> (fun b -> 
@@ -431,21 +399,6 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
             |LaTeX ->
-                let int0string_format_L =
-                    "I"+programList[prIndex].numFormat.iFormat.ToString()
-                let double0string_format_L = 
-                    let a,b = programList[prIndex].numFormat.dFormat
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                let format = 
-                    lst.data
-                    |> List.map (fun b -> 
-                        match b,b.etype with
-                          |_,It _ -> int0string_format_L
-                          |_,Dt -> double0string_format_L
-                          |_,Zt -> double0string_format_L + "," + double0string_format_L 
-                          |RStr _,_ -> "A"
-                          |_ -> "")
-                    |> fun s -> String.Join(",",s)
                 let code =
                     lst.data
                     |> List.map (fun b ->
@@ -458,23 +411,8 @@ namespace Aqualis
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
-                writein("write("+fp+",\"("+format+")\") "+code+"\n")
+                writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)\n")
             |HTML ->
-                let int0string_format_H =
-                    "I"+programList[prIndex].numFormat.iFormat.ToString()
-                let double0string_format_H = 
-                    let a,b = programList[prIndex].numFormat.dFormat
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                let format = 
-                    lst.data
-                    |> List.map (fun b -> 
-                        match b,b.etype with
-                          |_,It _ -> int0string_format_H
-                          |_,Dt -> double0string_format_H
-                          |_,Zt -> double0string_format_H+","+double0string_format_H 
-                          |RStr _,_ -> "A"
-                          |_ -> "")
-                    |> fun s -> String.Join("",s)
                 let code =
                     lst.data
                     |> List.map (fun b ->
@@ -489,11 +427,8 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
             |Python ->
-                let int0string_format_P =
-                    "%"+programList[prIndex].numFormat.iFormat.ToString()+"d"
-                let double0string_format_P = 
-                    let a,b = programList[prIndex].numFormat.dFormat
-                    "%"+a.ToString()+"."+b.ToString()+"e"
+                let int0string_format_P = "%d"
+                let double0string_format_P = "%.17g"
                 let format = 
                     lst.data
                     |> (fun b -> 

@@ -95,9 +95,9 @@ type gensvg =
             let pxi = 0.5*cvx+px.[i]
             let pyi = 0.5*cvy-py.[i]
             if i=0 then
-                wr <| st("M" + pxi.ToString "0.000" + "," + pyi.ToString "0.000")
+                wr <| st("M" + pxi.ToString() + "," + pyi.ToString())
             else
-                wr <| st("L" + pxi.ToString "0.000" + "," + pyi.ToString "0.000")
+                wr <| st("L" + pxi.ToString() + "," + pyi.ToString())
         wr <| st "\""
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
