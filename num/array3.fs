@@ -1,27 +1,27 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     ///<summary>3次元配列変数</summary>
     type Expr3 =
         ///<summary>変数</summary>
         |Var3 of (VarType*string)
         ///<summary>部分配列</summary>
         |Arx3 of (num0*num0*num0*((num0*num0*num0)->num0))
-        
+
     ///<summary>3次元配列</summary>
     type base3 (typ:Etype,x:Expr3) =
         ///<summary>変数を作成しリストに追加</summary>
-        new (typ,size,name,para) = 
-            programList[prIndex].var.setVar(typ,size,name,para)
+        new (typ,size,name,para) =
+            (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
             base3(typ,Var3(size,name))
         ///<summary>変数を作成しリストに追加</summary>
         new(sname,size,name) =
-            programList[prIndex].var.setVar(Structure sname,size,name,"")
+            (GenerationScope.currentProgram()).var.setVar(Structure sname,size,name,"")
             base3(Structure sname,Var3(size,name))
         member _.Expr with get() = x
         member _.code with get() =
@@ -29,11 +29,11 @@ namespace Aqualis
             |Var3(_,x) -> x
             |_ -> "Error(property .code)"
         ///<summary>変数の要素数</summary>
-        member __.size1 
+        member __.size1
           with get() =
             match x with
-            |Var3(_,name) -> 
-                match programList[prIndex].language with 
+            |Var3(_,name) ->
+                match (GenerationScope.currentProgram()).language with
                 |Fortran ->
                     num0(Var(It 4,name+"_size(1)",NaN))
                 |C99 ->
@@ -54,11 +54,11 @@ namespace Aqualis
                     num0 NaN
             |Arx3(s1,_,_,_) -> s1
         ///<summary>変数の要素数</summary>
-        member __.size2 
+        member __.size2
           with get() =
             match x with
-            |Var3(_,name) -> 
-                match programList[prIndex].language with 
+            |Var3(_,name) ->
+                match (GenerationScope.currentProgram()).language with
                 |Fortran ->
                     num0(Var(It 4,name+"_size(2)",NaN))
                 |C99 ->
@@ -79,11 +79,11 @@ namespace Aqualis
                     num0 NaN
             |Arx3(_,s2,_,_) -> s2
         ///<summary>変数の要素数</summary>
-        member __.size3 
+        member __.size3
           with get() =
             match x with
-            |Var3(_,name) -> 
-                match programList[prIndex].language with 
+            |Var3(_,name) ->
+                match (GenerationScope.currentProgram()).language with
                 |Fortran ->
                     num0(Var(It 4,name+"_size(3)",NaN))
                 |C99 ->
@@ -105,19 +105,19 @@ namespace Aqualis
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:num0,j:num0,k:num0) =
-            if debug.debugMode then
+            if (GenerationScope.debug()).debugMode then
                 match x with
                 |Var3(_,name) ->
-                    error.inc()
-                    !("***debug array3 access check: "+error.ID+"*****************************")
-                    br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () -> 
-                        print.t ("ERROR"+error.ID+" array "+name+" is not allocated")
+                    (GenerationScope.errors()).inc()
+                    !("***debug array3 access check: "+(GenerationScope.errors()).ID+"*****************************")
+                    br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () ->
+                        print.t ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is not allocated")
                     br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                        print.s <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                        print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                     br.if1 (Or [j .< _0; this.size2 .<= j]) <| fun () ->
-                        print.s <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
+                        print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
                     br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
-                        print.s <| "ERROR" + error.ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
+                        print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
             match x,language() with
@@ -125,7 +125,7 @@ namespace Aqualis
             |Var3(_,name),C99 -> num0(Idx1(typ,name,(i + j * this.size1 + k * this.size1 * this.size2).Expr))
             |Var3(_,name),_ -> num0(Idx3(typ,name,i.Expr,j.Expr,k.Expr))
             |Arx3(_,_,_,f),_ -> f (i,j,k)
-            
+
         member this.Idx3(i:num0,j:num0,k:int) = this.Idx3(i,j,I k)
         member this.Idx3(i:num0,j:int,k:num0) = this.Idx3(i,I j,k)
         member this.Idx3(i:num0,j:int,k:int) = this.Idx3(i,I j,I k)
@@ -467,27 +467,27 @@ namespace Aqualis
         member this.Idx3(_:unit,_:unit,(a3:num0,b3:int)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
         member this.Idx3(_:unit,_:unit,(a3:int,b3:num0)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
         member this.Idx3(_:unit,_:unit,(a3:int,b3:int)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
-        
+
         ///<summary>配列のメモリ割り当て</summary>
         member this.allocate(n1:num0,n2:num0,n3:num0) =
                 match x with
                 |Var3(size,name) ->
-                    if debug.debugMode then
-                        error.inc()
-                        !("***debug array1 allocate check: "+error.ID+"*****************************")
+                    if (GenerationScope.debug()).debugMode then
+                        (GenerationScope.errors()).inc()
+                        !("***debug array1 allocate check: "+(GenerationScope.errors()).ID+"*****************************")
                         br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
-                                print.t ("ERROR"+error.ID+" array "+name+" is already allocated")
+                                print.t ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated")
                         ! "****************************************************"
-                    match programList[prIndex].language with
+                    match (GenerationScope.currentProgram()).language with
                     |Fortran ->
                         match size with
                         |A3(0,0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            writein("allocate("+name+"(1:"+this.size1.Expr.eval (programList[prIndex])+",1:"+this.size2.Expr.eval (programList[prIndex])+",1:"+this.size3.Expr.eval (programList[prIndex])+")"+")"+"\n")
-                        |_ -> 
+                            writein("allocate("+name+"(1:"+this.size1.Expr.eval ((GenerationScope.currentProgram()))+",1:"+this.size2.Expr.eval ((GenerationScope.currentProgram()))+",1:"+this.size3.Expr.eval ((GenerationScope.currentProgram()))+")"+")"+"\n")
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |C99 ->
                         match size with
@@ -495,38 +495,38 @@ namespace Aqualis
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            writein(name+" = "+"("+typ.tostring(language())+" *)"+"malloc("+"sizeof("+typ.tostring(language())+")*"+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+");\n")
-                        |_ -> 
+                            writein(name+" = "+"("+typ.tostring(language())+" *)"+"malloc("+"sizeof("+typ.tostring(language())+")*"+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size2.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size3.Expr.eval ((GenerationScope.currentProgram()))+");\n")
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |LaTeX ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}$\\\\\n")
                         |A3(0,0,0),Dt   ->
-                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}$\\\\\n")
                         |A3(0,0,0),Zt   ->
-                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}$\\\\\n")
-                        |_ -> 
+                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}$\\\\\n")
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |HTML ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
                         |A3(0,0,0),Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
                         |A3(0,0,0),Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
-                        |_ -> 
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |HTMLSequenceDiagram ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
                         |A3(0,0,0),Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
                         |A3(0,0,0),Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (programList[prIndex])+"\\times"+n2.Expr.eval (programList[prIndex])+"\\times"+n3.Expr.eval (programList[prIndex])+"}\\)<br>\n")
-                        |_ -> 
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n2.Expr.eval ((GenerationScope.currentProgram()))+"\\times"+n3.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |Python ->
                         match size with
@@ -535,11 +535,11 @@ namespace Aqualis
                             this.size2 <== n2
                             this.size3 <== n3
                             match typ with
-                            |Structure sname -> writein(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+this.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+this.size1.Expr.eval (programList[prIndex])+"),int("+this.size2.Expr.eval (programList[prIndex])+"),int("+this.size3.Expr.eval (programList[prIndex])+"))\n")
-                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+", dtype=int).reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
-                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+", dtype=numpy.complex128).reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
-                            |_               -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+").reshape("+this.size1.Expr.eval (programList[prIndex])+","+this.size2.Expr.eval (programList[prIndex])+","+this.size3.Expr.eval (programList[prIndex])+")"+"\n")
-                        |_ -> 
+                            |Structure sname -> writein(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval ((GenerationScope.currentProgram()))+"))] for _ in range(int("+this.size2.Expr.eval ((GenerationScope.currentProgram()))+"))] for _ in range(int("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"))], dtype=object).reshape(int("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"),int("+this.size2.Expr.eval ((GenerationScope.currentProgram()))+"),int("+this.size3.Expr.eval ((GenerationScope.currentProgram()))+"))\n")
+                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size2.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size3.Expr.eval ((GenerationScope.currentProgram()))+", dtype=int).reshape("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+","+this.size2.Expr.eval ((GenerationScope.currentProgram()))+","+this.size3.Expr.eval ((GenerationScope.currentProgram()))+")"+"\n")
+                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size2.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size3.Expr.eval ((GenerationScope.currentProgram()))+", dtype=numpy.complex128).reshape("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+","+this.size2.Expr.eval ((GenerationScope.currentProgram()))+","+this.size3.Expr.eval ((GenerationScope.currentProgram()))+")"+"\n")
+                            |_               -> writein(name+" = numpy.zeros("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size2.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size3.Expr.eval ((GenerationScope.currentProgram()))+").reshape("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+","+this.size2.Expr.eval ((GenerationScope.currentProgram()))+","+this.size3.Expr.eval ((GenerationScope.currentProgram()))+")"+"\n")
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |JavaScript ->
                         match size with
@@ -547,8 +547,8 @@ namespace Aqualis
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            writein(name+" = "+"Array("+this.size1.Expr.eval (programList[prIndex])+"*"+this.size2.Expr.eval (programList[prIndex])+"*"+this.size3.Expr.eval (programList[prIndex])+");\n")
-                        |_ -> 
+                            writein(name+" = "+"Array("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size2.Expr.eval ((GenerationScope.currentProgram()))+"*"+this.size3.Expr.eval ((GenerationScope.currentProgram()))+");\n")
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |PHP ->
                         match size with
@@ -557,12 +557,12 @@ namespace Aqualis
                             this.size2 <== n2
                             this.size3 <== n3
                             writein(name+" = [];\n")
-                        |_ -> 
+                        |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |Numeric ->
                         ()
                 |_ -> ()
-                
+
         member this.allocate(n1:int,n2:num0,n3:num0) = this.allocate(I n1,n2,n3)
         member this.allocate(n1:num0,n2:int,n3:num0) = this.allocate(n1,I n2,n3)
         member this.allocate(n1:num0,n2:num0,n3:int) = this.allocate(n1,n2,I n3)
@@ -570,22 +570,22 @@ namespace Aqualis
         member this.allocate(n1:int,n2:num0,n3:int) = this.allocate(I n1,n2,I n3)
         member this.allocate(n1:num0,n2:int,n3:int) = this.allocate(n1,I n2,I n3)
         member this.allocate(n1:int,n2:int,n3:int) = this.allocate(I n1,I n2,I n3)
-        
+
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
-            if debug.debugMode then
+            if (GenerationScope.debug()).debugMode then
                 match x with
                 |Var3(_,name) ->
-                    error.inc()
-                    !("***debug array1 deallocate check: "+error.ID+"*****************************")
+                    (GenerationScope.errors()).inc()
+                    !("***debug array1 deallocate check: "+(GenerationScope.errors()).ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            print.t ("ERROR"+error.ID+" cannot deallocate array "+name)
+                            print.t ("ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name)
                     ! "****************************************************"
                 |_ -> ()
             match x with
             |Var3(size,name) ->
-                match programList[prIndex].language with
+                match (GenerationScope.currentProgram()).language with
                 |Fortran ->
                     match size with
                     |A3(0,0,0) ->
@@ -640,57 +640,57 @@ namespace Aqualis
                 |Numeric ->
                     ()
             |_ -> ()
-            
+
         ///<summary>配列のクリア</summary>
         abstract member clear: unit -> unit
-        default __.clear() = 
+        default __.clear() =
             printfn "WARNING: abstract clear method"
-            
+
         ///<summary>配列サイズの初期化</summary>
         abstract member sizeinit: unit -> unit
-        default __.sizeinit() = 
+        default __.sizeinit() =
             printfn "WARNING: abstract sizeinit method"
-            
+
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach code =
-            iter.num this.size1 <| fun i -> 
-                iter.num this.size2 <| fun j -> 
-                    iter.num this.size3 <| fun k -> 
+            iter.num this.size1 <| fun i ->
+                iter.num this.size2 <| fun j ->
+                    iter.num this.size3 <| fun k ->
                         code(i,j,k)
-                        
+
         ///<summary>配列の全要素に対する処理</summary>
         member this.Foreach (counterName1:string,counterName2:string,counterName3:string) code =
-            iter.num (this.size1,counterName1) <| fun i -> 
-                iter.num (this.size2,counterName2) <| fun j -> 
-                    iter.num (this.size3,counterName3) <| fun k -> 
+            iter.num (this.size1,counterName1) <| fun i ->
+                iter.num (this.size2,counterName2) <| fun j ->
+                    iter.num (this.size3,counterName3) <| fun k ->
                         code(i,j,k)
-                        
+
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach_exit code =
-            iter.num_exit this.size1 <| fun (ext1,i) -> 
-                iter.num_exit this.size2 <| fun (ext2,j) -> 
-                    iter.num_exit this.size3 <| fun (ext3,k) -> 
+            iter.num_exit this.size1 <| fun (ext1,i) ->
+                iter.num_exit this.size2 <| fun (ext2,j) ->
+                    iter.num_exit this.size3 <| fun (ext3,k) ->
                         code(ext1,ext2,ext3,i,j,k)
-                        
+
         ///<summary>配列の全要素に対する処理</summary>
         member this.Foreach_exit (counterName1:string,counterName2:string,counterName3:string) code =
-            iter.num_exit (this.size1,counterName1) <| fun (ext1,i) -> 
-                iter.num_exit (this.size2,counterName2) <| fun (ext2,j) -> 
-                    iter.num_exit (this.size3,counterName3) <| fun (ext3,k) -> 
+            iter.num_exit (this.size1,counterName1) <| fun (ext1,i) ->
+                iter.num_exit (this.size2,counterName2) <| fun (ext2,j) ->
+                    iter.num_exit (this.size3,counterName3) <| fun (ext3,k) ->
                         code(ext1,ext2,ext3,i,j,k)
-                        
+
         static member sizeMismatchError(v1:base3,v2:base3) =
-            if debug.debugMode then
-                error.inc()
-                !("***debug array1 access check: "+error.ID+"*****************************")
-                br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '<==' array size1 mismatch")
-                br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '<==' array size2 mismatch")
-                br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '<==' array size3 mismatch")
+            if (GenerationScope.debug()).debugMode then
+                (GenerationScope.errors()).inc()
+                !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
+                br.if1 (v1.size1 .=/ v2.size1) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size1 mismatch")
+                br.if1 (v1.size2 .=/ v2.size2) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size2 mismatch")
+                br.if1 (v1.size3 .=/ v2.size3) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size3 mismatch")
                 ! "****************************************************"
-                
+
     ///<summary>数値型1次元配列</summary>
     type num3 (typ:Etype,x:Expr3, ?context:GenerationContext) =
         inherit base3(typ,x)
@@ -699,7 +699,7 @@ namespace Aqualis
             |Some value -> Some value
             |None -> GenerationContext.TryCurrent
         new (typ,size,name,para) =
-            programList[prIndex].var.setVar(typ,size,name,para)
+            (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
             num3(typ,Var3(size,name), ?context=GenerationContext.TryCurrent)
         member _.Context = context
         member this.etype with get() = typ
@@ -1045,197 +1045,197 @@ namespace Aqualis
         member this.Item with get(_:unit,_:unit,(a3:num0,b3:int)) = num3(typ,this.Idx3((),(),(a3,I b3)))
         member this.Item with get(_:unit,_:unit,(a3:int,b3:num0)) = num3(typ,this.Idx3((),(),(I a3,b3)))
         member this.Item with get(_:unit,_:unit,(a3:int,b3:int)) = num3(typ,this.Idx3((),(),(I a3,I b3)))
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:num0,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3(It 4,Arx3(s1,s2,s3,f))
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:num0,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3(Dt,Arx3(s1,s2,s3,f))
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:num0,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3(Zt,Arx3(s1,s2,s3,f))
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:int,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3.fiarray(I s1,s2,s3,f)
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:int,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3.fdarray(I s1,s2,s3,f)
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:int,s2:num0,s3:num0,f:num0*num0*num0->num0) = num3.fzarray(I s1,s2,s3,f)
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:num0,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fiarray(s1,I s2,s3,f)
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:num0,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fdarray(s1,I s2,s3,f)
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:num0,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fzarray(s1,I s2,s3,f)
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:num0,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fiarray(s1,s2,I s3,f)
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:num0,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fdarray(s1,s2,I s3,f)
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:num0,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fzarray(s1,s2,I s3,f)
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:int,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fiarray(I s1,I s2,s3,f)
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:int,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fdarray(I s1,I s2,s3,f)
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:int,s2:int,s3:num0,f:num0*num0*num0->num0) = num3.fzarray(I s1,I s2,s3,f)
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:int,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fiarray(I s1,s2,I s3,f)
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:int,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fdarray(I s1,s2,I s3,f)
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:int,s2:num0,s3:int,f:num0*num0*num0->num0) = num3.fzarray(I s1,s2,I s3,f)
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:num0,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fiarray(s1,I s2,I s3,f)
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:num0,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fdarray(s1,I s2,I s3,f)
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:num0,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fzarray(s1,I s2,I s3,f)
-        
-        //<summary>3次元配列生成(整数型)</summary> 
+
+        //<summary>3次元配列生成(整数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fiarray(s1:int,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fiarray(I s1,I s2,I s3,f)
-        
-        //<summary>3次元配列生成(倍精度浮動小数点型)</summary> 
+
+        //<summary>3次元配列生成(倍精度浮動小数点型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fdarray(s1:int,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fdarray(I s1,I s2,I s3,f)
-        
-        //<summary>3次元配列生成(複素数型)</summary> 
+
+        //<summary>3次元配列生成(複素数型)</summary>
         ///<param name="s1">第1要素数</param>
         ///<param name="s2">第2要素数</param>
         ///<param name="s3">第3要素数</param>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         static member fzarray(s1:int,s2:int,s3:int,f:num0*num0*num0->num0) = num3.fzarray(I s1,I s2,I s3,f)
-        
-        //<summary>元の配列と同じサイズの配列生成</summary> 
+
+        //<summary>元の配列と同じサイズの配列生成</summary>
         ///<param name="f">(i,j,k)要素に対する要素値</param>
         member this.farray(f:num0*num0*num0->num0) = num3(this.etype,Arx3(this.size1,this.size2,this.size3,f))
-        
-        //<summary>値を0で初期化</summary> 
-        override this.clear() = 
+
+        //<summary>値を0で初期化</summary>
+        override this.clear() =
             this <== I 0
-            
+
         ///<summary>配列サイズ変数をメモリ未割当て状態に初期化</summary>
-        override this.sizeinit() = 
+        override this.sizeinit() =
             this.size1 <== -1
-            
+
         static member sizeMismatchError(x:num3,y:num3) =
-            if debug.debugMode then
-                error.inc()
-                !("***debug array1 access check: "+error.ID+"*****************************")
-                br.if1 (x.size1 .=/ y.size1) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '+' array size1 mismatch")
-                br.if1 (x.size2 .=/ y.size2) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '+' array size2 mismatch")
+            if (GenerationScope.debug()).debugMode then
+                (GenerationScope.errors()).inc()
+                !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
+                br.if1 (x.size1 .=/ y.size1) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '+' array size1 mismatch")
+                br.if1 (x.size2 .=/ y.size2) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '+' array size2 mismatch")
                 ! "****************************************************"
-                
+
         static member (+) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y[i,j,k]))
@@ -1245,7 +1245,7 @@ namespace Aqualis
         static member (+) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
         static member (+) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
         static member (+) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]+y))
-        
+
         static member (-) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y[i,j,k]))
@@ -1255,7 +1255,7 @@ namespace Aqualis
         static member (-) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
         static member (-) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
         static member (-) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]-y))
-        
+
         static member ( * ) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y[i,j,k]))
@@ -1265,7 +1265,7 @@ namespace Aqualis
         static member ( * ) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
         static member ( * ) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
         static member ( * ) (x:num3,y:double) = num3(x.etype%%Dt,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]*y))
-        
+
         static member (/) (x:num3,y:num3) =
             num3.sizeMismatchError(x,y)
             num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]/y[i,j,k]))
@@ -1283,7 +1283,7 @@ namespace Aqualis
         static member (./) (x:int,y:num3) = num3(It 4%%y.etype,Arx3(y.size1, y.size2, y.size3, fun (i,j,k) -> x./y[i,j,k]))
         static member (./) (x:num3,y:num0) = num3(x.etype%%y.etype,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
         static member (./) (x:num3,y:int) = num3(x.etype%%It 4,Arx3(x.size1, x.size2, x.size3, fun (i,j,k) -> x[i,j,k]./y))
-        
+
         static member (<==) (v1:num3,v2:num3) =
             let context =
                 match v1.Context with
@@ -1293,22 +1293,20 @@ namespace Aqualis
                         invalidOp "Values from different GenerationContext instances cannot be assigned."
                     |_ -> left
                 |None -> invalidOp "The assignment target is not associated with a GenerationContext."
-            let programList = [context.CurrentProgram]
-            let prIndex = 0
             let writein text = context.CurrentProgram.codewritein text
-            if debug.debugMode then
-                error.inc()
-                !("***debug array1 access check: "+error.ID+"*****************************")
-                br.if1 (v1.size1 .=/ v2.size1) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '<==' array size1 mismatch")
-                br.if1 (v1.size2 .=/ v2.size2) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '<==' array size2 mismatch")
-                br.if1 (v1.size3 .=/ v2.size3) <| fun () -> 
-                    print.t ("ERROR"+error.ID+" operator '<==' array size3 mismatch")
+            if (GenerationScope.debug()).debugMode then
+                (GenerationScope.errors()).inc()
+                !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
+                br.if1 (v1.size1 .=/ v2.size1) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size1 mismatch")
+                br.if1 (v1.size2 .=/ v2.size2) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size2 mismatch")
+                br.if1 (v1.size3 .=/ v2.size3) <| fun () ->
+                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size3 mismatch")
                 !("****************************************************")
             match v1.Expr,v2.Expr with
             |Var3(_,x),Var3(_,y) ->
-                match programList[prIndex].language with
+                match context.CurrentProgram.language with
                 |Fortran|LaTeX ->
                     writein(x + "=" + y)
                 |C99 ->
@@ -1325,13 +1323,13 @@ namespace Aqualis
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
                 |Numeric -> ()
             |Var3(_,x),Arx3(_,_,_,f) ->
-                match programList[prIndex].language with
+                match context.CurrentProgram.language with
                 |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
             |Arx3(_,_,_,_),Var3(_,_) ->
-                match programList[prIndex].language with
+                match context.CurrentProgram.language with
                 |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
             |Arx3(_,_,_,_),Arx3(_,_,_,_) ->
-                match programList[prIndex].language with
+                match context.CurrentProgram.language with
                 |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2[i,j,k]
         static member (<==) (v1:num3,v2:num0) =
             let context =
@@ -1342,37 +1340,35 @@ namespace Aqualis
             |Some right when not (obj.ReferenceEquals(context, right)) ->
                 invalidOp "Values from different GenerationContext instances cannot be assigned."
             |_ -> ()
-            let programList = [context.CurrentProgram]
-            let prIndex = 0
             let writein text = context.CurrentProgram.codewritein text
             match v1.Expr with
             |Var3(_,x) ->
-                match programList[prIndex].language with
+                match context.CurrentProgram.language with
                 |Fortran|LaTeX ->
-                    writein(x + "=" + v2.Expr.eval (programList[prIndex]))
+                    writein(x + "=" + v2.Expr.eval (context.CurrentProgram))
                 |C99 ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |HTML ->
-                    writein(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
+                    writein(x + " \\leftarrow " + v2.Expr.eval (context.CurrentProgram))
                 |HTMLSequenceDiagram ->
-                    writein(x + " \\leftarrow " + v2.Expr.eval (programList[prIndex]))
+                    writein(x + " \\leftarrow " + v2.Expr.eval (context.CurrentProgram))
                 |Python ->
                     match v1.etype with
-                    |Structure sname -> writein(x + " = numpy.array([[["+sname+"() for _ in range(int("+v1.size3.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size2.Expr.eval (programList[prIndex])+"))] for _ in range(int("+v1.size1.Expr.eval (programList[prIndex])+"))], dtype=object).reshape(int("+v1.size1.Expr.eval (programList[prIndex])+"),int("+v1.size2.Expr.eval (programList[prIndex])+"),int("+v1.size3.Expr.eval (programList[prIndex])+"))\n")
-                    |_               -> writein(x+"[:,:,:]="+v2.Expr.eval (programList[prIndex])+"\n")
+                    |Structure sname -> writein(x + " = numpy.array([[["+sname+"() for _ in range(int("+v1.size3.Expr.eval (context.CurrentProgram)+"))] for _ in range(int("+v1.size2.Expr.eval (context.CurrentProgram)+"))] for _ in range(int("+v1.size1.Expr.eval (context.CurrentProgram)+"))], dtype=object).reshape(int("+v1.size1.Expr.eval (context.CurrentProgram)+"),int("+v1.size2.Expr.eval (context.CurrentProgram)+"),int("+v1.size3.Expr.eval (context.CurrentProgram)+"))\n")
+                    |_               -> writein(x+"[:,:,:]="+v2.Expr.eval (context.CurrentProgram)+"\n")
                 |JavaScript ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |PHP ->
                     iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
                 |Numeric -> ()
             |Arx3(_,_,_,_) ->
-                match programList[prIndex].language with
+                match context.CurrentProgram.language with
                 |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> iter.num v1.size2 <| fun j -> iter.num v1.size3 <| fun k -> v1[i,j,k] <== v2
         static member (<==) (v1:num3,v2:double) =
             v1 <== D v2
         static member (<==) (v1:num3,v2:int) =
             v1 <== I v2
-            
+
     [<AutoOpen>]
     module asm_num3 =
         type asm with

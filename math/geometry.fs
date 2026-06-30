@@ -1,13 +1,13 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
-    module geometry = 
-        
+
+    module geometry =
+
         /// 2次元ベクトル
         type Point2(x:num0,y:num0) =
             member public _.x with get() = x
@@ -20,7 +20,7 @@ namespace Aqualis
             static member ( * ) (a:int,b:Point2) = new Point2(a*b.x, a*b.y)
             static member ( * ) (a:num0,b:Point2) = new Point2(a*b.x, a*b.y)
             static member ( * ) (a:Point2,b:Point2) = a.x*b.x+a.y*b.y
-          
+
         type point2(name) =
             static member sname = "point2"
             new(name,c) =
@@ -47,29 +47,29 @@ namespace Aqualis
             static member ( * ) (a:point2,b:point2) = a.x*b.x+a.y*b.y
             static member ( * ) (a:point2,b:Point2) = a.x*b.x+a.y*b.y
             static member ( * ) (a:Point2,b:point2) = a.x*b.x+a.y*b.y
-            static member (<==) (a:point2,b:Point2) = 
+            static member (<==) (a:point2,b:Point2) =
                 a.x <== b.x
                 a.y <== b.y
-            static member (<==) (a:point2,b:point2) = 
+            static member (<==) (a:point2,b:point2) =
                 a.x <== b.x
                 a.y <== b.y
             static member str_mem(psname, vname, name) =
                 str.addmember(psname,(Structure point2.sname,A0,name))
                 point2(str.mem(vname,name))
-                
+
         type point2_1(name,size1) =
             inherit base1(point2.sname,size1,name)
             //変数宣言を行う場合
             new(name,size1) =
                 str.reg(point2.sname,name,size1)
                 point2_1(name,A1 size1)
-            member this.Item with get(i:num0) = point2(this.Idx1(i).Expr.eval (programList[prIndex]))
-            member this.Item with get(i:int ) = point2(this.Idx1(i).Expr.eval (programList[prIndex]))
+            member this.Item with get(i:num0) = point2(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
+            member this.Item with get(i:int ) = point2(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
             static member str_mem(sname, vname, name, size1) =
                 str.addmember(sname,(Structure sname,A1 size1,name))
                 point2_1(str.mem(vname,name),size1)
-            
+
         /// 3次元ベクトル
         type Point3(x:num0,y:num0,z:num0) =
             member public _.x with get() = x
@@ -85,7 +85,7 @@ namespace Aqualis
             static member ( * ) (a:double,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
             static member ( * ) (a:Point3,b:Point3) = a.x*b.x+a.y*b.y+a.z*b.z
             static member ( % ) (a:Point3,b:Point3) = new Point3(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x)
-                
+
         type point3(sname,name) =
             static member sname = "point3"
             new(name) =
@@ -112,38 +112,38 @@ namespace Aqualis
             static member ( * ) (a:point3,b:point3) = a.x*b.x+a.y*b.y+a.z*b.z
             static member ( * ) (a:point3,b:Point3) = a.x*b.x+a.y*b.y+a.z*b.z
             static member ( * ) (a:Point3,b:point3) = a.x*b.x+a.y*b.y+a.z*b.z
-            static member (<==) (a:point3,b:Point3) = 
+            static member (<==) (a:point3,b:Point3) =
                 a.x <== b.x
                 a.y <== b.y
                 a.z <== b.z
-            static member (<==) (a:point3,b:point3) = 
+            static member (<==) (a:point3,b:point3) =
                 a.x <== b.x
                 a.y <== b.y
                 a.z <== b.z
             static member str_mem(psname, vname, name) =
                 str.addmember(psname,(Structure(point3.sname),A0,name))
                 point3(str.mem(vname,name))
-            
+
         type point3_1(sname,name,size1) =
             inherit base1(point3.sname,size1,name)
             new(name,size1) =
                 str.reg(point3.sname,name,size1)
                 point3_1(point3.sname,name,A1 size1)
-            member this.Item with get(i:num0) = point3(this.Idx1(i).Expr.eval (programList[prIndex]))
-            member this.Item with get(i:int ) = point3(this.Idx1(i).Expr.eval (programList[prIndex]))
-            
+            member this.Item with get(i:num0) = point3(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
+            member this.Item with get(i:int ) = point3(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
+
         ///<summary>
         ///中心(x,y)、1辺の長さdの正方形領域に、中心(center_x,center_y)、半径radiusの円が占める割合を計算
         ///結果はfに保存（0.0≦f≦1.0）
         ///</summary>
-        let circle(x:num0,y:num0,center_x:num0,center_y:num0,radius:num0,d:num0,f:num0):num0 = 
+        let circle(x:num0,y:num0,center_x:num0,center_y:num0,radius:num0,d:num0,f:num0):num0 =
             let rad(y:num0,x:num0,t:num0) =
                 br.branch <| fun b ->
                     b.IF (x.=0.0) <| fun () -> t <== 0.500*asm.pi
                     b.IF (x.>0.0) <| fun () -> t <== asm.atan(y/x)
                     b.EL <| fun () -> t <== asm.atan(y/x)+asm.pi
                 t
-            group.section ("中心("+x.Expr.eval (programList[prIndex])+","+y.Expr.eval (programList[prIndex])+")、サイズ"+d.Expr.eval (programList[prIndex])+"の正方形領域に、"+"中心("+center_x.Expr.eval (programList[prIndex])+","+center_y.Expr.eval (programList[prIndex])+")、半径"+radius.Expr.eval (programList[prIndex])+"の円が占める割合を計算→結果は"+f.Expr.eval (programList[prIndex])) <| fun () ->
+            group.section ("中心("+x.Expr.eval ((GenerationScope.currentProgram()))+","+y.Expr.eval ((GenerationScope.currentProgram()))+")、サイズ"+d.Expr.eval ((GenerationScope.currentProgram()))+"の正方形領域に、"+"中心("+center_x.Expr.eval ((GenerationScope.currentProgram()))+","+center_y.Expr.eval ((GenerationScope.currentProgram()))+")、半径"+radius.Expr.eval ((GenerationScope.currentProgram()))+"の円が占める割合を計算→結果は"+f.Expr.eval ((GenerationScope.currentProgram()))) <| fun () ->
                 ch.dddd <| fun (c_x,c_y,r,rr) ->
                 ch.dddd <| fun (pAx,pBx,pCx,pDx) ->
                 ch.dddd <| fun (pAy,pBy,pCy,pDy) ->
@@ -165,13 +165,13 @@ namespace Aqualis
                     pDx <== c_x+0.5
                     pDy <== c_y-0.5
                     let printerror s = br.if1 <| Or [f.>1.0; f.<0.0] <| fun () -> print.t ("error at pattern "+s+".")
-                    //重なり面積の計算 
+                    //重なり面積の計算
                     br.branch <| fun b ->
                         //---pattern 1.--------------------------------------
                         b.IF <| And [asm.pow(pAx,2)+asm.pow(pAy,2) .<  rr; asm.pow(pBx,2)+asm.pow(pBy,2) .<  rr; asm.pow(pCx,2)+asm.pow(pCy,2) .< rr; asm.pow(pDx,2)+asm.pow(pDy,2) .<  rr] <| fun () ->
                             f <== 1.0
                         //---pattern 2.--------------------------------------
-                        b.IF <| And [asm.pow(pAx,2)+asm.pow(pAy,2) .<  rr; asm.pow(pBx,2)+asm.pow(pBy,2) .>= rr; asm.pow(pCx,2)+asm.pow(pCy,2) .< rr; asm.pow(pDx,2)+asm.pow(pDy,2) .<  rr] <| fun () -> 
+                        b.IF <| And [asm.pow(pAx,2)+asm.pow(pAy,2) .<  rr; asm.pow(pBx,2)+asm.pow(pBy,2) .>= rr; asm.pow(pCx,2)+asm.pow(pCy,2) .< rr; asm.pow(pDx,2)+asm.pow(pDy,2) .<  rr] <| fun () ->
                             pPx <== asm.sqrt(rr-asm.pow(pBy,2))
                             pPy <== pBy
                             pQx <== pBx

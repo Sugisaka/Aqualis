@@ -1,38 +1,38 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     [<AutoOpen>]
     module asm_random =
         type asm with
             ///<summary>0～1の一様乱数を取得</summary>
             static member random (code:(((num1->unit)->unit)*(num0->unit)->unit)) =
-                match programList[prIndex].language with
+                match (GenerationScope.currentProgram()).language with
                 |Fortran ->
                     ch.i <| fun seedsize ->
                     ch.i01 <| fun seed ->
-                        writein("call random_seed(size="+seedsize.Expr.eval (programList[prIndex])+")")
+                        writein("call random_seed(size="+seedsize.Expr.eval ((GenerationScope.currentProgram()))+")")
                         seed.allocate seedsize
                         iter.num seedsize <| fun i ->
-                            writein("call system_clock(count="+seed.code+"("+(i+1).Expr.eval (programList[prIndex])+"))")
+                            writein("call system_clock(count="+seed.code+"("+(i+1).Expr.eval ((GenerationScope.currentProgram()))+"))")
                             writein("call random_seed(put="+seed.code+"(:))")
                         let setseed code =
                             code seed
                             writein("call random_seed(put="+seed.code+"(:))")
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein("call random_number("+n+")")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                         seed.deallocate()
                 |C99 ->
-                    programList[prIndex].hlist.add "<time.h>"
+                    (GenerationScope.currentProgram()).hlist.add "<time.h>"
                     writein "srand((unsigned) time(NULL));"
                     ch.i1 _1 <| fun seed ->
                         let setseed code =
@@ -40,9 +40,9 @@ namespace Aqualis
                             writein("srand("+seed.code+"[0]);")
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein(n + " = (double)rand()/RAND_MAX;")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |LaTeX ->
@@ -52,9 +52,9 @@ namespace Aqualis
                             writein("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein(n + " = (random number: 0->1);")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |HTML ->
@@ -64,9 +64,9 @@ namespace Aqualis
                             writein("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein(n + " = (random number: 0->1);")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |HTMLSequenceDiagram ->
@@ -76,9 +76,9 @@ namespace Aqualis
                             writein("random_seed="+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein(n + " = (random number: 0->1);")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |Python ->
@@ -89,9 +89,9 @@ namespace Aqualis
                             writein("random_seed = numpy.random.default_rng("+seed.code+"[0])")
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein(n + " = random_seed.uniform(0.0, 1.0)")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                 |JavaScript ->
@@ -100,9 +100,9 @@ namespace Aqualis
                             code seed
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein(n + " = Math.random();")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                         seed.deallocate()
@@ -112,15 +112,15 @@ namespace Aqualis
                             code seed
                         let getrand (x:num0) =
                             match x.Expr with
-                            |Var(_,n,_) -> 
+                            |Var(_,n,_) ->
                                 writein(n + " = random_int(0, PHP_INT_MAX) / PHP_INT_MAX;")
-                            |_ -> 
+                            |_ ->
                                 writein "Error:double型以外の変数に乱数値を代入できません"
                         code(setseed,getrand)
                         seed.deallocate()
                 |Numeric ->
                     ()
-                    
+
             ///<summary>中心m、標準偏差sの正規分布に従う乱数を取得</summary>
             static member random_normaldistribution code =
                 asm.random <| fun (setseed,getrand) ->

@@ -1,74 +1,74 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     open System
-    
+
     ///<summary>数学関数</summary>
     type asm =
         ///<summary>虚数単位</summary>
         static member uj with get() =
-            if programList.Length=0 then
+            if GenerationContext.TryCurrent.IsNone then
                 num0(Cpx(0.0,1.0))
             else
-                match programList[prIndex].language with
-                |Fortran -> 
-                    programList[prIndex].var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
+                match (GenerationScope.currentProgram()).language with
+                |Fortran ->
+                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
                     num0(Var(Zt,"uj",NaN))
-                |C99 -> 
+                |C99 ->
                     //#defineで定義済み
                     num0(Var(Zt,"uj",NaN))
                 |LaTeX ->
-                    programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                     num0(Var(Zt,"\\mathrm{j}",NaN))
                 |HTML ->
-                    programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                     num0(Var(Zt,"\\mathrm{j}",NaN))
                 |HTMLSequenceDiagram ->
-                    programList[prIndex].var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
                     num0(Var(Zt,"\\mathrm{j}",NaN))
-                |Python -> 
+                |Python ->
                     num0(Var(Zt,"1.0j",NaN))
-                |JavaScript -> 
+                |JavaScript ->
                     num0(Cpx(0.0,1.0))
-                |PHP -> 
+                |PHP ->
                     num0(Cpx(0.0,1.0))
-                |Numeric -> 
+                |Numeric ->
                     num0(Cpx(0.0,1.0))
         ///<summary>円周率</summary>
-        static member pi with get() = 
-            if programList.Length=0 then
+        static member pi with get() =
+            if GenerationContext.TryCurrent.IsNone then
                 num0(Dbl Math.PI)
             else
-                match programList[prIndex].language with
+                match (GenerationScope.currentProgram()).language with
                 |Fortran ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
                     num0(Var(Dt,"pi",NaN))
                 |C99 ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                     num0(Var(Dt,"pi",NaN))
                 |LaTeX ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                     num0(Var(Dt,"\\pi",NaN))
                 |HTML ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                     num0(Var(Dt,"\\pi",NaN))
                 |HTMLSequenceDiagram ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
                     num0(Var(Dt,"\\pi",NaN))
                 |Python ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                     num0(Var(Dt,"pi",NaN))
                 |JavaScript ->
                     num0(Dbl Math.PI)
                 |PHP ->
-                    programList[prIndex].var.setUniqVar(Dt,A0,"pi","3.14159265358979")
+                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979")
                     num0(Var(Dt,"pi",NaN))
-                |Numeric -> 
+                |Numeric ->
                     num0(Dbl Math.PI)
         ///<summary>2πj</summary>
         static member j2p with get() = 2*asm.pi*asm.uj
@@ -130,8 +130,8 @@ namespace Aqualis
         static member zLet (x:int) = asm.zLet (I x)
         static member zLet (x:double) = asm.zLet (D x)
         static member zLet (x:double*double) = asm.zLet (Z x)
-        static member diff (f:num0) (x:num0) = num0(expr.diff f.Expr x.Expr programList[prIndex])
-        
+        static member diff (f:num0) (x:num0) = num0(expr.diff f.Expr x.Expr (GenerationScope.currentProgram()))
+
     [<AutoOpen>]
     module num0_op =
         type num0 with

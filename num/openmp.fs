@@ -1,27 +1,25 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     open System
-    
+
     ///<summary>OpenMP処理</summary>
     type omp =
         static member temp = 0
         ///<summary>ループを並列化</summary>
         static member parallelize code =
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran ->
-                isOmpUsed <- true
-                programList[prIndex].mlist.add "omp_lib"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).mlist.add "omp_lib"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
                 let rec printplist list n counter (s:string) =
                     match list,counter with
                     |[],_ ->
@@ -39,37 +37,33 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist programList[prIndex].varPrivate.list 0 0 ""
+                printplist (GenerationScope.currentProgram()).varPrivate.list 0 0 ""
                 writein "!$omp end parallel do\n"
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |C99 ->
-                isOmpUsed <- true
-                programList[prIndex].hlist.add "<omp.h>"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
-                if programList[prIndex].varPrivate.list.Length > 0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).hlist.add "<omp.h>"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
+                if (GenerationScope.currentProgram()).varPrivate.list.Length > 0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) (GenerationScope.currentProgram()).varPrivate.list)
                     writein("#pragma omp parallel for private("+s+")\n")
                 else
                     writein "#pragma omp parallel for\n"
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |_ ->
                 ()
-                
+
         ///<summary>ループを並列化</summary>
         static member parallelize_th (th:int) = fun code ->
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran ->
-                isOmpUsed <- true
-                programList[prIndex].mlist.add "omp_lib"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).mlist.add "omp_lib"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
                 let rec printplist list n counter (s:string) =
                     match list,counter with
                     |[],_ ->
@@ -87,37 +81,33 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist programList[prIndex].varPrivate.list 0 0 ""
+                printplist (GenerationScope.currentProgram()).varPrivate.list 0 0 ""
                 writein "!$omp end parallel do\n"
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |C99 ->
-                isOmpUsed <- true
-                programList[prIndex].hlist.add "<omp.h>"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
-                if programList[prIndex].varPrivate.list.Length > 0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).hlist.add "<omp.h>"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
+                if (GenerationScope.currentProgram()).varPrivate.list.Length > 0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) (GenerationScope.currentProgram()).varPrivate.list)
                     writein("#pragma omp parallel for private("+s+") num_threads("+(string th)+")\n")
                 else
                     writein("#pragma omp parallel for num_threads("+(string th)+")\n")
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |_ ->
                 ()
 
         ///<summary>ループを並列化</summary>
         static member reduction (var:num0) (ope:string) = fun code ->
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran ->
-                isOmpUsed <- true
-                programList[prIndex].mlist.add "omp_lib"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).mlist.add "omp_lib"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
                 let rec printplist list n counter (s:string) =
                     match list,counter with
                     |[],_ ->
@@ -135,19 +125,17 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist programList[prIndex].varPrivate.list 0 0 ""
+                printplist (GenerationScope.currentProgram()).varPrivate.list 0 0 ""
                 writein "!$omp end parallel do\n"
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |C99 ->
-                isOmpUsed <- true
-                programList[prIndex].hlist.add "<omp.h>"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
-                if programList[prIndex].varPrivate.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).hlist.add "<omp.h>"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
+                if (GenerationScope.currentProgram()).varPrivate.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) (GenerationScope.currentProgram()).varPrivate.list)
                     match ope with
                     |"+" |"-" |"*" ->
                         writein("#pragma omp parallel for private("+s+") reduction("+ope+":"+var.code+")\n")
@@ -159,21 +147,19 @@ namespace Aqualis
                         writein("#pragma omp parallel for reduction("+ope+":"+var.code+")\n")
                     |_ ->
                         ()
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |_ ->
                 ()
 
         ///<summary>ループを並列化</summary>
         static member reduction_th (th:int) (var:num0) (ope:string) = fun code ->
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran ->
-                isOmpUsed <- true
-                programList[prIndex].mlist.add "omp_lib"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).mlist.add "omp_lib"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
                 let rec printplist list n counter (s:string) =
                     match list,counter with
                     |[],_ ->
@@ -191,19 +177,17 @@ namespace Aqualis
                         printplist lst 1 1 pp
                     |(_,_,p,_)::lst,_ ->
                         printplist lst n (counter+1) (s+(if counter=0 then "" else ",")+p)
-                printplist programList[prIndex].varPrivate.list 0 0 ""
+                printplist (GenerationScope.currentProgram()).varPrivate.list 0 0 ""
                 writein "!$omp end parallel do\n"
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |C99 ->
-                isOmpUsed <- true
-                programList[prIndex].hlist.add "<omp.h>"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
-                if programList[prIndex].varPrivate.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).hlist.add "<omp.h>"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
+                if (GenerationScope.currentProgram()).varPrivate.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) (GenerationScope.currentProgram()).varPrivate.list)
                     match ope with
                     |"+" |"-" |"*" ->
                         writein("#pragma omp parallel for private("+s+") num_threads("+(string th)+") reduction("+ope+":"+var.code+")\n")
@@ -215,77 +199,73 @@ namespace Aqualis
                         writein("#pragma omp parallel for num_threads("+(string th)+") reduction("+ope+":"+var.code+")\n")
                     |_ ->
                         ()
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |_ ->
                 ()
 
         ///<summary>それぞれ別スレッドで実行</summary>
         static member sections (th:int) = fun code ->
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran ->
-                isOmpUsed <- true
-                programList[prIndex].mlist.add "omp_lib"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
-                if programList[prIndex].varPrivate.list.Length>0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).mlist.add "omp_lib"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
+                if (GenerationScope.currentProgram()).varPrivate.list.Length>0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) (GenerationScope.currentProgram()).varPrivate.list)
                     writein("!$omp parallel private(" + s + ") num_threads(" + string th + ")\n")
                 else
                     writein("!$omp parallel num_threads(" + string th + ")\n")
-                programList[prIndex].indentInc()
+                (GenerationScope.currentProgram()).indentInc()
                 writein("!$omp sections"+"\n")
-                programList[prIndex].indentInc()
-                programList[prIndex].indentDec()
+                (GenerationScope.currentProgram()).indentInc()
+                (GenerationScope.currentProgram()).indentDec()
                 writein("!$omp end sections"+"\n")
-                programList[prIndex].indentDec()
+                (GenerationScope.currentProgram()).indentDec()
                 writein "!$omp end parallel\n"
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |C99 ->
-                isOmpUsed <- true
-                programList[prIndex].hlist.add "<omp.h>"
-                isParMode <- true
-                programList[prIndex].close()
-                code()
-                isParMode <- false
-                programList[prIndex].appendOpen()
-                if programList[prIndex].varPrivate.list.Length > 0 then
-                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) programList[prIndex].varPrivate.list)
+                (GenerationScope.requireContext()).IsOpenMpUsed <- true
+                (GenerationScope.currentProgram()).hlist.add "<omp.h>"
+                (GenerationScope.currentProgram()).close()
+                (GenerationScope.requireContext()).WithParallelMode(code)
+                (GenerationScope.currentProgram()).appendOpen()
+                if (GenerationScope.currentProgram()).varPrivate.list.Length > 0 then
+                    let s = String.Join(",", List.map (fun (_,_,s,_) -> s) (GenerationScope.currentProgram()).varPrivate.list)
                     writein("#pragma omp parallel private(" + s + ") num_threads(" + string th + ")\n")
                 else
                     writein("#pragma omp parallel num_threads(" + string th + ")\n")
                 writein("{"+"\n")
-                programList[prIndex].indentInc()
+                (GenerationScope.currentProgram()).indentInc()
                 writein("#pragma omp sections"+"\n")
                 writein("{"+"\n")
-                programList[prIndex].indentInc()
-                programList[prIndex].indentDec()
+                (GenerationScope.currentProgram()).indentInc()
+                (GenerationScope.currentProgram()).indentDec()
                 writein("}"+"\n")
-                programList[prIndex].indentDec()
+                (GenerationScope.currentProgram()).indentDec()
                 writein("}"+"\n")
-                programList[prIndex].varPrivate.clear()
+                (GenerationScope.currentProgram()).varPrivate.clear()
             |_ ->
                 ()
 
         ///<summary>別スレッドで実行</summary>
         static member section code =
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran ->
                 writein("!$omp section"+"\n")
-                code()
+                (GenerationScope.requireContext()).WithParallelMode(code)
             |C99 ->
                 writein("#pragma omp section"+"\n")
                 writein("{"+"\n")
-                code()
+                (GenerationScope.requireContext()).WithParallelMode(code)
                 writein("}"+"\n")
             |_ ->
                 ()
 
         ///<summary>スレッド番号の取得</summary>
         static member thread_num with get() =
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran |C99 ->
                 num0(Var(It 4,"omp_get_thread_num()",NaN))
             |_ ->
@@ -294,7 +274,7 @@ namespace Aqualis
 
         ///<summary>最大スレッド数の取得</summary>
         static member max_threads with get() =
-            match programList[prIndex].language with
+            match (GenerationScope.currentProgram()).language with
             |Fortran |C99 ->
                 num0(Var(It 4,"omp_get_max_threads()",NaN))
             |_ ->

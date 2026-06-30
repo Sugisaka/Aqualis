@@ -41,7 +41,7 @@ namespace Aqualis
             static member loopL (c:program) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = gotoLabel.nextGotoLabel()
+                let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                 let exit() = c.codewritein("goto " + label)
                 expr.substL i (Int 1) c
                 c.codewritein "do"
@@ -89,7 +89,7 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = gotoLabel.nextGotoLabel()
+                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                     let exit() = c.codewritein("goto " + label)
                     c.comment("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
                     c.indentInc()
@@ -101,7 +101,7 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = gotoLabel.nextGotoLabel()
+                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                     let exit() = c.codewritein("goto " + label)
                     c.codewritein("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
                     c.indentInc()

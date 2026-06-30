@@ -1,26 +1,26 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     open System
     open System.IO
-    
+
     [<AutoOpen>]
     module Aqualis_main =
-        
+
         ///<summary>コンパイル</summary>
         let Compile langgList dir projectname (aqver:string,codever:string) code =
             for lang in langgList do
-                match lang with 
-                |Fortran -> 
+                match lang with
+                |Fortran ->
                     makeProgram [dir,projectname,Fortran] <| fun () ->
                         //メインコード生成
                         code()
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
                         let writer = codeWriter(dir + "\\" + projectname + ".f90", 2, Fortran)
                         writer.codewritein "!=============================================================================================\n"
@@ -33,45 +33,45 @@ namespace Aqualis
                         writer.codewritein "!=============================================================================================\n"
                         writer.codewritein("program " + projectname + "\n")
                         //モジュールファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| programList[prIndex].mlist.list
+                        List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| (GenerationScope.currentProgram()).mlist.list
                         writer.codewritein "implicit none\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| programList[prIndex].hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| (GenerationScope.currentProgram()).hlist.list
                         //構造体の定義
                         str.Def_Structure writer
                         //グローバル変数の定義
                         declareall writer
                         //メインコード
-                        writer.codewritein(programList[prIndex].allCodes)
+                        writer.codewritein((GenerationScope.currentProgram()).allCodes)
                         //サブルーチン
                         writer.codewritein "\n"
                         writer.codewritein "contains\n"
                         writer.codewritein "\n"
-                        for funname in programList[prIndex].flist.list do
+                        for funname in (GenerationScope.currentProgram()).flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
                         writer.codewritein("end program " + projectname + "\n")
                         writer.close()
                         //beeファイル削除
-                        programList[prIndex].delete()
+                        (GenerationScope.currentProgram()).delete()
                         //コンパイル・実行用スクリプト生成
                         let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_F.sh")
-                        if isOaccUsed then
+                        if (GenerationScope.requireContext()).IsOpenAccUsed then
                             wr.Write "#!/bin/bash\n"
                             wr.Write("\n")
-                            let source = String.Join(" ", programList[prIndex].slist.list)
-                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
+                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("pgfortran -acc -Minfo=accel " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
                             wr.Close()
-                        else if isOmpUsed then
+                        else if (GenerationScope.requireContext()).IsOpenMpUsed then
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
                             wr.Write "FC='/usr/bin/gfortran'\n"
                             wr.Write "\n"
-                            let source = String.Join(" ", programList[prIndex].slist.list)
-                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
+                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("$FC" + " -fopenmp " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
                         else
@@ -79,19 +79,19 @@ namespace Aqualis
                             wr.Write "\n"
                             wr.Write "FC='/usr/bin/gfortran'\n"
                             wr.Write "\n"
-                            let source = String.Join(" ", programList[prIndex].slist.list)
-                            let option = "-ffree-line-length-none " + String.Join(" ", programList[prIndex].olist.list)
+                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
+                            let option = "-ffree-line-length-none " + String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("$FC " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
                         wr.Close()
                 |C99 ->
                     makeProgram [dir,projectname,C99] <| fun () ->
                         //メインコード生成
-                        programList[prIndex].indentInc()
+                        (GenerationScope.currentProgram()).indentInc()
                         code()
-                        programList[prIndex].olist.add "-lm"
-                        programList[prIndex].indentDec()
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).olist.add "-lm"
+                        (GenerationScope.currentProgram()).indentDec()
+                        (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
                         let writer = codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
@@ -107,7 +107,7 @@ namespace Aqualis
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| programList[prIndex].hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| (GenerationScope.currentProgram()).hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
@@ -115,43 +115,43 @@ namespace Aqualis
                         //グローバル変数の宣言
                         declareall writer
                         //extern指定子
-                        for s in programList[prIndex].elist.list do
+                        for s in (GenerationScope.currentProgram()).elist.list do
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
-                        for funname in programList[prIndex].flist.list do
+                        for funname in (GenerationScope.currentProgram()).flist.list do
                             writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein ("\n")
                         //Main関数
                         writer.codewritein "int main()\n"
                         writer.codewritein "{\n"
-                        writer.codewritein (programList[prIndex].allCodes)
+                        writer.codewritein ((GenerationScope.currentProgram()).allCodes)
                         writer.codewritein "  return 0;\n"
                         writer.codewritein "}\n"
                         writer.close()
                         //beeファイル削除
-                        programList[prIndex].delete()
+                        (GenerationScope.currentProgram()).delete()
                         //コンパイル・実行用スクリプト生成
                         let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_C.sh")
-                        if isOmpUsed then
+                        if (GenerationScope.requireContext()).IsOpenMpUsed then
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
-                            let source = String.Join(" ", programList[prIndex].slist.list)
-                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
+                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("gcc" + " -fopenmp " + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
-                        else if isOaccUsed then
+                        else if (GenerationScope.requireContext()).IsOpenAccUsed then
                             wr.Write "#!/bin/bash"
                             wr.Write "\n"
-                            let source = String.Join(" ", programList[prIndex].slist.list)
-                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
+                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("pgcc -acc -Minfo=accel" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
                         else
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
-                            let source = String.Join(" ", programList[prIndex].slist.list)
-                            let option = String.Join(" ", programList[prIndex].olist.list)
+                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
+                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("gcc" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
                         wr.Close()
@@ -159,12 +159,12 @@ namespace Aqualis
                     makeProgram [dir,projectname,LaTeX] <| fun () ->
                         //メインコード生成
                         code()
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
                         let writer = codeWriter(dir + "\\" + projectname + ".tex", 2, LaTeX)
                         writer.codewritein "\\documentclass[a4paper,fleqn]{ltjsarticle}\n"
                         writer.codewritein "\\usepackage{amsmath}\n"
-                        List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| programList[prIndex].hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| (GenerationScope.currentProgram()).hlist.list
                         writer.codewritein "\\oddsidemargin=-0.4mm\n"
                         writer.codewritein "\\topmargin=4.6mm\n"
                         writer.codewritein "\\headheight=0mm\n"
@@ -182,7 +182,7 @@ namespace Aqualis
                         str.Def_Structure writer
                         //関数定義
                         writer.codewritein "\\section{subroutines}\n"
-                        for funname in programList[prIndex].flist.list do
+                        for funname in (GenerationScope.currentProgram()).flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein("\n")
@@ -193,16 +193,16 @@ namespace Aqualis
                         writer.codewritein "\\end{itemize}\n"
                         //メインコード
                         writer.codewritein "\\section{main code}\n"
-                        writer.codewritein(programList[prIndex].allCodes)
+                        writer.codewritein((GenerationScope.currentProgram()).allCodes)
                         writer.codewritein "\\end{document}\n"
                         writer.close()
                         //beeファイル削除
-                        programList[prIndex].delete()
+                        (GenerationScope.currentProgram()).delete()
                 |HTML ->
                     makeProgram [dir,projectname,HTML] <| fun () ->
                         //メインコード生成
                         code()
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
                         let writer = codeWriter(dir + "\\" + projectname + ".html", 2, HTML)
                         writer.codewritein "<!DOCTYPE html>\n"
@@ -339,7 +339,7 @@ namespace Aqualis
                         //関数定義
                         writer.codewritein "\t\t<div id=\"deffunc\">\n"
                         writer.codewritein "\t\t<h2>関数定義</h2>\n"
-                        for funname in programList[prIndex].flist.list do
+                        for funname in (GenerationScope.currentProgram()).flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
@@ -357,13 +357,13 @@ namespace Aqualis
                         writer.codewritein "<input type=\"text\" id=\"textvar\" value=\"\">\n"
                         writer.codewritein "<input type=\"button\" onclick=\"fsearch()\" value=\"Search\">\n"
                         writer.codewritein "<br/>\n"
-                        writer.codewritein(programList[prIndex].allCodes)
+                        writer.codewritein((GenerationScope.currentProgram()).allCodes)
                         writer.codewritein "\t\t</div>\n"
                         writer.codewritein "\t</body>\n"
                         writer.codewritein "</html>\n"
                         writer.close()
                         //beeファイル削除
-                        programList[prIndex].delete()
+                        (GenerationScope.currentProgram()).delete()
                 |HTMLSequenceDiagram ->
                     // ディレクトリ作成
                     if not <| Directory.Exists (dir + "\\" + "contents_" + projectname) then
@@ -381,7 +381,7 @@ namespace Aqualis
                             switchBody <| fun () ->
                                 code()
                             let codeBody = switchBody <| fun () ->
-                                programList[prIndex].allCodes
+                                (GenerationScope.currentProgram()).allCodes
                             // html書き込みストリーム作成
                             switchMain <| fun () ->
                                 writein "<!DOCTYPE html>"
@@ -392,7 +392,7 @@ namespace Aqualis
                                         // titleタグ
                                         writein("<title>"+projectname+"</title>")
                                         // metaタグ
-                                        writein "<meta charset=\"UTF-8\">"    
+                                        writein "<meta charset=\"UTF-8\">"
                                         //追加（5/29）viewportタブ
                                         writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
                                         // titleタグ
@@ -413,15 +413,16 @@ namespace Aqualis
                                     let s0 = Style [area.backGroundColor "#ffffff"]
                                     html.tagb ("body", [s0.atr]) <| fun () ->
                                         writein codeBody
+                            let context = GenerationScope.requireContext()
                             for i in 0..1 do
-                                programList[i].close()
+                                context.Programs[i].close()
                             // bodyタグ一時コード削除
-                            programList[1].delete()
+                            context.Programs[1].delete()
                 |Python ->
                     makeProgram [dir,projectname,Python] <| fun () ->
                         //メインコード生成
                         code()
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
                         let writer = codeWriter(dir + "\\" + projectname + ".py", 2, Python)
                         writer.codewritein "#=============================================================================================\n"
@@ -444,21 +445,21 @@ namespace Aqualis
                         writer.codewritein "from scipy.special import jv, yn\n"
                         writer.codewritein "import sys\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein("import " + s + "\n")) <| programList[prIndex].hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein("import " + s + "\n")) <| (GenerationScope.currentProgram()).hlist.list
                         //構造体の定義
                         str.Def_Structure writer
                         //グローバル変数の定義
                         declareall writer
                         //関数定義
-                        for funname in programList[prIndex].flist.list do
+                        for funname in (GenerationScope.currentProgram()).flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein("\n")
                         //メインコード
-                        writer.codewritein(programList[prIndex].allCodes)
+                        writer.codewritein((GenerationScope.currentProgram()).allCodes)
                         writer.close()
                         //beeファイル削除
-                        programList[prIndex].delete()
+                        (GenerationScope.currentProgram()).delete()
                         let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_P.sh")
                         wr.Write "#!/bin/bash\n"
                         wr.Write "\n"
@@ -467,10 +468,10 @@ namespace Aqualis
                 |JavaScript ->
                     makeProgram [dir,projectname,JavaScript] <| fun () ->
                         //メインコード生成
-                        programList[prIndex].indentInc()
+                        (GenerationScope.currentProgram()).indentInc()
                         code()
-                        programList[prIndex].indentDec()
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).indentDec()
+                        (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
                         let writer = codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
@@ -486,7 +487,7 @@ namespace Aqualis
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| programList[prIndex].hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| (GenerationScope.currentProgram()).hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
@@ -494,25 +495,25 @@ namespace Aqualis
                         //グローバル変数の宣言
                         declareall writer
                         //extern指定子
-                        for s in programList[prIndex].elist.list do
+                        for s in (GenerationScope.currentProgram()).elist.list do
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
-                        for funname in programList[prIndex].flist.list do
+                        for funname in (GenerationScope.currentProgram()).flist.list do
                             writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein ("\n")
                         //Main
-                        writer.codewritein (programList[prIndex].allCodes)
+                        writer.codewritein ((GenerationScope.currentProgram()).allCodes)
                         writer.close()
                         //beeファイル削除
-                        programList[prIndex].delete()
+                        (GenerationScope.currentProgram()).delete()
                 |PHP ->
                     makeProgram [dir,projectname,PHP] <| fun () ->
                         //メインコード生成
-                        programList[prIndex].indentInc()
+                        (GenerationScope.currentProgram()).indentInc()
                         code()
-                        programList[prIndex].indentDec()
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).indentDec()
+                        (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
                         let writer = codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
@@ -528,7 +529,7 @@ namespace Aqualis
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| programList[prIndex].hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| (GenerationScope.currentProgram()).hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
@@ -536,16 +537,16 @@ namespace Aqualis
                         //グローバル変数の宣言
                         declareall writer
                         //extern指定子
-                        for s in programList[prIndex].elist.list do
+                        for s in (GenerationScope.currentProgram()).elist.list do
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
-                        for funname in programList[prIndex].flist.list do
+                        for funname in (GenerationScope.currentProgram()).flist.list do
                             writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
                         //Main
-                        writer.codewritein (programList[prIndex].allCodes)
+                        writer.codewritein ((GenerationScope.currentProgram()).allCodes)
                         writer.close()
                         //beeファイル削除
-                        programList[prIndex].delete()
+                        (GenerationScope.currentProgram()).delete()
                 |Numeric -> code()

@@ -1,70 +1,70 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
 
 open System
 open System.IO
-        
+
 type PHPbool(x:string) =
-    
+
     member this.name with get() = x
     static member var(x) = PHPbool("$"+x)
     static member (<==) (a:PHPbool,b:PHPbool) = hwritein ("<?php ", a.name + " = " + b.name + " ?>")
-    
+
 type PHPdata(x:list<reduceExprString>) =
     new(x:string) = PHPdata [RStr x]
     new(x:num0) = PHPdata [RNvr x.Expr]
     member _.data with get() = x
     member this.extcode(pr:program) = "<?php echo " + this.code + "; ?>"
     static member var x = PHPdata [RNvr(Var(Nt,"$"+x,NaN))]
-    static member var (x,init:PHPdata) = 
+    static member var (x,init:PHPdata) =
         let v = PHPdata.var x
         v <== init
         v
-    static member var (x,init:num0) = 
+    static member var (x,init:num0) =
         let v = PHPdata.var x
         v <== init
         v
-    static member var (x,init:int) = 
+    static member var (x,init:int) =
         let v = PHPdata.var x
         v <== I init
         v
-    static member var (x,init:double) = 
+    static member var (x,init:double) =
         let v = PHPdata.var x
         v <== D init
         v
     static member f(s:string) = PHPdata [RNvr(Var(Nt,s,NaN))]
-    member this.num0 with get() = 
-        match x with 
+    member this.num0 with get() =
+        match x with
         |[RNvr c] -> num0 c
-        |_ -> 
+        |_ ->
             printfn "num0に変換できません：%s" <| this.toString(".",StrQuotation)
-            num0 NaN 
-    
+            num0 NaN
+
     /// 配列を生成
     static member array() = PHPdata.f "array()"
 
-    static member array(arrayname:string) = 
+    static member array(arrayname:string) =
         let c = PHPdata.var arrayname
         hwritein ("<?php ", "$"+arrayname+" = array(); ?>")
         c
-        
-    static member array(arrayname:string,data:list<string*string>) = 
+
+    static member array(arrayname:string,data:list<string*string>) =
         let c = PHPdata.var arrayname
         hwritein ("<?php ", "$"+arrayname+" = array(); ?>")
         hwritein ("<?php ", "$"+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
         c
 
-    static member array(arrayname:string,data:list<string*PHPdata>) = 
+    static member array(arrayname:string,data:list<string*PHPdata>) =
         let c = PHPdata.var arrayname
         hwritein ("<?php ", "$"+arrayname+" = array(); ?>")
         hwritein ("<?php ", "$"+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
         c
-    // static member array(arrayname:string,data:list<string*PHPdata>) = 
+    // static member array(arrayname:string,data:list<string*PHPdata>) =
     //     let c = PHPdata.var arrayname
     //     writein ("<?php "+arrayname+" = array(); ?>")
     //     writein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
@@ -73,7 +73,7 @@ type PHPdata(x:list<reduceExprString>) =
     // /// 配列に要素を追加
     // static member array_push(a:PHPdata,el:PHPdata) = php.phpcode <| fun () -> write("array_push("+a.code+","+el.code+")")
     // static member array_push(a:PHPdata,el:num0) = php.array_push(a,PHPdata el)
-    
+
     member this.push (x:list<PHPdata>) = hwritein ("<?php ", "array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:PHPdata) -> q.code) x) + "); ?>")
     member this.push (x:PHPdata) = this.push [x]
     // member this.push (x:num0) = this.push [PHPdata x]
@@ -94,7 +94,7 @@ type PHPdata(x:list<reduceExprString>) =
                 |Direct -> x
                 |StrQuotation -> "\""+x+"\""
                 |CodeStrQuotation -> "\\\""+x+"\\\""
-            |RNvr x -> x.eval (programList[prIndex]))
+            |RNvr x -> x.eval ((GenerationScope.currentProgram())))
         |> fun s -> String.Join(c,s)
     member this.Item(i:PHPdata) = PHPdata [RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN))]
     member this.Item(i:int) = this[PHPdata [RNvr(Int i)]]
@@ -106,14 +106,14 @@ type PHPdata(x:list<reduceExprString>) =
     static member (++) (a:string,b:PHPdata) = PHPdata a ++ b
     static member (++) (a:PHPdata,b:string) = a ++ PHPdata b
     static member (++) (a:PHPdata,b:num0) = a ++ PHPdata b
-    
+
 
     member this.foreach code =
         ch.i <| fun i ->
             php.phpcode <| fun () -> writei("for("+i.code+"=0; "+i.code+"<count("+this.code+"); "+i.code+"++):")
-            programList[prIndex].indentInc()
+            (GenerationScope.currentProgram()).indentInc()
             code i
-            programList[prIndex].indentDec()
+            (GenerationScope.currentProgram()).indentDec()
             php.phpcode <| fun () -> writei "endfor;"
     member this.foreach (key:PHPdata,value:PHPdata) = fun code ->
         ch.i <| fun i ->
@@ -141,14 +141,14 @@ type PHPdata(x:list<reduceExprString>) =
     static member (.>) (a:PHPdata,b:int) = a .> PHPdata (I b)
     static member (.>=) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .>= num0(Var(Nt,b.code,NaN))
     static member (.>=) (a:PHPdata,b:int) = a .>= PHPdata (I b)
-    
+
 and php =
     /// phpファイルを生成
     static member phpfile (dir:string,projectname:string) code =
         makeProgram [dir, projectname, PHP] <| fun () ->
             code ()
-            programList[prIndex].close()
-            
+            (GenerationScope.currentProgram()).close()
+
     /// htmlコード内にphpコードを埋め込み
     static member phpcode (code:unit->unit) =
         write "<?php "
@@ -190,7 +190,7 @@ and php =
     /// 指定した要素の配列内でのインデックス（キー）を検索
     static member array_search(s:PHPdata, idArray:PHPdata) = PHPdata.f("array_search("+s.code+", "+idArray.code+")")
     /// ファイル内のテキストを配列に格納
-    static member file(filename:PHPdata, flag:list<FileFlag>) = 
+    static member file(filename:PHPdata, flag:list<FileFlag>) =
         PHPdata.f("file("+filename.code+", "+(flag |> List.map (fun s -> s.str) |> (fun p -> String.Join(" | ",p)) )+")")
     /// ファイルを開く
     static member fopen(filename:PHPdata,rw:FileOpenMode) = PHPdata.f("fopen("+filename.code+", "+rw.str+")")
@@ -352,32 +352,32 @@ and php =
 
 [<AutoOpen>]
 module num0ForPHP =
-        
+
     type num0 with
         member this.phpdata with get() = PHPdata [RNvr this.Expr]
-        
+
     // type num1 with
     //     member this.phpdata with get() = PHPdata [RNvr this.Expr]
         // // member this.phpcode(pr:program) = "<?php echo " + this.code + "; ?>"
         // static member var x = num1(Nt,Var1(A1 0,"$"+x))
-        
-        // static member array(arrayname:string) = 
+
+        // static member array(arrayname:string) =
         //     let c = num1.var arrayname
         //     writein ("<?php "+arrayname+" = array(); ?>")
         //     c
-            
-        // static member array(arrayname:string,data:list<string*string>) = 
+
+        // static member array(arrayname:string,data:list<string*string>) =
         //     let c = num1.var arrayname
         //     writein ("<?php "+arrayname+" = array(); ?>")
         //     writein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
         //     c
 
-        // static member array(arrayname:string,data:list<string*PHPdata>) = 
+        // static member array(arrayname:string,data:list<string*PHPdata>) =
         //     let c = PHPdata arrayname
         //     writein ("<?php "+arrayname+" = array(); ?>")
         //     writein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
         //     c
-        // // static member array(arrayname:string,data:list<string*PHPdata>) = 
+        // // static member array(arrayname:string,data:list<string*PHPdata>) =
         // //     let c = PHPdata.var arrayname
         // //     writein ("<?php "+arrayname+" = array(); ?>")
         // //     writein ("<?php "+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
@@ -385,7 +385,7 @@ module num0ForPHP =
         // member this.push (x:list<PHPdata>) = writein ("<?php array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:PHPdata) -> q.code) x) + "); ?>")
         // member this.push (x:PHPdata) = this.push [x]
         // member this.push (x:num0) = this.push [PHPdata x]
-        
+
     type html with
         static member h1 (t:PHPdata) = html.h1 t.phpcode
         static member h2 (t:PHPdata) = html.h2 t.phpcode

@@ -1,14 +1,14 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     open System
     open System.IO
-    
+
     type Label = |WriteLabel of StreamWriter |ReadLabel of list<string*string>
 
     type TeXWriter(figlabel:Label,equlabel:Label,tablabel:Label,codelabel:Label,lang:Language,figdir:string) =
@@ -22,9 +22,9 @@ namespace Aqualis
         let mutable ssecnum = 0
         let mutable sssecnum = 0
         let mutable licheck = 0
-        
+
         member _.write s = writein s
-        
+
         member this.tag (tagname:string) code =
             match lang with
             |HTML ->
@@ -36,7 +36,7 @@ namespace Aqualis
                 code()
                 writein("\\end{"+tagname+"}")
             |_ -> ()
-            
+
         member this.block lst code =
             match lang with
             |HTML ->
@@ -135,7 +135,7 @@ namespace Aqualis
             |LaTeX ->
                 writein "\\par"
                 code this.footnote
-            |_ -> 
+            |_ ->
                 ()
         member this.footnote(txt:string) =
             writein("\\footnote{"+txt+"}")
@@ -462,17 +462,17 @@ namespace Aqualis
             |_ -> ""
         member this.link txt url =
             match lang with
-            |LaTeX -> 
+            |LaTeX ->
                 txt
-            |HTML -> 
+            |HTML ->
                 "<a href=\""+url+"\">"+txt+"</a>"
-            |_ -> 
+            |_ ->
                 ""
         member this.pdflink(text,filename) =
             match lang with
             |HTML ->
                 writein("    <div class='pdflink'><a href='"+filename+".pdf' target='_blank'>"+text+"</a></div>")
-            |_ -> 
+            |_ ->
                 ()
         member this.bold(txt:string) = match lang with |LaTeX -> "\\boldsymbol{"+txt+"}" |HTML -> "\\boldsymbol{"+txt+"}" |_ -> ""
         member this.lt with get() = match lang with |LaTeX -> "<" |HTML -> "\\lt" |_ -> ""
@@ -520,7 +520,7 @@ namespace Aqualis
         member this.cubed with get() = match lang with |LaTeX -> "\\cubed" |HTML -> "^3" |_ -> ""
         member this.percent with get() = match lang with |LaTeX -> "\\%" |HTML -> "%" |_ -> ""
         member this.pow(n:int) = match lang with |LaTeX -> "^"+(if n<0 then "{"+n.ToString()+"}" else n.ToString()) |HTML -> "^"+(if n<0 then "{"+n.ToString()+"}" else n.ToString()) |_ -> ""
-        
+
     [<AutoOpen>]
     module Aqualis_doc =
         /// <summary>
@@ -528,7 +528,7 @@ namespace Aqualis
         /// </summary>
         let Document (lang:Language) (outputdir:string) (filename:string) (title:string,titlelong:string) (figdir:string) code =
             for i in 1..2 do
-                let figlabel = 
+                let figlabel =
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_figlabel"))
                     else
@@ -542,7 +542,7 @@ namespace Aqualis
                                 let k = t.Split([|','|],StringSplitOptions.RemoveEmptyEntries)
                                 read ((k[0],k[1])::lst)
                         read []
-                let equlabel = 
+                let equlabel =
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_equlabel"))
                     else
@@ -556,7 +556,7 @@ namespace Aqualis
                                 let k = t.Split([|','|],StringSplitOptions.RemoveEmptyEntries)
                                 read ((k[0],k[1])::lst)
                         read []
-                let tablabel = 
+                let tablabel =
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_tablabel"))
                     else
@@ -570,7 +570,7 @@ namespace Aqualis
                                 let k = t.Split([|','|],StringSplitOptions.RemoveEmptyEntries)
                                 read ((k[0],k[1])::lst)
                         read []
-                let codelabel = 
+                let codelabel =
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_codelabel"))
                     else
@@ -635,12 +635,12 @@ namespace Aqualis
                         code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir))
                         writein "    </body>"
                         writein "</html>"
-                        programList[prIndex].close()
+                        (GenerationScope.currentProgram()).close()
                 |LaTeX ->
                     makeProgram [outputdir,filename+".tex",LaTeX; outputdir,filename+"_temp.tex",LaTeX] <| fun () ->
-                        prIndex <- 1
-                        code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir))
-                        prIndex <- 0
+                        let context = GenerationScope.requireContext()
+                        context.WithProgram(1, fun () ->
+                            code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir)))
                         writein "\\documentclass[a4paper]{ltjsarticle}"
                         writein ""
                         writein "\\usepackage{luatexja}"
@@ -653,7 +653,7 @@ namespace Aqualis
                         writein "\\usepackage{upgreek}"
                         writein "\\usepackage[no-math]{luatexja-fontspec}"
                         writein "\\usepackage[haranoaji,deluxe,match,nfssonly]{luatexja-preset}"
-                        for p in programList[1].hlist.list do
+                        for p in context.Programs[1].hlist.list do
                             writein p
                         writein ""
                         writein "\\newcommand{\\inputfigure}[2]{"
@@ -710,10 +710,10 @@ namespace Aqualis
                         writein "\\renewcommand{\\lstlistingname}{ソースコード}"
                         writein ""
                         writein "\\begin{document}"
-                        writein(programList[1].allCodes)
+                        writein(context.Programs[1].allCodes)
                         writein "\\end{document}"
-                        programList[prIndex].close()
-                        programList[1].delete()
+                        (GenerationScope.currentProgram()).close()
+                        context.Programs[1].delete()
                 |_ -> ()
                 match figlabel with
                 |WriteLabel wr -> wr.Close()

@@ -1,39 +1,39 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     open System.IO
     open System.Threading
-    
+
     type program(outputdir,pjname,lang:Language) =
-        
+
         let cwriter = codeWriter(outputdir+"\\"+pjname,2,lang)
-        
+
         /// 構造体
         let structData = structure()
-        
+
         ///<summary>言語設定</summary>
         member val language = lang with get
-        
+
         ///<summary>出力先ディレクトリ</summary>
         member val dir = outputdir with get
-        
+
         ///<summary>プロジェクト名</summary>
         member val projectName = pjname with get
-        
+
         ///<summary>定義された変数リスト</summary>
         member val var = varCollector lang with get
-        
+
         member val varPrivate = varCollector lang with get
-        
+
         member val varCopyIn = varCollector lang with get
-        
+
         member val varCopyOut = varCollector lang with get
-        
+
         ///<summary>整数型変数リスト</summary>
         member val i0 = varGenerator (
             match lang with
@@ -41,7 +41,7 @@ namespace Aqualis
             |PHP -> fun n -> "$i0"+n.ToString "000"
             |_ -> fun n -> "i0"+n.ToString "000"
             ) with get
-            
+
         ///<summary>倍精度浮動小数点型変数リスト</summary>
         member val d0 = varGenerator (
             match lang with
@@ -49,7 +49,7 @@ namespace Aqualis
             |PHP -> fun n -> "$d0"+n.ToString "000"
             |_ -> fun n -> "d0"+n.ToString "000"
             ) with get
-        
+
         ///<summary>複素数型変数リスト</summary>
         member val z0 = varGenerator (
             match lang with
@@ -57,7 +57,7 @@ namespace Aqualis
             |PHP -> fun n -> "$z0"+n.ToString "000"
             |_ -> fun n -> "z0"+n.ToString "000"
             ) with get
-        
+
         ///<summary>文字変数リスト</summary>
         member val c0 = varGenerator (
             match lang with
@@ -65,7 +65,7 @@ namespace Aqualis
             |PHP -> fun n -> "$c0"+n.ToString "000"
             |_ -> fun n -> "c0"+n.ToString "000"
             ) with get
-        
+
         ///<summary>文字列変数リスト</summary>
         member val t0 = varGenerator (
             match lang with
@@ -73,7 +73,7 @@ namespace Aqualis
             |PHP -> fun n -> "$t0"+n.ToString "000"
             |_ -> fun n -> "t0"+n.ToString "000"
             ) with get
-        
+
         ///<summary>ファイルポインタリスト</summary>
         member val f0 = varGenerator (
             match lang with
@@ -81,7 +81,7 @@ namespace Aqualis
             |PHP -> fun n -> "$f0"+n.ToString "000"
             |_ -> fun n -> "f0"+n.ToString "000"
             ) with get
-        
+
         ///<summary>整数型1次元配列リスト</summary>
         member val i1 = varGenerator (
             match lang with
@@ -89,31 +89,31 @@ namespace Aqualis
             |PHP -> fun n -> "$i1"+n.ToString "000"
             |_ -> fun n -> "i1"+n.ToString "000"
             ) with get
-        
+
         ///<summary>倍精度浮動小数点型1次元配列リスト</summary>
         member val d1 = varGenerator (
-            match lang with 
+            match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d1"+n.ToString "000"
             |_ -> fun n -> "d1"+n.ToString "000"
             ) with get
-        
+
         ///<summary>複素数型1次元配列リスト</summary>
         member val z1 = varGenerator (
-            match lang with 
+            match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z1"+n.ToString "000"
             |_ -> fun n -> "z1"+n.ToString "000"
             ) with get
-        
+
         ///<summary>整数型2次元配列リスト</summary>
         member val i2 = varGenerator (
-            match lang with 
+            match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i2"+n.ToString "000"
             |_ -> fun n -> "i2"+n.ToString "000"
             ) with get
-        
+
         ///<summary>倍精度浮動小数点型2次元配列リスト</summary>
         member val d2 = varGenerator (
             match lang with
@@ -121,63 +121,63 @@ namespace Aqualis
             |PHP -> fun n -> "$d2"+n.ToString "000"
             |_ -> fun n -> "d2"+n.ToString "000"
             ) with get
-        
+
         ///<summary>複素数型2次元配列リスト</summary>
         member val z2 = varGenerator (
-            match lang with 
+            match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z2"+n.ToString "000"
             |_ -> fun n -> "z2"+n.ToString "000"
             ) with get
-        
+
         ///<summary>整数型3次元配列リスト</summary>
         member val i3 = varGenerator (
-            match lang with 
+            match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i3"+n.ToString "000"
             |_ -> fun n -> "i3"+n.ToString "000"
             ) with get
-        
+
         ///<summary>倍精度浮動小数点型3次元配列リスト</summary>
         member val d3 = varGenerator (
-            match lang with 
+            match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d3"+n.ToString "000"
             |_ -> fun n -> "d3"+n.ToString "000"
             ) with get
-        
+
         ///<summary>複素数型3次元配列リスト</summary>
         member val z3 = varGenerator (
-            match lang with 
+            match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z3"+n.ToString "000"
             |_ -> fun n -> "z3"+n.ToString "000"
             ) with get
-        
+
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
         member val hlist = new UniqueList()
-        
+
         ///<summary>ライブラリの使用時に必要なモジュールファイル</summary>
         member val mlist = new UniqueList()
-        
+
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
         member val elist = new UniqueList()
-        
+
         ///<summary>定義された関数のリスト</summary>
         member val flist = new UniqueList()
-        
+
         ///<summary>コンパイル時に必要な他のソースファイル</summary>
         member val slist = new UniqueList()
-        
+
         ///<summary>コンパイル時に必要なライブラリ・オプション</summary>
         member val olist = new UniqueList()
-        
+
         member val numFormat = numericFormatController lang with get
-        
+
         member val arg = argumentController lang with get
-        
+
         member _.comment(s:string) = cwriter.comment s
-        
+
         member _.codewrite(s:string) = cwriter.codewrite s
         member _.codewritei(s:string) = cwriter.codewritei s
         member _.codewriten(s:string) = cwriter.codewriten s
@@ -187,7 +187,7 @@ namespace Aqualis
         member _.indentDec() = cwriter.indent.dec()
         member _.appendOpen() = cwriter.appendOpen()
         member _.close() = cwriter.close()
-        member _.allCodes with get() = 
+        member _.allCodes with get() =
             cwriter.close()
             File.ReadAllText(outputdir+"\\"+pjname)
         member _.delete() = cwriter.delete()
@@ -198,57 +198,89 @@ namespace Aqualis
     /// The current context is stored in AsyncLocal only to keep the existing DSL
     /// syntax (for example, x <== y) source-compatible. Values created by the DSL
     /// capture this instance and assignments use the captured context.
-    type GenerationContext(programs: program list) =
+    type private GenerationState =
+        {
+            Programs: program array
+            mutable DisplaySection: bool
+            mutable IsOpenMpUsed: bool
+            mutable IsOpenAccUsed: bool
+            mutable IsParallelMode: bool
+            Functions: ResizeArray<string>
+            GotoLabels: gotoLabelController
+            Errors: errorIDController
+            Debug: debugController
+        }
+
+    type GenerationContext private (state:GenerationState, currentIndex:int) =
         static let current = AsyncLocal<GenerationContext option>()
-        let programs = programs |> List.toArray
-        let mutable currentIndex = 0
-        let mutable displaySection = false
-        let mutable isOmpUsed = false
-        let mutable isOaccUsed = false
-        let mutable isParMode = false
-        let functions = ResizeArray<string>()
 
-        do
-            if programs.Length = 0 then
+        static member private CreateState(programs:program list) =
+            let programArray = programs |> List.toArray
+            if programArray.Length = 0 then
                 invalidArg (nameof programs) "At least one program is required."
+            {
+                Programs = programArray
+                DisplaySection = false
+                IsOpenMpUsed = false
+                IsOpenAccUsed = false
+                IsParallelMode = false
+                Functions = ResizeArray<string>()
+                GotoLabels = gotoLabelController()
+                Errors = errorIDController()
+                Debug = debugController()
+            }
 
-        member _.Programs = programs
+        new(programs:program list) =
+            GenerationContext(GenerationContext.CreateState(programs), 0)
+
+        member _.Programs = state.Programs
 
         member _.CurrentIndex = currentIndex
 
-        member _.CurrentProgram = programs[currentIndex]
+        member _.CurrentProgram = state.Programs[currentIndex]
 
         member _.DisplaySection
-            with get () = displaySection
-            and set value = displaySection <- value
+            with get () = state.DisplaySection
+            and set value = state.DisplaySection <- value
 
         member _.IsOpenMpUsed
-            with get () = isOmpUsed
-            and set value = isOmpUsed <- value
+            with get () = state.IsOpenMpUsed
+            and set value = state.IsOpenMpUsed <- value
 
         member _.IsOpenAccUsed
-            with get () = isOaccUsed
-            and set value = isOaccUsed <- value
+            with get () = state.IsOpenAccUsed
+            and set value = state.IsOpenAccUsed <- value
 
         member _.IsParallelMode
-            with get () = isParMode
-            and set value = isParMode <- value
+            with get () = state.IsParallelMode
+            and set value = state.IsParallelMode <- value
 
-        member _.Functions = functions
+        member this.WithParallelMode(code: unit -> 'T) : 'T =
+            let previous = state.IsParallelMode
+            try
+                state.IsParallelMode <- true
+                code()
+            finally
+                state.IsParallelMode <- previous
+
+        member _.Functions = state.Functions
 
         member _.DistinctFunctions =
-            functions |> Seq.distinct |> Seq.toList
+            state.Functions |> Seq.distinct |> Seq.toList
 
-        member _.WithProgram(index: int, code: unit -> 'T) : 'T =
-            if index < 0 || index >= programs.Length then
+        member _.GotoLabels = state.GotoLabels
+
+        member _.Errors = state.Errors
+
+        member _.Debug = state.Debug
+
+        member _.ForProgram(index:int) =
+            if index < 0 || index >= state.Programs.Length then
                 invalidArg (nameof index) $"Program index {index} is outside the valid range."
+            GenerationContext(state, index)
 
-            let previousIndex = currentIndex
-            try
-                currentIndex <- index
-                code ()
-            finally
-                currentIndex <- previousIndex
+        member this.WithProgram(index: int, code: unit -> 'T) : 'T =
+            this.ForProgram(index).Activate(code)
 
         member this.Activate(code: unit -> 'T) : 'T =
             let previous = current.Value
@@ -259,47 +291,31 @@ namespace Aqualis
                 current.Value <- previous
 
         static member TryCurrent = current.Value
-        
+
+    module internal GenerationScope =
+        let requireContext() =
+            GenerationContext.TryCurrent
+            |> Option.defaultWith (fun () ->
+                invalidOp "This operation must run inside a GenerationContext.")
+
+        let currentProgram() =
+            (requireContext()).CurrentProgram
+
+        let gotoLabels() =
+            (requireContext()).GotoLabels
+
+        let errors() =
+            (requireContext()).Errors
+
+        let debug() =
+            (requireContext()).Debug
+
     [<AutoOpen>]
     module aqualisProgram =
-        
-        let gotoLabel = gotoLabelController()
-        let error = errorIDController()
-        let debug = debugController()
-        let mutable displaySection = false
-        let mutable isOmpUsed = false
-        let mutable isOaccUsed = false
-        ///<summary>trueのとき並列処理を書き込む</summary>
-        let mutable isParMode = false
-        ///<summary>定義された関数のリスト</summary>
-        let mutable funlist: string list = []
+
         ///<summary>現在生成中のプログラミング言語</summary>
         let funlist_nonoverlap() =
-            let rec reduce lst1 lst2 =
-                match lst1 with
-                |x::y ->
-                    match List.tryFind (fun s -> s=x) lst2 with
-                    |None ->
-                        reduce y (lst2@[x])
-                    |_ ->
-                        reduce y lst2
-                |[] -> lst2
-            reduce funlist []
-        let mutable programList:list<program> = []
-                    
-        let mutable prIndex = 0
-        
-        let private withProgramState newProgramList newPrIndex code =
-            let oldProgramList = programList
-            let oldPrIndex = prIndex
-            try
-                programList <- newProgramList
-                prIndex <- newPrIndex
-                code ()
-            finally
-                programList <- oldProgramList
-                prIndex <- oldPrIndex
-                
+            (GenerationScope.requireContext()).DistinctFunctions
         let makeProgramWithContext
             (programInfo: list<string * string * Language>)
             (code: GenerationContext -> 'T)
@@ -309,71 +325,70 @@ namespace Aqualis
                 |> List.map program
             let context = GenerationContext programs
 
-            context.Activate(fun () ->
-                withProgramState programs 0 (fun () -> code context))
+            context.Activate(fun () -> code context)
 
         /// Backward-compatible entry point. New code should prefer
         /// makeProgramWithContext when it needs direct access to the context.
         let makeProgram (programInfo: list<string * string * Language>) (code: unit -> 'T) : 'T =
             makeProgramWithContext programInfo (fun _ -> code ())
-            
-        let write(s:string) = programList[prIndex].codewrite s
-        let writei(s:string) = programList[prIndex].codewritei s
-        let writen(s:string) = programList[prIndex].codewriten s
-        let writein(s:string) = programList[prIndex].codewritein s
-        let hwritein(h:string,s:string) = programList[prIndex].codewritein (h,s)
+
+        let write(s:string) = GenerationScope.currentProgram().codewrite s
+        let writei(s:string) = GenerationScope.currentProgram().codewritei s
+        let writen(s:string) = GenerationScope.currentProgram().codewriten s
+        let writein(s:string) = GenerationScope.currentProgram().codewritein s
+        let hwritein(h:string,s:string) = GenerationScope.currentProgram().codewritein (h,s)
         let eqbr() = writein "\\\\"
-        let language() = programList[prIndex].language
-        
+        let language() = GenerationScope.currentProgram().language
+
         ///<summary>コメント文を生成</summary>
-        let (!) s = programList[prIndex].comment s
-        
+        let (!) s = GenerationScope.currentProgram().comment s
+
     ///<summary>コード生成の設定</summary>
     type AqualisCompiler () =
-        
+
         ///<summary>言語</summary>
-        static member language with get() = programList[prIndex].language
-        
+        static member language with get() = GenerationScope.currentProgram().language
+
         ///<summary>プロジェクト名</summary>
-        static member projectName with get() = programList[prIndex].projectName
-        
+        static member projectName with get() = GenerationScope.currentProgram().projectName
+
         ///<summary>整数を文字列に変換した時の桁数</summary>
-        static member intFormat with get() = programList[prIndex].numFormat.iFormat
+        static member intFormat with get() = GenerationScope.currentProgram().numFormat.iFormat
 
         ///<summary>整数をn桁の文字列で変換するように設定</summary>
-        static member intFormatSet d = programList[prIndex].numFormat.setIFormat d
-        
+        static member intFormatSet d = GenerationScope.currentProgram().numFormat.setIFormat d
+
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member doubleFormat with get() = programList[prIndex].numFormat.dFormat
-        
+        static member doubleFormat with get() = GenerationScope.currentProgram().numFormat.dFormat
+
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member doubleFormatSet(n,d) = programList[prIndex].numFormat.setDFormat(n,d)
-        
+        static member doubleFormatSet(n,d) = GenerationScope.currentProgram().numFormat.setDFormat(n,d)
+
         ///<summary>デバッグモードの切り替え</summary>
         static member set_DebugMode (x:Switch) =
             match x with
-            |ON  -> debug.setDebugMode true
-            |OFF -> debug.setDebugMode false
-            
+            |ON  -> (GenerationScope.debug()).setDebugMode true
+            |OFF -> (GenerationScope.debug()).setDebugMode false
+
         ///<summary>デバッグモードの切り替え</summary>
         static member set_DisplaySection (x:Switch) =
             match x with
-            |ON  -> displaySection <- true
-            |OFF -> displaySection <- false
-            
+            |ON  -> (GenerationScope.requireContext()).DisplaySection <- true
+            |OFF -> (GenerationScope.requireContext()).DisplaySection <- false
+
         ///<summary>codeをデバッグモードで実行</summary>
         static member debug code =
             AqualisCompiler.set_DebugMode ON
             code()
             AqualisCompiler.set_DebugMode OFF
-            
+
         ///<summary>プログラムの実行を強制終了</summary>
         static member abort() =
-            match language() with 
+            match language() with
             |Fortran ->
-                writein "stop" 
+                writein "stop"
             |C99 ->
-                writein "return 1;" 
+                writein "return 1;"
             |LaTeX ->
                 writein "stop"
             |HTML ->
@@ -388,7 +403,7 @@ namespace Aqualis
                 ()
             |Numeric ->
                 ()
-            
+
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
         static member stop() =
             match language() with
@@ -410,17 +425,17 @@ namespace Aqualis
                 ()
             |Numeric ->
                 ()
-                
+
         /// <summary>
         /// インクルードファイル追加（TeXの場合はプリアンブル部挿入コード）
         /// </summary>
         /// <param name="t">オプション</param>
         static member incld(s:string) =
-            programList[prIndex].hlist.add s
-            
+            GenerationScope.currentProgram().hlist.add s
+
         /// <summary>
         /// コンパイルオプションを追加
         /// </summary>
         /// <param name="t">オプション</param>
         static member option(t:string) =
-            programList[prIndex].olist.add("-"+t)
+            GenerationScope.currentProgram().olist.add("-"+t)

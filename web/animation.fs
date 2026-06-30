@@ -1,9 +1,9 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
 
 open System
@@ -12,7 +12,7 @@ open System.IO
 type AnimationType =
     |Loop of int*int
     |Range of int*int
-    
+
 type MovieSetting = {
     /// キャラクター表示
     Character:Switch;
@@ -20,27 +20,27 @@ type MovieSetting = {
     Subtitle:Switch;
     /// 音声再生
     Voice:Switch}
-    
+
 type tposition = {
     /// x座標：時間（フレーム番号）の関数
-    X:num0->num0; 
+    X:num0->num0;
     /// y座標：時間（フレーム番号）の関数
     Y:num0->num0}
-    
+
 type Line = {
     /// 始点
     Start:tposition;
     /// 終点
     End:tposition;}
-    
+
 type Ellipse = {
     /// 中心座標
-    center:tposition; 
+    center:tposition;
     /// 半径(x)
-    radiusX:num0->num0; 
+    radiusX:num0->num0;
     /// 半径(y)
     radiusY:num0->num0;}
-    
+
 type Arc = {
     /// 円弧の中心座標
     center:tposition;
@@ -50,13 +50,13 @@ type Arc = {
     angle2:num0->num0;
     /// 円弧の半径
     radius:num0->num0;}
-    
+
 type Text = {
     /// 中心座標
     center:tposition;
     /// 表示するテキスト
     str:string; }
-    
+
 type MathText = {
     /// 中心座標
     center:tposition;
@@ -83,7 +83,7 @@ type AnimationLine(s:Style,canvasX:int,canvasY:int) =
     /// 指定したLineオブジェクトをキャンパスに追加する
     /// </summary>
     /// <param name="f">描画対象となる線分</param>
-    member this.P (f:Line) = 
+    member this.P (f:Line) =
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein("    var e = document.getElementById(\""+id+"\");")
@@ -120,7 +120,7 @@ type AnimationEllipse(s:Style,canvasX:int,canvasY:int) =
     /// 指定したEllipseオブジェクトをキャンパスに追加する
     /// </summary>
     /// <param name="e">描画対象となる円</param>
-    member this.P (e:Ellipse) = 
+    member this.P (e:Ellipse) =
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein("    var e = document.getElementById(\""+id+"\");")
@@ -157,7 +157,7 @@ type AnimationArc(s:Style,canvasX:int,canvasY:int) =
     /// 指定したArcオブジェクトをキャンパスに追加する
     /// </summary>
     /// <param name="e">描画対象となる円弧</param>
-    member this.P (e:Arc) = 
+    member this.P (e:Arc) =
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
@@ -207,7 +207,7 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     /// 指定したTextオブジェクトをキャンパスに追加する
     /// </summary>
     /// <param name="e">対象となるテキスト</param>
-    member this.P (e:Text) = 
+    member this.P (e:Text) =
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
@@ -224,8 +224,8 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     /// <summary>
     /// 指定したMathTextオブジェクトをキャンパスに追加する
     /// </summary>
-    /// <param name="e">対象となる数式</param>      
-    member this.P (e:MathText) = 
+    /// <param name="e">対象となる数式</param>
+    member this.P (e:MathText) =
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
@@ -246,7 +246,7 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
 /// </summary>
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
-/// <param name="canvasY">描画領域の縦幅</param> 
+/// <param name="canvasY">描画領域の縦幅</param>
 type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
     let id = nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
@@ -261,7 +261,7 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
     /// 指定した頂点座標のリストを多角形としてキャンパスに追加する
     /// </summary>
     /// <param name="apex">多角形を構成する頂点座標のリスト</param>
-    member this.P (apex:list<tposition>) = 
+    member this.P (apex:list<tposition>) =
         let t = num0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\"" + id + "\");")
@@ -277,7 +277,7 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
             writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
 /// <summary>
-/// スライドアニメーション全体を管轄するクラス 
+/// スライドアニメーション全体を管轄するクラス
 /// </summary>
 type SlideAnimation =
     /// <summary>
@@ -443,7 +443,7 @@ type SlideAnimation =
             writein "        }"
             writein "    }"
             writein "}"
-            
+
 [<AutoOpen>]
 module movieSetting =
     /// キャラクターのデフォルト表示・非表示設定
@@ -453,11 +453,11 @@ module movieSetting =
     /// 音声のデフォルト表示・非表示設定
     let mutable voice = true
     /// デフォルトの設定
-    let setDefault(s:MovieSetting) = 
+    let setDefault(s:MovieSetting) =
         match s.Character with |ON -> character <- true |OFF -> character <- false
         match s.Subtitle  with |ON -> subtitle  <- true |OFF -> subtitle  <- false
         match s.Voice     with |ON -> voice     <- true |OFF -> voice     <- false
-        
+
 [<AutoOpen>]
 module htmlexpr =
     type html with
@@ -469,16 +469,16 @@ module htmlexpr =
         static member htmlfile (dir:string,filename:string) code =
             makeProgram [dir,filename,HTML] <| fun () ->
                 code()
-                programList[prIndex].close()
+                (GenerationScope.currentProgram()).close()
         /// <summary>
         /// 内部要素のないタグ
         /// </summary>
         static member taga (t:string,lst:list<string*PHPdata>) =
             writei("<"+t+" ")
-            programList[prIndex].indentInc()
+            (GenerationScope.currentProgram()).indentInc()
             for a,s in lst do
                 write(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-            programList[prIndex].indentDec()
+            (GenerationScope.currentProgram()).indentDec()
             writen " />"
         /// <summary>
         /// 内部要素のあるタグ
@@ -488,10 +488,10 @@ module htmlexpr =
                 write("<"+t+">")
             else
                 write("<"+t+" ")
-                programList[prIndex].indentInc()
+                (GenerationScope.currentProgram()).indentInc()
                 for a,s in lst do
                     write(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-                programList[prIndex].indentDec()
+                (GenerationScope.currentProgram()).indentDec()
                 write ">"
             code()
             writen ("</"+t+">")
@@ -503,10 +503,10 @@ module htmlexpr =
                 writein("<"+t+">")
             else
                 writei("<"+t+" ")
-                programList[prIndex].indentInc()
+                (GenerationScope.currentProgram()).indentInc()
                 for a,s in lst do
                     writei(a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-                programList[prIndex].indentDec()
+                (GenerationScope.currentProgram()).indentDec()
                 writen ">"
             code()
             writein ("</"+t+">")
@@ -525,21 +525,21 @@ module htmlexpr =
         static member h1 (t:num0,s:Style) = fun code ->
             html.tagb ("h1",[s.atr]) <| fun () -> php.echo t.code
             code()
-            
+
         static member h2 (t:num0) = fun code ->
             html.tagb "h2" <| fun () -> php.echo t.code
             code()
         static member h2 (t:num0,s:Style) = fun code ->
             html.tagb ("h2",[s.atr]) <| fun () -> php.echo t.code
             code()
-            
+
         static member h3 (t:num0) = fun code ->
             html.tagb "h3" <| fun () -> php.echo t.code
             code()
         static member h3 (t:num0,s:Style) = fun code ->
             html.tagb ("h3",[s.atr]) <| fun () -> php.echo t.code
             code()
-            
+
         static member h4 (t:num0) = fun code ->
             html.tagb "h4" <| fun () -> php.echo t.code
             code()
@@ -556,7 +556,7 @@ module htmlexpr =
         /// <summary>
         /// フォーム送信用のsubmitボタンを生成する
         /// <para>
-        /// nameとvalueの型違いに対応したオーバーロードを提供する            
+        /// nameとvalueの型違いに対応したオーバーロードを提供する
         /// </para>
         /// </summary>
         static member submit(name:string,value:PHPdata) = html.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value",value.code)])
@@ -612,7 +612,7 @@ module htmlexpr =
         /// </summary>
         /// <param name="t">タグ名</param>
         /// <param name="code">タグ内部の内容を生成する関数</param>
-        static member splitTag t code = 
+        static member splitTag t code =
             let b (lst:list<string*PHPdata>) =
                 if lst.Length=0 then
                     writein ("<"+t+">")
@@ -621,16 +621,16 @@ module htmlexpr =
                     for a,s in lst do
                         writein(a + "=" + s.code + " ")
                     writein ">"
-            code b 
+            code b
             writein ("</"+t+">")
         /// <summary>
         /// select要素を生成
         /// </summary>
-        static member Select = html.splitTag "select" 
+        static member Select = html.splitTag "select"
         /// <summary>
         /// tr要素を生成
         /// </summary>
-        static member Tr = html.splitTag "tr" 
+        static member Tr = html.splitTag "tr"
         /// <summary>
         /// div要素を生成する
         /// </summary>
@@ -640,7 +640,7 @@ module htmlexpr =
         /// CSSdataの内容に応じてHTML要素を生成する
         /// </summary>
         /// <param name="a">生成する要素を指定するCSSデータ</param>
-        static member div (a:CSSdata) = fun code -> 
+        static member div (a:CSSdata) = fun code ->
             match a.label with
             |HTMLTag s -> html.tagb s code
             |CSSClass s -> html.tagb ("div",[Atr("class",s)]) code
@@ -651,7 +651,7 @@ module htmlexpr =
         /// </summary>
         /// <param name="a">生成対象を指定するCSSデータ</param>
         /// <param name="atr">追加する属性のリスト</param>
-        static member div (a:CSSdata,atr:list<Atr>) = fun code -> 
+        static member div (a:CSSdata,atr:list<Atr>) = fun code ->
             match a.label with
             |HTMLTag s -> html.tagb s code
             |CSSClass s -> html.tagb ("div",[Atr("class",s)]@atr) code
@@ -661,7 +661,7 @@ module htmlexpr =
         /// CSSdataに基づいてarticle要素を生成する
         /// </summary>
         /// <param name="a">要素に適用するCSSデータ</param>
-        static member article (a:CSSdata) = fun code -> 
+        static member article (a:CSSdata) = fun code ->
             match a.label with
             |CSSClass s -> html.tagb ("article",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("article",[Atr("id",s)]) code
@@ -669,7 +669,7 @@ module htmlexpr =
         /// <summary>
         /// CSSdataに基づいてaside要素を生成する
         /// </summary>
-        static member aside (a:CSSdata) = fun code -> 
+        static member aside (a:CSSdata) = fun code ->
             match a.label with
             |CSSClass s -> html.tagb ("aside",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("aside",[Atr("id",s)]) code
@@ -677,7 +677,7 @@ module htmlexpr =
         /// <summary>
         /// CSSdataに基づいてpara要素を生成する
         /// </summary>
-        static member para (a:CSSdata) = fun code -> 
+        static member para (a:CSSdata) = fun code ->
             match a.label with
             |CSSClass s -> html.tagb ("p",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("p",[Atr("id",s)]) code
@@ -685,7 +685,7 @@ module htmlexpr =
         /// <summary>
         /// CSSdataに基づいてsection要素を生成する
         /// </summary>
-        static member section (a:CSSdata) = fun code -> 
+        static member section (a:CSSdata) = fun code ->
             match a.label with
             |CSSClass s -> html.tagb ("section",[Atr("class",s)]) code
             |CSSID s -> html.tagb ("section",[Atr("id",s)]) code
@@ -693,7 +693,7 @@ module htmlexpr =
         /// <summary>
         /// CSSdataに基づいてspan要素を生成する
         /// </summary>
-        static member span (a:CSSdata) = fun code -> 
+        static member span (a:CSSdata) = fun code ->
             match a.label with
             // |CSSClass s -> html.tagb0 ("span",["class",s]) code
             // |CSSID s -> html.tagb0 ("span",["id"
@@ -703,20 +703,20 @@ module htmlexpr =
 
         /// <summary>
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-        /// </summary>    
-        static member checkbox(name:PHPdata) = 
+        /// </summary>
+        static member checkbox(name:PHPdata) =
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
             html.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1";])
         /// <summary>
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-        /// </summary> 
+        /// </summary>
         static member checkbox_disabled(name:PHPdata) =
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
             html.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "disabled",PHPdata "disabled"])
         /// <summary>
         /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
         /// </summary>
-        static member checkbox_checked(name:PHPdata) = 
+        static member checkbox_checked(name:PHPdata) =
             html.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
             html.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "checked",PHPdata "checked";])
         /// <summary>
@@ -826,11 +826,11 @@ module htmlexpr =
             html.tagb0 ("pre",style) <| fun () ->
                 html.tagb0 ("code",[]) <| fun () ->
                     write cd.phpcode
-                    
+
         static member code (style:list<string*string>) = html.code (style |> List.map (fun (a,b) -> a,PHPdata b))
-        
+
         static member code (style:list<string*string>, cd:PHPdata) = html.code (style |> List.map (fun (a,b) -> a,PHPdata b),cd)
-        
+
         static member code (cd:PHPdata) = html.code ([],cd)
         /// <summary>
         /// 罫線指定付きの表を生成
@@ -870,8 +870,8 @@ module htmlexpr =
         /// num0式を評価し、MathJax形式で出力する
         /// </summary>
         static member eq(text:num0) =
-            writein ("\\("+text.Expr.evalL programList[prIndex] + "\\)")
-            
+            writein ("\\("+text.Expr.evalL (GenerationScope.currentProgram()) + "\\)")
+
         /// <summary>
         /// キャラクター付き解説ページ
         /// </summary>
@@ -909,7 +909,7 @@ module htmlexpr =
                     html.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
                 animationButtonList <- []
         /// <summary>
-        /// 指定位置にスライドを生成 
+        /// 指定位置にスライドを生成
         /// </summary>
         /// <param name="p">スライドの表示位置</param>
         static member slide (p:position)  code =
@@ -1006,7 +1006,7 @@ module htmlexpr =
 /// </summary>
 /// <param name="figcounter">図形の識別番号</param>
 /// <param name="originX, originY">描画の基準座標</param>
-/// <param name="canvasX, canvasY">キャンパスのサイズ</param>       
+/// <param name="canvasX, canvasY">キャンパスのサイズ</param>
 type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
     /// アニメーションの実行順序リスト
@@ -1097,7 +1097,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let y1 = center.y + radiusY * sin theta1
         let x2 = center.x + radiusX * cos theta2
         let y2 = center.y + radiusY * sin theta2
-        let d = 
+        let d =
             if theta2-theta1 < Math.PI then
                 "M " + x1.ToString() + " " + (float canvasY-y1).ToString() + " A " + radiusX.ToString() + " " + radiusY.ToString() + " 0 0 0 " + x2.ToString() + " " + (float canvasY-y2).ToString()
             else
@@ -1136,7 +1136,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let q1y = endP.y + r*sin(t0-15.0*pi/180.0)
         let q2x = endP.x + r*cos(t0+15.0*pi/180.0)
         let q2y = endP.y + r*sin(t0+15.0*pi/180.0)
-        let ux,uy = 
+        let ux,uy =
             let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
             endP.x + (startP.x-endP.x)*c,
             endP.y + (startP.y-endP.y)*c
@@ -1180,7 +1180,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
         let ss = Style (s.list@c)
         html.tagb ("div", [ss.atr]) <| fun () ->
-            writein ("\\(" + e.Expr.evalH programList[prIndex] + "\\)")
+            writein ("\\(" + e.Expr.evalH (GenerationScope.currentProgram()) + "\\)")
     /// <summary>
     /// 画像を表示
     /// </summary>
@@ -1245,7 +1245,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
             writein "    loop();"
             writein "}"
             writein codejs
-            
+
 [<AutoOpen>]
 module dochtml =
     let htmlpresentation (dir:string) (filename:string) (title:string) (cssfile:option<string>) (pagesizeX:option<int>,pagesizeY:option<int>) isPageAnimation code =
@@ -1324,9 +1324,9 @@ module dochtml =
                     SlideAnimation.jsDrawPrev("contents_" + filename)
                 // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
                 let codeDraw = switchJSMain <| fun () ->
-                    programList[prIndex].allCodes
+                    (GenerationScope.currentProgram()).allCodes
                 let codeBody = switchBody <| fun () ->
-                    programList[prIndex].allCodes
+                    (GenerationScope.currentProgram()).allCodes
                 // html書き込みストリーム作成
                 switchMain <| fun () ->
                     writein "<!DOCTYPE html>"
@@ -1337,7 +1337,7 @@ module dochtml =
                             // titleタグ
                             writein("<title>"+title+"</title>")
                             // metaタグ
-                            writein "<meta charset=\"UTF-8\">"    
+                            writein "<meta charset=\"UTF-8\">"
                             //追加（5/29）viewportタブ
                             match pagesizeX with
                             |None ->
@@ -1399,7 +1399,7 @@ module dochtml =
                                     size.height (y.ToString()+"px")]
                                 html.tagb ("div", [s1.atr]) <| fun () ->
                                     writein codeBody
-                                    
+
                 switchJSAnimationStart <| fun () ->
                     writein "test: () => {}"
                     writein "};"
@@ -1417,26 +1417,27 @@ module dochtml =
                 switchAutoAnimation <| fun () ->
                     writein "test: () => {}"
                     writein "};"
+                let context = GenerationScope.requireContext()
                 for i in 0..7 do
-                    programList[i].close()
+                    context.Programs[i].close()
                 // bodyタグ一時コード削除
-                programList[1].delete()
+                context.Programs[1].delete()
                 // JavaScript関数一時コード削除
-                programList[2].delete()
-                
+                context.Programs[2].delete()
+
     /// 全体がキャンバスの無制限レイアウト
     let freeCanvas outputdir filename (title:string) cssfile code =
         htmlpresentation outputdir filename title cssfile (None, None) false <| fun () ->
             html.canvas <| Style [size.width "0px"; size.height "0px"] <| code
-            
+
     /// 全体がキャンバスの無制限レイアウト
     let freePage outputdir filename (title:string) cssfile code =
         htmlpresentation outputdir filename title cssfile (None, None) false code
-        
+
     /// 固定幅レイアウト
     let fixedWidthPage outputdir filename (title:string) pageWidth cssfile code =
         htmlpresentation outputdir filename title cssfile (Some pageWidth, None) false code
-        
+
     let fixedPage outputdir filename (title:string) pageWidth pageHeight setting cssfile code =
         setDefault setting
         htmlpresentation outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun () ->
@@ -1447,7 +1448,7 @@ module dochtml =
             html.switchSubtitle()
             html.switchAudio()
             html.audioPlayer()
-            
+
 [<AutoOpen>]
 module htmlexpr2 =
     type html with

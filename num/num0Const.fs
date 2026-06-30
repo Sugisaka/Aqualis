@@ -1,9 +1,9 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
 
 open System
@@ -44,4 +44,4 @@ module num0Const =
     let And (s:list<bool0>) = bool0(AND(s |> List.map (fun p -> p.Expr)))
     let Or (s:list<bool0>) = bool0(OR(s |> List.map (fun p -> p.Expr)))
     let inf = num0(Var(Dt,"\\infty",NaN))
-    let (|=) (x:num0) = expr.equivAlign (Var(Nt,"",NaN)) x.Expr (programList[prIndex])
+    let (|=) (x:num0) = expr.equivAlign (Var(Nt,"",NaN)) x.Expr ((GenerationScope.currentProgram()))

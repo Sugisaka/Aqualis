@@ -1,14 +1,14 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
 
 open System
 open System.IO
-            
+
 [<AutoOpen>]
 module htmlio =
     /// 変数カウンタ
@@ -31,15 +31,11 @@ module htmlio =
     // /// body要素内のコード
     // let mutable wrBody = OptionWriter()
     // let mutable wrJS = OptionWriter()
-    
+
     let private withProgramIndex index code =
-        let oldPrIndex = prIndex
-        try
-            prIndex <- index
-            code ()
-        finally
-            prIndex <- oldPrIndex
-            
+        let context = GenerationScope.requireContext()
+        context.WithProgram(index, code)
+
     /// HTMLファイルへの書き込み
     let switchMain code = withProgramIndex 0 code
     /// HTMLファイルbodyタグ内への書き込み
@@ -56,41 +52,41 @@ module htmlio =
     let switchJSAnimationReset code = withProgramIndex 6 code
     /// 自動開始アニメーション実行コードの書き込み
     let switchAutoAnimation code = withProgramIndex 7 code
-    
+
     let mutable animationButtonList:list<string*string*int*int> = []
     let mutable audioList:string list = []
     /// 図面カウンタ
     let mutable figcounter = 0
     /// アニメーションカウンタ
     let mutable anicounter = 0
-    
+
     let nextContentsID() =
         contentsCounter <- contentsCounter + 1
         "contentsID"+contentsCounter.ToString()
-        
+
     let nextAnimationSeqID() =
         animtionSeqCounter <- animtionSeqCounter + 1
         "animationSeqID"+animtionSeqCounter.ToString(),"animationSeqResetID"+animtionSeqCounter.ToString()
-        
+
     let nextAnimationGroup() =
         animationGroupCounter <- animationGroupCounter + 1
         animationGroupCounter.ToString()
-        
+
     let animationButtonReset() =
         animationButtonList <- []
-        
+
     let addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
        animationButtonList <- animationButtonList@[fnameStart,fnameReset,buttonX,buttonY]
-       
+
     let addAutoAnimation(fnameStart,fnameReset) =
         switchAutoAnimation <| fun () ->
             writein("animationStartMap['"+fnameStart+"']();")
-            
+
     // /// ファイル書き込み
     // let write (t:string) = wrBody.Write t
     // let fileOpen (t:string) = wrBody.FileSet t
     // let fileClose (t:string) = wrBody.Close()
-    
+
     // /// ファイルを閉じて書き込んだコードを取得
     // let read() =
     //     let drawcode = wrDraw.Read()

@@ -1,17 +1,17 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     ///<summary>条件分岐</summary>
     type br (ifcode,elseifcode,elsecode) =
-        
+
         ///<summary>条件分岐式のカウンタ</summary>
         let mutable con = 1
-        
+
         ///<summary>条件式(if)</summary>
         member __.IF (cond:bool0) code =
             if con=0 then
@@ -21,28 +21,28 @@ namespace Aqualis
             else
                 elseifcode cond.Expr code
             con <- con + 1
-            
+
         ///<summary>条件式(else)</summary>
         member __.EL code =
             elsecode code
             con <- 0
-            
+
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
         static member branch code =
-            expr.branch programList[prIndex] <| fun q ->
+            expr.branch (GenerationScope.currentProgram()) <| fun q ->
             let ib = br q
             code ib
-            
+
         ///<summary>条件分岐式(if式)</summary>
         static member if1 (cond:bool0) code =
-            if programList.Length = 0 then
+            if GenerationContext.TryCurrent.IsNone then
                 let c = cond.Expr.simp
                 match c with
                 |True -> code()
                 |False -> ()
                 |_ -> printfn "条件式 %s を評価できません" <| c.ToString()
             else
-                match programList[prIndex].language with
+                match (GenerationScope.currentProgram()).language with
                 |LaTeX|HTML ->
                     br.branch <| fun b ->
                         b.IF cond <| fun () ->
@@ -55,17 +55,17 @@ namespace Aqualis
                         br.branch <| fun b ->
                             b.IF cond <| fun () ->
                                 code()
-                        
+
         ///<summary>条件分岐式(if...else...式)</summary>
         static member if2 (cond:bool0) code1 code2 =
-            if programList.Length = 0 then
+            if GenerationContext.TryCurrent.IsNone then
                 let c = cond.Expr.simp
                 match c with
                 |True -> code1()
                 |False -> code2()
                 |_ -> printfn "条件式 %s を評価できません" <| c.ToString()
             else
-                match programList[prIndex].language with
+                match (GenerationScope.currentProgram()).language with
                 |LaTeX|HTML ->
                     br.branch <| fun b ->
                         b.IF cond <| fun () ->
@@ -82,7 +82,7 @@ namespace Aqualis
                                 code1()
                             b.EL <| fun () ->
                                 code2()
-                            
+
     ///<summary>条件分岐（処理スキップ）</summary>
     type dummy_br () =
         ///<summary>条件式(if)</summary>
@@ -95,4 +95,4 @@ namespace Aqualis
         static member if1 cond code = ()
         ///<summary>条件分岐式(if...else...式)</summary>
         static member if2 cond code1 code2 = ()
-        
+

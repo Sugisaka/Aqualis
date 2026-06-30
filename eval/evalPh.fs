@@ -1,48 +1,48 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     [<AutoOpen>]
     module exprEvalPh =
-        
+
         open System
-        
+
         type expr with
-            
+
             static member substPh (x:expr) (y:expr) (c:program) =
                 c.codewritein ("<?php ", x.evalPh c + " = " + y.evalPh c + "; ?>")
-                
+
             static member equivPh (x:expr) (y:expr) (c:program) =
                 printfn "PHPでこの文は使用できません"
-                
+
             static member equivAlignPh (x:expr) (y:expr) (c:program) =
                 printfn "PHPでこの文は使用できません"
-                
+
             static member forLoopPh (c:program) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalPh c
                 let n2_ = n2.evalPh c
-                if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
+                if (GenerationScope.requireContext()).IsParallelMode then (GenerationScope.currentProgram()).varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein("<?php ", "for(" + i.evalPh c + " = " + n1_ + "; " + i.evalPh c + " <= " + n2_ + "; " + i.evalPh c + "++): ?>")
                 c.indentInc()
                 code i
                 c.indentDec()
                 c.codewritein("<?php ", "endfor; ?>")
                 returnVar()
-                
+
             ///<summary>無限ループ</summary>
             static member loopPh (c:program) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = "_" + gotoLabel.nextGotoLabel()
+                let label = "_" + (GenerationScope.gotoLabels()).nextGotoLabel()
                 let exit() = c.codewritein("<?php ", "goto "+label+"; ?>")
                 expr.substPh i (Int 1) c
-                if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
+                if (GenerationScope.requireContext()).IsParallelMode then (GenerationScope.currentProgram()).varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein("<?php ", "for(;;): ?>")
                 c.indentInc()
                 code(exit,i)
@@ -51,7 +51,7 @@ namespace Aqualis
                 c.codewritein("<?php ", "endfor; ?>")
                 c.codewritein(label+":;")
                 returnVar()
-                
+
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoPh (c:program) (cond:expr) = fun code ->
                 c.codewritein("<?php ", "while(" + cond.evalPh c + "): ?>")
@@ -59,14 +59,14 @@ namespace Aqualis
                 code()
                 c.indentDec()
                 c.codewritein("<?php ", "endwhile; ?>")
-                
+
             ///<summary>指定した範囲でループ</summary>
-            static member rangePh (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member rangePh (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
-                |Int a, Int b when a>b -> 
+                |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
+                    if (GenerationScope.requireContext()).IsParallelMode then (GenerationScope.currentProgram()).varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("<?php for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code i
@@ -76,23 +76,23 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
+                    if (GenerationScope.requireContext()).IsParallelMode then (GenerationScope.currentProgram()).varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code i
                     c.indentDec()
                     c.codewritein("<?php ", "endfor; ?>")
                     returnVar()
-                    
+
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitPh (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member range_exitPh (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
-                |Int a, Int b when a>b -> 
+                |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = gotoLabel.nextGotoLabel()
+                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                     let exit() = c.codewritein("<?php ", "goto "+label+" ?>")
-                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
+                    if (GenerationScope.requireContext()).IsParallelMode then (GenerationScope.currentProgram()).varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("<?php for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code(exit,i)
@@ -103,9 +103,9 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = gotoLabel.nextGotoLabel()
+                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                     let exit() = c.codewritein("<?php ", "goto "+label+" ?>")
-                    if isParMode then programList[prIndex].varPrivate.setVar(It 4,A0,iname,"")
+                    if (GenerationScope.requireContext()).IsParallelMode then (GenerationScope.currentProgram()).varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code(exit,i)
@@ -113,7 +113,7 @@ namespace Aqualis
                     c.codewritein("<?php ", "endfor; ?>")
                     c.codewritein(label+":")
                     returnVar()
-                    
+
             static member branchPh (c:program) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPh c
@@ -134,7 +134,7 @@ namespace Aqualis
                     c.indentDec()
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein("<?php ", "endif; ?>")
-                
+
             member this.evalPh(c:program) =
                 match this.simp with
                 |False -> "false"
@@ -145,12 +145,12 @@ namespace Aqualis
                 |GreaterEq(x,y) -> x.evalPh c + " >= " + y.evalPh c
                 |Less(x,y) -> x.evalPh c + " < " + y.evalPh c
                 |LessEq(x,y) -> x.evalPh c + " <= " + y.evalPh c
-                |AND x -> 
-                    x 
+                |AND x ->
+                    x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalPh c + ")" |_ -> v.evalPh c)
                     |> fun lst -> String.Join(" && ", lst)
-                |OR x -> 
-                    x 
+                |OR x ->
+                    x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalPh c + ")" |_ -> v.evalPh c)
                     |> fun lst -> String.Join(" || ", lst)
                 |Int x -> c.numFormat.ItoS x
@@ -158,12 +158,12 @@ namespace Aqualis
                 |Cpx (0.0,1.0) -> "uj"
                 |Cpx (re,im) -> (Add(Zt, Dbl re, Mul(Zt, Cpx(0.0,1.0), Dbl im))).evalPh c
                 |Var (_,s,x) -> s
-                |Inv(_,x) -> 
+                |Inv(_,x) ->
                     match x with
                     |Add _|Sub _ -> "-(" + x.evalPh c + ")"
                     |_ -> "-" + x.evalPh c
                 |Add(_,x,y) -> x.evalPh c + "+" + y.evalPh c
-                |Sub(_,x,y) -> 
+                |Sub(_,x,y) ->
                     match x,y with
                     |x,(Add _|Sub _) -> x.evalPh c + "-(" + y.evalPh c + ")"
                     |_ -> x.evalPh c + "-" + y.evalPh c
@@ -173,7 +173,7 @@ namespace Aqualis
                     |(Add _|Sub _),_ -> "(" + x.evalPh c + ")*" + y.evalPh c
                     |_,(Add _|Sub _) -> x.evalPh c + "*(" + y.evalPh c + ")"
                     |_ -> x.evalPh c + "*" + y.evalPh c
-                |Div(It 4,x,y) when x.etype = It 4 && y.etype = It 4 -> 
+                |Div(It 4,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     "intdiv(" + x.evalPh c + ", " + y.evalPh c + ")"
                 |Div(_,x,y) ->
                     match x,y with
@@ -195,13 +195,13 @@ namespace Aqualis
                 |Log(_,x) -> "log(" + x.evalPh c + ")"
                 |Log10(_,x) -> "log10(" + x.evalPh c + ")"
                 |Sqrt(_,x) -> "sqrt(" + x.evalPh c + ")"
-                |ToInt x -> 
+                |ToInt x ->
                     match x with
                     |Add _|Sub _ |Mul _ |Div _ ->
                         "(int)(" + x.evalPh c + ")"
                     |_ ->
                         "(int)" + x.evalPh c
-                |ToDbl x -> 
+                |ToDbl x ->
                     match x with
                     |Add _|Sub _ |Mul _ |Div _ ->
                         "(float)(" + x.evalPh c + ")"
@@ -216,10 +216,10 @@ namespace Aqualis
                 |Idx2 (_,name,i,j) ->
                     printfn "Ph言語では2次元配列の代わりに1次元配列を使用します"
                     "NaN"
-                |Idx3 (_,name,i,j,k) -> 
+                |Idx3 (_,name,i,j,k) ->
                     printfn "Ph言語では3次元配列の代わりに1次元配列を使用します"
                     "NaN"
-                |Let (t,y,f) -> 
+                |Let (t,y,f) ->
                     let x =
                         match t with
                         |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), y)
@@ -237,8 +237,8 @@ namespace Aqualis
                             // 加算・代入処理
                             expr.substPh u (Add(t,u, f i)) c
                         u)).evalPh c
-                |IfEl(cond,n1,n2) -> 
-                    (Let(n1.etype, NaN, fun x -> 
+                |IfEl(cond,n1,n2) ->
+                    (Let(n1.etype, NaN, fun x ->
                         expr.branchPh c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substPh x n1 c

@@ -1,20 +1,20 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
-    module fft2 = 
-        
+
+    module fft2 =
+
         type fftw_plan2(sname_,name) =
             static member sname = "fftw_plan"
             new(name) =
                 str.regWithoutAddStructure(fftw_plan2.sname,name)
                 fftw_plan2 (fftw_plan2.sname,name)
             member __.code = name
-            
+
         let fftshift2(x:num2) =
             br.if2 (x.size2%2 .= 0)
                 <| fun () ->
@@ -30,7 +30,7 @@ namespace Aqualis
                 <| fun () ->
                     iter.num x.size2 <| fun i ->
                         fft1.fftshift_odd(x[(),i])
-                        
+
         let ifftshift2(x:num2) =
             br.if2 (x.size2%2 .= 0)
                 <| fun () ->
@@ -48,16 +48,16 @@ namespace Aqualis
                         fft1.ifftshift_odd(x[(),i])
 
         let private fft2(planname:string,data1:num2,data2:num2,fftdir:int) =
-            programList[prIndex].olist.add "-lfftw3"
-            programList[prIndex].olist.add "-I/usr/local/include"
-            ch.iiii <| fun (nx,ny,nx2,ny2) -> 
+            (GenerationScope.currentProgram()).olist.add "-lfftw3"
+            (GenerationScope.currentProgram()).olist.add "-I/usr/local/include"
+            ch.iiii <| fun (nx,ny,nx2,ny2) ->
                 nx <== data1.size1
                 ny <== data1.size2
                 nx2 <== data1.size1./2
                 ny2 <== data1.size2./2
-                match programList[prIndex].language with
+                match (GenerationScope.currentProgram()).language with
                 |Fortran ->
-                    programList[prIndex].hlist.add "'fftw3.f'"
+                    (GenerationScope.currentProgram()).hlist.add "'fftw3.f'"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
                         writein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
@@ -74,7 +74,7 @@ namespace Aqualis
                         ifftshift2 data2
                         writein("call dfftw_destroy_plan(" + plan.code + ")")
                 |C99 ->
-                    programList[prIndex].hlist.add "<fftw3.h>"
+                    (GenerationScope.currentProgram()).hlist.add "<fftw3.h>"
                     let plan = fftw_plan2 planname
                     if fftdir=1 then
                         writein(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
@@ -95,7 +95,7 @@ namespace Aqualis
                 |HTML ->
                     writein(data2.code + " = <mi mathvariant=\"script\">F</mi><mfenced open=\"[\" close=\"]\">" + data1.code + "</mfenced>")
                 |Python ->
-                    programList[prIndex].hlist.add "pyfftw"
+                    (GenerationScope.currentProgram()).hlist.add "pyfftw"
                     let plan = var.i1(planname, 8)
                     if fftdir=1 then
                         writein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".shape, dtype='complex128')")
@@ -121,9 +121,9 @@ namespace Aqualis
                     iter.num nx <| fun i ->
                         iter.num ny <| fun j ->
                             data2.[i,j]<==data2.[i,j]/(nx*ny)
-                        
+
         let fft(planname:string,data1:num2,data2:num2) =
                 fft2(planname,data1,data2,1)
-                
+
         let ifft(planname:string,data1:num2,data2:num2) =
                 fft2(planname,data1,data2,-1)

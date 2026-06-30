@@ -37,7 +37,7 @@ namespace Aqualis
             static member loopPy (c:program) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = gotoLabel.nextGotoLabel()
+                let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                 let exit() = c.codewritein("goto "+label)
                 expr.substPy i (Int 1) c
                 c.codewritein "while True:"
@@ -47,7 +47,7 @@ namespace Aqualis
                 expr.substPy i (Add(It 4, i, Int 1)) c
                 c.indentDec()
                 if label = "10" then
-                    gotoLabel.exit_reset()
+                    (GenerationScope.gotoLabels()).exit_reset()
                 else 
                     c.codewritein("if flag < " + label + ":")
                     c.indentInc()
@@ -88,14 +88,14 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = gotoLabel.nextGotoLabel()
+                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                     let exit() = c.comment("goto "+label)
                     c.comment("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
                     if label = "10" then
-                        gotoLabel.exit_reset()
+                        (GenerationScope.gotoLabels()).exit_reset()
                     else 
                         c.comment("if flag < "+label)
                         c.indentInc()
@@ -105,14 +105,14 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = gotoLabel.nextGotoLabel()
+                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.codewritein("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
                     if label = "10" then
-                        gotoLabel.exit_reset()
+                        (GenerationScope.gotoLabels()).exit_reset()
                     else 
                         c.codewritein("if flag < "+label+":")
                         c.indentInc()

@@ -1,105 +1,105 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     open System
-    
+
     type CSS = {Key:string; Value:string}
-    
+
     type Atr(s:string,t:string) =
         new(s:string) = Atr(s,"")
-        // new(s:Style) = 
+        // new(s:Style) =
         //     let h:string = s.code
         //     Atr h
         member _.name with get() = s
         member _.value with get() = t
-        member _.code with get() = 
+        member _.code with get() =
             match t with
             |"" -> s
             |_ -> s+" = \""+t+"\""
-        static member list(s:list<Atr>) = 
+        static member list(s:list<Atr>) =
             String.concat " " (
-                s 
+                s
                 |> List.map (fun (s:Atr) -> s.code)
-                |> List.filter (fun s -> s<>"")) 
-                
+                |> List.filter (fun s -> s<>""))
+
     and Style(s:list<CSS>) =
         member _.list with get() = s
         member _.code0 with get() =
-            s 
-            |> List.map (fun s -> s.Key+": "+s.Value) 
+            s
+            |> List.map (fun s -> s.Key+": "+s.Value)
             |> fun s -> String.concat "; " s
         // member _.code with get() =
-        //     s 
-        //     |> List.map (fun s -> s.Key+": "+s.Value) 
+        //     s
+        //     |> List.map (fun s -> s.Key+": "+s.Value)
         //     |> fun s -> String.concat "; " s
         //     |> fun s -> if s = "" then "" else "style = \""+s+"\""
         member this.atr with get() = Atr("style", this.code0)
         static member (+) (a:Style,b:Style) = Style(a.list@b.list)
         static member blank = Style []
-        
+
     [<AutoOpen>]
     module style =
         let zindex(n:int) = {Key="z-index"; Value=n.ToString()}
-        module area = 
+        module area =
             let backGroundColor (s:string) = {Key="background-color"; Value=s}
             let backGroundSize (s:string) = {Key="background-size"; Value=s}
             let backGroundImage (filename:string) = {Key="background-image"; Value="url("+filename+")"}
             let opacity (s:string) = {Key="background-opacity"; Value=s}
-        module font = 
+        module font =
             let size (s:int) = {Key="font-size"; Value=s.ToString()+"px"}
             let color (s:string) = {Key="color"; Value=s}
             let weight (s:string) = {Key="font-weight"; Value=s.ToString()}
             let family (s:string) = {Key="font-family"; Value=s}
             let lineHeight (s:int) = {Key="line-height"; Value=s.ToString()+"px"}
             let style (s:string) = {Key="font-style"; Value=s}
-        module size = 
+        module size =
             let width (s:string) = {Key="width"; Value=s}
             let height (s:string) = {Key="height"; Value=s}
             let maxWidth (s:string) = { Key = "max-width"; Value = s }
-        module margin = 
+        module margin =
             let left (s:string) = {Key="margin-left"; Value=s}
             let right (s:string) = {Key="margin-right"; Value=s}
             let top (s:string) = {Key="margin-top"; Value=s}
             let bottom (s:string) = {Key="margin-bottom"; Value=s}
             let all (s:int) = {Key="margin"; Value=s.ToString()+"px"}
             let custom (s:string) = {Key="margin"; Value=s}
-        module padding = 
+        module padding =
             let left (s:int) = {Key="padding-left"; Value=s.ToString()+"px"}
             let right (s:int) = {Key="padding-right"; Value=s.ToString()+"px"}
             let top (s:int) = {Key="padding-top"; Value=s.ToString()+"px"}
             let bottom (s:int) = {Key="padding-bottom"; Value=s.ToString()+"px"}
             let all (s:int) = {Key="padding"; Value=s.ToString()+"px"}
             let paddingVH (v:int,h:int) = {Key="padding"; Value=v.ToString()+"px"+h.ToString()+"px"}
-        module border = 
+        module border =
             let style (s:string) = {Key="border"; Value=s}
             let color (s:string) = {Key="border-color"; Value=s}
-            module width = 
+            module width =
                 let top (s:int) = {Key="border-top-width"; Value=s.ToString()+"px"}
                 let bottom (s:int) = {Key="border-bottom-width"; Value=s.ToString()+"px"}
                 let left (s:int) = {Key="border-left-width"; Value=s.ToString()+"px"}
                 let right (s:int) = {Key="border-right-width"; Value=s.ToString()+"px"}
-        module stroke = 
+        module stroke =
             let color (s:string) = {Key="stroke"; Value=s}
             let width (s:float) = {Key="stroke-width"; Value=s.ToString()+"px"}
             let dasharray (s:list<int>) = {Key="stroke-dasharray"; Value=String.Join(" ",s |> List.map (fun i -> i.ToString()))}
             let opacity(s:float) = {Key="stroke-opacity"; Value=s.ToString()}
-        module fill = 
+        module fill =
             let color (s:string) = {Key="fill"; Value=s}
             let opacity(s:float) = {Key="fill-opacity"; Value=s.ToString()}
-        module align = 
-            module items = 
+        module align =
+            module items =
                 let center = {Key="align-items"; Value="center"}
             let justifyContent (s:string) = {Key="justify-content"; Value=s}
             let text (s:string) = {Key="text-align"; Value=s}
             let vertical (s:string) = {Key="vertical-align"; Value=s}
             let textDecoration (s:string) = {Key = "text-decoration"; Value = s}
             let float (s:string) = {Key = "float"; Value = s}
-        module display = 
+        module display =
             let flex = {Key="display"; Value="flex"}
             let display (s:string) = {Key="display"; Value= s}
             let gap (s:string) = {Key="gap"; Value=s}
@@ -117,12 +117,12 @@ namespace Aqualis
             let custom (s:string) = {Key = "object-fit"; Value = s}
         module flex =
             let wrap (s:string) = {Key="flex-wrap"; Value=s}
-        module position = 
+        module position =
             let position (s:string) = {Key="position"; Value=s}
             let index (s:int) = {Key="z-index"; Value=s.ToString()}
         module space =
             let space (s:string) = {Key = "white-space"; Value = s.ToString();}
-            
+
     type Anchor = {Left:double; Right:double; Top:double; Bottom:double;}
 
     type position(xx:float,yy:float) =
@@ -137,7 +137,7 @@ namespace Aqualis
         static member Origin with get() = position(0,0)
         static member (+) (p1:position,p2:position) = position(p1.x+p2.x, p1.y+p2.y)
         static member (-) (p1:position,p2:position) = position(p1.x-p2.x, p1.y-p2.y)
-        
+
     type html =
         static member head title = fun code ->
             writein "<!doctype html>"
@@ -270,7 +270,7 @@ namespace Aqualis
                 writein("<"+t+" "+a+" >")
             code()
             writein ("</"+t+">")
-            
+
         // /// 内部要素のあるタグ
         // static member tagb (t:string,lst:list<string*string>) = fun code ->
         //     if lst.Length=0 then
@@ -302,32 +302,32 @@ namespace Aqualis
         //         write("<"+t+">")
         //     else
         //         writen("<"+t+" ")
-        //         programList[prIndex].indentInc()
+        //         (GenerationScope.currentProgram()).indentInc()
         //         for a,s in lst do
         //             writen(a + " = \"" + s + "\"")
-        //         programList[prIndex].indentDec()
+        //         (GenerationScope.currentProgram()).indentDec()
         //         write ">"
         //     code()
         //     writen ("</"+t+">")
-            
+
         static member tagv (t:string,atr:list<Atr>) =
             writein("<" + t + " " + Atr.list atr + ">")
-            
+
         static member tage (t:string) =
-            writein("</" + t + ">") 
-            
+            writein("</" + t + ">")
+
         static member h1 (t:string) = fun code ->
             html.tagb "h1" <| fun () -> writein t
             code()
-            
+
         static member h1 (t:string,s:Style) = fun code ->
             html.tagb ("h1",[s.atr]) <| fun () -> writein t
             code()
-            
+
         static member h2 (t:string) = fun code ->
             html.tagb "h2" <| fun () -> writein t
             code()
-            
+
         static member h2 (t:string,s:Style) = fun code ->
             html.tagb ("h2",[s.atr]) <| fun () -> writein t
             code()
@@ -374,16 +374,16 @@ namespace Aqualis
         // static member enumerate code = html.tagb "ol" code
         static member enumerate (a:list<Atr>) = fun code -> html.tagb ("ol",a) code
         // static member enumerate (a:Style) = fun code -> html.tagb ("ol",a) code
-        static member enumerateList (a:list<Atr>) (c:list<unit->unit>) = 
+        static member enumerateList (a:list<Atr>) (c:list<unit->unit>) =
             html.tagb "ol" <| fun () ->
-                for x in c do 
+                for x in c do
                     html.item a x
         static member itemize code = html.tagb "ul" code
         static member itemize (a:list<Atr>) = fun code -> html.tagb ("ul",a) code
         // static member itemize (a:Style) = fun code -> html.tagb ("ul",a) code
-        static member itemizeList (a:list<Atr>) (c:list<unit->unit>) = 
+        static member itemizeList (a:list<Atr>) (c:list<unit->unit>) =
             html.tagb "ul" <| fun () ->
-                for x in c do 
+                for x in c do
                     html.item a x
         // static member item code = html.tagb "li" code
         // static member item (a:Style) = fun code -> html.tagb ("li",a) code
@@ -491,23 +491,23 @@ namespace Aqualis
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
                 writein text
-                
+
         static member canvas (s:Style) code =
             html.tagb ("div", [s.atr]) <| fun () ->
                 code ()
-                
+
         static member div (cls:string, s:Style) = fun code ->
             html.tagb ("div", [s.atr; Atr("class", cls)]) code
-            
+
         static member div (s:list<Atr>) = fun code ->
             html.tagb ("div", s) code
-            
+
         static member tag (tagname:string) (s:string) code =
             html.tagb (tagname, s) code
-            
+
         static member tag_ (tagname:string) (s:string) =
             html.taga (tagname, s)
-            
+
         static member fig (p:position) code =
             let f = figure()
             code(f,p)
@@ -523,7 +523,7 @@ namespace Aqualis
                 "\">")
             code(f,p)
             writein "</svg>"
-            
+
         static member blockTextcode (s:Style) (p:position) (width:float,height:float) (borderWidth:float,borderStyle:string,borderColor:string) (text:list<string>) =
             let padding = 5
             let s1 = Style [size.width (width.ToString()+"px")
@@ -544,7 +544,7 @@ namespace Aqualis
             Right = p.x+double width+2.0*double padding+2.0*double borderWidth;
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding+2.0*double borderWidth;}
-            
+
         static member textFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
             let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                             {Key = "margin-top"; Value = p.y.ToString()+"px";}
@@ -553,13 +553,13 @@ namespace Aqualis
                             {Key = "color"; Value = color.ToString();}]
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
                 code()
-                
+
         static member equationFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
             html.textFrame s p size color <| fun () ->
                 writein "\\("
                 code()
                 writein "\\)"
-                
+
         static member alignFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
             html.textFrame s p size color <| fun () ->
                 writein "\\["
@@ -567,7 +567,7 @@ namespace Aqualis
                 code()
                 writein "\\end{align}"
                 writein "\\]"
-                
+
         static member line (s:Style) (pp:list<position>) =
             html.fig (position(0.0,0.0)) <| fun (f,p) ->
                 f.polyLine s pp
@@ -583,7 +583,7 @@ namespace Aqualis
         static member rectangle (s:Style) (ps:position) (w:int,h:int) =
             html.fig (position(0.0,0.0)) <| fun (f,p) ->
                 f.rect s (p + ps) w h
-                
+
         static member graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
             html.fig (position(px0,py0)) <| fun (f,p) ->
                 if x1*x2<0.0 then
@@ -637,7 +637,7 @@ namespace Aqualis
             let text (s:Style) (ps:position) text =
                 html.text (Style[font.family "'Noto Sans JP', sans-serif";font.weight "600"; zindex 3]+s) (position(px0,py0) + T ps) text
             code(line,arrow,circle,rectangle,text)
-            
+
     and figure() =
         let padding = 10.0
         let mutable xmin:option<double> = None
@@ -657,34 +657,34 @@ namespace Aqualis
             let marginX = this.Xmin-padding
             let marginY = this.Ymin-padding
             sizeX,sizeY,marginX,marginY
-            
+
         member private _.updateRange(p:position) =
             match xmin with
             |None ->
                 xmin <- Some p.x
-            |Some xx when p.x<xx -> 
+            |Some xx when p.x<xx ->
                 xmin <- Some p.x
             |_ -> ()
             match ymin with
             |None ->
                 ymin <- Some p.y
-            |Some yy when p.y<yy -> 
+            |Some yy when p.y<yy ->
                 ymin <- Some p.y
             |_ -> ()
-            
+
             match xmax with
             |None ->
                 xmax <- Some p.x
-            |Some xx when p.x>xx -> 
+            |Some xx when p.x>xx ->
                 xmax <- Some p.x
             |_ -> ()
             match ymax with
             |None ->
                 ymax <- Some p.y
-            |Some yy when p.y>yy -> 
+            |Some yy when p.y>yy ->
                 ymax <- Some p.y
             |_ -> ()
-            
+
         member this.line (s:Style) = fun (startP:position) (endP:position) ->
             if writeMode then
                 html.taga ("line", [
@@ -695,7 +695,7 @@ namespace Aqualis
             else
                 this.updateRange startP
                 this.updateRange endP
-                
+
         member this.line (id:string) = fun (s:Style) (startP:position) (endP:position) ->
             if writeMode then
                 html.taga ("line", [
@@ -707,7 +707,7 @@ namespace Aqualis
             else
                 this.updateRange startP
                 this.updateRange endP
-                
+
         member this.rect (s:Style) (startP:position) (sx:int) (sy:int) =
             if writeMode then
                 html.taga ("rect", [
@@ -718,7 +718,7 @@ namespace Aqualis
             else
                 this.updateRange startP
                 this.updateRange(startP.shift(sx,sy))
-                
+
         member this.ellipse (s:Style) (center:position) (radiusX:int) (radiusY:int) =
             if writeMode then
                 html.taga ("ellipse", [
@@ -731,7 +731,7 @@ namespace Aqualis
                 this.updateRange(center.shiftX radiusX)
                 this.updateRange(center.shiftY -radiusY)
                 this.updateRange(center.shiftY radiusY)
-                
+
         member this.polygon (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
@@ -739,7 +739,7 @@ namespace Aqualis
             else
                 for q in apex do
                     this.updateRange q
-                    
+
         member this.polyLine (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
@@ -747,7 +747,7 @@ namespace Aqualis
             else
                 for q in apex do
                     this.updateRange q
-                    
+
         member this.triangleArrow (s:Style) (lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
             let pi = 3.14159265358979
             let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
@@ -755,7 +755,7 @@ namespace Aqualis
             let q1y = endP.y + arrowSize*sin(t0-15.0*pi/180.0)
             let q2x = endP.x + arrowSize*cos(t0+15.0*pi/180.0)
             let q2y = endP.y + arrowSize*sin(t0+15.0*pi/180.0)
-            let ux,uy = 
+            let ux,uy =
                 let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
                 endP.x + (startP.x-endP.x)*c,
                 endP.y + (startP.y-endP.y)*c
@@ -767,7 +767,7 @@ namespace Aqualis
                 this.updateRange(position(q1x,q1y))
                 this.updateRange(position(q2x,q2y))
             this.polygon s [position(q1x,q1y);endP;position(q2x,q2y)]
-            
+
         member this.polyLineTriangleArrow (lineStyle:Style,arrowStyle:Style,lineWidth:float,arrowSize:float) (pp:list<position>) =
             let pi = 3.14159265358979
             let startP = pp[pp.Length-2]
@@ -777,7 +777,7 @@ namespace Aqualis
             let q1y = endP.y + arrowSize*sin(t0-15.0*pi/180.0)
             let q2x = endP.x + arrowSize*cos(t0+15.0*pi/180.0)
             let q2y = endP.y + arrowSize*sin(t0+15.0*pi/180.0)
-            let ux,uy = 
+            let ux,uy =
                 let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
                 endP.x + (startP.x-endP.x)*c,
                 endP.y + (startP.y-endP.y)*c
@@ -789,7 +789,7 @@ namespace Aqualis
                 this.updateRange(position(q1x,q1y))
                 this.updateRange(position(q2x,q2y))
             this.polygon arrowStyle [position(q1x,q1y);endP;position(q2x,q2y)]
-            
+
         member this.lineArrow (s:Style,lineWidth:float,arrowSize:float) (startP:position) (endP:position) =
             let pi = 3.14159265358979
             let t0 = atan2 (startP.y-endP.y) (startP.x-endP.x)
@@ -797,7 +797,7 @@ namespace Aqualis
             let q1y = endP.y + arrowSize*sin(t0-15.0*pi/180.0)
             let q2x = endP.x + arrowSize*cos(t0+15.0*pi/180.0)
             let q2y = endP.y + arrowSize*sin(t0+15.0*pi/180.0)
-            let ux,uy = 
+            let ux,uy =
                 let c = lineWidth/sqrt((endP.x-startP.x)*(endP.x-startP.x)+(endP.y-startP.y)*(endP.y-startP.y))
                 endP.x + (startP.x-endP.x)*c,
                 endP.y + (startP.y-endP.y)*c

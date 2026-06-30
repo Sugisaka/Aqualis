@@ -17,10 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="TestHelpers.fs" />
     <Compile Include="GenerationContextTests.fs" />
     <Compile Include="AssignmentTests.fs" />
+    <Compile Include="ChTests.fs" />
     <Compile Include="GoldenFileTests.fs" />
     <Compile Include="MarkdownTests.fs" />
   </ItemGroup>
