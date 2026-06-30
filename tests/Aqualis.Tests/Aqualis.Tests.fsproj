@@ -23,6 +23,7 @@
     <Compile Include="ChTests.fs" />
     <Compile Include="GoldenFileTests.fs" />
     <Compile Include="MarkdownTests.fs" />
+    <Compile Include="Plot2dTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

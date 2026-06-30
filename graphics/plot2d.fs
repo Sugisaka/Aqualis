@@ -135,6 +135,13 @@ namespace Aqualis
         let mutable min_ : double = 0.0
         let mutable max_ : double = 0.0
         let mutable error : string = ""
+
+        let appendError message =
+            error <-
+                if String.IsNullOrEmpty error then
+                    message
+                else
+                    error + Environment.NewLine + message
         
         /// データのx方向サンプリング点数
         member _.Nx with get() = nx
@@ -189,6 +196,9 @@ namespace Aqualis
         /// <param name="eval">複素数→プロット値</param>
         member public this.FileRead(filename:string,ix:int,iy:int,izre:int,izim:int) =
             isDataLoaded <- false
+            data <- [||]
+            nx <- 0
+            ny <- 0
             error <- "";
             if not <| File.Exists filename then
                 error <- "ファイル「"+filename+"」は存在しません"
@@ -268,25 +278,47 @@ namespace Aqualis
                     // read関数実行→sizeの返却値 *)
                     read 0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
                     
-                if dx = 0.0 then error <- (if error = "" then "" else error+"\r\n") + "xの値が一定です。1次元データの可能性があります。"
-                if dy = 0.0 then error <- (if error = "" then "" else error+"\r\n") + "yの値が一定です。1次元データの可能性があります。"
-                
-                // 離散間隔とデータ範囲から離散点数を決定
-                nx <- int (Math.Floor((xmax - xmin) / dx + 0.5) + 1.0)
-                ny <- int (Math.Floor((ymax - ymin) / dy + 0.5) + 1.0)
-                
+                if dx <= 0.0 || Double.IsNaN dx || Double.IsInfinity dx then
+                    appendError "xの値が一定です。1次元データの可能性があります。"
+                if dy <= 0.0 || Double.IsNaN dy || Double.IsInfinity dy then
+                    appendError "yの値が一定です。1次元データの可能性があります。"
+
                 if error="" then
-                    // 配列初期化
-                    try
-                        // 複素数データ
-                        if isCPXdata then
-                            data <- Array.zeroCreate(2*nx*ny)
-                        // 実数データ
+                    // 離散間隔とデータ範囲から離散点数を決定
+                    let calculatedNx =
+                        Math.Floor((xmax - xmin) / dx + 0.5) + 1.0
+                    let calculatedNy =
+                        Math.Floor((ymax - ymin) / dy + 0.5) + 1.0
+
+                    if
+                        Double.IsNaN calculatedNx ||
+                        Double.IsInfinity calculatedNx ||
+                        calculatedNx < 1.0 ||
+                        calculatedNx > float Int32.MaxValue ||
+                        Double.IsNaN calculatedNy ||
+                        Double.IsInfinity calculatedNy ||
+                        calculatedNy < 1.0 ||
+                        calculatedNy > float Int32.MaxValue
+                    then
+                        appendError "配列サイズが有効範囲外です。"
+                    else
+                        nx <- int calculatedNx
+                        ny <- int calculatedNy
+
+                        let elementCount =
+                            int64 nx * int64 ny *
+                            (if isCPXdata then 2L else 1L)
+
+                        if elementCount > int64 Int32.MaxValue then
+                            appendError ("配列サイズ("+nx.ToString()+","+ny.ToString()+")を確保できません")
                         else
-                            data <- Array.zeroCreate(nx*ny)
-                    with
-                    | :? System.OutOfMemoryException | :? System.ArgumentException ->
-                        error <- (if error = "" then "" else error+"\r\n") + "配列サイズ("+nx.ToString()+","+ny.ToString()+")を確保できません"
+                            try
+                                data <- Array.zeroCreate(int elementCount)
+                            with
+                            | :? System.OutOfMemoryException
+                            | :? System.ArgumentException
+                            | :? System.OverflowException ->
+                                appendError ("配列サイズ("+nx.ToString()+","+ny.ToString()+")を確保できません")
                     // ここまでエラーなしの場合：データ読み込み
                     if error = "" then
                         let reader = new StreamReader(filename)
