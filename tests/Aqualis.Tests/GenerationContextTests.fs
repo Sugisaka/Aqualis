@@ -179,6 +179,52 @@ module GenerationContextTests =
             context.CurrentProgram.close()
 
     [<Fact>]
+    let ``debug mode is restored after normal completion and an exception`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "debug-mode.c" C99
+
+        try
+            context.Activate(fun () ->
+                Assert.False(context.Debug.debugMode)
+
+                AqualisCompiler.debug(fun () ->
+                    Assert.True(context.Debug.debugMode))
+
+                Assert.False(context.Debug.debugMode)
+
+                Assert.Throws<InvalidOperationException>(
+                    Action(fun () ->
+                        AqualisCompiler.debug(fun () ->
+                            Assert.True(context.Debug.debugMode)
+                            invalidOp "expected")))
+                |> ignore
+
+                Assert.False(context.Debug.debugMode))
+        finally
+            context.CurrentProgram.close()
+
+    [<Fact>]
+    let ``debug mode preserves an existing enabled state and supports nesting`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "nested-debug-mode.c" C99
+
+        try
+            context.Activate(fun () ->
+                AqualisCompiler.set_DebugMode ON
+
+                AqualisCompiler.debug(fun () ->
+                    Assert.True(context.Debug.debugMode)
+
+                    AqualisCompiler.debug(fun () ->
+                        Assert.True(context.Debug.debugMode))
+
+                    Assert.True(context.Debug.debugMode))
+
+                Assert.True(context.Debug.debugMode))
+        finally
+            context.CurrentProgram.close()
+
+    [<Fact>]
     let ``program switches on one parent context do not interfere`` () =
         use output = new TemporaryDirectory()
         let context =

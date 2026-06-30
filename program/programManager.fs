@@ -337,6 +337,14 @@ namespace Aqualis
             finally
                 state.IsParallelMode <- previous
 
+        member _.WithDebugMode(enabled:bool, code: unit -> 'T) : 'T =
+            let previous = state.Debug.debugMode
+            try
+                state.Debug.setDebugMode enabled
+                code()
+            finally
+                state.Debug.setDebugMode previous
+
         member _.Functions = state.Functions
 
         member _.DistinctFunctions =
@@ -479,9 +487,8 @@ namespace Aqualis
 
         ///<summary>codeをデバッグモードで実行</summary>
         static member debug code =
-            AqualisCompiler.set_DebugMode ON
-            code()
-            AqualisCompiler.set_DebugMode OFF
+            let context = GenerationScope.requireContext()
+            context.WithDebugMode(true, code)
 
         ///<summary>プログラムの実行を強制終了</summary>
         static member abort() =
