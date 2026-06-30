@@ -7,7 +7,7 @@ open Aqualis
 
 module GenerationContextTests =
     let private createContext path name language =
-        GenerationContext [program(path, name, language)]
+        GenerationContext [new program(path, name, language)]
 
     [<Fact>]
     let ``Activate restores the outer context after normal completion`` () =
@@ -48,8 +48,8 @@ module GenerationContextTests =
         use output = new TemporaryDirectory()
         let context =
             GenerationContext [
-                program(output.Path, "first.tmp", C99)
-                program(output.Path, "second.tmp", Python)
+                new program(output.Path, "first.tmp", C99)
+                new program(output.Path, "second.tmp", Python)
             ]
 
         Assert.Equal(0, context.CurrentIndex)
@@ -229,8 +229,8 @@ module GenerationContextTests =
         use output = new TemporaryDirectory()
         let context =
             GenerationContext [
-                program(output.Path, "switch-first.c", C99)
-                program(output.Path, "switch-second.py", Python)
+                new program(output.Path, "switch-first.c", C99)
+                new program(output.Path, "switch-second.py", Python)
             ]
 
         try

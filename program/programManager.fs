@@ -11,7 +11,7 @@ namespace Aqualis
 
     type program(outputdir,pjname,lang:Language) =
 
-        let cwriter = codeWriter(outputdir+"\\"+pjname,2,lang)
+        let cwriter = new codeWriter(outputdir+"\\"+pjname,2,lang)
 
         /// 構造体
         let structData = structure()
@@ -192,6 +192,10 @@ namespace Aqualis
             File.ReadAllText(outputdir+"\\"+pjname)
         member _.delete() = cwriter.delete()
         member _.str with get() = structData
+
+        interface System.IDisposable with
+            member _.Dispose() =
+                (cwriter :> System.IDisposable).Dispose()
 
     type MovieSetting = {
         Character: Switch
@@ -413,16 +417,25 @@ namespace Aqualis
         ///<summary>現在生成中のプログラミング言語</summary>
         let funlist_nonoverlap() =
             (GenerationScope.requireContext()).DistinctFunctions
+        let private disposePrograms (programs:program list) =
+            programs
+            |> List.iter (fun item ->
+                (item :> System.IDisposable).Dispose())
+
         let makeProgramWithContext
             (programInfo: list<string * string * Language>)
             (code: GenerationContext -> 'T)
             : 'T =
             let programs =
                 programInfo
-                |> List.map program
+                |> List.map (fun (dir, name, language) ->
+                    new program(dir, name, language))
             let context = GenerationContext programs
 
-            context.Activate(fun () -> code context)
+            try
+                context.Activate(fun () -> code context)
+            finally
+                disposePrograms programs
 
         let makeProgramWithMovieSetting
             (movieSetting:MovieSetting)
@@ -431,10 +444,14 @@ namespace Aqualis
             : 'T =
             let programs =
                 programInfo
-                |> List.map program
+                |> List.map (fun (dir, name, language) ->
+                    new program(dir, name, language))
             let context = GenerationContext(programs, movieSetting)
 
-            context.Activate(code)
+            try
+                context.Activate(code)
+            finally
+                disposePrograms programs
 
         /// Backward-compatible entry point. New code should prefer
         /// makeProgramWithContext when it needs direct access to the context.

@@ -27,9 +27,9 @@ module AssignmentTests =
     let ``assignment rejects values from different contexts`` () =
         use output = new TemporaryDirectory()
         let leftContext =
-            GenerationContext [program(output.Path, "left.c", C99)]
+            GenerationContext [new program(output.Path, "left.c", C99)]
         let rightContext =
-            GenerationContext [program(output.Path, "right.c", C99)]
+            GenerationContext [new program(output.Path, "right.c", C99)]
 
         try
             let left =

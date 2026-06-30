@@ -8,18 +8,18 @@ open Aqualis
 
 module WebGenerationStateTests =
     let private createContext path name =
-        GenerationContext [program(path, name, HTML)]
+        GenerationContext [new program(path, name, HTML)]
 
     [<Fact>]
     let ``movie settings are fixed when each context is created`` () =
         use output = new TemporaryDirectory()
         let disabled =
             GenerationContext(
-                [program(output.Path, "movie-disabled.tmp", HTML)],
+                [new program(output.Path, "movie-disabled.tmp", HTML)],
                 { Character = OFF; Subtitle = OFF; Voice = OFF })
         let defaults =
             GenerationContext(
-                [program(output.Path, "movie-default.tmp", HTML)],
+                [new program(output.Path, "movie-default.tmp", HTML)],
                 MovieSetting.Default)
 
         disabled.Activate(fun () ->

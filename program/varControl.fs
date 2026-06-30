@@ -149,17 +149,34 @@ namespace Aqualis
     type codeWriter(filename:string,indentsize:int,lan:Language) =
         
         let mutable cwriter:option<StreamWriter> = if filename = "" then None else Some (new StreamWriter(filename,false))
-        
-        let mutable isFileOpen = true
+
+        let disposeWriter() =
+            match cwriter with
+            |None ->
+                ()
+            |Some writer ->
+                writer.Dispose()
+                cwriter <- None
+
+        let requireWriter() =
+            match cwriter with
+            |Some writer ->
+                writer
+            |None ->
+                raise (
+                    ObjectDisposedException(
+                        nameof codeWriter,
+                        $"The code writer for '{filename}' is closed."))
+
+        let reopen (append:bool) =
+            disposeWriter()
+            if not (String.IsNullOrEmpty filename) then
+                cwriter <- Some(new StreamWriter(filename, append))
         
         member val indent = IndentController indentsize with get
         
         member _.cwrite(s:string) =
-            match cwriter with
-            |None -> 
-                printfn "file %s not opened" filename
-            |Some w -> 
-                w.Write s
+            (requireWriter()).Write s
                 
         ///<summary>コード出力(インデントなし・改行なし)</summary>
         member this.codewrite (ss:string) = 
@@ -431,35 +448,26 @@ namespace Aqualis
                 
         ///<summary>ファイルを閉じる</summary>
         member this.close() =
-            match cwriter with
-            |None ->
-                ()
-            |Some w -> 
-                w.Close()
-            isFileOpen <- false
+            disposeWriter()
             
         ///<summary>ファイルの書き込みを再開</summary>
         member this.appendOpen() =
-            cwriter <- Some(new StreamWriter(filename,true))
+            reopen true
             
         ///<summary>既存のファイルを削除して開き直す</summary>
         member this.deleteOpen() =
-            if isFileOpen then
-                match cwriter with
-                |None -> ()
-                |Some w -> w.Close()
-            if File.Exists filename then File.Delete filename
-            cwriter <- Some(new StreamWriter(filename))
+            reopen false
             
         ///<summary>並列処理の一時ファイルを削除</summary>
         member _.delete() = 
-            if isFileOpen then
-                match cwriter with
-                |None -> ()
-                |Some w -> w.Close()
+            disposeWriter()
             if File.Exists filename then File.Delete filename
             
         member _.allCode with get() = File.ReadAllText filename
+
+        interface IDisposable with
+            member _.Dispose() =
+                disposeWriter()
         
     type argumentController(lang:Language) =
         

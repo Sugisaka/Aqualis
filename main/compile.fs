@@ -22,7 +22,7 @@ namespace Aqualis
                         code()
                         (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
-                        let writer = codeWriter(dir + "\\" + projectname + ".f90", 2, Fortran)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".f90", 2, Fortran)
                         writer.codewritein "!=============================================================================================\n"
                         writer.codewritein("! Project name: " + projectname + "\n")
                         writer.codewritein("! Project version: " + codever + "\n")
@@ -93,7 +93,7 @@ namespace Aqualis
                         (GenerationScope.currentProgram()).indentDec()
                         (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
-                        let writer = codeWriter(dir + "\\" + projectname + ".c", 2, C99)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")
@@ -161,7 +161,7 @@ namespace Aqualis
                         code()
                         (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
-                        let writer = codeWriter(dir + "\\" + projectname + ".tex", 2, LaTeX)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".tex", 2, LaTeX)
                         writer.codewritein "\\documentclass[a4paper,fleqn]{ltjsarticle}\n"
                         writer.codewritein "\\usepackage{amsmath}\n"
                         List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| (GenerationScope.currentProgram()).hlist.list
@@ -204,7 +204,7 @@ namespace Aqualis
                         code()
                         (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
-                        let writer = codeWriter(dir + "\\" + projectname + ".html", 2, HTML)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".html", 2, HTML)
                         writer.codewritein "<!DOCTYPE html>\n"
                         writer.codewritein "<html lang='ja'>\n"
                         writer.codewritein "\t<head>\n"
@@ -425,7 +425,7 @@ namespace Aqualis
                         code()
                         (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
-                        let writer = codeWriter(dir + "\\" + projectname + ".py", 2, Python)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".py", 2, Python)
                         writer.codewritein "#=============================================================================================\n"
                         writer.codewritein("# Project name: " + projectname + "\n")
                         writer.codewritein("# Project version: " + codever + "\n")
@@ -474,7 +474,7 @@ namespace Aqualis
                         (GenerationScope.currentProgram()).indentDec()
                         (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
-                        let writer = codeWriter(dir + "\\" + projectname + ".c", 2, C99)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")
@@ -516,7 +516,7 @@ namespace Aqualis
                         (GenerationScope.currentProgram()).indentDec()
                         (GenerationScope.currentProgram()).close()
                         //ソースファイル出力
-                        let writer = codeWriter(dir + "\\" + projectname + ".c", 2, C99)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")

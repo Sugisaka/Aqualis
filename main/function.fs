@@ -42,7 +42,7 @@ namespace Aqualis
                     code()
                     (GenerationScope.currentProgram()).close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
                     writer.codewritein "!=============================================================================================\n"
                     writer.codewritein("! Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in (GenerationScope.currentProgram()).arg.list do
@@ -76,7 +76,7 @@ namespace Aqualis
                     code()
                     (GenerationScope.currentProgram()).close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
                     writer.codewritein "/*==========================================================================================*/\n"
                     writer.codewritein("/* Subroutine name: " + projectname + " */\n")
                     for _,(_,_,nm) in (GenerationScope.currentProgram()).arg.list do
@@ -116,7 +116,7 @@ namespace Aqualis
                     code()
                     (GenerationScope.currentProgram()).close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
                     writer.codewritein "%=============================================================================================\n"
                     writer.codewritein("% Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in (GenerationScope.currentProgram()).arg.list do
@@ -150,7 +150,7 @@ namespace Aqualis
                     code()
                     (GenerationScope.currentProgram()).close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
                     writer.codewritein("<h3>" + projectname + "</h3>\n")
                     writer.codewritein "<ul>\n"
                     for _,(_,_,nm) in (GenerationScope.currentProgram()).arg.list do
@@ -186,7 +186,7 @@ namespace Aqualis
                     code()
                     (GenerationScope.currentProgram()).close()
                     //ソースファイル(関数部分)出力
-                    let writer = codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, (GenerationScope.currentProgram()).language)
                     writer.codewritein "#==========================================================================================\n"
                     writer.codewritein("# Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in (GenerationScope.currentProgram()).arg.list do
