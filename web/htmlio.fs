@@ -12,20 +12,9 @@ open System.IO
 [<AutoOpen>]
 module htmlio =
     /// 変数カウンタ
-    let mutable icounter = 0
     /// draw関数のコード出力先ファイル名
-    let mutable filename_draw = ""
     /// HTML本体のコード出力先ファイル名
-    let mutable filename_body = ""
-    let mutable filename_js = ""
-    let mutable filename_JSAnimationStart = ""
-    let mutable filename_JSAnimationSeqReset = ""
-    let mutable filename_JSAnimationReset = ""
     /// コンテンツディレクトリ
-    let mutable contentsDir = ""
-    let mutable private contentsCounter = -1
-    let mutable private animtionSeqCounter = -1
-    let mutable private animationGroupCounter = -1
     // /// draw関数内のコード
     // let mutable wrDraw = OptionWriter()
     // /// body要素内のコード
@@ -53,30 +42,31 @@ module htmlio =
     /// 自動開始アニメーション実行コードの書き込み
     let switchAutoAnimation code = withProgramIndex 7 code
 
-    let mutable animationButtonList:list<string*string*int*int> = []
-    let mutable audioList:string list = []
     /// 図面カウンタ
-    let mutable figcounter = 0
     /// アニメーションカウンタ
-    let mutable anicounter = 0
 
     let nextContentsID() =
-        contentsCounter <- contentsCounter + 1
-        "contentsID"+contentsCounter.ToString()
+        let state = WebGenerationScope.html()
+        state.ContentsCounter <- state.ContentsCounter + 1
+        "contentsID"+state.ContentsCounter.ToString()
 
     let nextAnimationSeqID() =
-        animtionSeqCounter <- animtionSeqCounter + 1
-        "animationSeqID"+animtionSeqCounter.ToString(),"animationSeqResetID"+animtionSeqCounter.ToString()
+        let state = WebGenerationScope.html()
+        state.AnimationSequenceCounter <- state.AnimationSequenceCounter + 1
+        "animationSeqID"+state.AnimationSequenceCounter.ToString(),
+        "animationSeqResetID"+state.AnimationSequenceCounter.ToString()
 
     let nextAnimationGroup() =
-        animationGroupCounter <- animationGroupCounter + 1
-        animationGroupCounter.ToString()
+        let state = WebGenerationScope.html()
+        state.AnimationGroupCounter <- state.AnimationGroupCounter + 1
+        state.AnimationGroupCounter.ToString()
 
     let animationButtonReset() =
-        animationButtonList <- []
+        (WebGenerationScope.html()).AnimationButtons.Clear()
 
     let addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
-       animationButtonList <- animationButtonList@[fnameStart,fnameReset,buttonX,buttonY]
+       (WebGenerationScope.html()).AnimationButtons.Add(
+           fnameStart, fnameReset, buttonX, buttonY)
 
     let addAutoAnimation(fnameStart,fnameReset) =
         switchAutoAnimation <| fun () ->

@@ -369,7 +369,6 @@ namespace Aqualis
                     if not <| Directory.Exists (dir + "\\" + "contents_" + projectname) then
                         ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + projectname)
                     // コンテンツディレクトリ
-                    contentsDir <- dir + "\\" + "contents_" + projectname
                     makeProgram
                         [
                             // メインファイル
@@ -378,6 +377,8 @@ namespace Aqualis
                             dir, projectname + "_body", HTMLSequenceDiagram
                         ]
                         <| fun () ->
+                            (WebGenerationScope.html()).ContentsDirectory <-
+                                dir + "\\" + "contents_" + projectname
                             switchBody <| fun () ->
                                 code()
                             let codeBody = switchBody <| fun () ->

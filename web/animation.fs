@@ -9,17 +9,18 @@ namespace Aqualis
 open System
 open System.IO
 
+module private AnimationGenerationScope =
+    let html() = WebGenerationScope.html()
+    let options() = WebGenerationScope.animation()
+    let contentsDirectory() = (html()).ContentsDirectory
+
 type AnimationType =
     |Loop of int*int
     |Range of int*int
 
-type MovieSetting = {
     /// キャラクター表示
-    Character:Switch;
     /// 字幕表示
-    Subtitle:Switch;
     /// 音声再生
-    Voice:Switch}
 
 type tposition = {
     /// x座標：時間（フレーム番号）の関数
@@ -285,9 +286,10 @@ type SlideAnimation =
     /// </summary>
     static member writeAudioList() =
         switchJSMain <| fun () ->
+            let audioFiles = (WebGenerationScope.html()).AudioFiles
             writein "const audioList = ["
-            for i in 0..audioList.Length-1 do
-                writein ("    \""+audioList[i] + "\"" + if i<audioList.Length-1 then "," else "")
+            for i in 0..audioFiles.Count-1 do
+                writein ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Count-1 then "," else "")
             writein "];"
     /// <summary>
     /// キャラクター表示を制御するJavaScriptコードの生成
@@ -334,10 +336,11 @@ type SlideAnimation =
     /// </summary>
     static member jsDrawNext(audioDir:string) =
         switchJSMain <| fun () ->
+            let animationCount = (WebGenerationScope.html()).AnimationCounter
             writein "function drawNext()"
             writein "{"
             writein "    resetAll();"
-            writein("    if(pagecount<"+anicounter.ToString()+")")
+            writein("    if(pagecount<"+animationCount.ToString()+")")
             writein "    {"
             writein "        const swc = document.getElementById(\"switchCharacter\");"
             writein "        const sws = document.getElementById(\"switchSubtitle\");"
@@ -444,19 +447,10 @@ type SlideAnimation =
             writein "    }"
             writein "}"
 
-[<AutoOpen>]
-module movieSetting =
     /// キャラクターのデフォルト表示・非表示設定
-    let mutable character = true
     /// 字幕のデフォルト表示・非表示設定
-    let mutable subtitle = true
     /// 音声のデフォルト表示・非表示設定
-    let mutable voice = true
     /// デフォルトの設定
-    let setDefault(s:MovieSetting) =
-        match s.Character with |ON -> character <- true |OFF -> character <- false
-        match s.Subtitle  with |ON -> subtitle  <- true |OFF -> subtitle  <- false
-        match s.Voice     with |ON -> voice     <- true |OFF -> voice     <- false
 
 [<AutoOpen>]
 module htmlexpr =
@@ -746,44 +740,44 @@ module htmlexpr =
         static member image (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists contentsDir then
-                    File.Copy(filename, contentsDir + "\\" + f, true)
+                if Directory.Exists (AnimationGenerationScope.contentsDirectory()) then
+                    File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" contentsDir
+                    printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "image file not exist: %s" filename
             let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
-            html.taga ("img", [st.atr;Atr("src", Path.GetFileName contentsDir + "\\" + f)])
+            html.taga ("img", [st.atr;Atr("src", Path.GetFileName (AnimationGenerationScope.contentsDirectory()) + "\\" + f)])
         static member image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists contentsDir then
-                    File.Copy(filename, contentsDir + "\\" + f, true)
+                if Directory.Exists (AnimationGenerationScope.contentsDirectory()) then
+                    File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" contentsDir
+                    printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "image file not exist: %s" filename
-            html.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName contentsDir + "\\" + f)])
+            html.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName (AnimationGenerationScope.contentsDirectory()) + "\\" + f)])
         static member image (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists contentsDir then
-                    File.Copy(filename, contentsDir + "\\" + f, true)
+                if Directory.Exists (AnimationGenerationScope.contentsDirectory()) then
+                    File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" contentsDir
+                    printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "image file not exist: %s" filename
-            html.taga ("img", [s.atr;Atr("src", Path.GetFileName contentsDir + "\\" + f)])
+            html.taga ("img", [s.atr;Atr("src", Path.GetFileName (AnimationGenerationScope.contentsDirectory()) + "\\" + f)])
         static member image (filename:string) =
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists contentsDir then
-                    File.Copy(filename, contentsDir + "\\" + f, true)
+                if Directory.Exists (AnimationGenerationScope.contentsDirectory()) then
+                    File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" contentsDir
+                    printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "image file not exist: %s" filename
-            html.taga ("img", [Atr("src", Path.GetFileName contentsDir + "\\" + f)])
+            html.taga ("img", [Atr("src", Path.GetFileName (AnimationGenerationScope.contentsDirectory()) + "\\" + f)])
         /// <summary>
         /// 指定位置に動画を表示する
         /// </summary>
@@ -793,25 +787,25 @@ module htmlexpr =
         static member video (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists contentsDir then
-                    File.Copy(filename, contentsDir + "\\" + f, true)
+                if Directory.Exists (AnimationGenerationScope.contentsDirectory()) then
+                    File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" contentsDir
+                    printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "video file not exist: %s" filename
             let st = Style [{Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
-            html.tagv ("video", [st.atr;Atr("src", contentsDir + "\\" + f); Atr("controls", "")])
+            html.tagv ("video", [st.atr;Atr("src", AnimationGenerationScope.contentsDirectory() + "\\" + f); Atr("controls", "")])
             html.tage "video"
         static member video (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists contentsDir then
-                    File.Copy(filename, contentsDir + "\\" + f, true)
+                if Directory.Exists (AnimationGenerationScope.contentsDirectory()) then
+                    File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" contentsDir
+                    printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "video file not exist: %s" filename
-            html.tagv ("video", [s.atr;Atr("src", contentsDir + "\\" + f); Atr("controls", "")])
+            html.tagv ("video", [s.atr;Atr("src", AnimationGenerationScope.contentsDirectory() + "\\" + f); Atr("controls", "")])
             html.tage "video"
 
         /// <summary>
@@ -877,44 +871,50 @@ module htmlexpr =
         /// </summary>
         static member page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
             html.slide position.Origin <| fun p ->
+                let htmlState = AnimationGenerationScope.html()
+                let options = AnimationGenerationScope.options()
+                let animationCounter = htmlState.AnimationCounter
+                let contentsDirectory = htmlState.ContentsDirectory
                 // 音声ファイル追加
-                audioList <- audioList@[match audioFile with |Some t -> t |None -> ""]
+                htmlState.AudioFiles.Add(match audioFile with |Some t -> t |None -> "")
                 // 字幕枠
-                html.tag "div" ("id = \"sb"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if options.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
                 // キャラクター画像
-                html.tag "div" ("id = \"c"+anicounter.ToString()+"\"" + "style=\"" + (if character then "display: block; " else "display: none; ") + "\"") <| fun () ->
+                html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if options.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
                     for ci in c do
                         if File.Exists ci.CharacterImageFile then
-                            if Directory.Exists contentsDir then
-                                File.Copy(ci.CharacterImageFile, contentsDir+"\\"+Path.GetFileName ci.CharacterImageFile, true)
-                                html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDir + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
+                            if Directory.Exists contentsDirectory then
+                                File.Copy(ci.CharacterImageFile, contentsDirectory+"\\"+Path.GetFileName ci.CharacterImageFile, true)
+                                html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
                             else
-                                printfn "directory not exist: %s" contentsDir
+                                printfn "directory not exist: %s" contentsDirectory
                         else
                             printfn "character image file not exist: %s" ci.CharacterImageFile
                 // 字幕
-                html.tag "div" ("id = \"s"+anicounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if subtitle then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if options.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
                     <| fun () -> writein audio.Subtitle
                 switchAutoAnimation <| fun () ->
-                    writein("page"+anicounter.ToString()+": () => {")
+                    writein("page"+animationCounter.ToString()+": () => {")
                 // メインコンテンツ
                 html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
                     code2 p
                 switchAutoAnimation <| fun () ->
                     writein "},"
-                if animationButtonList.Length > 0 then
-                    let fStartName,fResetName,btnx,btny = animationButtonList[animationButtonList.Length-1]
+                if htmlState.AnimationButtons.Count > 0 then
+                    let fStartName,fResetName,btnx,btny = htmlState.AnimationButtons[htmlState.AnimationButtons.Count-1]
                     html.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
                     html.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
-                animationButtonList <- []
+                htmlState.AnimationButtons.Clear()
         /// <summary>
         /// 指定位置にスライドを生成
         /// </summary>
         /// <param name="p">スライドの表示位置</param>
         static member slide (p:position)  code =
-                anicounter <- anicounter + 1
-                html.tagb ("div", "id=\"p"+anicounter.ToString()+"\" style=\"display: "+(if anicounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
+                let state = AnimationGenerationScope.html()
+                state.AnimationCounter <- state.AnimationCounter + 1
+                let animationCounter = state.AnimationCounter
+                html.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
                     code p
         /// <summary>
         /// 前のページへ移動するボタンを生成
@@ -944,21 +944,21 @@ module htmlexpr =
         /// キャラクター表示を制御するチェックボックスを生成
         /// </summary>
         static member switchCharacter() =
-            html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if character then "checked" else "")
+            html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if (AnimationGenerationScope.options()).CharacterEnabled then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
                 writein "キャラクター"
         /// <summary>
         /// 字幕表示を制御するチェックボックスを生成
         /// </summary>
         static member switchSubtitle() =
-            html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if subtitle then "checked" else "")
+            html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if (AnimationGenerationScope.options()).SubtitleEnabled then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
                 writein "字幕"
         /// <summary>
         /// 音声再生を制御するチェックボックスを生成
         /// </summary>
         static member switchAudio() =
-            html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if voice then "checked" else "")
+            html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if (AnimationGenerationScope.options()).VoiceEnabled then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
                 writein "音声"
         static member audioPlayer() =
@@ -972,10 +972,10 @@ module htmlexpr =
                             {Key = "position"; Value = "absolute";}]
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists contentsDir then
-                    File.Copy(filename, contentsDir + "\\" + f, true)
+                if Directory.Exists (AnimationGenerationScope.contentsDirectory()) then
+                    File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" contentsDir
+                    printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "image file not exist: %s" filename
             html.taga ("img", [(s1+s).atr])
@@ -1187,14 +1187,14 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     /// <param name="filename">画像のファイル名</param>
     member this.image (s:Style) (center:position) (filename:string) =
         let f = Path.GetFileName filename
-        File.Copy(filename, contentsDir + "\\" + f, true)
+        File.Copy(filename, AnimationGenerationScope.contentsDirectory() + "\\" + f, true)
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
             {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
             {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
         let ss = Style (s.list@c)
-        html.taga ("img", [ss.atr; Atr("src",contentsDir + "\\" + f)])
+        html.taga ("img", [ss.atr; Atr("src",AnimationGenerationScope.contentsDirectory() + "\\" + f)])
     /// <summary>
     /// 開始ボタンの制御用JavaScriptコードを生成
     /// </summary>
@@ -1248,13 +1248,20 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
 
 [<AutoOpen>]
 module dochtml =
-    let htmlpresentation (dir:string) (filename:string) (title:string) (cssfile:option<string>) (pagesizeX:option<int>,pagesizeY:option<int>) isPageAnimation code =
+    let private htmlpresentationCore
+        (movieSetting:MovieSetting)
+        (dir:string)
+        (filename:string)
+        (title:string)
+        (cssfile:option<string>)
+        (pagesizeX:option<int>,pagesizeY:option<int>)
+        isPageAnimation
+        code =
         // ディレクトリ作成
         if not <| Directory.Exists (dir + "\\" + "contents_" + filename) then
             ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + filename)
         // コンテンツディレクトリ
-        contentsDir <- dir + "\\" + "contents_" + filename
-        makeProgram
+        makeProgramWithMovieSetting movieSetting
             [
                 // メインファイル
                 dir, filename + ".html", HTML
@@ -1274,6 +1281,8 @@ module dochtml =
                 dir  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
             ]
             <| fun () ->
+                (WebGenerationScope.html()).ContentsDirectory <-
+                    dir + "\\" + "contents_" + filename
                 switchJSAnimationStart <| fun () ->
                     writein "const animationStartMap = {"
                 switchJSAnimationReset <| fun () ->
@@ -1426,6 +1435,24 @@ module dochtml =
                 context.Programs[2].delete()
 
     /// 全体がキャンバスの無制限レイアウト
+    let htmlpresentation
+        (dir:string)
+        (filename:string)
+        (title:string)
+        (cssfile:option<string>)
+        pagesize
+        isPageAnimation
+        code =
+        htmlpresentationCore
+            MovieSetting.Default
+            dir
+            filename
+            title
+            cssfile
+            pagesize
+            isPageAnimation
+            code
+
     let freeCanvas outputdir filename (title:string) cssfile code =
         htmlpresentation outputdir filename title cssfile (None, None) false <| fun () ->
             html.canvas <| Style [size.width "0px"; size.height "0px"] <| code
@@ -1439,8 +1466,7 @@ module dochtml =
         htmlpresentation outputdir filename title cssfile (Some pageWidth, None) false code
 
     let fixedPage outputdir filename (title:string) pageWidth pageHeight setting cssfile code =
-        setDefault setting
-        htmlpresentation outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun () ->
+        htmlpresentationCore setting outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun () ->
             code()
             html.prevButton()
             html.nextButton()
@@ -1459,8 +1485,9 @@ module htmlexpr2 =
         /// <param name="p">表示位置</param>
         /// <param name="buttonX, buttonY">操作ボタンの配置座標</param>
         static member animationManual (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
-            figcounter <- figcounter + 1
-            let f = FigureAnimation(figcounter,s.mX,s.mY,s.sX,s.sY)
+            let state = AnimationGenerationScope.html()
+            state.FigureCounter <- state.FigureCounter + 1
+            let f = FigureAnimation(state.FigureCounter,s.mX,s.mY,s.sX,s.sY)
             switchBody <| fun () ->
                 writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 writein ("width=\""+s.sX.ToString()+"px\" ")
@@ -1482,8 +1509,9 @@ module htmlexpr2 =
         /// 自動再生型のアニメーション領域を生成する
         /// </summary>
         static member animationAuto (s:ViewBoxStyle) (p:position) code =
-            figcounter <- figcounter + 1
-            let f = FigureAnimation(figcounter,s.mX,s.mY,s.sX,s.sY)
+            let state = AnimationGenerationScope.html()
+            state.FigureCounter <- state.FigureCounter + 1
+            let f = FigureAnimation(state.FigureCounter,s.mX,s.mY,s.sX,s.sY)
             switchBody <| fun () ->
                 writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 writein ("width=\""+s.sX.ToString()+"px\" ")

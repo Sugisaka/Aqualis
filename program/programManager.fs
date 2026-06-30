@@ -193,6 +193,71 @@ namespace Aqualis
         member _.delete() = cwriter.delete()
         member _.str with get() = structData
 
+    type MovieSetting = {
+        Character: Switch
+        Subtitle: Switch
+        Voice: Switch
+    }
+
+    [<RequireQualifiedAccess>]
+    module MovieSetting =
+        let Default = {
+            Character = ON
+            Subtitle = ON
+            Voice = ON
+        }
+
+    type internal HtmlGenerationState() =
+        member val InputCounter = 0 with get, set
+        member val DrawFileName = "" with get, set
+        member val BodyFileName = "" with get, set
+        member val JavaScriptFileName = "" with get, set
+        member val AnimationStartFileName = "" with get, set
+        member val AnimationSequenceResetFileName = "" with get, set
+        member val AnimationResetFileName = "" with get, set
+        member val ContentsDirectory = "" with get, set
+        member val ContentsCounter = -1 with get, set
+        member val AnimationSequenceCounter = -1 with get, set
+        member val AnimationGroupCounter = -1 with get, set
+        member val FigureCounter = 0 with get, set
+        member val AnimationCounter = 0 with get, set
+        member val AnimationButtons = ResizeArray<string * string * int * int>()
+        member val AudioFiles = ResizeArray<string>()
+
+    type internal AnimationOptionsState(setting:MovieSetting) =
+        member val CharacterEnabled = (setting.Character = ON)
+        member val SubtitleEnabled = (setting.Subtitle = ON)
+        member val VoiceEnabled = (setting.Voice = ON)
+
+    type internal SequenceDiagramBuilder() =
+        member val TerminalLifeLine = 100.0 with get, set
+        member val Variables: list<string * int * float> = [] with get, set
+        member val Frames: list<float * float * float * float> = [] with get, set
+        member val Branches: list<list<string * float>> = [] with get, set
+
+    type internal SequenceDiagramState() =
+        member val TopMargin = 40.0 with get, set
+        member val LeftMargin = 40.0 with get, set
+        member val VariableInterval = 150.0 with get, set
+        member val SingleArrowLength = 37.5 with get, set
+        member val VariableHeaderWidth = 50.0 with get, set
+        member val VariableHeaderHeight = 20.0 with get, set
+        member val LineWidth = 2.0 with get, set
+        member val ActiveLineWidth = 10.0 with get, set
+        member val FrameMargin = 10.0 with get, set
+        member val TimeStep = 10.0 with get, set
+        member val FrameBorder = 2.0 with get, set
+        member val ActiveLineColor = "rgba(0, 191, 255, 0.5)" with get, set
+        member val LoopFrameColor = "rgb(255, 0, 0)" with get, set
+        member val BranchFrameColor = "rgb(0, 180, 0)" with get, set
+        member val SectionFrameColor = "rgb(127,0,255)" with get, set
+        member val Builder = SequenceDiagramBuilder()
+
+    type internal WebGenerationState(movieSetting:MovieSetting) =
+        member val Html = HtmlGenerationState()
+        member val Animation = AnimationOptionsState(movieSetting)
+        member val SequenceDiagram = SequenceDiagramState()
+
     /// State owned by one code-generation operation.
     ///
     /// The current context is stored in AsyncLocal only to keep the existing DSL
@@ -209,12 +274,13 @@ namespace Aqualis
             GotoLabels: gotoLabelController
             Errors: errorIDController
             Debug: debugController
+            Web: WebGenerationState
         }
 
     type GenerationContext private (state:GenerationState, currentIndex:int) =
         static let current = AsyncLocal<GenerationContext option>()
 
-        static member private CreateState(programs:program list) =
+        static member private CreateState(programs:program list, movieSetting:MovieSetting) =
             let programArray = programs |> List.toArray
             if programArray.Length = 0 then
                 invalidArg (nameof programs) "At least one program is required."
@@ -228,10 +294,18 @@ namespace Aqualis
                 GotoLabels = gotoLabelController()
                 Errors = errorIDController()
                 Debug = debugController()
+                Web = WebGenerationState(movieSetting)
             }
 
         new(programs:program list) =
-            GenerationContext(GenerationContext.CreateState(programs), 0)
+            GenerationContext(
+                GenerationContext.CreateState(programs, MovieSetting.Default),
+                0)
+
+        new(programs:program list, movieSetting:MovieSetting) =
+            GenerationContext(
+                GenerationContext.CreateState(programs, movieSetting),
+                0)
 
         member _.Programs = state.Programs
 
@@ -274,6 +348,8 @@ namespace Aqualis
 
         member _.Debug = state.Debug
 
+        member internal _.Web = state.Web
+
         member _.ForProgram(index:int) =
             if index < 0 || index >= state.Programs.Length then
                 invalidArg (nameof index) $"Program index {index} is outside the valid range."
@@ -310,6 +386,19 @@ namespace Aqualis
         let debug() =
             (requireContext()).Debug
 
+    module internal WebGenerationScope =
+        let state() =
+            (GenerationScope.requireContext()).Web
+
+        let html() =
+            (state()).Html
+
+        let animation() =
+            (state()).Animation
+
+        let sequenceDiagram() =
+            (state()).SequenceDiagram
+
     [<AutoOpen>]
     module aqualisProgram =
 
@@ -326,6 +415,18 @@ namespace Aqualis
             let context = GenerationContext programs
 
             context.Activate(fun () -> code context)
+
+        let makeProgramWithMovieSetting
+            (movieSetting:MovieSetting)
+            (programInfo: list<string * string * Language>)
+            (code: unit -> 'T)
+            : 'T =
+            let programs =
+                programInfo
+                |> List.map program
+            let context = GenerationContext(programs, movieSetting)
+
+            context.Activate(code)
 
         /// Backward-compatible entry point. New code should prefer
         /// makeProgramWithContext when it needs direct access to the context.
