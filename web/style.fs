@@ -83,9 +83,8 @@ type Character(scriptDataDir:string,name:string) =
                 match lst with
                 |[] -> ()
                 |_ ->
-                    let wr = new StreamWriter(this.scriptFile (audioFileCounter+1), false)
+                    use wr = new StreamWriter(this.scriptFile (audioFileCounter+1), false)
                     lst |> List.iter (fun audio -> wr.WriteLine audio.Script)
-                    wr.Close()
     member this.script(subtitle:string,script:string) =
         match serif |> List.tryFind (fun a -> a.Script=script) with
         |None ->

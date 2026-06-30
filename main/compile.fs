@@ -6,6 +6,43 @@
 //
 namespace Aqualis
 
+    module internal ShellCommand =
+        let private quoteArgument (value:string) =
+            let isSafe character =
+                System.Char.IsLetterOrDigit character ||
+                "_-./:=+@%,".Contains character
+
+            if value |> Seq.forall isSafe then
+                value
+            else
+                "\"" +
+                value
+                    .Replace("\\", "\\\\")
+                    .Replace("\"", "\\\"")
+                    .Replace("$", "\\$")
+                    .Replace("`", "\\`") +
+                "\""
+
+        let buildCompileCommand
+            compiler
+            fixedArguments
+            sources
+            mainSource
+            options
+            output =
+            [
+                yield compiler
+                yield! fixedArguments
+                yield! sources
+                yield mainSource
+                yield! options
+                yield "-o"
+                yield output
+            ]
+            |> List.filter (System.String.IsNullOrWhiteSpace >> not)
+            |> List.map quoteArgument
+            |> String.concat " "
+
     open System
     open System.IO
 
@@ -56,7 +93,7 @@ namespace Aqualis
                         //beeファイル削除
                         (GenerationScope.currentProgram()).delete()
                         //コンパイル・実行用スクリプト生成
-                        let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_F.sh")
+                        use wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_F.sh")
                         if (GenerationScope.requireContext()).IsOpenAccUsed then
                             wr.Write "#!/bin/bash\n"
                             wr.Write("\n")
@@ -64,7 +101,6 @@ namespace Aqualis
                             let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("pgfortran -acc -Minfo=accel " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
-                            wr.Close()
                         else if (GenerationScope.requireContext()).IsOpenMpUsed then
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
@@ -83,7 +119,6 @@ namespace Aqualis
                             let option = "-ffree-line-length-none " + String.Join(" ", (GenerationScope.currentProgram()).olist.list)
                             wr.Write("$FC " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
                             wr.Write("./" + projectname + ".exe\n")
-                        wr.Close()
                 |C99 ->
                     makeProgram [dir,projectname,C99] <| fun () ->
                         //メインコード生成
@@ -132,29 +167,33 @@ namespace Aqualis
                         //beeファイル削除
                         (GenerationScope.currentProgram()).delete()
                         //コンパイル・実行用スクリプト生成
-                        let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_C.sh")
+                        use wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_C.sh")
+                        let sources = (GenerationScope.currentProgram()).slist.list
+                        let options = (GenerationScope.currentProgram()).olist.list
+                        let writeCompileCommand compiler fixedArguments =
+                            ShellCommand.buildCompileCommand
+                                compiler
+                                fixedArguments
+                                sources
+                                (projectname + ".c")
+                                options
+                                (projectname + ".exe")
+                            |> wr.WriteLine
                         if (GenerationScope.requireContext()).IsOpenMpUsed then
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
-                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
-                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
-                            wr.Write("gcc" + " -fopenmp " + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
+                            writeCompileCommand "gcc" ["-fopenmp"]
                             wr.Write("./" + projectname + ".exe\n")
                         else if (GenerationScope.requireContext()).IsOpenAccUsed then
                             wr.Write "#!/bin/bash"
                             wr.Write "\n"
-                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
-                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
-                            wr.Write("pgcc -acc -Minfo=accel" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
+                            writeCompileCommand "pgcc" ["-acc"; "-Minfo=accel"]
                             wr.Write("./" + projectname + ".exe\n")
                         else
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
-                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
-                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
-                            wr.Write("gcc" + source + " " + projectname + ".c " + option + " -o " + projectname + ".exe\n")
+                            writeCompileCommand "gcc" []
                             wr.Write("./" + projectname + ".exe\n")
-                        wr.Close()
                 |LaTeX ->
                     makeProgram [dir,projectname,LaTeX] <| fun () ->
                         //メインコード生成
@@ -461,11 +500,10 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         (GenerationScope.currentProgram()).delete()
-                        let wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_P.sh")
+                        use wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_P.sh")
                         wr.Write "#!/bin/bash\n"
                         wr.Write "\n"
                         wr.Write("python3 " + projectname + ".py\n")
-                        wr.Close()
                 |JavaScript ->
                     makeProgram [dir,projectname,JavaScript] <| fun () ->
                         //メインコード生成

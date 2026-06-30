@@ -1083,11 +1083,23 @@ type aiscriptfile =
     /// <param name="filename">ファイル名</param>
     /// <param name="scale">スケール</param>
     static member make (dir:string, filename:string, scale:double) = fun code ->
-        let wr = new StreamWriter(dir+"\\"+filename,false,new UTF8Encoding(true))
-        let sv = aiscriptmaker wr
-        sv.header scale
-        code sv
-        wr.Close()
+        let outputPath = Path.Combine(dir, filename)
+        let temporaryPath = outputPath + ".tmp"
+        try
+            do
+                use wr =
+                    new StreamWriter(
+                        temporaryPath,
+                        false,
+                        new UTF8Encoding(true))
+                let sv = aiscriptmaker wr
+                sv.header scale
+                code sv
+            File.Move(temporaryPath, outputPath, true)
+        with _ ->
+            if File.Exists temporaryPath then
+                File.Delete temporaryPath
+            reraise()
         
     /// <summary>
     /// jsxファイルを作成

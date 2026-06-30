@@ -23,6 +23,16 @@ namespace Aqualis
         let mutable sssecnum = 0
         let mutable licheck = 0
 
+        let disposeLabel = function
+            |WriteLabel writer -> writer.Dispose()
+            |ReadLabel _ -> ()
+
+        let disposeLabels() =
+            disposeLabel figlabel
+            disposeLabel equlabel
+            disposeLabel tablabel
+            disposeLabel codelabel
+
         member _.write s = writein s
 
         member this.tag (tagname:string) code =
@@ -119,7 +129,7 @@ namespace Aqualis
             |HTML ->
                 ftncounter <- ftncounter + 1
                 let filename = "footnote"+ftncounter.ToString()
-                let wr = new StreamWriter(filename)
+                use wr = new StreamWriter(filename)
                 let addfootnote(txt:string) =
                     ftnnum <- ftnnum + 1
                     writein("<sup><a name=\"xft"+ftnnum.ToString()+"\"><a href=\"#ft"+ftnnum.ToString()+"\">"+ftnnum.ToString()+")</a></a></sup>")
@@ -521,6 +531,10 @@ namespace Aqualis
         member this.percent with get() = match lang with |LaTeX -> "\\%" |HTML -> "%" |_ -> ""
         member this.pow(n:int) = match lang with |LaTeX -> "^"+(if n<0 then "{"+n.ToString()+"}" else n.ToString()) |HTML -> "^"+(if n<0 then "{"+n.ToString()+"}" else n.ToString()) |_ -> ""
 
+        interface IDisposable with
+            member _.Dispose() =
+                disposeLabels()
+
     [<AutoOpen>]
     module Aqualis_doc =
         /// <summary>
@@ -532,7 +546,7 @@ namespace Aqualis
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_figlabel"))
                     else
-                        let rd = new StreamReader(filename+"_figlabel")
+                        use rd = new StreamReader(filename+"_figlabel")
                         let rec read lst =
                             match rd.ReadLine() with
                             |null ->
@@ -546,7 +560,7 @@ namespace Aqualis
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_equlabel"))
                     else
-                        let rd = new StreamReader(filename+"_equlabel")
+                        use rd = new StreamReader(filename+"_equlabel")
                         let rec read lst =
                             match rd.ReadLine() with
                             |null ->
@@ -560,7 +574,7 @@ namespace Aqualis
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_tablabel"))
                     else
-                        let rd = new StreamReader(filename+"_tablabel")
+                        use rd = new StreamReader(filename+"_tablabel")
                         let rec read lst =
                             match rd.ReadLine() with
                             |null ->
@@ -574,7 +588,7 @@ namespace Aqualis
                     if i=1 then
                         WriteLabel(new StreamWriter(filename+"_codelabel"))
                     else
-                        let rd = new StreamReader(filename+"_codelabel")
+                        use rd = new StreamReader(filename+"_codelabel")
                         let rec read lst =
                             match rd.ReadLine() with
                             |null ->
@@ -632,7 +646,15 @@ namespace Aqualis
                         writein "    </head>"
                         writein "    <body>"
                         writein("    <span class='headtitle'>"+titlelong+"</span>")
-                        code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir))
+                        use document =
+                            new TeXWriter(
+                                figlabel,
+                                equlabel,
+                                tablabel,
+                                codelabel,
+                                lang,
+                                figdir)
+                        code document
                         writein "    </body>"
                         writein "</html>"
                         (GenerationScope.currentProgram()).close()
@@ -640,7 +662,15 @@ namespace Aqualis
                     makeProgram [outputdir,filename+".tex",LaTeX; outputdir,filename+"_temp.tex",LaTeX] <| fun () ->
                         let context = GenerationScope.requireContext()
                         context.WithProgram(1, fun () ->
-                            code(TeXWriter(figlabel,equlabel,tablabel,codelabel,lang,figdir)))
+                            use document =
+                                new TeXWriter(
+                                    figlabel,
+                                    equlabel,
+                                    tablabel,
+                                    codelabel,
+                                    lang,
+                                    figdir)
+                            code document)
                         writein "\\documentclass[a4paper]{ltjsarticle}"
                         writein ""
                         writein "\\usepackage{luatexja}"

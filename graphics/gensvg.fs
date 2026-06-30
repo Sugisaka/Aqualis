@@ -1024,11 +1024,19 @@ type svgfile =
     /// </summary>
     /// <param name="dir">出力先ディレクトリ</param>
     static member make (dir:string,filename:string) = fun (cvx,cvy) (scale:double) code ->
-        let wr = new StreamWriter(dir+"\\"+filename,false,Encoding.Default)
-        let sv = svgfilemaker(cvx,cvy,wr,scale)
-        sv.header <| fun sv ->
-            code sv
-        wr.Close()
+        let outputPath = Path.Combine(dir, filename)
+        let temporaryPath = outputPath + ".tmp"
+        try
+            do
+                use wr = new StreamWriter(temporaryPath,false,Encoding.Default)
+                let sv = svgfilemaker(cvx,cvy,wr,scale)
+                sv.header <| fun sv ->
+                    code sv
+            File.Move(temporaryPath, outputPath, true)
+        with _ ->
+            if File.Exists temporaryPath then
+                File.Delete temporaryPath
+            reraise()
         
     /// <summary>
     /// SVGファイルを作成

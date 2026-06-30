@@ -27,6 +27,11 @@ namespace Aqualis
         |Rx of ((double*double*double)->(double*double*double))
         /// (データ値実部,データ値虚部,最小値,最大値)→(赤,緑,青)
         |Cx of ((double*double*double*double)->(double*double*double))
+
+    type private PlotBinaryValueType =
+        |Int32Value
+        |Float64Value
+        |Complex128Value
         
     module colorMap  =
         /// 黒→白
@@ -381,44 +386,115 @@ namespace Aqualis
         /// <param name="eval">複素数→プロット値</param>
         member public this.FileRead(filename:string) =
             isDataLoaded <- false
-            error <- "";
-            if not <| File.Exists filename then
-                error <- "ファイル「"+filename+"」は存在しません"
-            if error = "" then
-                let fs = new FileStream(filename, FileMode.Open, FileAccess.Read)
-                let rd = new BinaryReader(fs)
-                let format = rd.ReadInt32()
-                if format = 1 then
-                    let ntype = rd.ReadInt32()
-                    let dim = rd.ReadInt32()
-                    if dim > 0 then
-                        let size1 = rd.ReadInt32()
-                        nx <- size1
-                    if dim > 1 then
-                        let size2 = rd.ReadInt32()
-                        ny <- size2
-                    if dim > 2 then
-                        ignore <| rd.ReadInt32()
-                    if ntype = 3000 then
-                        data <- Array.zeroCreate(2*nx*ny)
+            isCPXdata <- false
+            data <- [||]
+            nx <- 0
+            ny <- 0
+            error <- ""
+
+            if not (File.Exists filename) then
+                appendError $"ファイル「{filename}」は存在しません"
+            else
+                try
+                    use stream =
+                        new FileStream(
+                            filename,
+                            FileMode.Open,
+                            FileAccess.Read,
+                            FileShare.Read)
+                    use reader = new BinaryReader(stream)
+
+                    if stream.Length < 12L then
+                        appendError "バイナリヘッダーが途中で終了しています。"
                     else
-                        data <- Array.zeroCreate(nx*ny)
-                    match ntype with
-                    |1004 ->
-                        isCPXdata <- false
-                        for i = 0 to data.GetUpperBound 0 do
-                            data[i] <- double (rd.ReadInt32())
-                        isDataLoaded <- true
-                    |2000|3000 ->
-                        isCPXdata <- true
-                        for i = 0 to data.GetUpperBound 0 do
-                            data[i] <- rd.ReadDouble()
-                        isDataLoaded <- true
-                    |_ ->
-                        ()
-                else
-                    error <- (if error = "" then "" else error+"\r\n") + "unknown file format"
-                rd.Close()
+                        let format = reader.ReadInt32()
+                        let rawValueType = reader.ReadInt32()
+                        let dimension = reader.ReadInt32()
+
+                        let valueType =
+                            match rawValueType with
+                            |1004 -> Some Int32Value
+                            |2000 -> Some Float64Value
+                            |3000 -> Some Complex128Value
+                            |_ ->
+                                appendError $"未対応のデータ型です: {rawValueType}"
+                                None
+
+                        if format <> 1 then
+                            appendError $"未対応のファイル形式です: {format}"
+                        if dimension <> 2 then
+                            appendError $"plot2dでは2次元データのみ読み込めます: dim={dimension}"
+
+                        let mutable width = 0
+                        let mutable height = 0
+                        if error = "" then
+                            if stream.Length - stream.Position < 8L then
+                                appendError "配列サイズを格納したヘッダーが途中で終了しています。"
+                            else
+                                width <- reader.ReadInt32()
+                                height <- reader.ReadInt32()
+                                if width <= 0 || height <= 0 then
+                                    appendError $"配列サイズが不正です: ({width},{height})"
+
+                        match valueType with
+                        |Some valueType when error = "" ->
+                            let scalarMultiplier =
+                                match valueType with
+                                |Complex128Value -> 2L
+                                |_ -> 1L
+                            let elementCount =
+                                int64 width * int64 height * scalarMultiplier
+
+                            if
+                                elementCount <= 0L ||
+                                elementCount > int64 Array.MaxLength
+                            then
+                                appendError $"配列サイズが有効範囲外です: ({width},{height})"
+                            else
+                                let bytesPerElement =
+                                    match valueType with
+                                    |Int32Value -> 4L
+                                    |Float64Value
+                                    |Complex128Value -> 8L
+                                let expectedBytes =
+                                    elementCount * bytesPerElement
+                                let remainingBytes =
+                                    stream.Length - stream.Position
+
+                                if remainingBytes < expectedBytes then
+                                    appendError (
+                                        $"データが不足しています。必要: {expectedBytes} byte、" +
+                                        $"実際: {remainingBytes} byte")
+                                else
+                                    let loadedData =
+                                        Array.zeroCreate<double> (int elementCount)
+
+                                    match valueType with
+                                    |Int32Value ->
+                                        for index = 0 to loadedData.Length - 1 do
+                                            loadedData[index] <-
+                                                double (reader.ReadInt32())
+                                    |Float64Value
+                                    |Complex128Value ->
+                                        for index = 0 to loadedData.Length - 1 do
+                                            loadedData[index] <- reader.ReadDouble()
+
+                                    data <- loadedData
+                                    nx <- width
+                                    ny <- height
+                                    isCPXdata <- valueType = Complex128Value
+                                    isDataLoaded <- true
+                        |_ ->
+                            ()
+                with
+                | :? EndOfStreamException ->
+                    appendError "バイナリファイルが途中で終了しています。"
+                | :? UnauthorizedAccessException as exceptionInfo ->
+                    appendError $"ファイルへアクセスできません: {exceptionInfo.Message}"
+                | :? IOException as exceptionInfo ->
+                    appendError $"ファイルを読み込めません: {exceptionInfo.Message}"
+                | :? OutOfMemoryException ->
+                    appendError "データ配列を確保できません。"
                 
         /// <summary>
         /// 24ビットビットマップファイルを作成
@@ -458,8 +534,8 @@ namespace Aqualis
                 min_ <- min
                 max_ <- max
                 //---ビットマップファイル生成---------------------------------------------
-                let f_strm:FileStream = new FileStream(filename, FileMode.Create)
-                let bw:BinaryWriter = new BinaryWriter(f_strm)
+                use f_strm = new FileStream(filename, FileMode.Create)
+                use bw = new BinaryWriter(f_strm)
                 //---BMPFILEHEADER構造体--------------------------------------------------
                 let bfSize:int32 = 54 + (3 * Nx + rest) * Ny //ファイル全体のバイト数
                 let bfReserved1:int16 = 0s          //常に0
@@ -512,7 +588,6 @@ namespace Aqualis
                         bw.Write(byte <| floor (255.0*r+0.5))    //赤
                     for _ = 0 to rest-1 do
                         bw.Write(byte 0)
-                bw.Close()
                 
         /// <summary>
         /// カラーバー出力
@@ -545,8 +620,8 @@ namespace Aqualis
                         -abs max, abs max
                         
                 //---ビットマップファイル生成---------------------------------------------
-                let f_strm:FileStream = new FileStream(filename, FileMode.Create)
-                let bw:BinaryWriter = new BinaryWriter(f_strm)
+                use f_strm = new FileStream(filename, FileMode.Create)
+                use bw = new BinaryWriter(f_strm)
                 //---BMPFILEHEADER構造体--------------------------------------------------
                 let bfSize:int32 = 54 + (3 * nx + rest) * ny //ファイル全体のバイト数
                 let bfReserved1:int16 = 0s          //常に0
@@ -594,7 +669,6 @@ namespace Aqualis
                         bw.Write(byte <| floor (255.0*r+0.5)) //赤
                     for _ = 0 to rest-1 do
                         bw.Write(byte 0)
-                bw.Close()
                 
         /// 複素数→実部
         static member getRe (re:double,_:double) = re

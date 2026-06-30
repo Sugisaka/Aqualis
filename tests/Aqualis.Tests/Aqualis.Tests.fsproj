@@ -19,6 +19,8 @@
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
     <Compile Include="CodeWriterTests.fs" />
+    <Compile Include="CompilerScriptTests.fs" />
+    <Compile Include="FileResourceTests.fs" />
     <Compile Include="GenerationContextTests.fs" />
     <Compile Include="AssignmentTests.fs" />
     <Compile Include="ChTests.fs" />

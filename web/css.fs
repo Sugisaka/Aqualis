@@ -59,8 +59,22 @@ type CSSFile(outputdir:string,filename:string) =
         code()
         wr.WriteLine "}"
     member this.close() =
-        wr.Close()
+        wr.Dispose()
+
+    interface IDisposable with
+        member _.Dispose() =
+            wr.Dispose()
+
     static member make (outputdir:string) (filename:string) code =
-        let c = CSSFile(outputdir,filename)
-        code c
-        c.close()
+        let outputPath = Path.Combine(outputdir, filename)
+        let temporaryName = filename + ".tmp"
+        let temporaryPath = Path.Combine(outputdir, temporaryName)
+        try
+            do
+                use c = new CSSFile(outputdir, temporaryName)
+                code c
+            File.Move(temporaryPath, outputPath, true)
+        with _ ->
+            if File.Exists temporaryPath then
+                File.Delete temporaryPath
+            reraise()

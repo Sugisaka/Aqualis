@@ -8,13 +8,32 @@ namespace Aqualis
     
     module shellscript = 
         
+        open System
         open System.IO
         open System.Text
         
         type Shell(dir:string,project:string,nproc:int) =
             let mutable id = 0
-            let mutable w = 
-                [|for i in 1..nproc -> new StreamWriter(dir+"\\shell_"+project+"_"+i.ToString("00")+".sh",false,Encoding.Default) |]
+            let w =
+                if nproc <= 0 then
+                    invalidArg (nameof nproc) "The process count must be positive."
+
+                let created = ResizeArray<StreamWriter>()
+                try
+                    for i in 1..nproc do
+                        created.Add(
+                            new StreamWriter(
+                                dir+"\\shell_"+project+"_"+i.ToString("00")+".sh",
+                                false,
+                                Encoding.Default))
+                    created.ToArray()
+                with _ ->
+                    created |> Seq.iter _.Dispose()
+                    reraise()
+
+            let disposeWriters() =
+                w |> Array.iter _.Dispose()
+
             do
                 for i in 1..nproc do
                     w.[i-1].Write("#!bin/bash"+"\n\n")
@@ -84,10 +103,12 @@ namespace Aqualis
                     ()
                     
             member __.Close() =
-                for i in 1..nproc do
-                    w.[i-1].Close()
+                disposeWriters()
+
+            interface IDisposable with
+                member _.Dispose() =
+                    disposeWriters()
                         
         let makeShellScript (dir:string) (project:string) (n:int) code =
-            let proc = new Shell(dir,project,n)
+            use proc = new Shell(dir,project,n)
             code proc
-            proc.Close()

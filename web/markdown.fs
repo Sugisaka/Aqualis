@@ -162,7 +162,6 @@ module markDown =
         /// 閉じていないタグをすべて閉じる
         match rd.ReadLine() with
         |null -> 
-            rd.Close()
             closeAllStack md data stack
         |code ->
             let normalizedCode =

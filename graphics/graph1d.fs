@@ -258,17 +258,16 @@ type graph1d =
         //データファイルの行数
         let nline =
             let mutable counter:int = 0
-            let r = new StreamReader(filename)
+            use r = new StreamReader(filename)
             let mutable t = ""
             t <- r.ReadLine()
             while not(t=null) do
                 counter <- counter + 1
                 t <- r.ReadLine()
-            r.Close()
             counter
         let x = Array.zeroCreate<double> nline
         let y = Array.zeroCreate<double> nline
-        let r = new StreamReader(filename)
+        use r = new StreamReader(filename)
         let mutable sep = [|' '|]
         for i in 0..(nline-1) do
             let t = r.ReadLine()
@@ -289,7 +288,6 @@ type graph1d =
                         v
             x[i] <- colx pd
             y[i] <- coly pd
-        r.Close()
         x,y
         
     ///<summary>グラフ生成</summary>
