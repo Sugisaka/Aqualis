@@ -23,7 +23,10 @@ module htmlio =
 
     let private withProgramIndex index code =
         let context = GenerationScope.requireContext()
-        context.WithProgram(index, code)
+        if context.CurrentIndex = index then
+            code()
+        else
+            context.WithProgram(index, code)
 
     /// HTMLファイルへの書き込み
     let switchMain code = withProgramIndex 0 code

@@ -1,6 +1,8 @@
 namespace Aqualis
 
 open System.IO
+open System
+open System.Net
 open System.Text.RegularExpressions
 
 module private MarkdownRegex =
@@ -47,26 +49,29 @@ type MarkDownContents =
     |Math
     /// コードブロック（言語）
     |CodeBlock of string
+
+type InlineNode =
+    |Text of string
+    |Strong of string
+    |Italic of string
+    |InlineMath of string
+    |InlineCode of string
+    |Link of label:string option * url:string * section:string option
     
 /// マークダウン解読要素（解読中に収集するデータ型を'aに指定）
 type MarkDown<'a> =
     {
-        Link : option<string> -> string -> option<string> -> string
-        Italic : string -> string
-        Strong : string -> string
-        InlineMath : string -> string
-        InlineCode : string -> string
-        Section1 : string -> list<'a> -> list<'a>
-        Section2 : string -> list<'a> -> list<'a>
-        Section3 : string -> list<'a> -> list<'a>
-        Section4 : string -> list<'a> -> list<'a>
-        Section5 : string -> list<'a> -> list<'a>
-        Image : string -> list<'a> -> list<'a>
+        Section1 : InlineNode list -> list<'a> -> list<'a>
+        Section2 : InlineNode list -> list<'a> -> list<'a>
+        Section3 : InlineNode list -> list<'a> -> list<'a>
+        Section4 : InlineNode list -> list<'a> -> list<'a>
+        Section5 : InlineNode list -> list<'a> -> list<'a>
+        Image : string -> string -> list<'a> -> list<'a>
         OpenUL : list<'a> -> list<'a>
-        ItemUL : string -> list<'a> -> list<'a>
+        ItemUL : InlineNode list -> list<'a> -> list<'a>
         CloseUL : list<'a> -> list<'a>
         OpenOL : list<'a> -> list<'a>
-        ItemOL : string -> list<'a> -> list<'a>
+        ItemOL : InlineNode list -> list<'a> -> list<'a>
         CloseOL : list<'a> -> list<'a>
         OpenCodeBlock : string -> list<'a> -> list<'a>
         InsideCodeBlock : string -> list<'a> -> list<'a>
@@ -75,11 +80,11 @@ type MarkDown<'a> =
         InsideMath : string -> list<'a> -> list<'a>
         CloseMath : list<'a> -> list<'a>
         OpenTable : list<'a> -> list<'a>
-        TableHeader : list<string> -> list<'a> -> list<'a>
-        TableData : list<string> -> list<'a> -> list<'a>
+        TableHeader : list<InlineNode list> -> list<'a> -> list<'a>
+        TableData : list<InlineNode list> -> list<'a> -> list<'a>
         CloseTable : list<'a> -> list<'a>
-        Paragraph : string -> list<'a> -> list<'a>
-        Direct : string -> list<'a> -> list<'a>
+        Paragraph : InlineNode list -> list<'a> -> list<'a>
+        Direct : InlineNode list -> list<'a> -> list<'a>
     }
 
 [<AutoOpen>]
@@ -93,31 +98,55 @@ module markDown =
             |Table -> md.CloseTable d
             |CodeBlock _ -> md.CloseCodeBlock d) data stack
 
-    let private renderInlineMatch (md:MarkDown<'a>) (m:Match) =
+    let private inlineNode (m:Match) =
         if m.Groups["code"].Success then
-            md.InlineCode m.Groups["codeText"].Value
+            InlineCode m.Groups["codeText"].Value
         elif m.Groups["strong"].Success then
-            md.Strong m.Groups["strongText"].Value
+            Strong m.Groups["strongText"].Value
         elif m.Groups["italic"].Success then
-            md.Italic m.Groups["italicText"].Value
+            Italic m.Groups["italicText"].Value
         elif m.Groups["math"].Success then
-            md.InlineMath m.Groups["mathText"].Value
+            InlineMath m.Groups["mathText"].Value
         elif m.Groups["markdownLink"].Success then
-            md.Link (Some m.Groups["markdownLabel"].Value) m.Groups["markdownUrl"].Value None
+            Link (
+                Some m.Groups["markdownLabel"].Value,
+                m.Groups["markdownUrl"].Value,
+                None)
         elif m.Groups["wikiSectionLabel"].Success then
-            md.Link
-                (Some m.Groups["wikiSectionLabelText"].Value)
-                m.Groups["wikiSectionLabelUrl"].Value
-                (Some m.Groups["wikiSectionLabelSection"].Value)
+            Link (
+                Some m.Groups["wikiSectionLabelText"].Value,
+                m.Groups["wikiSectionLabelUrl"].Value,
+                Some m.Groups["wikiSectionLabelSection"].Value)
         elif m.Groups["wikiLabel"].Success then
-            md.Link (Some m.Groups["wikiLabelText"].Value) m.Groups["wikiLabelUrl"].Value None
+            Link (
+                Some m.Groups["wikiLabelText"].Value,
+                m.Groups["wikiLabelUrl"].Value,
+                None)
         elif m.Groups["wikiSection"].Success then
-            md.Link None m.Groups["wikiSectionUrl"].Value (Some m.Groups["wikiSectionName"].Value)
+            Link (
+                None,
+                m.Groups["wikiSectionUrl"].Value,
+                Some m.Groups["wikiSectionName"].Value)
         elif m.Groups["wiki"].Success then
             let url = m.Groups["wikiUrl"].Value
-            md.Link (Some url) url None
+            Link (Some url, url, None)
         else
-            m.Value
+            Text m.Value
+
+    let private parseInline (value:string) =
+        let nodes = ResizeArray<InlineNode>()
+        let mutable position = 0
+
+        for item in MarkdownRegex.inlineSyntax.Matches(value) do
+            if item.Index > position then
+                nodes.Add(Text(value.Substring(position, item.Index - position)))
+            nodes.Add(inlineNode item)
+            position <- item.Index + item.Length
+
+        if position < value.Length then
+            nodes.Add(Text(value.Substring(position)))
+
+        nodes |> Seq.toList
 
     let private isTableSeparator (cells:string list) =
         let rec allButLastAreSeparators (remaining:string list) =
@@ -150,28 +179,20 @@ module markDown =
                 MarkdownRegex.codeBlockStart.Match(normalizedCode)
             let isCodeBlockEnd =
                 MarkdownRegex.codeBlockEnd.IsMatch(normalizedCode)
-            let convertedCode =
-                match stack with
-                |CodeBlock _::_ -> normalizedCode
-                |_ when codeBlockStartMatch.Success || isCodeBlockEnd -> normalizedCode
-                |_ ->
-                    MarkdownRegex.inlineSyntax.Replace(
-                        normalizedCode,
-                        MatchEvaluator (renderInlineMatch md))
-            let headingMatch = MarkdownRegex.heading.Match(convertedCode)
-            let mi1 = MarkdownRegex.wikiImage.Match(convertedCode)
-            let mi2 = MarkdownRegex.markdownImage.Match(convertedCode)
-            let mul = MarkdownRegex.unorderedList.Match(convertedCode)
-            let mol = MarkdownRegex.orderedList.Match(convertedCode)
+            let headingMatch = MarkdownRegex.heading.Match(normalizedCode)
+            let mi1 = MarkdownRegex.wikiImage.Match(normalizedCode)
+            let mi2 = MarkdownRegex.markdownImage.Match(normalizedCode)
+            let mul = MarkdownRegex.unorderedList.Match(normalizedCode)
+            let mol = MarkdownRegex.orderedList.Match(normalizedCode)
             let tableData = 
-                if convertedCode.StartsWith "|" && convertedCode.EndsWith "|" then
-                    MarkdownRegex.tableCell.Matches(convertedCode)
+                if normalizedCode.StartsWith "|" && normalizedCode.EndsWith "|" then
+                    MarkdownRegex.tableCell.Matches(normalizedCode)
                     |> Seq.cast<Match>
                     |> Seq.map (fun m -> m.Groups.[1].Value.Trim())
                     |> Seq.toList
                 else
                     []
-            match convertedCode,stack with
+            match normalizedCode,stack with
             |_,CodeBlock _::rest when isCodeBlockEnd ->
                 readmd md rd rest (md.CloseCodeBlock data)
             |s,CodeBlock _::_ ->
@@ -181,7 +202,7 @@ module markDown =
                 readmd md rd [] (closeAllStack md data stack)
             |_ when headingMatch.Success ->
                 let level = headingMatch.Groups["marks"].Value.Length
-                let text = headingMatch.Groups["text"].Value
+                let text = headingMatch.Groups["text"].Value |> parseInline
                 let closedData = closeAllStack md data stack
                 let sectionData =
                     match level with
@@ -193,15 +214,21 @@ module markDown =
                     |_ -> closedData
                 readmd md rd [] sectionData
             |_ when mi1.Success ->
-                readmd md rd stack (md.Image mi1.Groups.[1].Value data)
+                let source = mi1.Groups.[1].Value
+                readmd md rd stack (md.Image source source data)
             |_ when mi2.Success ->
-                readmd md rd stack (md.Image mi2.Groups.[2].Value data)
+                readmd md rd stack (
+                    md.Image mi2.Groups.[1].Value mi2.Groups.[2].Value data)
             |_,Table::_ when isTableSeparator tableData ->
                 readmd md rd stack data
             |_,Table::_ ->
-                readmd md rd stack (md.TableData tableData data)
+                readmd md rd stack (
+                    md.TableData (tableData |> List.map parseInline) data)
             |_,_ when tableData.Length>0 ->
-                readmd md rd (Table::stack) (md.TableHeader tableData (md.OpenTable data))
+                readmd md rd (Table::stack) (
+                    md.TableHeader
+                        (tableData |> List.map parseInline)
+                        (md.OpenTable data))
             |_ when codeBlockStartMatch.Success ->
                 let lang = codeBlockStartMatch.Groups.[1].Value
                 readmd md rd (CodeBlock lang::stack) (md.OpenCodeBlock lang data)
@@ -213,7 +240,7 @@ module markDown =
                 readmd md rd (Math::stack) (md.OpenMath data)
             |_ when mul.Success ->
                 let i = mul.Groups.[1].Value.Length/2
-                let text = mul.Groups.[2].Value
+                let text = mul.Groups.[2].Value |> parseInline
                 match stack with
                 |UL j::_ when i=j -> 
                     //前行が同じインデントの箇条書き
@@ -238,7 +265,7 @@ module markDown =
                     readmd md rd (UL i::stack) (md.ItemUL text (md.OpenUL data))
             |_ when mol.Success ->
                 let i = mol.Groups.[1].Value.Length/2
-                let text = mol.Groups.[3].Value
+                let text = mol.Groups.[3].Value |> parseInline
                 match stack with
                 |OL j::_ when i=j -> 
                     //前行が同じインデントの箇条書き
@@ -264,96 +291,116 @@ module markDown =
             |s,_ ->
                 match stack with
                 |UL _::st ->
-                    readmd md rd st (md.Direct s (md.CloseUL data))
+                    readmd md rd st (md.Direct (parseInline s) (md.CloseUL data))
                 |OL _::st ->
-                    readmd md rd st (md.Direct s (md.CloseOL data))
+                    readmd md rd st (md.Direct (parseInline s) (md.CloseOL data))
                 |Math ::st ->
-                    readmd md rd st (md.Direct s (md.CloseMath data))
+                    readmd md rd st (md.Direct (parseInline s) (md.CloseMath data))
                 |CodeBlock _ ::st ->
-                    readmd md rd st (md.Direct s (md.CloseCodeBlock data))
+                    readmd md rd st (md.Direct (parseInline s) (md.CloseCodeBlock data))
                 |_ ->
-                    readmd md rd stack (md.Paragraph s data)
+                    readmd md rd stack (md.Paragraph (parseInline s) data)
                     
-    let readMarkDown (MarkDownfilename:string) (md:MarkDown<'a>) = 
-        let rd = new StreamReader(MarkDownfilename)
+    let readMarkDown (MarkDownfilename:string) (md:MarkDown<'a>) =
+        use rd = new StreamReader(MarkDownfilename)
         readmd md rd [] []
-        
+
+    let private encodeHtml (value:string) =
+        WebUtility.HtmlEncode(value)
+
+    let private sanitizeUrl (value:string) =
+        let value = value.Trim()
+        match Uri.TryCreate(value, UriKind.RelativeOrAbsolute) with
+        |true, uri when
+            not uri.IsAbsoluteUri ||
+            uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+            uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ->
+            value
+        |_ ->
+            "#"
+
+    let private renderInline nodes =
+        nodes
+        |> List.map (function
+            |Text value -> encodeHtml value
+            |Strong value -> "<strong>" + encodeHtml value + "</strong>"
+            |Italic value -> "<i>" + encodeHtml value + "</i>"
+            |InlineMath value -> "\\(" + encodeHtml value + "\\)"
+            |InlineCode value -> "<code>" + encodeHtml value + "</code>"
+            |Link(label, url, section) ->
+                let href =
+                    sanitizeUrl url +
+                    (section
+                     |> Option.map (fun value -> "#" + value)
+                     |> Option.defaultValue "")
+                let text =
+                    label
+                    |> Option.defaultValue (
+                        url +
+                        (section
+                         |> Option.map (fun value -> ":" + value)
+                         |> Option.defaultValue ""))
+                "<a href=\"" + encodeHtml href + "\">" +
+                encodeHtml text +
+                "</a>")
+        |> String.concat ""
+
     let convertHTML (MarkDownfilename:string) (HTMLfilename:string) =
-        let wr = new StreamWriter(HTMLfilename)
+        use wr = new StreamWriter(HTMLfilename)
         let md = {
-            Link = fun label url section ->
-                "<a href=" +
-                url +
-                (match section with 
-                |None -> ""
-                |Some s -> "#" + s) +
-                ">" +
-                (match label with
-                |None -> 
-                    url + 
-                    match section with 
-                    |None -> ""
-                    |Some s -> ":" + s
-                |Some s -> s) +
-                "</a>"
-            Italic = fun s ->
-                "<i>"+s+"</i>"
-            Strong = fun s ->
-                "<strong>"+s+"</strong>"
-            InlineMath = fun s ->
-                "\\("+s+"\\)"
-            InlineCode = fun s ->
-                "<code>"+s+"</code>"
-            Section1 = fun s data -> 
-                wr.WriteLine("<h1>"+s+"</h1>")
+            Section1 = fun value data ->
+                wr.WriteLine("<h1>"+renderInline value+"</h1>")
                 data
-            Section2 = fun s data -> 
-                wr.WriteLine("<h2>"+s+"</h2>")
+            Section2 = fun value data ->
+                wr.WriteLine("<h2>"+renderInline value+"</h2>")
                 data
-            Section3 = fun s data -> 
-                wr.WriteLine("<h3>"+s+"</h3>")
+            Section3 = fun value data ->
+                wr.WriteLine("<h3>"+renderInline value+"</h3>")
                 data
-            Section4 = fun s data -> 
-                wr.WriteLine("<h4>"+s+"</h4>")
+            Section4 = fun value data ->
+                wr.WriteLine("<h4>"+renderInline value+"</h4>")
                 data
-            Section5 = fun s data -> 
-                wr.WriteLine("<h5>"+s+"</h5>")
+            Section5 = fun value data ->
+                wr.WriteLine("<h5>"+renderInline value+"</h5>")
                 data
-            Image = fun s data -> 
-                wr.WriteLine("<div><img src=\"img/"+s+"\"/></div>")
+            Image = fun alt source data ->
+                let source = "img/" + sanitizeUrl source
+                wr.WriteLine(
+                    "<div><img src=\"" + encodeHtml source +
+                    "\" alt=\"" + encodeHtml alt + "\"/></div>")
                 data
-            OpenUL = fun data -> 
+            OpenUL = fun data ->
                 wr.WriteLine "<ul>"
                 data
-            ItemUL = fun s data -> 
-                wr.WriteLine ("<li>"+s+"</li>")
+            ItemUL = fun value data ->
+                wr.WriteLine ("<li>"+renderInline value+"</li>")
                 data
-            CloseUL = fun data -> 
+            CloseUL = fun data ->
                 wr.WriteLine "</ul>"
                 data
-            OpenOL = fun data -> 
+            OpenOL = fun data ->
                 wr.WriteLine "<ol>"
                 data
-            ItemOL = fun s data -> 
-                wr.WriteLine ("<li>"+s+"</li>")
+            ItemOL = fun value data ->
+                wr.WriteLine ("<li>"+renderInline value+"</li>")
                 data
-            CloseOL = fun data -> 
+            CloseOL = fun data ->
                 wr.WriteLine "</ol>"
                 data
             OpenMath = fun data ->
                 wr.WriteLine "\\["
                 data
-            InsideMath = fun s data ->
-                wr.WriteLine s
+            InsideMath = fun value data ->
+                wr.WriteLine(encodeHtml value)
                 data
             CloseMath = fun data ->
                 wr.WriteLine "\\]"
                 data
-            OpenCodeBlock = fun lang data -> 
-                wr.WriteLine "<pre class = \"codeboxB\" ><code>"
+            OpenCodeBlock = fun _ data ->
+                wr.WriteLine "<pre class=\"codeboxB\"><code>"
                 data
-            InsideCodeBlock = fun s data -> 
-                wr.WriteLine s
+            InsideCodeBlock = fun value data ->
+                wr.WriteLine(encodeHtml value)
                 data
             CloseCodeBlock = fun data ->
                 wr.WriteLine "</code></pre>"
@@ -361,25 +408,28 @@ module markDown =
             OpenTable = fun data ->
                 wr.WriteLine "<table>"
                 data
-            TableHeader = fun s data ->
+            TableHeader = fun cells data ->
                 wr.Write "<tr>"
-                s |> List.iter (fun s -> wr.Write ("<th>"+s+"</th>"))
+                cells
+                |> List.iter (fun value ->
+                    wr.Write("<th>"+renderInline value+"</th>"))
                 wr.WriteLine "</tr>"
                 data
-            TableData = fun s data ->
+            TableData = fun cells data ->
                 wr.Write "<tr>"
-                s |> List.iter (fun s -> wr.Write ("<td>"+s+"</td>"))
+                cells
+                |> List.iter (fun value ->
+                    wr.Write("<td>"+renderInline value+"</td>"))
                 wr.WriteLine "</tr>"
                 data
             CloseTable = fun data ->
                 wr.WriteLine "</table>"
                 data
-            Paragraph = fun s data -> 
-                wr.WriteLine ("<p>"+s+"</p>")
+            Paragraph = fun value data ->
+                wr.WriteLine("<p>"+renderInline value+"</p>")
                 data
-            Direct = fun s data -> 
-                wr.WriteLine s
+            Direct = fun value data ->
+                wr.WriteLine(renderInline value)
                 data
             }
         ignore <| readMarkDown MarkDownfilename md
-        wr.Close()

@@ -7,6 +7,7 @@
 namespace Aqualis
     
     open System
+    open System.Globalization
     open System.IO
     
     ///<summary>プロット範囲の指定</summary>
@@ -181,8 +182,9 @@ namespace Aqualis
                     for j = 0 to ny-1 do
                         let zre = data[nx*j+i]
                         let zim = 0.0
-                        if max < f(zre,zim) then max <- f(zre,zim)
-                        if min > f(zre,zim) then min <- f(zre,zim)
+                        let value = f(zre,zim)
+                        if max < value then max <- value
+                        if min > value then min <- value
                 min,max
                 
         /// <summary>
@@ -199,213 +201,178 @@ namespace Aqualis
             data <- [||]
             nx <- 0
             ny <- 0
-            error <- "";
-            if not <| File.Exists filename then
-                error <- "ファイル「"+filename+"」は存在しません"
-            if error = "" then
-                // izim=-1の場合は実数データ
-                isCPXdata <- not (izim <= 0)
-                // 区切り文字の判定
-                let sep =
-                    let reader:StreamReader = new StreamReader(filename)
-                    let rec read n =
-                        let tmp:string=reader.ReadLine()
-                        match tmp with
-                        | _ when tmp.Contains "#" -> 
-                            read (n+1)
-                        | _ when tmp.Contains "\t" -> 
-                            reader.Close()
-                            [| '\t' |]
-                        | _ when tmp.Contains ","    -> 
-                            reader.Close()
-                            [| ',' |]
-                        | _ when tmp.Contains " "    -> 
-                            reader.Close()
-                            [| ' ' |]
-                        | _ -> 
-                            reader.Close()
-                            [| ' ' |]
-                    read 0
-                    
-                // データサイズの決定
-                let _, _, dx, dy, xmin, xmax, ymin, ymax = 
-                    let reader = new StreamReader(filename)
-                    // 1行読み込んで離散間隔dx,dy、データ範囲xmin,xmax,ymin,ymaxを更新
-                    let rec read n x0 y0 dx dy xmin xmax ymin ymax =
-                        let tmp=reader.ReadLine()
-                        // ファイル末尾
-                        if tmp=null then
-                            reader.Close()
-                            x0, y0, dx, dy, xmin, xmax, ymin, ymax
-                        // コメント行の場合：そのまま次の行を読み込む
-                        elif tmp.Contains("#") then
-                            read n x0 y0 dx dy xmin xmax ymin ymax
-                        // ファイル末尾でなく、コメント行でもない場合
-                        else
-                            // データのi列目を抽出
-                            let extract(i:int) =
-                                try
-                                    Double.Parse(tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[i - 1])
-                                with
-                                | :? System.FormatException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + i.ToString() + "列目「" + tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[i - 1] + "」を数値に変換できません"
-                                    0.0
-                                | :? System.IndexOutOfRangeException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + i.ToString() + "列目は存在しません"
-                                    0.0
-                            let x = extract ix
-                            let y = extract iy
-                            // エラー検出時：ファイル読み込み中断
-                            if error<>"" then
-                                reader.Close()
-                                x0, y0, -1.0, -1.0, xmin, xmax, ymin, ymax
-                            // 最初のデータ読み込み。各値に初期値を設定
-                            elif n=0 then
-                                read (n+1) x y 0.0 0.0 x x y y
-                            // 2回目のデータ読み込み。離散間隔に初期値を設定
-                            elif n=1 then
-                                read (n+1) x0 y0 (abs(x-x0)) (abs(y-y0)) x x y y
-                            // 3回目以降のデータ読み込み。データ範囲と離散間隔を更新
-                            else
-                                let xmin1 = if xmin > x then x else xmin
-                                let xmax1 = if xmax < x then x else xmax
-                                let ymin1 = if ymin > y then y else ymin
-                                let ymax1 = if ymax < y then y else ymax
-                                let dx1 = if dx=0.0 || dx > abs(x-x0) && abs(x-x0)<>0.0 then abs(x-x0) else dx
-                                let dy1 = if dy=0.0 || dy > abs(y-y0) && abs(y-y0)<>0.0 then abs(y-y0) else dy
-                                read (n+1) x0 y0 dx1 dy1 xmin1 xmax1 ymin1 ymax1
-                                
-                    // read関数実行→sizeの返却値 *)
-                    read 0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-                    
-                if dx <= 0.0 || Double.IsNaN dx || Double.IsInfinity dx then
-                    appendError "xの値が一定です。1次元データの可能性があります。"
-                if dy <= 0.0 || Double.IsNaN dy || Double.IsInfinity dy then
-                    appendError "yの値が一定です。1次元データの可能性があります。"
+            error <- ""
 
-                if error="" then
-                    // 離散間隔とデータ範囲から離散点数を決定
-                    let calculatedNx =
-                        Math.Floor((xmax - xmin) / dx + 0.5) + 1.0
-                    let calculatedNy =
-                        Math.Floor((ymax - ymin) / dy + 0.5) + 1.0
+            let errors = ResizeArray<string>()
+            let addError message =
+                if not (errors.Contains message) then
+                    errors.Add message
+            let finishErrors() =
+                error <- String.concat Environment.NewLine errors
+            let isDataLine (line:string) =
+                not (String.IsNullOrWhiteSpace line) &&
+                not (line.Contains "#")
+            let chooseSeparator (line:string) =
+                if line.Contains "\t" then [|'\t'|]
+                elif line.Contains "," then [|','|]
+                else [|' '|]
+            let tryParseColumn column (columns:string array) =
+                if column <= 0 || column > columns.Length then
+                    addError $"データ{column}列目は存在しません"
+                    None
+                else
+                    let text = columns[column - 1]
+                    match Double.TryParse(
+                        text,
+                        NumberStyles.Float,
+                        CultureInfo.InvariantCulture) with
+                    |true, value ->
+                        Some value
+                    |false, _ ->
+                        addError $"データ{column}列目「{text}」を数値に変換できません"
+                        None
 
-                    if
-                        Double.IsNaN calculatedNx ||
-                        Double.IsInfinity calculatedNx ||
-                        calculatedNx < 1.0 ||
-                        calculatedNx > float Int32.MaxValue ||
-                        Double.IsNaN calculatedNy ||
-                        Double.IsInfinity calculatedNy ||
-                        calculatedNy < 1.0 ||
-                        calculatedNy > float Int32.MaxValue
-                    then
-                        appendError "配列サイズが有効範囲外です。"
-                    else
-                        nx <- int calculatedNx
-                        ny <- int calculatedNy
+            if not (File.Exists filename) then
+                addError $"ファイル「{filename}」は存在しません"
+            else
+                let firstDataLine =
+                    File.ReadLines(filename)
+                    |> Seq.tryFind isDataLine
 
-                        let elementCount =
-                            int64 nx * int64 ny *
-                            (if isCPXdata then 2L else 1L)
+                match firstDataLine with
+                |None ->
+                    addError "データ行が存在しません"
+                |Some firstLine ->
+                    let separator = chooseSeparator firstLine
+                    let mutable firstPoint: (double * double) option = None
+                    let mutable pointCount = 0
+                    let mutable dx = 0.0
+                    let mutable dy = 0.0
+                    let mutable xmin = 0.0
+                    let mutable xmax = 0.0
+                    let mutable ymin = 0.0
+                    let mutable ymax = 0.0
 
-                        if elementCount > int64 Int32.MaxValue then
-                            appendError ("配列サイズ("+nx.ToString()+","+ny.ToString()+")を確保できません")
-                        else
-                            try
-                                data <- Array.zeroCreate(int elementCount)
+                    // First pass: validate coordinates and determine the grid.
+                    for line in File.ReadLines(filename) do
+                        if isDataLine line && errors.Count = 0 then
+                            let columns =
+                                line.Split(
+                                    separator,
+                                    StringSplitOptions.RemoveEmptyEntries)
+                            match
+                                tryParseColumn ix columns,
+                                tryParseColumn iy columns
                             with
-                            | :? System.OutOfMemoryException
-                            | :? System.ArgumentException
-                            | :? System.OverflowException ->
-                                appendError ("配列サイズ("+nx.ToString()+","+ny.ToString()+")を確保できません")
-                    // ここまでエラーなしの場合：データ読み込み
-                    if error = "" then
-                        let reader = new StreamReader(filename)
-                        let rec readD n =
-                            match reader.ReadLine() with
-                            |null ->
-                                isDataLoaded <- true
-                                reader.Close()
-                            |tmp when tmp.Contains "#" ->
-                                // コメント行なら次の行の読み込みに進む
-                                readD (n+1)
-                            |tmp ->
-                                // ファイル末尾でなくコメント文でない場合
-                                // x座標
-                                let x = Double.Parse(tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[ix - 1])
-                                // y座標
-                                let y = Double.Parse(tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[iy - 1])
-                                // x座標の配列インデックス
-                                let ix = int (Math.Floor((x - xmin) / dx + 0.5))
-                                // y座標の配列インデックス
-                                let iy = int (Math.Floor((y - ymin) / dy + 0.5))
-                                let k = tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries)
-                                try
-                                    let re = Double.Parse(k.[izre - 1])
-                                    data[nx*iy+ix] <- re
-                                with
-                                | :? System.FormatException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + izre.ToString() + "列目「" + k.[izre - 1] + "」を数値に変換できません"
-                                    reader.Close()
-                                | :? System.IndexOutOfRangeException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + izre.ToString() + "列目は存在しません"
-                                    reader.Close()
-                                if error = "" then
-                                    readD (n+1)
-                                else
-                                    ()
-                        let rec readZ n =
-                            match reader.ReadLine() with
-                            // ファイル末尾の場合
-                            |null ->
-                                isDataLoaded <- true
-                                reader.Close()
-                            // コメント行なら次の行の読み込みに進む
-                            |tmp when tmp.Contains "#" ->
-                                readZ (n+1)
-                            // ファイル末尾でなくコメント文でない場合
-                            |tmp ->
-                                // x座標
-                                let x = Double.Parse(tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[ix - 1])
-                                // y座標
-                                let y = Double.Parse(tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[iy - 1])
-                                // x座標の配列インデックス
-                                let ix = int (Math.Floor((x - xmin) / dx + 0.5))
-                                // y座標の配列インデックス
-                                let iy = int (Math.Floor((y - ymin) / dy + 0.5))
-                                let k = tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries)
-                                try
-                                    let re = Double.Parse(k.[izre - 1])
-                                    data[2*(nx*iy+ix)] <- re
-                                with
-                                | :? System.FormatException ->
-                                    let k = tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries)
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + izre.ToString() + "列目「" + k.[izre - 1] + "」を数値に変換できません"
-                                    reader.Close()
-                                | :? System.IndexOutOfRangeException ->
-                                    error <- (if error = "" then "" else error+"\r\n") + "データ" + izre.ToString() + "列目は存在しません"
-                                    reader.Close()
-                                if error = "" then
-                                    let h = tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries)
-                                    try
-                                        let im = Double.Parse(h.[izim - 1])
-                                        data[2*(nx*iy+ix)+1] <- im
-                                    with
-                                    | :? System.FormatException ->
-                                        error <- (if error = "" then "" else error+"\r\n") + "データ" + (izim.ToString()) + "列目「" + tmp.Split(sep, StringSplitOptions.RemoveEmptyEntries).[izim - 1] + "」を数値に変換できません"
-                                        reader.Close()
-                                    | :? System.IndexOutOfRangeException ->
-                                        error <- (if error = "" then "" else error+"\r\n") + "データ" + izim.ToString() + "列目は存在しません"
-                                        reader.Close()
-                                if error = "" then
-                                    readZ (n+1)
-                                else
-                                    ()
-                        if isCPXdata then
-                            readZ 0
+                            |Some x, Some y ->
+                                match firstPoint with
+                                |None ->
+                                    firstPoint <- Some(x, y)
+                                    xmin <- x
+                                    xmax <- x
+                                    ymin <- y
+                                    ymax <- y
+                                |Some(firstX, firstY) ->
+                                    xmin <- min xmin x
+                                    xmax <- max xmax x
+                                    ymin <- min ymin y
+                                    ymax <- max ymax y
+
+                                    let xDistance = abs (x - firstX)
+                                    let yDistance = abs (y - firstY)
+                                    if xDistance > 0.0 && (dx = 0.0 || xDistance < dx) then
+                                        dx <- xDistance
+                                    if yDistance > 0.0 && (dy = 0.0 || yDistance < dy) then
+                                        dy <- yDistance
+                                pointCount <- pointCount + 1
+                            |_ ->
+                                ()
+
+                    if pointCount = 0 && errors.Count = 0 then
+                        addError "データ行が存在しません"
+                    if dx <= 0.0 || Double.IsNaN dx || Double.IsInfinity dx then
+                        addError "xの値が一定です。1次元データの可能性があります。"
+                    if dy <= 0.0 || Double.IsNaN dy || Double.IsInfinity dy then
+                        addError "yの値が一定です。1次元データの可能性があります。"
+
+                    if errors.Count = 0 then
+                        let calculatedNx =
+                            Math.Floor((xmax - xmin) / dx + 0.5) + 1.0
+                        let calculatedNy =
+                            Math.Floor((ymax - ymin) / dy + 0.5) + 1.0
+
+                        if
+                            Double.IsNaN calculatedNx ||
+                            Double.IsInfinity calculatedNx ||
+                            calculatedNx < 1.0 ||
+                            calculatedNx > float Int32.MaxValue ||
+                            Double.IsNaN calculatedNy ||
+                            Double.IsInfinity calculatedNy ||
+                            calculatedNy < 1.0 ||
+                            calculatedNy > float Int32.MaxValue
+                        then
+                            addError "配列サイズが有効範囲外です。"
                         else
-                            readD 0
+                            nx <- int calculatedNx
+                            ny <- int calculatedNy
+                            isCPXdata <- izim > 0
+
+                            let elementCount =
+                                int64 nx * int64 ny *
+                                (if isCPXdata then 2L else 1L)
+                            if elementCount > int64 Int32.MaxValue then
+                                addError $"配列サイズ({nx},{ny})を確保できません"
+                            else
+                                try
+                                    data <- Array.zeroCreate(int elementCount)
+                                with
+                                | :? OutOfMemoryException
+                                | :? ArgumentException
+                                | :? OverflowException ->
+                                    addError $"配列サイズ({nx},{ny})を確保できません"
+
+                    if errors.Count = 0 then
+                        // Second pass: parse each row once and store real/complex data.
+                        for line in File.ReadLines(filename) do
+                            if isDataLine line && errors.Count = 0 then
+                                let columns =
+                                    line.Split(
+                                        separator,
+                                        StringSplitOptions.RemoveEmptyEntries)
+                                let imaginary =
+                                    if isCPXdata then
+                                        tryParseColumn izim columns
+                                    else
+                                        Some 0.0
+                                match
+                                    tryParseColumn ix columns,
+                                    tryParseColumn iy columns,
+                                    tryParseColumn izre columns,
+                                    imaginary
+                                with
+                                |Some x, Some y, Some real, Some imag ->
+                                    let xIndex =
+                                        int (Math.Floor((x - xmin) / dx + 0.5))
+                                    let yIndex =
+                                        int (Math.Floor((y - ymin) / dy + 0.5))
+                                    if
+                                        xIndex < 0 || xIndex >= nx ||
+                                        yIndex < 0 || yIndex >= ny
+                                    then
+                                        addError "データ座標が配列範囲外です"
+                                    else
+                                        let index = nx * yIndex + xIndex
+                                        if isCPXdata then
+                                            data[2 * index] <- real
+                                            data[2 * index + 1] <- imag
+                                        else
+                                            data[index] <- real
+                                |_ ->
+                                    ()
+
+                        isDataLoaded <- errors.Count = 0
+
+            finishErrors()
                         
         /// <summary>
         /// ファイルからデータ読み込み(バイナリデータ)

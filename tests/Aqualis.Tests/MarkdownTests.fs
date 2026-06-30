@@ -48,10 +48,46 @@ module MarkdownTests =
         Assert.Contains(@"\(x+1\)", html)
         Assert.Contains("<code>code</code>", html)
         Assert.Contains("<code>*literal* $literal$</code>", html)
-        Assert.Contains("<a href=page.html>label</a>", html)
-        Assert.Contains("<a href=page>wiki label</a>", html)
-        Assert.Contains("<a href=page#section>section label</a>", html)
-        Assert.Contains("<img src=\"img/figure.png\"/>", html)
+        Assert.Contains("<a href=\"page.html\">label</a>", html)
+        Assert.Contains("<a href=\"page\">wiki label</a>", html)
+        Assert.Contains("<a href=\"page#section\">section label</a>", html)
+        Assert.Contains("<img src=\"img/figure.png\" alt=\"\"", html)
         Assert.Contains("<li>item</li>", html)
         Assert.Contains("<table>", html)
         Assert.Contains("let x = 1", html)
+
+    [<Fact>]
+    let ``markdown HTML output escapes content and rejects unsafe links`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "unsafe.md")
+        let destination = Path.Combine(output.Path, "safe.html")
+
+        File.WriteAllText(
+            source,
+            String.concat "\n" [
+                "# <script>alert(1)</script>"
+                "**<img src=x onerror=alert(1)>**"
+                "`<b>not html</b>`"
+                "[unsafe](javascript:alert(1))"
+                "| <svg onload=alert(1)> |"
+                "| --- |"
+                ""
+                "```html"
+                "<script>alert(2)</script>"
+                "```"
+            ])
+
+        convertHTML source destination
+        let html = File.ReadAllText(destination)
+
+        Assert.DoesNotContain("<script>", html)
+        Assert.DoesNotContain("<img src=x", html)
+        Assert.DoesNotContain("<svg onload", html)
+        Assert.Contains("&lt;script&gt;alert(1)&lt;/script&gt;", html)
+        Assert.Contains(
+            "<strong>&lt;img src=x onerror=alert(1)&gt;</strong>",
+            html)
+        Assert.Contains("<code>&lt;b&gt;not html&lt;/b&gt;</code>", html)
+        Assert.Contains("<a href=\"#\">unsafe</a>", html)
+        Assert.Contains("&lt;svg onload=alert(1)&gt;", html)
+        Assert.Contains("&lt;script&gt;alert(2)&lt;/script&gt;", html)
