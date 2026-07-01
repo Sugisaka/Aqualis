@@ -118,7 +118,14 @@ namespace Aqualis
             
     ///<summary>デバッグモード管理</summary>
     type debugController() =
-        member val debugMode = false with get,set
+        let mutable enabled = 0
+        member _.debugMode
+            with get() = System.Threading.Volatile.Read(&enabled) <> 0
+            and set value =
+                System.Threading.Interlocked.Exchange(
+                    &enabled,
+                    if value then 1 else 0)
+                |> ignore
         ///<summary>trueの時はデバッグ用のコードを生成する</summary>
         member this.setDebugMode s = this.debugMode <- s
         
@@ -126,28 +133,31 @@ namespace Aqualis
     type gotoLabelController() =
         let mutable gotoLabel = 10
         
-        member _.nextGotoLabel() = 
-            gotoLabel <- gotoLabel + 1
-            gotoLabel.ToString()
+        member _.nextGotoLabel() =
+            System.Threading.Interlocked.Increment(&gotoLabel).ToString()
             
         ///<summary>ループ脱出先gotoラベルをひとつ前に戻す</summary>
-        member _.exit_false() = 
-            gotoLabel <- gotoLabel - 1
+        member _.exit_false() =
+            System.Threading.Interlocked.Decrement(&gotoLabel) |> ignore
             
         ///<summary>脱出しないループのとき、ループ脱出先gotoラベルを否定</summary>
-        member _.exit_reset() = 
-            gotoLabel <- 10
+        member _.exit_reset() =
+            System.Threading.Interlocked.Exchange(&gotoLabel, 10) |> ignore
             
     ///<summary>エラーID管理</summary>
     type errorIDController() =
         let mutable errorid = 1
         
-        member _.ID with get() = errorid.ToString()
-        member _.inc() = errorid <- errorid + 1
+        member _.ID
+            with get() =
+                System.Threading.Volatile.Read(&errorid).ToString()
+        member _.inc() =
+            System.Threading.Interlocked.Increment(&errorid) |> ignore
         
     ///<summary>コード書き込み管理</summary>
     type codeWriter(filename:string,indentsize:int,lan:Language) =
         
+        let gate = obj()
         let mutable cwriter:option<StreamWriter> = if filename = "" then None else Some (new StreamWriter(filename,false))
 
         let disposeWriter() =
@@ -176,7 +186,8 @@ namespace Aqualis
         member val indent = IndentController indentsize with get
         
         member _.cwrite(s:string) =
-            (requireWriter()).Write s
+            lock gate (fun () ->
+                (requireWriter()).Write s)
                 
         ///<summary>コード出力(インデントなし・改行なし)</summary>
         member this.codewrite (ss:string) = 
@@ -448,26 +459,27 @@ namespace Aqualis
                 
         ///<summary>ファイルを閉じる</summary>
         member this.close() =
-            disposeWriter()
+            lock gate disposeWriter
             
         ///<summary>ファイルの書き込みを再開</summary>
         member this.appendOpen() =
-            reopen true
+            lock gate (fun () -> reopen true)
             
         ///<summary>既存のファイルを削除して開き直す</summary>
         member this.deleteOpen() =
-            reopen false
+            lock gate (fun () -> reopen false)
             
         ///<summary>並列処理の一時ファイルを削除</summary>
-        member _.delete() = 
-            disposeWriter()
-            if File.Exists filename then File.Delete filename
+        member _.delete() =
+            lock gate (fun () ->
+                disposeWriter()
+                if File.Exists filename then File.Delete filename)
             
         member _.allCode with get() = File.ReadAllText filename
 
         interface IDisposable with
             member _.Dispose() =
-                disposeWriter()
+                lock gate disposeWriter
         
     type argumentController(lang:Language) =
         

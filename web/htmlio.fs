@@ -50,25 +50,23 @@ module htmlio =
 
     let nextContentsID() =
         let state = WebGenerationScope.html()
-        state.ContentsCounter <- state.ContentsCounter + 1
-        "contentsID"+state.ContentsCounter.ToString()
+        "contentsID" + state.NextContentsNumber().ToString()
 
     let nextAnimationSeqID() =
         let state = WebGenerationScope.html()
-        state.AnimationSequenceCounter <- state.AnimationSequenceCounter + 1
-        "animationSeqID"+state.AnimationSequenceCounter.ToString(),
-        "animationSeqResetID"+state.AnimationSequenceCounter.ToString()
+        let number = state.NextAnimationSequenceNumber()
+        "animationSeqID" + number.ToString(),
+        "animationSeqResetID" + number.ToString()
 
     let nextAnimationGroup() =
         let state = WebGenerationScope.html()
-        state.AnimationGroupCounter <- state.AnimationGroupCounter + 1
-        state.AnimationGroupCounter.ToString()
+        state.NextAnimationGroupNumber().ToString()
 
     let animationButtonReset() =
-        (WebGenerationScope.html()).AnimationButtons.Clear()
+        (WebGenerationScope.html()).ClearAnimationButtons()
 
     let addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
-       (WebGenerationScope.html()).AnimationButtons.Add(
+       (WebGenerationScope.html()).AddAnimationButton(
            fnameStart, fnameReset, buttonX, buttonY)
 
     let addAutoAnimation(fnameStart,fnameReset) =

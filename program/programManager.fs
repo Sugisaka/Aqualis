@@ -212,6 +212,15 @@ namespace Aqualis
         }
 
     type internal HtmlGenerationState() =
+        let gate = obj()
+        let mutable contentsCounter = -1
+        let mutable animationSequenceCounter = -1
+        let mutable animationGroupCounter = -1
+        let mutable figureCounter = 0
+        let mutable animationCounter = 0
+        let animationButtons = ResizeArray<string * string * int * int>()
+        let audioFiles = ResizeArray<string>()
+
         member val InputCounter = 0 with get, set
         member val DrawFileName = "" with get, set
         member val BodyFileName = "" with get, set
@@ -220,13 +229,51 @@ namespace Aqualis
         member val AnimationSequenceResetFileName = "" with get, set
         member val AnimationResetFileName = "" with get, set
         member val ContentsDirectory = "" with get, set
-        member val ContentsCounter = -1 with get, set
-        member val AnimationSequenceCounter = -1 with get, set
-        member val AnimationGroupCounter = -1 with get, set
-        member val FigureCounter = 0 with get, set
-        member val AnimationCounter = 0 with get, set
-        member val AnimationButtons = ResizeArray<string * string * int * int>()
-        member val AudioFiles = ResizeArray<string>()
+
+        member _.NextContentsNumber() =
+            lock gate (fun () ->
+                contentsCounter <- contentsCounter + 1
+                contentsCounter)
+
+        member _.NextAnimationSequenceNumber() =
+            lock gate (fun () ->
+                animationSequenceCounter <- animationSequenceCounter + 1
+                animationSequenceCounter)
+
+        member _.NextAnimationGroupNumber() =
+            lock gate (fun () ->
+                animationGroupCounter <- animationGroupCounter + 1
+                animationGroupCounter)
+
+        member _.NextFigureNumber() =
+            lock gate (fun () ->
+                figureCounter <- figureCounter + 1
+                figureCounter)
+
+        member _.NextAnimationNumber() =
+            lock gate (fun () ->
+                animationCounter <- animationCounter + 1
+                animationCounter)
+
+        member _.AnimationCount =
+            lock gate (fun () -> animationCounter)
+
+        member _.AddAnimationButton(button) =
+            lock gate (fun () -> animationButtons.Add(button))
+
+        member _.ClearAnimationButtons() =
+            lock gate animationButtons.Clear
+
+        member _.TryLastAnimationButton() =
+            lock gate (fun () ->
+                if animationButtons.Count = 0 then None
+                else Some animationButtons[animationButtons.Count - 1])
+
+        member _.AddAudioFile(audioFile:string) =
+            lock gate (fun () -> audioFiles.Add(audioFile))
+
+        member _.AudioFiles =
+            lock gate (fun () -> audioFiles |> Seq.toList)
 
     type internal AnimationOptionsState(setting:MovieSetting) =
         member val CharacterEnabled = (setting.Character = ON)
@@ -269,11 +316,11 @@ namespace Aqualis
     /// capture this instance and assignments use the captured context.
     type private GenerationState =
         {
+            Gate: obj
             Programs: program array
-            mutable DisplaySection: bool
-            mutable IsOpenMpUsed: bool
-            mutable IsOpenAccUsed: bool
-            mutable IsParallelMode: bool
+            mutable DisplaySection: int
+            mutable IsOpenMpUsed: int
+            mutable IsOpenAccUsed: int
             Functions: ResizeArray<string>
             GotoLabels: gotoLabelController
             Errors: errorIDController
@@ -281,7 +328,13 @@ namespace Aqualis
             Web: WebGenerationState
         }
 
-    type GenerationContext private (state:GenerationState, currentIndex:int) =
+    type GenerationContext private
+        (
+            state:GenerationState,
+            currentIndex:int,
+            debug:debugController,
+            parallelMode:bool
+        ) =
         static let current = AsyncLocal<GenerationContext option>()
 
         static member private CreateState(programs:program list, movieSetting:MovieSetting) =
@@ -289,11 +342,11 @@ namespace Aqualis
             if programArray.Length = 0 then
                 invalidArg (nameof programs) "At least one program is required."
             {
+                Gate = obj()
                 Programs = programArray
-                DisplaySection = false
-                IsOpenMpUsed = false
-                IsOpenAccUsed = false
-                IsParallelMode = false
+                DisplaySection = 0
+                IsOpenMpUsed = 0
+                IsOpenAccUsed = 0
                 Functions = ResizeArray<string>()
                 GotoLabels = gotoLabelController()
                 Errors = errorIDController()
@@ -302,14 +355,14 @@ namespace Aqualis
             }
 
         new(programs:program list) =
-            GenerationContext(
-                GenerationContext.CreateState(programs, MovieSetting.Default),
-                0)
+            let state =
+                GenerationContext.CreateState(programs, MovieSetting.Default)
+            GenerationContext(state, 0, state.Debug, false)
 
         new(programs:program list, movieSetting:MovieSetting) =
-            GenerationContext(
-                GenerationContext.CreateState(programs, movieSetting),
-                0)
+            let state =
+                GenerationContext.CreateState(programs, movieSetting)
+            GenerationContext(state, 0, state.Debug, false)
 
         member _.Programs = state.Programs
 
@@ -318,57 +371,77 @@ namespace Aqualis
         member _.CurrentProgram = state.Programs[currentIndex]
 
         member _.DisplaySection
-            with get () = state.DisplaySection
-            and set value = state.DisplaySection <- value
+            with get () =
+                System.Threading.Volatile.Read(&state.DisplaySection) <> 0
+            and set value =
+                System.Threading.Interlocked.Exchange(
+                    &state.DisplaySection,
+                    if value then 1 else 0)
+                |> ignore
 
         member _.IsOpenMpUsed
-            with get () = state.IsOpenMpUsed
-            and set value = state.IsOpenMpUsed <- value
+            with get () =
+                System.Threading.Volatile.Read(&state.IsOpenMpUsed) <> 0
+            and set value =
+                System.Threading.Interlocked.Exchange(
+                    &state.IsOpenMpUsed,
+                    if value then 1 else 0)
+                |> ignore
 
         member _.IsOpenAccUsed
-            with get () = state.IsOpenAccUsed
-            and set value = state.IsOpenAccUsed <- value
+            with get () =
+                System.Threading.Volatile.Read(&state.IsOpenAccUsed) <> 0
+            and set value =
+                System.Threading.Interlocked.Exchange(
+                    &state.IsOpenAccUsed,
+                    if value then 1 else 0)
+                |> ignore
 
-        member _.IsParallelMode
-            with get () = state.IsParallelMode
-            and set value = state.IsParallelMode <- value
+        member _.IsParallelMode = parallelMode
 
         member this.WithParallelMode(code: unit -> 'T) : 'T =
-            let previous = state.IsParallelMode
-            try
-                state.IsParallelMode <- true
-                code()
-            finally
-                state.IsParallelMode <- previous
+            GenerationContext(state, currentIndex, debug, true).Activate(code)
 
         member _.WithDebugMode(enabled:bool, code: unit -> 'T) : 'T =
-            let previous = state.Debug.debugMode
-            try
-                state.Debug.setDebugMode enabled
-                code()
-            finally
-                state.Debug.setDebugMode previous
+            let scopedDebug = debugController()
+            scopedDebug.setDebugMode enabled
+            GenerationContext(
+                state,
+                currentIndex,
+                scopedDebug,
+                parallelMode).Activate(code)
 
-        member _.Functions = state.Functions
+        member _.Functions =
+            lock state.Gate (fun () ->
+                state.Functions |> Seq.toList)
+
+        member _.AddFunction(name:string) =
+            lock state.Gate (fun () ->
+                state.Functions.Add(name))
 
         member _.DistinctFunctions =
-            state.Functions |> Seq.distinct |> Seq.toList
+            lock state.Gate (fun () ->
+                state.Functions |> Seq.distinct |> Seq.toList)
 
         member _.GotoLabels = state.GotoLabels
 
         member _.Errors = state.Errors
 
-        member _.Debug = state.Debug
+        member _.Debug = debug
 
         member internal _.Web = state.Web
 
         member _.ForProgram(index:int) =
             if index < 0 || index >= state.Programs.Length then
                 invalidArg (nameof index) $"Program index {index} is outside the valid range."
-            GenerationContext(state, index)
+            GenerationContext(state, index, debug, parallelMode)
 
         member this.WithProgram(index: int, code: unit -> 'T) : 'T =
-            this.ForProgram(index).Activate(code)
+            lock state.Gate (fun () ->
+                this.ForProgram(index).Activate(code))
+
+        member internal _.Synchronize(code: unit -> 'T) =
+            lock state.Gate code
 
         member this.Activate(code: unit -> 'T) : 'T =
             let previous = current.Value

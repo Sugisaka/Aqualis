@@ -146,7 +146,7 @@ module GenerationContextTests =
             first.Activate(fun () ->
                 AqualisCompiler.set_DisplaySection ON
                 first.IsOpenMpUsed <- true
-                first.Functions.Add("first"))
+                first.AddFunction("first"))
 
             second.Activate(fun () ->
                 Assert.False(second.DisplaySection)
@@ -170,7 +170,7 @@ module GenerationContextTests =
                 Assert.Throws<InvalidOperationException>(
                     Action(fun () ->
                         context.WithParallelMode(fun () ->
-                            Assert.True(context.IsParallelMode)
+                            Assert.True(GenerationContext.TryCurrent.Value.IsParallelMode)
                             invalidOp "expected")))
                 |> ignore
 
@@ -188,14 +188,14 @@ module GenerationContextTests =
                 Assert.False(context.Debug.debugMode)
 
                 AqualisCompiler.debug(fun () ->
-                    Assert.True(context.Debug.debugMode))
+                    Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode))
 
                 Assert.False(context.Debug.debugMode)
 
                 Assert.Throws<InvalidOperationException>(
                     Action(fun () ->
                         AqualisCompiler.debug(fun () ->
-                            Assert.True(context.Debug.debugMode)
+                            Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode)
                             invalidOp "expected")))
                 |> ignore
 
@@ -213,12 +213,12 @@ module GenerationContextTests =
                 AqualisCompiler.set_DebugMode ON
 
                 AqualisCompiler.debug(fun () ->
-                    Assert.True(context.Debug.debugMode)
+                    Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode)
 
                     AqualisCompiler.debug(fun () ->
-                        Assert.True(context.Debug.debugMode))
+                        Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode))
 
-                    Assert.True(context.Debug.debugMode))
+                    Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode))
 
                 Assert.True(context.Debug.debugMode))
         finally
@@ -289,3 +289,51 @@ module GenerationContextTests =
         finally
             first.CurrentProgram.close()
             second.CurrentProgram.close()
+
+    [<Fact>]
+    let ``one generation context can write from concurrent tasks`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "concurrent-write.c" C99
+        let workerCount = 8
+        let linesPerWorker = 100
+
+        context.Activate(fun () ->
+            Array.init workerCount (fun worker ->
+                Task.Run(Action(fun () ->
+                    for index in 1..linesPerWorker do
+                        writein $"line-{worker}-{index}")))
+            |> Task.WaitAll)
+
+        context.CurrentProgram.close()
+
+        let lines =
+            System.IO.File.ReadAllLines(
+                System.IO.Path.Combine(output.Path, "concurrent-write.c"))
+
+        Assert.Equal(workerCount * linesPerWorker, lines.Length)
+        Assert.Equal(lines.Length, lines |> Array.distinct |> Array.length)
+
+    [<Fact>]
+    let ``shared context counters allocate unique identifiers concurrently`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "concurrent-ids.html" HTML
+        let workerCount = 8
+        let idsPerWorker = 100
+        let gotoIds = System.Collections.Concurrent.ConcurrentBag<string>()
+        let contentsIds = System.Collections.Concurrent.ConcurrentBag<string>()
+
+        context.Activate(fun () ->
+            Array.init workerCount (fun _ ->
+                Task.Run(Action(fun () ->
+                    for _ in 1..idsPerWorker do
+                        gotoIds.Add(context.GotoLabels.nextGotoLabel())
+                        contentsIds.Add(nextContentsID()))))
+            |> Task.WaitAll)
+
+        context.CurrentProgram.close()
+
+        let expected = workerCount * idsPerWorker
+        Assert.Equal(expected, gotoIds.Count)
+        Assert.Equal(expected, gotoIds |> Seq.distinct |> Seq.length)
+        Assert.Equal(expected, contentsIds.Count)
+        Assert.Equal(expected, contentsIds |> Seq.distinct |> Seq.length)

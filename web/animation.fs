@@ -288,8 +288,8 @@ type SlideAnimation =
         switchJSMain <| fun () ->
             let audioFiles = (WebGenerationScope.html()).AudioFiles
             writein "const audioList = ["
-            for i in 0..audioFiles.Count-1 do
-                writein ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Count-1 then "," else "")
+            for i in 0..audioFiles.Length-1 do
+                writein ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Length-1 then "," else "")
             writein "];"
     /// <summary>
     /// キャラクター表示を制御するJavaScriptコードの生成
@@ -336,7 +336,7 @@ type SlideAnimation =
     /// </summary>
     static member jsDrawNext(audioDir:string) =
         switchJSMain <| fun () ->
-            let animationCount = (WebGenerationScope.html()).AnimationCounter
+            let animationCount = (WebGenerationScope.html()).AnimationCount
             writein "function drawNext()"
             writein "{"
             writein "    resetAll();"
@@ -873,10 +873,10 @@ module htmlexpr =
             html.slide position.Origin <| fun p ->
                 let htmlState = AnimationGenerationScope.html()
                 let options = AnimationGenerationScope.options()
-                let animationCounter = htmlState.AnimationCounter
+                let animationCounter = htmlState.AnimationCount
                 let contentsDirectory = htmlState.ContentsDirectory
                 // 音声ファイル追加
-                htmlState.AudioFiles.Add(match audioFile with |Some t -> t |None -> "")
+                htmlState.AddAudioFile(match audioFile with |Some t -> t |None -> "")
                 // 字幕枠
                 html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if options.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
@@ -901,19 +901,19 @@ module htmlexpr =
                     code2 p
                 switchAutoAnimation <| fun () ->
                     writein "},"
-                if htmlState.AnimationButtons.Count > 0 then
-                    let fStartName,fResetName,btnx,btny = htmlState.AnimationButtons[htmlState.AnimationButtons.Count-1]
+                match htmlState.TryLastAnimationButton() with
+                | Some(fStartName,fResetName,btnx,btny) ->
                     html.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
                     html.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
-                htmlState.AnimationButtons.Clear()
+                | None -> ()
+                htmlState.ClearAnimationButtons()
         /// <summary>
         /// 指定位置にスライドを生成
         /// </summary>
         /// <param name="p">スライドの表示位置</param>
         static member slide (p:position)  code =
                 let state = AnimationGenerationScope.html()
-                state.AnimationCounter <- state.AnimationCounter + 1
-                let animationCounter = state.AnimationCounter
+                let animationCounter = state.NextAnimationNumber()
                 html.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
                     code p
         /// <summary>
@@ -1486,8 +1486,7 @@ module htmlexpr2 =
         /// <param name="buttonX, buttonY">操作ボタンの配置座標</param>
         static member animationManual (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
             let state = AnimationGenerationScope.html()
-            state.FigureCounter <- state.FigureCounter + 1
-            let f = FigureAnimation(state.FigureCounter,s.mX,s.mY,s.sX,s.sY)
+            let f = FigureAnimation(state.NextFigureNumber(),s.mX,s.mY,s.sX,s.sY)
             switchBody <| fun () ->
                 writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 writein ("width=\""+s.sX.ToString()+"px\" ")
@@ -1510,8 +1509,7 @@ module htmlexpr2 =
         /// </summary>
         static member animationAuto (s:ViewBoxStyle) (p:position) code =
             let state = AnimationGenerationScope.html()
-            state.FigureCounter <- state.FigureCounter + 1
-            let f = FigureAnimation(state.FigureCounter,s.mX,s.mY,s.sX,s.sY)
+            let f = FigureAnimation(state.NextFigureNumber(),s.mX,s.mY,s.sX,s.sY)
             switchBody <| fun () ->
                 writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 writein ("width=\""+s.sX.ToString()+"px\" ")
