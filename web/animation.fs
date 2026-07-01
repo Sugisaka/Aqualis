@@ -10,9 +10,10 @@ open System
 open System.IO
 
 module private AnimationGenerationScope =
-    let html() = WebGenerationScope.html()
-    let options() = WebGenerationScope.animation()
-    let contentsDirectory() = (html()).ContentsDirectory
+    let contentsDirectory() = WebGenerationScope.contentsDirectory()
+    let characterEnabled() = WebGenerationScope.characterEnabled()
+    let subtitleEnabled() = WebGenerationScope.subtitleEnabled()
+    let voiceEnabled() = WebGenerationScope.voiceEnabled()
 
 type AnimationType =
     |Loop of int*int
@@ -286,7 +287,7 @@ type SlideAnimation =
     /// </summary>
     static member writeAudioList() =
         switchJSMain <| fun () ->
-            let audioFiles = (WebGenerationScope.html()).AudioFiles
+            let audioFiles = WebGenerationScope.audioFiles()
             writein "const audioList = ["
             for i in 0..audioFiles.Length-1 do
                 writein ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Length-1 then "," else "")
@@ -336,7 +337,7 @@ type SlideAnimation =
     /// </summary>
     static member jsDrawNext(audioDir:string) =
         switchJSMain <| fun () ->
-            let animationCount = (WebGenerationScope.html()).AnimationCount
+            let animationCount = WebGenerationScope.animationCount()
             writein "function drawNext()"
             writein "{"
             writein "    resetAll();"
@@ -871,17 +872,16 @@ module htmlexpr =
         /// </summary>
         static member page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
             html.slide position.Origin <| fun p ->
-                let htmlState = AnimationGenerationScope.html()
-                let options = AnimationGenerationScope.options()
-                let animationCounter = htmlState.AnimationCount
-                let contentsDirectory = htmlState.ContentsDirectory
+                let animationCounter = WebGenerationScope.animationCount()
+                let contentsDirectory = AnimationGenerationScope.contentsDirectory()
                 // 音声ファイル追加
-                htmlState.AddAudioFile(match audioFile with |Some t -> t |None -> "")
+                WebGenerationScope.addAudioFile(
+                    match audioFile with |Some t -> t |None -> "")
                 // 字幕枠
-                html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if options.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if AnimationGenerationScope.subtitleEnabled() then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
                 // キャラクター画像
-                html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if options.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
+                html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if AnimationGenerationScope.characterEnabled() then "display: block; " else "display: none; ") + "\"") <| fun () ->
                     for ci in c do
                         if File.Exists ci.CharacterImageFile then
                             if Directory.Exists contentsDirectory then
@@ -892,7 +892,7 @@ module htmlexpr =
                         else
                             printfn "character image file not exist: %s" ci.CharacterImageFile
                 // 字幕
-                html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if options.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if AnimationGenerationScope.subtitleEnabled() then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
                     <| fun () -> writein audio.Subtitle
                 switchAutoAnimation <| fun () ->
                     writein("page"+animationCounter.ToString()+": () => {")
@@ -901,19 +901,18 @@ module htmlexpr =
                     code2 p
                 switchAutoAnimation <| fun () ->
                     writein "},"
-                match htmlState.TryLastAnimationButton() with
+                match WebGenerationScope.tryLastAnimationButton() with
                 | Some(fStartName,fResetName,btnx,btny) ->
                     html.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
                     html.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
                 | None -> ()
-                htmlState.ClearAnimationButtons()
+                WebGenerationScope.clearAnimationButtons()
         /// <summary>
         /// 指定位置にスライドを生成
         /// </summary>
         /// <param name="p">スライドの表示位置</param>
         static member slide (p:position)  code =
-                let state = AnimationGenerationScope.html()
-                let animationCounter = state.NextAnimationNumber()
+                let animationCounter = WebGenerationScope.nextAnimationNumber()
                 html.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
                     code p
         /// <summary>
@@ -944,21 +943,21 @@ module htmlexpr =
         /// キャラクター表示を制御するチェックボックスを生成
         /// </summary>
         static member switchCharacter() =
-            html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if (AnimationGenerationScope.options()).CharacterEnabled then "checked" else "")
+            html.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if AnimationGenerationScope.characterEnabled() then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
                 writein "キャラクター"
         /// <summary>
         /// 字幕表示を制御するチェックボックスを生成
         /// </summary>
         static member switchSubtitle() =
-            html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if (AnimationGenerationScope.options()).SubtitleEnabled then "checked" else "")
+            html.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if AnimationGenerationScope.subtitleEnabled() then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
                 writein "字幕"
         /// <summary>
         /// 音声再生を制御するチェックボックスを生成
         /// </summary>
         static member switchAudio() =
-            html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if (AnimationGenerationScope.options()).VoiceEnabled then "checked" else "")
+            html.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if AnimationGenerationScope.voiceEnabled() then "checked" else "")
             html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
                 writein "音声"
         static member audioPlayer() =
@@ -1281,8 +1280,8 @@ module dochtml =
                 dir  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
             ]
             <| fun () ->
-                (WebGenerationScope.html()).ContentsDirectory <-
-                    dir + "\\" + "contents_" + filename
+                WebGenerationScope.setContentsDirectory(
+                    dir + "\\" + "contents_" + filename)
                 switchJSAnimationStart <| fun () ->
                     writein "const animationStartMap = {"
                 switchJSAnimationReset <| fun () ->
@@ -1485,8 +1484,10 @@ module htmlexpr2 =
         /// <param name="p">表示位置</param>
         /// <param name="buttonX, buttonY">操作ボタンの配置座標</param>
         static member animationManual (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
-            let state = AnimationGenerationScope.html()
-            let f = FigureAnimation(state.NextFigureNumber(),s.mX,s.mY,s.sX,s.sY)
+            let f =
+                FigureAnimation(
+                    WebGenerationScope.nextFigureNumber(),
+                    s.mX,s.mY,s.sX,s.sY)
             switchBody <| fun () ->
                 writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 writein ("width=\""+s.sX.ToString()+"px\" ")
@@ -1508,8 +1509,10 @@ module htmlexpr2 =
         /// 自動再生型のアニメーション領域を生成する
         /// </summary>
         static member animationAuto (s:ViewBoxStyle) (p:position) code =
-            let state = AnimationGenerationScope.html()
-            let f = FigureAnimation(state.NextFigureNumber(),s.mX,s.mY,s.sX,s.sY)
+            let f =
+                FigureAnimation(
+                    WebGenerationScope.nextFigureNumber(),
+                    s.mX,s.mY,s.sX,s.sY)
             switchBody <| fun () ->
                 writein ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 writein ("width=\""+s.sX.ToString()+"px\" ")

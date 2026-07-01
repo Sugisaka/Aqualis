@@ -44,51 +44,52 @@ namespace Aqualis
         
     [<AutoOpen>]
     module sequenceDiagramParam =
-        let private state() = WebGenerationScope.sequenceDiagram()
+        let private style() = WebGenerationScope.sequenceDiagramStyle()
         /// 上側マージン
-        let topMargin() = (state()).TopMargin
+        let topMargin() = (style()).TopMargin
         /// 左側マージン
-        let leftMargin() = (state()).LeftMargin
+        let leftMargin() = (style()).LeftMargin
         /// 変数間の間隔
-        let varInterval() = (state()).VariableInterval
+        let varInterval() = (style()).VariableInterval
         /// 単一代入文の矢印、基準線から代入先までの矢印の長さ
-        let singleArrowLength() = (state()).SingleArrowLength
+        let singleArrowLength() = (style()).SingleArrowLength
         /// 変数ヘッダーの横幅
-        let varHeaderWidth() = (state()).VariableHeaderWidth
+        let varHeaderWidth() = (style()).VariableHeaderWidth
         /// 変数ヘッダーの高さ
-        let varHeaderHeight() = (state()).VariableHeaderHeight
+        let varHeaderHeight() = (style()).VariableHeaderHeight
         /// 線の太さ
-        let lineWidth() = (state()).LineWidth
+        let lineWidth() = (style()).LineWidth
         /// 実効線の太さ
-        let activeLineWidth() = (state()).ActiveLineWidth
+        let activeLineWidth() = (style()).ActiveLineWidth
         // 枠のマージン
-        let frameMargin() = (state()).FrameMargin
+        let frameMargin() = (style()).FrameMargin
         /// 図形描画の時間方向間隔
-        let timeStep() = (state()).TimeStep
+        let timeStep() = (style()).TimeStep
         /// 枠線の太さ
-        let frameBorder() = (state()).FrameBorder
+        let frameBorder() = (style()).FrameBorder
         /// 現在のライフライン終端座標
-        let colorActiveLine() = (state()).ActiveLineColor
-        let colorLoopFrame() = (state()).LoopFrameColor
-        let colorBranchFrame() = (state()).BranchFrameColor
-        let colorSectionFrame() = (state()).SectionFrameColor
+        let colorActiveLine() = (style()).ActiveLineColor
+        let colorLoopFrame() = (style()).LoopFrameColor
+        let colorBranchFrame() = (style()).BranchFrameColor
+        let colorSectionFrame() = (style()).SectionFrameColor
         let setSequenceDiagramStyle(s:SequenceDiagramStyle) =
-            let state = state()
-            state.TopMargin <- s.TopMargin
-            state.LeftMargin <- s.LeftMargin
-            state.VariableInterval <- s.VarInterval
-            state.SingleArrowLength <- s.SingleArrowLength
-            state.VariableHeaderWidth <- s.VarHeaderWidth
-            state.VariableHeaderHeight <- s.VarHeaderHeight
-            state.LineWidth <- s.LineWidth
-            state.ActiveLineWidth <- s.ActiveLineWidth
-            state.FrameMargin <- s.FrameMargin
-            state.TimeStep <- s.TimeStep
-            state.FrameBorder <- s.FrameBorder
-            state.ActiveLineColor <- s.ColorActiveLine
-            state.LoopFrameColor <- s.ColorLoopFrame
-            state.BranchFrameColor <- s.ColorBranchFrame
-            state.SectionFrameColor <- s.ColorSectionFrame
+            WebGenerationScope.setSequenceDiagramStyle {
+                TopMargin = s.TopMargin
+                LeftMargin = s.LeftMargin
+                VariableInterval = s.VarInterval
+                SingleArrowLength = s.SingleArrowLength
+                VariableHeaderWidth = s.VarHeaderWidth
+                VariableHeaderHeight = s.VarHeaderHeight
+                LineWidth = s.LineWidth
+                ActiveLineWidth = s.ActiveLineWidth
+                FrameMargin = s.FrameMargin
+                TimeStep = s.TimeStep
+                FrameBorder = s.FrameBorder
+                ActiveLineColor = s.ColorActiveLine
+                LoopFrameColor = s.ColorLoopFrame
+                BranchFrameColor = s.ColorBranchFrame
+                SectionFrameColor = s.ColorSectionFrame
+            }
             
         let styleVarHead = 
             Style[
@@ -104,18 +105,18 @@ namespace Aqualis
     [<AutoOpen>]
     module sequenceDiagramData =
         let p0 = position.Origin
-        let private builder() = (WebGenerationScope.sequenceDiagram()).Builder
-        let terminalLifeLine() = (builder()).TerminalLifeLine
-        let setTerminalLifeLine value = (builder()).TerminalLifeLine <- value
+        let terminalLifeLine() = WebGenerationScope.terminalLifeLine()
+        let setTerminalLifeLine value =
+            WebGenerationScope.setTerminalLifeLine value
         /// シーケンス図に描画済み変数リスト
-        let varList() = (builder()).Variables
-        let setVarList value = (builder()).Variables <- value
+        let varList() = WebGenerationScope.sequenceVariables()
+        let setVarList value = WebGenerationScope.setSequenceVariables value
         /// フレーム枠座標スタックリスト
-        let frameStack() = (builder()).Frames
-        let setFrameStack value = (builder()).Frames <- value
+        let frameStack() = WebGenerationScope.sequenceFrames()
+        let setFrameStack value = WebGenerationScope.setSequenceFrames value
         /// 条件分岐枠スタックリスト
-        let branchStack() = (builder()).Branches
-        let setBranchStack value = (builder()).Branches <- value
+        let branchStack() = WebGenerationScope.sequenceBranches()
+        let setBranchStack value = WebGenerationScope.setSequenceBranches value
         /// 第n変数ライフラインのx座標
         let lifeLineX(n:int) = leftMargin() + varHeaderWidth() / 2.0 + float n * varInterval()
 

@@ -49,24 +49,21 @@ module htmlio =
     /// アニメーションカウンタ
 
     let nextContentsID() =
-        let state = WebGenerationScope.html()
-        "contentsID" + state.NextContentsNumber().ToString()
+        "contentsID" + WebGenerationScope.nextContentsNumber().ToString()
 
     let nextAnimationSeqID() =
-        let state = WebGenerationScope.html()
-        let number = state.NextAnimationSequenceNumber()
+        let number = WebGenerationScope.nextAnimationSequenceNumber()
         "animationSeqID" + number.ToString(),
         "animationSeqResetID" + number.ToString()
 
     let nextAnimationGroup() =
-        let state = WebGenerationScope.html()
-        state.NextAnimationGroupNumber().ToString()
+        WebGenerationScope.nextAnimationGroupNumber().ToString()
 
     let animationButtonReset() =
-        (WebGenerationScope.html()).ClearAnimationButtons()
+        WebGenerationScope.clearAnimationButtons()
 
     let addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
-       (WebGenerationScope.html()).AddAnimationButton(
+       WebGenerationScope.addAnimationButton(
            fnameStart, fnameReset, buttonX, buttonY)
 
     let addAutoAnimation(fnameStart,fnameReset) =

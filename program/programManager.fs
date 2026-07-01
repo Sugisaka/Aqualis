@@ -213,6 +213,7 @@ namespace Aqualis
 
     type internal HtmlGenerationState() =
         let gate = obj()
+        let mutable contentsDirectory = ""
         let mutable contentsCounter = -1
         let mutable animationSequenceCounter = -1
         let mutable animationGroupCounter = -1
@@ -221,14 +222,9 @@ namespace Aqualis
         let animationButtons = ResizeArray<string * string * int * int>()
         let audioFiles = ResizeArray<string>()
 
-        member val InputCounter = 0 with get, set
-        member val DrawFileName = "" with get, set
-        member val BodyFileName = "" with get, set
-        member val JavaScriptFileName = "" with get, set
-        member val AnimationStartFileName = "" with get, set
-        member val AnimationSequenceResetFileName = "" with get, set
-        member val AnimationResetFileName = "" with get, set
-        member val ContentsDirectory = "" with get, set
+        member _.ContentsDirectory
+            with get() = lock gate (fun () -> contentsDirectory)
+            and set value = lock gate (fun () -> contentsDirectory <- value)
 
         member _.NextContentsNumber() =
             lock gate (fun () ->
@@ -275,39 +271,63 @@ namespace Aqualis
         member _.AudioFiles =
             lock gate (fun () -> audioFiles |> Seq.toList)
 
-    type internal AnimationOptionsState(setting:MovieSetting) =
-        member val CharacterEnabled = (setting.Character = ON)
-        member val SubtitleEnabled = (setting.Subtitle = ON)
-        member val VoiceEnabled = (setting.Voice = ON)
+    type internal AnimationOptions = {
+        CharacterEnabled: bool
+        SubtitleEnabled: bool
+        VoiceEnabled: bool
+    }
 
-    type internal SequenceDiagramBuilder() =
+    [<RequireQualifiedAccess>]
+    module internal AnimationOptions =
+        let create(setting:MovieSetting) = {
+            CharacterEnabled = (setting.Character = ON)
+            SubtitleEnabled = (setting.Subtitle = ON)
+            VoiceEnabled = (setting.Voice = ON)
+        }
+
+    type internal SequenceDiagramBuilderState() =
         member val TerminalLifeLine = 100.0 with get, set
         member val Variables: list<string * int * float> = [] with get, set
         member val Frames: list<float * float * float * float> = [] with get, set
         member val Branches: list<list<string * float>> = [] with get, set
 
-    type internal SequenceDiagramState() =
-        member val TopMargin = 40.0 with get, set
-        member val LeftMargin = 40.0 with get, set
-        member val VariableInterval = 150.0 with get, set
-        member val SingleArrowLength = 37.5 with get, set
-        member val VariableHeaderWidth = 50.0 with get, set
-        member val VariableHeaderHeight = 20.0 with get, set
-        member val LineWidth = 2.0 with get, set
-        member val ActiveLineWidth = 10.0 with get, set
-        member val FrameMargin = 10.0 with get, set
-        member val TimeStep = 10.0 with get, set
-        member val FrameBorder = 2.0 with get, set
-        member val ActiveLineColor = "rgba(0, 191, 255, 0.5)" with get, set
-        member val LoopFrameColor = "rgb(255, 0, 0)" with get, set
-        member val BranchFrameColor = "rgb(0, 180, 0)" with get, set
-        member val SectionFrameColor = "rgb(127,0,255)" with get, set
-        member val Builder = SequenceDiagramBuilder()
+    type internal SequenceDiagramStyleState = {
+        TopMargin: float
+        LeftMargin: float
+        VariableInterval: float
+        SingleArrowLength: float
+        VariableHeaderWidth: float
+        VariableHeaderHeight: float
+        LineWidth: float
+        ActiveLineWidth: float
+        FrameMargin: float
+        TimeStep: float
+        FrameBorder: float
+        ActiveLineColor: string
+        LoopFrameColor: string
+        BranchFrameColor: string
+        SectionFrameColor: string
+    }
 
-    type internal WebGenerationState(movieSetting:MovieSetting) =
-        member val Html = HtmlGenerationState()
-        member val Animation = AnimationOptionsState(movieSetting)
-        member val SequenceDiagram = SequenceDiagramState()
+    [<RequireQualifiedAccess>]
+    module internal SequenceDiagramStyleState =
+        let Default = {
+            TopMargin = 40.0
+            LeftMargin = 40.0
+            VariableInterval = 150.0
+            SingleArrowLength = 37.5
+            VariableHeaderWidth = 50.0
+            VariableHeaderHeight = 20.0
+            LineWidth = 2.0
+            ActiveLineWidth = 10.0
+            FrameMargin = 10.0
+            TimeStep = 10.0
+            FrameBorder = 2.0
+            ActiveLineColor = "rgba(0, 191, 255, 0.5)"
+            LoopFrameColor = "rgb(255, 0, 0)"
+            BranchFrameColor = "rgb(0, 180, 0)"
+            SectionFrameColor = "rgb(127,0,255)"
+        }
 
     /// State owned by one code-generation operation.
     ///
@@ -325,7 +345,11 @@ namespace Aqualis
             GotoLabels: gotoLabelController
             Errors: errorIDController
             Debug: debugController
-            Web: WebGenerationState
+            Html: HtmlGenerationState
+            AnimationOptions: AnimationOptions
+            SequenceDiagramGate: obj
+            mutable SequenceDiagramStyle: SequenceDiagramStyleState
+            SequenceDiagramBuilder: SequenceDiagramBuilderState
         }
 
     type GenerationContext private
@@ -351,7 +375,11 @@ namespace Aqualis
                 GotoLabels = gotoLabelController()
                 Errors = errorIDController()
                 Debug = debugController()
-                Web = WebGenerationState(movieSetting)
+                Html = HtmlGenerationState()
+                AnimationOptions = AnimationOptions.create movieSetting
+                SequenceDiagramGate = obj()
+                SequenceDiagramStyle = SequenceDiagramStyleState.Default
+                SequenceDiagramBuilder = SequenceDiagramBuilderState()
             }
 
         new(programs:program list) =
@@ -429,7 +457,91 @@ namespace Aqualis
 
         member _.Debug = debug
 
-        member internal _.Web = state.Web
+        member internal _.NextContentsNumber() =
+            state.Html.NextContentsNumber()
+
+        member internal _.NextAnimationSequenceNumber() =
+            state.Html.NextAnimationSequenceNumber()
+
+        member internal _.NextAnimationGroupNumber() =
+            state.Html.NextAnimationGroupNumber()
+
+        member internal _.NextFigureNumber() =
+            state.Html.NextFigureNumber()
+
+        member internal _.NextAnimationNumber() =
+            state.Html.NextAnimationNumber()
+
+        member internal _.AnimationCount =
+            state.Html.AnimationCount
+
+        member internal _.AddAnimationButton(button) =
+            state.Html.AddAnimationButton(button)
+
+        member internal _.ClearAnimationButtons() =
+            state.Html.ClearAnimationButtons()
+
+        member internal _.TryLastAnimationButton() =
+            state.Html.TryLastAnimationButton()
+
+        member internal _.AddAudioFile(audioFile) =
+            state.Html.AddAudioFile(audioFile)
+
+        member internal _.AudioFiles =
+            state.Html.AudioFiles
+
+        member internal _.ContentsDirectory
+            with get() = state.Html.ContentsDirectory
+            and set value = state.Html.ContentsDirectory <- value
+
+        member internal _.CharacterEnabled =
+            state.AnimationOptions.CharacterEnabled
+
+        member internal _.SubtitleEnabled =
+            state.AnimationOptions.SubtitleEnabled
+
+        member internal _.VoiceEnabled =
+            state.AnimationOptions.VoiceEnabled
+
+        member internal _.SequenceDiagramStyle =
+            lock state.SequenceDiagramGate (fun () ->
+                state.SequenceDiagramStyle)
+
+        member internal _.SetSequenceDiagramStyle(style) =
+            lock state.SequenceDiagramGate (fun () ->
+                state.SequenceDiagramStyle <- style)
+
+        member internal _.TerminalLifeLine
+            with get() =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.TerminalLifeLine)
+            and set value =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.TerminalLifeLine <- value)
+
+        member internal _.SequenceVariables
+            with get() =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.Variables)
+            and set value =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.Variables <- value)
+
+        member internal _.SequenceFrames
+            with get() =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.Frames)
+            and set value =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.Frames <- value)
+
+        member internal _.SequenceBranches
+            with get() =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.Branches)
+            and set value =
+                lock state.SequenceDiagramGate (fun () ->
+                    state.SequenceDiagramBuilder.Branches <- value)
 
         member _.ForProgram(index:int) =
             if index < 0 || index >= state.Programs.Length then
@@ -472,17 +584,45 @@ namespace Aqualis
             (requireContext()).Debug
 
     module internal WebGenerationScope =
-        let state() =
-            (GenerationScope.requireContext()).Web
+        let private context() = GenerationScope.requireContext()
 
-        let html() =
-            (state()).Html
+        let nextContentsNumber() = (context()).NextContentsNumber()
+        let nextAnimationSequenceNumber() =
+            (context()).NextAnimationSequenceNumber()
+        let nextAnimationGroupNumber() =
+            (context()).NextAnimationGroupNumber()
+        let nextFigureNumber() = (context()).NextFigureNumber()
+        let nextAnimationNumber() = (context()).NextAnimationNumber()
+        let animationCount() = (context()).AnimationCount
+        let addAnimationButton button = (context()).AddAnimationButton(button)
+        let clearAnimationButtons() = (context()).ClearAnimationButtons()
+        let tryLastAnimationButton() =
+            (context()).TryLastAnimationButton()
+        let addAudioFile audioFile = (context()).AddAudioFile(audioFile)
+        let audioFiles() = (context()).AudioFiles
+        let contentsDirectory() = (context()).ContentsDirectory
+        let setContentsDirectory value =
+            (context()).ContentsDirectory <- value
 
-        let animation() =
-            (state()).Animation
+        let characterEnabled() = (context()).CharacterEnabled
+        let subtitleEnabled() = (context()).SubtitleEnabled
+        let voiceEnabled() = (context()).VoiceEnabled
 
-        let sequenceDiagram() =
-            (state()).SequenceDiagram
+        let sequenceDiagramStyle() = (context()).SequenceDiagramStyle
+        let setSequenceDiagramStyle style =
+            (context()).SetSequenceDiagramStyle(style)
+        let terminalLifeLine() = (context()).TerminalLifeLine
+        let setTerminalLifeLine value =
+            (context()).TerminalLifeLine <- value
+        let sequenceVariables() = (context()).SequenceVariables
+        let setSequenceVariables value =
+            (context()).SequenceVariables <- value
+        let sequenceFrames() = (context()).SequenceFrames
+        let setSequenceFrames value =
+            (context()).SequenceFrames <- value
+        let sequenceBranches() = (context()).SequenceBranches
+        let setSequenceBranches value =
+            (context()).SequenceBranches <- value
 
     [<AutoOpen>]
     module aqualisProgram =

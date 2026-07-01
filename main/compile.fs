@@ -416,8 +416,8 @@ namespace Aqualis
                             dir, projectname + "_body", HTMLSequenceDiagram
                         ]
                         <| fun () ->
-                            (WebGenerationScope.html()).ContentsDirectory <-
-                                dir + "\\" + "contents_" + projectname
+                            WebGenerationScope.setContentsDirectory(
+                                dir + "\\" + "contents_" + projectname)
                             switchBody <| fun () ->
                                 code()
                             let codeBody = switchBody <| fun () ->
