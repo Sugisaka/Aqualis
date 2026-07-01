@@ -197,6 +197,7 @@ namespace Aqualis
             member _.Dispose() =
                 (cwriter :> System.IDisposable).Dispose()
 
+    /// <summary>Specifies which presentation features are enabled for movie generation.</summary>
     type MovieSetting = {
         Character: Switch
         Subtitle: Switch
@@ -211,6 +212,7 @@ namespace Aqualis
             Voice = ON
         }
 
+    /// <summary>Stores synchronized mutable state used while generating HTML and animations.</summary>
     type internal HtmlGenerationState() =
         let gate = obj()
         let mutable contentsDirectory = ""
@@ -222,55 +224,68 @@ namespace Aqualis
         let animationButtons = ResizeArray<string * string * int * int>()
         let audioFiles = ResizeArray<string>()
 
+        /// <summary>Gets or sets the directory that receives generated web content.</summary>
         member _.ContentsDirectory
             with get() = lock gate (fun () -> contentsDirectory)
             and set value = lock gate (fun () -> contentsDirectory <- value)
 
+        /// <summary>Allocates the next unique HTML content number.</summary>
         member _.NextContentsNumber() =
             lock gate (fun () ->
                 contentsCounter <- contentsCounter + 1
                 contentsCounter)
 
+        /// <summary>Allocates the next unique animation sequence number.</summary>
         member _.NextAnimationSequenceNumber() =
             lock gate (fun () ->
                 animationSequenceCounter <- animationSequenceCounter + 1
                 animationSequenceCounter)
 
+        /// <summary>Allocates the next unique animation group number.</summary>
         member _.NextAnimationGroupNumber() =
             lock gate (fun () ->
                 animationGroupCounter <- animationGroupCounter + 1
                 animationGroupCounter)
 
+        /// <summary>Allocates the next unique animated figure number.</summary>
         member _.NextFigureNumber() =
             lock gate (fun () ->
                 figureCounter <- figureCounter + 1
                 figureCounter)
 
+        /// <summary>Allocates the next unique animation page number.</summary>
         member _.NextAnimationNumber() =
             lock gate (fun () ->
                 animationCounter <- animationCounter + 1
                 animationCounter)
 
+        /// <summary>Gets the number assigned to the most recently created animation page.</summary>
         member _.AnimationCount =
             lock gate (fun () -> animationCounter)
 
+        /// <summary>Registers the control button data for an animation.</summary>
         member _.AddAnimationButton(button) =
             lock gate (fun () -> animationButtons.Add(button))
 
+        /// <summary>Removes all registered animation control buttons.</summary>
         member _.ClearAnimationButtons() =
             lock gate animationButtons.Clear
 
+        /// <summary>Returns the most recently registered animation control button, if any.</summary>
         member _.TryLastAnimationButton() =
             lock gate (fun () ->
                 if animationButtons.Count = 0 then None
                 else Some animationButtons[animationButtons.Count - 1])
 
+        /// <summary>Registers an audio file referenced by the generated presentation.</summary>
         member _.AddAudioFile(audioFile:string) =
             lock gate (fun () -> audioFiles.Add(audioFile))
 
+        /// <summary>Gets a snapshot of the registered audio files.</summary>
         member _.AudioFiles =
             lock gate (fun () -> audioFiles |> Seq.toList)
 
+    /// <summary>Contains immutable feature options for animation generation.</summary>
     type internal AnimationOptions = {
         CharacterEnabled: bool
         SubtitleEnabled: bool
@@ -285,12 +300,18 @@ namespace Aqualis
             VoiceEnabled = (setting.Voice = ON)
         }
 
+    /// <summary>Stores mutable data accumulated while building a sequence diagram.</summary>
     type internal SequenceDiagramBuilderState() =
+        /// <summary>Gets or sets the current terminal position of the life lines.</summary>
         member val TerminalLifeLine = 100.0 with get, set
+        /// <summary>Gets or sets the variables already placed in the diagram.</summary>
         member val Variables: list<string * int * float> = [] with get, set
+        /// <summary>Gets or sets the active frame stack.</summary>
         member val Frames: list<float * float * float * float> = [] with get, set
+        /// <summary>Gets or sets the active branch stack.</summary>
         member val Branches: list<list<string * float>> = [] with get, set
 
+    /// <summary>Contains an immutable snapshot of sequence diagram rendering settings.</summary>
     type internal SequenceDiagramStyleState = {
         TopMargin: float
         LeftMargin: float
@@ -352,6 +373,7 @@ namespace Aqualis
             SequenceDiagramBuilder: SequenceDiagramBuilderState
         }
 
+    /// <summary>Provides the scoped state and active output program for one generation operation.</summary>
     type GenerationContext private
         (
             state:GenerationState,
@@ -361,6 +383,7 @@ namespace Aqualis
         ) =
         static let current = AsyncLocal<GenerationContext option>()
 
+        /// <summary>Creates the state shared by all scoped views of a generation context.</summary>
         static member private CreateState(programs:program list, movieSetting:MovieSetting) =
             let programArray = programs |> List.toArray
             if programArray.Length = 0 then
@@ -382,22 +405,28 @@ namespace Aqualis
                 SequenceDiagramBuilder = SequenceDiagramBuilderState()
             }
 
+        /// <summary>Creates a generation context using the default movie settings.</summary>
         new(programs:program list) =
             let state =
                 GenerationContext.CreateState(programs, MovieSetting.Default)
             GenerationContext(state, 0, state.Debug, false)
 
+        /// <summary>Creates a generation context using the specified movie settings.</summary>
         new(programs:program list, movieSetting:MovieSetting) =
             let state =
                 GenerationContext.CreateState(programs, movieSetting)
             GenerationContext(state, 0, state.Debug, false)
 
+        /// <summary>Gets the output programs owned by this generation operation.</summary>
         member _.Programs = state.Programs
 
+        /// <summary>Gets the index of the active output program for this scoped context.</summary>
         member _.CurrentIndex = currentIndex
 
+        /// <summary>Gets the active output program.</summary>
         member _.CurrentProgram = state.Programs[currentIndex]
 
+        /// <summary>Gets or sets whether generated code should display section information.</summary>
         member _.DisplaySection
             with get () =
                 System.Threading.Volatile.Read(&state.DisplaySection) <> 0
@@ -407,6 +436,7 @@ namespace Aqualis
                     if value then 1 else 0)
                 |> ignore
 
+        /// <summary>Gets or sets whether generated code uses OpenMP.</summary>
         member _.IsOpenMpUsed
             with get () =
                 System.Threading.Volatile.Read(&state.IsOpenMpUsed) <> 0
@@ -416,6 +446,7 @@ namespace Aqualis
                     if value then 1 else 0)
                 |> ignore
 
+        /// <summary>Gets or sets whether generated code uses OpenACC.</summary>
         member _.IsOpenAccUsed
             with get () =
                 System.Threading.Volatile.Read(&state.IsOpenAccUsed) <> 0
@@ -425,11 +456,14 @@ namespace Aqualis
                     if value then 1 else 0)
                 |> ignore
 
+        /// <summary>Gets whether the current scoped context is generating a parallel section.</summary>
         member _.IsParallelMode = parallelMode
 
+        /// <summary>Runs an operation in a child context with parallel mode enabled.</summary>
         member this.WithParallelMode(code: unit -> 'T) : 'T =
             GenerationContext(state, currentIndex, debug, true).Activate(code)
 
+        /// <summary>Runs an operation in a child context with the specified debug mode.</summary>
         member _.WithDebugMode(enabled:bool, code: unit -> 'T) : 'T =
             let scopedDebug = debugController()
             scopedDebug.setDebugMode enabled
@@ -439,78 +473,102 @@ namespace Aqualis
                 scopedDebug,
                 parallelMode).Activate(code)
 
+        /// <summary>Gets a snapshot of the registered function names.</summary>
         member _.Functions =
             lock state.Gate (fun () ->
                 state.Functions |> Seq.toList)
 
+        /// <summary>Registers a generated function name.</summary>
         member _.AddFunction(name:string) =
             lock state.Gate (fun () ->
                 state.Functions.Add(name))
 
+        /// <summary>Gets the registered function names without duplicates.</summary>
         member _.DistinctFunctions =
             lock state.Gate (fun () ->
                 state.Functions |> Seq.distinct |> Seq.toList)
 
+        /// <summary>Gets the goto-label allocator for this generation operation.</summary>
         member _.GotoLabels = state.GotoLabels
 
+        /// <summary>Gets the error identifier allocator for this generation operation.</summary>
         member _.Errors = state.Errors
 
+        /// <summary>Gets the debug controller for the current scoped context.</summary>
         member _.Debug = debug
 
+        /// <summary>Allocates the next unique HTML content number.</summary>
         member internal _.NextContentsNumber() =
             state.Html.NextContentsNumber()
 
+        /// <summary>Allocates the next unique animation sequence number.</summary>
         member internal _.NextAnimationSequenceNumber() =
             state.Html.NextAnimationSequenceNumber()
 
+        /// <summary>Allocates the next unique animation group number.</summary>
         member internal _.NextAnimationGroupNumber() =
             state.Html.NextAnimationGroupNumber()
 
+        /// <summary>Allocates the next unique animated figure number.</summary>
         member internal _.NextFigureNumber() =
             state.Html.NextFigureNumber()
 
+        /// <summary>Allocates the next unique animation page number.</summary>
         member internal _.NextAnimationNumber() =
             state.Html.NextAnimationNumber()
 
+        /// <summary>Gets the current animation page count.</summary>
         member internal _.AnimationCount =
             state.Html.AnimationCount
 
+        /// <summary>Registers animation control button data.</summary>
         member internal _.AddAnimationButton(button) =
             state.Html.AddAnimationButton(button)
 
+        /// <summary>Clears registered animation control button data.</summary>
         member internal _.ClearAnimationButtons() =
             state.Html.ClearAnimationButtons()
 
+        /// <summary>Returns the most recently registered animation control button, if any.</summary>
         member internal _.TryLastAnimationButton() =
             state.Html.TryLastAnimationButton()
 
+        /// <summary>Registers an audio file used by the generated presentation.</summary>
         member internal _.AddAudioFile(audioFile) =
             state.Html.AddAudioFile(audioFile)
 
+        /// <summary>Gets a snapshot of registered audio files.</summary>
         member internal _.AudioFiles =
             state.Html.AudioFiles
 
+        /// <summary>Gets or sets the directory used for generated web content.</summary>
         member internal _.ContentsDirectory
             with get() = state.Html.ContentsDirectory
             and set value = state.Html.ContentsDirectory <- value
 
+        /// <summary>Gets whether character images are enabled.</summary>
         member internal _.CharacterEnabled =
             state.AnimationOptions.CharacterEnabled
 
+        /// <summary>Gets whether subtitles are enabled.</summary>
         member internal _.SubtitleEnabled =
             state.AnimationOptions.SubtitleEnabled
 
+        /// <summary>Gets whether voice playback is enabled.</summary>
         member internal _.VoiceEnabled =
             state.AnimationOptions.VoiceEnabled
 
+        /// <summary>Gets the current immutable sequence diagram style snapshot.</summary>
         member internal _.SequenceDiagramStyle =
             lock state.SequenceDiagramGate (fun () ->
                 state.SequenceDiagramStyle)
 
+        /// <summary>Replaces the sequence diagram style as one synchronized operation.</summary>
         member internal _.SetSequenceDiagramStyle(style) =
             lock state.SequenceDiagramGate (fun () ->
                 state.SequenceDiagramStyle <- style)
 
+        /// <summary>Gets or sets the current terminal position of sequence diagram life lines.</summary>
         member internal _.TerminalLifeLine
             with get() =
                 lock state.SequenceDiagramGate (fun () ->
@@ -519,6 +577,7 @@ namespace Aqualis
                 lock state.SequenceDiagramGate (fun () ->
                     state.SequenceDiagramBuilder.TerminalLifeLine <- value)
 
+        /// <summary>Gets or sets the variables placed in the current sequence diagram.</summary>
         member internal _.SequenceVariables
             with get() =
                 lock state.SequenceDiagramGate (fun () ->
@@ -527,6 +586,7 @@ namespace Aqualis
                 lock state.SequenceDiagramGate (fun () ->
                     state.SequenceDiagramBuilder.Variables <- value)
 
+        /// <summary>Gets or sets the active sequence diagram frame stack.</summary>
         member internal _.SequenceFrames
             with get() =
                 lock state.SequenceDiagramGate (fun () ->
@@ -535,6 +595,7 @@ namespace Aqualis
                 lock state.SequenceDiagramGate (fun () ->
                     state.SequenceDiagramBuilder.Frames <- value)
 
+        /// <summary>Gets or sets the active sequence diagram branch stack.</summary>
         member internal _.SequenceBranches
             with get() =
                 lock state.SequenceDiagramGate (fun () ->
@@ -543,18 +604,22 @@ namespace Aqualis
                 lock state.SequenceDiagramGate (fun () ->
                     state.SequenceDiagramBuilder.Branches <- value)
 
+        /// <summary>Creates a scoped context that targets the output program at the specified index.</summary>
         member _.ForProgram(index:int) =
             if index < 0 || index >= state.Programs.Length then
                 invalidArg (nameof index) $"Program index {index} is outside the valid range."
             GenerationContext(state, index, debug, parallelMode)
 
+        /// <summary>Runs an operation against the specified output program under the context lock.</summary>
         member this.WithProgram(index: int, code: unit -> 'T) : 'T =
             lock state.Gate (fun () ->
                 this.ForProgram(index).Activate(code))
 
+        /// <summary>Runs an operation while holding the generation context lock.</summary>
         member internal _.Synchronize(code: unit -> 'T) =
             lock state.Gate code
 
+        /// <summary>Makes this context current for the duration of an operation.</summary>
         member this.Activate(code: unit -> 'T) : 'T =
             let previous = current.Value
             try
@@ -563,6 +628,7 @@ namespace Aqualis
             finally
                 current.Value <- previous
 
+        /// <summary>Gets the current asynchronous generation context, if one is active.</summary>
         static member TryCurrent = current.Value
 
     module internal GenerationScope =
