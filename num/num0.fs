@@ -118,7 +118,13 @@ namespace Aqualis
 
     ///<summary>変数（数値データ）クラス</summary>
     and num0(x:expr, ?context:GenerationContext) =
-        let context = defaultArg (context |> Option.map Some) GenerationContext.TryCurrent
+        let context =
+            match context with
+            |Some explicitContext -> Some explicitContext
+            |None ->
+                match x with
+                |Int _ |Dbl _ |Cpx _ -> None
+                |_ -> GenerationContext.TryCurrent
 
         member this.Expr with get() = x
 
