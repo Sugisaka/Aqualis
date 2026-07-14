@@ -22,11 +22,15 @@ type TextAnchor =
 type Setting3D = {DirX:double; DirY:double; DirZ:double; ScaleX:double; ScaleY:double; ScaleZ:double;}
 
 type gensvg =
-    static member header (cvx:double,cvy:double) = fun (wr:exprString->unit) a code ->
+    static member headerOpen (cvx:double,cvy:double,wr:exprString->unit) =
         wr <| st "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
         wr <| st("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 "+cvx.ToString("0.000")+" "+cvy.ToString("0.000")+"\" style=\"enable-background:new 0 0 "+cvx.ToString("0.000")+" "+cvy.ToString("0.000")+";\" xml:space=\"preserve\">")
-        code a
+    static member headerClose (wr:exprString->unit) =
         wr <| st "</svg>"
+    static member header (cvx:double,cvy:double) = fun (wr:exprString->unit) a code ->
+        gensvg.headerOpen(cvx,cvx,wr)
+        code a
+        gensvg.headerClose wr
         
     static member layer(wr:exprString -> unit,layername:string) = fun code ->
         wr <| st("<g id=\""+layername+"\">")
@@ -421,22 +425,37 @@ type gensvg =
     static member text(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,text:exprString,size:num0,fillcolor,strokecolor) =
         gensvg.text(cvx,cvy,wr,cx,cy,text,size,TimesNewRoman,Left,None,fillcolor,strokecolor)
         
-type svgfilemaker(cvx:double,cvy:double,wr:StreamWriter,scale:double) =
+type svgfilemaker(cvx:double,cvy:double,writer:StreamWriter,scale:double) =
     let wr (x:exprString) =
         let rec write (xx:exprString) =
             for x in xx.data do
                 match x with
-                |RStr s -> wr.Write s
+                |RStr s -> writer.Write s
                 |RNvr s -> 
                     let p = s.simp
                     match p with
-                    |Inv(_,Int s) -> wr.Write((-s).ToString())
-                    |Inv(_,Dbl s) -> wr.Write((-s).ToString "0.000")
-                    |Int s -> wr.Write(s.ToString())
-                    |Dbl s -> wr.Write(s.ToString "0.000")
+                    |Inv(_,Int s) -> writer.Write((-s).ToString())
+                    |Inv(_,Dbl s) -> writer.Write((-s).ToString "0.000")
+                    |Int s -> writer.Write(s.ToString())
+                    |Dbl s -> writer.Write(s.ToString "0.000")
                     |_ -> printfn "出力できない値です：%s" <| p.ToString()
         write x
-        wr.Write "\n"
+        writer.Write "\n"
+    /// <summary>
+    /// ファイルを閉じる
+    /// </summary>
+    member this.close() = writer.Close()
+    /// <summary>
+    /// ヘッダー部を開く
+    /// </summary>
+    member this.headerOpen() = gensvg.headerOpen(cvx,cvy,wr)
+    /// <summary>
+    /// ヘッダー部を閉じる
+    /// </summary>
+    member this.headerClose() = gensvg.headerClose wr
+    /// <summary>
+    /// ヘッダー部の書き込み
+    /// </summary>
     member internal this.header code = gensvg.header (cvx,cvy) wr this code
     /// <summary>
     /// レイヤーを追加
