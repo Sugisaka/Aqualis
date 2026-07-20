@@ -57,34 +57,54 @@ namespace Aqualis
                 
         ///<summary>構造体メンバがすべてそれ以前に定義された構造体となるようにソート</summary>
         member internal __.sort() =
-            //lst1：ソート済みリスト
-            //lst2：未ソートリスト
-            //lst0：検証対象のリスト
-            let rec sort (lst1:structmember list) (lst2:structmember list) (lst0:structmember list) =
-                //pに含まれる型名にp2に含まれていない型の構造体が入っているか検索
-                let rec search1 (p1:(Etype*VarType*string)list) (p2:structmember list) res =
-                    match p1 with
-                    |(Structure sname,_,_)::b when List.exists (fun (n:structmember)->sname=n.sname) p2 = false ->
-                        false
-                    |a::b ->
-                        search1 b p2 (res&&true)
-                    |[] ->
-                        res
-                match lst0 with
-                |[] when lst2.Length=0 ->
-                    //lst0を最後まで検証し、未ソートリストlst2が空になったとき
-                    //lst1：ソート済みのリスト
-                    lst1
-                |a::b when search1 a.memlist lst1 true ->
-                    //aに中にlst1で未定義の構造体が入っていない場合
-                    //lst1に追加して次を検証
-                    sort (lst1@[a]) lst2 b
-                |a::b ->
-                    //aに中にlst1で未定義の構造体が入っていない場合
-                    //lst2に追加して次を検証
-                    sort lst1 (lst2@[a]) b
-                |_ ->
-                    //lst0を最後まで検証し、未ソートリストlst2の要素が残っているとき
-                    //未ソート分をやり直し
-                    sort lst1 [] lst2
-            lock gate (fun () -> sort [] [] strlist)
+            lock gate (fun () ->
+                let structuresByName =
+                    strlist
+                    |> Seq.map (fun item -> item.sname, item)
+                    |> dict
+
+                // 1: visiting, 2: visited
+                let states =
+                    System.Collections.Generic.Dictionary<string,int>()
+                let sorted = ResizeArray<structmember>()
+
+                let dependencies (item:structmember) =
+                    item.memlist
+                    |> Seq.choose (fun (elementType,_,_) ->
+                        match elementType with
+                        |Structure dependencyName -> Some dependencyName
+                        |_ -> None)
+                    |> Seq.distinct
+                    |> Seq.toList
+
+                let rec visit path name =
+                    match states.TryGetValue name with
+                    |true,2 ->
+                        ()
+                    |true,1 ->
+                        let cycleStart =
+                            path
+                            |> List.tryFindIndex ((=) name)
+                            |> Option.defaultValue 0
+                        let cycle =
+                            (path |> List.skip cycleStart) @ [name]
+                        invalidOp (
+                            "Circular structure dependency detected: " +
+                            String.concat " -> " cycle)
+                    |_ ->
+                        match structuresByName.TryGetValue name with
+                        |false,_ ->
+                            invalidOp (
+                                $"Structure '{name}' is referenced but not defined.")
+                        |true,item ->
+                            states[name] <- 1
+                            let currentPath = path @ [name]
+                            for dependency in dependencies item do
+                                visit currentPath dependency
+                            states[name] <- 2
+                            sorted.Add item
+
+                for item in strlist do
+                    visit [] item.sname
+
+                sorted |> Seq.toList)
