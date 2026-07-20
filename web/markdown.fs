@@ -159,7 +159,7 @@ module markDown =
         allButLastAreSeparators cells
 
     let rec readmd (md:MarkDown<'a>) (rd:StreamReader) (stack:list<MarkDownContents>) (data:list<'a>) =
-        /// 閉じていないタグをすべて閉じる
+        // 閉じていないタグをすべて閉じる
         match rd.ReadLine() with
         |null -> 
             closeAllStack md data stack

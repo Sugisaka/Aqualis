@@ -187,6 +187,9 @@ namespace Aqualis
             member x.inc() = x <== x + 1
             ///<summary>デクリメント</summary>
             member x.dec() = x <== x - 1
+        type double0 with
+            ///<summary>近い整数値に変換</summary>
+            member this.round with get() = asm.toint <| asm.floor this+0.5
         type complex0 with
             ///<summary>実部</summary>
             member x.re with get() = double0(Re x.Expr)

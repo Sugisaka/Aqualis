@@ -13,18 +13,12 @@ namespace Aqualis
         new (typ,size,name,para) =
             (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
             double1(typ,Var1(size,name),?context=GenerationContext.TryCurrent)
+        new(a:int0,f:int0->double0) = double1(Dt,Arx1(a,fun i -> (f i).Expr))
+        new(a:int ,f:int0->double0) = double1(Dt,Arx1(I a,fun i -> (f i).Expr))
 
         override _.WrapScalar value = double0 value
         override _.Create(elementType,value) = double1(elementType,value)
         override _.AssignAt(index,value) = this[index] <== double0 value
-
-        static member fiarray(s1:int0,f:int0->int0) = double1(It 4,Arx1(s1,fun i -> (f i).Expr))
-        static member fdarray(s1:int0,f:int0->double0) = double1(Dt,Arx1(s1,fun i -> (f i).Expr))
-        static member fzarray(s1:int0,f:int0->complex0) = double1(Zt,Arx1(s1,fun i -> (f i).Expr))
-        static member fiarray(s1:int,f:int0->int0) = double1.fiarray(I s1,f)
-        static member fdarray(s1:int,f:int0->double0) = double1.fdarray(I s1,f)
-        static member fzarray(s1:int,f:int0->complex0) = double1.fzarray(I s1,f)
-
         override _.clear() = this.AssignScalar(D 0.0)
         override _.sizeinit() = this.size1 <== -1
 

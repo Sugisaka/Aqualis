@@ -237,23 +237,23 @@ namespace Aqualis
 
         ///<summary>加算</summary>
         static member ( + ) (x:int0,y:int0) = int0(Add(x%%y, x.Expr, y.Expr))
-        static member ( + ) (x:int0,y:double) = x + int0(Dbl y)
+        static member ( + ) (x:int0,y:double) = x + double0(Dbl y)
         static member ( + ) (x:int0,y:int) = x + int0(Int y)
-        static member ( + ) (x:double,y:int0) = int0(Dbl x) + y
+        static member ( + ) (x:double,y:int0) = double0(Dbl x) + y
         static member ( + ) (x:int,y:int0) = int0(Int x) + y
 
         ///<summary>減算</summary>
         static member ( - ) (x:int0,y:int0) = int0(Sub(x%%y, x.Expr, y.Expr))
-        static member ( - ) (x:int0,y:double) = x-int0(Dbl y)
+        static member ( - ) (x:int0,y:double) = x-double0(Dbl y)
         static member ( - ) (x:int0,y:int) = x-int0(Int y)
-        static member ( - ) (x:double,y:int0) = int0(Dbl x)-y
+        static member ( - ) (x:double,y:int0) = double0(Dbl x)-y
         static member ( - ) (x:int,y:int0) = int0(Int x)-y
 
         ///<summary>乗算</summary>
         static member ( * ) (x:int0,y:int0) = int0(Mul(x%%y, x.Expr, y.Expr))
-        static member ( * ) (x:int0,y:double) = x*int0(Dbl y)
+        static member ( * ) (x:int0,y:double) = x*double0(Dbl y)
         static member ( * ) (x:int0,y:int) = x*int0(Int y)
-        static member ( * ) (x:double,y:int0) = int0(Dbl x)*y
+        static member ( * ) (x:double,y:int0) = double0(Dbl x)*y
         static member ( * ) (x:int,y:int0) = int0(Int x)*y
 
         ///<summary>除算</summary>
@@ -387,8 +387,8 @@ namespace Aqualis
         static member ( ~- ) (x:double0) = double0(Inv(x.etype,x.Expr))
 
         ///<summary>加算</summary>
-        static member ( + ) (x:int0,y:double0) = double0(Add(Dt, x.Expr, y.Expr))
-        static member ( + ) (x:double0,y:int0) = double0(Add(Dt, x.Expr, y.Expr))
+        static member ( + ) (x:int0,y:double0):double0 = double0(Add(Dt, x.Expr, y.Expr))
+        static member ( + ) (x:double0,y:int0):double0 = double0(Add(Dt, x.Expr, y.Expr))
         static member ( + ) (x:double0,y:double0) = double0(Add(Dt, x.Expr, y.Expr))
         static member ( + ) (x:double0,y:double) = x + double0(Dbl y)
         static member ( + ) (x:double0,y:int) = x + double0(Int y)
@@ -396,8 +396,8 @@ namespace Aqualis
         static member ( + ) (x:int,y:double0) = double0(Int x) + y
 
         ///<summary>減算</summary>
-        static member ( - ) (x:int0,y:double0) = double0(Sub(Dt, x.Expr, y.Expr))
-        static member ( - ) (x:double0,y:int0) = double0(Sub(Dt, x.Expr, y.Expr))
+        static member ( - ) (x:int0,y:double0):double0 = double0(Sub(Dt, x.Expr, y.Expr))
+        static member ( - ) (x:double0,y:int0):double0 = double0(Sub(Dt, x.Expr, y.Expr))
         static member ( - ) (x:double0,y:double0) = double0(Sub(Dt, x.Expr, y.Expr))
         static member ( - ) (x:double0,y:double) = x-double0(Dbl y)
         static member ( - ) (x:double0,y:int) = x-double0(Int y)
@@ -405,8 +405,8 @@ namespace Aqualis
         static member ( - ) (x:int,y:double0) = double0(Int x)-y
 
         ///<summary>乗算</summary>
-        static member ( * ) (x:int0,y:double0) = double0(Mul(Dt, x.Expr, y.Expr))
-        static member ( * ) (x:double0,y:int0) = double0(Mul(Dt, x.Expr, y.Expr))
+        static member ( * ) (x:int0,y:double0):double0 = double0(Mul(Dt, x.Expr, y.Expr))
+        static member ( * ) (x:double0,y:int0):double0 = double0(Mul(Dt, x.Expr, y.Expr))
         static member ( * ) (x:double0,y:double0) = double0(Mul(Dt, x.Expr, y.Expr))
         static member ( * ) (x:double0,y:double) = x*double0(Dbl y)
         static member ( * ) (x:double0,y:int) = x*double0(Int y)
@@ -425,8 +425,18 @@ namespace Aqualis
         ///<summary>累乗</summary>
         static member powr(x:int0, y:double0) = double0(Pow(Dt, x.Expr, y.Expr))
         static member powr(x:double0, y:int0) = double0(Pow(Dt, x.Expr, y.Expr))
+        static member powr(x:double0, y:int) = double0(Pow(Dt, x.Expr, Int y))
+        static member powr(x:int, y:double0) = double0(Pow(Dt, Int x, y.Expr))
         static member powr(x:double0, y:double0) = double0(Pow(Dt, x.Expr, y.Expr))
+        static member powr(x:double0, y:double) = double0(Pow(Dt, x.Expr, Dbl y))
+        static member powr(x:double, y:double0) = double0(Pow(Dt, Dbl x, y.Expr))
+        static member ( .** ) (x:int0, y:double0) = double0(Pow(Dt, x.Expr, y.Expr))
+        static member ( .** ) (x:double0, y:int0) = double0(Pow(Dt, x.Expr, y.Expr))
+        static member ( .** ) (x:double0, y:int) = double0(Pow(Dt, x.Expr, Int y))
+        static member ( .** ) (x:int, y:double0) = double0(Pow(Dt, Int x, y.Expr))
         static member ( .** ) (x:double0, y:double0) = double0(Pow(Dt, x.Expr, y.Expr))
+        static member ( .** ) (x:double0, y:double) = double0(Pow(Dt, x.Expr, Dbl y))
+        static member ( .** ) (x:double, y:double0) = double0(Pow(Dt, Dbl x, y.Expr))
 
         ///<summary>等号</summary>
         static member (.=) (x:double0,y:double0) = bool0(Eq(x.Expr,y.Expr))
@@ -596,14 +606,22 @@ namespace Aqualis
 
         ///<summary>累乗</summary>
         static member powr(x:int0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
-        static member powr(x:double0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
         static member powr(x:complex0, y:int0) = complex0(Pow(Zt, x.Expr, y.Expr))
+        static member powr(x:double0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
         static member powr(x:complex0, y:double0) = complex0(Pow(Zt, x.Expr, y.Expr))
+        static member powr(x:int, y:complex0) = complex0(Pow(Zt, Int x, y.Expr))
+        static member powr(x:complex0, y:int) = complex0(Pow(Zt, x.Expr, Int y))
+        static member powr(x:double, y:complex0) = complex0(Pow(Zt, Dbl x, y.Expr))
+        static member powr(x:complex0, y:double) = complex0(Pow(Zt, x.Expr, Dbl y))
         static member powr(x:complex0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
         static member ( .** ) (x:int0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
-        static member ( .** ) (x:double0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
         static member ( .** ) (x:complex0, y:int0) = complex0(Pow(Zt, x.Expr, y.Expr))
+        static member ( .** ) (x:double0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
         static member ( .** ) (x:complex0, y:double0) = complex0(Pow(Zt, x.Expr, y.Expr))
+        static member ( .** ) (x:int, y:complex0) = complex0(Pow(Zt, Int x, y.Expr))
+        static member ( .** ) (x:complex0, y:int) = complex0(Pow(Zt, x.Expr, Int y))
+        static member ( .** ) (x:double, y:complex0) = complex0(Pow(Zt, Dbl x, y.Expr))
+        static member ( .** ) (x:complex0, y:double) = complex0(Pow(Zt, x.Expr, Dbl y))
         static member ( .** ) (x:complex0, y:complex0) = complex0(Pow(Zt, x.Expr, y.Expr))
 
         ///<summary>代入</summary>
@@ -678,6 +696,10 @@ namespace Aqualis
         static member (++) (a:exprString,b:double0) = a ++ exprString b
         static member (++) (a:exprString,b:complex0) = a ++ exprString b
         static member (++) (a:exprString,b:bool0) = a ++ exprString b
+        static member (++) (a:int,b:exprString) = int0(Int a) ++ b
+        static member (++) (a:exprString,b:int) = a ++ int0(Int b)
+        static member (++) (a:double,b:exprString) = double0(Dbl a) ++ b
+        static member (++) (a:exprString,b:double) = a ++ double0(Dbl b)
 
     [<AutoOpen>]
     module strExpr =

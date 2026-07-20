@@ -5,24 +5,14 @@ namespace Aqualis
         new(typ,size,name,para)=
             (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
             double2(typ,Var2(size,name),?context=GenerationContext.TryCurrent)
+        new(a:int0,b:int0,f:int0*int0->double0) = double2(Dt,Arx2(a, b, fun ij -> (f ij).Expr))
+        new(a:int ,b:int0,f:int0*int0->double0) = double2(Dt,Arx2(I a, b, fun ij -> (f ij).Expr))
+        new(a:int0,b:int ,f:int0*int0->double0) = double2(Dt,Arx2(a, I b, fun ij -> (f ij).Expr))
+        new(a:int ,b:int ,f:int0*int0->double0) = double2(Dt,Arx2(I a, I b, fun ij -> (f ij).Expr))
         override _.WrapScalar value=double0 value
         override _.WrapRow value=double1(typ,value)
         override _.Create(elementType,value)=double2(elementType,value)
         override _.AssignAt(i,j,value)=this[i,j] <== double0 value
-
-        static member fiarray(a:int0,b:int0,f:int0*int0->int0)=double2(It 4,Arx2(a,b,fun ij->(f ij).Expr))
-        static member fdarray(a:int0,b:int0,f:int0*int0->double0)=double2(Dt,Arx2(a,b,fun ij->(f ij).Expr))
-        static member fzarray(a:int0,b:int0,f:int0*int0->complex0)=double2(Zt,Arx2(a,b,fun ij->(f ij).Expr))
-        static member fiarray(a:int,b:int0,f)=double2.fiarray(I a,b,f)
-        static member fdarray(a:int,b:int0,f)=double2.fdarray(I a,b,f)
-        static member fzarray(a:int,b:int0,f)=double2.fzarray(I a,b,f)
-        static member fiarray(a:int0,b:int,f)=double2.fiarray(a,I b,f)
-        static member fdarray(a:int0,b:int,f)=double2.fdarray(a,I b,f)
-        static member fzarray(a:int0,b:int,f)=double2.fzarray(a,I b,f)
-        static member fiarray(a:int,b:int,f)=double2.fiarray(I a,I b,f)
-        static member fdarray(a:int,b:int,f)=double2.fdarray(I a,I b,f)
-        static member fzarray(a:int,b:int,f)=double2.fzarray(I a,I b,f)
-
         override _.clear()=this.AssignScalar(D 0.0)
         override _.sizeinit()=this.size1<== -1;this.size2<== -1
         static member (<==)(x:double2,y:double2)=x.AssignArray y
