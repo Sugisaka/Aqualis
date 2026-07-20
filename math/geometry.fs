@@ -22,13 +22,18 @@ namespace Aqualis
             static member ( * ) (a:double0,b:Point2) = new Point2(a*b.x, a*b.y)
             static member ( * ) (a:Point2,b:Point2) = a.x*b.x+a.y*b.y
 
-        type point2(name) =
+        type point2(sname_,name) =
+            inherit structureValue<point2>(sname_,name)
             static member sname = "point2"
+            new(name) =
+                str.reg(point2.sname,name)
+                point2(point2.sname,name)
             new(name,c) =
                 str.reg(point2.sname,name,c)
-                point2 name
-            member public __.x = str.d0(point2.sname, name, "x")
-            member public __.y = str.d0(point2.sname, name, "y")
+                point2(point2.sname,name)
+            override _.Rewrap n = point2(sname_,n)
+            member public __.x = str.d0(sname_,name,"x")
+            member public __.y = str.d0(sname_,name,"y")
             member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y)
             member public this.normalize() =
                 ch.d <| fun norm ->
@@ -57,20 +62,20 @@ namespace Aqualis
                 a.y <== b.y
             static member str_mem(psname, vname, name) =
                 str.addmember(psname,(Structure point2.sname,A0,name))
-                point2(str.mem(vname,name))
+                point2(point2.sname,str.mem(vname,name))
 
-        type point2_1(name,size1) =
-            inherit base1(point2.sname,size1,name)
+        type point2_1(sname_,name,size1) =
+            inherit structureArray1<point2,point2_1>(sname_,name,size1)
             //変数宣言を行う場合
             new(name,size1) =
                 str.reg(point2.sname,name,size1)
-                point2_1(name,A1 size1)
-            member this.Item with get(i:int0) = point2(this.Idx1(i).eval (GenerationScope.currentProgram()))
-            member this.Item with get(i:int ) = point2(this.Idx1(i).eval (GenerationScope.currentProgram()))
+                point2_1(point2.sname,name,A1 size1)
+            override _.WrapElement n = point2(sname_,n)
+            override _.Rewrap(n,v) = point2_1(sname_,n,v)
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
-            static member str_mem(sname, vname, name, size1) =
-                str.addmember(sname,(Structure sname,A1 size1,name))
-                point2_1(str.mem(vname,name),size1)
+            static member str_mem(psname, vname, name, size1) =
+                str.addmember(psname,(Structure point2.sname,A1 size1,name))
+                point2_1(point2.sname,str.mem(vname,name),A1 size1)
 
         /// 3次元ベクトル
         type Point3(x:double0,y:double0,z:double0) =
@@ -89,14 +94,16 @@ namespace Aqualis
             static member ( * ) (a:Point3,b:Point3) = a.x*b.x+a.y*b.y+a.z*b.z
             static member ( % ) (a:Point3,b:Point3) = new Point3(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x)
 
-        type point3(sname,name) =
+        type point3(sname_,name) =
+            inherit structureValue<point3>(sname_,name)
             static member sname = "point3"
             new(name) =
                 str.reg(point3.sname,name)
-                point3 name
-            member public __.x = str.d0(point3.sname, name, "x")
-            member public __.y = str.d0(point3.sname, name, "y")
-            member public __.z = str.d0(point3.sname, name, "z")
+                point3(point3.sname,name)
+            override _.Rewrap n = point3(sname_,n)
+            member public __.x = str.d0(sname_,name,"x")
+            member public __.y = str.d0(sname_,name,"y")
+            member public __.z = str.d0(sname_,name,"z")
             member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y+this.z*this.z)
             member public this.normalize() =
                 ch.d <| fun norm ->
@@ -126,15 +133,15 @@ namespace Aqualis
                 a.z <== b.z
             static member str_mem(psname, vname, name) =
                 str.addmember(psname,(Structure(point3.sname),A0,name))
-                point3(str.mem(vname,name))
+                point3(point3.sname,str.mem(vname,name))
 
-        type point3_1(sname,name,size1) =
-            inherit base1(point3.sname,size1,name)
+        type point3_1(sname_,name,size1) =
+            inherit structureArray1<point3,point3_1>(sname_,name,size1)
             new(name,size1) =
                 str.reg(point3.sname,name,size1)
                 point3_1(point3.sname,name,A1 size1)
-            member this.Item with get(i:int0) = point3(this.Idx1(i).eval ((GenerationScope.currentProgram())))
-            member this.Item with get(i:int ) = point3(this.Idx1(i).eval ((GenerationScope.currentProgram())))
+            override _.WrapElement n = point3(sname_,n)
+            override _.Rewrap(n,v) = point3_1(sname_,n,v)
 
         ///<summary>
         ///中心(x,y)、1辺の長さdの正方形領域に、中心(center_x,center_y)、半径radiusの円が占める割合を計算

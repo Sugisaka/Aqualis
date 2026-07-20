@@ -24,6 +24,7 @@
     <Compile Include="GenerationContextTests.fs" />
     <Compile Include="AssignmentTests.fs" />
     <Compile Include="NumericArrayGenericTests.fs" />
+    <Compile Include="GeometryCrtpTests.fs" />
     <Compile Include="ChTests.fs" />
     <Compile Include="GoldenFileTests.fs" />
     <Compile Include="MarkdownTests.fs" />
