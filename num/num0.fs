@@ -29,6 +29,10 @@ namespace Aqualis
             |RStr t -> Structure "string"
             |RNvr t -> t.etype
 
+    /// Common read-only representation of a scalar numeric expression.
+    type INum0 =
+        abstract member Code : string
+
 
     type bool0(x:expr, ?context:GenerationContext) =
         let context = defaultArg (context |> Option.map Some) GenerationContext.TryCurrent
@@ -201,6 +205,9 @@ namespace Aqualis
             |Some ctx -> x.eval ctx.CurrentProgram
             |None -> x.eval ((GenerationScope.currentProgram()))
 
+        interface INum0 with
+            member this.Code = this.code
+
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:int0,y:int0) =
             match x.etype,y.etype with
@@ -366,6 +373,9 @@ namespace Aqualis
             match context with
             |Some ctx -> x.eval ctx.CurrentProgram
             |None -> x.eval ((GenerationScope.currentProgram()))
+
+        interface INum0 with
+            member this.Code = this.code
 
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:double0,y:double0) =
@@ -545,6 +555,9 @@ namespace Aqualis
             match context with
             |Some ctx -> x.eval ctx.CurrentProgram
             |None -> x.eval ((GenerationScope.currentProgram()))
+
+        interface INum0 with
+            member this.Code = this.code
 
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:complex0,y:complex0) =

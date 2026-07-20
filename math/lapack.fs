@@ -826,6 +826,7 @@ namespace Aqualis
                                                         "&" + lwork.code + ", " +
                                                         rwork.code + ", " +
                                                         "&" + info.code + ");")
+                                                |_ -> ()
                                         |LaTeX ->
                                             writein("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                                         |HTML ->

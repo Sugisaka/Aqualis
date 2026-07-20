@@ -173,7 +173,8 @@ namespace Aqualis
             |Arx1(_,_),Arx1(_,_) ->
                 match context.CurrentProgram.language with
                 |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-        static member (<==) (v1:double1,v2:int1) = double1(v2.Etype,v2.Expr)
+        static member (<==) (v1:double1,v2:int1) = 
+            v1 <== double1(v2.Etype,v2.Expr)
 
         static member (<==) (v1:double1,v2:double0) =
             let context =

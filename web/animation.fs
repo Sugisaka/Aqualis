@@ -59,7 +59,7 @@ type Text = {
     /// 表示するテキスト
     str:string; }
 
-type MathText<'a> = {
+type MathText<'a when 'a :> INum0> = {
     /// 中心座標
     center:tposition;
     /// 表示する数式
@@ -232,7 +232,7 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
-            writein ("    e.innerHTML = \"\\\\(" + e.eq.code + "\\\\)\";")
+            writein ("    e.innerHTML = \"\\\\(" + (e.eq :> INum0).Code + "\\\\)\";")
             writein  "    MathJax.typeset();"
             writein ("    var x =" + (originX + e.center.X t).code+ ";")
             writein ("    var y =" + (originY + canvasY - e.center.Y t).code+ ";")
