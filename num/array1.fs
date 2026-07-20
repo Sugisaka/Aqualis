@@ -266,3 +266,152 @@ namespace Aqualis
                     b.IF (x.size1 .=/ y.size1) <| fun () ->
                         print.t ("ERROR"+(GenerationScope.errors()).ID+" array size (first index) mismatch")
                 ! "****************************************************"
+
+    /// Shared implementation for one-dimensional numeric arrays.
+    /// The self type preserves the public int1/double1/complex1 result type.
+    [<AbstractClass>]
+    type NumericArray1<'Scalar,'Self
+        when 'Scalar :> INum0
+        and 'Self :> NumericArray1<'Scalar,'Self>>
+        (typ:Etype, x:Expr1, ?context:GenerationContext) =
+        inherit base1(typ,x)
+
+        let context =
+            match context with
+            |Some value -> Some value
+            |None -> GenerationContext.TryCurrent
+
+        member _.Context = context
+        member _.etype = typ
+
+        abstract member WrapScalar : expr -> 'Scalar
+        abstract member Create : Etype * Expr1 -> 'Self
+        abstract member AssignAt : int0 * expr -> unit
+
+        member this.Item
+            with get(i:int0) = this.WrapScalar(this.Idx1 i)
+        member this.Item
+            with get(i:int) = this.WrapScalar(this.Idx1(I i))
+        member this.Item
+            with get(a:int0,b:int0) = this.Create(typ,this.Idx1(a,b))
+        member this.Item
+            with get(a:int0,b:int) = this.Create(typ,this.Idx1(a,b))
+        member this.Item
+            with get(a:int,b:int0) = this.Create(typ,this.Idx1(a,b))
+        member this.Item
+            with get(a:int,b:int) = this.Create(typ,this.Idx1(a,b))
+
+        member private this.New(etype, body) = this.Create(etype,Arx1(this.size1,body))
+
+        static member private Binary
+            (x:NumericArray1<'Scalar,'Self>, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
+            base1.sizeMismatchError(x,y)
+            x.New(x.etype%%y.etype, fun i -> make(x.etype%%y.etype,(x[i] :> INum0).Expr,(y[i] :> INum0).Expr))
+
+        static member private ScalarLeft
+            (scalar:INum0, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
+            y.New(scalar.Etype%%y.etype, fun i -> make(scalar.Etype%%y.etype,scalar.Expr,(y[i] :> INum0).Expr))
+
+        static member private ScalarRight
+            (x:NumericArray1<'Scalar,'Self>, scalar:INum0, make:Etype*expr*expr->expr) =
+            x.New(x.etype%%scalar.Etype, fun i -> make(x.etype%%scalar.Etype,(x[i] :> INum0).Expr,scalar.Expr))
+
+        static member private PrimitiveLeft
+            (etype:Etype, value:expr, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
+            y.New(etype%%y.etype, fun i -> make(etype%%y.etype,value,(y[i] :> INum0).Expr))
+
+        static member private PrimitiveRight
+            (x:NumericArray1<'Scalar,'Self>, etype:Etype, value:expr, make:Etype*expr*expr->expr) =
+            x.New(x.etype%%etype, fun i -> make(x.etype%%etype,(x[i] :> INum0).Expr,value))
+
+        static member (+) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
+            NumericArray1.Binary(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Add(t,a,b))
+        static member (+) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Add(t,a,b))
+
+        static member (-) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
+            NumericArray1.Binary(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Sub(t,a,b))
+        static member (-) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Sub(t,a,b))
+
+        static member (*) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
+            NumericArray1.Binary(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Mul(t,a,b))
+        static member (*) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Mul(t,a,b))
+
+        static member (/) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
+            NumericArray1.Binary(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Div(t,a,b))
+        static member (/) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Div(t,a,b))
+
+        member this.AssignArray(other:NumericArray1<'Scalar,'Self>) =
+            let ctx =
+                match context with
+                |Some left ->
+                    match other.Context with
+                    |Some right when not (obj.ReferenceEquals(left,right)) ->
+                        invalidOp "Values from different GenerationContext instances cannot be assigned."
+                    |_ -> left
+                |None -> invalidOp "The assignment target is not associated with a GenerationContext."
+            let writein text = ctx.CurrentProgram.codewritein text
+            base1.sizeMismatchError(this,other)
+            match this.Expr,other.Expr with
+            |Var1(_,left),Var1(_,right) ->
+                match ctx.CurrentProgram.language with
+                |Fortran|LaTeX -> writein(left+"="+right)
+                |HTML|HTMLSequenceDiagram -> writein(left+" \\leftarrow "+right)
+                |Python -> writein(left+" = copy.deepcopy("+right+")")
+                |C99|JavaScript|PHP -> iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
+                |Numeric -> ()
+            |_ -> iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
+
+        member this.AssignScalar(value:INum0) =
+            let ctx = context |> Option.defaultWith(fun()->invalidOp "The assignment target is not associated with a GenerationContext.")
+            match value.Context with
+            |Some right when not(obj.ReferenceEquals(ctx,right)) -> invalidOp "Values from different GenerationContext instances cannot be assigned."
+            |_ -> ()
+            let writein text = ctx.CurrentProgram.codewritein text
+            match this.Expr with
+            |Var1(_,name) ->
+                match ctx.CurrentProgram.language with
+                |Fortran|LaTeX -> writein(name+"="+value.Expr.eval ctx.CurrentProgram)
+                |HTML|HTMLSequenceDiagram -> writein(name+" \\leftarrow "+value.Expr.eval ctx.CurrentProgram)
+                |Python ->
+                    match typ with
+                    |Structure sname -> writein(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval ctx.CurrentProgram+"))], dtype=object)\n")
+                    |_ -> writein(name+"[:]="+value.Expr.eval ctx.CurrentProgram+"\n")
+                |C99|JavaScript|PHP -> iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)
+                |Numeric -> ()
+            |Arx1 _ -> iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)

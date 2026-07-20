@@ -355,3 +355,170 @@ namespace Aqualis
                     b.IF (x.size2 .=/ y.size2) <| fun () ->
                         print.t ("ERROR"+(GenerationScope.errors()).ID+" array size (second index) mismatch")
                 ! "****************************************************"
+
+    /// Shared implementation for two-dimensional numeric arrays.
+    [<AbstractClass>]
+    type NumericArray2<'Scalar,'Row,'Self
+        when 'Scalar :> INum0
+        and 'Self :> NumericArray2<'Scalar,'Row,'Self>>
+        (typ:Etype,x:Expr2,?context:GenerationContext) =
+        inherit base2(typ,x)
+
+        let context = defaultArg (context |> Option.map Some) GenerationContext.TryCurrent
+        member _.Context = context
+        member _.etype = typ
+        abstract member WrapScalar: expr -> 'Scalar
+        abstract member WrapRow: Expr1 -> 'Row
+        abstract member Create: Etype * Expr2 -> 'Self
+        abstract member AssignAt: int0 * int0 * expr -> unit
+
+        member this.Item with get(i:int0,j:int0) = this.WrapScalar(this.Idx2(i,j))
+        member this.Item with get(i:int0,j:int) = this.WrapScalar(this.Idx2(i,I j))
+        member this.Item with get(i:int,j:int0) = this.WrapScalar(this.Idx2(I i,j))
+        member this.Item with get(i:int,j:int) = this.WrapScalar(this.Idx2(I i,I j))
+        member this.Item with get(i:int0,(a:int0,b:int0)) = this.WrapRow(this.Idx2(i,(a,b)))
+        member this.Item with get(i:int0,(a:int0,b:int)) = this.WrapRow(this.Idx2(i,(a,I b)))
+        member this.Item with get(i:int0,(a:int,b:int0)) = this.WrapRow(this.Idx2(i,(I a,b)))
+        member this.Item with get(i:int0,(a:int,b:int)) = this.WrapRow(this.Idx2(i,(I a,I b)))
+        member this.Item with get(i:int0,_:unit) = this.WrapRow(this.Idx2(i,()))
+        member this.Item with get(i:int,(a:int0,b:int0)) = this.WrapRow(this.Idx2(I i,(a,b)))
+        member this.Item with get(i:int,(a:int0,b:int)) = this.WrapRow(this.Idx2(I i,(a,I b)))
+        member this.Item with get(i:int,(a:int,b:int0)) = this.WrapRow(this.Idx2(I i,(I a,b)))
+        member this.Item with get(i:int,(a:int,b:int)) = this.WrapRow(this.Idx2(I i,(I a,I b)))
+        member this.Item with get(i:int,_:unit) = this.WrapRow(this.Idx2(I i,()))
+        member this.Item with get((a:int0,b:int0),j:int0) = this.WrapRow(this.Idx2((a,b),j))
+        member this.Item with get((a:int0,b:int0),j:int) = this.WrapRow(this.Idx2((a,b),I j))
+        member this.Item with get((a:int0,b:int0),(c:int0,d:int0)) = this.Create(typ,this.Idx2((a,b),(c,d)))
+        member this.Item with get((a:int0,b:int0),(c:int0,d:int)) = this.Create(typ,this.Idx2((a,b),(c,I d)))
+        member this.Item with get((a:int0,b:int0),(c:int,d:int0)) = this.Create(typ,this.Idx2((a,b),(I c,d)))
+        member this.Item with get((a:int0,b:int0),(c:int,d:int)) = this.Create(typ,this.Idx2((a,b),(I c,I d)))
+        member this.Item with get((a:int0,b:int0),_:unit) = this.Create(typ,this.Idx2((a,b),()))
+        member this.Item with get((a:int0,b:int),j:int0) = this.WrapRow(this.Idx2((a,I b),j))
+        member this.Item with get((a:int0,b:int),j:int) = this.WrapRow(this.Idx2((a,I b),I j))
+        member this.Item with get((a:int0,b:int),(c:int0,d:int0)) = this.Create(typ,this.Idx2((a,I b),(c,d)))
+        member this.Item with get((a:int0,b:int),(c:int0,d:int)) = this.Create(typ,this.Idx2((a,I b),(c,I d)))
+        member this.Item with get((a:int0,b:int),(c:int,d:int0)) = this.Create(typ,this.Idx2((a,I b),(I c,d)))
+        member this.Item with get((a:int0,b:int),(c:int,d:int)) = this.Create(typ,this.Idx2((a,I b),(I c,I d)))
+        member this.Item with get((a:int0,b:int),_:unit) = this.Create(typ,this.Idx2((a,I b),()))
+        member this.Item with get((a:int,b:int0),j:int0) = this.WrapRow(this.Idx2((I a,b),j))
+        member this.Item with get((a:int,b:int0),j:int) = this.WrapRow(this.Idx2((I a,b),I j))
+        member this.Item with get((a:int,b:int0),(c:int0,d:int0)) = this.Create(typ,this.Idx2((I a,b),(c,d)))
+        member this.Item with get((a:int,b:int0),(c:int0,d:int)) = this.Create(typ,this.Idx2((I a,b),(c,I d)))
+        member this.Item with get((a:int,b:int0),(c:int,d:int0)) = this.Create(typ,this.Idx2((I a,b),(I c,d)))
+        member this.Item with get((a:int,b:int0),(c:int,d:int)) = this.Create(typ,this.Idx2((I a,b),(I c,I d)))
+        member this.Item with get((a:int,b:int0),_:unit) = this.Create(typ,this.Idx2((I a,b),()))
+        member this.Item with get((a:int,b:int),j:int0) = this.WrapRow(this.Idx2((I a,I b),j))
+        member this.Item with get((a:int,b:int),j:int) = this.WrapRow(this.Idx2((I a,I b),I j))
+        member this.Item with get((a:int,b:int),(c:int0,d:int0)) = this.Create(typ,this.Idx2((I a,I b),(c,d)))
+        member this.Item with get((a:int,b:int),(c:int0,d:int)) = this.Create(typ,this.Idx2((I a,I b),(c,I d)))
+        member this.Item with get((a:int,b:int),(c:int,d:int0)) = this.Create(typ,this.Idx2((I a,I b),(I c,d)))
+        member this.Item with get((a:int,b:int),(c:int,d:int)) = this.Create(typ,this.Idx2((I a,I b),(I c,I d)))
+        member this.Item with get((a:int,b:int),_:unit) = this.Create(typ,this.Idx2((I a,I b),()))
+        member this.Item with get(_:unit,j:int0) = this.WrapRow(this.Idx2((),j))
+        member this.Item with get(_:unit,j:int) = this.WrapRow(this.Idx2((),I j))
+        member this.Item with get(_:unit,(a:int0,b:int0)) = this.Create(typ,this.Idx2((),(a,b)))
+        member this.Item with get(_:unit,(a:int0,b:int)) = this.Create(typ,this.Idx2((),(a,I b)))
+        member this.Item with get(_:unit,(a:int,b:int0)) = this.Create(typ,this.Idx2((),(I a,b)))
+        member this.Item with get(_:unit,(a:int,b:int)) = this.Create(typ,this.Idx2((),(I a,I b)))
+
+        member private this.New(elementType,body) = this.Create(elementType,Arx2(this.size1,this.size2,body))
+        static member private Binary(x:NumericArray2<'Scalar,'Row,'Self>,y:NumericArray2<'Scalar,'Row,'Self>,make:Etype*expr*expr->expr) =
+            base2.sizeMismatchError(x,y)
+            x.New(x.etype%%y.etype,fun(i,j)->make(x.etype%%y.etype,(x[i,j]:>INum0).Expr,(y[i,j]:>INum0).Expr))
+        static member private ScalarLeft(value:INum0,y:NumericArray2<'Scalar,'Row,'Self>,make:Etype*expr*expr->expr) =
+            y.New(value.Etype%%y.etype,fun(i,j)->make(value.Etype%%y.etype,value.Expr,(y[i,j]:>INum0).Expr))
+        static member private ScalarRight(x:NumericArray2<'Scalar,'Row,'Self>,value:INum0,make:Etype*expr*expr->expr) =
+            x.New(x.etype%%value.Etype,fun(i,j)->make(x.etype%%value.Etype,(x[i,j]:>INum0).Expr,value.Expr))
+        static member private PrimitiveLeft(elementType,value,y:NumericArray2<'Scalar,'Row,'Self>,make:Etype*expr*expr->expr) =
+            y.New(elementType%%y.etype,fun(i,j)->make(elementType%%y.etype,value,(y[i,j]:>INum0).Expr))
+        static member private PrimitiveRight(x:NumericArray2<'Scalar,'Row,'Self>,elementType,value,make:Etype*expr*expr->expr) =
+            x.New(x.etype%%elementType,fun(i,j)->make(x.etype%%elementType,(x[i,j]:>INum0).Expr,value))
+
+        static member (+)(x:NumericArray2<'Scalar,'Row,'Self>,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.Binary(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:int0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:double0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:complex0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:int,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:double,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:NumericArray2<'Scalar,'Row,'Self>,y:int0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:NumericArray2<'Scalar,'Row,'Self>,y:double0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:NumericArray2<'Scalar,'Row,'Self>,y:complex0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:NumericArray2<'Scalar,'Row,'Self>,y:int)=NumericArray2.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Add(t,a,b))
+        static member (+)(x:NumericArray2<'Scalar,'Row,'Self>,y:double)=NumericArray2.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Add(t,a,b))
+
+        static member (-)(x:NumericArray2<'Scalar,'Row,'Self>,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.Binary(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:int0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:double0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:complex0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:int,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:double,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:NumericArray2<'Scalar,'Row,'Self>,y:int0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:NumericArray2<'Scalar,'Row,'Self>,y:double0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:NumericArray2<'Scalar,'Row,'Self>,y:complex0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:NumericArray2<'Scalar,'Row,'Self>,y:int)=NumericArray2.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Sub(t,a,b))
+        static member (-)(x:NumericArray2<'Scalar,'Row,'Self>,y:double)=NumericArray2.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Sub(t,a,b))
+
+        static member (*)(x:NumericArray2<'Scalar,'Row,'Self>,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.Binary(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:int0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:double0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:complex0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:int,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:double,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:NumericArray2<'Scalar,'Row,'Self>,y:int0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:NumericArray2<'Scalar,'Row,'Self>,y:double0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:NumericArray2<'Scalar,'Row,'Self>,y:complex0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:NumericArray2<'Scalar,'Row,'Self>,y:int)=NumericArray2.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Mul(t,a,b))
+        static member (*)(x:NumericArray2<'Scalar,'Row,'Self>,y:double)=NumericArray2.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Mul(t,a,b))
+
+        static member (/)(x:NumericArray2<'Scalar,'Row,'Self>,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.Binary(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:int0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:double0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:complex0,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:int,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:double,y:NumericArray2<'Scalar,'Row,'Self>)=NumericArray2.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:NumericArray2<'Scalar,'Row,'Self>,y:int0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:NumericArray2<'Scalar,'Row,'Self>,y:double0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:NumericArray2<'Scalar,'Row,'Self>,y:complex0)=NumericArray2.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:NumericArray2<'Scalar,'Row,'Self>,y:int)=NumericArray2.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Div(t,a,b))
+        static member (/)(x:NumericArray2<'Scalar,'Row,'Self>,y:double)=NumericArray2.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Div(t,a,b))
+
+        member this.AssignArray(other:NumericArray2<'Scalar,'Row,'Self>) =
+            let ctx =
+                match context with
+                |Some left ->
+                    match other.Context with
+                    |Some right when not(obj.ReferenceEquals(left,right))->invalidOp "Values from different GenerationContext instances cannot be assigned."
+                    |_ -> left
+                |None -> invalidOp "The assignment target is not associated with a GenerationContext."
+            let writein text=ctx.CurrentProgram.codewritein text
+            base2.sizeMismatchError(this,other)
+            let elementwise()=iter.num this.size1 <| fun i->iter.num this.size2 <| fun j->this.AssignAt(i,j,(other[i,j]:>INum0).Expr)
+            match this.Expr,other.Expr with
+            |Var2(_,left),Var2(_,right)->
+                match ctx.CurrentProgram.language with
+                |Fortran|LaTeX->writein(left+"="+right)
+                |HTML|HTMLSequenceDiagram->writein(left+" \\leftarrow "+right)
+                |Python->writein(left+" = copy.deepcopy("+right+")")
+                |C99|JavaScript|PHP->elementwise()
+                |Numeric->()
+            |_->elementwise()
+
+        member this.AssignScalar(value:INum0)=
+            let ctx=context|>Option.defaultWith(fun()->invalidOp "The assignment target is not associated with a GenerationContext.")
+            match value.Context with
+            |Some right when not(obj.ReferenceEquals(ctx,right))->invalidOp "Values from different GenerationContext instances cannot be assigned."
+            |_->()
+            let writein text=ctx.CurrentProgram.codewritein text
+            let elementwise()=iter.num this.size1 <| fun i->iter.num this.size2 <| fun j->this.AssignAt(i,j,value.Expr)
+            match this.Expr with
+            |Var2(_,name)->
+                match ctx.CurrentProgram.language with
+                |Fortran|LaTeX->writein(name+"="+value.Expr.eval ctx.CurrentProgram)
+                |HTML|HTMLSequenceDiagram->writein(name+" \\leftarrow "+value.Expr.eval ctx.CurrentProgram)
+                |Python->
+                    match typ with
+                    |Structure sname->writein(name+" = numpy.array([["+sname+"() for _ in range(int("+this.size2.Expr.eval ctx.CurrentProgram+"))] for _ in range(int("+this.size1.Expr.eval ctx.CurrentProgram+"))], dtype=object).reshape(int("+this.size1.Expr.eval ctx.CurrentProgram+"),int("+this.size2.Expr.eval ctx.CurrentProgram+"))\n")
+                    |_->writein(name+"[:,:]="+value.Expr.eval ctx.CurrentProgram+"\n")
+                |C99|JavaScript|PHP->elementwise()
+                |Numeric->()
+            |Arx2 _->elementwise()

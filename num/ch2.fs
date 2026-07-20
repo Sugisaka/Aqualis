@@ -8,93 +8,26 @@ namespace Aqualis
 
     [<AutoOpen>]
     module ch2 =
-        let private useTemporaryChar0 selectGenerator code =
+        let private useTemporary selectGenerator wrap code =
             let context = TemporaryVariableScope.requireContext()
             TemporaryVariableScope.useOne
                 (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> Var(Structure "char", name, NaN))
-                code
-        let private useTemporaryInt0 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> int0(Var(It 4, name, NaN), context=context))
+                (fun name -> wrap context name)
                 code
 
-        let private useTemporaryInt1 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> int1(It 4, Var1(A1 0, name), context=context))
-                code
-
-        let private useTemporaryInt2 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> int2(It 4, Var2(A2(0, 0), name), context=context))
-                code
-
-        let private useTemporaryInt3 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> int3(It 4, Var3(A3(0, 0, 0), name), context=context))
-                code
-        let private useTemporaryDouble0 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> double0(Var(Dt, name, NaN), context=context))
-                code
-
-        let private useTemporaryDouble1 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> double1(Dt, Var1(A1 0, name), context=context))
-                code
-
-        let private useTemporaryDouble2 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> double2(Dt, Var2(A2(0, 0), name), context=context))
-                code
-
-        let private useTemporaryDouble3 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> double3(Dt, Var3(A3(0, 0, 0), name), context=context))
-                code
-        let private useTemporaryComplex0 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> complex0(Var(Zt, name, NaN), context=context))
-                code
-
-        let private useTemporaryComplex1 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> complex1(Zt, Var1(A1 0, name), context=context))
-                code
-
-        let private useTemporaryComplex2 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> complex2(Zt, Var2(A2(0, 0), name), context=context))
-                code
-
-        let private useTemporaryComplex3 selectGenerator code =
-            let context = TemporaryVariableScope.requireContext()
-            TemporaryVariableScope.useOne
-                (fun () -> selectGenerator context.CurrentProgram)
-                (fun name -> complex3(Zt, Var3(A3(0, 0, 0), name), context=context))
-                code
+        let private useTemporaryChar0 select code = useTemporary select (fun _ name->Var(Structure "char",name,NaN)) code
+        let private useTemporaryInt0 select code = useTemporary select (fun ctx name->int0(Var(It 4,name,NaN),context=ctx)) code
+        let private useTemporaryInt1 select code = useTemporary select (fun ctx name->int1(It 4,Var1(A1 0,name),context=ctx)) code
+        let private useTemporaryInt2 select code = useTemporary select (fun ctx name->int2(It 4,Var2(A2(0,0),name),context=ctx)) code
+        let private useTemporaryInt3 select code = useTemporary select (fun ctx name->int3(It 4,Var3(A3(0,0,0),name),context=ctx)) code
+        let private useTemporaryDouble0 select code = useTemporary select (fun ctx name->double0(Var(Dt,name,NaN),context=ctx)) code
+        let private useTemporaryDouble1 select code = useTemporary select (fun ctx name->double1(Dt,Var1(A1 0,name),context=ctx)) code
+        let private useTemporaryDouble2 select code = useTemporary select (fun ctx name->double2(Dt,Var2(A2(0,0),name),context=ctx)) code
+        let private useTemporaryDouble3 select code = useTemporary select (fun ctx name->double3(Dt,Var3(A3(0,0,0),name),context=ctx)) code
+        let private useTemporaryComplex0 select code = useTemporary select (fun ctx name->complex0(Var(Zt,name,NaN),context=ctx)) code
+        let private useTemporaryComplex1 select code = useTemporary select (fun ctx name->complex1(Zt,Var1(A1 0,name),context=ctx)) code
+        let private useTemporaryComplex2 select code = useTemporary select (fun ctx name->complex2(Zt,Var2(A2(0,0),name),context=ctx)) code
+        let private useTemporaryComplex3 select code = useTemporary select (fun ctx name->complex3(Zt,Var3(A3(0,0,0),name),context=ctx)) code
 
         ///<summary>一時変数の生成と使用</summary>
         type ch with

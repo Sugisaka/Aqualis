@@ -16,8 +16,8 @@ let step = 2
 group.section 1 step <| fun () ->
     
     let res1 =
-        asm.dLet 2 <| fun x ->
-            asm.dLet 3 <| fun y ->
+        asm.dLet _2 <| fun x ->
+            asm.dLet _3 <| fun y ->
                 asm.dSum (1, 4) <| fun z -> (x+y)*z
                 
     let aqualis  = new AqualisBuilder<num0>()

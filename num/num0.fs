@@ -32,6 +32,34 @@ namespace Aqualis
     /// Common read-only representation of a scalar numeric expression.
     type INum0 =
         abstract member Code : string
+        abstract member Expr : expr
+        abstract member Etype : Etype
+        abstract member Context : GenerationContext option
+
+    /// Shared storage and generation-context behavior for scalar numeric types.
+    [<AbstractClass>]
+    type NumericScalar<'Self>(x:expr, ?context:GenerationContext) =
+        let context =
+            match context with
+            |Some explicitContext -> Some explicitContext
+            |None ->
+                match x with
+                |Int _ |Dbl _ |Cpx _ -> None
+                |_ -> GenerationContext.TryCurrent
+
+        member _.Expr = x
+        member _.Context = context
+        member _.etype = x.etype
+        member _.code =
+            match context with
+            |Some ctx -> x.eval ctx.CurrentProgram
+            |None -> x.eval(GenerationScope.currentProgram())
+
+        interface INum0 with
+            member this.Code = this.code
+            member this.Expr = this.Expr
+            member this.Etype = this.etype
+            member this.Context = this.Context
 
 
     type bool0(x:expr, ?context:GenerationContext) =
@@ -186,27 +214,7 @@ namespace Aqualis
 
     ///<summary>変数（数値データ）クラス</summary>
     and int0(x:expr, ?context:GenerationContext) =
-        let context =
-            match context with
-            |Some explicitContext -> Some explicitContext
-            |None ->
-                match x with
-                |Int _ |Dbl _ |Cpx _ -> None
-                |_ -> GenerationContext.TryCurrent
-
-        member this.Expr with get() = x
-
-        member _.Context = context
-
-        member this.etype with get() = x.etype
-
-        member this.code with get() =
-            match context with
-            |Some ctx -> x.eval ctx.CurrentProgram
-            |None -> x.eval ((GenerationScope.currentProgram()))
-
-        interface INum0 with
-            member this.Code = this.code
+        inherit NumericScalar<int0>(x,?context=context)
 
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:int0,y:int0) =
@@ -355,27 +363,7 @@ namespace Aqualis
         static member html (e:list<int0>) = "\\[\\begin{align}"+String.Join("\\\\",e |> List.map (fun f -> f.code))+"\\end{align}\\]"
     ///<summary>変数（数値データ）クラス</summary>
     and double0(x:expr, ?context:GenerationContext) =
-        let context =
-            match context with
-            |Some explicitContext -> Some explicitContext
-            |None ->
-                match x with
-                |Int _ |Dbl _ |Cpx _ -> None
-                |_ -> GenerationContext.TryCurrent
-
-        member this.Expr with get() = x
-
-        member _.Context = context
-
-        member this.etype with get() = x.etype
-
-        member this.code with get() =
-            match context with
-            |Some ctx -> x.eval ctx.CurrentProgram
-            |None -> x.eval ((GenerationScope.currentProgram()))
-
-        interface INum0 with
-            member this.Code = this.code
+        inherit NumericScalar<double0>(x,?context=context)
 
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:double0,y:double0) =
@@ -537,27 +525,7 @@ namespace Aqualis
         
     ///<summary>変数（数値データ）クラス</summary>
     and complex0(x:expr, ?context:GenerationContext) =
-        let context =
-            match context with
-            |Some explicitContext -> Some explicitContext
-            |None ->
-                match x with
-                |Int _ |Dbl _ |Cpx _ -> None
-                |_ -> GenerationContext.TryCurrent
-
-        member this.Expr with get() = x
-
-        member _.Context = context
-
-        member this.etype with get() = x.etype
-
-        member this.code with get() =
-            match context with
-            |Some ctx -> x.eval ctx.CurrentProgram
-            |None -> x.eval ((GenerationScope.currentProgram()))
-
-        interface INum0 with
-            member this.Code = this.code
+        inherit NumericScalar<complex0>(x,?context=context)
 
         ///<summary>優先度の高い型を選択</summary>
         static member ( %% ) (x:complex0,y:complex0) =
