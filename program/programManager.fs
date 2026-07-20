@@ -615,9 +615,20 @@ namespace Aqualis
             lock state.Gate (fun () ->
                 this.ForProgram(index).Activate(code))
 
+        /// <summary>
+        /// Runs one synchronous DSL-generation transaction under the context lock.
+        /// Concurrent transactions on the same context are serialized so that
+        /// temporary variables, indentation, and multi-statement blocks cannot
+        /// interleave. Do not wait for another transaction on this context from
+        /// inside the callback.
+        /// </summary>
+        member this.GenerateAtomically(code: unit -> 'T) : 'T =
+            lock state.Gate (fun () ->
+                this.Activate(code))
+
         /// <summary>Runs an operation while holding the generation context lock.</summary>
-        member internal _.Synchronize(code: unit -> 'T) =
-            lock state.Gate code
+        member internal this.Synchronize(code: unit -> 'T) =
+            this.GenerateAtomically(code)
 
         /// <summary>Makes this context current for the duration of an operation.</summary>
         member this.Activate(code: unit -> 'T) : 'T =

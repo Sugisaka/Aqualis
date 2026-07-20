@@ -337,3 +337,119 @@ module GenerationContextTests =
         Assert.Equal(expected, gotoIds |> Seq.distinct |> Seq.length)
         Assert.Equal(expected, contentsIds.Count)
         Assert.Equal(expected, contentsIds |> Seq.distinct |> Seq.length)
+
+    [<Fact>]
+    let ``atomic generation transactions keep DSL blocks contiguous`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "atomic-blocks.c" C99
+        let workerCount = 16
+        let linesPerWorker = 20
+
+        Array.init workerCount (fun worker ->
+            Task.Run(Action(fun () ->
+                context.GenerateAtomically(fun () ->
+                    writein $"begin-{worker}"
+                    for index in 1..linesPerWorker do
+                        writein $"line-{worker}-{index}"
+                        System.Threading.Thread.Yield() |> ignore
+                    writein $"end-{worker}"))))
+        |> Task.WaitAll
+
+        context.CurrentProgram.close()
+
+        let lines =
+            System.IO.File.ReadAllLines(
+                System.IO.Path.Combine(output.Path, "atomic-blocks.c"))
+
+        let mutable position = 0
+        let observedWorkers = ResizeArray<int>()
+        while position < lines.Length do
+            let worker = Int32.Parse(lines[position].Substring("begin-".Length))
+            observedWorkers.Add worker
+            position <- position + 1
+            for index in 1..linesPerWorker do
+                Assert.Equal($"line-{worker}-{index}", lines[position])
+                position <- position + 1
+            Assert.Equal($"end-{worker}", lines[position])
+            position <- position + 1
+
+        Assert.Equal(workerCount, observedWorkers.Count)
+        Assert.Equal(workerCount, observedWorkers |> Seq.distinct |> Seq.length)
+
+    [<Fact>]
+    let ``atomic generation transaction releases its lock after an exception`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "atomic-exception.c" C99
+
+        context.Activate(fun () ->
+            Assert.Throws<InvalidOperationException>(Action(fun () ->
+                context.GenerateAtomically(fun () ->
+                    Assert.Same(context, GenerationContext.TryCurrent.Value)
+                    invalidOp "expected")))
+            |> ignore
+
+            context.GenerateAtomically(fun () ->
+                Assert.Same(context, GenerationContext.TryCurrent.Value)
+                context.GenerateAtomically(fun () ->
+                    Assert.Same(context, GenerationContext.TryCurrent.Value)
+                    writein "after-exception")))
+
+        context.CurrentProgram.close()
+
+        let generated =
+            System.IO.File.ReadAllText(
+                System.IO.Path.Combine(output.Path, "atomic-exception.c"))
+        Assert.Contains("after-exception", generated)
+
+    [<Fact>]
+    let ``temporary variable leases are unique during unsynchronized concurrent access`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "concurrent-temporaries.c" C99
+        let active =
+            System.Collections.Concurrent.ConcurrentDictionary<string,int>()
+        let mutable collisions = 0
+
+        Array.init 200 (fun _ ->
+            Task.Run(Action(fun () ->
+                context.Activate(fun () ->
+                    ch.d (fun value ->
+                        let count =
+                            active.AddOrUpdate(
+                                value.code,
+                                1,
+                                fun _ current -> current + 1)
+                        if count > 1 then
+                            System.Threading.Interlocked.Increment(&collisions)
+                            |> ignore
+                        System.Threading.Thread.Sleep 1
+                        active.AddOrUpdate(
+                            value.code,
+                            0,
+                            fun _ current -> current - 1)
+                        |> ignore)))))
+        |> Task.WaitAll
+
+        context.CurrentProgram.close()
+        Assert.Equal(0, collisions)
+
+    [<Fact>]
+    let ``shared collectors retain concurrent additions`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "concurrent-collectors.c" C99
+        let itemCount = 200
+
+        Array.init itemCount (fun index ->
+            Task.Run(Action(fun () ->
+                context.Activate(fun () ->
+                    let name = $"item-{index}"
+                    context.CurrentProgram.hlist.add name
+                    context.CurrentProgram.var.setUniqVar(It 4, A0, name, "")
+                    context.CurrentProgram.arg.add(name, (It 4, A0, name))
+                    context.CurrentProgram.str.addstructure name))))
+        |> Task.WaitAll
+
+        context.CurrentProgram.close()
+
+        Assert.Equal(itemCount, context.CurrentProgram.hlist.list.Length)
+        Assert.Equal(itemCount, context.CurrentProgram.var.list.Length)
+        Assert.Equal(itemCount, context.CurrentProgram.arg.list.Length)

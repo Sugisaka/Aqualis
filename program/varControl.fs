@@ -10,6 +10,7 @@ namespace Aqualis
     open System.IO
     
     type varGenerator(h:int->string) =
+        let gate = obj()
         let mutable offlineNumList:list<int> = []
         let mutable onlineNumList:list<int> = []
         let mutable offlineStrList:list<string> = []
@@ -17,93 +18,107 @@ namespace Aqualis
         let mutable autoVarCounter = 0
         member _.getVar() =
             let varname,num =
-                match offlineNumList with
-                |a::b ->
-                    offlineNumList <- b
-                    onlineNumList <- a::onlineNumList
-                    h a, a
-                |[] ->
-                    autoVarCounter <- autoVarCounter + 1
-                    let v = h autoVarCounter
-                    onlineNumList <- autoVarCounter::onlineNumList
-                    v,autoVarCounter
+                lock gate (fun () ->
+                    match offlineNumList with
+                    |a::b ->
+                        offlineNumList <- b
+                        onlineNumList <- a::onlineNumList
+                        h a, a
+                    |[] ->
+                        autoVarCounter <- autoVarCounter + 1
+                        let v = h autoVarCounter
+                        onlineNumList <- autoVarCounter::onlineNumList
+                        v,autoVarCounter)
             let returnVar() =
-                onlineNumList <- List.filter (fun x -> x <> num) onlineNumList
-                offlineNumList <- num::offlineNumList
+                lock gate (fun () ->
+                    if List.contains num onlineNumList then
+                        onlineNumList <- List.filter (fun x -> x <> num) onlineNumList
+                        offlineNumList <- num::offlineNumList)
             varname,returnVar
         member _.getVarAndCounter() =
-            let varname,num =
-                match offlineNumList with
-                |a::b ->
-                    offlineNumList <- b
-                    onlineNumList <- a::onlineNumList
-                    h a, a
-                |[] ->
-                    let v = h autoVarCounter
-                    onlineNumList <- autoVarCounter::onlineNumList
-                    autoVarCounter <- autoVarCounter + 1
-                    v,autoVarCounter
+            let varname,num,counter =
+                lock gate (fun () ->
+                    match offlineNumList with
+                    |a::b ->
+                        offlineNumList <- b
+                        onlineNumList <- a::onlineNumList
+                        h a, a, a
+                    |[] ->
+                        let v = h autoVarCounter
+                        let num = autoVarCounter
+                        onlineNumList <- num::onlineNumList
+                        autoVarCounter <- autoVarCounter + 1
+                        v,num,autoVarCounter)
             let returnVar() =
-                onlineNumList <- List.filter (fun x -> x <> num) onlineNumList
-                offlineNumList <- num::offlineNumList
-            varname,num,returnVar
+                lock gate (fun () ->
+                    if List.contains num onlineNumList then
+                        onlineNumList <- List.filter (fun x -> x <> num) onlineNumList
+                        offlineNumList <- num::offlineNumList)
+            varname,counter,returnVar
         member this.isVarExist(v:string) =
-            List.tryFind (fun x -> x=v) onlineStrList, List.tryFind (fun x -> x=v) offlineStrList, List.tryFind (fun (x:int) -> h x = v) onlineNumList, List.tryFind (fun (x:int) -> h x = v) offlineNumList
+            lock gate (fun () ->
+                List.tryFind (fun x -> x=v) onlineStrList,
+                List.tryFind (fun x -> x=v) offlineStrList,
+                List.tryFind (fun (x:int) -> h x = v) onlineNumList,
+                List.tryFind (fun (x:int) -> h x = v) offlineNumList)
         member this.varName(x:int) = h x
-        member this.maxcounter with get() = autoVarCounter
-        member this.varList with get() = offlineStrList@([1..autoVarCounter] |> List.map (fun a -> h a))        
-        member this.OfflineNumList with get() = offlineNumList
-        member this.OnlineNumList with get() = onlineNumList
-        member this.OfflineStrList with get() = offlineStrList
-        member this.OnlineStrList with get() = onlineStrList
-        member this.addOfflineStrList(v:string) = offlineStrList <- v::offlineStrList
-        member this.addOnlineStrList(v:string) = onlineStrList <- v::onlineStrList
-        member this.removeOfflineNumList(v:int) = offlineNumList <- List.filter (fun x -> x <> v) offlineNumList
-        member this.removeOnlineNumList(v:int) = onlineNumList <- List.filter (fun x -> x <> v) onlineNumList
-        member this.removeOfflineStrList(v:string) = offlineStrList <- List.filter (fun x -> x <> v) offlineStrList
-        member this.removeOnlineStrList(v:string) = onlineStrList <- List.filter (fun x -> x <> v) onlineStrList
+        member this.maxcounter with get() = lock gate (fun () -> autoVarCounter)
+        member this.varList with get() = lock gate (fun () -> offlineStrList@([1..autoVarCounter] |> List.map (fun a -> h a)))
+        member this.OfflineNumList with get() = lock gate (fun () -> offlineNumList)
+        member this.OnlineNumList with get() = lock gate (fun () -> onlineNumList)
+        member this.OfflineStrList with get() = lock gate (fun () -> offlineStrList)
+        member this.OnlineStrList with get() = lock gate (fun () -> onlineStrList)
+        member this.addOfflineStrList(v:string) = lock gate (fun () -> offlineStrList <- v::offlineStrList)
+        member this.addOnlineStrList(v:string) = lock gate (fun () -> onlineStrList <- v::onlineStrList)
+        member this.removeOfflineNumList(v:int) = lock gate (fun () -> offlineNumList <- List.filter (fun x -> x <> v) offlineNumList)
+        member this.removeOnlineNumList(v:int) = lock gate (fun () -> onlineNumList <- List.filter (fun x -> x <> v) onlineNumList)
+        member this.removeOfflineStrList(v:string) = lock gate (fun () -> offlineStrList <- List.filter (fun x -> x <> v) offlineStrList)
+        member this.removeOnlineStrList(v:string) = lock gate (fun () -> onlineStrList <- List.filter (fun x -> x <> v) onlineStrList)
         
     ///<summary>重複なしリスト</summary>
     type UniqueList() =
+        let gate = obj()
         ///<summary>リスト</summary>
         let mutable ulist:list<string> = []
         ///<summary>リストをクリア</summary>
         member _.clear() =
-            ulist <- []
+            lock gate (fun () -> ulist <- [])
         ///<summary>リストに項目追加</summary>
         member _.add(s:string) =
-            match List.exists (fun t -> t=s) ulist with
-            |true -> ()
-            |false -> ulist <- ulist@[s]
+            lock gate (fun () ->
+                match List.exists (fun t -> t=s) ulist with
+                |true -> ()
+                |false -> ulist <- ulist@[s])
         ///<summary>リスト</summary>
-        member _.list with get() = ulist
+        member _.list with get() = lock gate (fun () -> ulist)
         
     ///<summary>インデントの設定</summary>
     type IndentController(indentsize:int) =
+        let gate = obj()
         let mutable indentposition = 0
-        member _.inc() = indentposition <- indentposition + 1
-        member _.dec() = indentposition <- indentposition - 1
-        member _.clear() = indentposition <- 0
-        member _.space with get() = String(' ', indentsize*indentposition)
+        member _.inc() = lock gate (fun () -> indentposition <- indentposition + 1)
+        member _.dec() = lock gate (fun () -> indentposition <- indentposition - 1)
+        member _.clear() = lock gate (fun () -> indentposition <- 0)
+        member _.space with get() = lock gate (fun () -> String(' ', indentsize*indentposition))
         
     ///<summary>数値から文字列変換時のフォーマット管理</summary>
     type numericFormatController(lang:Language) =
-        
+        let gate = obj()
         let mutable int_string_format = 12
         
         let mutable double_string_format = 27,17
         
         ///<summary>整数型を文字列に変換するときの桁数</summary>
-        member this.iFormat with get() = int_string_format
+        member this.iFormat with get() = lock gate (fun () -> int_string_format)
         
         ///<summary>整数型を文字列に変換するときの桁数</summary>
-        member this.setIFormat n = int_string_format <- n
+        member this.setIFormat n = lock gate (fun () -> int_string_format <- n)
         
         ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
-        member this.dFormat with get() = double_string_format
+        member this.dFormat with get() = lock gate (fun () -> double_string_format)
         
         ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
-        member this.setDFormat(n,m) = double_string_format <- n,m
+        member this.setDFormat(n,m) = lock gate (fun () -> double_string_format <- n,m)
 
         ///<summary>int型の数値を文字列に変換</summary>
         member fmt.ItoS(n:int) = 
@@ -478,40 +493,48 @@ namespace Aqualis
                 lock gate disposeWriter
         
     type argumentController(lang:Language) =
-        
+        let gate = obj()
+        let mutable arguments:(string*(Etype*VarType*string)) list = []
         ///<summary>この関数の引数リスト： 関数呼び出しに与えられた変数名,(関数内での変数情報)</summary>
-        member val list : (string*(Etype*VarType*string)) list = [] with get,set
+        member _.list
+            with get() = lock gate (fun () -> arguments)
+            and set value = lock gate (fun () -> arguments <- value)
         
         ///<summary>関数の引数を追加</summary>
-        member this.add x = this.list <- this.list@[x]
+        member _.add x = lock gate (fun () -> arguments <- arguments@[x])
         
     ///<summary>変数管理</summary>
     type varCollector(lang:Language) =
+        let gate = obj()
         ///<summary>型名,変数名,定数</summary>
         let mutable vlist:list<Etype*VarType*string*string> = []
         ///<summary>リスト</summary>
-        member _.list with get() = vlist
+        member _.list with get() = lock gate (fun () -> vlist)
         member _.clear() =
-            vlist <- []
+            lock gate (fun () -> vlist <- [])
         ///<summary>変数が存在するか検証</summary>
         member _.exists(name_:string) =
-            List.exists (fun (etyp,atyp,name,cst) -> name_=name) vlist
+            lock gate (fun () ->
+                List.exists (fun (etyp,atyp,name,cst) -> name_=name) vlist)
         ///<summary>変数が存在するか検証</summary>
         member _.exists(etyp_,atyp_,name_,cst_) =
-            List.exists (fun (etyp,atyp,name,cst) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist
+            lock gate (fun () ->
+                List.exists (fun (etyp,atyp,name,cst) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist)
         ///<summary>重複に関係なく変数を登録</summary>
         member _.setVar(etyp,atyp,name,cst) =
-            vlist <- (etyp,atyp,name,cst)::vlist
+            lock gate (fun () -> vlist <- (etyp,atyp,name,cst)::vlist)
         ///<summary>同名の変数が登録済みの場合は変数を登録しない</summary>
         member this.setUniqVar(etyp,atyp,name,cst) =
-            if not (this.exists(etyp,atyp,name,cst)) then
-                vlist <- (etyp,atyp,name,cst)::vlist //(etyp,atyp,name,cst)をvlistの先頭部分に追加する。
+            lock gate (fun () ->
+                if not (List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist) then
+                    vlist <- (etyp,atyp,name,cst)::vlist) //(etyp,atyp,name,cst)をvlistの先頭部分に追加する。
         ///<summary>同名の変数が登録済みの場合は変数を登録せずに警告を表示</summary>
         member this.setUniqVarWarning(etyp,atyp,name,cst) =
-            if this.exists(etyp,atyp,name,cst) then
-                printfn "%s" ("変数「" + name + "」が複数定義されています")
-            else
-                vlist <- (etyp,atyp,name,cst)::vlist
+            lock gate (fun () ->
+                if List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist then
+                    printfn "%s" ("変数「" + name + "」が複数定義されています")
+                else
+                    vlist <- (etyp,atyp,name,cst)::vlist)
                 
         ///<summary>変数の型名を文字列に変換</summary>
         member __.Stype typ = 

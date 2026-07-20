@@ -8,47 +8,52 @@ namespace Aqualis
     
     ///<summary>構造体sname_のメンバ変数を管理</summary>
     type structmember (sname_:string) =
+        let gate = obj()
         let mutable memlist_:(Etype*VarType*string)list = []
         ///<summary>メンバ変数を追加</summary>
         member __.add(typ,vtp,name) =
-            if List.exists(fun (typ_,vtp_,name_) -> typ_=typ && vtp_=vtp && name_=name) memlist_ = false then
-                memlist_ <- (typ,vtp,name)::memlist_
-                match vtp with
-                |A0 -> ()
-                |A1 _ -> memlist_ <- (It 4,A1 1,name+"_size")::memlist_
-                |A2 _ -> memlist_ <- (It 4,A1 2,name+"_size")::memlist_
-                |A3 _ -> memlist_ <- (It 4,A1 3,name+"_size")::memlist_
+            lock gate (fun () ->
+                if List.exists(fun (typ_,vtp_,name_) -> typ_=typ && vtp_=vtp && name_=name) memlist_ = false then
+                    memlist_ <- (typ,vtp,name)::memlist_
+                    match vtp with
+                    |A0 -> ()
+                    |A1 _ -> memlist_ <- (It 4,A1 1,name+"_size")::memlist_
+                    |A2 _ -> memlist_ <- (It 4,A1 2,name+"_size")::memlist_
+                    |A3 _ -> memlist_ <- (It 4,A1 3,name+"_size")::memlist_)
                 
         ///<summary>構造体名</summary>
         member __.sname with get() = sname_
-        member __.memlist with get() = memlist_
+        member __.memlist with get() = lock gate (fun () -> memlist_)
         
     ///<summary>構造体を管理</summary>
     type structure () =
+        let gate = obj()
         ///<summary>定義された構造体リスト</summary>
         let mutable strlist:structmember list = []
         
-        member this.clear() = strlist <- []
+        member this.clear() = lock gate (fun () -> strlist <- [])
         
         ///<summary>構造体を追加</summary>
         member __.addstructure sname =
-            //構造体が未定義の場合はリストに追加
-            if strlist |> List.exists(fun s -> s.sname=sname) = false then
-                strlist <- structmember sname::strlist
+            lock gate (fun () ->
+                //構造体が未定義の場合はリストに追加
+                if strlist |> List.exists(fun s -> s.sname=sname) = false then
+                    strlist <- structmember sname::strlist)
         
         ///<summary>構造体メンバ変数を追加</summary>
         member this.addmember(sname,(typ,vtp,name)) =
-            // 追加するメンバ変数の型が構造体の場合、その構造体定義も追加
-            match typ with
-            |Structure s ->
-                this.addstructure s
-            |_ ->
-                ()
-            match strlist |> List.tryFindIndex (fun s -> s.sname=sname) with
-            |Some i ->
-                strlist.[i].add(typ,vtp,name)
-            |None ->
-                ()
+            lock gate (fun () ->
+                // 追加するメンバ変数の型が構造体の場合、その構造体定義も追加
+                match typ with
+                |Structure s ->
+                    this.addstructure s
+                |_ ->
+                    ()
+                match strlist |> List.tryFindIndex (fun s -> s.sname=sname) with
+                |Some i ->
+                    strlist.[i].add(typ,vtp,name)
+                |None ->
+                    ())
                 
         ///<summary>構造体メンバがすべてそれ以前に定義された構造体となるようにソート</summary>
         member internal __.sort() =
@@ -82,4 +87,4 @@ namespace Aqualis
                     //lst0を最後まで検証し、未ソートリストlst2の要素が残っているとき
                     //未ソート分をやり直し
                     sort lst1 [] lst2
-            sort [] [] strlist
+            lock gate (fun () -> sort [] [] strlist)
