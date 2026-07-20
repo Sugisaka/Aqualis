@@ -8,20 +8,25 @@ namespace Aqualis
 
     module internal ShellCommand =
         let private quoteArgument (value:string) =
+            if isNull value then
+                nullArg (nameof value)
+            if value.IndexOf '\u0000' >= 0 then
+                invalidArg (nameof value) "A shell argument cannot contain NUL."
+
             let isSafe character =
                 System.Char.IsLetterOrDigit character ||
                 "_-./:=+@%,".Contains character
 
-            if value |> Seq.forall isSafe then
+            if value <> "" && value |> Seq.forall isSafe then
                 value
             else
-                "\"" +
-                value
-                    .Replace("\\", "\\\\")
-                    .Replace("\"", "\\\"")
-                    .Replace("$", "\\$")
-                    .Replace("`", "\\`") +
-                "\""
+                "'" + value.Replace("'", "'\"'\"'") + "'"
+
+        let buildCommand executable arguments =
+            executable::arguments
+            |> List.filter (System.String.IsNullOrWhiteSpace >> not)
+            |> List.map quoteArgument
+            |> String.concat " "
 
         let buildCompileCommand
             compiler
@@ -30,8 +35,7 @@ namespace Aqualis
             mainSource
             options
             output =
-            [
-                yield compiler
+            buildCommand compiler [
                 yield! fixedArguments
                 yield! sources
                 yield mainSource
@@ -39,9 +43,6 @@ namespace Aqualis
                 yield "-o"
                 yield output
             ]
-            |> List.filter (System.String.IsNullOrWhiteSpace >> not)
-            |> List.map quoteArgument
-            |> String.concat " "
 
     open System
     open System.IO
@@ -95,31 +96,35 @@ namespace Aqualis
                         (GenerationScope.currentProgram()).delete()
                         //コンパイル・実行用スクリプト生成
                         use wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_F.sh")
+                        wr.WriteLine "#!/bin/bash"
+                        wr.WriteLine()
+                        let sources = (GenerationScope.currentProgram()).slist.list
+                        let options = (GenerationScope.currentProgram()).olist.list
+                        let writeCompileCommand compiler fixedArguments =
+                            ShellCommand.buildCompileCommand
+                                compiler
+                                fixedArguments
+                                sources
+                                (projectname + ".f90")
+                                options
+                                (projectname + ".exe")
+                            |> wr.WriteLine
                         if (GenerationScope.requireContext()).IsOpenAccUsed then
-                            wr.Write "#!/bin/bash\n"
-                            wr.Write("\n")
-                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
-                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
-                            wr.Write("pgfortran -acc -Minfo=accel " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
-                            wr.Write("./" + projectname + ".exe\n")
+                            writeCompileCommand
+                                "/usr/bin/pgfortran"
+                                ["-acc"; "-Minfo=accel"]
                         else if (GenerationScope.requireContext()).IsOpenMpUsed then
-                            wr.Write "#!/bin/bash\n"
-                            wr.Write "\n"
-                            wr.Write "FC='/usr/bin/gfortran'\n"
-                            wr.Write "\n"
-                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
-                            let option = String.Join(" ", (GenerationScope.currentProgram()).olist.list)
-                            wr.Write("$FC" + " -fopenmp " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
-                            wr.Write("./" + projectname + ".exe\n")
+                            writeCompileCommand
+                                "/usr/bin/gfortran"
+                                ["-fopenmp"]
                         else
-                            wr.Write "#!/bin/bash\n"
-                            wr.Write "\n"
-                            wr.Write "FC='/usr/bin/gfortran'\n"
-                            wr.Write "\n"
-                            let source = String.Join(" ", (GenerationScope.currentProgram()).slist.list)
-                            let option = "-ffree-line-length-none " + String.Join(" ", (GenerationScope.currentProgram()).olist.list)
-                            wr.Write("$FC " + source + " " + projectname + ".f90 " + option + " -o " + projectname + ".exe\n")
-                            wr.Write("./" + projectname + ".exe\n")
+                            writeCompileCommand
+                                "/usr/bin/gfortran"
+                                ["-ffree-line-length-none"]
+                        ShellCommand.buildCommand
+                            ("./" + projectname + ".exe")
+                            []
+                        |> wr.WriteLine
                 |C99 ->
                     makeProgram [dir,projectname,C99] <| fun () ->
                         //メインコード生成
@@ -184,17 +189,17 @@ namespace Aqualis
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
                             writeCompileCommand "gcc" ["-fopenmp"]
-                            wr.Write("./" + projectname + ".exe\n")
+                            ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
                         else if (GenerationScope.requireContext()).IsOpenAccUsed then
                             wr.Write "#!/bin/bash"
                             wr.Write "\n"
                             writeCompileCommand "pgcc" ["-acc"; "-Minfo=accel"]
-                            wr.Write("./" + projectname + ".exe\n")
+                            ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
                         else
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
                             writeCompileCommand "gcc" []
-                            wr.Write("./" + projectname + ".exe\n")
+                            ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
                 |LaTeX ->
                     makeProgram [dir,projectname,LaTeX] <| fun () ->
                         //メインコード生成
