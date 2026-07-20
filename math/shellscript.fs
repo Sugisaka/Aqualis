@@ -10,7 +10,6 @@ namespace Aqualis
         
         open System
         open System.IO
-        open System.Text
         
         type Shell(dir:string,project:string,nproc:int) =
             let mutable id = 0
@@ -22,10 +21,8 @@ namespace Aqualis
                 try
                     for i in 1..nproc do
                         created.Add(
-                            new StreamWriter(
-                                dir+"\\shell_"+project+"_"+i.ToString("00")+".sh",
-                                false,
-                                Encoding.Default))
+                            ShellScriptWriter.create(
+                                dir+"\\shell_"+project+"_"+i.ToString("00")+".sh"))
                     created.ToArray()
                 with _ ->
                     created |> Seq.iter _.Dispose()

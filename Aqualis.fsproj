@@ -11,6 +11,7 @@
     <Compile Include="expr\expr.fs" />
     <Compile Include="expr\simp.fs" />
     <Compile Include="program\varControl.fs" />
+    <Compile Include="program\shellScriptWriter.fs" />
     <Compile Include="program\structure.fs" />
     <Compile Include="program\programManager.fs" />
     <Compile Include="program\varControl2.fs" />

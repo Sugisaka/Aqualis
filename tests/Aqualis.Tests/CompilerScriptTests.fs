@@ -5,6 +5,18 @@ open Xunit
 open Aqualis
 
 module CompilerScriptTests =
+    let private assertLfOnlyWithoutBom path =
+        let bytes = File.ReadAllBytes path
+        let hasUtf8Bom =
+            bytes.Length >= 3 &&
+            bytes.[0] = 0xEFuy &&
+            bytes.[1] = 0xBBuy &&
+            bytes.[2] = 0xBFuy
+
+        Assert.True(bytes |> Array.contains 0x0Auy, $"LF was not found in {path}.")
+        Assert.False(bytes |> Array.contains 0x0Duy, $"CR was found in {path}.")
+        Assert.False(hasUtf8Bom, $"UTF-8 BOM was found in {path}.")
+
     let private generateCScript outputDirectory projectName configure =
         Compile
             [C99]
@@ -106,3 +118,37 @@ module CompilerScriptTests =
         Assert.Contains("./normal.exe", normal)
         Assert.Contains("./openmp.exe", openMp)
         Assert.Contains("./openacc.exe", openAcc)
+
+    [<Fact>]
+    let ``generated shell scripts use LF and UTF-8 without BOM`` () =
+        use output = new TemporaryDirectory()
+
+        generateCScript output.Path "c-script" ignore |> ignore
+        generateFortranScript output.Path "fortran-script" ignore |> ignore
+
+        Compile
+            [Python]
+            output.Path
+            "python-script"
+            ("test", "1.0")
+            ignore
+
+        Compile
+            [C99]
+            output.Path
+            "distributed"
+            ("test", "1.0")
+            (fun () ->
+                use scripts = new shellscript.Shell(output.Path, "distributed", 2)
+                scripts.AddProcess()
+                scripts.AddProcess())
+
+        [ "proc_c-script_C.sh"
+          "proc_fortran-script_F.sh"
+          "proc_python-script_P.sh"
+          "proc_distributed_C.sh"
+          "shell_distributed_01.sh"
+          "shell_distributed_02.sh" ]
+        |> List.iter (fun fileName ->
+            Path.Combine(output.Path, fileName)
+            |> assertLfOnlyWithoutBom)

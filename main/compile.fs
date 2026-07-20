@@ -95,7 +95,7 @@ namespace Aqualis
                         //beeファイル削除
                         (GenerationScope.currentProgram()).delete()
                         //コンパイル・実行用スクリプト生成
-                        use wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_F.sh")
+                        use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_F.sh")
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
                         let sources = (GenerationScope.currentProgram()).slist.list
@@ -173,7 +173,7 @@ namespace Aqualis
                         //beeファイル削除
                         (GenerationScope.currentProgram()).delete()
                         //コンパイル・実行用スクリプト生成
-                        use wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_C.sh")
+                        use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_C.sh")
                         let sources = (GenerationScope.currentProgram()).slist.list
                         let options = (GenerationScope.currentProgram()).olist.list
                         let writeCompileCommand compiler fixedArguments =
@@ -506,7 +506,7 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         (GenerationScope.currentProgram()).delete()
-                        use wr = new StreamWriter(dir + "\\" + "proc_" + projectname + "_P.sh")
+                        use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_P.sh")
                         wr.Write "#!/bin/bash\n"
                         wr.Write "\n"
                         wr.Write("python3 " + projectname + ".py\n")
