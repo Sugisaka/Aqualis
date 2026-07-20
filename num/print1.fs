@@ -11,7 +11,7 @@ namespace Aqualis
     ///<summary>画面表示</summary>
     type print () =
         ///<summary>変数リストを画面表示</summary>
-        static member s (lst:exprString)  =
+        static member cc (lst:exprString)  =
             match (GenerationScope.currentProgram()).language with
             |Fortran ->
                 let clist =
@@ -173,7 +173,7 @@ namespace Aqualis
                     |RNvr (Cpx (re,im)) -> printf "%e %e " re im
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
-        static member t (str:string) =
+        static member c (str:string) =
             match (GenerationScope.currentProgram()).language with
             |Fortran ->
                 writein("print *, "+"\""+str+"\""+"\n")
@@ -195,12 +195,3 @@ namespace Aqualis
                 writein("print(\""+str+"\")\n")
             |Numeric ->
                 printfn "%s" str
-        static member n (ss:list<num0>) = print.s <| exprString (ss |> List.map (fun x -> RNvr x.Expr))
-        ///<summary>1個の項目を画面表示</summary>
-        static member c (ss:num0) = print.n [ss]
-        ///<summary>2個の項目を画面表示</summary>
-        static member cc (s1:num0) (s2:num0) = print.n [s1;s2]
-        ///<summary>3個の項目を画面表示</summary>
-        static member ccc (s1:num0) (s2:num0) (s3:num0) = print.n [s1;s2;s3]
-        ///<summary>4個の項目を画面表示</summary>
-        static member cccc (s1:num0) (s2:num0) (s3:num0) (s4:num0) = print.n [s1;s2;s3;s4]

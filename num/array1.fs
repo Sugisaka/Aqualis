@@ -11,7 +11,7 @@ namespace Aqualis
         ///<summary>変数</summary>
         |Var1 of (VarType*string)
         ///<summary>部分配列</summary>
-        |Arx1 of (num0*(num0->num0))
+        |Arx1 of (int0*(int0->expr))
 
     ///<summary>1次元配列</summary>
     type base1 (typ:Etype,x:Expr1) =
@@ -23,6 +23,7 @@ namespace Aqualis
         new(sname,size,name) =
             (GenerationScope.currentProgram()).var.setVar(Structure sname,size,name,"")
             base1(Structure sname,Var1(size,name))
+        member _.Etype with get() = typ
         member _.Expr with get() = x
         member _.code with get() =
             match x with
@@ -35,26 +36,26 @@ namespace Aqualis
             |Var1(_,name) ->
                 match (GenerationScope.currentProgram()).language with
                 |Fortran ->
-                    num0(Var(It 4,name+"_size(1)",NaN))
+                    int0(Var(It 4,name+"_size(1)",NaN))
                 |C99 ->
-                    num0(Var(It 4,name+"_size[0]",NaN))
+                    int0(Var(It 4,name+"_size[0]",NaN))
                 |LaTeX ->
-                    num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |HTML ->
-                    num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |HTMLSequenceDiagram ->
-                    num0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |Python ->
-                    num0(Var(It 4,name+"_size[0]",NaN))
+                    int0(Var(It 4,name+"_size[0]",NaN))
                 |JavaScript ->
-                    num0(Var(It 4,name+"_size[0]",NaN))
+                    int0(Var(It 4,name+"_size[0]",NaN))
                 |PHP ->
-                    num0(Var(It 4,name+"_size[0]",NaN))
+                    int0(Var(It 4,name+"_size[0]",NaN))
                 |Numeric ->
-                    num0 NaN
+                    int0 NaN
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
-        member this.Idx1(i:num0) =
+        member this.Idx1(i:int0) =
             if (GenerationScope.debug()).debugMode then
                 match x with
                 |Var1(_,name) ->
@@ -68,17 +69,17 @@ namespace Aqualis
                     ! "****************************************************"
                 |_ -> ()
             match x,language() with
-            |Var1(_,name),Fortran -> num0(Idx1(typ,name,(i+1).Expr))
-            |Var1(_,name),_       -> num0(Idx1(typ,name,i.Expr))
+            |Var1(_,name),Fortran -> Idx1(typ,name,(i+1).Expr)
+            |Var1(_,name),_       -> Idx1(typ,name,i.Expr)
             |Arx1(_,f),_ -> f i
         member this.Idx1(i:int) = this.Idx1(I i)
-        member this.Idx1(a:num0,b:num0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
-        member this.Idx1(a:num0,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
-        member this.Idx1(a:int ,b:num0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(a:int0,b:int0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(a:int0,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(a:int ,b:int0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
         member this.Idx1(a:int ,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
 
         ///<summary>配列のメモリ割り当て</summary>
-        member this.allocate(n1:num0) =
+        member this.allocate(n1:int0) =
                 match x with
                 |Var1(size1,name) ->
                     if (GenerationScope.debug()).debugMode then
@@ -265,226 +266,3 @@ namespace Aqualis
                     b.IF (x.size1 .=/ y.size1) <| fun () ->
                         print.t ("ERROR"+(GenerationScope.errors()).ID+" array size (first index) mismatch")
                 ! "****************************************************"
-
-    ///<summary>数値型1次元配列</summary>
-    type num1 (typ:Etype,x:Expr1, ?context:GenerationContext) =
-        inherit base1(typ,x)
-        let context =
-            match context with
-            |Some value -> Some value
-            |None -> GenerationContext.TryCurrent
-        new (typ,size,name,para) =
-            (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
-            num1(typ,Var1(size,name), ?context=GenerationContext.TryCurrent)
-        member _.Context = context
-        member this.etype with get() = typ
-        member this.Item with get(i:num0) = this.Idx1 i
-        member this.Item with get(i:int) = this.Idx1(I i)
-        member this.Item with get((a:num0,b:num0)) = num1(typ,this.Idx1(a,b))
-        member this.Item with get((a:num0,b:int )) = num1(typ,this.Idx1(a,b) )
-        member this.Item with get((a:int ,b:num0)) = num1(typ,this.Idx1(a,b))
-        member this.Item with get((a:int ,b:int )) = num1(typ,this.Idx1(a,b) )
-
-        //<summary>1次元配列生成(整数型)</summary>
-        ///<param name="s1">第1要素数</param>
-        ///<param name="f">(i,j)要素に対する要素値</param>
-        static member fiarray(s1:num0,f:num0->num0) = num1(It 4,Arx1(s1,f))
-
-        //<summary>1次元配列生成(倍精度浮動小数点型)</summary>
-        ///<param name="s1">第1要素数</param>
-        ///<param name="f">(i,j)要素に対する要素値</param>
-        static member fdarray(s1:num0,f:num0->num0) = num1(Dt,Arx1(s1,f))
-
-        //<summary>1次元配列生成(複素数型)</summary>
-        ///<param name="s1">第1要素数</param>
-        ///<param name="f">(i,j)要素に対する要素値</param>
-        static member fzarray(s1:num0,f:num0->num0) = num1(Zt,Arx1(s1,f))
-
-        //<summary>1次元配列生成(整数型)</summary>
-        ///<param name="s1">第1要素数</param>
-        ///<param name="f">(i,j)要素に対する要素値</param>
-        static member fiarray(s1:int,f:num0->num0) = num1.fiarray(I s1,f)
-
-        //<summary>1次元配列生成(倍精度浮動小数点型)</summary>
-        ///<param name="s1">第1要素数</param>
-        ///<param name="f">(i,j)要素に対する要素値</param>
-        static member fdarray(s1:int,f:num0->num0) = num1.fdarray(I s1,f)
-
-        //<summary>1次元配列生成(複素数型)</summary>
-        ///<param name="s1">第1要素数</param>
-        ///<param name="f">(i,j)要素に対する要素値</param>
-        static member fzarray(s1:int,f:num0->num0) = num1.fzarray(I s1,f)
-
-        //<summary>元の配列と同じサイズの配列生成</summary>
-        ///<param name="f">(i,j)要素に対する要素値</param>
-        member this.farray(f:num0->num0) = num1(this.etype,Arx1(this.size1,f))
-
-        //<summary>値を0で初期化</summary>
-        override this.clear() =
-            this <== I 0
-
-        ///<summary>配列サイズ変数をメモリ未割当て状態に初期化</summary>
-        override this.sizeinit() =
-            this.size1 <== -1
-
-        static member sizeMismatchError(x:num1,y:num1) =
-            if (GenerationScope.debug()).debugMode then
-                (GenerationScope.errors()).inc()
-                !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
-                br.branch <| fun b ->
-                    b.IF (x.size1 .=/ y.size1) <| fun () ->
-                        print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '+' array size mismatch")
-                ! "****************************************************"
-
-        static member (+) (x:num1,y:num1) =
-            num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype, Arx1(x.size1, fun i -> x[i]+y[i]))
-        static member (+) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x+y[i]))
-        static member (+) (x:int,y:num1) = num1((It 4)%%y.etype,Arx1(y.size1, fun (i:num0) -> x+y[i]))
-        static member (+) (x:double,y:num1) = num1(Dt%%y.etype,Arx1(y.size1, fun (i:num0) -> x+y[i]))
-        static member (+) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]+y))
-        static member (+) (x:num1,y:int) = num1(x.etype%%(It 4),Arx1(x.size1, fun i -> x[i]+y))
-        static member (+) (x:num1,y:double) = num1(x.etype%%Dt,Arx1(x.size1, fun i -> x[i]+y))
-
-        static member (-) (x:num1,y:num1) =
-            num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]-y[i]))
-        static member (-) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x-y[i]))
-        static member (-) (x:int,y:num1) = num1(It 4%%y.etype,Arx1(y.size1, fun (i:num0) -> x-y[i]))
-        static member (-) (x:double,y:num1) = num1(Dt%%y.etype,Arx1(y.size1, fun (i:num0) -> x-y[i]))
-        static member (-) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]-y))
-        static member (-) (x:num1,y:int) = num1(x.etype%%It 4,Arx1(x.size1, fun i -> x[i]-y))
-        static member (-) (x:num1,y:double) = num1(x.etype%%Dt,Arx1(x.size1, fun i -> x[i]-y))
-
-        static member ( * ) (x:num1,y:num1) =
-            num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]*y[i]))
-        static member ( * ) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x*y[i]))
-        static member ( * ) (x:int,y:num1) = num1(It 4%%y.etype,Arx1(y.size1, fun (i:num0) -> x*y[i]))
-        static member ( * ) (x:double,y:num1) = num1(Dt%%y.etype,Arx1(y.size1, fun (i:num0) -> x*y[i]))
-        static member ( * ) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]*y))
-        static member ( * ) (x:num1,y:int) = num1(x.etype%%It 4,Arx1(x.size1, fun i -> x[i]*y))
-        static member ( * ) (x:num1,y:double) = num1(x.etype%%Dt,Arx1(x.size1, fun i -> x[i]*y))
-
-        static member (/) (x:num1,y:num1) =
-            num1.sizeMismatchError(x,y)
-            num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]/y[i]))
-        static member (/) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x/y[i]))
-        static member (/) (x:int,y:num1) = num1(It 4%%y.etype,Arx1(y.size1, fun (i:num0) -> x/y[i]))
-        static member (/) (x:double,y:num1) = num1(Dt%%y.etype,Arx1(y.size1, fun (i:num0) -> x/y[i]))
-        static member (/) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]/y))
-        static member (/) (x:num1,y:int) = num1(x.etype%%It 4,Arx1(x.size1, fun i -> x[i]/y))
-        static member (/) (x:num1,y:double) = num1(x.etype%%Dt,Arx1(x.size1, fun i -> x[i]/y))
-
-        static member (./) (x:num1,y:num1) =
-            num1.sizeMismatchError(x,y)
-            Arx1(x.size1, fun i -> x[i]/y[i])
-        static member (./) (x:num0,y:num1) = num1(x.etype%%y.etype,Arx1(y.size1, fun (i:num0) -> x./y[i]))
-        static member (./) (x:int,y:num1) = num1(It 4%%y.etype,Arx1(y.size1, fun (i:num0) -> x./y[i]))
-        static member (./) (x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1, fun i -> x[i]./y))
-        static member (./) (x:num1,y:int) = num1(x.etype%%It 4,Arx1(x.size1, fun i -> x[i]./y))
-
-        static member (<==) (v1:num1,v2:num1) =
-            let context =
-                match v1.Context with
-                |Some left ->
-                    match v2.Context with
-                    |Some right when not (obj.ReferenceEquals(left, right)) ->
-                        invalidOp "Values from different GenerationContext instances cannot be assigned."
-                    |_ -> left
-                |None -> invalidOp "The assignment target is not associated with a GenerationContext."
-            let writein text = context.CurrentProgram.codewritein text
-            if (GenerationScope.debug()).debugMode then
-                (GenerationScope.errors()).inc()
-                !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
-                br.branch <| fun b ->
-                    b.IF (v1.size1 .=/ v2.size1) <| fun () ->
-                        print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size mismatch")
-                ! "****************************************************"
-            match v1.Expr,v2.Expr with
-            |Var1(_,x),Var1(_,y) ->
-                match context.CurrentProgram.language with
-                |Fortran|LaTeX ->
-                    writein(x + "=" + y)
-                |C99 ->
-                    iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-                |HTML ->
-                    writein(x + " \\leftarrow " + y)
-                |HTMLSequenceDiagram ->
-                    writein(x + " \\leftarrow " + y)
-                |Python ->
-                    writein(x + " = copy.deepcopy("+y+")")
-                |JavaScript ->
-                    iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-                |PHP ->
-                    iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-                |Numeric ->
-                    ()
-            |Var1(_,x),Arx1(_,f) ->
-                match context.CurrentProgram.language with
-                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-            |Arx1(_,_),Var1(_,_) ->
-                match context.CurrentProgram.language with
-                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-            |Arx1(_,_),Arx1(_,_) ->
-                match context.CurrentProgram.language with
-                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2[i]
-
-        static member (<==) (v1:num1,v2:num0) =
-            let context =
-                v1.Context
-                |> Option.defaultWith (fun () ->
-                    invalidOp "The assignment target is not associated with a GenerationContext.")
-            match v2.Context with
-            |Some right when not (obj.ReferenceEquals(context, right)) ->
-                invalidOp "Values from different GenerationContext instances cannot be assigned."
-            |_ -> ()
-            let writein text = context.CurrentProgram.codewritein text
-            match v1.Expr with
-            |Var1(_,x) ->
-                match context.CurrentProgram.language with
-                |Fortran|LaTeX ->
-                    writein(x + "=" + v2.Expr.eval (context.CurrentProgram))
-                |C99 ->
-                    iter.num v1.size1 <| fun i -> v1[i] <== v2
-                |HTML ->
-                    writein(x + " \\leftarrow " + v2.Expr.eval (context.CurrentProgram))
-                |HTMLSequenceDiagram ->
-                    writein(x + " \\leftarrow " + v2.Expr.eval (context.CurrentProgram))
-                |Python ->
-                    match v1.etype with
-                    |Structure sname -> writein(x+" = numpy.array(["+sname+"() for _ in range(int("+v1.size1.Expr.eval (context.CurrentProgram)+"))], dtype=object)\n")
-                    |_               -> writein(x+"[:]="+v2.Expr.eval (context.CurrentProgram)+"\n")
-                |JavaScript ->
-                    iter.num v1.size1 <| fun i -> v1[i] <== v2
-                |PHP ->
-                    iter.num v1.size1 <| fun i -> v1[i] <== v2
-                |Numeric ->
-                    ()
-            |Arx1(_,_) ->
-                match context.CurrentProgram.language with
-                |Fortran|LaTeX|C99|HTML|HTMLSequenceDiagram|Python|JavaScript|PHP|Numeric -> iter.num v1.size1 <| fun i -> v1[i] <== v2
-        static member (<==) (x:num1,y:double) = x <== D y
-        static member (<==) (x:num1,y:int) = x <== I y
-
-    [<AutoOpen>]
-    module asm_num1 =
-        type asm with
-            static member pow(x:num1,y:num0) = num1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y)))
-            static member pow(x:num1,y:int) = num1(x.etype%%It 4,Arx1(x.size1,fun i -> asm.pow(x[i],y)))
-            static member pow(x:num1,y:double) = num1(x.etype%%Dt,Arx1(x.size1,fun i -> asm.pow(x[i],y)))
-            static member sin(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.sin(x[i])))
-            static member cos(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.cos(x[i])))
-            static member tan(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.tan(x[i])))
-            static member asin(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.asin(x[i])))
-            static member acos(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.acos(x[i])))
-            static member atan(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.atan(x[i])))
-            static member atan2(x:num1,y:num1) = num1(Dt,Arx1(x.size1,fun i -> asm.atan2(x[i],y[i])))
-            static member exp(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.exp(x[i])))
-            static member abs(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.abs(x[i])))
-            static member log(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.log(x[i])))
-            static member log10(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.log10(x[i])))
-            static member sqrt(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.sqrt(x[i])))
-            static member floor(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.floor(x[i])))
-            static member ceil(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.ceil(x[i])))
-            static member conj(x:num1) = num1(x.etype,Arx1(x.size1,fun i -> asm.conj(x[i])))

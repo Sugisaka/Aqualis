@@ -109,105 +109,105 @@ module Aqualis_str =
         static member i0 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(It 4,A0,name))
-            num0(Var(It 4,str.mem(vname,name),NaN))
+            int0(Var(It 4,str.mem(vname,name),NaN))
         static member d0 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Dt,A0,name))
-            num0(Var(Dt,str.mem(vname,name),NaN))
+            double0(Var(Dt,str.mem(vname,name),NaN))
         static member z0 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Zt,A0,name))
-            num0(Var(Zt,str.mem(vname,name),NaN))
+            complex0(Var(Zt,str.mem(vname,name),NaN))
         static member i1 (sname, vname, name, size1) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(It 4,A1(size1),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            num1(It 4,Var1(A1(size1),str.mem(vname,name)))
+            int1(It 4,Var1(A1(size1),str.mem(vname,name)))
         static member d1 (sname, vname, name, size1) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Dt,A1(size1),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            num1(Dt,Var1(A1(size1),str.mem(vname,name)))
+            double1(Dt,Var1(A1(size1),str.mem(vname,name)))
         static member z1 (sname, vname, name, size1) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Zt,A1(size1),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            num1(Zt,Var1(A1(size1),str.mem(vname,name)))
+            complex1(Zt,Var1(A1(size1),str.mem(vname,name)))
         static member i2 (sname, vname, name, size1, size2) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(It 4,A2(size1,size2),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            num2(It 4,Var2(A2(size1,size2),str.mem(vname,name)))
+            int2(It 4,Var2(A2(size1,size2),str.mem(vname,name)))
         static member d2 (sname, vname, name, size1, size2) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Dt,A2(size1,size2),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            num2(Dt,Var2(A2(size1,size2),str.mem(vname,name)))
+            double2(Dt,Var2(A2(size1,size2),str.mem(vname,name)))
         static member z2 (sname, vname, name, size1, size2) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Zt,A2(size1,size2),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            num2(Zt,Var2(A2(size1,size2),str.mem(vname,name)))
+            complex2(Zt,Var2(A2(size1,size2),str.mem(vname,name)))
         static member i3 (sname, vname, name, size1, size2, size3) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(It 4,A3(size1,size2,size3),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            num3(It 4,Var3(A3(size1,size2,size3),str.mem(vname,name)))
+            int3(It 4,Var3(A3(size1,size2,size3),str.mem(vname,name)))
         static member d3 (sname, vname, name, size1, size2, size3) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Dt,A3(size1,size2,size3),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            num3(Dt,Var3(A3(size1,size2,size3),str.mem(vname,name)))
+            double3(Dt,Var3(A3(size1,size2,size3),str.mem(vname,name)))
         static member z3 (sname, vname, name, size1, size2, size3) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Zt,A3(size1,size2,size3),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            num3(Zt,Var3(A3(size1,size2,size3),str.mem(vname,name)))
+            complex3(Zt,Var3(A3(size1,size2,size3),str.mem(vname,name)))
         static member i1 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(It 4,A1(0),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            num1(It 4,Var1(A1(0),str.mem(vname,name)))
+            int1(It 4,Var1(A1(0),str.mem(vname,name)))
         static member d1 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Dt,A1(0),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            num1(Dt,Var1(A1(0),str.mem(vname,name)))
+            double1(Dt,Var1(A1(0),str.mem(vname,name)))
         static member z1 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Zt,A1(0),name))
             this.addmember(sname,(It 4,A1(1),name+"_size"))
-            num1(Zt,Var1(A1(0),str.mem(vname,name)))
+            complex1(Zt,Var1(A1(0),str.mem(vname,name)))
         static member i2 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(It 4,A2(0,0),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            num2(It 4,Var2(A2(0,0),str.mem(vname,name)))
+            int2(It 4,Var2(A2(0,0),str.mem(vname,name)))
         static member d2 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Dt,A2(0,0),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            num2(Dt,Var2(A2(0,0),str.mem(vname,name)))
+            double2(Dt,Var2(A2(0,0),str.mem(vname,name)))
         static member z2 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Zt,A2(0,0),name))
             this.addmember(sname,(It 4,A1(2),name+"_size"))
-            num2(Zt,Var2(A2(0,0),str.mem(vname,name)))
+            complex2(Zt,Var2(A2(0,0),str.mem(vname,name)))
         static member i3 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(It 4,A3(0,0,0),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            num3(It 4,Var3(A3(0,0,0),str.mem(vname,name)))
+            int3(It 4,Var3(A3(0,0,0),str.mem(vname,name)))
         static member d3 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Dt,A3(0,0,0),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            num3(Dt,Var3(A3(0,0,0),str.mem(vname,name)))
+            double3(Dt,Var3(A3(0,0,0),str.mem(vname,name)))
         static member z3 (sname, vname, name) =
             let this = (GenerationScope.currentProgram()).str
             this.addmember(sname,(Zt,A3(0,0,0),name))
             this.addmember(sname,(It 4,A1(3),name+"_size"))
-            num3(Zt,Var3(A3(0,0,0),str.mem(vname,name)))
+            complex3(Zt,Var3(A3(0,0,0),str.mem(vname,name)))
 
         static member reg(sname,name:string) =
             let this = (GenerationScope.currentProgram()).str

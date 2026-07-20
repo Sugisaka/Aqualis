@@ -10,7 +10,7 @@ namespace Aqualis
     module asm_random =
         type asm with
             ///<summary>0～1の一様乱数を取得</summary>
-            static member random (code:(((num1->unit)->unit)*(num0->unit)->unit)) =
+            static member random (code:(((int1->unit)->unit)*(double0->unit)->unit)) =
                 match (GenerationScope.currentProgram()).language with
                 |Fortran ->
                     ch.i <| fun seedsize ->
@@ -23,7 +23,7 @@ namespace Aqualis
                         let setseed code =
                             code seed
                             writein("call random_seed(put="+seed.code+"(:))")
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein("call random_number("+n+")")
@@ -38,7 +38,7 @@ namespace Aqualis
                         let setseed code =
                             code seed
                             writein("srand("+seed.code+"[0]);")
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein(n + " = (double)rand()/RAND_MAX;")
@@ -50,7 +50,7 @@ namespace Aqualis
                         let setseed code =
                             code seed
                             writein("random_seed="+seed.code+"[0])")
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein(n + " = (random number: 0->1);")
@@ -62,7 +62,7 @@ namespace Aqualis
                         let setseed code =
                             code seed
                             writein("random_seed="+seed.code+"[0])")
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein(n + " = (random number: 0->1);")
@@ -74,7 +74,7 @@ namespace Aqualis
                         let setseed code =
                             code seed
                             writein("random_seed="+seed.code+"[0])")
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein(n + " = (random number: 0->1);")
@@ -87,7 +87,7 @@ namespace Aqualis
                         let setseed code =
                             code seed
                             writein("random_seed = numpy.random.default_rng("+seed.code+"[0])")
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein(n + " = random_seed.uniform(0.0, 1.0)")
@@ -98,7 +98,7 @@ namespace Aqualis
                     ch.i1 1 <| fun seed ->
                         let setseed code =
                             code seed
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein(n + " = Math.random();")
@@ -110,7 +110,7 @@ namespace Aqualis
                     ch.i1 1 <| fun seed ->
                         let setseed code =
                             code seed
-                        let getrand (x:num0) =
+                        let getrand (x:double0) =
                             match x.Expr with
                             |Var(_,n,_) ->
                                 writein(n + " = random_int(0, PHP_INT_MAX) / PHP_INT_MAX;")
@@ -124,7 +124,7 @@ namespace Aqualis
             ///<summary>中心m、標準偏差sの正規分布に従う乱数を取得</summary>
             static member random_normaldistribution code =
                 asm.random <| fun (setseed,getrand) ->
-                    let getrand_normal (s:num0,m:num0,x:num0) =
+                    let getrand_normal (s:double0,m:double0,x:double0) =
                         ch.dd <| fun (a,b) ->
                         getrand a
                         getrand b

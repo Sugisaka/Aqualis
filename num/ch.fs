@@ -48,42 +48,42 @@ namespace Aqualis
             let context = TemporaryVariableScope.requireContext()
             TemporaryVariableScope.useOne
                 context.CurrentProgram.i0.getVar
-                (fun name -> num0(Var(It 4, name, NaN), context=context))
+                (fun name -> int0(Var(It 4, name, NaN), context=context))
                 code
 
         static member d code =
             let context = TemporaryVariableScope.requireContext()
             TemporaryVariableScope.useOne
                 context.CurrentProgram.d0.getVar
-                (fun name -> num0(Var(Dt, name, NaN), context=context))
+                (fun name -> double0(Var(Dt, name, NaN), context=context))
                 code
 
         static member z code =
             let context = TemporaryVariableScope.requireContext()
             TemporaryVariableScope.useOne
                 context.CurrentProgram.z0.getVar
-                (fun name -> num0(Var(Zt, name, NaN), context=context))
+                (fun name -> complex0(Var(Zt, name, NaN), context=context))
                 code
 
         static member I name = fun code ->
             let context = TemporaryVariableScope.requireContext()
             TemporaryVariableScope.useOne
                 (fun () -> context.CurrentProgram.i0.getVar(name, It 4, A0))
-                (fun variableName -> num0(Var(It 4, variableName, NaN), context=context))
+                (fun variableName -> int0(Var(It 4, variableName, NaN), context=context))
                 code
 
         static member D name = fun code ->
             let context = TemporaryVariableScope.requireContext()
             TemporaryVariableScope.useOne
                 (fun () -> context.CurrentProgram.d0.getVar(name, Dt, A0))
-                (fun variableName -> num0(Var(Dt, variableName, NaN), context=context))
+                (fun variableName -> double0(Var(Dt, variableName, NaN), context=context))
                 code
 
         static member Z name = fun code ->
             let context = TemporaryVariableScope.requireContext()
             TemporaryVariableScope.useOne
                 (fun () -> context.CurrentProgram.z0.getVar(name, Zt, A0))
-                (fun variableName -> num0(Var(Zt, variableName, NaN), context=context))
+                (fun variableName -> complex0(Var(Zt, variableName, NaN), context=context))
                 code
 
         static member ix (count:int) code =
@@ -91,7 +91,7 @@ namespace Aqualis
             TemporaryVariableScope.useMany
                 count
                 context.CurrentProgram.i0.getVar
-                (fun name -> num0(Var(It 4, name, NaN), context=context))
+                (fun name -> int0(Var(It 4, name, NaN), context=context))
                 code
 
         static member dx (count:int) code =
@@ -99,7 +99,7 @@ namespace Aqualis
             TemporaryVariableScope.useMany
                 count
                 context.CurrentProgram.d0.getVar
-                (fun name -> num0(Var(Dt, name, NaN), context=context))
+                (fun name -> double0(Var(Dt, name, NaN), context=context))
                 code
 
         static member zx (count:int) code =
@@ -107,5 +107,5 @@ namespace Aqualis
             TemporaryVariableScope.useMany
                 count
                 context.CurrentProgram.z0.getVar
-                (fun name -> num0(Var(Zt, name, NaN), context=context))
+                (fun name -> complex0(Var(Zt, name, NaN), context=context))
                 code

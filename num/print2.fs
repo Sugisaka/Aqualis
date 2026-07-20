@@ -12,20 +12,50 @@ namespace Aqualis
         type print with
             
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:num1) = 
+            static member c (s:int1) = 
                 iter.num s.size1 <| fun i -> 
-                    print.cc i s[i]
+                    print.s <| i++s[i]
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:double1) = 
+                iter.num s.size1 <| fun i -> 
+                    print.s <| i++s[i]
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:complex1) = 
+                iter.num s.size1 <| fun i -> 
+                    print.s <| i++s[i]
                     
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:num2) = 
+            static member c (s:int2) = 
                 iter.num s.size1 <| fun i -> 
                     iter.num s.size2 <| fun j -> 
-                        print.ccc i j s[i,j]
+                        print.s <| i++j++s[i,j]
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:double2) = 
+                iter.num s.size1 <| fun i -> 
+                    iter.num s.size2 <| fun j -> 
+                        print.s <| i++j++s[i,j]
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:complex2) = 
+                iter.num s.size1 <| fun i -> 
+                    iter.num s.size2 <| fun j -> 
+                        print.s <| i++j++s[i,j]
                         
             ///<summary>1個の項目を画面表示</summary>
-            static member c (s:num3) = 
+            static member c (s:int3) = 
                 iter.num s.size1 <| fun i -> 
                     iter.num s.size2 <| fun j -> 
                         iter.num s.size3 <| fun k -> 
-                            print.cccc i j k s[i,j,k]
+                            print.s <| i++j++k++s[i,j,k]
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:double3) = 
+                iter.num s.size1 <| fun i -> 
+                    iter.num s.size2 <| fun j -> 
+                        iter.num s.size3 <| fun k -> 
+                            print.s <| i++j++k++s[i,j,k]
+            ///<summary>1個の項目を画面表示</summary>
+            static member c (s:complex3) = 
+                iter.num s.size1 <| fun i -> 
+                    iter.num s.size2 <| fun j -> 
+                        iter.num s.size3 <| fun k -> 
+                            print.s <| i++j++k++s[i,j,k]
                             
