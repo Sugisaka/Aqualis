@@ -24,7 +24,9 @@ type Setting3D = {DirX:double; DirY:double; DirZ:double; ScaleX:double; ScaleY:d
 type gensvg =
     static member headerOpen (cvx:double,cvy:double,wr:exprString->unit) =
         wr <| st "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-        wr <| st("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 "+cvx.ToString("0.000")+" "+cvy.ToString("0.000")+"\" style=\"enable-background:new 0 0 "+cvx.ToString("0.000")+" "+cvy.ToString("0.000")+";\" xml:space=\"preserve\">")
+        let cvxText = InvariantFormat.numberWithFormat "0.000" cvx
+        let cvyText = InvariantFormat.numberWithFormat "0.000" cvy
+        wr <| st("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 "+cvxText+" "+cvyText+"\" style=\"enable-background:new 0 0 "+cvxText+" "+cvyText+";\" xml:space=\"preserve\">")
     static member headerClose (wr:exprString->unit) =
         wr <| st "</svg>"
     static member header (cvx:double,cvy:double) = fun (wr:exprString->unit) a code ->
@@ -99,9 +101,9 @@ type gensvg =
             let pxi = 0.5*cvx+px.[i]
             let pyi = 0.5*cvy-py.[i]
             if i=0 then
-                wr <| st("M" + pxi.ToString() + "," + pyi.ToString())
+                wr <| st("M" + InvariantFormat.number pxi + "," + InvariantFormat.number pyi)
             else
-                wr <| st("L" + pxi.ToString() + "," + pyi.ToString())
+                wr <| st("L" + InvariantFormat.number pxi + "," + InvariantFormat.number pyi)
         wr <| st "\""
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
@@ -413,7 +415,7 @@ type gensvg =
         let rt =
             match rotation with
             |None -> st ""
-            |Some r -> "transform=\"rotate("+r.ToString()+","++cx++","++cy++")\""
+            |Some r -> "transform=\"rotate("+InvariantFormat.number r+","++cx++","++cy++")\""
             
         wr <| st "<text"
         wr <| "x=\""++cx++"\""
@@ -435,9 +437,9 @@ type svgfilemaker(cvx:double,cvy:double,writer:StreamWriter,scale:double) =
                     let p = s.simp
                     match p with
                     |Inv(_,Int s) -> writer.Write((-s).ToString())
-                    |Inv(_,Dbl s) -> writer.Write((-s).ToString "0.000")
+                    |Inv(_,Dbl s) -> writer.Write(InvariantFormat.numberWithFormat "0.000" (-s))
                     |Int s -> writer.Write(s.ToString())
-                    |Dbl s -> writer.Write(s.ToString "0.000")
+                    |Dbl s -> writer.Write(InvariantFormat.numberWithFormat "0.000" s)
                     |_ -> printfn "出力できない値です：%s" <| p.ToString()
         write x
         writer.Write "\n"

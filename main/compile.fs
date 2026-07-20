@@ -69,6 +69,7 @@ namespace Aqualis
                         writer.codewritein("! Generated date: " + System.DateTime.Now.ToString() + "\n")
                         writer.codewritein "!=============================================================================================\n"
                         writer.codewritein("program " + projectname + "\n")
+                        writer.codewritein "use, intrinsic :: ieee_arithmetic\n"
                         //モジュールファイルのインクルード
                         List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| (GenerationScope.currentProgram()).mlist.list
                         writer.codewritein "implicit none\n"

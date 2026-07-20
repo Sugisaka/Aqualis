@@ -110,11 +110,7 @@ namespace Aqualis
             n.ToString()
         ///<summary>double型の数値を文字列に変換</summary>
         member this.DtoS(d:double) =
-            match lang with
-            |Fortran -> d.ToString("0.0#################E0").Replace("E","d") 
-            |C99 -> d.ToString "0.0#################E0"
-            |Python -> d.ToString "0.0#################E0"
-            |_ -> d.ToString()
+            InvariantFormat.codeNumber lang d
             
     ///<summary>デバッグモード管理</summary>
     type debugController() =

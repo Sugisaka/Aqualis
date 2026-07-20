@@ -23,6 +23,7 @@
     <Compile Include="FileResourceTests.fs" />
     <Compile Include="GenerationContextTests.fs" />
     <Compile Include="AssignmentTests.fs" />
+    <Compile Include="NumericFormattingTests.fs" />
     <Compile Include="NumericArrayGenericTests.fs" />
     <Compile Include="GeometryCrtpTests.fs" />
     <Compile Include="ChTests.fs" />

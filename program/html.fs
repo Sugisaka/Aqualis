@@ -85,12 +85,12 @@ namespace Aqualis
                 let right (s:int) = {Key="border-right-width"; Value=s.ToString()+"px"}
         module stroke =
             let color (s:string) = {Key="stroke"; Value=s}
-            let width (s:float) = {Key="stroke-width"; Value=s.ToString()+"px"}
+            let width (s:float) = {Key="stroke-width"; Value=InvariantFormat.number s+"px"}
             let dasharray (s:list<int>) = {Key="stroke-dasharray"; Value=String.Join(" ",s |> List.map (fun i -> i.ToString()))}
-            let opacity(s:float) = {Key="stroke-opacity"; Value=s.ToString()}
+            let opacity(s:float) = {Key="stroke-opacity"; Value=InvariantFormat.number s}
         module fill =
             let color (s:string) = {Key="fill"; Value=s}
-            let opacity(s:float) = {Key="fill-opacity"; Value=s.ToString()}
+            let opacity(s:float) = {Key="fill-opacity"; Value=InvariantFormat.number s}
         module align =
             module items =
                 let center = {Key="align-items"; Value="center"}
@@ -355,7 +355,7 @@ namespace Aqualis
         // static member table_ code = html.tagb "table" code
         static member table (a:list<Atr>) = fun code -> html.tagb ("table",a) code
         static member tableData (lst:list<list<string>>) = fun (p:position) (size:int) ->
-            writein ("<table style =\"margin-left: "+p.x.ToString()+"px; margin-top: "+p.y.ToString()+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
+            writein ("<table style =\"margin-left: "+InvariantFormat.number p.x+"px; margin-top: "+InvariantFormat.number p.y+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
             for m in 0..lst.Length-1 do
                 writein "<tr>"
                 for s in lst[m] do
@@ -424,8 +424,8 @@ namespace Aqualis
         static member setjs filename =
             html.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
         static member title (s:Style) (p:position) (text:string) =
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-family"; Value = "'Noto Sans JP'";}
                             {Key = "color"; Value = "black";}
@@ -435,8 +435,8 @@ namespace Aqualis
             html.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
         static member contents (s:Style) (p:position) (text:string) =
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-family"; Value = "'Noto Sans JP'";}
                             {Key = "color"; Value = "black";}
@@ -449,8 +449,8 @@ namespace Aqualis
             html.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
         static member subtitle1 (s:Style) (p:position) (text:string) =
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-family"; Value = "'Noto Sans JP'";}
                             {Key = "color"; Value = "black";}
@@ -463,8 +463,8 @@ namespace Aqualis
             html.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
         static member subtitle2 (s:Style) (p:position) (text:string) =
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-family"; Value = "'Noto Sans JP'";}
                             {Key = "color"; Value = "black";}
@@ -481,13 +481,13 @@ namespace Aqualis
             html.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
         static member div (s:Style) = fun (p:position) code ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", [(s1+s).atr]) code
         static member text (s:Style) = fun (p:position) (text:string) ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
                 writein text
@@ -513,12 +513,12 @@ namespace Aqualis
             code(f,p)
             let sx,sy,mx,my = f.setWriteMode()
             writein (
-                "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
-                "width=\""+sx.ToString()+"px\" "+
-                "heigth=\""+sy.ToString()+"px\" "+
+                "<svg viewBox=\"0 0 "+InvariantFormat.number sx+" "+InvariantFormat.number sy+"\" "+
+                "width=\""+InvariantFormat.number sx+"px\" "+
+                "heigth=\""+InvariantFormat.number sy+"px\" "+
                 "xmlns=\"http://www.w3.org/2000/svg\" "+
-                "style=\"margin-left: "+mx.ToString()+"; "+
-                "margin-top: "+my.ToString()+"; "+
+                "style=\"margin-left: "+InvariantFormat.number mx+"; "+
+                "margin-top: "+InvariantFormat.number my+"; "+
                 "position: absolute;"+
                 "\">")
             code(f,p)
@@ -526,14 +526,14 @@ namespace Aqualis
 
         static member blockTextcode (s:Style) (p:position) (width:float,height:float) (borderWidth:float,borderStyle:string,borderColor:string) (text:list<string>) =
             let padding = 5
-            let s1 = Style [size.width (width.ToString()+"px")
-                            size.height (height.ToString()+"px")
+            let s1 = Style [size.width (InvariantFormat.number width+"px")
+                            size.height (InvariantFormat.number height+"px")
                             font.family "'Noto Sans Mono',monospace"
-                            {Key = "margin-left"; Value = p.x.ToString() + "px";}
-                            {Key = "margin-top"; Value = p.y.ToString() + "px";}
+                            {Key = "margin-left"; Value = InvariantFormat.number p.x + "px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y + "px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "overflow-wrap"; Value = "break-word";}
-                            {Key = "border-width"; Value = borderWidth.ToString() + "px";}
+                            {Key = "border-width"; Value = InvariantFormat.number borderWidth + "px";}
                             {Key = "border-style"; Value = borderStyle;}
                             {Key = "border-width"; Value = borderColor;}]
             html.tagb ("div", [(s1+s).atr])
@@ -546,8 +546,8 @@ namespace Aqualis
             Bottom = p.y+double height+2.0*double padding+2.0*double borderWidth;}
 
         static member textFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-size"; Value = size.ToString()+"px";}
                             {Key = "color"; Value = color.ToString();}]
@@ -688,10 +688,10 @@ namespace Aqualis
         member this.line (s:Style) = fun (startP:position) (endP:position) ->
             if writeMode then
                 html.taga ("line", [
-                    Atr("x1",(startP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y1",(startP.y-this.Ymin+this.Padding).ToString());
-                    Atr("x2",(endP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y2",(endP.y-this.Ymin+this.Padding).ToString());]@[s.atr])
+                    Atr("x1",InvariantFormat.number (startP.x-this.Xmin+this.Padding));
+                    Atr("y1",InvariantFormat.number (startP.y-this.Ymin+this.Padding));
+                    Atr("x2",InvariantFormat.number (endP.x-this.Xmin+this.Padding));
+                    Atr("y2",InvariantFormat.number (endP.y-this.Ymin+this.Padding));]@[s.atr])
             else
                 this.updateRange startP
                 this.updateRange endP
@@ -700,10 +700,10 @@ namespace Aqualis
             if writeMode then
                 html.taga ("line", [
                     Atr("id",id);
-                    Atr("x1",(startP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y1",(startP.y-this.Ymin+this.Padding).ToString());
-                    Atr("x2",(endP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y2",(endP.y-this.Ymin+this.Padding).ToString());]@[s.atr])
+                    Atr("x1",InvariantFormat.number (startP.x-this.Xmin+this.Padding));
+                    Atr("y1",InvariantFormat.number (startP.y-this.Ymin+this.Padding));
+                    Atr("x2",InvariantFormat.number (endP.x-this.Xmin+this.Padding));
+                    Atr("y2",InvariantFormat.number (endP.y-this.Ymin+this.Padding));]@[s.atr])
             else
                 this.updateRange startP
                 this.updateRange endP
@@ -711,10 +711,10 @@ namespace Aqualis
         member this.rect (s:Style) (startP:position) (sx:int) (sy:int) =
             if writeMode then
                 html.taga ("rect", [
-                    Atr("x", (startP.x-this.Xmin+this.Padding).ToString());
-                    Atr("y", (startP.y-this.Ymin+this.Padding).ToString());
-                    Atr("width",sx.ToString())
-                    Atr("height", sy.ToString())]@[s.atr])
+                    Atr("x", InvariantFormat.number (startP.x-this.Xmin+this.Padding));
+                    Atr("y", InvariantFormat.number (startP.y-this.Ymin+this.Padding));
+                    Atr("width",InvariantFormat.number sx)
+                    Atr("height", InvariantFormat.number sy)]@[s.atr])
             else
                 this.updateRange startP
                 this.updateRange(startP.shift(sx,sy))
@@ -722,10 +722,10 @@ namespace Aqualis
         member this.ellipse (s:Style) (center:position) (radiusX:int) (radiusY:int) =
             if writeMode then
                 html.taga ("ellipse", [
-                    Atr("cx", (center.x-this.Xmin+this.Padding).ToString());
-                    Atr("cy", (center.y-this.Ymin+this.Padding).ToString());
-                    Atr("rx", radiusX.ToString());
-                    Atr("ry", radiusY.ToString());]@[s.atr])
+                    Atr("cx", InvariantFormat.number (center.x-this.Xmin+this.Padding));
+                    Atr("cy", InvariantFormat.number (center.y-this.Ymin+this.Padding));
+                    Atr("rx", InvariantFormat.number radiusX);
+                    Atr("ry", InvariantFormat.number radiusY);]@[s.atr])
             else
                 this.updateRange(center.shiftX -radiusX)
                 this.updateRange(center.shiftX radiusX)
@@ -734,7 +734,7 @@ namespace Aqualis
 
         member this.polygon (s:Style) (apex:list<position>) =
             if writeMode then
-                let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
+                let pp = String.concat " " <| List.map (fun (p:position) -> InvariantFormat.number (p.x-this.Xmin+this.Padding)+","+InvariantFormat.number (p.y-this.Ymin+this.Padding)) apex
                 html.taga ("polygon", [Atr("points",pp)]@[s.atr])
             else
                 for q in apex do
@@ -742,7 +742,7 @@ namespace Aqualis
 
         member this.polyLine (s:Style) (apex:list<position>) =
             if writeMode then
-                let pp = String.concat " " <| List.map (fun (p:position) -> (p.x-this.Xmin+this.Padding).ToString()+","+(p.y-this.Ymin+this.Padding).ToString()) apex
+                let pp = String.concat " " <| List.map (fun (p:position) -> InvariantFormat.number (p.x-this.Xmin+this.Padding)+","+InvariantFormat.number (p.y-this.Ymin+this.Padding)) apex
                 html.taga ("polyline", [Atr("points", pp)]@[s.atr])
             else
                 for q in apex do

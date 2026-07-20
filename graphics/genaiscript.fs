@@ -487,9 +487,9 @@ type aiscriptmaker(writer:StreamWriter) =
                     let p = s.simp
                     match p with
                     |Inv(_,Int s) -> writer.Write((-s).ToString())
-                    |Inv(_,Dbl s) -> writer.Write((-s).ToString "0.000")
+                    |Inv(_,Dbl s) -> writer.Write(InvariantFormat.numberWithFormat "0.000" (-s))
                     |Int s -> writer.Write(s.ToString())
-                    |Dbl s -> writer.Write(s.ToString "0.000")
+                    |Dbl s -> writer.Write(InvariantFormat.numberWithFormat "0.000" s)
                     |_ -> printfn "出力できない値です：%s" <| p.ToString()
             writer.Write "\n"
         write x

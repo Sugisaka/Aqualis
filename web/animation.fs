@@ -770,8 +770,8 @@ module htmlexpr =
         /// <param name="p">表示位置</param>
         /// <param name="text">表示する数式</param>
         static member Mathtext (s:Style) (p:position) (text:PHPdata) =
-            let s1 = Style [{Key = "margin-left"; Value=p.x.ToString()+"px"}
-                            {Key = "margin-top"; Value=p.y.ToString()+"px"}
+            let s1 = Style [{Key = "margin-left"; Value=InvariantFormat.number p.x+"px"}
+                            {Key = "margin-top"; Value=InvariantFormat.number p.y+"px"}
                             {Key = "position"; Value = "absolute";}]
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
                 writein ("\\(" + text.code + "\\)")
@@ -790,7 +790,7 @@ module htmlexpr =
                     printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "image file not exist: %s" filename
-            let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
+            let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
             html.taga ("img", [st.atr;Atr("src", Path.GetFileName (AnimationGenerationScope.contentsDirectory()) + "\\" + f)])
         static member image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename
@@ -837,7 +837,7 @@ module htmlexpr =
                     printfn "directory not exist: %s" (AnimationGenerationScope.contentsDirectory())
             else
                 printfn "video file not exist: %s" filename
-            let st = Style [{Key="margin-left"; Value=p.x.ToString()+"px"}; {Key="margin-top"; Value=p.y.ToString()+"px"}] + s
+            let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
             html.tagv ("video", [st.atr;Atr("src", AnimationGenerationScope.contentsDirectory() + "\\" + f); Atr("controls", "")])
             html.tage "video"
         static member video (s:Style) = fun (filename:string) ->
@@ -1019,8 +1019,8 @@ module htmlexpr =
         /// 指定位置に画像を表示
         /// </summary>
         static member imageA (s:Style) = fun (p:position) (filename:string) ->
-            let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}]
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -1040,10 +1040,10 @@ module htmlexpr =
         /// <param name="text">表示する文字列のリスト</param>
         static member blockText (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
             let padding = 5
-            let s1 = Style [size.width (width.ToString()+"px")
-                            size.height (height.ToString()+"px")
-                            {Key = "margin-left"; Value = p.x.ToString()+"px";}
-                            {Key = "margin-top"; Value = p.y.ToString()+"px";}
+            let s1 = Style [size.width (InvariantFormat.number width+"px")
+                            size.height (InvariantFormat.number height+"px")
+                            {Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "overflow-wrap"; Value = "break-word";}]
             html.tagb ("div", [(s1+s).atr]) <| fun () ->
@@ -1116,10 +1116,10 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     /// <param name="startP, endP">直線の始点、終点</param>
     member this.line (s:Style) (startP:position) (endP:position) =
         let c = [
-            Atr("x1",startP.x.ToString())
-            Atr("y1",(double canvasY-startP.y).ToString())
-            Atr("x2",endP.x.ToString())
-            Atr("y2",(double canvasY-endP.y).ToString())]
+            Atr("x1",InvariantFormat.number startP.x)
+            Atr("y1",InvariantFormat.number (double canvasY-startP.y))
+            Atr("x2",InvariantFormat.number endP.x)
+            Atr("y2",InvariantFormat.number (double canvasY-endP.y))]
         html.taga ("line", [s.atr]@c)
     /// <summary>
     /// 楕円を描画
@@ -1128,10 +1128,10 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     /// <param name="radiusX, radiusY">x軸、Y軸方向の半径</param>
     member this.ellipse (s:Style) (center:position) (radiusX:float,radiusY:float) =
         let c = [
-            Atr("cx",center.x.ToString())
-            Atr("cy",(double canvasY-center.y).ToString())
-            Atr("rx",radiusX.ToString())
-            Atr("ry",radiusY.ToString())]
+            Atr("cx",InvariantFormat.number center.x)
+            Atr("cy",InvariantFormat.number (double canvasY-center.y))
+            Atr("rx",InvariantFormat.number radiusX)
+            Atr("ry",InvariantFormat.number radiusY)]
         html.taga ("ellipse", [s.atr]@c)
     /// <summary>
     /// 円を描画
@@ -1151,9 +1151,9 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let y2 = center.y + radiusY * sin theta2
         let d =
             if theta2-theta1 < Math.PI then
-                "M " + x1.ToString() + " " + (float canvasY-y1).ToString() + " A " + radiusX.ToString() + " " + radiusY.ToString() + " 0 0 0 " + x2.ToString() + " " + (float canvasY-y2).ToString()
+                "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 0 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
             else
-                "M " + x1.ToString() + " " + (float canvasY-y1).ToString() + " A " + radiusX.ToString() + " " + radiusY.ToString() + " 0 1 0 " + x2.ToString() + " " + (float canvasY-y2).ToString()
+                "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 1 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
         html.taga ("path", [s.atr]@[Atr("d",d)])
     /// <summary>
     /// 多角形を描画
@@ -1162,7 +1162,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     member this.polygon (s:Style) (apex:list<position>) =
         let pp =
             apex
-            |> List.map (fun p -> p.x.ToString() + "," + (double canvasY-p.y).ToString())
+            |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
         html.taga ("polygon", [s.atr]@[Atr("points",pp)])
     /// <summary>
@@ -1172,7 +1172,7 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     member this.polyline (s:Style) (apex:list<position>) =
         let pp =
             apex
-            |> List.map (fun p -> p.x.ToString() + "," + (double canvasY-p.y).ToString())
+            |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
         html.taga ("polyline", [s.atr]@[Atr("points",pp)])
     /// <summary>
@@ -1201,10 +1201,10 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     /// <param name="sx, sy">四角形の横幅、縦幅</param>
     member this.rect (s:Style) (center:position) (sx:float,sy:float) =
         let c = [
-            Atr("x",(center.x-0.5*sx).ToString())
-            Atr("y",(double canvasY-center.y-0.5*sy).ToString())
-            Atr("width",sx.ToString())
-            Atr("height",sy.ToString())]
+            Atr("x",InvariantFormat.number (center.x-0.5*sx))
+            Atr("y",InvariantFormat.number (double canvasY-center.y-0.5*sy))
+            Atr("width",InvariantFormat.number sx)
+            Atr("height",InvariantFormat.number sy)]
         html.taga ("rect", [s.atr]@c)
     /// <summary>
     /// テキストを表示
@@ -1215,8 +1215,8 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
-            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
-            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+            {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
+            {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
         html.tagb ("div", [ss.atr]) <| fun () ->
             writein str
@@ -1228,8 +1228,8 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
-            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
-            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+            {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
+            {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
         html.tagb ("div", [ss.atr]) <| fun () ->
             writein ("\\(" + e.Expr.evalH (GenerationScope.currentProgram()) + "\\)")
@@ -1241,8 +1241,8 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
-            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
-            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+            {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
+            {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
         html.tagb ("div", [ss.atr]) <| fun () ->
             writein ("\\(" + e.Expr.evalH (GenerationScope.currentProgram()) + "\\)")
@@ -1254,8 +1254,8 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
-            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
-            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+            {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
+            {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
         html.tagb ("div", [ss.atr]) <| fun () ->
             writein ("\\(" + e.Expr.evalH (GenerationScope.currentProgram()) + "\\)")
@@ -1269,8 +1269,8 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
-            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
-            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+            {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
+            {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
         html.taga ("img", [ss.atr; Atr("src",AnimationGenerationScope.contentsDirectory() + "\\" + f)])
     /// <summary>
