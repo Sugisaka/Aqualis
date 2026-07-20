@@ -57,6 +57,7 @@
     <Compile Include="num\str.fs" />
     <Compile Include="num\fileio.fs" />
     <Compile Include="num\args.fs" />
+    <Compile Include="num\strCRTP.fs" />
     <Compile Include="num\declare.fs" />
     <Compile Include="num\template.fs" />
     <Compile Include="math\geometry.fs" />

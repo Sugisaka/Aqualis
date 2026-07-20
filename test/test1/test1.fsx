@@ -26,11 +26,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((6.2*(4.2/(-7.7)*(-2.1)))-y-6.8)).Expr.eval (programList[prIndex])
+        let s = (((6.2*(4.2/(-7.7)*(-2.1)))-y-6.8)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((6.2*(4.2/(-7.7)*(-2.1)))-q-6.8)
             z2 <== ((6.2*(4.2/(-7.7)*(-2.1)))-y-6.8)
-            wr [I 1; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 1)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 2
         !"test002"
         //let z0 = (-x)
@@ -39,11 +39,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 2; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 2)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 3
         !"test003"
         //let z0 = (-6.2)
@@ -68,11 +68,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y)+5.6)+(y/(-y)-x+x/4.6)+((-x)))+(x/(y+(-y))+(-1.3)+x*y))).Expr.eval (programList[prIndex])
+        let s = (((((-y)+5.6)+(y/(-y)-x+x/4.6)+((-x)))+(x/(y+(-y))+(-1.3)+x*y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q)+5.6)+(q/(-q)-p+p/4.6)+((-p)))+(p/(q+(-q))+(-1.3)+p*q))
             z2 <== ((((-y)+5.6)+(y/(-y)-x+x/4.6)+((-x)))+(x/(y+(-y))+(-1.3)+x*y))
-            wr [I 5; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 5)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 6
         !"test006"
         //let z0 = (5.2/7.4+(((-6.6)*(-x)))*((y)/(-7.3)*((-y)-8.4*x-(-5.5)))-x)
@@ -81,11 +81,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.2/7.4+(((-6.6)*(-x)))*((y)/(-7.3)*((-y)-8.4*x-(-5.5)))-x)).Expr.eval (programList[prIndex])
+        let s = ((5.2/7.4+(((-6.6)*(-x)))*((y)/(-7.3)*((-y)-8.4*x-(-5.5)))-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.2/7.4+(((-6.6)*(-p)))*((q)/(-7.3)*((-q)-8.4*p-(-5.5)))-p)
             z2 <== (5.2/7.4+(((-6.6)*(-x)))*((y)/(-7.3)*((-y)-8.4*x-(-5.5)))-x)
-            wr [I 6; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 6)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 7
         !"test007"
         //let z0 = ((y)+y+(0.8)*(-8.6)/7.1)
@@ -94,11 +94,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y)+y+(0.8)*(-8.6)/7.1)).Expr.eval (programList[prIndex])
+        let s = (((y)+y+(0.8)*(-8.6)/7.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q)+q+(0.8)*(-8.6)/7.1)
             z2 <== ((y)+y+(0.8)*(-8.6)/7.1)
-            wr [I 7; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 7)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 8
         !"test008"
         //let z0 = 5.0
@@ -115,11 +115,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 9; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 9)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 10
         !"test010"
         //let z0 = (y+((-8.5)/5.3+(4.6*(-y)+x-7.2))-(2.1-(8.1*(-x))*((-3.8)+1.2)+(-y)-(-2.7))*6.8+(y/4.0+6.3-0.0*y)+x*(-1.0))
@@ -128,11 +128,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+((-8.5)/5.3+(4.6*(-y)+x-7.2))-(2.1-(8.1*(-x))*((-3.8)+1.2)+(-y)-(-2.7))*6.8+(y/4.0+6.3-0.0*y)+x*(-1.0))).Expr.eval (programList[prIndex])
+        let s = ((y+((-8.5)/5.3+(4.6*(-y)+x-7.2))-(2.1-(8.1*(-x))*((-3.8)+1.2)+(-y)-(-2.7))*6.8+(y/4.0+6.3-0.0*y)+x*(-1.0))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+((-8.5)/5.3+(4.6*(-q)+p-7.2))-(2.1-(8.1*(-p))*((-3.8)+1.2)+(-q)-(-2.7))*6.8+(q/4.0+6.3-0.0*q)+p*(-1.0))
             z2 <== (y+((-8.5)/5.3+(4.6*(-y)+x-7.2))-(2.1-(8.1*(-x))*((-3.8)+1.2)+(-y)-(-2.7))*6.8+(y/4.0+6.3-0.0*y)+x*(-1.0))
-            wr [I 10; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 10)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 11
         !"test011"
         //let z0 = ((y*(-y)+(-1.1))*5.7)*8.2*(y*(-4.3)*((-3.4))-4.7)*((-y))+((-y))+x-y
@@ -141,11 +141,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y*(-y)+(-1.1))*5.7)*8.2*(y*(-4.3)*((-3.4))-4.7)*((-y))+((-y))+x-y).Expr.eval (programList[prIndex])
+        let s = (((y*(-y)+(-1.1))*5.7)*8.2*(y*(-4.3)*((-3.4))-4.7)*((-y))+((-y))+x-y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q*(-q)+(-1.1))*5.7)*8.2*(q*(-4.3)*((-3.4))-4.7)*((-q))+((-q))+p-q
             z2 <== ((y*(-y)+(-1.1))*5.7)*8.2*(y*(-4.3)*((-3.4))-4.7)*((-y))+((-y))+x-y
-            wr [I 11; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 11)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 12
         !"test012"
         //let z0 = 2.2
@@ -170,11 +170,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 14; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 14)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 15
         !"test015"
         //let z0 = (-x)
@@ -183,11 +183,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 15; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 15)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 16
         !"test016"
         //let z0 = 1.1
@@ -204,11 +204,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)/(((-x)*(-y)*(-y)*y)*(3.5)/8.7-(-1.6)))).Expr.eval (programList[prIndex])
+        let s = (((-x)/(((-x)*(-y)*(-y)*y)*(3.5)/8.7-(-1.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)/(((-p)*(-q)*(-q)*q)*(3.5)/8.7-(-1.6)))
             z2 <== ((-x)/(((-x)*(-y)*(-y)*y)*(3.5)/8.7-(-1.6)))
-            wr [I 17; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 17)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 18
         !"test018"
         //let z0 = (2.7-6.2)
@@ -225,11 +225,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((7.0)+y*x-x)).Expr.eval (programList[prIndex])
+        let s = (((7.0)+y*x-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((7.0)+q*p-p)
             z2 <== ((7.0)+y*x-x)
-            wr [I 19; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 19)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 20
         !"test020"
         //let z0 = (-4.2)
@@ -246,11 +246,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-0.4)+6.3*2.2-(-x))-0.7-(1.6/3.5*x)-(4.1*x+0.7/y*y))+((x/x/2.8))).Expr.eval (programList[prIndex])
+        let s = ((((-0.4)+6.3*2.2-(-x))-0.7-(1.6/3.5*x)-(4.1*x+0.7/y*y))+((x/x/2.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-0.4)+6.3*2.2-(-p))-0.7-(1.6/3.5*p)-(4.1*p+0.7/q*q))+((p/p/2.8))
             z2 <== (((-0.4)+6.3*2.2-(-x))-0.7-(1.6/3.5*x)-(4.1*x+0.7/y*y))+((x/x/2.8))
-            wr [I 21; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 21)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 22
         !"test022"
         //let z0 = ((((-0.6)-(-2.5)+(-5.8)-(-y)))/5.8-((5.2*(-0.4))+4.3*(-x)*(y+y+7.5*1.8-7.2)))
@@ -259,11 +259,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-0.6)-(-2.5)+(-5.8)-(-y)))/5.8-((5.2*(-0.4))+4.3*(-x)*(y+y+7.5*1.8-7.2)))).Expr.eval (programList[prIndex])
+        let s = (((((-0.6)-(-2.5)+(-5.8)-(-y)))/5.8-((5.2*(-0.4))+4.3*(-x)*(y+y+7.5*1.8-7.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-0.6)-(-2.5)+(-5.8)-(-q)))/5.8-((5.2*(-0.4))+4.3*(-p)*(q+q+7.5*1.8-7.2)))
             z2 <== ((((-0.6)-(-2.5)+(-5.8)-(-y)))/5.8-((5.2*(-0.4))+4.3*(-x)*(y+y+7.5*1.8-7.2)))
-            wr [I 22; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 22)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 23
         !"test023"
         //let z0 = (-x)
@@ -272,11 +272,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 23; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 23)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 24
         !"test024"
         //let z0 = 6.1
@@ -293,11 +293,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x))).Expr.eval (programList[prIndex])
+        let s = (((-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p))
             z2 <== ((-x))
-            wr [I 25; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 25)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 26
         !"test026"
         //let z0 = (x*(((-5.5)+(-4.5)*1.4/(-6.8)+(-y))*6.7*(x-(-x)-y-(-x))/((-y)/(-7.4)+y+(-y))/y)*2.8-y+(((-x)-y+(-0.7)/(-y))*2.7-(4.7+(-y))))
@@ -306,11 +306,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*(((-5.5)+(-4.5)*1.4/(-6.8)+(-y))*6.7*(x-(-x)-y-(-x))/((-y)/(-7.4)+y+(-y))/y)*2.8-y+(((-x)-y+(-0.7)/(-y))*2.7-(4.7+(-y))))).Expr.eval (programList[prIndex])
+        let s = ((x*(((-5.5)+(-4.5)*1.4/(-6.8)+(-y))*6.7*(x-(-x)-y-(-x))/((-y)/(-7.4)+y+(-y))/y)*2.8-y+(((-x)-y+(-0.7)/(-y))*2.7-(4.7+(-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*(((-5.5)+(-4.5)*1.4/(-6.8)+(-q))*6.7*(p-(-p)-q-(-p))/((-q)/(-7.4)+q+(-q))/q)*2.8-q+(((-p)-q+(-0.7)/(-q))*2.7-(4.7+(-q))))
             z2 <== (x*(((-5.5)+(-4.5)*1.4/(-6.8)+(-y))*6.7*(x-(-x)-y-(-x))/((-y)/(-7.4)+y+(-y))/y)*2.8-y+(((-x)-y+(-0.7)/(-y))*2.7-(4.7+(-y))))
-            wr [I 26; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 26)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 27
         !"test027"
         //let z0 = (-0.3)
@@ -351,11 +351,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.2*(-x))).Expr.eval (programList[prIndex])
+        let s = ((5.2*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.2*(-p))
             z2 <== (5.2*(-x))
-            wr [I 31; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 31)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 32
         !"test032"
         //let z0 = ((x-2.8)-(-y)-y)
@@ -364,11 +364,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-2.8)-(-y)-y)).Expr.eval (programList[prIndex])
+        let s = (((x-2.8)-(-y)-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-2.8)-(-q)-q)
             z2 <== ((x-2.8)-(-y)-y)
-            wr [I 32; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 32)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 33
         !"test033"
         //let z0 = ((((-x)))*((-y)+((-y)-7.2))*((-2.4)+((-y)))+y+(-x))
@@ -377,11 +377,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)))*((-y)+((-y)-7.2))*((-2.4)+((-y)))+y+(-x))).Expr.eval (programList[prIndex])
+        let s = (((((-x)))*((-y)+((-y)-7.2))*((-2.4)+((-y)))+y+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)))*((-q)+((-q)-7.2))*((-2.4)+((-q)))+q+(-p))
             z2 <== ((((-x)))*((-y)+((-y)-7.2))*((-2.4)+((-y)))+y+(-x))
-            wr [I 33; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 33)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 34
         !"test034"
         //let z0 = 6.4
@@ -398,11 +398,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x+(x-(-2.8)+y+(-5.8)/(-4.2))+(-3.5)-(-0.7)-(-6.8)*(x/(-y)+(-8.5))*(-7.3)-((-3.8)+(-y))-((6.7)-8.7-(-1.1)-(-7.0)+(-0.3)/1.0))).Expr.eval (programList[prIndex])
+        let s = ((x+(x-(-2.8)+y+(-5.8)/(-4.2))+(-3.5)-(-0.7)-(-6.8)*(x/(-y)+(-8.5))*(-7.3)-((-3.8)+(-y))-((6.7)-8.7-(-1.1)-(-7.0)+(-0.3)/1.0))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p+(p-(-2.8)+q+(-5.8)/(-4.2))+(-3.5)-(-0.7)-(-6.8)*(p/(-q)+(-8.5))*(-7.3)-((-3.8)+(-q))-((6.7)-8.7-(-1.1)-(-7.0)+(-0.3)/1.0))
             z2 <== (x+(x-(-2.8)+y+(-5.8)/(-4.2))+(-3.5)-(-0.7)-(-6.8)*(x/(-y)+(-8.5))*(-7.3)-((-3.8)+(-y))-((6.7)-8.7-(-1.1)-(-7.0)+(-0.3)/1.0))
-            wr [I 35; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 35)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 36
         !"test036"
         //let z0 = (-y)
@@ -411,11 +411,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 36; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 36)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 37
         !"test037"
         //let z0 = (6.3-(-y)/5.8*7.1/(-y)+8.0-3.3)-((-x)-(-x)-(-8.7))+3.5-(-2.5)-3.0/1.7+(-x)*(-x)
@@ -424,11 +424,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((6.3-(-y)/5.8*7.1/(-y)+8.0-3.3)-((-x)-(-x)-(-8.7))+3.5-(-2.5)-3.0/1.7+(-x)*(-x)).Expr.eval (programList[prIndex])
+        let s = ((6.3-(-y)/5.8*7.1/(-y)+8.0-3.3)-((-x)-(-x)-(-8.7))+3.5-(-2.5)-3.0/1.7+(-x)*(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (6.3-(-q)/5.8*7.1/(-q)+8.0-3.3)-((-p)-(-p)-(-8.7))+3.5-(-2.5)-3.0/1.7+(-p)*(-p)
             z2 <== (6.3-(-y)/5.8*7.1/(-y)+8.0-3.3)-((-x)-(-x)-(-8.7))+3.5-(-2.5)-3.0/1.7+(-x)*(-x)
-            wr [I 37; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 37)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 38
         !"test038"
         //let z0 = (-2.2)
@@ -445,11 +445,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+8.7*(x+(-y)-x)+(-y)*(y*(-x)-(-6.6)-x+y)*x*(x)/((-x)*y+(-5.5)/0.1))).Expr.eval (programList[prIndex])
+        let s = (((-x)+8.7*(x+(-y)-x)+(-y)*(y*(-x)-(-6.6)-x+y)*x*(x)/((-x)*y+(-5.5)/0.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+8.7*(p+(-q)-p)+(-q)*(q*(-p)-(-6.6)-p+q)*p*(p)/((-p)*q+(-5.5)/0.1))
             z2 <== ((-x)+8.7*(x+(-y)-x)+(-y)*(y*(-x)-(-6.6)-x+y)*x*(x)/((-x)*y+(-5.5)/0.1))
-            wr [I 39; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 39)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 40
         !"test040"
         //let z0 = (-y)
@@ -458,11 +458,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 40; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 40)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 41
         !"test041"
         //let z0 = (-2.4)
@@ -479,11 +479,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 42; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 42)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 43
         !"test043"
         //let z0 = (((y/(-y)*(-7.8)*x)+(-x)/(7.1))/y-(((-x)+(-2.8)-(-y)*(-4.4)*5.6)*(y+(-5.4)-(-7.0)/(-8.7))+3.4+6.1/1.1)*y*((-y))/(0.1*(-2.4)*(-7.2)-(-0.0))/(-y)-0.3)
@@ -492,11 +492,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((y/(-y)*(-7.8)*x)+(-x)/(7.1))/y-(((-x)+(-2.8)-(-y)*(-4.4)*5.6)*(y+(-5.4)-(-7.0)/(-8.7))+3.4+6.1/1.1)*y*((-y))/(0.1*(-2.4)*(-7.2)-(-0.0))/(-y)-0.3)).Expr.eval (programList[prIndex])
+        let s = ((((y/(-y)*(-7.8)*x)+(-x)/(7.1))/y-(((-x)+(-2.8)-(-y)*(-4.4)*5.6)*(y+(-5.4)-(-7.0)/(-8.7))+3.4+6.1/1.1)*y*((-y))/(0.1*(-2.4)*(-7.2)-(-0.0))/(-y)-0.3)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((q/(-q)*(-7.8)*p)+(-p)/(7.1))/q-(((-p)+(-2.8)-(-q)*(-4.4)*5.6)*(q+(-5.4)-(-7.0)/(-8.7))+3.4+6.1/1.1)*q*((-q))/(0.1*(-2.4)*(-7.2)-(-0.0))/(-q)-0.3)
             z2 <== (((y/(-y)*(-7.8)*x)+(-x)/(7.1))/y-(((-x)+(-2.8)-(-y)*(-4.4)*5.6)*(y+(-5.4)-(-7.0)/(-8.7))+3.4+6.1/1.1)*y*((-y))/(0.1*(-2.4)*(-7.2)-(-0.0))/(-y)-0.3)
-            wr [I 43; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 43)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 44
         !"test044"
         //let z0 = (y*((-1.8)-(y*1.6*(-y))/(y-y)/(-y)+(-8.6)/y+y)-(x*(-0.1)/4.7)+(-0.0)+((-y)-(-y)+(-3.0))-((-6.6))/((-y)+(6.3+7.2-(-7.7)/(-x)/(-7.5))+(-x)+(-0.2)*8.3))
@@ -505,11 +505,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*((-1.8)-(y*1.6*(-y))/(y-y)/(-y)+(-8.6)/y+y)-(x*(-0.1)/4.7)+(-0.0)+((-y)-(-y)+(-3.0))-((-6.6))/((-y)+(6.3+7.2-(-7.7)/(-x)/(-7.5))+(-x)+(-0.2)*8.3))).Expr.eval (programList[prIndex])
+        let s = ((y*((-1.8)-(y*1.6*(-y))/(y-y)/(-y)+(-8.6)/y+y)-(x*(-0.1)/4.7)+(-0.0)+((-y)-(-y)+(-3.0))-((-6.6))/((-y)+(6.3+7.2-(-7.7)/(-x)/(-7.5))+(-x)+(-0.2)*8.3))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*((-1.8)-(q*1.6*(-q))/(q-q)/(-q)+(-8.6)/q+q)-(p*(-0.1)/4.7)+(-0.0)+((-q)-(-q)+(-3.0))-((-6.6))/((-q)+(6.3+7.2-(-7.7)/(-p)/(-7.5))+(-p)+(-0.2)*8.3))
             z2 <== (y*((-1.8)-(y*1.6*(-y))/(y-y)/(-y)+(-8.6)/y+y)-(x*(-0.1)/4.7)+(-0.0)+((-y)-(-y)+(-3.0))-((-6.6))/((-y)+(6.3+7.2-(-7.7)/(-x)/(-7.5))+(-x)+(-0.2)*8.3))
-            wr [I 44; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 44)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 45
         !"test045"
         //let z0 = (-x)
@@ -518,11 +518,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 45; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 45)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 46
         !"test046"
         //let z0 = (-2.6)
@@ -539,11 +539,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)-y+(-5.2)*((-x))/(-x)-x/0.0+(x*4.6)/((-0.8)*(-y)))).Expr.eval (programList[prIndex])
+        let s = (((-x)-y+(-5.2)*((-x))/(-x)-x/0.0+(x*4.6)/((-0.8)*(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)-q+(-5.2)*((-p))/(-p)-p/0.0+(p*4.6)/((-0.8)*(-q)))
             z2 <== ((-x)-y+(-5.2)*((-x))/(-x)-x/0.0+(x*4.6)/((-0.8)*(-y)))
-            wr [I 47; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 47)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 48
         !"test048"
         //let z0 = (7.6+(4.7)/(x+y/0.1+(-0.7)+(-x))/(8.3*(-y)*(-x)/y/(-x))+x/x*x+(-x))
@@ -552,11 +552,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.6+(4.7)/(x+y/0.1+(-0.7)+(-x))/(8.3*(-y)*(-x)/y/(-x))+x/x*x+(-x))).Expr.eval (programList[prIndex])
+        let s = ((7.6+(4.7)/(x+y/0.1+(-0.7)+(-x))/(8.3*(-y)*(-x)/y/(-x))+x/x*x+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.6+(4.7)/(p+q/0.1+(-0.7)+(-p))/(8.3*(-q)*(-p)/q/(-p))+p/p*p+(-p))
             z2 <== (7.6+(4.7)/(x+y/0.1+(-0.7)+(-x))/(8.3*(-y)*(-x)/y/(-x))+x/x*x+(-x))
-            wr [I 48; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 48)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 49
         !"test049"
         //let z0 = (-4.5)
@@ -573,11 +573,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.2/((-y)/(-x)/(-x)*y)/6.3*2.7-(-2.0)-1.1/(2.1-(-y)/(-5.8)*(-x)-x))).Expr.eval (programList[prIndex])
+        let s = ((7.2/((-y)/(-x)/(-x)*y)/6.3*2.7-(-2.0)-1.1/(2.1-(-y)/(-5.8)*(-x)-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.2/((-q)/(-p)/(-p)*q)/6.3*2.7-(-2.0)-1.1/(2.1-(-q)/(-5.8)*(-p)-p))
             z2 <== (7.2/((-y)/(-x)/(-x)*y)/6.3*2.7-(-2.0)-1.1/(2.1-(-y)/(-5.8)*(-x)-x))
-            wr [I 50; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 50)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 51
         !"test051"
         //let z0 = 3.1
@@ -602,11 +602,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x))).Expr.eval (programList[prIndex])
+        let s = (((-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p))
             z2 <== ((-x))
-            wr [I 53; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 53)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 54
         !"test054"
         //let z0 = ((-y)+(-x)*0.8/(-7.5))
@@ -615,11 +615,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)+(-x)*0.8/(-7.5))).Expr.eval (programList[prIndex])
+        let s = (((-y)+(-x)*0.8/(-7.5))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)+(-p)*0.8/(-7.5))
             z2 <== ((-y)+(-x)*0.8/(-7.5))
-            wr [I 54; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 54)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 55
         !"test055"
         //let z0 = (2.0)
@@ -636,11 +636,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)*(-x)+1.4)/x*y/(2.4*(-4.5)))-x-x)).Expr.eval (programList[prIndex])
+        let s = (((((-x)*(-x)+1.4)/x*y/(2.4*(-4.5)))-x-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)*(-p)+1.4)/p*q/(2.4*(-4.5)))-p-p)
             z2 <== ((((-x)*(-x)+1.4)/x*y/(2.4*(-4.5)))-x-x)
-            wr [I 56; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 56)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 57
         !"test057"
         //let z0 = (-y)
@@ -649,11 +649,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 57; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 57)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 58
         !"test058"
         //let z0 = y
@@ -662,11 +662,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 58; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 58)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 59
         !"test059"
         //let z0 = (-4.5)
@@ -691,11 +691,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((7.6*(-x)*x*(-x))+(y-1.6))*y)).Expr.eval (programList[prIndex])
+        let s = ((((7.6*(-x)*x*(-x))+(y-1.6))*y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((7.6*(-p)*p*(-p))+(q-1.6))*q)
             z2 <== (((7.6*(-x)*x*(-x))+(y-1.6))*y)
-            wr [I 61; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 61)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 62
         !"test062"
         //let z0 = (5.7-8.5*y)
@@ -704,11 +704,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.7-8.5*y)).Expr.eval (programList[prIndex])
+        let s = ((5.7-8.5*y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.7-8.5*q)
             z2 <== (5.7-8.5*y)
-            wr [I 62; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 62)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 63
         !"test063"
         //let z0 = (x/x)
@@ -717,11 +717,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/x)).Expr.eval (programList[prIndex])
+        let s = ((x/x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/p)
             z2 <== (x/x)
-            wr [I 63; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 63)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 64
         !"test064"
         //let z0 = x
@@ -730,11 +730,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 64; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 64)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 65
         !"test065"
         //let z0 = (-y)
@@ -743,11 +743,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 65; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 65)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 66
         !"test066"
         //let z0 = (1.6-y)
@@ -756,11 +756,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((1.6-y)).Expr.eval (programList[prIndex])
+        let s = ((1.6-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (1.6-q)
             z2 <== (1.6-y)
-            wr [I 66; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 66)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 67
         !"test067"
         //let z0 = (-x)
@@ -769,11 +769,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 67; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 67)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 68
         !"test068"
         //let z0 = y
@@ -782,11 +782,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 68; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 68)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 69
         !"test069"
         //let z0 = x
@@ -795,11 +795,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 69; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 69)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 70
         !"test070"
         //let z0 = ((-6.7)/(4.2*(-1.1)*y)*(-x)*x-x-((-x)+x/y)-y+(-4.2)*x)
@@ -808,11 +808,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-6.7)/(4.2*(-1.1)*y)*(-x)*x-x-((-x)+x/y)-y+(-4.2)*x)).Expr.eval (programList[prIndex])
+        let s = (((-6.7)/(4.2*(-1.1)*y)*(-x)*x-x-((-x)+x/y)-y+(-4.2)*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-6.7)/(4.2*(-1.1)*q)*(-p)*p-p-((-p)+p/q)-q+(-4.2)*p)
             z2 <== ((-6.7)/(4.2*(-1.1)*y)*(-x)*x-x-((-x)+x/y)-y+(-4.2)*x)
-            wr [I 70; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 70)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 71
         !"test071"
         //let z0 = (-x)
@@ -821,11 +821,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 71; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 71)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 72
         !"test072"
         //let z0 = ((-5.1)/(-y)*(-x)-(7.5-(-3.1)-(-2.0)+(-y)-(-6.1)))
@@ -834,11 +834,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-5.1)/(-y)*(-x)-(7.5-(-3.1)-(-2.0)+(-y)-(-6.1)))).Expr.eval (programList[prIndex])
+        let s = (((-5.1)/(-y)*(-x)-(7.5-(-3.1)-(-2.0)+(-y)-(-6.1)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-5.1)/(-q)*(-p)-(7.5-(-3.1)-(-2.0)+(-q)-(-6.1)))
             z2 <== ((-5.1)/(-y)*(-x)-(7.5-(-3.1)-(-2.0)+(-y)-(-6.1)))
-            wr [I 72; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 72)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 73
         !"test073"
         //let z0 = (-1.3)
@@ -855,11 +855,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 74; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 74)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 75
         !"test075"
         //let z0 = 5.4
@@ -892,11 +892,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 78; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 78)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 79
         !"test079"
         //let z0 = ((x-1.6*7.7)*(x/(-3.5)+(-x))+(y*(-8.4)+0.4-x)/((-y)*y)*(-y)*(-8.1)-(-8.2)+3.0*(-x)*x/(-7.7)/(-1.8)-3.4/(2.0+(-y))-x-y)
@@ -905,11 +905,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-1.6*7.7)*(x/(-3.5)+(-x))+(y*(-8.4)+0.4-x)/((-y)*y)*(-y)*(-8.1)-(-8.2)+3.0*(-x)*x/(-7.7)/(-1.8)-3.4/(2.0+(-y))-x-y)).Expr.eval (programList[prIndex])
+        let s = (((x-1.6*7.7)*(x/(-3.5)+(-x))+(y*(-8.4)+0.4-x)/((-y)*y)*(-y)*(-8.1)-(-8.2)+3.0*(-x)*x/(-7.7)/(-1.8)-3.4/(2.0+(-y))-x-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-1.6*7.7)*(p/(-3.5)+(-p))+(q*(-8.4)+0.4-p)/((-q)*q)*(-q)*(-8.1)-(-8.2)+3.0*(-p)*p/(-7.7)/(-1.8)-3.4/(2.0+(-q))-p-q)
             z2 <== ((x-1.6*7.7)*(x/(-3.5)+(-x))+(y*(-8.4)+0.4-x)/((-y)*y)*(-y)*(-8.1)-(-8.2)+3.0*(-x)*x/(-7.7)/(-1.8)-3.4/(2.0+(-y))-x-y)
-            wr [I 79; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 79)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 80
         !"test080"
         //let z0 = ((-0.4))
@@ -926,11 +926,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/(-3.0))).Expr.eval (programList[prIndex])
+        let s = ((x/(-3.0))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/(-3.0))
             z2 <== (x/(-3.0))
-            wr [I 81; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 81)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 82
         !"test082"
         //let z0 = (y/(3.2/(-5.1)/y)-(7.7*y*(-y))/(5.0-(8.4*(-y)+(-y)*y)+(-1.6)-y+(-x)-4.1-5.2)-((-8.4)*x-(-y)+(-x)-(-4.5))+(-3.4)*(-y)+y-y*((y*y/2.0)))
@@ -939,11 +939,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y/(3.2/(-5.1)/y)-(7.7*y*(-y))/(5.0-(8.4*(-y)+(-y)*y)+(-1.6)-y+(-x)-4.1-5.2)-((-8.4)*x-(-y)+(-x)-(-4.5))+(-3.4)*(-y)+y-y*((y*y/2.0)))).Expr.eval (programList[prIndex])
+        let s = ((y/(3.2/(-5.1)/y)-(7.7*y*(-y))/(5.0-(8.4*(-y)+(-y)*y)+(-1.6)-y+(-x)-4.1-5.2)-((-8.4)*x-(-y)+(-x)-(-4.5))+(-3.4)*(-y)+y-y*((y*y/2.0)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q/(3.2/(-5.1)/q)-(7.7*q*(-q))/(5.0-(8.4*(-q)+(-q)*q)+(-1.6)-q+(-p)-4.1-5.2)-((-8.4)*p-(-q)+(-p)-(-4.5))+(-3.4)*(-q)+q-q*((q*q/2.0)))
             z2 <== (y/(3.2/(-5.1)/y)-(7.7*y*(-y))/(5.0-(8.4*(-y)+(-y)*y)+(-1.6)-y+(-x)-4.1-5.2)-((-8.4)*x-(-y)+(-x)-(-4.5))+(-3.4)*(-y)+y-y*((y*y/2.0)))
-            wr [I 82; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 82)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 83
         !"test083"
         //let z0 = (-7.7)
@@ -968,11 +968,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 85; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 85)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 86
         !"test086"
         //let z0 = (7.5*0.1/((-x)-6.8/(-y))/y-(-y)+(5.4*x-(-y)-(-y)*(-8.7)))
@@ -981,11 +981,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.5*0.1/((-x)-6.8/(-y))/y-(-y)+(5.4*x-(-y)-(-y)*(-8.7)))).Expr.eval (programList[prIndex])
+        let s = ((7.5*0.1/((-x)-6.8/(-y))/y-(-y)+(5.4*x-(-y)-(-y)*(-8.7)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.5*0.1/((-p)-6.8/(-q))/q-(-q)+(5.4*p-(-q)-(-q)*(-8.7)))
             z2 <== (7.5*0.1/((-x)-6.8/(-y))/y-(-y)+(5.4*x-(-y)-(-y)*(-8.7)))
-            wr [I 86; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 86)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 87
         !"test087"
         //let z0 = ((-5.6))
@@ -1002,11 +1002,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 88; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 88)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 89
         !"test089"
         //let z0 = y
@@ -1015,11 +1015,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 89; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 89)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 90
         !"test090"
         //let z0 = (-4.1)
@@ -1036,11 +1036,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 91; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 91)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 92
         !"test092"
         //let z0 = (-x)
@@ -1049,11 +1049,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 92; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 92)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 93
         !"test093"
         //let z0 = (1.3-3.6+y-5.5)
@@ -1062,11 +1062,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((1.3-3.6+y-5.5)).Expr.eval (programList[prIndex])
+        let s = ((1.3-3.6+y-5.5)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (1.3-3.6+q-5.5)
             z2 <== (1.3-3.6+y-5.5)
-            wr [I 93; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 93)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 94
         !"test094"
         //let z0 = (-5.7)
@@ -1083,11 +1083,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((0.4/1.5)*(x+(-y)*y-2.6/8.7)+4.0-2.2*(-x)))).Expr.eval (programList[prIndex])
+        let s = ((((0.4/1.5)*(x+(-y)*y-2.6/8.7)+4.0-2.2*(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((0.4/1.5)*(p+(-q)*q-2.6/8.7)+4.0-2.2*(-p)))
             z2 <== (((0.4/1.5)*(x+(-y)*y-2.6/8.7)+4.0-2.2*(-x)))
-            wr [I 95; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 95)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 96
         !"test096"
         //let z0 = (-y)
@@ -1096,11 +1096,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 96; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 96)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 97
         !"test097"
         //let z0 = ((((-0.3)/(-4.0)*(-x)+5.0)-x*(-x)-(-0.7))/((-x)*5.4-8.1/(x)+((-y)-(-y)/6.7/y))/((-y)*1.6*y*(-y)+x+(-y)-((-2.1)+x/2.6-(-y)+(-x))+x/x+x/(-5.7))*((x/(-x)*(-y)-(-y)/(-7.3))*x*1.3))
@@ -1109,11 +1109,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-0.3)/(-4.0)*(-x)+5.0)-x*(-x)-(-0.7))/((-x)*5.4-8.1/(x)+((-y)-(-y)/6.7/y))/((-y)*1.6*y*(-y)+x+(-y)-((-2.1)+x/2.6-(-y)+(-x))+x/x+x/(-5.7))*((x/(-x)*(-y)-(-y)/(-7.3))*x*1.3))).Expr.eval (programList[prIndex])
+        let s = (((((-0.3)/(-4.0)*(-x)+5.0)-x*(-x)-(-0.7))/((-x)*5.4-8.1/(x)+((-y)-(-y)/6.7/y))/((-y)*1.6*y*(-y)+x+(-y)-((-2.1)+x/2.6-(-y)+(-x))+x/x+x/(-5.7))*((x/(-x)*(-y)-(-y)/(-7.3))*x*1.3))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-0.3)/(-4.0)*(-p)+5.0)-p*(-p)-(-0.7))/((-p)*5.4-8.1/(p)+((-q)-(-q)/6.7/q))/((-q)*1.6*q*(-q)+p+(-q)-((-2.1)+p/2.6-(-q)+(-p))+p/p+p/(-5.7))*((p/(-p)*(-q)-(-q)/(-7.3))*p*1.3))
             z2 <== ((((-0.3)/(-4.0)*(-x)+5.0)-x*(-x)-(-0.7))/((-x)*5.4-8.1/(x)+((-y)-(-y)/6.7/y))/((-y)*1.6*y*(-y)+x+(-y)-((-2.1)+x/2.6-(-y)+(-x))+x/x+x/(-5.7))*((x/(-x)*(-y)-(-y)/(-7.3))*x*1.3))
-            wr [I 97; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 97)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 98
         !"test098"
         //let z0 = (((x-(-0.6)+(-0.0)+x/(-0.6))*y+(-0.0)/((-5.4)/x))/((-1.7)*(-0.2)*4.8+(-1.4)-x)+0.3-((-8.3)-(-x))*((-7.8)+(-y))/(1.3)*(0.4-(-x)/(2.5*(-3.7)+4.1)-(7.5+4.0*2.8/(-y)-(-4.3))/(-2.7)))
@@ -1122,11 +1122,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x-(-0.6)+(-0.0)+x/(-0.6))*y+(-0.0)/((-5.4)/x))/((-1.7)*(-0.2)*4.8+(-1.4)-x)+0.3-((-8.3)-(-x))*((-7.8)+(-y))/(1.3)*(0.4-(-x)/(2.5*(-3.7)+4.1)-(7.5+4.0*2.8/(-y)-(-4.3))/(-2.7)))).Expr.eval (programList[prIndex])
+        let s = ((((x-(-0.6)+(-0.0)+x/(-0.6))*y+(-0.0)/((-5.4)/x))/((-1.7)*(-0.2)*4.8+(-1.4)-x)+0.3-((-8.3)-(-x))*((-7.8)+(-y))/(1.3)*(0.4-(-x)/(2.5*(-3.7)+4.1)-(7.5+4.0*2.8/(-y)-(-4.3))/(-2.7)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p-(-0.6)+(-0.0)+p/(-0.6))*q+(-0.0)/((-5.4)/p))/((-1.7)*(-0.2)*4.8+(-1.4)-p)+0.3-((-8.3)-(-p))*((-7.8)+(-q))/(1.3)*(0.4-(-p)/(2.5*(-3.7)+4.1)-(7.5+4.0*2.8/(-q)-(-4.3))/(-2.7)))
             z2 <== (((x-(-0.6)+(-0.0)+x/(-0.6))*y+(-0.0)/((-5.4)/x))/((-1.7)*(-0.2)*4.8+(-1.4)-x)+0.3-((-8.3)-(-x))*((-7.8)+(-y))/(1.3)*(0.4-(-x)/(2.5*(-3.7)+4.1)-(7.5+4.0*2.8/(-y)-(-4.3))/(-2.7)))
-            wr [I 98; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 98)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 99
         !"test099"
         //let z0 = 3.0
@@ -1159,11 +1159,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x)).Expr.eval (programList[prIndex])
+        let s = ((x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p)
             z2 <== (x)
-            wr [I 102; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 102)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 103
         !"test103"
         //let z0 = x
@@ -1172,11 +1172,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 103; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 103)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 104
         !"test104"
         //let z0 = y
@@ -1185,11 +1185,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 104; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 104)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 105
         !"test105"
         //let z0 = (-x)
@@ -1198,11 +1198,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 105; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 105)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 106
         !"test106"
         //let z0 = (-4.6)
@@ -1219,11 +1219,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 107; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 107)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 108
         !"test108"
         //let z0 = ((-5.4)/5.0+(y/3.6-x)-3.4/0.6+y*x-((-1.0)+(-x)+1.1/(-4.8)/4.0)/((-7.6)+y/3.5*(-y)-(-x)))
@@ -1232,11 +1232,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-5.4)/5.0+(y/3.6-x)-3.4/0.6+y*x-((-1.0)+(-x)+1.1/(-4.8)/4.0)/((-7.6)+y/3.5*(-y)-(-x)))).Expr.eval (programList[prIndex])
+        let s = (((-5.4)/5.0+(y/3.6-x)-3.4/0.6+y*x-((-1.0)+(-x)+1.1/(-4.8)/4.0)/((-7.6)+y/3.5*(-y)-(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-5.4)/5.0+(q/3.6-p)-3.4/0.6+q*p-((-1.0)+(-p)+1.1/(-4.8)/4.0)/((-7.6)+q/3.5*(-q)-(-p)))
             z2 <== ((-5.4)/5.0+(y/3.6-x)-3.4/0.6+y*x-((-1.0)+(-x)+1.1/(-4.8)/4.0)/((-7.6)+y/3.5*(-y)-(-x)))
-            wr [I 108; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 108)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 109
         !"test109"
         //let z0 = ((1.7+(-6.8))*y+((8.7-7.0)*((-6.6)/8.7-(-x)/y/y)*(-1.1)+(-1.2))-(((-7.8))-(-y)+x+(3.4/(-1.5)/(-y)-(-y))+(-7.5)/3.1)*((-6.6)+(-y)-(8.1/(-7.1))))
@@ -1245,11 +1245,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((1.7+(-6.8))*y+((8.7-7.0)*((-6.6)/8.7-(-x)/y/y)*(-1.1)+(-1.2))-(((-7.8))-(-y)+x+(3.4/(-1.5)/(-y)-(-y))+(-7.5)/3.1)*((-6.6)+(-y)-(8.1/(-7.1))))).Expr.eval (programList[prIndex])
+        let s = (((1.7+(-6.8))*y+((8.7-7.0)*((-6.6)/8.7-(-x)/y/y)*(-1.1)+(-1.2))-(((-7.8))-(-y)+x+(3.4/(-1.5)/(-y)-(-y))+(-7.5)/3.1)*((-6.6)+(-y)-(8.1/(-7.1))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((1.7+(-6.8))*q+((8.7-7.0)*((-6.6)/8.7-(-p)/q/q)*(-1.1)+(-1.2))-(((-7.8))-(-q)+p+(3.4/(-1.5)/(-q)-(-q))+(-7.5)/3.1)*((-6.6)+(-q)-(8.1/(-7.1))))
             z2 <== ((1.7+(-6.8))*y+((8.7-7.0)*((-6.6)/8.7-(-x)/y/y)*(-1.1)+(-1.2))-(((-7.8))-(-y)+x+(3.4/(-1.5)/(-y)-(-y))+(-7.5)/3.1)*((-6.6)+(-y)-(8.1/(-7.1))))
-            wr [I 109; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 109)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 110
         !"test110"
         //let z0 = (-3.4)
@@ -1266,11 +1266,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)/0.3/6.0)).Expr.eval (programList[prIndex])
+        let s = (((-y)/0.3/6.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)/0.3/6.0)
             z2 <== ((-y)/0.3/6.0)
-            wr [I 111; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 111)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 112
         !"test112"
         //let z0 = y
@@ -1279,11 +1279,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 112; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 112)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 113
         !"test113"
         //let z0 = (2.4)
@@ -1300,11 +1300,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y)/(-y)/x)*((-5.0)-y/(-x)-(-y))+y-6.6-3.1)/(8.6+8.5*y+(-1.2)*5.6)-((-8.0)-(7.6*4.5)))).Expr.eval (programList[prIndex])
+        let s = (((((-y)/(-y)/x)*((-5.0)-y/(-x)-(-y))+y-6.6-3.1)/(8.6+8.5*y+(-1.2)*5.6)-((-8.0)-(7.6*4.5)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q)/(-q)/p)*((-5.0)-q/(-p)-(-q))+q-6.6-3.1)/(8.6+8.5*q+(-1.2)*5.6)-((-8.0)-(7.6*4.5)))
             z2 <== ((((-y)/(-y)/x)*((-5.0)-y/(-x)-(-y))+y-6.6-3.1)/(8.6+8.5*y+(-1.2)*5.6)-((-8.0)-(7.6*4.5)))
-            wr [I 114; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 114)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 115
         !"test115"
         //let z0 = ((-6.0)-(((-y)))/y*((-6.1))*(-x)*2.2*((x-1.1+(-y)+(-y))+(-y)*(7.2))*(-0.7))
@@ -1313,11 +1313,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-6.0)-(((-y)))/y*((-6.1))*(-x)*2.2*((x-1.1+(-y)+(-y))+(-y)*(7.2))*(-0.7))).Expr.eval (programList[prIndex])
+        let s = (((-6.0)-(((-y)))/y*((-6.1))*(-x)*2.2*((x-1.1+(-y)+(-y))+(-y)*(7.2))*(-0.7))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-6.0)-(((-q)))/q*((-6.1))*(-p)*2.2*((p-1.1+(-q)+(-q))+(-q)*(7.2))*(-0.7))
             z2 <== ((-6.0)-(((-y)))/y*((-6.1))*(-x)*2.2*((x-1.1+(-y)+(-y))+(-y)*(7.2))*(-0.7))
-            wr [I 115; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 115)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 116
         !"test116"
         //let z0 = (y+4.0-((-2.7)/((-7.3)/1.2)-((-y)*(-y))-((-y)/7.0*y)*((-x)*4.0/8.2+(-3.4)-(-7.4)))/7.2*(0.4+(x)))
@@ -1326,11 +1326,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+4.0-((-2.7)/((-7.3)/1.2)-((-y)*(-y))-((-y)/7.0*y)*((-x)*4.0/8.2+(-3.4)-(-7.4)))/7.2*(0.4+(x)))).Expr.eval (programList[prIndex])
+        let s = ((y+4.0-((-2.7)/((-7.3)/1.2)-((-y)*(-y))-((-y)/7.0*y)*((-x)*4.0/8.2+(-3.4)-(-7.4)))/7.2*(0.4+(x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+4.0-((-2.7)/((-7.3)/1.2)-((-q)*(-q))-((-q)/7.0*q)*((-p)*4.0/8.2+(-3.4)-(-7.4)))/7.2*(0.4+(p)))
             z2 <== (y+4.0-((-2.7)/((-7.3)/1.2)-((-y)*(-y))-((-y)/7.0*y)*((-x)*4.0/8.2+(-3.4)-(-7.4)))/7.2*(0.4+(x)))
-            wr [I 116; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 116)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 117
         !"test117"
         //let z0 = (0.0/(-x))
@@ -1339,11 +1339,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.0/(-x))).Expr.eval (programList[prIndex])
+        let s = ((0.0/(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.0/(-p))
             z2 <== (0.0/(-x))
-            wr [I 117; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 117)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 118
         !"test118"
         //let z0 = y
@@ -1352,11 +1352,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 118; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 118)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 119
         !"test119"
         //let z0 = ((((-x)/(-y)+y-y/7.0))+(y-((-8.1))/x))
@@ -1365,11 +1365,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)/(-y)+y-y/7.0))+(y-((-8.1))/x))).Expr.eval (programList[prIndex])
+        let s = (((((-x)/(-y)+y-y/7.0))+(y-((-8.1))/x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)/(-q)+q-q/7.0))+(q-((-8.1))/p))
             z2 <== ((((-x)/(-y)+y-y/7.0))+(y-((-8.1))/x))
-            wr [I 119; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 119)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 120
         !"test120"
         //let z0 = (-x)
@@ -1378,11 +1378,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 120; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 120)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 121
         !"test121"
         //let z0 = 2.6
@@ -1399,11 +1399,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.5)*x*y)-((-x)/y)/((-x)/(-y))).Expr.eval (programList[prIndex])
+        let s = (((-0.5)*x*y)-((-x)/y)/((-x)/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.5)*p*q)-((-p)/q)/((-p)/(-q))
             z2 <== ((-0.5)*x*y)-((-x)/y)/((-x)/(-y))
-            wr [I 122; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 122)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 123
         !"test123"
         //let z0 = (x/(2.6*(-3.6)+((-y)/6.2*(-y)*(-y)*(-x)))/(x/(-3.7)/(-y)/((-8.0)-4.3+(-1.0)*(-2.2))*(-x)))
@@ -1412,11 +1412,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/(2.6*(-3.6)+((-y)/6.2*(-y)*(-y)*(-x)))/(x/(-3.7)/(-y)/((-8.0)-4.3+(-1.0)*(-2.2))*(-x)))).Expr.eval (programList[prIndex])
+        let s = ((x/(2.6*(-3.6)+((-y)/6.2*(-y)*(-y)*(-x)))/(x/(-3.7)/(-y)/((-8.0)-4.3+(-1.0)*(-2.2))*(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/(2.6*(-3.6)+((-q)/6.2*(-q)*(-q)*(-p)))/(p/(-3.7)/(-q)/((-8.0)-4.3+(-1.0)*(-2.2))*(-p)))
             z2 <== (x/(2.6*(-3.6)+((-y)/6.2*(-y)*(-y)*(-x)))/(x/(-3.7)/(-y)/((-8.0)-4.3+(-1.0)*(-2.2))*(-x)))
-            wr [I 123; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 123)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 124
         !"test124"
         //let z0 = ((y+7.6*(-5.5)/(-2.2))*((-y)*6.8*(-3.3)*8.7)/(-1.5))-1.1-x*((-5.6)/y-((-2.6)-1.5*y-0.5+(-4.2))*y)+y
@@ -1425,11 +1425,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y+7.6*(-5.5)/(-2.2))*((-y)*6.8*(-3.3)*8.7)/(-1.5))-1.1-x*((-5.6)/y-((-2.6)-1.5*y-0.5+(-4.2))*y)+y).Expr.eval (programList[prIndex])
+        let s = (((y+7.6*(-5.5)/(-2.2))*((-y)*6.8*(-3.3)*8.7)/(-1.5))-1.1-x*((-5.6)/y-((-2.6)-1.5*y-0.5+(-4.2))*y)+y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q+7.6*(-5.5)/(-2.2))*((-q)*6.8*(-3.3)*8.7)/(-1.5))-1.1-p*((-5.6)/q-((-2.6)-1.5*q-0.5+(-4.2))*q)+q
             z2 <== ((y+7.6*(-5.5)/(-2.2))*((-y)*6.8*(-3.3)*8.7)/(-1.5))-1.1-x*((-5.6)/y-((-2.6)-1.5*y-0.5+(-4.2))*y)+y
-            wr [I 124; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 124)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 125
         !"test125"
         //let z0 = y
@@ -1438,11 +1438,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 125; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 125)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 126
         !"test126"
         //let z0 = y
@@ -1451,11 +1451,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 126; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 126)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 127
         !"test127"
         //let z0 = (-5.4)
@@ -1480,11 +1480,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-0.8)*6.1+(-y)/(-x)*8.5))).Expr.eval (programList[prIndex])
+        let s = ((((-0.8)*6.1+(-y)/(-x)*8.5))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-0.8)*6.1+(-q)/(-p)*8.5))
             z2 <== (((-0.8)*6.1+(-y)/(-x)*8.5))
-            wr [I 129; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 129)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 130
         !"test130"
         //let z0 = x
@@ -1493,11 +1493,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 130; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 130)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 131
         !"test131"
         //let z0 = (-6.6)
@@ -1514,11 +1514,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)/(-3.7)-(-5.3)+(-5.5))*((-6.3)-(-0.8))/(y)-8.2+5.7/7.2+((-x)))*(x-(y/0.3-5.5-(-7.7))/(6.0))-(((-y)-(-x)+(-x))*(-y)*(-7.7)))).Expr.eval (programList[prIndex])
+        let s = (((((-x)/(-3.7)-(-5.3)+(-5.5))*((-6.3)-(-0.8))/(y)-8.2+5.7/7.2+((-x)))*(x-(y/0.3-5.5-(-7.7))/(6.0))-(((-y)-(-x)+(-x))*(-y)*(-7.7)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)/(-3.7)-(-5.3)+(-5.5))*((-6.3)-(-0.8))/(q)-8.2+5.7/7.2+((-p)))*(p-(q/0.3-5.5-(-7.7))/(6.0))-(((-q)-(-p)+(-p))*(-q)*(-7.7)))
             z2 <== ((((-x)/(-3.7)-(-5.3)+(-5.5))*((-6.3)-(-0.8))/(y)-8.2+5.7/7.2+((-x)))*(x-(y/0.3-5.5-(-7.7))/(6.0))-(((-y)-(-x)+(-x))*(-y)*(-7.7)))
-            wr [I 132; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 132)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 133
         !"test133"
         //let z0 = ((6.0+(-x)/(-1.2)/(-y)))
@@ -1527,11 +1527,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((6.0+(-x)/(-1.2)/(-y)))).Expr.eval (programList[prIndex])
+        let s = (((6.0+(-x)/(-1.2)/(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((6.0+(-p)/(-1.2)/(-q)))
             z2 <== ((6.0+(-x)/(-1.2)/(-y)))
-            wr [I 133; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 133)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 134
         !"test134"
         //let z0 = (-x)
@@ -1540,11 +1540,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 134; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 134)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 135
         !"test135"
         //let z0 = (-x)
@@ -1553,11 +1553,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 135; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 135)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 136
         !"test136"
         //let z0 = ((-7.4)-((-0.3)+((-x))*(y*2.6*(-x)+(-x)-(-x)))*(-x))
@@ -1566,11 +1566,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.4)-((-0.3)+((-x))*(y*2.6*(-x)+(-x)-(-x)))*(-x))).Expr.eval (programList[prIndex])
+        let s = (((-7.4)-((-0.3)+((-x))*(y*2.6*(-x)+(-x)-(-x)))*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.4)-((-0.3)+((-p))*(q*2.6*(-p)+(-p)-(-p)))*(-p))
             z2 <== ((-7.4)-((-0.3)+((-x))*(y*2.6*(-x)+(-x)-(-x)))*(-x))
-            wr [I 136; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 136)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 137
         !"test137"
         //let z0 = (-y)
@@ -1579,11 +1579,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 137; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 137)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 138
         !"test138"
         //let z0 = 4.4
@@ -1600,11 +1600,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 139; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 139)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 140
         !"test140"
         //let z0 = ((-y)-(((-x)/1.6/y)-(-y)-(-y))+3.5/((-8.5)/(-2.7)/4.7)*x)
@@ -1613,11 +1613,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-(((-x)/1.6/y)-(-y)-(-y))+3.5/((-8.5)/(-2.7)/4.7)*x)).Expr.eval (programList[prIndex])
+        let s = (((-y)-(((-x)/1.6/y)-(-y)-(-y))+3.5/((-8.5)/(-2.7)/4.7)*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-(((-p)/1.6/q)-(-q)-(-q))+3.5/((-8.5)/(-2.7)/4.7)*p)
             z2 <== ((-y)-(((-x)/1.6/y)-(-y)-(-y))+3.5/((-8.5)/(-2.7)/4.7)*x)
-            wr [I 140; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 140)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 141
         !"test141"
         //let z0 = ((-y)-2.0/x+(x+(-x)*y))
@@ -1626,11 +1626,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-2.0/x+(x+(-x)*y))).Expr.eval (programList[prIndex])
+        let s = (((-y)-2.0/x+(x+(-x)*y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-2.0/p+(p+(-p)*q))
             z2 <== ((-y)-2.0/x+(x+(-x)*y))
-            wr [I 141; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 141)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 142
         !"test142"
         //let z0 = x
@@ -1639,11 +1639,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 142; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 142)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 143
         !"test143"
         //let z0 = ((((-y)-1.5/6.0/8.4)))
@@ -1652,11 +1652,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y)-1.5/6.0/8.4)))).Expr.eval (programList[prIndex])
+        let s = (((((-y)-1.5/6.0/8.4)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q)-1.5/6.0/8.4)))
             z2 <== ((((-y)-1.5/6.0/8.4)))
-            wr [I 143; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 143)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 144
         !"test144"
         //let z0 = (-6.4)
@@ -1673,11 +1673,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 145; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 145)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 146
         !"test146"
         //let z0 = (7.4-((-1.3)*0.0*(-x)-(-y)-(-y))/1.0*x/(((-y)+(-8.5)+(-5.6)*6.0)*((-7.3)*(-y)*(-x)/y-(-7.8))*2.3+x*((-y)-2.8+(-2.7)+y))*y-(0.5+x*((-5.8)*5.0-(-3.0)+0.0)+((-x)/y-7.3-(-6.2)*(-0.0))+((-x))))
@@ -1686,11 +1686,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.4-((-1.3)*0.0*(-x)-(-y)-(-y))/1.0*x/(((-y)+(-8.5)+(-5.6)*6.0)*((-7.3)*(-y)*(-x)/y-(-7.8))*2.3+x*((-y)-2.8+(-2.7)+y))*y-(0.5+x*((-5.8)*5.0-(-3.0)+0.0)+((-x)/y-7.3-(-6.2)*(-0.0))+((-x))))).Expr.eval (programList[prIndex])
+        let s = ((7.4-((-1.3)*0.0*(-x)-(-y)-(-y))/1.0*x/(((-y)+(-8.5)+(-5.6)*6.0)*((-7.3)*(-y)*(-x)/y-(-7.8))*2.3+x*((-y)-2.8+(-2.7)+y))*y-(0.5+x*((-5.8)*5.0-(-3.0)+0.0)+((-x)/y-7.3-(-6.2)*(-0.0))+((-x))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.4-((-1.3)*0.0*(-p)-(-q)-(-q))/1.0*p/(((-q)+(-8.5)+(-5.6)*6.0)*((-7.3)*(-q)*(-p)/q-(-7.8))*2.3+p*((-q)-2.8+(-2.7)+q))*q-(0.5+p*((-5.8)*5.0-(-3.0)+0.0)+((-p)/q-7.3-(-6.2)*(-0.0))+((-p))))
             z2 <== (7.4-((-1.3)*0.0*(-x)-(-y)-(-y))/1.0*x/(((-y)+(-8.5)+(-5.6)*6.0)*((-7.3)*(-y)*(-x)/y-(-7.8))*2.3+x*((-y)-2.8+(-2.7)+y))*y-(0.5+x*((-5.8)*5.0-(-3.0)+0.0)+((-x)/y-7.3-(-6.2)*(-0.0))+((-x))))
-            wr [I 146; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 146)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 147
         !"test147"
         //let z0 = (y-(-x)/x*(-x)/(y*(-8.5)/2.1+(-1.8)/(-2.1))*0.7+((5.4/y*(-x)+x)/((-3.7)-(-y)*2.1+3.7*(-x))-(-y)/(-y)-2.3/8.6*3.1*(-y)/(-3.2)))
@@ -1699,11 +1699,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-(-x)/x*(-x)/(y*(-8.5)/2.1+(-1.8)/(-2.1))*0.7+((5.4/y*(-x)+x)/((-3.7)-(-y)*2.1+3.7*(-x))-(-y)/(-y)-2.3/8.6*3.1*(-y)/(-3.2)))).Expr.eval (programList[prIndex])
+        let s = ((y-(-x)/x*(-x)/(y*(-8.5)/2.1+(-1.8)/(-2.1))*0.7+((5.4/y*(-x)+x)/((-3.7)-(-y)*2.1+3.7*(-x))-(-y)/(-y)-2.3/8.6*3.1*(-y)/(-3.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-(-p)/p*(-p)/(q*(-8.5)/2.1+(-1.8)/(-2.1))*0.7+((5.4/q*(-p)+p)/((-3.7)-(-q)*2.1+3.7*(-p))-(-q)/(-q)-2.3/8.6*3.1*(-q)/(-3.2)))
             z2 <== (y-(-x)/x*(-x)/(y*(-8.5)/2.1+(-1.8)/(-2.1))*0.7+((5.4/y*(-x)+x)/((-3.7)-(-y)*2.1+3.7*(-x))-(-y)/(-y)-2.3/8.6*3.1*(-y)/(-3.2)))
-            wr [I 147; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 147)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 148
         !"test148"
         //let z0 = ((-7.5)/(-y)+y)
@@ -1712,11 +1712,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.5)/(-y)+y)).Expr.eval (programList[prIndex])
+        let s = (((-7.5)/(-y)+y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.5)/(-q)+q)
             z2 <== ((-7.5)/(-y)+y)
-            wr [I 148; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 148)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 149
         !"test149"
         //let z0 = y/(-x)/(((-2.6)*(-x)-y)+(x/(-y)*x/y+(-x))-(-y))/6.2-((-5.7)*x)+((6.4)-(-y))
@@ -1725,11 +1725,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y/(-x)/(((-2.6)*(-x)-y)+(x/(-y)*x/y+(-x))-(-y))/6.2-((-5.7)*x)+((6.4)-(-y))).Expr.eval (programList[prIndex])
+        let s = (y/(-x)/(((-2.6)*(-x)-y)+(x/(-y)*x/y+(-x))-(-y))/6.2-((-5.7)*x)+((6.4)-(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q/(-p)/(((-2.6)*(-p)-q)+(p/(-q)*p/q+(-p))-(-q))/6.2-((-5.7)*p)+((6.4)-(-q))
             z2 <== y/(-x)/(((-2.6)*(-x)-y)+(x/(-y)*x/y+(-x))-(-y))/6.2-((-5.7)*x)+((6.4)-(-y))
-            wr [I 149; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 149)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 150
         !"test150"
         //let z0 = y
@@ -1738,11 +1738,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 150; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 150)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 151
         !"test151"
         //let z0 = (((-5.4)+2.7)*(y/(-2.7)+7.1)-(y/((-x)/y*(-5.6)+(-x)+(-x))*((-x)+(-x)*(-0.4)+2.7)-((-x)*x*(-3.1)*7.7)+((-y)*(-6.0)))/(-y)-((-3.8)/(-5.3)/y)+((-4.5))-(0.2-y)*((-6.4)*3.3+(-8.3))+8.8)
@@ -1751,11 +1751,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.4)+2.7)*(y/(-2.7)+7.1)-(y/((-x)/y*(-5.6)+(-x)+(-x))*((-x)+(-x)*(-0.4)+2.7)-((-x)*x*(-3.1)*7.7)+((-y)*(-6.0)))/(-y)-((-3.8)/(-5.3)/y)+((-4.5))-(0.2-y)*((-6.4)*3.3+(-8.3))+8.8)).Expr.eval (programList[prIndex])
+        let s = ((((-5.4)+2.7)*(y/(-2.7)+7.1)-(y/((-x)/y*(-5.6)+(-x)+(-x))*((-x)+(-x)*(-0.4)+2.7)-((-x)*x*(-3.1)*7.7)+((-y)*(-6.0)))/(-y)-((-3.8)/(-5.3)/y)+((-4.5))-(0.2-y)*((-6.4)*3.3+(-8.3))+8.8)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.4)+2.7)*(q/(-2.7)+7.1)-(q/((-p)/q*(-5.6)+(-p)+(-p))*((-p)+(-p)*(-0.4)+2.7)-((-p)*p*(-3.1)*7.7)+((-q)*(-6.0)))/(-q)-((-3.8)/(-5.3)/q)+((-4.5))-(0.2-q)*((-6.4)*3.3+(-8.3))+8.8)
             z2 <== (((-5.4)+2.7)*(y/(-2.7)+7.1)-(y/((-x)/y*(-5.6)+(-x)+(-x))*((-x)+(-x)*(-0.4)+2.7)-((-x)*x*(-3.1)*7.7)+((-y)*(-6.0)))/(-y)-((-3.8)/(-5.3)/y)+((-4.5))-(0.2-y)*((-6.4)*3.3+(-8.3))+8.8)
-            wr [I 151; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 151)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 152
         !"test152"
         //let z0 = (6.7*(((-x)+(-y)+y-(-y))*(-x)-((-7.4))*(y))-4.6/((8.2+(-6.0)+y-(-y)/y)-3.8/(-x)-(-x))*x)
@@ -1764,11 +1764,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((6.7*(((-x)+(-y)+y-(-y))*(-x)-((-7.4))*(y))-4.6/((8.2+(-6.0)+y-(-y)/y)-3.8/(-x)-(-x))*x)).Expr.eval (programList[prIndex])
+        let s = ((6.7*(((-x)+(-y)+y-(-y))*(-x)-((-7.4))*(y))-4.6/((8.2+(-6.0)+y-(-y)/y)-3.8/(-x)-(-x))*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (6.7*(((-p)+(-q)+q-(-q))*(-p)-((-7.4))*(q))-4.6/((8.2+(-6.0)+q-(-q)/q)-3.8/(-p)-(-p))*p)
             z2 <== (6.7*(((-x)+(-y)+y-(-y))*(-x)-((-7.4))*(y))-4.6/((8.2+(-6.0)+y-(-y)/y)-3.8/(-x)-(-x))*x)
-            wr [I 152; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 152)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 153
         !"test153"
         //let z0 = (-2.7)
@@ -1785,11 +1785,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x/(-y)).Expr.eval (programList[prIndex])
+        let s = (x/(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p/(-q)
             z2 <== x/(-y)
-            wr [I 154; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 154)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 155
         !"test155"
         //let z0 = ((8.1*((-y)+6.5*(-0.6)+(-8.5)))+(4.8*((-8.6)*(-7.3)/y/8.1+(-3.7))-(-y)+((-3.2)+2.1+7.7-y-(-6.1)))+y)
@@ -1798,11 +1798,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((8.1*((-y)+6.5*(-0.6)+(-8.5)))+(4.8*((-8.6)*(-7.3)/y/8.1+(-3.7))-(-y)+((-3.2)+2.1+7.7-y-(-6.1)))+y)).Expr.eval (programList[prIndex])
+        let s = (((8.1*((-y)+6.5*(-0.6)+(-8.5)))+(4.8*((-8.6)*(-7.3)/y/8.1+(-3.7))-(-y)+((-3.2)+2.1+7.7-y-(-6.1)))+y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((8.1*((-q)+6.5*(-0.6)+(-8.5)))+(4.8*((-8.6)*(-7.3)/q/8.1+(-3.7))-(-q)+((-3.2)+2.1+7.7-q-(-6.1)))+q)
             z2 <== ((8.1*((-y)+6.5*(-0.6)+(-8.5)))+(4.8*((-8.6)*(-7.3)/y/8.1+(-3.7))-(-y)+((-3.2)+2.1+7.7-y-(-6.1)))+y)
-            wr [I 155; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 155)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 156
         !"test156"
         //let z0 = (0.4+(-6.8)/((x*0.5))+(((-2.3)+(-x)-(-y)+x-(-5.3))/0.4))
@@ -1811,11 +1811,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.4+(-6.8)/((x*0.5))+(((-2.3)+(-x)-(-y)+x-(-5.3))/0.4))).Expr.eval (programList[prIndex])
+        let s = ((0.4+(-6.8)/((x*0.5))+(((-2.3)+(-x)-(-y)+x-(-5.3))/0.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.4+(-6.8)/((p*0.5))+(((-2.3)+(-p)-(-q)+p-(-5.3))/0.4))
             z2 <== (0.4+(-6.8)/((x*0.5))+(((-2.3)+(-x)-(-y)+x-(-5.3))/0.4))
-            wr [I 156; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 156)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 157
         !"test157"
         //let z0 = 3.2
@@ -1840,11 +1840,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 159; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 159)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 160
         !"test160"
         //let z0 = x
@@ -1853,11 +1853,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 160; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 160)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 161
         !"test161"
         //let z0 = ((-y)/(0.6*(-0.0)-y+y+(-5.3))-y+(-2.3))+(-x)/((8.1+(-6.6)+(-x)/6.5/(-y)))*y*((y)*(-y)/(-x)/(-2.6)-((-y)*(-2.2)/x))
@@ -1866,11 +1866,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)/(0.6*(-0.0)-y+y+(-5.3))-y+(-2.3))+(-x)/((8.1+(-6.6)+(-x)/6.5/(-y)))*y*((y)*(-y)/(-x)/(-2.6)-((-y)*(-2.2)/x))).Expr.eval (programList[prIndex])
+        let s = (((-y)/(0.6*(-0.0)-y+y+(-5.3))-y+(-2.3))+(-x)/((8.1+(-6.6)+(-x)/6.5/(-y)))*y*((y)*(-y)/(-x)/(-2.6)-((-y)*(-2.2)/x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)/(0.6*(-0.0)-q+q+(-5.3))-q+(-2.3))+(-p)/((8.1+(-6.6)+(-p)/6.5/(-q)))*q*((q)*(-q)/(-p)/(-2.6)-((-q)*(-2.2)/p))
             z2 <== ((-y)/(0.6*(-0.0)-y+y+(-5.3))-y+(-2.3))+(-x)/((8.1+(-6.6)+(-x)/6.5/(-y)))*y*((y)*(-y)/(-x)/(-2.6)-((-y)*(-2.2)/x))
-            wr [I 161; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 161)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 162
         !"test162"
         //let z0 = (-0.5)
@@ -1887,11 +1887,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((8.4-(((-x))*(-x)*x+((-y)/y))-(((-y)-(-0.6))/((-y)/(-y)-8.0)/((-y)+(-x))-(x)-(-x))+(x*(-7.1)*x/x/1.8/y-2.6/x))).Expr.eval (programList[prIndex])
+        let s = ((8.4-(((-x))*(-x)*x+((-y)/y))-(((-y)-(-0.6))/((-y)/(-y)-8.0)/((-y)+(-x))-(x)-(-x))+(x*(-7.1)*x/x/1.8/y-2.6/x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (8.4-(((-p))*(-p)*p+((-q)/q))-(((-q)-(-0.6))/((-q)/(-q)-8.0)/((-q)+(-p))-(p)-(-p))+(p*(-7.1)*p/p/1.8/q-2.6/p))
             z2 <== (8.4-(((-x))*(-x)*x+((-y)/y))-(((-y)-(-0.6))/((-y)/(-y)-8.0)/((-y)+(-x))-(x)-(-x))+(x*(-7.1)*x/x/1.8/y-2.6/x))
-            wr [I 163; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 163)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 164
         !"test164"
         //let z0 = x
@@ -1900,11 +1900,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 164; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 164)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 165
         !"test165"
         //let z0 = (-3.2)
@@ -1921,11 +1921,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-6.7)+(-x)-(((-x)*(-x)+x)+y))).Expr.eval (programList[prIndex])
+        let s = (((-6.7)+(-x)-(((-x)*(-x)+x)+y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-6.7)+(-p)-(((-p)*(-p)+p)+q))
             z2 <== ((-6.7)+(-x)-(((-x)*(-x)+x)+y))
-            wr [I 166; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 166)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 167
         !"test167"
         //let z0 = ((y)+(y+7.5*(-6.8)/(-8.7))+(-4.8)*(x+6.5/0.8-(-x))*3.0)
@@ -1934,11 +1934,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y)+(y+7.5*(-6.8)/(-8.7))+(-4.8)*(x+6.5/0.8-(-x))*3.0)).Expr.eval (programList[prIndex])
+        let s = (((y)+(y+7.5*(-6.8)/(-8.7))+(-4.8)*(x+6.5/0.8-(-x))*3.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q)+(q+7.5*(-6.8)/(-8.7))+(-4.8)*(p+6.5/0.8-(-p))*3.0)
             z2 <== ((y)+(y+7.5*(-6.8)/(-8.7))+(-4.8)*(x+6.5/0.8-(-x))*3.0)
-            wr [I 167; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 167)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 168
         !"test168"
         //let z0 = (7.5-x*(-y)*x+(-8.3)/(-y)*y+y)
@@ -1947,11 +1947,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.5-x*(-y)*x+(-8.3)/(-y)*y+y)).Expr.eval (programList[prIndex])
+        let s = ((7.5-x*(-y)*x+(-8.3)/(-y)*y+y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.5-p*(-q)*p+(-8.3)/(-q)*q+q)
             z2 <== (7.5-x*(-y)*x+(-8.3)/(-y)*y+y)
-            wr [I 168; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 168)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 169
         !"test169"
         //let z0 = y
@@ -1960,11 +1960,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 169; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 169)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 170
         !"test170"
         //let z0 = (-0.2)-(-x)+(-x)*(6.3*((-x))+(y*(-x))-(8.3+(-y)/(-y))*(0.8))+(-3.0)
@@ -1973,11 +1973,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-0.2)-(-x)+(-x)*(6.3*((-x))+(y*(-x))-(8.3+(-y)/(-y))*(0.8))+(-3.0)).Expr.eval (programList[prIndex])
+        let s = ((-0.2)-(-x)+(-x)*(6.3*((-x))+(y*(-x))-(8.3+(-y)/(-y))*(0.8))+(-3.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-0.2)-(-p)+(-p)*(6.3*((-p))+(q*(-p))-(8.3+(-q)/(-q))*(0.8))+(-3.0)
             z2 <== (-0.2)-(-x)+(-x)*(6.3*((-x))+(y*(-x))-(8.3+(-y)/(-y))*(0.8))+(-3.0)
-            wr [I 170; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 170)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 171
         !"test171"
         //let z0 = 8.8
@@ -1994,11 +1994,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)))*((-x)*4.5-((-x)*y*7.4+2.4/(-6.8)))/(-4.2)*2.0/(-y)/0.6+(-y)/(5.6)*(y/(-y)/6.0+0.6)/(-3.2)*(((-4.8)))).Expr.eval (programList[prIndex])
+        let s = ((((-x)))*((-x)*4.5-((-x)*y*7.4+2.4/(-6.8)))/(-4.2)*2.0/(-y)/0.6+(-y)/(5.6)*(y/(-y)/6.0+0.6)/(-3.2)*(((-4.8)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)))*((-p)*4.5-((-p)*q*7.4+2.4/(-6.8)))/(-4.2)*2.0/(-q)/0.6+(-q)/(5.6)*(q/(-q)/6.0+0.6)/(-3.2)*(((-4.8)))
             z2 <== (((-x)))*((-x)*4.5-((-x)*y*7.4+2.4/(-6.8)))/(-4.2)*2.0/(-y)/0.6+(-y)/(5.6)*(y/(-y)/6.0+0.6)/(-3.2)*(((-4.8)))
-            wr [I 172; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 172)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 173
         !"test173"
         //let z0 = (-y)
@@ -2007,11 +2007,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 173; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 173)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 174
         !"test174"
         //let z0 = (-7.7)
@@ -2036,11 +2036,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)/(-0.0)/(-x))).Expr.eval (programList[prIndex])
+        let s = (((-y)/(-0.0)/(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)/(-0.0)/(-p))
             z2 <== ((-y)/(-0.0)/(-x))
-            wr [I 176; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 176)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 177
         !"test177"
         //let z0 = (4.1-(-0.8)*(-y)-(-0.7)/(-8.8))-(-y)-y+x+y*(-x)+(y*3.6/y)+(-y)+((6.1)+(-y)-x-((-y)/(-x)-(-x)-(-8.8))/((-5.5)+(-y)))
@@ -2049,11 +2049,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((4.1-(-0.8)*(-y)-(-0.7)/(-8.8))-(-y)-y+x+y*(-x)+(y*3.6/y)+(-y)+((6.1)+(-y)-x-((-y)/(-x)-(-x)-(-8.8))/((-5.5)+(-y)))).Expr.eval (programList[prIndex])
+        let s = ((4.1-(-0.8)*(-y)-(-0.7)/(-8.8))-(-y)-y+x+y*(-x)+(y*3.6/y)+(-y)+((6.1)+(-y)-x-((-y)/(-x)-(-x)-(-8.8))/((-5.5)+(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (4.1-(-0.8)*(-q)-(-0.7)/(-8.8))-(-q)-q+p+q*(-p)+(q*3.6/q)+(-q)+((6.1)+(-q)-p-((-q)/(-p)-(-p)-(-8.8))/((-5.5)+(-q)))
             z2 <== (4.1-(-0.8)*(-y)-(-0.7)/(-8.8))-(-y)-y+x+y*(-x)+(y*3.6/y)+(-y)+((6.1)+(-y)-x-((-y)/(-x)-(-x)-(-8.8))/((-5.5)+(-y)))
-            wr [I 177; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 177)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 178
         !"test178"
         //let z0 = (2.7/(x/0.4+x+(-y)/x))/6.3*(3.6/(-5.4)-x+2.3*x/3.4+((-y)/(-8.5)+(-7.3))/(-x))*(-x)
@@ -2062,11 +2062,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((2.7/(x/0.4+x+(-y)/x))/6.3*(3.6/(-5.4)-x+2.3*x/3.4+((-y)/(-8.5)+(-7.3))/(-x))*(-x)).Expr.eval (programList[prIndex])
+        let s = ((2.7/(x/0.4+x+(-y)/x))/6.3*(3.6/(-5.4)-x+2.3*x/3.4+((-y)/(-8.5)+(-7.3))/(-x))*(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (2.7/(p/0.4+p+(-q)/p))/6.3*(3.6/(-5.4)-p+2.3*p/3.4+((-q)/(-8.5)+(-7.3))/(-p))*(-p)
             z2 <== (2.7/(x/0.4+x+(-y)/x))/6.3*(3.6/(-5.4)-x+2.3*x/3.4+((-y)/(-8.5)+(-7.3))/(-x))*(-x)
-            wr [I 178; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 178)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 179
         !"test179"
         //let z0 = ((y+(-0.2)*(3.4-(-y)+0.1+y)*((-x))/(x+(-x)*(-x)/x))/x)
@@ -2075,11 +2075,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y+(-0.2)*(3.4-(-y)+0.1+y)*((-x))/(x+(-x)*(-x)/x))/x)).Expr.eval (programList[prIndex])
+        let s = (((y+(-0.2)*(3.4-(-y)+0.1+y)*((-x))/(x+(-x)*(-x)/x))/x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q+(-0.2)*(3.4-(-q)+0.1+q)*((-p))/(p+(-p)*(-p)/p))/p)
             z2 <== ((y+(-0.2)*(3.4-(-y)+0.1+y)*((-x))/(x+(-x)*(-x)/x))/x)
-            wr [I 179; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 179)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 180
         !"test180"
         //let z0 = 8.0
@@ -2096,11 +2096,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x+3.6*y*(-x))*((-2.5)/8.7+(-y))-(-0.0)*2.3-(-y)*(-1.0)/x)).Expr.eval (programList[prIndex])
+        let s = (((x+3.6*y*(-x))*((-2.5)/8.7+(-y))-(-0.0)*2.3-(-y)*(-1.0)/x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p+3.6*q*(-p))*((-2.5)/8.7+(-q))-(-0.0)*2.3-(-q)*(-1.0)/p)
             z2 <== ((x+3.6*y*(-x))*((-2.5)/8.7+(-y))-(-0.0)*2.3-(-y)*(-1.0)/x)
-            wr [I 181; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 181)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 182
         !"test182"
         //let z0 = (-3.5)
@@ -2117,11 +2117,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*((-1.4)-7.0/(-8.7))*((x+(-x)*x*x+(-y))-(-6.7)*((-1.0)+(-x)-(-2.1))*(x))/((8.2*x/x-(-7.6))-((-5.7)/(-y))*y-y+((-y)-(-x)/y)))).Expr.eval (programList[prIndex])
+        let s = ((y*((-1.4)-7.0/(-8.7))*((x+(-x)*x*x+(-y))-(-6.7)*((-1.0)+(-x)-(-2.1))*(x))/((8.2*x/x-(-7.6))-((-5.7)/(-y))*y-y+((-y)-(-x)/y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*((-1.4)-7.0/(-8.7))*((p+(-p)*p*p+(-q))-(-6.7)*((-1.0)+(-p)-(-2.1))*(p))/((8.2*p/p-(-7.6))-((-5.7)/(-q))*q-q+((-q)-(-p)/q)))
             z2 <== (y*((-1.4)-7.0/(-8.7))*((x+(-x)*x*x+(-y))-(-6.7)*((-1.0)+(-x)-(-2.1))*(x))/((8.2*x/x-(-7.6))-((-5.7)/(-y))*y-y+((-y)-(-x)/y)))
-            wr [I 183; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 183)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 184
         !"test184"
         //let z0 = (-y)
@@ -2130,11 +2130,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 184; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 184)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 185
         !"test185"
         //let z0 = (-x)
@@ -2143,11 +2143,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 185; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 185)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 186
         !"test186"
         //let z0 = (-4.8)*y/((3.0)*(-8.3)+(y+x+(-x)-8.1))
@@ -2156,11 +2156,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-4.8)*y/((3.0)*(-8.3)+(y+x+(-x)-8.1))).Expr.eval (programList[prIndex])
+        let s = ((-4.8)*y/((3.0)*(-8.3)+(y+x+(-x)-8.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-4.8)*q/((3.0)*(-8.3)+(q+p+(-p)-8.1))
             z2 <== (-4.8)*y/((3.0)*(-8.3)+(y+x+(-x)-8.1))
-            wr [I 186; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 186)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 187
         !"test187"
         //let z0 = (-8.2)
@@ -2177,11 +2177,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 188; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 188)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 189
         !"test189"
         //let z0 = (-y)
@@ -2190,11 +2190,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 189; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 189)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 190
         !"test190"
         //let z0 = (y+((y+y-x*x*(-y))-(-x)+((-0.8)/(-x)/5.0*2.0*3.7)/(-4.0)))
@@ -2203,11 +2203,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+((y+y-x*x*(-y))-(-x)+((-0.8)/(-x)/5.0*2.0*3.7)/(-4.0)))).Expr.eval (programList[prIndex])
+        let s = ((y+((y+y-x*x*(-y))-(-x)+((-0.8)/(-x)/5.0*2.0*3.7)/(-4.0)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+((q+q-p*p*(-q))-(-p)+((-0.8)/(-p)/5.0*2.0*3.7)/(-4.0)))
             z2 <== (y+((y+y-x*x*(-y))-(-x)+((-0.8)/(-x)/5.0*2.0*3.7)/(-4.0)))
-            wr [I 190; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 190)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 191
         !"test191"
         //let z0 = x
@@ -2216,11 +2216,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 191; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 191)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 192
         !"test192"
         //let z0 = (((7.6/0.1-(-y)*y)/5.4+((-5.5)))*(5.5-(0.7*y+8.3)*((-8.1))-(-x)*(-2.1)-((-8.4)*(-8.5)*(-8.0)))-(((-7.3)*8.8*(-x)/(-6.2))))
@@ -2229,11 +2229,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((7.6/0.1-(-y)*y)/5.4+((-5.5)))*(5.5-(0.7*y+8.3)*((-8.1))-(-x)*(-2.1)-((-8.4)*(-8.5)*(-8.0)))-(((-7.3)*8.8*(-x)/(-6.2))))).Expr.eval (programList[prIndex])
+        let s = ((((7.6/0.1-(-y)*y)/5.4+((-5.5)))*(5.5-(0.7*y+8.3)*((-8.1))-(-x)*(-2.1)-((-8.4)*(-8.5)*(-8.0)))-(((-7.3)*8.8*(-x)/(-6.2))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((7.6/0.1-(-q)*q)/5.4+((-5.5)))*(5.5-(0.7*q+8.3)*((-8.1))-(-p)*(-2.1)-((-8.4)*(-8.5)*(-8.0)))-(((-7.3)*8.8*(-p)/(-6.2))))
             z2 <== (((7.6/0.1-(-y)*y)/5.4+((-5.5)))*(5.5-(0.7*y+8.3)*((-8.1))-(-x)*(-2.1)-((-8.4)*(-8.5)*(-8.0)))-(((-7.3)*8.8*(-x)/(-6.2))))
-            wr [I 192; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 192)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 193
         !"test193"
         //let z0 = 3.2
@@ -2266,11 +2266,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 196; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 196)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 197
         !"test197"
         //let z0 = (0.6-((-6.3)*(5.0+(-6.7))+x*x/((-x)-(-x)/3.6+(-y)))+(-4.4)/((-7.4)/3.2+((-y)*(-4.5)/(-0.2)-x+(-y))))
@@ -2279,11 +2279,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.6-((-6.3)*(5.0+(-6.7))+x*x/((-x)-(-x)/3.6+(-y)))+(-4.4)/((-7.4)/3.2+((-y)*(-4.5)/(-0.2)-x+(-y))))).Expr.eval (programList[prIndex])
+        let s = ((0.6-((-6.3)*(5.0+(-6.7))+x*x/((-x)-(-x)/3.6+(-y)))+(-4.4)/((-7.4)/3.2+((-y)*(-4.5)/(-0.2)-x+(-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.6-((-6.3)*(5.0+(-6.7))+p*p/((-p)-(-p)/3.6+(-q)))+(-4.4)/((-7.4)/3.2+((-q)*(-4.5)/(-0.2)-p+(-q))))
             z2 <== (0.6-((-6.3)*(5.0+(-6.7))+x*x/((-x)-(-x)/3.6+(-y)))+(-4.4)/((-7.4)/3.2+((-y)*(-4.5)/(-0.2)-x+(-y))))
-            wr [I 197; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 197)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 198
         !"test198"
         //let z0 = 2.5
@@ -2300,11 +2300,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y-((-x)*(-y)))/(-x)-3.4-0.1)).Expr.eval (programList[prIndex])
+        let s = (((y-((-x)*(-y)))/(-x)-3.4-0.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q-((-p)*(-q)))/(-p)-3.4-0.1)
             z2 <== ((y-((-x)*(-y)))/(-x)-3.4-0.1)
-            wr [I 199; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 199)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 200
         !"test200"
         //let z0 = (-8.0)
@@ -2321,11 +2321,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+y*(((-y)+(-6.2)+(-2.7)*(-y)*(-1.2)))*((7.0/(-3.4))*y*((-4.4)/(-2.6)/(-x)+2.0*y)))).Expr.eval (programList[prIndex])
+        let s = ((y+y*(((-y)+(-6.2)+(-2.7)*(-y)*(-1.2)))*((7.0/(-3.4))*y*((-4.4)/(-2.6)/(-x)+2.0*y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+q*(((-q)+(-6.2)+(-2.7)*(-q)*(-1.2)))*((7.0/(-3.4))*q*((-4.4)/(-2.6)/(-p)+2.0*q)))
             z2 <== (y+y*(((-y)+(-6.2)+(-2.7)*(-y)*(-1.2)))*((7.0/(-3.4))*y*((-4.4)/(-2.6)/(-x)+2.0*y)))
-            wr [I 201; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 201)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 202
         !"test202"
         //let z0 = ((7.0/7.1*y+(-x)*x+(-8.2)*(-x))+7.2+(((-y))*(y-(-y)*(-x)+2.4)-(-y)/3.2-x)+x+4.1+y)
@@ -2334,11 +2334,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((7.0/7.1*y+(-x)*x+(-8.2)*(-x))+7.2+(((-y))*(y-(-y)*(-x)+2.4)-(-y)/3.2-x)+x+4.1+y)).Expr.eval (programList[prIndex])
+        let s = (((7.0/7.1*y+(-x)*x+(-8.2)*(-x))+7.2+(((-y))*(y-(-y)*(-x)+2.4)-(-y)/3.2-x)+x+4.1+y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((7.0/7.1*q+(-p)*p+(-8.2)*(-p))+7.2+(((-q))*(q-(-q)*(-p)+2.4)-(-q)/3.2-p)+p+4.1+q)
             z2 <== ((7.0/7.1*y+(-x)*x+(-8.2)*(-x))+7.2+(((-y))*(y-(-y)*(-x)+2.4)-(-y)/3.2-x)+x+4.1+y)
-            wr [I 202; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 202)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 203
         !"test203"
         //let z0 = (-7.2)
@@ -2355,11 +2355,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 204; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 204)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 205
         !"test205"
         //let z0 = 0.4
@@ -2392,11 +2392,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y)-(-x)+(-x))+(x))/(1.4)+(6.7*x+(-8.3)/(-7.2)/(-0.1))+3.8-2.1+6.0+(((-y)-(-6.1)*(-8.1)/y+(-x))+(4.1/(-y)*5.4-x-(-4.7))/(y*(-1.0))+x)-((2.3+(-y)/(-y)*2.8)+2.5-(-8.7)*((-4.4)-0.3+2.8+7.0-6.0)-8.0))).Expr.eval (programList[prIndex])
+        let s = (((((-y)-(-x)+(-x))+(x))/(1.4)+(6.7*x+(-8.3)/(-7.2)/(-0.1))+3.8-2.1+6.0+(((-y)-(-6.1)*(-8.1)/y+(-x))+(4.1/(-y)*5.4-x-(-4.7))/(y*(-1.0))+x)-((2.3+(-y)/(-y)*2.8)+2.5-(-8.7)*((-4.4)-0.3+2.8+7.0-6.0)-8.0))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q)-(-p)+(-p))+(p))/(1.4)+(6.7*p+(-8.3)/(-7.2)/(-0.1))+3.8-2.1+6.0+(((-q)-(-6.1)*(-8.1)/q+(-p))+(4.1/(-q)*5.4-p-(-4.7))/(q*(-1.0))+p)-((2.3+(-q)/(-q)*2.8)+2.5-(-8.7)*((-4.4)-0.3+2.8+7.0-6.0)-8.0))
             z2 <== ((((-y)-(-x)+(-x))+(x))/(1.4)+(6.7*x+(-8.3)/(-7.2)/(-0.1))+3.8-2.1+6.0+(((-y)-(-6.1)*(-8.1)/y+(-x))+(4.1/(-y)*5.4-x-(-4.7))/(y*(-1.0))+x)-((2.3+(-y)/(-y)*2.8)+2.5-(-8.7)*((-4.4)-0.3+2.8+7.0-6.0)-8.0))
-            wr [I 208; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 208)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 209
         !"test209"
         //let z0 = (-3.8)
@@ -2413,11 +2413,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 210; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 210)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 211
         !"test211"
         //let z0 = (((-4.3)/x-7.8+6.4/y)/(-7.4))
@@ -2426,11 +2426,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-4.3)/x-7.8+6.4/y)/(-7.4))).Expr.eval (programList[prIndex])
+        let s = ((((-4.3)/x-7.8+6.4/y)/(-7.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-4.3)/p-7.8+6.4/q)/(-7.4))
             z2 <== (((-4.3)/x-7.8+6.4/y)/(-7.4))
-            wr [I 211; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 211)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 212
         !"test212"
         //let z0 = 5.4
@@ -2447,11 +2447,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.1-(-x)-x)).Expr.eval (programList[prIndex])
+        let s = ((7.1-(-x)-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.1-(-p)-p)
             z2 <== (7.1-(-x)-x)
-            wr [I 213; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 213)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 214
         !"test214"
         //let z0 = (3.8*4.7*(((-6.5)/(-x))*((-5.1)-x*(-x))*(x-6.1*(-4.4)/(-6.0)+(-7.2))/(-6.4)*(-x))/y)
@@ -2460,11 +2460,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((3.8*4.7*(((-6.5)/(-x))*((-5.1)-x*(-x))*(x-6.1*(-4.4)/(-6.0)+(-7.2))/(-6.4)*(-x))/y)).Expr.eval (programList[prIndex])
+        let s = ((3.8*4.7*(((-6.5)/(-x))*((-5.1)-x*(-x))*(x-6.1*(-4.4)/(-6.0)+(-7.2))/(-6.4)*(-x))/y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (3.8*4.7*(((-6.5)/(-p))*((-5.1)-p*(-p))*(p-6.1*(-4.4)/(-6.0)+(-7.2))/(-6.4)*(-p))/q)
             z2 <== (3.8*4.7*(((-6.5)/(-x))*((-5.1)-x*(-x))*(x-6.1*(-4.4)/(-6.0)+(-7.2))/(-6.4)*(-x))/y)
-            wr [I 214; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 214)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 215
         !"test215"
         //let z0 = 6.7
@@ -2497,11 +2497,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((8.4+((-y)))).Expr.eval (programList[prIndex])
+        let s = ((8.4+((-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (8.4+((-q)))
             z2 <== (8.4+((-y)))
-            wr [I 218; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 218)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 219
         !"test219"
         //let z0 = (8.2-(-8.3)*8.2/y)*x+(8.0+((-y)/(-x)/y*(-6.7)-x))
@@ -2510,11 +2510,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((8.2-(-8.3)*8.2/y)*x+(8.0+((-y)/(-x)/y*(-6.7)-x))).Expr.eval (programList[prIndex])
+        let s = ((8.2-(-8.3)*8.2/y)*x+(8.0+((-y)/(-x)/y*(-6.7)-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (8.2-(-8.3)*8.2/q)*p+(8.0+((-q)/(-p)/q*(-6.7)-p))
             z2 <== (8.2-(-8.3)*8.2/y)*x+(8.0+((-y)/(-x)/y*(-6.7)-x))
-            wr [I 219; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 219)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 220
         !"test220"
         //let z0 = ((x)+x*x*((-x)*x/(-5.8)-(-6.5))-((-8.3)+(-6.2)/(-x)))
@@ -2523,11 +2523,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x)+x*x*((-x)*x/(-5.8)-(-6.5))-((-8.3)+(-6.2)/(-x)))).Expr.eval (programList[prIndex])
+        let s = (((x)+x*x*((-x)*x/(-5.8)-(-6.5))-((-8.3)+(-6.2)/(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p)+p*p*((-p)*p/(-5.8)-(-6.5))-((-8.3)+(-6.2)/(-p)))
             z2 <== ((x)+x*x*((-x)*x/(-5.8)-(-6.5))-((-8.3)+(-6.2)/(-x)))
-            wr [I 220; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 220)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 221
         !"test221"
         //let z0 = (8.3*((x)))
@@ -2536,11 +2536,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((8.3*((x)))).Expr.eval (programList[prIndex])
+        let s = ((8.3*((x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (8.3*((p)))
             z2 <== (8.3*((x)))
-            wr [I 221; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 221)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 222
         !"test222"
         //let z0 = ((-y)+((y+y+4.0+(-2.1)-(-5.7))/(6.1/(-0.7)/y+(-5.1))/(-0.6))-x)
@@ -2549,11 +2549,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)+((y+y+4.0+(-2.1)-(-5.7))/(6.1/(-0.7)/y+(-5.1))/(-0.6))-x)).Expr.eval (programList[prIndex])
+        let s = (((-y)+((y+y+4.0+(-2.1)-(-5.7))/(6.1/(-0.7)/y+(-5.1))/(-0.6))-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)+((q+q+4.0+(-2.1)-(-5.7))/(6.1/(-0.7)/q+(-5.1))/(-0.6))-p)
             z2 <== ((-y)+((y+y+4.0+(-2.1)-(-5.7))/(6.1/(-0.7)/y+(-5.1))/(-0.6))-x)
-            wr [I 222; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 222)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 223
         !"test223"
         //let z0 = (5.7)
@@ -2578,11 +2578,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*x)).Expr.eval (programList[prIndex])
+        let s = ((x*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*p)
             z2 <== (x*x)
-            wr [I 225; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 225)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 226
         !"test226"
         //let z0 = (-2.0)
@@ -2615,11 +2615,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-7.7)+(-3.1)/7.2)+(-y))).Expr.eval (programList[prIndex])
+        let s = ((((-7.7)+(-3.1)/7.2)+(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-7.7)+(-3.1)/7.2)+(-q))
             z2 <== (((-7.7)+(-3.1)/7.2)+(-y))
-            wr [I 229; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 229)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 230
         !"test230"
         //let z0 = (-y)
@@ -2628,11 +2628,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 230; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 230)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 231
         !"test231"
         //let z0 = 2.7
@@ -2649,11 +2649,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 232; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 232)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 233
         !"test233"
         //let z0 = 4.8
@@ -2686,11 +2686,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 236; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 236)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 237
         !"test237"
         //let z0 = (x*((x/(-y)-2.6/(-y)+y)/y))
@@ -2699,11 +2699,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*((x/(-y)-2.6/(-y)+y)/y))).Expr.eval (programList[prIndex])
+        let s = ((x*((x/(-y)-2.6/(-y)+y)/y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*((p/(-q)-2.6/(-q)+q)/q))
             z2 <== (x*((x/(-y)-2.6/(-y)+y)/y))
-            wr [I 237; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 237)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 238
         !"test238"
         //let z0 = ((-4.4)/((y*(-x)*y)/x+x+y*(-y)/(-x)/(-0.0))/(-1.2)*(((-5.6)/6.6)/((-x)-x/8.8)/x/5.8-x)+(((-y)-x/4.8)*((-x)*x)))
@@ -2712,11 +2712,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.4)/((y*(-x)*y)/x+x+y*(-y)/(-x)/(-0.0))/(-1.2)*(((-5.6)/6.6)/((-x)-x/8.8)/x/5.8-x)+(((-y)-x/4.8)*((-x)*x)))).Expr.eval (programList[prIndex])
+        let s = (((-4.4)/((y*(-x)*y)/x+x+y*(-y)/(-x)/(-0.0))/(-1.2)*(((-5.6)/6.6)/((-x)-x/8.8)/x/5.8-x)+(((-y)-x/4.8)*((-x)*x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.4)/((q*(-p)*q)/p+p+q*(-q)/(-p)/(-0.0))/(-1.2)*(((-5.6)/6.6)/((-p)-p/8.8)/p/5.8-p)+(((-q)-p/4.8)*((-p)*p)))
             z2 <== ((-4.4)/((y*(-x)*y)/x+x+y*(-y)/(-x)/(-0.0))/(-1.2)*(((-5.6)/6.6)/((-x)-x/8.8)/x/5.8-x)+(((-y)-x/4.8)*((-x)*x)))
-            wr [I 238; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 238)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 239
         !"test239"
         //let z0 = (0.6)
@@ -2733,11 +2733,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y)+((-6.5)+(-x)*(-y))*((x/(-7.7)/y*(-x)+(-x))+x/6.8)+(-y))).Expr.eval (programList[prIndex])
+        let s = (((y)+((-6.5)+(-x)*(-y))*((x/(-7.7)/y*(-x)+(-x))+x/6.8)+(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q)+((-6.5)+(-p)*(-q))*((p/(-7.7)/q*(-p)+(-p))+p/6.8)+(-q))
             z2 <== ((y)+((-6.5)+(-x)*(-y))*((x/(-7.7)/y*(-x)+(-x))+x/6.8)+(-y))
-            wr [I 240; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 240)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 241
         !"test241"
         //let z0 = 6.2
@@ -2754,11 +2754,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*2.4)).Expr.eval (programList[prIndex])
+        let s = ((y*2.4)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*2.4)
             z2 <== (y*2.4)
-            wr [I 242; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 242)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 243
         !"test243"
         //let z0 = y*((x)-(x)-(-6.1))-((-x))-y
@@ -2767,11 +2767,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y*((x)-(x)-(-6.1))-((-x))-y).Expr.eval (programList[prIndex])
+        let s = (y*((x)-(x)-(-6.1))-((-x))-y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q*((p)-(p)-(-6.1))-((-p))-q
             z2 <== y*((x)-(x)-(-6.1))-((-x))-y
-            wr [I 243; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 243)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 244
         !"test244"
         //let z0 = (-x)
@@ -2780,11 +2780,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 244; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 244)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 245
         !"test245"
         //let z0 = (((-6.1)/(-0.1)/y)+x*(-7.6)*8.2*0.1)-(-y)
@@ -2793,11 +2793,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-6.1)/(-0.1)/y)+x*(-7.6)*8.2*0.1)-(-y)).Expr.eval (programList[prIndex])
+        let s = ((((-6.1)/(-0.1)/y)+x*(-7.6)*8.2*0.1)-(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-6.1)/(-0.1)/q)+p*(-7.6)*8.2*0.1)-(-q)
             z2 <== (((-6.1)/(-0.1)/y)+x*(-7.6)*8.2*0.1)-(-y)
-            wr [I 245; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 245)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 246
         !"test246"
         //let z0 = ((-x)/(-y))
@@ -2806,11 +2806,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)/(-y))).Expr.eval (programList[prIndex])
+        let s = (((-x)/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)/(-q))
             z2 <== ((-x)/(-y))
-            wr [I 246; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 246)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 247
         !"test247"
         //let z0 = 1.5+4.0
@@ -2827,11 +2827,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((0.5/((-8.7)/(-y)/6.4+0.8/0.4))*(-x)/(-x))).Expr.eval (programList[prIndex])
+        let s = (((0.5/((-8.7)/(-y)/6.4+0.8/0.4))*(-x)/(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((0.5/((-8.7)/(-q)/6.4+0.8/0.4))*(-p)/(-p))
             z2 <== ((0.5/((-8.7)/(-y)/6.4+0.8/0.4))*(-x)/(-x))
-            wr [I 248; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 248)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 249
         !"test249"
         //let z0 = (x+((-7.0)+(0.7+(-3.0)/(-2.7)/(-y)-(-y))+((-0.3)/5.8)/6.5-x)*8.0)
@@ -2840,11 +2840,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x+((-7.0)+(0.7+(-3.0)/(-2.7)/(-y)-(-y))+((-0.3)/5.8)/6.5-x)*8.0)).Expr.eval (programList[prIndex])
+        let s = ((x+((-7.0)+(0.7+(-3.0)/(-2.7)/(-y)-(-y))+((-0.3)/5.8)/6.5-x)*8.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p+((-7.0)+(0.7+(-3.0)/(-2.7)/(-q)-(-q))+((-0.3)/5.8)/6.5-p)*8.0)
             z2 <== (x+((-7.0)+(0.7+(-3.0)/(-2.7)/(-y)-(-y))+((-0.3)/5.8)/6.5-x)*8.0)
-            wr [I 249; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 249)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 250
         !"test250"
         //let z0 = (-8.7)
@@ -2861,11 +2861,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-2.3)/((-6.8)-(-y)+2.5+y)+6.7*(5.1+4.1-(-5.0)))*((-7.3)+y+3.4/(-x)+5.4-2.0*(-y)*3.2/y)+((-x)-x+8.6)-y)).Expr.eval (programList[prIndex])
+        let s = ((((-2.3)/((-6.8)-(-y)+2.5+y)+6.7*(5.1+4.1-(-5.0)))*((-7.3)+y+3.4/(-x)+5.4-2.0*(-y)*3.2/y)+((-x)-x+8.6)-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-2.3)/((-6.8)-(-q)+2.5+q)+6.7*(5.1+4.1-(-5.0)))*((-7.3)+q+3.4/(-p)+5.4-2.0*(-q)*3.2/q)+((-p)-p+8.6)-q)
             z2 <== (((-2.3)/((-6.8)-(-y)+2.5+y)+6.7*(5.1+4.1-(-5.0)))*((-7.3)+y+3.4/(-x)+5.4-2.0*(-y)*3.2/y)+((-x)-x+8.6)-y)
-            wr [I 251; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 251)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 252
         !"test252"
         //let z0 = ((3.3)+(((-x)-(-6.3)))/(-5.5))
@@ -2874,11 +2874,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((3.3)+(((-x)-(-6.3)))/(-5.5))).Expr.eval (programList[prIndex])
+        let s = (((3.3)+(((-x)-(-6.3)))/(-5.5))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((3.3)+(((-p)-(-6.3)))/(-5.5))
             z2 <== ((3.3)+(((-x)-(-6.3)))/(-5.5))
-            wr [I 252; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 252)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 253
         !"test253"
         //let z0 = ((4.4-2.2-(-5.8)-7.0)-((-1.1)*(-y)-(-x)/(-3.8)/(-x))-6.4+(-7.2))/((5.2+3.6/(-4.2)*8.5/(-0.5)))+(-7.0)-(-5.2)+(y)+((-y))-((-y)-(-4.6)*x-(-x)-(-2.0))+(-0.6)
@@ -2887,11 +2887,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((4.4-2.2-(-5.8)-7.0)-((-1.1)*(-y)-(-x)/(-3.8)/(-x))-6.4+(-7.2))/((5.2+3.6/(-4.2)*8.5/(-0.5)))+(-7.0)-(-5.2)+(y)+((-y))-((-y)-(-4.6)*x-(-x)-(-2.0))+(-0.6)).Expr.eval (programList[prIndex])
+        let s = (((4.4-2.2-(-5.8)-7.0)-((-1.1)*(-y)-(-x)/(-3.8)/(-x))-6.4+(-7.2))/((5.2+3.6/(-4.2)*8.5/(-0.5)))+(-7.0)-(-5.2)+(y)+((-y))-((-y)-(-4.6)*x-(-x)-(-2.0))+(-0.6)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((4.4-2.2-(-5.8)-7.0)-((-1.1)*(-q)-(-p)/(-3.8)/(-p))-6.4+(-7.2))/((5.2+3.6/(-4.2)*8.5/(-0.5)))+(-7.0)-(-5.2)+(q)+((-q))-((-q)-(-4.6)*p-(-p)-(-2.0))+(-0.6)
             z2 <== ((4.4-2.2-(-5.8)-7.0)-((-1.1)*(-y)-(-x)/(-3.8)/(-x))-6.4+(-7.2))/((5.2+3.6/(-4.2)*8.5/(-0.5)))+(-7.0)-(-5.2)+(y)+((-y))-((-y)-(-4.6)*x-(-x)-(-2.0))+(-0.6)
-            wr [I 253; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 253)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 254
         !"test254"
         //let z0 = (-y)
@@ -2900,11 +2900,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 254; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 254)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 255
         !"test255"
         //let z0 = ((-x)+((-0.6)-8.6)+((-x)*y*(-4.2)*(-2.7))+1.8)+((x-(-y)+(-1.6)*6.0)+x*((-x)-0.5*(-6.6)))/(-5.5)
@@ -2913,11 +2913,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+((-0.6)-8.6)+((-x)*y*(-4.2)*(-2.7))+1.8)+((x-(-y)+(-1.6)*6.0)+x*((-x)-0.5*(-6.6)))/(-5.5)).Expr.eval (programList[prIndex])
+        let s = (((-x)+((-0.6)-8.6)+((-x)*y*(-4.2)*(-2.7))+1.8)+((x-(-y)+(-1.6)*6.0)+x*((-x)-0.5*(-6.6)))/(-5.5)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+((-0.6)-8.6)+((-p)*q*(-4.2)*(-2.7))+1.8)+((p-(-q)+(-1.6)*6.0)+p*((-p)-0.5*(-6.6)))/(-5.5)
             z2 <== ((-x)+((-0.6)-8.6)+((-x)*y*(-4.2)*(-2.7))+1.8)+((x-(-y)+(-1.6)*6.0)+x*((-x)-0.5*(-6.6)))/(-5.5)
-            wr [I 255; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 255)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 256
         !"test256"
         //let z0 = y
@@ -2926,11 +2926,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 256; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 256)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 257
         !"test257"
         //let z0 = 3.0/((-y)*(-0.1)/(-4.2)+(-y)/1.7)
@@ -2939,11 +2939,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (3.0/((-y)*(-0.1)/(-4.2)+(-y)/1.7)).Expr.eval (programList[prIndex])
+        let s = (3.0/((-y)*(-0.1)/(-4.2)+(-y)/1.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 3.0/((-q)*(-0.1)/(-4.2)+(-q)/1.7)
             z2 <== 3.0/((-y)*(-0.1)/(-4.2)+(-y)/1.7)
-            wr [I 257; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 257)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 258
         !"test258"
         //let z0 = ((((-4.7)*(-x)))/(-1.8))
@@ -2952,11 +2952,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-4.7)*(-x)))/(-1.8))).Expr.eval (programList[prIndex])
+        let s = (((((-4.7)*(-x)))/(-1.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-4.7)*(-p)))/(-1.8))
             z2 <== ((((-4.7)*(-x)))/(-1.8))
-            wr [I 258; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 258)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 259
         !"test259"
         //let z0 = ((x+1.4+(-6.3))+(-2.4)+((-y)/8.2/x*0.0*y)-(-4.4)+(-x))
@@ -2965,11 +2965,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x+1.4+(-6.3))+(-2.4)+((-y)/8.2/x*0.0*y)-(-4.4)+(-x))).Expr.eval (programList[prIndex])
+        let s = (((x+1.4+(-6.3))+(-2.4)+((-y)/8.2/x*0.0*y)-(-4.4)+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p+1.4+(-6.3))+(-2.4)+((-q)/8.2/p*0.0*q)-(-4.4)+(-p))
             z2 <== ((x+1.4+(-6.3))+(-2.4)+((-y)/8.2/x*0.0*y)-(-4.4)+(-x))
-            wr [I 259; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 259)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 260
         !"test260"
         //let z0 = y+(-x)*((1.0/x+1.0-(-y)*y)+(-2.2)+((-y)/(-1.3)+(-y))-(1.6*0.2-x+(-y)+y))
@@ -2978,11 +2978,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y+(-x)*((1.0/x+1.0-(-y)*y)+(-2.2)+((-y)/(-1.3)+(-y))-(1.6*0.2-x+(-y)+y))).Expr.eval (programList[prIndex])
+        let s = (y+(-x)*((1.0/x+1.0-(-y)*y)+(-2.2)+((-y)/(-1.3)+(-y))-(1.6*0.2-x+(-y)+y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q+(-p)*((1.0/p+1.0-(-q)*q)+(-2.2)+((-q)/(-1.3)+(-q))-(1.6*0.2-p+(-q)+q))
             z2 <== y+(-x)*((1.0/x+1.0-(-y)*y)+(-2.2)+((-y)/(-1.3)+(-y))-(1.6*0.2-x+(-y)+y))
-            wr [I 260; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 260)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 261
         !"test261"
         //let z0 = y
@@ -2991,11 +2991,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 261; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 261)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 262
         !"test262"
         //let z0 = (-y)
@@ -3004,11 +3004,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 262; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 262)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 263
         !"test263"
         //let z0 = (((-7.6)*(x/x-(-y)*(-x))-(-2.0)+(-y)+(-y))+(-y)-(-7.0)/(-2.6)+(-3.6))
@@ -3017,11 +3017,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-7.6)*(x/x-(-y)*(-x))-(-2.0)+(-y)+(-y))+(-y)-(-7.0)/(-2.6)+(-3.6))).Expr.eval (programList[prIndex])
+        let s = ((((-7.6)*(x/x-(-y)*(-x))-(-2.0)+(-y)+(-y))+(-y)-(-7.0)/(-2.6)+(-3.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-7.6)*(p/p-(-q)*(-p))-(-2.0)+(-q)+(-q))+(-q)-(-7.0)/(-2.6)+(-3.6))
             z2 <== (((-7.6)*(x/x-(-y)*(-x))-(-2.0)+(-y)+(-y))+(-y)-(-7.0)/(-2.6)+(-3.6))
-            wr [I 263; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 263)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 264
         !"test264"
         //let z0 = 8.6
@@ -3046,11 +3046,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-4.4)-1.5-x)*0.8)/y/0.7)).Expr.eval (programList[prIndex])
+        let s = (((((-4.4)-1.5-x)*0.8)/y/0.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-4.4)-1.5-p)*0.8)/q/0.7)
             z2 <== ((((-4.4)-1.5-x)*0.8)/y/0.7)
-            wr [I 266; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 266)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 267
         !"test267"
         //let z0 = (-7.1)
@@ -3067,11 +3067,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((3.1/(2.6*(-y)/1.2)+(-8.7)*(-y))).Expr.eval (programList[prIndex])
+        let s = ((3.1/(2.6*(-y)/1.2)+(-8.7)*(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (3.1/(2.6*(-q)/1.2)+(-8.7)*(-q))
             z2 <== (3.1/(2.6*(-y)/1.2)+(-8.7)*(-y))
-            wr [I 268; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 268)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 269
         !"test269"
         //let z0 = (((x+(-y)+(-y)/x)+x*(-y))/((y*(-3.3))-((-0.0)*(-x)/(-1.0)+x-8.3)*((-x))*(-y)+((-4.1)+0.4*(-2.8)))/((x/(-x)+(-x)*0.4*(-x))-y*(-x))-((y+(-7.0))*y+(4.7)-(-3.4)-(-y)))
@@ -3080,11 +3080,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x+(-y)+(-y)/x)+x*(-y))/((y*(-3.3))-((-0.0)*(-x)/(-1.0)+x-8.3)*((-x))*(-y)+((-4.1)+0.4*(-2.8)))/((x/(-x)+(-x)*0.4*(-x))-y*(-x))-((y+(-7.0))*y+(4.7)-(-3.4)-(-y)))).Expr.eval (programList[prIndex])
+        let s = ((((x+(-y)+(-y)/x)+x*(-y))/((y*(-3.3))-((-0.0)*(-x)/(-1.0)+x-8.3)*((-x))*(-y)+((-4.1)+0.4*(-2.8)))/((x/(-x)+(-x)*0.4*(-x))-y*(-x))-((y+(-7.0))*y+(4.7)-(-3.4)-(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p+(-q)+(-q)/p)+p*(-q))/((q*(-3.3))-((-0.0)*(-p)/(-1.0)+p-8.3)*((-p))*(-q)+((-4.1)+0.4*(-2.8)))/((p/(-p)+(-p)*0.4*(-p))-q*(-p))-((q+(-7.0))*q+(4.7)-(-3.4)-(-q)))
             z2 <== (((x+(-y)+(-y)/x)+x*(-y))/((y*(-3.3))-((-0.0)*(-x)/(-1.0)+x-8.3)*((-x))*(-y)+((-4.1)+0.4*(-2.8)))/((x/(-x)+(-x)*0.4*(-x))-y*(-x))-((y+(-7.0))*y+(4.7)-(-3.4)-(-y)))
-            wr [I 269; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 269)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 270
         !"test270"
         //let z0 = ((-x)/(0.3+0.6+x-x)-8.2/x+y)
@@ -3093,11 +3093,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)/(0.3+0.6+x-x)-8.2/x+y)).Expr.eval (programList[prIndex])
+        let s = (((-x)/(0.3+0.6+x-x)-8.2/x+y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)/(0.3+0.6+p-p)-8.2/p+q)
             z2 <== ((-x)/(0.3+0.6+x-x)-8.2/x+y)
-            wr [I 270; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 270)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 271
         !"test271"
         //let z0 = ((y/((-4.1))-(y)+4.7*((-2.1))))
@@ -3106,11 +3106,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y/((-4.1))-(y)+4.7*((-2.1))))).Expr.eval (programList[prIndex])
+        let s = (((y/((-4.1))-(y)+4.7*((-2.1))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q/((-4.1))-(q)+4.7*((-2.1))))
             z2 <== ((y/((-4.1))-(y)+4.7*((-2.1))))
-            wr [I 271; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 271)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 272
         !"test272"
         //let z0 = ((((-3.8))-(0.8+2.5+(-y)-(-y)*0.0)*y+(-x)+(5.5+x-2.4/(-y)-8.8))/4.8/((-x)/8.5-y)+(-7.6))
@@ -3119,11 +3119,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-3.8))-(0.8+2.5+(-y)-(-y)*0.0)*y+(-x)+(5.5+x-2.4/(-y)-8.8))/4.8/((-x)/8.5-y)+(-7.6))).Expr.eval (programList[prIndex])
+        let s = (((((-3.8))-(0.8+2.5+(-y)-(-y)*0.0)*y+(-x)+(5.5+x-2.4/(-y)-8.8))/4.8/((-x)/8.5-y)+(-7.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-3.8))-(0.8+2.5+(-q)-(-q)*0.0)*q+(-p)+(5.5+p-2.4/(-q)-8.8))/4.8/((-p)/8.5-q)+(-7.6))
             z2 <== ((((-3.8))-(0.8+2.5+(-y)-(-y)*0.0)*y+(-x)+(5.5+x-2.4/(-y)-8.8))/4.8/((-x)/8.5-y)+(-7.6))
-            wr [I 272; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 272)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 273
         !"test273"
         //let z0 = (y-y/(-x)+((-x)*(-x)*(-0.5))+((-x))-1.7)
@@ -3132,11 +3132,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-y/(-x)+((-x)*(-x)*(-0.5))+((-x))-1.7)).Expr.eval (programList[prIndex])
+        let s = ((y-y/(-x)+((-x)*(-x)*(-0.5))+((-x))-1.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-q/(-p)+((-p)*(-p)*(-0.5))+((-p))-1.7)
             z2 <== (y-y/(-x)+((-x)*(-x)*(-0.5))+((-x))-1.7)
-            wr [I 273; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 273)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 274
         !"test274"
         //let z0 = ((y/(-6.4)-(-0.0))*((-x)*(-3.2)*(-8.5)/y)-(-y)-(-x)*(y+3.2-x*(-4.6)/y)-(-2.2)/(-y)/4.0)
@@ -3145,11 +3145,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y/(-6.4)-(-0.0))*((-x)*(-3.2)*(-8.5)/y)-(-y)-(-x)*(y+3.2-x*(-4.6)/y)-(-2.2)/(-y)/4.0)).Expr.eval (programList[prIndex])
+        let s = (((y/(-6.4)-(-0.0))*((-x)*(-3.2)*(-8.5)/y)-(-y)-(-x)*(y+3.2-x*(-4.6)/y)-(-2.2)/(-y)/4.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q/(-6.4)-(-0.0))*((-p)*(-3.2)*(-8.5)/q)-(-q)-(-p)*(q+3.2-p*(-4.6)/q)-(-2.2)/(-q)/4.0)
             z2 <== ((y/(-6.4)-(-0.0))*((-x)*(-3.2)*(-8.5)/y)-(-y)-(-x)*(y+3.2-x*(-4.6)/y)-(-2.2)/(-y)/4.0)
-            wr [I 274; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 274)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 275
         !"test275"
         //let z0 = ((-2.5)+(((-7.1))-(6.7-(-x)*(-6.1)+8.1-6.1)-5.2*y-(0.4+y+3.5+0.6+5.5))-(-2.8)+(x)+((-x)/((-2.6)/x-(-0.3)*0.4)+((-5.3)/(-x)-(-0.0)/(-0.1))+y-x))
@@ -3158,11 +3158,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-2.5)+(((-7.1))-(6.7-(-x)*(-6.1)+8.1-6.1)-5.2*y-(0.4+y+3.5+0.6+5.5))-(-2.8)+(x)+((-x)/((-2.6)/x-(-0.3)*0.4)+((-5.3)/(-x)-(-0.0)/(-0.1))+y-x))).Expr.eval (programList[prIndex])
+        let s = (((-2.5)+(((-7.1))-(6.7-(-x)*(-6.1)+8.1-6.1)-5.2*y-(0.4+y+3.5+0.6+5.5))-(-2.8)+(x)+((-x)/((-2.6)/x-(-0.3)*0.4)+((-5.3)/(-x)-(-0.0)/(-0.1))+y-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-2.5)+(((-7.1))-(6.7-(-p)*(-6.1)+8.1-6.1)-5.2*q-(0.4+q+3.5+0.6+5.5))-(-2.8)+(p)+((-p)/((-2.6)/p-(-0.3)*0.4)+((-5.3)/(-p)-(-0.0)/(-0.1))+q-p))
             z2 <== ((-2.5)+(((-7.1))-(6.7-(-x)*(-6.1)+8.1-6.1)-5.2*y-(0.4+y+3.5+0.6+5.5))-(-2.8)+(x)+((-x)/((-2.6)/x-(-0.3)*0.4)+((-5.3)/(-x)-(-0.0)/(-0.1))+y-x))
-            wr [I 275; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 275)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 276
         !"test276"
         //let z0 = (-5.8)
@@ -3179,11 +3179,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-(8.2-(7.8)))).Expr.eval (programList[prIndex])
+        let s = (((-y)-(8.2-(7.8)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-(8.2-(7.8)))
             z2 <== ((-y)-(8.2-(7.8)))
-            wr [I 277; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 277)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 278
         !"test278"
         //let z0 = x+x-(-x)
@@ -3192,11 +3192,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x+x-(-x)).Expr.eval (programList[prIndex])
+        let s = (x+x-(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p+p-(-p)
             z2 <== x+x-(-x)
-            wr [I 278; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 278)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 279
         !"test279"
         //let z0 = 5.4
@@ -3213,11 +3213,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 280; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 280)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 281
         !"test281"
         //let z0 = (-4.8)
@@ -3234,11 +3234,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((0.5/(-x)-(-1.5)/(-8.6))-1.3+(-7.8)-y+(-7.4)+3.5*y*(-8.4)-8.6)).Expr.eval (programList[prIndex])
+        let s = (((0.5/(-x)-(-1.5)/(-8.6))-1.3+(-7.8)-y+(-7.4)+3.5*y*(-8.4)-8.6)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((0.5/(-p)-(-1.5)/(-8.6))-1.3+(-7.8)-q+(-7.4)+3.5*q*(-8.4)-8.6)
             z2 <== ((0.5/(-x)-(-1.5)/(-8.6))-1.3+(-7.8)-y+(-7.4)+3.5*y*(-8.4)-8.6)
-            wr [I 282; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 282)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 283
         !"test283"
         //let z0 = (-y)
@@ -3247,11 +3247,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 283; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 283)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 284
         !"test284"
         //let z0 = x
@@ -3260,11 +3260,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 284; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 284)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 285
         !"test285"
         //let z0 = (y+((-8.0)/(-3.0))*y/(x/((-4.2)))+(-1.4))
@@ -3273,11 +3273,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+((-8.0)/(-3.0))*y/(x/((-4.2)))+(-1.4))).Expr.eval (programList[prIndex])
+        let s = ((y+((-8.0)/(-3.0))*y/(x/((-4.2)))+(-1.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+((-8.0)/(-3.0))*q/(p/((-4.2)))+(-1.4))
             z2 <== (y+((-8.0)/(-3.0))*y/(x/((-4.2)))+(-1.4))
-            wr [I 285; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 285)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 286
         !"test286"
         //let z0 = ((-y))
@@ -3286,11 +3286,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))).Expr.eval (programList[prIndex])
+        let s = (((-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))
             z2 <== ((-y))
-            wr [I 286; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 286)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 287
         !"test287"
         //let z0 = 0.5
@@ -3307,11 +3307,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 288; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 288)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 289
         !"test289"
         //let z0 = (-1.6)
@@ -3328,11 +3328,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 290; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 290)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 291
         !"test291"
         //let z0 = ((x-(-4.6)+(y/0.4-1.3*6.0)/x/(-0.3))+y/(-x)/(-x)*(-x)-x)
@@ -3341,11 +3341,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-(-4.6)+(y/0.4-1.3*6.0)/x/(-0.3))+y/(-x)/(-x)*(-x)-x)).Expr.eval (programList[prIndex])
+        let s = (((x-(-4.6)+(y/0.4-1.3*6.0)/x/(-0.3))+y/(-x)/(-x)*(-x)-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-(-4.6)+(q/0.4-1.3*6.0)/p/(-0.3))+q/(-p)/(-p)*(-p)-p)
             z2 <== ((x-(-4.6)+(y/0.4-1.3*6.0)/x/(-0.3))+y/(-x)/(-x)*(-x)-x)
-            wr [I 291; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 291)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 292
         !"test292"
         //let z0 = (((-x)+((-y)/y)))
@@ -3354,11 +3354,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)+((-y)/y)))).Expr.eval (programList[prIndex])
+        let s = ((((-x)+((-y)/y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)+((-q)/q)))
             z2 <== (((-x)+((-y)/y)))
-            wr [I 292; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 292)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 293
         !"test293"
         //let z0 = y
@@ -3367,11 +3367,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 293; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 293)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 294
         !"test294"
         //let z0 = (-3.7)
@@ -3388,11 +3388,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((1.6)*((-x)-(-2.0)-5.8*y))*((-x)+(-8.7))/(1.4+(-2.4)/(-5.0)/x)*x+y+(-y)-(-8.3)*(-x)/1.8+(-y)+x-(7.4/(y)-((-y)*(-y)*(-0.2)))).Expr.eval (programList[prIndex])
+        let s = (((1.6)*((-x)-(-2.0)-5.8*y))*((-x)+(-8.7))/(1.4+(-2.4)/(-5.0)/x)*x+y+(-y)-(-8.3)*(-x)/1.8+(-y)+x-(7.4/(y)-((-y)*(-y)*(-0.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((1.6)*((-p)-(-2.0)-5.8*q))*((-p)+(-8.7))/(1.4+(-2.4)/(-5.0)/p)*p+q+(-q)-(-8.3)*(-p)/1.8+(-q)+p-(7.4/(q)-((-q)*(-q)*(-0.2)))
             z2 <== ((1.6)*((-x)-(-2.0)-5.8*y))*((-x)+(-8.7))/(1.4+(-2.4)/(-5.0)/x)*x+y+(-y)-(-8.3)*(-x)/1.8+(-y)+x-(7.4/(y)-((-y)*(-y)*(-0.2)))
-            wr [I 295; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 295)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 296
         !"test296"
         //let z0 = (-2.2)
@@ -3409,11 +3409,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((6.0+((-y))/(4.4*4.4)*y)/((-y)+((-x)-(-5.5)+2.7*(-1.5))-((-y)+(-x)-(-x)))-(-y)-(y*7.6-(-7.3)))).Expr.eval (programList[prIndex])
+        let s = (((6.0+((-y))/(4.4*4.4)*y)/((-y)+((-x)-(-5.5)+2.7*(-1.5))-((-y)+(-x)-(-x)))-(-y)-(y*7.6-(-7.3)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((6.0+((-q))/(4.4*4.4)*q)/((-q)+((-p)-(-5.5)+2.7*(-1.5))-((-q)+(-p)-(-p)))-(-q)-(q*7.6-(-7.3)))
             z2 <== ((6.0+((-y))/(4.4*4.4)*y)/((-y)+((-x)-(-5.5)+2.7*(-1.5))-((-y)+(-x)-(-x)))-(-y)-(y*7.6-(-7.3)))
-            wr [I 297; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 297)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 298
         !"test298"
         //let z0 = (-1.1)
@@ -3446,11 +3446,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 301; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 301)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 302
         !"test302"
         //let z0 = x
@@ -3459,11 +3459,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 302; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 302)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 303
         !"test303"
         //let z0 = ((-0.7)+(-x))
@@ -3472,11 +3472,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.7)+(-x))).Expr.eval (programList[prIndex])
+        let s = (((-0.7)+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.7)+(-p))
             z2 <== ((-0.7)+(-x))
-            wr [I 303; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 303)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 304
         !"test304"
         //let z0 = ((5.5/y-(-8.3))*((-y)+(x/7.5/(-6.0)*y*x)+6.8))
@@ -3485,11 +3485,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((5.5/y-(-8.3))*((-y)+(x/7.5/(-6.0)*y*x)+6.8))).Expr.eval (programList[prIndex])
+        let s = (((5.5/y-(-8.3))*((-y)+(x/7.5/(-6.0)*y*x)+6.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((5.5/q-(-8.3))*((-q)+(p/7.5/(-6.0)*q*p)+6.8))
             z2 <== ((5.5/y-(-8.3))*((-y)+(x/7.5/(-6.0)*y*x)+6.8))
-            wr [I 304; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 304)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 305
         !"test305"
         //let z0 = ((((-y))-(y-x/(-4.7))-(x+5.8)-y+(5.6-6.3-(-x)*5.0))/(-0.3)/(x)/((8.6/y+x)/y))
@@ -3498,11 +3498,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y))-(y-x/(-4.7))-(x+5.8)-y+(5.6-6.3-(-x)*5.0))/(-0.3)/(x)/((8.6/y+x)/y))).Expr.eval (programList[prIndex])
+        let s = (((((-y))-(y-x/(-4.7))-(x+5.8)-y+(5.6-6.3-(-x)*5.0))/(-0.3)/(x)/((8.6/y+x)/y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q))-(q-p/(-4.7))-(p+5.8)-q+(5.6-6.3-(-p)*5.0))/(-0.3)/(p)/((8.6/q+p)/q))
             z2 <== ((((-y))-(y-x/(-4.7))-(x+5.8)-y+(5.6-6.3-(-x)*5.0))/(-0.3)/(x)/((8.6/y+x)/y))
-            wr [I 305; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 305)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 306
         !"test306"
         //let z0 = 5.6
@@ -3527,11 +3527,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 308; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 308)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 309
         !"test309"
         //let z0 = (8.4+8.8+2.2/x+(-8.7)+(-8.2))
@@ -3540,11 +3540,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((8.4+8.8+2.2/x+(-8.7)+(-8.2))).Expr.eval (programList[prIndex])
+        let s = ((8.4+8.8+2.2/x+(-8.7)+(-8.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (8.4+8.8+2.2/p+(-8.7)+(-8.2))
             z2 <== (8.4+8.8+2.2/x+(-8.7)+(-8.2))
-            wr [I 309; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 309)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 310
         !"test310"
         //let z0 = ((y-(-x)-x/((-5.0)-(-x)+(-x)/(-7.4))-(3.4-(-y)/y/3.2/(-3.1))+x)*y+(-6.7)-4.5+y-((-y)-x-((-0.0)*(-0.4)*(-x))+2.3/8.1)/(((-1.3))*(-6.5)*(x+(-2.0)/(-y)+(-y)+(-6.8))/(x)))
@@ -3553,11 +3553,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y-(-x)-x/((-5.0)-(-x)+(-x)/(-7.4))-(3.4-(-y)/y/3.2/(-3.1))+x)*y+(-6.7)-4.5+y-((-y)-x-((-0.0)*(-0.4)*(-x))+2.3/8.1)/(((-1.3))*(-6.5)*(x+(-2.0)/(-y)+(-y)+(-6.8))/(x)))).Expr.eval (programList[prIndex])
+        let s = (((y-(-x)-x/((-5.0)-(-x)+(-x)/(-7.4))-(3.4-(-y)/y/3.2/(-3.1))+x)*y+(-6.7)-4.5+y-((-y)-x-((-0.0)*(-0.4)*(-x))+2.3/8.1)/(((-1.3))*(-6.5)*(x+(-2.0)/(-y)+(-y)+(-6.8))/(x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q-(-p)-p/((-5.0)-(-p)+(-p)/(-7.4))-(3.4-(-q)/q/3.2/(-3.1))+p)*q+(-6.7)-4.5+q-((-q)-p-((-0.0)*(-0.4)*(-p))+2.3/8.1)/(((-1.3))*(-6.5)*(p+(-2.0)/(-q)+(-q)+(-6.8))/(p)))
             z2 <== ((y-(-x)-x/((-5.0)-(-x)+(-x)/(-7.4))-(3.4-(-y)/y/3.2/(-3.1))+x)*y+(-6.7)-4.5+y-((-y)-x-((-0.0)*(-0.4)*(-x))+2.3/8.1)/(((-1.3))*(-6.5)*(x+(-2.0)/(-y)+(-y)+(-6.8))/(x)))
-            wr [I 310; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 310)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 311
         !"test311"
         //let z0 = (-3.4)
@@ -3582,11 +3582,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.4)*(-y)*x/(y+(-y)/x+(x*(-6.6)-(-x)*0.3*x)))).Expr.eval (programList[prIndex])
+        let s = (((-4.4)*(-y)*x/(y+(-y)/x+(x*(-6.6)-(-x)*0.3*x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.4)*(-q)*p/(q+(-q)/p+(p*(-6.6)-(-p)*0.3*p)))
             z2 <== ((-4.4)*(-y)*x/(y+(-y)/x+(x*(-6.6)-(-x)*0.3*x)))
-            wr [I 313; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 313)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 314
         !"test314"
         //let z0 = (((-y)-(-x)-((-x)/y+(-x)*(-x))-x+2.4))
@@ -3595,11 +3595,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)-(-x)-((-x)/y+(-x)*(-x))-x+2.4))).Expr.eval (programList[prIndex])
+        let s = ((((-y)-(-x)-((-x)/y+(-x)*(-x))-x+2.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)-(-p)-((-p)/q+(-p)*(-p))-p+2.4))
             z2 <== (((-y)-(-x)-((-x)/y+(-x)*(-x))-x+2.4))
-            wr [I 314; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 314)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 315
         !"test315"
         //let z0 = (-6.5)
@@ -3616,11 +3616,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 316; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 316)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 317
         !"test317"
         //let z0 = (-0.1)
@@ -3645,11 +3645,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+((1.8/(-5.3)))/((0.3/5.4+x*y/5.4)))).Expr.eval (programList[prIndex])
+        let s = (((-x)+((1.8/(-5.3)))/((0.3/5.4+x*y/5.4)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+((1.8/(-5.3)))/((0.3/5.4+p*q/5.4)))
             z2 <== ((-x)+((1.8/(-5.3)))/((0.3/5.4+x*y/5.4)))
-            wr [I 319; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 319)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 320
         !"test320"
         //let z0 = x
@@ -3658,11 +3658,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 320; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 320)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 321
         !"test321"
         //let z0 = ((-x)/4.7+(y)*(-4.2))
@@ -3671,11 +3671,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)/4.7+(y)*(-4.2))).Expr.eval (programList[prIndex])
+        let s = (((-x)/4.7+(y)*(-4.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)/4.7+(q)*(-4.2))
             z2 <== ((-x)/4.7+(y)*(-4.2))
-            wr [I 321; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 321)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 322
         !"test322"
         //let z0 = ((-x)+3.8/(-5.6)/(-0.3)-y*(-y)*((-y)-(-x)*5.3*((-1.0)-x/(-4.4)/(-6.7)-(-x))*(-2.0)+(-7.6)+(-y)))
@@ -3684,11 +3684,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+3.8/(-5.6)/(-0.3)-y*(-y)*((-y)-(-x)*5.3*((-1.0)-x/(-4.4)/(-6.7)-(-x))*(-2.0)+(-7.6)+(-y)))).Expr.eval (programList[prIndex])
+        let s = (((-x)+3.8/(-5.6)/(-0.3)-y*(-y)*((-y)-(-x)*5.3*((-1.0)-x/(-4.4)/(-6.7)-(-x))*(-2.0)+(-7.6)+(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+3.8/(-5.6)/(-0.3)-q*(-q)*((-q)-(-p)*5.3*((-1.0)-p/(-4.4)/(-6.7)-(-p))*(-2.0)+(-7.6)+(-q)))
             z2 <== ((-x)+3.8/(-5.6)/(-0.3)-y*(-y)*((-y)-(-x)*5.3*((-1.0)-x/(-4.4)/(-6.7)-(-x))*(-2.0)+(-7.6)+(-y)))
-            wr [I 322; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 322)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 323
         !"test323"
         //let z0 = (-y)
@@ -3697,11 +3697,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 323; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 323)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 324
         !"test324"
         //let z0 = ((-y))
@@ -3710,11 +3710,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))).Expr.eval (programList[prIndex])
+        let s = (((-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))
             z2 <== ((-y))
-            wr [I 324; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 324)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 325
         !"test325"
         //let z0 = (((-y)+y/(y+5.4+6.1-(-4.4)*3.4))/(-y)*x-(y+(-x)/((-0.4)+y*(-8.0)-1.1)+((-y)/x-(-8.2)-1.7)))
@@ -3723,11 +3723,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)+y/(y+5.4+6.1-(-4.4)*3.4))/(-y)*x-(y+(-x)/((-0.4)+y*(-8.0)-1.1)+((-y)/x-(-8.2)-1.7)))).Expr.eval (programList[prIndex])
+        let s = ((((-y)+y/(y+5.4+6.1-(-4.4)*3.4))/(-y)*x-(y+(-x)/((-0.4)+y*(-8.0)-1.1)+((-y)/x-(-8.2)-1.7)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)+q/(q+5.4+6.1-(-4.4)*3.4))/(-q)*p-(q+(-p)/((-0.4)+q*(-8.0)-1.1)+((-q)/p-(-8.2)-1.7)))
             z2 <== (((-y)+y/(y+5.4+6.1-(-4.4)*3.4))/(-y)*x-(y+(-x)/((-0.4)+y*(-8.0)-1.1)+((-y)/x-(-8.2)-1.7)))
-            wr [I 325; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 325)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 326
         !"test326"
         //let z0 = ((-x)*((-y)/(-3.7)+(-7.6)*(-1.2))*y/(-1.3)*(((-x))*((-8.8)/y*(-5.4)+6.5)-3.5/y)*((-3.8)-(x+2.5)*((-y)+(-8.0)+(-3.4)-(-8.7))))
@@ -3736,11 +3736,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)*((-y)/(-3.7)+(-7.6)*(-1.2))*y/(-1.3)*(((-x))*((-8.8)/y*(-5.4)+6.5)-3.5/y)*((-3.8)-(x+2.5)*((-y)+(-8.0)+(-3.4)-(-8.7))))).Expr.eval (programList[prIndex])
+        let s = (((-x)*((-y)/(-3.7)+(-7.6)*(-1.2))*y/(-1.3)*(((-x))*((-8.8)/y*(-5.4)+6.5)-3.5/y)*((-3.8)-(x+2.5)*((-y)+(-8.0)+(-3.4)-(-8.7))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)*((-q)/(-3.7)+(-7.6)*(-1.2))*q/(-1.3)*(((-p))*((-8.8)/q*(-5.4)+6.5)-3.5/q)*((-3.8)-(p+2.5)*((-q)+(-8.0)+(-3.4)-(-8.7))))
             z2 <== ((-x)*((-y)/(-3.7)+(-7.6)*(-1.2))*y/(-1.3)*(((-x))*((-8.8)/y*(-5.4)+6.5)-3.5/y)*((-3.8)-(x+2.5)*((-y)+(-8.0)+(-3.4)-(-8.7))))
-            wr [I 326; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 326)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 327
         !"test327"
         //let z0 = (-x)
@@ -3749,11 +3749,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 327; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 327)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 328
         !"test328"
         //let z0 = (-y)
@@ -3762,11 +3762,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 328; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 328)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 329
         !"test329"
         //let z0 = ((-5.6)-((8.6*4.6/(-y))-x*(-6.8)+x)-(-8.8)+(((-x)+(-y)/(-y))*(x)+(-x)/y*((-y))))
@@ -3775,11 +3775,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-5.6)-((8.6*4.6/(-y))-x*(-6.8)+x)-(-8.8)+(((-x)+(-y)/(-y))*(x)+(-x)/y*((-y))))).Expr.eval (programList[prIndex])
+        let s = (((-5.6)-((8.6*4.6/(-y))-x*(-6.8)+x)-(-8.8)+(((-x)+(-y)/(-y))*(x)+(-x)/y*((-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-5.6)-((8.6*4.6/(-q))-p*(-6.8)+p)-(-8.8)+(((-p)+(-q)/(-q))*(p)+(-p)/q*((-q))))
             z2 <== ((-5.6)-((8.6*4.6/(-y))-x*(-6.8)+x)-(-8.8)+(((-x)+(-y)/(-y))*(x)+(-x)/y*((-y))))
-            wr [I 329; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 329)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 330
         !"test330"
         //let z0 = ((-5.5)*(-7.8)/3.2)-6.3/(x/8.8/y)/(-0.6)*x*(-x)+(-y)+(-1.1)*3.7/(-6.4)-1.8*((7.4)/(5.1/4.7+x)-(1.5*x))
@@ -3788,11 +3788,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-5.5)*(-7.8)/3.2)-6.3/(x/8.8/y)/(-0.6)*x*(-x)+(-y)+(-1.1)*3.7/(-6.4)-1.8*((7.4)/(5.1/4.7+x)-(1.5*x))).Expr.eval (programList[prIndex])
+        let s = (((-5.5)*(-7.8)/3.2)-6.3/(x/8.8/y)/(-0.6)*x*(-x)+(-y)+(-1.1)*3.7/(-6.4)-1.8*((7.4)/(5.1/4.7+x)-(1.5*x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-5.5)*(-7.8)/3.2)-6.3/(p/8.8/q)/(-0.6)*p*(-p)+(-q)+(-1.1)*3.7/(-6.4)-1.8*((7.4)/(5.1/4.7+p)-(1.5*p))
             z2 <== ((-5.5)*(-7.8)/3.2)-6.3/(x/8.8/y)/(-0.6)*x*(-x)+(-y)+(-1.1)*3.7/(-6.4)-1.8*((7.4)/(5.1/4.7+x)-(1.5*x))
-            wr [I 330; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 330)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 331
         !"test331"
         //let z0 = ((-y)*((-3.4)/(-x)/(-2.4)-(-x)-3.4/(-1.8)))
@@ -3801,11 +3801,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)*((-3.4)/(-x)/(-2.4)-(-x)-3.4/(-1.8)))).Expr.eval (programList[prIndex])
+        let s = (((-y)*((-3.4)/(-x)/(-2.4)-(-x)-3.4/(-1.8)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)*((-3.4)/(-p)/(-2.4)-(-p)-3.4/(-1.8)))
             z2 <== ((-y)*((-3.4)/(-x)/(-2.4)-(-x)-3.4/(-1.8)))
-            wr [I 331; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 331)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 332
         !"test332"
         //let z0 = ((((-y)/(-0.1))+(-y)+3.6/0.6*y*(-x)/x)*((-1.8)-y-x+((-5.4)-x*(-1.4)/x))*(y/5.3/((-y)*(-y)+(-x)+0.4-(-x))+(-y))-((-4.5)/7.8/(-y)/3.0)/(-y)*((-0.4)/(-x)-y/(-8.7)*(-1.8))*(-x))
@@ -3814,11 +3814,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y)/(-0.1))+(-y)+3.6/0.6*y*(-x)/x)*((-1.8)-y-x+((-5.4)-x*(-1.4)/x))*(y/5.3/((-y)*(-y)+(-x)+0.4-(-x))+(-y))-((-4.5)/7.8/(-y)/3.0)/(-y)*((-0.4)/(-x)-y/(-8.7)*(-1.8))*(-x))).Expr.eval (programList[prIndex])
+        let s = (((((-y)/(-0.1))+(-y)+3.6/0.6*y*(-x)/x)*((-1.8)-y-x+((-5.4)-x*(-1.4)/x))*(y/5.3/((-y)*(-y)+(-x)+0.4-(-x))+(-y))-((-4.5)/7.8/(-y)/3.0)/(-y)*((-0.4)/(-x)-y/(-8.7)*(-1.8))*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q)/(-0.1))+(-q)+3.6/0.6*q*(-p)/p)*((-1.8)-q-p+((-5.4)-p*(-1.4)/p))*(q/5.3/((-q)*(-q)+(-p)+0.4-(-p))+(-q))-((-4.5)/7.8/(-q)/3.0)/(-q)*((-0.4)/(-p)-q/(-8.7)*(-1.8))*(-p))
             z2 <== ((((-y)/(-0.1))+(-y)+3.6/0.6*y*(-x)/x)*((-1.8)-y-x+((-5.4)-x*(-1.4)/x))*(y/5.3/((-y)*(-y)+(-x)+0.4-(-x))+(-y))-((-4.5)/7.8/(-y)/3.0)/(-y)*((-0.4)/(-x)-y/(-8.7)*(-1.8))*(-x))
-            wr [I 332; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 332)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 333
         !"test333"
         //let z0 = 8.1
@@ -3835,11 +3835,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.3/(((-3.3)/x/(-6.2)/(-x))+6.4*(-y))*2.3)).Expr.eval (programList[prIndex])
+        let s = ((7.3/(((-3.3)/x/(-6.2)/(-x))+6.4*(-y))*2.3)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.3/(((-3.3)/p/(-6.2)/(-p))+6.4*(-q))*2.3)
             z2 <== (7.3/(((-3.3)/x/(-6.2)/(-x))+6.4*(-y))*2.3)
-            wr [I 334; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 334)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 335
         !"test335"
         //let z0 = ((-x)-(2.5+y)*(-x)+(-y))
@@ -3848,11 +3848,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)-(2.5+y)*(-x)+(-y))).Expr.eval (programList[prIndex])
+        let s = (((-x)-(2.5+y)*(-x)+(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)-(2.5+q)*(-p)+(-q))
             z2 <== ((-x)-(2.5+y)*(-x)+(-y))
-            wr [I 335; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 335)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 336
         !"test336"
         //let z0 = (x-(-5.7)*(-5.2)/(-1.3)+(-2.1)*y/(((-4.1)-x))+x+((-7.3)-y+((-2.7))+x*((-y))))
@@ -3861,11 +3861,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x-(-5.7)*(-5.2)/(-1.3)+(-2.1)*y/(((-4.1)-x))+x+((-7.3)-y+((-2.7))+x*((-y))))).Expr.eval (programList[prIndex])
+        let s = ((x-(-5.7)*(-5.2)/(-1.3)+(-2.1)*y/(((-4.1)-x))+x+((-7.3)-y+((-2.7))+x*((-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p-(-5.7)*(-5.2)/(-1.3)+(-2.1)*q/(((-4.1)-p))+p+((-7.3)-q+((-2.7))+p*((-q))))
             z2 <== (x-(-5.7)*(-5.2)/(-1.3)+(-2.1)*y/(((-4.1)-x))+x+((-7.3)-y+((-2.7))+x*((-y))))
-            wr [I 336; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 336)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 337
         !"test337"
         //let z0 = ((-4.3)-(-x)+(x-(-4.3)-4.8)+(0.8*7.5-x+3.7)*x-(-0.4)*(((-1.8)-1.7-(-3.4)-(-1.5))*(-y)*((-y)*y/(-y)-6.8/(-6.4))))
@@ -3874,11 +3874,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.3)-(-x)+(x-(-4.3)-4.8)+(0.8*7.5-x+3.7)*x-(-0.4)*(((-1.8)-1.7-(-3.4)-(-1.5))*(-y)*((-y)*y/(-y)-6.8/(-6.4))))).Expr.eval (programList[prIndex])
+        let s = (((-4.3)-(-x)+(x-(-4.3)-4.8)+(0.8*7.5-x+3.7)*x-(-0.4)*(((-1.8)-1.7-(-3.4)-(-1.5))*(-y)*((-y)*y/(-y)-6.8/(-6.4))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.3)-(-p)+(p-(-4.3)-4.8)+(0.8*7.5-p+3.7)*p-(-0.4)*(((-1.8)-1.7-(-3.4)-(-1.5))*(-q)*((-q)*q/(-q)-6.8/(-6.4))))
             z2 <== ((-4.3)-(-x)+(x-(-4.3)-4.8)+(0.8*7.5-x+3.7)*x-(-0.4)*(((-1.8)-1.7-(-3.4)-(-1.5))*(-y)*((-y)*y/(-y)-6.8/(-6.4))))
-            wr [I 337; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 337)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 338
         !"test338"
         //let z0 = 2.7
@@ -3895,11 +3895,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 339; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 339)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 340
         !"test340"
         //let z0 = ((-x)+y*y-((x-(-y)*8.4)/(-2.5)-(6.6/(-x)*x)*((-2.4)/(-7.5)+(-1.1)-(-1.2)*(-7.0))+(5.8-3.1*y-(-5.6)-0.0))/(-6.0))
@@ -3908,11 +3908,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+y*y-((x-(-y)*8.4)/(-2.5)-(6.6/(-x)*x)*((-2.4)/(-7.5)+(-1.1)-(-1.2)*(-7.0))+(5.8-3.1*y-(-5.6)-0.0))/(-6.0))).Expr.eval (programList[prIndex])
+        let s = (((-x)+y*y-((x-(-y)*8.4)/(-2.5)-(6.6/(-x)*x)*((-2.4)/(-7.5)+(-1.1)-(-1.2)*(-7.0))+(5.8-3.1*y-(-5.6)-0.0))/(-6.0))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+q*q-((p-(-q)*8.4)/(-2.5)-(6.6/(-p)*p)*((-2.4)/(-7.5)+(-1.1)-(-1.2)*(-7.0))+(5.8-3.1*q-(-5.6)-0.0))/(-6.0))
             z2 <== ((-x)+y*y-((x-(-y)*8.4)/(-2.5)-(6.6/(-x)*x)*((-2.4)/(-7.5)+(-1.1)-(-1.2)*(-7.0))+(5.8-3.1*y-(-5.6)-0.0))/(-6.0))
-            wr [I 340; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 340)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 341
         !"test341"
         //let z0 = 7.5
@@ -3929,11 +3929,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y)*3.1-(-x)+(-x))*(-x)+y/(-4.4)-(-1.5)-7.6/(-0.1)-4.3*((-0.2)-y/3.3))*4.4/((-y)*(-5.1)*((-x))-(y*7.1+y*6.4*y)*6.7)/(-0.3))).Expr.eval (programList[prIndex])
+        let s = (((((-y)*3.1-(-x)+(-x))*(-x)+y/(-4.4)-(-1.5)-7.6/(-0.1)-4.3*((-0.2)-y/3.3))*4.4/((-y)*(-5.1)*((-x))-(y*7.1+y*6.4*y)*6.7)/(-0.3))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q)*3.1-(-p)+(-p))*(-p)+q/(-4.4)-(-1.5)-7.6/(-0.1)-4.3*((-0.2)-q/3.3))*4.4/((-q)*(-5.1)*((-p))-(q*7.1+q*6.4*q)*6.7)/(-0.3))
             z2 <== ((((-y)*3.1-(-x)+(-x))*(-x)+y/(-4.4)-(-1.5)-7.6/(-0.1)-4.3*((-0.2)-y/3.3))*4.4/((-y)*(-5.1)*((-x))-(y*7.1+y*6.4*y)*6.7)/(-0.3))
-            wr [I 342; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 342)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 343
         !"test343"
         //let z0 = (-y)
@@ -3942,11 +3942,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 343; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 343)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 344
         !"test344"
         //let z0 = 1.5
@@ -3963,11 +3963,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((8.7-(-x)+((0.3)-(3.5*(-y)/y/7.2+(-2.7))*(-6.7)-(-3.4))/((-6.6)+(-1.3)))).Expr.eval (programList[prIndex])
+        let s = ((8.7-(-x)+((0.3)-(3.5*(-y)/y/7.2+(-2.7))*(-6.7)-(-3.4))/((-6.6)+(-1.3)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (8.7-(-p)+((0.3)-(3.5*(-q)/q/7.2+(-2.7))*(-6.7)-(-3.4))/((-6.6)+(-1.3)))
             z2 <== (8.7-(-x)+((0.3)-(3.5*(-y)/y/7.2+(-2.7))*(-6.7)-(-3.4))/((-6.6)+(-1.3)))
-            wr [I 345; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 345)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 346
         !"test346"
         //let z0 = ((-0.1))
@@ -3984,11 +3984,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)+1.0+(y/((-0.5)+(-6.3)-(-x)/(-y))/(-x))-(2.8))).Expr.eval (programList[prIndex])
+        let s = (((-y)+1.0+(y/((-0.5)+(-6.3)-(-x)/(-y))/(-x))-(2.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)+1.0+(q/((-0.5)+(-6.3)-(-p)/(-q))/(-p))-(2.8))
             z2 <== ((-y)+1.0+(y/((-0.5)+(-6.3)-(-x)/(-y))/(-x))-(2.8))
-            wr [I 347; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 347)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 348
         !"test348"
         //let z0 = x
@@ -3997,11 +3997,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 348; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 348)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 349
         !"test349"
         //let z0 = 2.2
@@ -4018,11 +4018,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 350; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 350)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 351
         !"test351"
         //let z0 = x
@@ -4031,11 +4031,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 351; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 351)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 352
         !"test352"
         //let z0 = (3.7/x*(-y)*(-6.6)-3.2/(-4.2)+y/y+(-7.1))/(((-3.8)+5.4))-5.1/(-7.2)-4.5
@@ -4044,11 +4044,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((3.7/x*(-y)*(-6.6)-3.2/(-4.2)+y/y+(-7.1))/(((-3.8)+5.4))-5.1/(-7.2)-4.5).Expr.eval (programList[prIndex])
+        let s = ((3.7/x*(-y)*(-6.6)-3.2/(-4.2)+y/y+(-7.1))/(((-3.8)+5.4))-5.1/(-7.2)-4.5).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (3.7/p*(-q)*(-6.6)-3.2/(-4.2)+q/q+(-7.1))/(((-3.8)+5.4))-5.1/(-7.2)-4.5
             z2 <== (3.7/x*(-y)*(-6.6)-3.2/(-4.2)+y/y+(-7.1))/(((-3.8)+5.4))-5.1/(-7.2)-4.5
-            wr [I 352; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 352)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 353
         !"test353"
         //let z0 = ((((-8.8)+3.3+(-x)/(-6.7)*8.6)*(x-y+(-x)+1.0/4.3)-((-5.4)*x/(-x)*x)+8.5)-(-2.3)/(-7.7)/(6.6-(-1.1))/3.6*6.2)
@@ -4057,11 +4057,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-8.8)+3.3+(-x)/(-6.7)*8.6)*(x-y+(-x)+1.0/4.3)-((-5.4)*x/(-x)*x)+8.5)-(-2.3)/(-7.7)/(6.6-(-1.1))/3.6*6.2)).Expr.eval (programList[prIndex])
+        let s = (((((-8.8)+3.3+(-x)/(-6.7)*8.6)*(x-y+(-x)+1.0/4.3)-((-5.4)*x/(-x)*x)+8.5)-(-2.3)/(-7.7)/(6.6-(-1.1))/3.6*6.2)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-8.8)+3.3+(-p)/(-6.7)*8.6)*(p-q+(-p)+1.0/4.3)-((-5.4)*p/(-p)*p)+8.5)-(-2.3)/(-7.7)/(6.6-(-1.1))/3.6*6.2)
             z2 <== ((((-8.8)+3.3+(-x)/(-6.7)*8.6)*(x-y+(-x)+1.0/4.3)-((-5.4)*x/(-x)*x)+8.5)-(-2.3)/(-7.7)/(6.6-(-1.1))/3.6*6.2)
-            wr [I 353; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 353)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 354
         !"test354"
         //let z0 = (((x/(-y)/(-2.8)*(-y)))/(-5.5)*((-x)*(-x)-6.8-(-y)/y)+((-y)/(y+7.3+4.2*(-x)+(-y)))-(-4.6))
@@ -4070,11 +4070,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x/(-y)/(-2.8)*(-y)))/(-5.5)*((-x)*(-x)-6.8-(-y)/y)+((-y)/(y+7.3+4.2*(-x)+(-y)))-(-4.6))).Expr.eval (programList[prIndex])
+        let s = ((((x/(-y)/(-2.8)*(-y)))/(-5.5)*((-x)*(-x)-6.8-(-y)/y)+((-y)/(y+7.3+4.2*(-x)+(-y)))-(-4.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p/(-q)/(-2.8)*(-q)))/(-5.5)*((-p)*(-p)-6.8-(-q)/q)+((-q)/(q+7.3+4.2*(-p)+(-q)))-(-4.6))
             z2 <== (((x/(-y)/(-2.8)*(-y)))/(-5.5)*((-x)*(-x)-6.8-(-y)/y)+((-y)/(y+7.3+4.2*(-x)+(-y)))-(-4.6))
-            wr [I 354; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 354)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 355
         !"test355"
         //let z0 = 6.7
@@ -4099,11 +4099,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 357; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 357)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 358
         !"test358"
         //let z0 = x
@@ -4112,11 +4112,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 358; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 358)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 359
         !"test359"
         //let z0 = ((-y)-((-x)/7.5)*(-y)/(-x))
@@ -4125,11 +4125,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-((-x)/7.5)*(-y)/(-x))).Expr.eval (programList[prIndex])
+        let s = (((-y)-((-x)/7.5)*(-y)/(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-((-p)/7.5)*(-q)/(-p))
             z2 <== ((-y)-((-x)/7.5)*(-y)/(-x))
-            wr [I 359; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 359)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 360
         !"test360"
         //let z0 = ((-y)+3.7)
@@ -4138,11 +4138,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)+3.7)).Expr.eval (programList[prIndex])
+        let s = (((-y)+3.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)+3.7)
             z2 <== ((-y)+3.7)
-            wr [I 360; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 360)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 361
         !"test361"
         //let z0 = 3.4
@@ -4159,11 +4159,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-5.8)-((-y)+x/x))).Expr.eval (programList[prIndex])
+        let s = (((-5.8)-((-y)+x/x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-5.8)-((-q)+p/p))
             z2 <== ((-5.8)-((-y)+x/x))
-            wr [I 362; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 362)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 363
         !"test363"
         //let z0 = ((-4.3)-1.8-(((-x)/(-4.7))+((-4.1)+x*y)*(-y)+4.1/4.8))
@@ -4172,11 +4172,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.3)-1.8-(((-x)/(-4.7))+((-4.1)+x*y)*(-y)+4.1/4.8))).Expr.eval (programList[prIndex])
+        let s = (((-4.3)-1.8-(((-x)/(-4.7))+((-4.1)+x*y)*(-y)+4.1/4.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.3)-1.8-(((-p)/(-4.7))+((-4.1)+p*q)*(-q)+4.1/4.8))
             z2 <== ((-4.3)-1.8-(((-x)/(-4.7))+((-4.1)+x*y)*(-y)+4.1/4.8))
-            wr [I 363; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 363)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 364
         !"test364"
         //let z0 = ((-x)+(((-0.8)+(-0.3)/1.7-(-8.2)/3.1)/y))
@@ -4185,11 +4185,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+(((-0.8)+(-0.3)/1.7-(-8.2)/3.1)/y))).Expr.eval (programList[prIndex])
+        let s = (((-x)+(((-0.8)+(-0.3)/1.7-(-8.2)/3.1)/y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+(((-0.8)+(-0.3)/1.7-(-8.2)/3.1)/q))
             z2 <== ((-x)+(((-0.8)+(-0.3)/1.7-(-8.2)/3.1)/y))
-            wr [I 364; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 364)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 365
         !"test365"
         //let z0 = (((-y)/(8.8+(-7.3))/8.2*(-4.1)/(-y))/(-0.6)-y+x)
@@ -4198,11 +4198,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)/(8.8+(-7.3))/8.2*(-4.1)/(-y))/(-0.6)-y+x)).Expr.eval (programList[prIndex])
+        let s = ((((-y)/(8.8+(-7.3))/8.2*(-4.1)/(-y))/(-0.6)-y+x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)/(8.8+(-7.3))/8.2*(-4.1)/(-q))/(-0.6)-q+p)
             z2 <== (((-y)/(8.8+(-7.3))/8.2*(-4.1)/(-y))/(-0.6)-y+x)
-            wr [I 365; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 365)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 366
         !"test366"
         //let z0 = 3.5*x-(2.1/(-5.3)-(-7.4)+(-y)/x)*(6.4/(-0.6)+y/(-5.0)+(-5.1))*((-x)*4.3+x-(-3.0)-4.1*7.1)+x-8.7
@@ -4211,11 +4211,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (3.5*x-(2.1/(-5.3)-(-7.4)+(-y)/x)*(6.4/(-0.6)+y/(-5.0)+(-5.1))*((-x)*4.3+x-(-3.0)-4.1*7.1)+x-8.7).Expr.eval (programList[prIndex])
+        let s = (3.5*x-(2.1/(-5.3)-(-7.4)+(-y)/x)*(6.4/(-0.6)+y/(-5.0)+(-5.1))*((-x)*4.3+x-(-3.0)-4.1*7.1)+x-8.7).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 3.5*p-(2.1/(-5.3)-(-7.4)+(-q)/p)*(6.4/(-0.6)+q/(-5.0)+(-5.1))*((-p)*4.3+p-(-3.0)-4.1*7.1)+p-8.7
             z2 <== 3.5*x-(2.1/(-5.3)-(-7.4)+(-y)/x)*(6.4/(-0.6)+y/(-5.0)+(-5.1))*((-x)*4.3+x-(-3.0)-4.1*7.1)+x-8.7
-            wr [I 366; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 366)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 367
         !"test367"
         //let z0 = (-4.2)
@@ -4232,11 +4232,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 368; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 368)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 369
         !"test369"
         //let z0 = 6.5
@@ -4253,11 +4253,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-4.6)-((-y))-((-6.1)+x-x/3.0))-((6.1/4.2-(-x)/(-4.7)+(-x)))/x/(-x)/((-y)/(7.6*(-x)-x/(-x))*(8.5*5.3+(-8.5)-(-x))+((-1.6)+(-x))))).Expr.eval (programList[prIndex])
+        let s = ((((-4.6)-((-y))-((-6.1)+x-x/3.0))-((6.1/4.2-(-x)/(-4.7)+(-x)))/x/(-x)/((-y)/(7.6*(-x)-x/(-x))*(8.5*5.3+(-8.5)-(-x))+((-1.6)+(-x))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-4.6)-((-q))-((-6.1)+p-p/3.0))-((6.1/4.2-(-p)/(-4.7)+(-p)))/p/(-p)/((-q)/(7.6*(-p)-p/(-p))*(8.5*5.3+(-8.5)-(-p))+((-1.6)+(-p))))
             z2 <== (((-4.6)-((-y))-((-6.1)+x-x/3.0))-((6.1/4.2-(-x)/(-4.7)+(-x)))/x/(-x)/((-y)/(7.6*(-x)-x/(-x))*(8.5*5.3+(-8.5)-(-x))+((-1.6)+(-x))))
-            wr [I 370; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 370)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 371
         !"test371"
         //let z0 = ((-x)-0.1)-(-5.7)/(-y)-4.1*3.7/(1.6+(-y)*(-y)-(-6.5))*((-y)/y/6.7*(-2.4)+y)-((-y)+(-5.6))/((-1.8))/0.5*(-x)+2.3*(-x)*((3.4*y/3.0))
@@ -4266,11 +4266,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)-0.1)-(-5.7)/(-y)-4.1*3.7/(1.6+(-y)*(-y)-(-6.5))*((-y)/y/6.7*(-2.4)+y)-((-y)+(-5.6))/((-1.8))/0.5*(-x)+2.3*(-x)*((3.4*y/3.0))).Expr.eval (programList[prIndex])
+        let s = (((-x)-0.1)-(-5.7)/(-y)-4.1*3.7/(1.6+(-y)*(-y)-(-6.5))*((-y)/y/6.7*(-2.4)+y)-((-y)+(-5.6))/((-1.8))/0.5*(-x)+2.3*(-x)*((3.4*y/3.0))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)-0.1)-(-5.7)/(-q)-4.1*3.7/(1.6+(-q)*(-q)-(-6.5))*((-q)/q/6.7*(-2.4)+q)-((-q)+(-5.6))/((-1.8))/0.5*(-p)+2.3*(-p)*((3.4*q/3.0))
             z2 <== ((-x)-0.1)-(-5.7)/(-y)-4.1*3.7/(1.6+(-y)*(-y)-(-6.5))*((-y)/y/6.7*(-2.4)+y)-((-y)+(-5.6))/((-1.8))/0.5*(-x)+2.3*(-x)*((3.4*y/3.0))
-            wr [I 371; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 371)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 372
         !"test372"
         //let z0 = ((((-x)+(-x)-(-4.2)-5.7)-((-x)+y/(-2.6)))*(x)*(y-(-2.1)+((-y)))*y*((y/(-8.8)+x+5.4)/x+(-2.7)/((-1.8)-(-y)*5.7+1.2)+7.2))
@@ -4279,11 +4279,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)+(-x)-(-4.2)-5.7)-((-x)+y/(-2.6)))*(x)*(y-(-2.1)+((-y)))*y*((y/(-8.8)+x+5.4)/x+(-2.7)/((-1.8)-(-y)*5.7+1.2)+7.2))).Expr.eval (programList[prIndex])
+        let s = (((((-x)+(-x)-(-4.2)-5.7)-((-x)+y/(-2.6)))*(x)*(y-(-2.1)+((-y)))*y*((y/(-8.8)+x+5.4)/x+(-2.7)/((-1.8)-(-y)*5.7+1.2)+7.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)+(-p)-(-4.2)-5.7)-((-p)+q/(-2.6)))*(p)*(q-(-2.1)+((-q)))*q*((q/(-8.8)+p+5.4)/p+(-2.7)/((-1.8)-(-q)*5.7+1.2)+7.2))
             z2 <== ((((-x)+(-x)-(-4.2)-5.7)-((-x)+y/(-2.6)))*(x)*(y-(-2.1)+((-y)))*y*((y/(-8.8)+x+5.4)/x+(-2.7)/((-1.8)-(-y)*5.7+1.2)+7.2))
-            wr [I 372; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 372)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 373
         !"test373"
         //let z0 = 4.1+(-0.6)-((-6.4)*y)/(y+y/8.5)-((-y)-6.6*(-x)-y)/y*(x+y*(-1.2)-6.1+0.7*(-y))*1.8
@@ -4292,11 +4292,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (4.1+(-0.6)-((-6.4)*y)/(y+y/8.5)-((-y)-6.6*(-x)-y)/y*(x+y*(-1.2)-6.1+0.7*(-y))*1.8).Expr.eval (programList[prIndex])
+        let s = (4.1+(-0.6)-((-6.4)*y)/(y+y/8.5)-((-y)-6.6*(-x)-y)/y*(x+y*(-1.2)-6.1+0.7*(-y))*1.8).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 4.1+(-0.6)-((-6.4)*q)/(q+q/8.5)-((-q)-6.6*(-p)-q)/q*(p+q*(-1.2)-6.1+0.7*(-q))*1.8
             z2 <== 4.1+(-0.6)-((-6.4)*y)/(y+y/8.5)-((-y)-6.6*(-x)-y)/y*(x+y*(-1.2)-6.1+0.7*(-y))*1.8
-            wr [I 373; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 373)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 374
         !"test374"
         //let z0 = (((5.2)+x/x+7.3)-(6.2-(-x)-x)-x+(-y)-((-x)-4.5))
@@ -4305,11 +4305,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((5.2)+x/x+7.3)-(6.2-(-x)-x)-x+(-y)-((-x)-4.5))).Expr.eval (programList[prIndex])
+        let s = ((((5.2)+x/x+7.3)-(6.2-(-x)-x)-x+(-y)-((-x)-4.5))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((5.2)+p/p+7.3)-(6.2-(-p)-p)-p+(-q)-((-p)-4.5))
             z2 <== (((5.2)+x/x+7.3)-(6.2-(-x)-x)-x+(-y)-((-x)-4.5))
-            wr [I 374; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 374)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 375
         !"test375"
         //let z0 = (((-1.7))/5.0*((-y)+(-y)+1.1-(-y)*x-(-x)/x)*x)
@@ -4318,11 +4318,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-1.7))/5.0*((-y)+(-y)+1.1-(-y)*x-(-x)/x)*x)).Expr.eval (programList[prIndex])
+        let s = ((((-1.7))/5.0*((-y)+(-y)+1.1-(-y)*x-(-x)/x)*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-1.7))/5.0*((-q)+(-q)+1.1-(-q)*p-(-p)/p)*p)
             z2 <== (((-1.7))/5.0*((-y)+(-y)+1.1-(-y)*x-(-x)/x)*x)
-            wr [I 375; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 375)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 376
         !"test376"
         //let z0 = (((-7.0)+y+(-y)+(-x))*(-x))*(-0.5)*(((-y)*4.2-(-y))+((-y)/(-2.2)+(-x)))+((-3.7))+(-x)
@@ -4331,11 +4331,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-7.0)+y+(-y)+(-x))*(-x))*(-0.5)*(((-y)*4.2-(-y))+((-y)/(-2.2)+(-x)))+((-3.7))+(-x)).Expr.eval (programList[prIndex])
+        let s = ((((-7.0)+y+(-y)+(-x))*(-x))*(-0.5)*(((-y)*4.2-(-y))+((-y)/(-2.2)+(-x)))+((-3.7))+(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-7.0)+q+(-q)+(-p))*(-p))*(-0.5)*(((-q)*4.2-(-q))+((-q)/(-2.2)+(-p)))+((-3.7))+(-p)
             z2 <== (((-7.0)+y+(-y)+(-x))*(-x))*(-0.5)*(((-y)*4.2-(-y))+((-y)/(-2.2)+(-x)))+((-3.7))+(-x)
-            wr [I 376; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 376)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 377
         !"test377"
         //let z0 = (((7.0-(-y)*y/6.1)/((-x)*(-8.1))+((-2.7)/(-2.5))-6.8/x-(-5.3)*(-y))+(1.3+(2.5+(-4.2)/4.2-x)*((-x)/y/(-y)+y/2.7)*(y))-(((-y)-(-y)-y/(-6.4)*4.3)/(-y)-(x+(-5.3)+(-3.0))-((-6.2)/4.5))*(1.4/x))
@@ -4344,11 +4344,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((7.0-(-y)*y/6.1)/((-x)*(-8.1))+((-2.7)/(-2.5))-6.8/x-(-5.3)*(-y))+(1.3+(2.5+(-4.2)/4.2-x)*((-x)/y/(-y)+y/2.7)*(y))-(((-y)-(-y)-y/(-6.4)*4.3)/(-y)-(x+(-5.3)+(-3.0))-((-6.2)/4.5))*(1.4/x))).Expr.eval (programList[prIndex])
+        let s = ((((7.0-(-y)*y/6.1)/((-x)*(-8.1))+((-2.7)/(-2.5))-6.8/x-(-5.3)*(-y))+(1.3+(2.5+(-4.2)/4.2-x)*((-x)/y/(-y)+y/2.7)*(y))-(((-y)-(-y)-y/(-6.4)*4.3)/(-y)-(x+(-5.3)+(-3.0))-((-6.2)/4.5))*(1.4/x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((7.0-(-q)*q/6.1)/((-p)*(-8.1))+((-2.7)/(-2.5))-6.8/p-(-5.3)*(-q))+(1.3+(2.5+(-4.2)/4.2-p)*((-p)/q/(-q)+q/2.7)*(q))-(((-q)-(-q)-q/(-6.4)*4.3)/(-q)-(p+(-5.3)+(-3.0))-((-6.2)/4.5))*(1.4/p))
             z2 <== (((7.0-(-y)*y/6.1)/((-x)*(-8.1))+((-2.7)/(-2.5))-6.8/x-(-5.3)*(-y))+(1.3+(2.5+(-4.2)/4.2-x)*((-x)/y/(-y)+y/2.7)*(y))-(((-y)-(-y)-y/(-6.4)*4.3)/(-y)-(x+(-5.3)+(-3.0))-((-6.2)/4.5))*(1.4/x))
-            wr [I 377; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 377)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 378
         !"test378"
         //let z0 = (-2.0)
@@ -4373,11 +4373,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)/3.7/((-5.7)+1.1+x)*0.4/(5.8*(-x)/(-x)+1.5)-(x+2.3)/(-6.5)*y-((3.8+(-7.4)-5.3+y)-((-y)/5.2-5.5+2.2)-x/(7.4+(-4.2)-(-0.7)*6.6)))).Expr.eval (programList[prIndex])
+        let s = (((-y)/3.7/((-5.7)+1.1+x)*0.4/(5.8*(-x)/(-x)+1.5)-(x+2.3)/(-6.5)*y-((3.8+(-7.4)-5.3+y)-((-y)/5.2-5.5+2.2)-x/(7.4+(-4.2)-(-0.7)*6.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)/3.7/((-5.7)+1.1+p)*0.4/(5.8*(-p)/(-p)+1.5)-(p+2.3)/(-6.5)*q-((3.8+(-7.4)-5.3+q)-((-q)/5.2-5.5+2.2)-p/(7.4+(-4.2)-(-0.7)*6.6)))
             z2 <== ((-y)/3.7/((-5.7)+1.1+x)*0.4/(5.8*(-x)/(-x)+1.5)-(x+2.3)/(-6.5)*y-((3.8+(-7.4)-5.3+y)-((-y)/5.2-5.5+2.2)-x/(7.4+(-4.2)-(-0.7)*6.6)))
-            wr [I 380; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 380)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 381
         !"test381"
         //let z0 = 1.2
@@ -4418,11 +4418,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 385; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 385)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 386
         !"test386"
         //let z0 = 8.5
@@ -4439,11 +4439,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-(2.0)*y)).Expr.eval (programList[prIndex])
+        let s = ((y-(2.0)*y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-(2.0)*q)
             z2 <== (y-(2.0)*y)
-            wr [I 387; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 387)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 388
         !"test388"
         //let z0 = (7.0*((-7.1)/4.5*((-y)))+0.5)
@@ -4452,11 +4452,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.0*((-7.1)/4.5*((-y)))+0.5)).Expr.eval (programList[prIndex])
+        let s = ((7.0*((-7.1)/4.5*((-y)))+0.5)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.0*((-7.1)/4.5*((-q)))+0.5)
             z2 <== (7.0*((-7.1)/4.5*((-y)))+0.5)
-            wr [I 388; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 388)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 389
         !"test389"
         //let z0 = ((((-1.7)-8.8)/(-6.0))/8.8-(((-x)-x)/(x*(-8.7)+y+4.2)/((-y)*(-y)*(-5.1))))
@@ -4465,11 +4465,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-1.7)-8.8)/(-6.0))/8.8-(((-x)-x)/(x*(-8.7)+y+4.2)/((-y)*(-y)*(-5.1))))).Expr.eval (programList[prIndex])
+        let s = (((((-1.7)-8.8)/(-6.0))/8.8-(((-x)-x)/(x*(-8.7)+y+4.2)/((-y)*(-y)*(-5.1))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-1.7)-8.8)/(-6.0))/8.8-(((-p)-p)/(p*(-8.7)+q+4.2)/((-q)*(-q)*(-5.1))))
             z2 <== ((((-1.7)-8.8)/(-6.0))/8.8-(((-x)-x)/(x*(-8.7)+y+4.2)/((-y)*(-y)*(-5.1))))
-            wr [I 389; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 389)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 390
         !"test390"
         //let z0 = (-0.0)
@@ -4486,11 +4486,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y/(((-y)+(-y))-((-x))-2.1-x/1.1/2.1)+(((-x)*(-3.4))*(-y))-x-((-6.8)+5.1-(-4.8)-(-x)*4.5)-(8.6+5.6*(-x))+(-y)-2.0)).Expr.eval (programList[prIndex])
+        let s = ((y/(((-y)+(-y))-((-x))-2.1-x/1.1/2.1)+(((-x)*(-3.4))*(-y))-x-((-6.8)+5.1-(-4.8)-(-x)*4.5)-(8.6+5.6*(-x))+(-y)-2.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q/(((-q)+(-q))-((-p))-2.1-p/1.1/2.1)+(((-p)*(-3.4))*(-q))-p-((-6.8)+5.1-(-4.8)-(-p)*4.5)-(8.6+5.6*(-p))+(-q)-2.0)
             z2 <== (y/(((-y)+(-y))-((-x))-2.1-x/1.1/2.1)+(((-x)*(-3.4))*(-y))-x-((-6.8)+5.1-(-4.8)-(-x)*4.5)-(8.6+5.6*(-x))+(-y)-2.0)
-            wr [I 391; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 391)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 392
         !"test392"
         //let z0 = 5.7
@@ -4523,11 +4523,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 395; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 395)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 396
         !"test396"
         //let z0 = (-x)
@@ -4536,11 +4536,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 396; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 396)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 397
         !"test397"
         //let z0 = (-y)
@@ -4549,11 +4549,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 397; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 397)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 398
         !"test398"
         //let z0 = y*((x+y*3.0-(-x))*(-1.2)*((-2.1)*y-(-x)-0.2+(-x))*(-y)+(-x))-1.4
@@ -4562,11 +4562,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y*((x+y*3.0-(-x))*(-1.2)*((-2.1)*y-(-x)-0.2+(-x))*(-y)+(-x))-1.4).Expr.eval (programList[prIndex])
+        let s = (y*((x+y*3.0-(-x))*(-1.2)*((-2.1)*y-(-x)-0.2+(-x))*(-y)+(-x))-1.4).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q*((p+q*3.0-(-p))*(-1.2)*((-2.1)*q-(-p)-0.2+(-p))*(-q)+(-p))-1.4
             z2 <== y*((x+y*3.0-(-x))*(-1.2)*((-2.1)*y-(-x)-0.2+(-x))*(-y)+(-x))-1.4
-            wr [I 398; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 398)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 399
         !"test399"
         //let z0 = (-y)
@@ -4575,11 +4575,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 399; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 399)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 400
         !"test400"
         //let z0 = 4.7
@@ -4604,11 +4604,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x-((3.1)/1.7)*(5.0/8.2-y*(7.3/6.1-0.3/(-7.0)))-((7.5-(-x))))).Expr.eval (programList[prIndex])
+        let s = ((x-((3.1)/1.7)*(5.0/8.2-y*(7.3/6.1-0.3/(-7.0)))-((7.5-(-x))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p-((3.1)/1.7)*(5.0/8.2-q*(7.3/6.1-0.3/(-7.0)))-((7.5-(-p))))
             z2 <== (x-((3.1)/1.7)*(5.0/8.2-y*(7.3/6.1-0.3/(-7.0)))-((7.5-(-x))))
-            wr [I 402; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 402)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 403
         !"test403"
         //let z0 = (-7.0)
@@ -4625,11 +4625,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 404; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 404)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 405
         !"test405"
         //let z0 = (-y)
@@ -4638,11 +4638,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 405; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 405)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 406
         !"test406"
         //let z0 = y
@@ -4651,11 +4651,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 406; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 406)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 407
         !"test407"
         //let z0 = (0.5/y+((-8.6)+x/y-(-x)+x-x/(-4.0)-(-y))/((-8.0)*3.4)*(-0.2)+((-y)*(-y)*1.2/(-4.6))-(x*y)/(-y))
@@ -4664,11 +4664,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.5/y+((-8.6)+x/y-(-x)+x-x/(-4.0)-(-y))/((-8.0)*3.4)*(-0.2)+((-y)*(-y)*1.2/(-4.6))-(x*y)/(-y))).Expr.eval (programList[prIndex])
+        let s = ((0.5/y+((-8.6)+x/y-(-x)+x-x/(-4.0)-(-y))/((-8.0)*3.4)*(-0.2)+((-y)*(-y)*1.2/(-4.6))-(x*y)/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.5/q+((-8.6)+p/q-(-p)+p-p/(-4.0)-(-q))/((-8.0)*3.4)*(-0.2)+((-q)*(-q)*1.2/(-4.6))-(p*q)/(-q))
             z2 <== (0.5/y+((-8.6)+x/y-(-x)+x-x/(-4.0)-(-y))/((-8.0)*3.4)*(-0.2)+((-y)*(-y)*1.2/(-4.6))-(x*y)/(-y))
-            wr [I 407; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 407)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 408
         !"test408"
         //let z0 = (-4.3)
@@ -4693,11 +4693,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)+(-3.7)).Expr.eval (programList[prIndex])
+        let s = ((-x)+(-3.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)+(-3.7)
             z2 <== (-x)+(-3.7)
-            wr [I 410; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 410)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 411
         !"test411"
         //let z0 = (x+6.8)
@@ -4706,11 +4706,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x+6.8)).Expr.eval (programList[prIndex])
+        let s = ((x+6.8)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p+6.8)
             z2 <== (x+6.8)
-            wr [I 411; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 411)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 412
         !"test412"
         //let z0 = (-x)
@@ -4719,11 +4719,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 412; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 412)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 413
         !"test413"
         //let z0 = (-5.6)
@@ -4740,11 +4740,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 414; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 414)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 415
         !"test415"
         //let z0 = ((y/((-y))))
@@ -4753,11 +4753,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y/((-y))))).Expr.eval (programList[prIndex])
+        let s = (((y/((-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q/((-q))))
             z2 <== ((y/((-y))))
-            wr [I 415; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 415)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 416
         !"test416"
         //let z0 = ((-6.1)/x*(6.3*(-x)-5.7/4.1)/(x*x/2.0)-((-y)/(-7.8)+(-2.5))+(y-((-7.4)-(-y)/(-x)/(-x)))*((-x)-(y/1.2*(-y)+(-y))/x-((-4.4)*x)/(-8.3)))
@@ -4766,11 +4766,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-6.1)/x*(6.3*(-x)-5.7/4.1)/(x*x/2.0)-((-y)/(-7.8)+(-2.5))+(y-((-7.4)-(-y)/(-x)/(-x)))*((-x)-(y/1.2*(-y)+(-y))/x-((-4.4)*x)/(-8.3)))).Expr.eval (programList[prIndex])
+        let s = (((-6.1)/x*(6.3*(-x)-5.7/4.1)/(x*x/2.0)-((-y)/(-7.8)+(-2.5))+(y-((-7.4)-(-y)/(-x)/(-x)))*((-x)-(y/1.2*(-y)+(-y))/x-((-4.4)*x)/(-8.3)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-6.1)/p*(6.3*(-p)-5.7/4.1)/(p*p/2.0)-((-q)/(-7.8)+(-2.5))+(q-((-7.4)-(-q)/(-p)/(-p)))*((-p)-(q/1.2*(-q)+(-q))/p-((-4.4)*p)/(-8.3)))
             z2 <== ((-6.1)/x*(6.3*(-x)-5.7/4.1)/(x*x/2.0)-((-y)/(-7.8)+(-2.5))+(y-((-7.4)-(-y)/(-x)/(-x)))*((-x)-(y/1.2*(-y)+(-y))/x-((-4.4)*x)/(-8.3)))
-            wr [I 416; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 416)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 417
         !"test417"
         //let z0 = (-1.7)
@@ -4787,11 +4787,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 418; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 418)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 419
         !"test419"
         //let z0 = ((-0.1)*4.2)
@@ -4808,11 +4808,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((y-x*y)/2.3*y/(-y))*((y+7.6/(-8.3)*2.1+x)+(-7.8)*((-y)*(-y)+2.7)*y-5.8)*(-x)-3.1)).Expr.eval (programList[prIndex])
+        let s = ((((y-x*y)/2.3*y/(-y))*((y+7.6/(-8.3)*2.1+x)+(-7.8)*((-y)*(-y)+2.7)*y-5.8)*(-x)-3.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((q-p*q)/2.3*q/(-q))*((q+7.6/(-8.3)*2.1+p)+(-7.8)*((-q)*(-q)+2.7)*q-5.8)*(-p)-3.1)
             z2 <== (((y-x*y)/2.3*y/(-y))*((y+7.6/(-8.3)*2.1+x)+(-7.8)*((-y)*(-y)+2.7)*y-5.8)*(-x)-3.1)
-            wr [I 420; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 420)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 421
         !"test421"
         //let z0 = x
@@ -4821,11 +4821,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 421; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 421)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 422
         !"test422"
         //let z0 = (((-x)+(-5.5))*(-x)+(-7.7))
@@ -4834,11 +4834,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)+(-5.5))*(-x)+(-7.7))).Expr.eval (programList[prIndex])
+        let s = ((((-x)+(-5.5))*(-x)+(-7.7))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)+(-5.5))*(-p)+(-7.7))
             z2 <== (((-x)+(-5.5))*(-x)+(-7.7))
-            wr [I 422; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 422)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 423
         !"test423"
         //let z0 = (-8.2)
@@ -4855,11 +4855,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+((y-(-0.8))-y-x)*((-x)*4.5*y/(-x))/((6.8+3.4+(-0.1))+(-y))-((-8.6)/(-3.0)/(-x)-x))).Expr.eval (programList[prIndex])
+        let s = ((y+((y-(-0.8))-y-x)*((-x)*4.5*y/(-x))/((6.8+3.4+(-0.1))+(-y))-((-8.6)/(-3.0)/(-x)-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+((q-(-0.8))-q-p)*((-p)*4.5*q/(-p))/((6.8+3.4+(-0.1))+(-q))-((-8.6)/(-3.0)/(-p)-p))
             z2 <== (y+((y-(-0.8))-y-x)*((-x)*4.5*y/(-x))/((6.8+3.4+(-0.1))+(-y))-((-8.6)/(-3.0)/(-x)-x))
-            wr [I 424; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 424)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 425
         !"test425"
         //let z0 = 7.6
@@ -4876,11 +4876,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x))+(6.0*(-x))+y/(-2.3)*(-y)-(-x)*(x+(-y)*y/(y)*x)*(-8.1))).Expr.eval (programList[prIndex])
+        let s = ((((-x))+(6.0*(-x))+y/(-2.3)*(-y)-(-x)*(x+(-y)*y/(y)*x)*(-8.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p))+(6.0*(-p))+q/(-2.3)*(-q)-(-p)*(p+(-q)*q/(q)*p)*(-8.1))
             z2 <== (((-x))+(6.0*(-x))+y/(-2.3)*(-y)-(-x)*(x+(-y)*y/(y)*x)*(-8.1))
-            wr [I 426; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 426)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 427
         !"test427"
         //let z0 = 7.7
@@ -4897,11 +4897,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 428; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 428)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 429
         !"test429"
         //let z0 = y
@@ -4910,11 +4910,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 429; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 429)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 430
         !"test430"
         //let z0 = (-6.4)
@@ -4931,11 +4931,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 431; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 431)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 432
         !"test432"
         //let z0 = (-7.1)
@@ -4952,11 +4952,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 433; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 433)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 434
         !"test434"
         //let z0 = ((-y)*7.7+(-y))
@@ -4965,11 +4965,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)*7.7+(-y))).Expr.eval (programList[prIndex])
+        let s = (((-y)*7.7+(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)*7.7+(-q))
             z2 <== ((-y)*7.7+(-y))
-            wr [I 434; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 434)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 435
         !"test435"
         //let z0 = ((-8.3))
@@ -4986,11 +4986,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((4.1/((-0.0)/y/(-y)*y-x)/(((-x))*x*(y-(-5.1)+(-x))*((-2.5)-(-7.7)*(-y)/x/(-8.5))-x))).Expr.eval (programList[prIndex])
+        let s = ((4.1/((-0.0)/y/(-y)*y-x)/(((-x))*x*(y-(-5.1)+(-x))*((-2.5)-(-7.7)*(-y)/x/(-8.5))-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (4.1/((-0.0)/q/(-q)*q-p)/(((-p))*p*(q-(-5.1)+(-p))*((-2.5)-(-7.7)*(-q)/p/(-8.5))-p))
             z2 <== (4.1/((-0.0)/y/(-y)*y-x)/(((-x))*x*(y-(-5.1)+(-x))*((-2.5)-(-7.7)*(-y)/x/(-8.5))-x))
-            wr [I 436; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 436)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 437
         !"test437"
         //let z0 = (x/((-5.5))/0.8-y*y+(-x)*(-6.4)*((-4.2)+(-x))/y+y-(-y))
@@ -4999,11 +4999,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/((-5.5))/0.8-y*y+(-x)*(-6.4)*((-4.2)+(-x))/y+y-(-y))).Expr.eval (programList[prIndex])
+        let s = ((x/((-5.5))/0.8-y*y+(-x)*(-6.4)*((-4.2)+(-x))/y+y-(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/((-5.5))/0.8-q*q+(-p)*(-6.4)*((-4.2)+(-p))/q+q-(-q))
             z2 <== (x/((-5.5))/0.8-y*y+(-x)*(-6.4)*((-4.2)+(-x))/y+y-(-y))
-            wr [I 437; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 437)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 438
         !"test438"
         //let z0 = x
@@ -5012,11 +5012,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 438; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 438)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 439
         !"test439"
         //let z0 = (5.2/y+(((-7.0)+0.7/6.6))*((-6.5)))
@@ -5025,11 +5025,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.2/y+(((-7.0)+0.7/6.6))*((-6.5)))).Expr.eval (programList[prIndex])
+        let s = ((5.2/y+(((-7.0)+0.7/6.6))*((-6.5)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.2/q+(((-7.0)+0.7/6.6))*((-6.5)))
             z2 <== (5.2/y+(((-7.0)+0.7/6.6))*((-6.5)))
-            wr [I 439; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 439)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 440
         !"test440"
         //let z0 = (-1.4)
@@ -5046,11 +5046,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-4.2+(x*2.0*(-4.8)*y*y*(-8.8)+(-4.4)))).Expr.eval (programList[prIndex])
+        let s = (((-y)-4.2+(x*2.0*(-4.8)*y*y*(-8.8)+(-4.4)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-4.2+(p*2.0*(-4.8)*q*q*(-8.8)+(-4.4)))
             z2 <== ((-y)-4.2+(x*2.0*(-4.8)*y*y*(-8.8)+(-4.4)))
-            wr [I 441; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 441)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 442
         !"test442"
         //let z0 = 5.8
@@ -5067,11 +5067,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 443; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 443)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 444
         !"test444"
         //let z0 = (-y)
@@ -5080,11 +5080,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 444; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 444)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 445
         !"test445"
         //let z0 = (1.0/x-((-x)+(-y)*5.7-2.3+(-2.4))-3.6/(-y))
@@ -5093,11 +5093,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((1.0/x-((-x)+(-y)*5.7-2.3+(-2.4))-3.6/(-y))).Expr.eval (programList[prIndex])
+        let s = ((1.0/x-((-x)+(-y)*5.7-2.3+(-2.4))-3.6/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (1.0/p-((-p)+(-q)*5.7-2.3+(-2.4))-3.6/(-q))
             z2 <== (1.0/x-((-x)+(-y)*5.7-2.3+(-2.4))-3.6/(-y))
-            wr [I 445; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 445)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 446
         !"test446"
         //let z0 = (((-7.6))*(0.6-x+x*x-3.6+7.5*((-4.8)/y+2.8)/x)/(-4.3)/y+(x/(-2.5)))
@@ -5106,11 +5106,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-7.6))*(0.6-x+x*x-3.6+7.5*((-4.8)/y+2.8)/x)/(-4.3)/y+(x/(-2.5)))).Expr.eval (programList[prIndex])
+        let s = ((((-7.6))*(0.6-x+x*x-3.6+7.5*((-4.8)/y+2.8)/x)/(-4.3)/y+(x/(-2.5)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-7.6))*(0.6-p+p*p-3.6+7.5*((-4.8)/q+2.8)/p)/(-4.3)/q+(p/(-2.5)))
             z2 <== (((-7.6))*(0.6-x+x*x-3.6+7.5*((-4.8)/y+2.8)/x)/(-4.3)/y+(x/(-2.5)))
-            wr [I 446; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 446)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 447
         !"test447"
         //let z0 = ((-0.8)*(5.0))*((x/0.1+3.2)+(x/y)+((-1.4)+x)/x-(-1.6)*5.2-((-y)*(-7.3)+(-x)))
@@ -5119,11 +5119,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.8)*(5.0))*((x/0.1+3.2)+(x/y)+((-1.4)+x)/x-(-1.6)*5.2-((-y)*(-7.3)+(-x)))).Expr.eval (programList[prIndex])
+        let s = (((-0.8)*(5.0))*((x/0.1+3.2)+(x/y)+((-1.4)+x)/x-(-1.6)*5.2-((-y)*(-7.3)+(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.8)*(5.0))*((p/0.1+3.2)+(p/q)+((-1.4)+p)/p-(-1.6)*5.2-((-q)*(-7.3)+(-p)))
             z2 <== ((-0.8)*(5.0))*((x/0.1+3.2)+(x/y)+((-1.4)+x)/x-(-1.6)*5.2-((-y)*(-7.3)+(-x)))
-            wr [I 447; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 447)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 448
         !"test448"
         //let z0 = (3.7-(-7.5)+(y-(-8.0)+(-4.3)-(-y)+x/x/y/(-7.7)+x)-(-3.1)-(((-4.4))*5.2/(x)*(-8.2)))
@@ -5132,11 +5132,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((3.7-(-7.5)+(y-(-8.0)+(-4.3)-(-y)+x/x/y/(-7.7)+x)-(-3.1)-(((-4.4))*5.2/(x)*(-8.2)))).Expr.eval (programList[prIndex])
+        let s = ((3.7-(-7.5)+(y-(-8.0)+(-4.3)-(-y)+x/x/y/(-7.7)+x)-(-3.1)-(((-4.4))*5.2/(x)*(-8.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (3.7-(-7.5)+(q-(-8.0)+(-4.3)-(-q)+p/p/q/(-7.7)+p)-(-3.1)-(((-4.4))*5.2/(p)*(-8.2)))
             z2 <== (3.7-(-7.5)+(y-(-8.0)+(-4.3)-(-y)+x/x/y/(-7.7)+x)-(-3.1)-(((-4.4))*5.2/(x)*(-8.2)))
-            wr [I 448; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 448)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 449
         !"test449"
         //let z0 = ((-y))
@@ -5145,11 +5145,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))).Expr.eval (programList[prIndex])
+        let s = (((-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))
             z2 <== ((-y))
-            wr [I 449; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 449)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 450
         !"test450"
         //let z0 = 5.5
@@ -5166,11 +5166,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((6.3*(-3.0)-y*(-y)*(-y))).Expr.eval (programList[prIndex])
+        let s = ((6.3*(-3.0)-y*(-y)*(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (6.3*(-3.0)-q*(-q)*(-q))
             z2 <== (6.3*(-3.0)-y*(-y)*(-y))
-            wr [I 451; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 451)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 452
         !"test452"
         //let z0 = (-y)
@@ -5179,11 +5179,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 452; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 452)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 453
         !"test453"
         //let z0 = ((-x)-(-6.3)-(-x)/6.2/(-0.3)+8.8+((2.6+(-y)-x-(-2.8))*((-0.7)/2.7/0.1)-(-7.6)+((-x)*1.6)))
@@ -5192,11 +5192,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)-(-6.3)-(-x)/6.2/(-0.3)+8.8+((2.6+(-y)-x-(-2.8))*((-0.7)/2.7/0.1)-(-7.6)+((-x)*1.6)))).Expr.eval (programList[prIndex])
+        let s = (((-x)-(-6.3)-(-x)/6.2/(-0.3)+8.8+((2.6+(-y)-x-(-2.8))*((-0.7)/2.7/0.1)-(-7.6)+((-x)*1.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)-(-6.3)-(-p)/6.2/(-0.3)+8.8+((2.6+(-q)-p-(-2.8))*((-0.7)/2.7/0.1)-(-7.6)+((-p)*1.6)))
             z2 <== ((-x)-(-6.3)-(-x)/6.2/(-0.3)+8.8+((2.6+(-y)-x-(-2.8))*((-0.7)/2.7/0.1)-(-7.6)+((-x)*1.6)))
-            wr [I 453; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 453)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 454
         !"test454"
         //let z0 = (-y)
@@ -5205,11 +5205,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 454; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 454)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 455
         !"test455"
         //let z0 = (-4.7)*(-7.7)-(-8.2)
@@ -5226,11 +5226,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-8.6)/y-(-5.1)-(-5.5)+(-7.5))+(-0.2)/((-2.7)*(-2.4)/1.8*0.4*(-5.4))*(y*y+y/x)-(-8.2))/((x*7.0+x)*((-x)+0.1*(-x)*0.1)))).Expr.eval (programList[prIndex])
+        let s = (((((-8.6)/y-(-5.1)-(-5.5)+(-7.5))+(-0.2)/((-2.7)*(-2.4)/1.8*0.4*(-5.4))*(y*y+y/x)-(-8.2))/((x*7.0+x)*((-x)+0.1*(-x)*0.1)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-8.6)/q-(-5.1)-(-5.5)+(-7.5))+(-0.2)/((-2.7)*(-2.4)/1.8*0.4*(-5.4))*(q*q+q/p)-(-8.2))/((p*7.0+p)*((-p)+0.1*(-p)*0.1)))
             z2 <== ((((-8.6)/y-(-5.1)-(-5.5)+(-7.5))+(-0.2)/((-2.7)*(-2.4)/1.8*0.4*(-5.4))*(y*y+y/x)-(-8.2))/((x*7.0+x)*((-x)+0.1*(-x)*0.1)))
-            wr [I 456; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 456)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 457
         !"test457"
         //let z0 = x
@@ -5239,11 +5239,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 457; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 457)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 458
         !"test458"
         //let z0 = (x-(-y)-((-3.2)+4.8/x)*x)
@@ -5252,11 +5252,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x-(-y)-((-3.2)+4.8/x)*x)).Expr.eval (programList[prIndex])
+        let s = ((x-(-y)-((-3.2)+4.8/x)*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p-(-q)-((-3.2)+4.8/p)*p)
             z2 <== (x-(-y)-((-3.2)+4.8/x)*x)
-            wr [I 458; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 458)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 459
         !"test459"
         //let z0 = (-y)
@@ -5265,11 +5265,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 459; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 459)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 460
         !"test460"
         //let z0 = (-7.5)
@@ -5286,11 +5286,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (0.4*((0.6*(-8.6)+0.6+(-x))/5.5)-(-0.7)).Expr.eval (programList[prIndex])
+        let s = (0.4*((0.6*(-8.6)+0.6+(-x))/5.5)-(-0.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 0.4*((0.6*(-8.6)+0.6+(-p))/5.5)-(-0.7)
             z2 <== 0.4*((0.6*(-8.6)+0.6+(-x))/5.5)-(-0.7)
-            wr [I 461; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 461)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 462
         !"test462"
         //let z0 = (4.3*x*((-y)*(-y)*(-x)))*(((-2.0)*(-7.8)+4.6-2.5/y))/(-y)
@@ -5299,11 +5299,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((4.3*x*((-y)*(-y)*(-x)))*(((-2.0)*(-7.8)+4.6-2.5/y))/(-y)).Expr.eval (programList[prIndex])
+        let s = ((4.3*x*((-y)*(-y)*(-x)))*(((-2.0)*(-7.8)+4.6-2.5/y))/(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (4.3*p*((-q)*(-q)*(-p)))*(((-2.0)*(-7.8)+4.6-2.5/q))/(-q)
             z2 <== (4.3*x*((-y)*(-y)*(-x)))*(((-2.0)*(-7.8)+4.6-2.5/y))/(-y)
-            wr [I 462; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 462)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 463
         !"test463"
         //let z0 = (8.5+7.1)
@@ -5320,11 +5320,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-7.5)+(-4.5)*(-0.1)*0.4)+((-0.5))/(x)-((-x))-y+(1.2-5.8+4.0-(-0.5)*(-0.6)/7.6/(x*(-x)/x-(-5.1)))-((7.8*2.2+7.7)-y-(-8.6)+7.4-(-2.8)))).Expr.eval (programList[prIndex])
+        let s = ((((-7.5)+(-4.5)*(-0.1)*0.4)+((-0.5))/(x)-((-x))-y+(1.2-5.8+4.0-(-0.5)*(-0.6)/7.6/(x*(-x)/x-(-5.1)))-((7.8*2.2+7.7)-y-(-8.6)+7.4-(-2.8)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-7.5)+(-4.5)*(-0.1)*0.4)+((-0.5))/(p)-((-p))-q+(1.2-5.8+4.0-(-0.5)*(-0.6)/7.6/(p*(-p)/p-(-5.1)))-((7.8*2.2+7.7)-q-(-8.6)+7.4-(-2.8)))
             z2 <== (((-7.5)+(-4.5)*(-0.1)*0.4)+((-0.5))/(x)-((-x))-y+(1.2-5.8+4.0-(-0.5)*(-0.6)/7.6/(x*(-x)/x-(-5.1)))-((7.8*2.2+7.7)-y-(-8.6)+7.4-(-2.8)))
-            wr [I 464; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 464)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 465
         !"test465"
         //let z0 = 5.1
@@ -5349,11 +5349,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*0.7+(-x)*((4.1/3.0*(-y)+(-x))/2.2/x-(-y)-(-x)/(-0.0)-((-x)*6.5*x)))).Expr.eval (programList[prIndex])
+        let s = ((y*0.7+(-x)*((4.1/3.0*(-y)+(-x))/2.2/x-(-y)-(-x)/(-0.0)-((-x)*6.5*x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*0.7+(-p)*((4.1/3.0*(-q)+(-p))/2.2/p-(-q)-(-p)/(-0.0)-((-p)*6.5*p)))
             z2 <== (y*0.7+(-x)*((4.1/3.0*(-y)+(-x))/2.2/x-(-y)-(-x)/(-0.0)-((-x)*6.5*x)))
-            wr [I 467; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 467)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 468
         !"test468"
         //let z0 = (-y)
@@ -5362,11 +5362,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 468; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 468)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 469
         !"test469"
         //let z0 = ((-x)+(-x))
@@ -5375,11 +5375,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+(-x))).Expr.eval (programList[prIndex])
+        let s = (((-x)+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+(-p))
             z2 <== ((-x)+(-x))
-            wr [I 469; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 469)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 470
         !"test470"
         //let z0 = (-y)
@@ -5388,11 +5388,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 470; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 470)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 471
         !"test471"
         //let z0 = ((((-x)-(-y))+(x-(-6.2)*3.7)/(-y))*(x/(-y))/3.8/(((-8.3)+x-x)+((-6.4)*(-y)))+(-x))
@@ -5401,11 +5401,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)-(-y))+(x-(-6.2)*3.7)/(-y))*(x/(-y))/3.8/(((-8.3)+x-x)+((-6.4)*(-y)))+(-x))).Expr.eval (programList[prIndex])
+        let s = (((((-x)-(-y))+(x-(-6.2)*3.7)/(-y))*(x/(-y))/3.8/(((-8.3)+x-x)+((-6.4)*(-y)))+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)-(-q))+(p-(-6.2)*3.7)/(-q))*(p/(-q))/3.8/(((-8.3)+p-p)+((-6.4)*(-q)))+(-p))
             z2 <== ((((-x)-(-y))+(x-(-6.2)*3.7)/(-y))*(x/(-y))/3.8/(((-8.3)+x-x)+((-6.4)*(-y)))+(-x))
-            wr [I 471; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 471)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 472
         !"test472"
         //let z0 = 8.5
@@ -5422,11 +5422,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 473; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 473)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 474
         !"test474"
         //let z0 = 2.1*8.7/(-4.4)/(8.5)-8.3
@@ -5443,11 +5443,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*y*8.4/((-0.0)/4.0*(-2.6)*x/(-0.0))/((-y)/(-8.2)-y*(-5.6)))).Expr.eval (programList[prIndex])
+        let s = ((x*y*8.4/((-0.0)/4.0*(-2.6)*x/(-0.0))/((-y)/(-8.2)-y*(-5.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*q*8.4/((-0.0)/4.0*(-2.6)*p/(-0.0))/((-q)/(-8.2)-q*(-5.6)))
             z2 <== (x*y*8.4/((-0.0)/4.0*(-2.6)*x/(-0.0))/((-y)/(-8.2)-y*(-5.6)))
-            wr [I 475; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 475)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 476
         !"test476"
         //let z0 = (-x)*((2.0*(-1.8)+4.4)/1.8)-(-x)
@@ -5456,11 +5456,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)*((2.0*(-1.8)+4.4)/1.8)-(-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)*((2.0*(-1.8)+4.4)/1.8)-(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)*((2.0*(-1.8)+4.4)/1.8)-(-p)
             z2 <== (-x)*((2.0*(-1.8)+4.4)/1.8)-(-x)
-            wr [I 476; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 476)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 477
         !"test477"
         //let z0 = ((-x)+(-8.3))
@@ -5469,11 +5469,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+(-8.3))).Expr.eval (programList[prIndex])
+        let s = (((-x)+(-8.3))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+(-8.3))
             z2 <== ((-x)+(-8.3))
-            wr [I 477; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 477)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 478
         !"test478"
         //let z0 = x+8.7/((-3.6))+((-y))+((-3.0)-2.5+x)-((-7.1)*8.1)/(-2.2)
@@ -5482,11 +5482,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x+8.7/((-3.6))+((-y))+((-3.0)-2.5+x)-((-7.1)*8.1)/(-2.2)).Expr.eval (programList[prIndex])
+        let s = (x+8.7/((-3.6))+((-y))+((-3.0)-2.5+x)-((-7.1)*8.1)/(-2.2)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p+8.7/((-3.6))+((-q))+((-3.0)-2.5+p)-((-7.1)*8.1)/(-2.2)
             z2 <== x+8.7/((-3.6))+((-y))+((-3.0)-2.5+x)-((-7.1)*8.1)/(-2.2)
-            wr [I 478; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 478)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 479
         !"test479"
         //let z0 = (-y)+(-7.3)*(-x)*(-1.2)-x/((0.8-6.3-8.7*(-y)+6.4)/(y*x)/5.3)+(-x)
@@ -5495,11 +5495,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)+(-7.3)*(-x)*(-1.2)-x/((0.8-6.3-8.7*(-y)+6.4)/(y*x)/5.3)+(-x)).Expr.eval (programList[prIndex])
+        let s = ((-y)+(-7.3)*(-x)*(-1.2)-x/((0.8-6.3-8.7*(-y)+6.4)/(y*x)/5.3)+(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)+(-7.3)*(-p)*(-1.2)-p/((0.8-6.3-8.7*(-q)+6.4)/(q*p)/5.3)+(-p)
             z2 <== (-y)+(-7.3)*(-x)*(-1.2)-x/((0.8-6.3-8.7*(-y)+6.4)/(y*x)/5.3)+(-x)
-            wr [I 479; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 479)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 480
         !"test480"
         //let z0 = (y*(1.7+y/(-x))*0.2/(-y))/7.7-8.3/(-8.5)-(-y)
@@ -5508,11 +5508,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*(1.7+y/(-x))*0.2/(-y))/7.7-8.3/(-8.5)-(-y)).Expr.eval (programList[prIndex])
+        let s = ((y*(1.7+y/(-x))*0.2/(-y))/7.7-8.3/(-8.5)-(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*(1.7+q/(-p))*0.2/(-q))/7.7-8.3/(-8.5)-(-q)
             z2 <== (y*(1.7+y/(-x))*0.2/(-y))/7.7-8.3/(-8.5)-(-y)
-            wr [I 480; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 480)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 481
         !"test481"
         //let z0 = x
@@ -5521,11 +5521,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 481; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 481)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 482
         !"test482"
         //let z0 = (-y)
@@ -5534,11 +5534,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 482; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 482)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 483
         !"test483"
         //let z0 = (x/(((-x)*x+0.4))+y+2.1-(5.0))
@@ -5547,11 +5547,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/(((-x)*x+0.4))+y+2.1-(5.0))).Expr.eval (programList[prIndex])
+        let s = ((x/(((-x)*x+0.4))+y+2.1-(5.0))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/(((-p)*p+0.4))+q+2.1-(5.0))
             z2 <== (x/(((-x)*x+0.4))+y+2.1-(5.0))
-            wr [I 483; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 483)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 484
         !"test484"
         //let z0 = (-y)/(y+(-6.8)+7.1*((-y)+(-6.6)-(-7.5)+(-x)*(-0.7))-(-1.6)-(-6.6))+(-x)
@@ -5560,11 +5560,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)/(y+(-6.8)+7.1*((-y)+(-6.6)-(-7.5)+(-x)*(-0.7))-(-1.6)-(-6.6))+(-x)).Expr.eval (programList[prIndex])
+        let s = ((-y)/(y+(-6.8)+7.1*((-y)+(-6.6)-(-7.5)+(-x)*(-0.7))-(-1.6)-(-6.6))+(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)/(q+(-6.8)+7.1*((-q)+(-6.6)-(-7.5)+(-p)*(-0.7))-(-1.6)-(-6.6))+(-p)
             z2 <== (-y)/(y+(-6.8)+7.1*((-y)+(-6.6)-(-7.5)+(-x)*(-0.7))-(-1.6)-(-6.6))+(-x)
-            wr [I 484; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 484)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 485
         !"test485"
         //let z0 = (5.0*x*(y*(-x))+(x-(-x))+(6.1)-y/(-x)*(-y)-(-x))
@@ -5573,11 +5573,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.0*x*(y*(-x))+(x-(-x))+(6.1)-y/(-x)*(-y)-(-x))).Expr.eval (programList[prIndex])
+        let s = ((5.0*x*(y*(-x))+(x-(-x))+(6.1)-y/(-x)*(-y)-(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.0*p*(q*(-p))+(p-(-p))+(6.1)-q/(-p)*(-q)-(-p))
             z2 <== (5.0*x*(y*(-x))+(x-(-x))+(6.1)-y/(-x)*(-y)-(-x))
-            wr [I 485; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 485)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 486
         !"test486"
         //let z0 = (((x)/((-y)+(-y)*7.0)))
@@ -5586,11 +5586,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x)/((-y)+(-y)*7.0)))).Expr.eval (programList[prIndex])
+        let s = ((((x)/((-y)+(-y)*7.0)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p)/((-q)+(-q)*7.0)))
             z2 <== (((x)/((-y)+(-y)*7.0)))
-            wr [I 486; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 486)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 487
         !"test487"
         //let z0 = 7.7
@@ -5607,11 +5607,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 488; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 488)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 489
         !"test489"
         //let z0 = (-x)
@@ -5620,11 +5620,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 489; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 489)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 490
         !"test490"
         //let z0 = (-y)
@@ -5633,11 +5633,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 490; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 490)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 491
         !"test491"
         //let z0 = (-4.7)
@@ -5662,11 +5662,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 493; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 493)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 494
         !"test494"
         //let z0 = (6.7)
@@ -5683,11 +5683,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 495; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 495)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 496
         !"test496"
         //let z0 = (0.4-7.8/(-y)*((-8.2)+y+2.4/x)*x*8.4)
@@ -5696,11 +5696,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.4-7.8/(-y)*((-8.2)+y+2.4/x)*x*8.4)).Expr.eval (programList[prIndex])
+        let s = ((0.4-7.8/(-y)*((-8.2)+y+2.4/x)*x*8.4)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.4-7.8/(-q)*((-8.2)+q+2.4/p)*p*8.4)
             z2 <== (0.4-7.8/(-y)*((-8.2)+y+2.4/x)*x*8.4)
-            wr [I 496; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 496)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 497
         !"test497"
         //let z0 = (-y)
@@ -5709,11 +5709,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 497; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 497)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 498
         !"test498"
         //let z0 = x
@@ -5722,11 +5722,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 498; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 498)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 499
         !"test499"
         //let z0 = (((-4.0)))
@@ -5743,11 +5743,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+(-8.7)/(y/0.3)*(-2.3)+(-y)-4.8)).Expr.eval (programList[prIndex])
+        let s = ((y+(-8.7)/(y/0.3)*(-2.3)+(-y)-4.8)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+(-8.7)/(q/0.3)*(-2.3)+(-q)-4.8)
             z2 <== (y+(-8.7)/(y/0.3)*(-2.3)+(-y)-4.8)
-            wr [I 500; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 500)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 501
         !"test501"
         //let z0 = ((-x)+(-y))
@@ -5756,11 +5756,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+(-y))).Expr.eval (programList[prIndex])
+        let s = (((-x)+(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+(-q))
             z2 <== ((-x)+(-y))
-            wr [I 501; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 501)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 502
         !"test502"
         //let z0 = 7.6
@@ -5777,11 +5777,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 503; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 503)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 504
         !"test504"
         //let z0 = ((-1.6)-(x/(-4.4)*x/y+7.7)+y*(x+(-8.5)*(-y)*(-5.0)/(-x)))+((x)*(-y)-(0.3*6.2*(-7.3)+5.3)*(-x)+(-6.4)+x+(-x))-((-5.7)-3.5)
@@ -5790,11 +5790,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-1.6)-(x/(-4.4)*x/y+7.7)+y*(x+(-8.5)*(-y)*(-5.0)/(-x)))+((x)*(-y)-(0.3*6.2*(-7.3)+5.3)*(-x)+(-6.4)+x+(-x))-((-5.7)-3.5)).Expr.eval (programList[prIndex])
+        let s = (((-1.6)-(x/(-4.4)*x/y+7.7)+y*(x+(-8.5)*(-y)*(-5.0)/(-x)))+((x)*(-y)-(0.3*6.2*(-7.3)+5.3)*(-x)+(-6.4)+x+(-x))-((-5.7)-3.5)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-1.6)-(p/(-4.4)*p/q+7.7)+q*(p+(-8.5)*(-q)*(-5.0)/(-p)))+((p)*(-q)-(0.3*6.2*(-7.3)+5.3)*(-p)+(-6.4)+p+(-p))-((-5.7)-3.5)
             z2 <== ((-1.6)-(x/(-4.4)*x/y+7.7)+y*(x+(-8.5)*(-y)*(-5.0)/(-x)))+((x)*(-y)-(0.3*6.2*(-7.3)+5.3)*(-x)+(-6.4)+x+(-x))-((-5.7)-3.5)
-            wr [I 504; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 504)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 505
         !"test505"
         //let z0 = (y+(x-x-(-x)-((-y)-y)*x-(-y)-(-y))/x)
@@ -5803,11 +5803,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+(x-x-(-x)-((-y)-y)*x-(-y)-(-y))/x)).Expr.eval (programList[prIndex])
+        let s = ((y+(x-x-(-x)-((-y)-y)*x-(-y)-(-y))/x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+(p-p-(-p)-((-q)-q)*p-(-q)-(-q))/p)
             z2 <== (y+(x-x-(-x)-((-y)-y)*x-(-y)-(-y))/x)
-            wr [I 505; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 505)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 506
         !"test506"
         //let z0 = ((-1.8)*((-y)*(-y)/(-5.7)*(5.7+(-y)+0.6/(-7.6)-(-8.5)))+(-0.1)*8.2+(-y)+x)
@@ -5816,11 +5816,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-1.8)*((-y)*(-y)/(-5.7)*(5.7+(-y)+0.6/(-7.6)-(-8.5)))+(-0.1)*8.2+(-y)+x)).Expr.eval (programList[prIndex])
+        let s = (((-1.8)*((-y)*(-y)/(-5.7)*(5.7+(-y)+0.6/(-7.6)-(-8.5)))+(-0.1)*8.2+(-y)+x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-1.8)*((-q)*(-q)/(-5.7)*(5.7+(-q)+0.6/(-7.6)-(-8.5)))+(-0.1)*8.2+(-q)+p)
             z2 <== ((-1.8)*((-y)*(-y)/(-5.7)*(5.7+(-y)+0.6/(-7.6)-(-8.5)))+(-0.1)*8.2+(-y)+x)
-            wr [I 506; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 506)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 507
         !"test507"
         //let z0 = (-8.8)
@@ -5837,11 +5837,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x/3.4/0.5)+(-y)/(-1.5)-4.2+(-x)-3.2/6.8/(x+3.5+(-y)+2.0/(-0.0))+x/y)).Expr.eval (programList[prIndex])
+        let s = (((x/3.4/0.5)+(-y)/(-1.5)-4.2+(-x)-3.2/6.8/(x+3.5+(-y)+2.0/(-0.0))+x/y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p/3.4/0.5)+(-q)/(-1.5)-4.2+(-p)-3.2/6.8/(p+3.5+(-q)+2.0/(-0.0))+p/q)
             z2 <== ((x/3.4/0.5)+(-y)/(-1.5)-4.2+(-x)-3.2/6.8/(x+3.5+(-y)+2.0/(-0.0))+x/y)
-            wr [I 508; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 508)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 509
         !"test509"
         //let z0 = ((-0.4)-(6.0*(-y)/(-4.6)-(-y))+(x*(-6.7))+(1.3/(-5.6)+x)-(-y)-x)
@@ -5850,11 +5850,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.4)-(6.0*(-y)/(-4.6)-(-y))+(x*(-6.7))+(1.3/(-5.6)+x)-(-y)-x)).Expr.eval (programList[prIndex])
+        let s = (((-0.4)-(6.0*(-y)/(-4.6)-(-y))+(x*(-6.7))+(1.3/(-5.6)+x)-(-y)-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.4)-(6.0*(-q)/(-4.6)-(-q))+(p*(-6.7))+(1.3/(-5.6)+p)-(-q)-p)
             z2 <== ((-0.4)-(6.0*(-y)/(-4.6)-(-y))+(x*(-6.7))+(1.3/(-5.6)+x)-(-y)-x)
-            wr [I 509; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 509)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 510
         !"test510"
         //let z0 = ((x-((-x)+(-7.7))))
@@ -5863,11 +5863,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-((-x)+(-7.7))))).Expr.eval (programList[prIndex])
+        let s = (((x-((-x)+(-7.7))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-((-p)+(-7.7))))
             z2 <== ((x-((-x)+(-7.7))))
-            wr [I 510; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 510)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 511
         !"test511"
         //let z0 = ((-x)+x*(-4.7)/x/(-5.1)-(-y)-y-0.5*5.7)/((x/(-y))/5.3*(-6.0)*(-y)+(-y))-((3.1+y+2.3-x/4.5)/(x)+(-0.3)/5.4-(-x))
@@ -5876,11 +5876,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+x*(-4.7)/x/(-5.1)-(-y)-y-0.5*5.7)/((x/(-y))/5.3*(-6.0)*(-y)+(-y))-((3.1+y+2.3-x/4.5)/(x)+(-0.3)/5.4-(-x))).Expr.eval (programList[prIndex])
+        let s = (((-x)+x*(-4.7)/x/(-5.1)-(-y)-y-0.5*5.7)/((x/(-y))/5.3*(-6.0)*(-y)+(-y))-((3.1+y+2.3-x/4.5)/(x)+(-0.3)/5.4-(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+p*(-4.7)/p/(-5.1)-(-q)-q-0.5*5.7)/((p/(-q))/5.3*(-6.0)*(-q)+(-q))-((3.1+q+2.3-p/4.5)/(p)+(-0.3)/5.4-(-p))
             z2 <== ((-x)+x*(-4.7)/x/(-5.1)-(-y)-y-0.5*5.7)/((x/(-y))/5.3*(-6.0)*(-y)+(-y))-((3.1+y+2.3-x/4.5)/(x)+(-0.3)/5.4-(-x))
-            wr [I 511; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 511)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 512
         !"test512"
         //let z0 = (-8.3)
@@ -5897,11 +5897,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((5.4*y+(-y)*x*(-7.3)*((-x)/x)+((-3.5)+(-x)-(-y)*(-7.7)/7.0))/x)).Expr.eval (programList[prIndex])
+        let s = (((5.4*y+(-y)*x*(-7.3)*((-x)/x)+((-3.5)+(-x)-(-y)*(-7.7)/7.0))/x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((5.4*q+(-q)*p*(-7.3)*((-p)/p)+((-3.5)+(-p)-(-q)*(-7.7)/7.0))/p)
             z2 <== ((5.4*y+(-y)*x*(-7.3)*((-x)/x)+((-3.5)+(-x)-(-y)*(-7.7)/7.0))/x)
-            wr [I 513; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 513)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 514
         !"test514"
         //let z0 = (x+((5.1+(-1.1)+y*(-y))+(-1.5))/(-y)*((-8.8)*((-4.8)+y/7.4-x-(-2.5))/(-x)/y)/(-3.3))
@@ -5910,11 +5910,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x+((5.1+(-1.1)+y*(-y))+(-1.5))/(-y)*((-8.8)*((-4.8)+y/7.4-x-(-2.5))/(-x)/y)/(-3.3))).Expr.eval (programList[prIndex])
+        let s = ((x+((5.1+(-1.1)+y*(-y))+(-1.5))/(-y)*((-8.8)*((-4.8)+y/7.4-x-(-2.5))/(-x)/y)/(-3.3))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p+((5.1+(-1.1)+q*(-q))+(-1.5))/(-q)*((-8.8)*((-4.8)+q/7.4-p-(-2.5))/(-p)/q)/(-3.3))
             z2 <== (x+((5.1+(-1.1)+y*(-y))+(-1.5))/(-y)*((-8.8)*((-4.8)+y/7.4-x-(-2.5))/(-x)/y)/(-3.3))
-            wr [I 514; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 514)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 515
         !"test515"
         //let z0 = (((-5.6))+((-0.2)+y))
@@ -5923,11 +5923,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.6))+((-0.2)+y))).Expr.eval (programList[prIndex])
+        let s = ((((-5.6))+((-0.2)+y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.6))+((-0.2)+q))
             z2 <== (((-5.6))+((-0.2)+y))
-            wr [I 515; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 515)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 516
         !"test516"
         //let z0 = 5.4/5.3*(y)+((-5.2)*(-7.3)*(-x))/x*(x)/(-x)*(3.7-(-y)+(-1.7)*1.8)-((-5.5)-7.3-y/1.7)*(-y)*(-2.7)*x*x/(-x)*(y/(y+y/7.7))
@@ -5936,11 +5936,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (5.4/5.3*(y)+((-5.2)*(-7.3)*(-x))/x*(x)/(-x)*(3.7-(-y)+(-1.7)*1.8)-((-5.5)-7.3-y/1.7)*(-y)*(-2.7)*x*x/(-x)*(y/(y+y/7.7))).Expr.eval (programList[prIndex])
+        let s = (5.4/5.3*(y)+((-5.2)*(-7.3)*(-x))/x*(x)/(-x)*(3.7-(-y)+(-1.7)*1.8)-((-5.5)-7.3-y/1.7)*(-y)*(-2.7)*x*x/(-x)*(y/(y+y/7.7))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 5.4/5.3*(q)+((-5.2)*(-7.3)*(-p))/p*(p)/(-p)*(3.7-(-q)+(-1.7)*1.8)-((-5.5)-7.3-q/1.7)*(-q)*(-2.7)*p*p/(-p)*(q/(q+q/7.7))
             z2 <== 5.4/5.3*(y)+((-5.2)*(-7.3)*(-x))/x*(x)/(-x)*(3.7-(-y)+(-1.7)*1.8)-((-5.5)-7.3-y/1.7)*(-y)*(-2.7)*x*x/(-x)*(y/(y+y/7.7))
-            wr [I 516; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 516)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 517
         !"test517"
         //let z0 = y
@@ -5949,11 +5949,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 517; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 517)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 518
         !"test518"
         //let z0 = 3.3
@@ -5970,11 +5970,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (0.4*(-x)).Expr.eval (programList[prIndex])
+        let s = (0.4*(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 0.4*(-p)
             z2 <== 0.4*(-x)
-            wr [I 519; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 519)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 520
         !"test520"
         //let z0 = 2.8
@@ -6007,11 +6007,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x-y)-(-2.0)*(y/(-1.0)))/y-(-x)*4.5-(((-x)-x+(-y))))).Expr.eval (programList[prIndex])
+        let s = ((((x-y)-(-2.0)*(y/(-1.0)))/y-(-x)*4.5-(((-x)-x+(-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p-q)-(-2.0)*(q/(-1.0)))/q-(-p)*4.5-(((-p)-p+(-q))))
             z2 <== (((x-y)-(-2.0)*(y/(-1.0)))/y-(-x)*4.5-(((-x)-x+(-y))))
-            wr [I 523; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 523)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 524
         !"test524"
         //let z0 = ((((-3.8))-x-(0.0/0.2+8.6+2.2)-x))
@@ -6020,11 +6020,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-3.8))-x-(0.0/0.2+8.6+2.2)-x))).Expr.eval (programList[prIndex])
+        let s = (((((-3.8))-x-(0.0/0.2+8.6+2.2)-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-3.8))-p-(0.0/0.2+8.6+2.2)-p))
             z2 <== ((((-3.8))-x-(0.0/0.2+8.6+2.2)-x))
-            wr [I 524; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 524)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 525
         !"test525"
         //let z0 = x
@@ -6033,11 +6033,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 525; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 525)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 526
         !"test526"
         //let z0 = 2.1
@@ -6062,11 +6062,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x))*2.0+(-x)*((-5.2)-y/(-y)/y+(-6.0))/y+x*6.6*x)).Expr.eval (programList[prIndex])
+        let s = ((((-x))*2.0+(-x)*((-5.2)-y/(-y)/y+(-6.0))/y+x*6.6*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p))*2.0+(-p)*((-5.2)-q/(-q)/q+(-6.0))/q+p*6.6*p)
             z2 <== (((-x))*2.0+(-x)*((-5.2)-y/(-y)/y+(-6.0))/y+x*6.6*x)
-            wr [I 528; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 528)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 529
         !"test529"
         //let z0 = ((x-(-y)-(-6.5)*4.2/8.5))
@@ -6075,11 +6075,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-(-y)-(-6.5)*4.2/8.5))).Expr.eval (programList[prIndex])
+        let s = (((x-(-y)-(-6.5)*4.2/8.5))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-(-q)-(-6.5)*4.2/8.5))
             z2 <== ((x-(-y)-(-6.5)*4.2/8.5))
-            wr [I 529; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 529)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 530
         !"test530"
         //let z0 = (-5.8)
@@ -6096,11 +6096,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 531; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 531)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 532
         !"test532"
         //let z0 = (2.6)
@@ -6125,11 +6125,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)-x*(4.8+x-y+(y))+2.8/8.2).Expr.eval (programList[prIndex])
+        let s = ((-y)-x*(4.8+x-y+(y))+2.8/8.2).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)-p*(4.8+p-q+(q))+2.8/8.2
             z2 <== (-y)-x*(4.8+x-y+(y))+2.8/8.2
-            wr [I 534; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 534)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 535
         !"test535"
         //let z0 = (-y)/(((-y)*(-y)+1.3/6.4)-(-8.2)+((-x)+(-y)*4.5)*(-7.6))-(-7.4)*(5.5/(-x)*(-1.2)/(-y)+4.6)+y-(-y)-y*(-5.1)
@@ -6138,11 +6138,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)/(((-y)*(-y)+1.3/6.4)-(-8.2)+((-x)+(-y)*4.5)*(-7.6))-(-7.4)*(5.5/(-x)*(-1.2)/(-y)+4.6)+y-(-y)-y*(-5.1)).Expr.eval (programList[prIndex])
+        let s = ((-y)/(((-y)*(-y)+1.3/6.4)-(-8.2)+((-x)+(-y)*4.5)*(-7.6))-(-7.4)*(5.5/(-x)*(-1.2)/(-y)+4.6)+y-(-y)-y*(-5.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)/(((-q)*(-q)+1.3/6.4)-(-8.2)+((-p)+(-q)*4.5)*(-7.6))-(-7.4)*(5.5/(-p)*(-1.2)/(-q)+4.6)+q-(-q)-q*(-5.1)
             z2 <== (-y)/(((-y)*(-y)+1.3/6.4)-(-8.2)+((-x)+(-y)*4.5)*(-7.6))-(-7.4)*(5.5/(-x)*(-1.2)/(-y)+4.6)+y-(-y)-y*(-5.1)
-            wr [I 535; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 535)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 536
         !"test536"
         //let z0 = x
@@ -6151,11 +6151,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 536; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 536)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 537
         !"test537"
         //let z0 = 4.7
@@ -6172,11 +6172,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 538; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 538)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 539
         !"test539"
         //let z0 = (-8.0)
@@ -6201,11 +6201,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((4.0+(x*y+(-1.7)*0.5+5.8)+8.5)/(1.7-(-x)+y)+8.0)).Expr.eval (programList[prIndex])
+        let s = (((4.0+(x*y+(-1.7)*0.5+5.8)+8.5)/(1.7-(-x)+y)+8.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((4.0+(p*q+(-1.7)*0.5+5.8)+8.5)/(1.7-(-p)+q)+8.0)
             z2 <== ((4.0+(x*y+(-1.7)*0.5+5.8)+8.5)/(1.7-(-x)+y)+8.0)
-            wr [I 541; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 541)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 542
         !"test542"
         //let z0 = (x)
@@ -6214,11 +6214,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x)).Expr.eval (programList[prIndex])
+        let s = ((x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p)
             z2 <== (x)
-            wr [I 542; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 542)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 543
         !"test543"
         //let z0 = x
@@ -6227,11 +6227,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 543; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 543)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 544
         !"test544"
         //let z0 = 5.6
@@ -6256,11 +6256,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)*(1.5*5.1/(-x)/(-y)))-6.7/6.1/((-x)+(-8.0)+(-y)*(-8.5)/x/(-3.8)/(-x)/6.7/x)).Expr.eval (programList[prIndex])
+        let s = (((-x)*(1.5*5.1/(-x)/(-y)))-6.7/6.1/((-x)+(-8.0)+(-y)*(-8.5)/x/(-3.8)/(-x)/6.7/x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)*(1.5*5.1/(-p)/(-q)))-6.7/6.1/((-p)+(-8.0)+(-q)*(-8.5)/p/(-3.8)/(-p)/6.7/p)
             z2 <== ((-x)*(1.5*5.1/(-x)/(-y)))-6.7/6.1/((-x)+(-8.0)+(-y)*(-8.5)/x/(-3.8)/(-x)/6.7/x)
-            wr [I 546; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 546)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 547
         !"test547"
         //let z0 = ((-0.5)/y/x/((-x)/(-8.8)/(-2.3)+x*(-7.7))*(y-(-1.1))*((-1.7)+(4.5/x)/y)+(x/(-2.8)-(-y))-y)
@@ -6269,11 +6269,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.5)/y/x/((-x)/(-8.8)/(-2.3)+x*(-7.7))*(y-(-1.1))*((-1.7)+(4.5/x)/y)+(x/(-2.8)-(-y))-y)).Expr.eval (programList[prIndex])
+        let s = (((-0.5)/y/x/((-x)/(-8.8)/(-2.3)+x*(-7.7))*(y-(-1.1))*((-1.7)+(4.5/x)/y)+(x/(-2.8)-(-y))-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.5)/q/p/((-p)/(-8.8)/(-2.3)+p*(-7.7))*(q-(-1.1))*((-1.7)+(4.5/p)/q)+(p/(-2.8)-(-q))-q)
             z2 <== ((-0.5)/y/x/((-x)/(-8.8)/(-2.3)+x*(-7.7))*(y-(-1.1))*((-1.7)+(4.5/x)/y)+(x/(-2.8)-(-y))-y)
-            wr [I 547; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 547)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 548
         !"test548"
         //let z0 = (-5.2)
@@ -6298,11 +6298,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)/(-6.8))).Expr.eval (programList[prIndex])
+        let s = (((-y)/(-6.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)/(-6.8))
             z2 <== ((-y)/(-6.8))
-            wr [I 550; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 550)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 551
         !"test551"
         //let z0 = (((-x))*(2.2*((-y)*1.3-(-x)*x))+(((-y)/3.6-x)+0.3*(-5.7))-(x/(-1.0)/y*y*(-y)*3.6+(-x)+((-0.2)-x-4.2/x/(-1.6))+(3.2+(-x)+y)))
@@ -6311,11 +6311,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x))*(2.2*((-y)*1.3-(-x)*x))+(((-y)/3.6-x)+0.3*(-5.7))-(x/(-1.0)/y*y*(-y)*3.6+(-x)+((-0.2)-x-4.2/x/(-1.6))+(3.2+(-x)+y)))).Expr.eval (programList[prIndex])
+        let s = ((((-x))*(2.2*((-y)*1.3-(-x)*x))+(((-y)/3.6-x)+0.3*(-5.7))-(x/(-1.0)/y*y*(-y)*3.6+(-x)+((-0.2)-x-4.2/x/(-1.6))+(3.2+(-x)+y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p))*(2.2*((-q)*1.3-(-p)*p))+(((-q)/3.6-p)+0.3*(-5.7))-(p/(-1.0)/q*q*(-q)*3.6+(-p)+((-0.2)-p-4.2/p/(-1.6))+(3.2+(-p)+q)))
             z2 <== (((-x))*(2.2*((-y)*1.3-(-x)*x))+(((-y)/3.6-x)+0.3*(-5.7))-(x/(-1.0)/y*y*(-y)*3.6+(-x)+((-0.2)-x-4.2/x/(-1.6))+(3.2+(-x)+y)))
-            wr [I 551; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 551)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 552
         !"test552"
         //let z0 = (x+((x+x+(-x))+x+4.7+0.8))
@@ -6324,11 +6324,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x+((x+x+(-x))+x+4.7+0.8))).Expr.eval (programList[prIndex])
+        let s = ((x+((x+x+(-x))+x+4.7+0.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p+((p+p+(-p))+p+4.7+0.8))
             z2 <== (x+((x+x+(-x))+x+4.7+0.8))
-            wr [I 552; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 552)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 553
         !"test553"
         //let z0 = ((((-7.0)-x/(-y)/2.4+(-1.0))*6.3*0.7-6.7)*8.8*(-x))
@@ -6337,11 +6337,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-7.0)-x/(-y)/2.4+(-1.0))*6.3*0.7-6.7)*8.8*(-x))).Expr.eval (programList[prIndex])
+        let s = (((((-7.0)-x/(-y)/2.4+(-1.0))*6.3*0.7-6.7)*8.8*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-7.0)-p/(-q)/2.4+(-1.0))*6.3*0.7-6.7)*8.8*(-p))
             z2 <== ((((-7.0)-x/(-y)/2.4+(-1.0))*6.3*0.7-6.7)*8.8*(-x))
-            wr [I 553; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 553)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 554
         !"test554"
         //let z0 = (-y)
@@ -6350,11 +6350,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 554; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 554)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 555
         !"test555"
         //let z0 = (-2.8)
@@ -6371,11 +6371,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 556; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 556)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 557
         !"test557"
         //let z0 = (-5.7)
@@ -6392,11 +6392,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (3.8/((-0.8)/y)-x+2.0-2.7/((-3.3)/(-3.8)-(-y)+7.8*(-y)-(3.4*(-1.6)*8.0))+(-x)).Expr.eval (programList[prIndex])
+        let s = (3.8/((-0.8)/y)-x+2.0-2.7/((-3.3)/(-3.8)-(-y)+7.8*(-y)-(3.4*(-1.6)*8.0))+(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 3.8/((-0.8)/q)-p+2.0-2.7/((-3.3)/(-3.8)-(-q)+7.8*(-q)-(3.4*(-1.6)*8.0))+(-p)
             z2 <== 3.8/((-0.8)/y)-x+2.0-2.7/((-3.3)/(-3.8)-(-y)+7.8*(-y)-(3.4*(-1.6)*8.0))+(-x)
-            wr [I 558; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 558)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 559
         !"test559"
         //let z0 = 6.4
@@ -6413,11 +6413,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x))).Expr.eval (programList[prIndex])
+        let s = (((-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p))
             z2 <== ((-x))
-            wr [I 560; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 560)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 561
         !"test561"
         //let z0 = (((-5.2)-((-y)-0.5-(-y)/5.1-(-1.1))))
@@ -6426,11 +6426,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.2)-((-y)-0.5-(-y)/5.1-(-1.1))))).Expr.eval (programList[prIndex])
+        let s = ((((-5.2)-((-y)-0.5-(-y)/5.1-(-1.1))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.2)-((-q)-0.5-(-q)/5.1-(-1.1))))
             z2 <== (((-5.2)-((-y)-0.5-(-y)/5.1-(-1.1))))
-            wr [I 561; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 561)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 562
         !"test562"
         //let z0 = (-0.1)
@@ -6447,11 +6447,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)+8.0)).Expr.eval (programList[prIndex])
+        let s = (((-y)+8.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)+8.0)
             z2 <== ((-y)+8.0)
-            wr [I 563; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 563)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 564
         !"test564"
         //let z0 = x
@@ -6460,11 +6460,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 564; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 564)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 565
         !"test565"
         //let z0 = ((-x)*5.6+((-1.8)-(-1.8)))*1.4/(7.1-((-x)+y)*(-x)+(-6.4)*6.2)
@@ -6473,11 +6473,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)*5.6+((-1.8)-(-1.8)))*1.4/(7.1-((-x)+y)*(-x)+(-6.4)*6.2)).Expr.eval (programList[prIndex])
+        let s = (((-x)*5.6+((-1.8)-(-1.8)))*1.4/(7.1-((-x)+y)*(-x)+(-6.4)*6.2)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)*5.6+((-1.8)-(-1.8)))*1.4/(7.1-((-p)+q)*(-p)+(-6.4)*6.2)
             z2 <== ((-x)*5.6+((-1.8)-(-1.8)))*1.4/(7.1-((-x)+y)*(-x)+(-6.4)*6.2)
-            wr [I 565; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 565)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 566
         !"test566"
         //let z0 = x
@@ -6486,11 +6486,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 566; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 566)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 567
         !"test567"
         //let z0 = ((5.8*8.8+(-x)-5.2-x)*(-1.8)*x-(0.8-3.7/1.7+(-0.6)*(y*(-1.0)+(-7.7))+(-5.0)/(4.3-(-x)-y*y))*(y*(-7.6)*(-6.2)+y/4.6))
@@ -6499,11 +6499,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((5.8*8.8+(-x)-5.2-x)*(-1.8)*x-(0.8-3.7/1.7+(-0.6)*(y*(-1.0)+(-7.7))+(-5.0)/(4.3-(-x)-y*y))*(y*(-7.6)*(-6.2)+y/4.6))).Expr.eval (programList[prIndex])
+        let s = (((5.8*8.8+(-x)-5.2-x)*(-1.8)*x-(0.8-3.7/1.7+(-0.6)*(y*(-1.0)+(-7.7))+(-5.0)/(4.3-(-x)-y*y))*(y*(-7.6)*(-6.2)+y/4.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((5.8*8.8+(-p)-5.2-p)*(-1.8)*p-(0.8-3.7/1.7+(-0.6)*(q*(-1.0)+(-7.7))+(-5.0)/(4.3-(-p)-q*q))*(q*(-7.6)*(-6.2)+q/4.6))
             z2 <== ((5.8*8.8+(-x)-5.2-x)*(-1.8)*x-(0.8-3.7/1.7+(-0.6)*(y*(-1.0)+(-7.7))+(-5.0)/(4.3-(-x)-y*y))*(y*(-7.6)*(-6.2)+y/4.6))
-            wr [I 567; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 567)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 568
         !"test568"
         //let z0 = (((-y))*(y)+2.0+y-2.2-(-y)*(-y)-(-x)+((-6.3)*(x+(-x)*(-3.4))+(y-4.7*y))+((y-5.0)+(6.7)/2.8*((-6.5))*(-3.2)))
@@ -6512,11 +6512,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y))*(y)+2.0+y-2.2-(-y)*(-y)-(-x)+((-6.3)*(x+(-x)*(-3.4))+(y-4.7*y))+((y-5.0)+(6.7)/2.8*((-6.5))*(-3.2)))).Expr.eval (programList[prIndex])
+        let s = ((((-y))*(y)+2.0+y-2.2-(-y)*(-y)-(-x)+((-6.3)*(x+(-x)*(-3.4))+(y-4.7*y))+((y-5.0)+(6.7)/2.8*((-6.5))*(-3.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q))*(q)+2.0+q-2.2-(-q)*(-q)-(-p)+((-6.3)*(p+(-p)*(-3.4))+(q-4.7*q))+((q-5.0)+(6.7)/2.8*((-6.5))*(-3.2)))
             z2 <== (((-y))*(y)+2.0+y-2.2-(-y)*(-y)-(-x)+((-6.3)*(x+(-x)*(-3.4))+(y-4.7*y))+((y-5.0)+(6.7)/2.8*((-6.5))*(-3.2)))
-            wr [I 568; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 568)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 569
         !"test569"
         //let z0 = y
@@ -6525,11 +6525,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 569; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 569)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 570
         !"test570"
         //let z0 = 6.4
@@ -6546,11 +6546,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 571; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 571)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 572
         !"test572"
         //let z0 = y/x-(-x)+0.6
@@ -6559,11 +6559,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y/x-(-x)+0.6).Expr.eval (programList[prIndex])
+        let s = (y/x-(-x)+0.6).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q/p-(-p)+0.6
             z2 <== y/x-(-x)+0.6
-            wr [I 572; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 572)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 573
         !"test573"
         //let z0 = y
@@ -6572,11 +6572,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 573; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 573)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 574
         !"test574"
         //let z0 = (-x)
@@ -6585,11 +6585,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 574; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 574)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 575
         !"test575"
         //let z0 = ((-2.6)/((x-x-(-8.5))*(-3.4))*(-8.1)*x-(-x)-(-1.2))
@@ -6598,11 +6598,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-2.6)/((x-x-(-8.5))*(-3.4))*(-8.1)*x-(-x)-(-1.2))).Expr.eval (programList[prIndex])
+        let s = (((-2.6)/((x-x-(-8.5))*(-3.4))*(-8.1)*x-(-x)-(-1.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-2.6)/((p-p-(-8.5))*(-3.4))*(-8.1)*p-(-p)-(-1.2))
             z2 <== ((-2.6)/((x-x-(-8.5))*(-3.4))*(-8.1)*x-(-x)-(-1.2))
-            wr [I 575; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 575)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 576
         !"test576"
         //let z0 = (-x)
@@ -6611,11 +6611,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 576; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 576)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 577
         !"test577"
         //let z0 = x/y
@@ -6624,11 +6624,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x/y).Expr.eval (programList[prIndex])
+        let s = (x/y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p/q
             z2 <== x/y
-            wr [I 577; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 577)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 578
         !"test578"
         //let z0 = y*(-y)+(((-3.1)-2.3/8.0+(-3.4)-y)-((-4.3)/(-0.3)*y/(-x)+(-x)))/(-x)-5.2
@@ -6637,11 +6637,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y*(-y)+(((-3.1)-2.3/8.0+(-3.4)-y)-((-4.3)/(-0.3)*y/(-x)+(-x)))/(-x)-5.2).Expr.eval (programList[prIndex])
+        let s = (y*(-y)+(((-3.1)-2.3/8.0+(-3.4)-y)-((-4.3)/(-0.3)*y/(-x)+(-x)))/(-x)-5.2).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q*(-q)+(((-3.1)-2.3/8.0+(-3.4)-q)-((-4.3)/(-0.3)*q/(-p)+(-p)))/(-p)-5.2
             z2 <== y*(-y)+(((-3.1)-2.3/8.0+(-3.4)-y)-((-4.3)/(-0.3)*y/(-x)+(-x)))/(-x)-5.2
-            wr [I 578; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 578)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 579
         !"test579"
         //let z0 = ((-y)*(y-(-x))*(-3.1)*((-y)-x))
@@ -6650,11 +6650,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)*(y-(-x))*(-3.1)*((-y)-x))).Expr.eval (programList[prIndex])
+        let s = (((-y)*(y-(-x))*(-3.1)*((-y)-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)*(q-(-p))*(-3.1)*((-q)-p))
             z2 <== ((-y)*(y-(-x))*(-3.1)*((-y)-x))
-            wr [I 579; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 579)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 580
         !"test580"
         //let z0 = (((-y)*y/(6.1+(-4.6))*y-(x/(-6.6))))
@@ -6663,11 +6663,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)*y/(6.1+(-4.6))*y-(x/(-6.6))))).Expr.eval (programList[prIndex])
+        let s = ((((-y)*y/(6.1+(-4.6))*y-(x/(-6.6))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)*q/(6.1+(-4.6))*q-(p/(-6.6))))
             z2 <== (((-y)*y/(6.1+(-4.6))*y-(x/(-6.6))))
-            wr [I 580; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 580)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 581
         !"test581"
         //let z0 = 4.5
@@ -6692,11 +6692,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 583; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 583)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 584
         !"test584"
         //let z0 = ((-y)-((x+(-x)))/((-x)/(-1.4)-x)/(-2.3))
@@ -6705,11 +6705,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-((x+(-x)))/((-x)/(-1.4)-x)/(-2.3))).Expr.eval (programList[prIndex])
+        let s = (((-y)-((x+(-x)))/((-x)/(-1.4)-x)/(-2.3))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-((p+(-p)))/((-p)/(-1.4)-p)/(-2.3))
             z2 <== ((-y)-((x+(-x)))/((-x)/(-1.4)-x)/(-2.3))
-            wr [I 584; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 584)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 585
         !"test585"
         //let z0 = 8.6
@@ -6726,11 +6726,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((7.5+((-2.2))/y-(y))*7.8*(8.8/2.2*(-y))+((-x)+(-2.2))-((y*5.2+y)))).Expr.eval (programList[prIndex])
+        let s = (((7.5+((-2.2))/y-(y))*7.8*(8.8/2.2*(-y))+((-x)+(-2.2))-((y*5.2+y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((7.5+((-2.2))/q-(q))*7.8*(8.8/2.2*(-q))+((-p)+(-2.2))-((q*5.2+q)))
             z2 <== ((7.5+((-2.2))/y-(y))*7.8*(8.8/2.2*(-y))+((-x)+(-2.2))-((y*5.2+y)))
-            wr [I 586; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 586)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 587
         !"test587"
         //let z0 = 4.0
@@ -6747,11 +6747,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 588; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 588)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 589
         !"test589"
         //let z0 = (y*(-x)-(2.2))
@@ -6760,11 +6760,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*(-x)-(2.2))).Expr.eval (programList[prIndex])
+        let s = ((y*(-x)-(2.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*(-p)-(2.2))
             z2 <== (y*(-x)-(2.2))
-            wr [I 589; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 589)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 590
         !"test590"
         //let z0 = (-2.2)
@@ -6781,11 +6781,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.0)/(-x)*(3.7)+(x+y-(-4.3)-(-y)-x)-((-0.8)/(-7.5)-(-0.8)-(-y)/(-6.2)))+((-y)/0.8*(-0.7)+8.3)).Expr.eval (programList[prIndex])
+        let s = (((-4.0)/(-x)*(3.7)+(x+y-(-4.3)-(-y)-x)-((-0.8)/(-7.5)-(-0.8)-(-y)/(-6.2)))+((-y)/0.8*(-0.7)+8.3)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.0)/(-p)*(3.7)+(p+q-(-4.3)-(-q)-p)-((-0.8)/(-7.5)-(-0.8)-(-q)/(-6.2)))+((-q)/0.8*(-0.7)+8.3)
             z2 <== ((-4.0)/(-x)*(3.7)+(x+y-(-4.3)-(-y)-x)-((-0.8)/(-7.5)-(-0.8)-(-y)/(-6.2)))+((-y)/0.8*(-0.7)+8.3)
-            wr [I 591; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 591)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 592
         !"test592"
         //let z0 = (-8.3)
@@ -6802,11 +6802,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)+x*(-y)-(y/(-3.4)+(-x)+3.7)+(y/y/5.4)*((-y)*y*(-x))+y-((4.3*x/1.1)/1.8/((-y)-x))+((0.7+(-4.3))*((-x)/(-7.5))-(-y)/(-y)+5.7/x))).Expr.eval (programList[prIndex])
+        let s = (((-y)+x*(-y)-(y/(-3.4)+(-x)+3.7)+(y/y/5.4)*((-y)*y*(-x))+y-((4.3*x/1.1)/1.8/((-y)-x))+((0.7+(-4.3))*((-x)/(-7.5))-(-y)/(-y)+5.7/x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)+p*(-q)-(q/(-3.4)+(-p)+3.7)+(q/q/5.4)*((-q)*q*(-p))+q-((4.3*p/1.1)/1.8/((-q)-p))+((0.7+(-4.3))*((-p)/(-7.5))-(-q)/(-q)+5.7/p))
             z2 <== ((-y)+x*(-y)-(y/(-3.4)+(-x)+3.7)+(y/y/5.4)*((-y)*y*(-x))+y-((4.3*x/1.1)/1.8/((-y)-x))+((0.7+(-4.3))*((-x)/(-7.5))-(-y)/(-y)+5.7/x))
-            wr [I 593; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 593)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 594
         !"test594"
         //let z0 = (7.2*((-x)-(-y)+(-y)+1.4+(-y))-y/(-0.3)-6.5/(-7.4)-((-y)+4.6+x+(y*y)/3.5)-(6.7)+(-4.1))
@@ -6815,11 +6815,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.2*((-x)-(-y)+(-y)+1.4+(-y))-y/(-0.3)-6.5/(-7.4)-((-y)+4.6+x+(y*y)/3.5)-(6.7)+(-4.1))).Expr.eval (programList[prIndex])
+        let s = ((7.2*((-x)-(-y)+(-y)+1.4+(-y))-y/(-0.3)-6.5/(-7.4)-((-y)+4.6+x+(y*y)/3.5)-(6.7)+(-4.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.2*((-p)-(-q)+(-q)+1.4+(-q))-q/(-0.3)-6.5/(-7.4)-((-q)+4.6+p+(q*q)/3.5)-(6.7)+(-4.1))
             z2 <== (7.2*((-x)-(-y)+(-y)+1.4+(-y))-y/(-0.3)-6.5/(-7.4)-((-y)+4.6+x+(y*y)/3.5)-(6.7)+(-4.1))
-            wr [I 594; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 594)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 595
         !"test595"
         //let z0 = (-y)-((-y)-(-7.4)/x*y*(-y))+((-x))-(-y)
@@ -6828,11 +6828,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)-((-y)-(-7.4)/x*y*(-y))+((-x))-(-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)-((-y)-(-7.4)/x*y*(-y))+((-x))-(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)-((-q)-(-7.4)/p*q*(-q))+((-p))-(-q)
             z2 <== (-y)-((-y)-(-7.4)/x*y*(-y))+((-x))-(-y)
-            wr [I 595; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 595)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 596
         !"test596"
         //let z0 = y
@@ -6841,11 +6841,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 596; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 596)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 597
         !"test597"
         //let z0 = (5.1)
@@ -6862,11 +6862,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)+((-y))+y*y/4.8)+6.3/((-1.0)/0.4))).Expr.eval (programList[prIndex])
+        let s = ((((-x)+((-y))+y*y/4.8)+6.3/((-1.0)/0.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)+((-q))+q*q/4.8)+6.3/((-1.0)/0.4))
             z2 <== (((-x)+((-y))+y*y/4.8)+6.3/((-1.0)/0.4))
-            wr [I 598; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 598)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 599
         !"test599"
         //let z0 = (-3.8)
@@ -6883,11 +6883,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x-(-y)/(-0.5)/(-y))+y/(-x))-y-((3.4/(-8.2)-(-5.5)/(-0.2))))).Expr.eval (programList[prIndex])
+        let s = ((((x-(-y)/(-0.5)/(-y))+y/(-x))-y-((3.4/(-8.2)-(-5.5)/(-0.2))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p-(-q)/(-0.5)/(-q))+q/(-p))-q-((3.4/(-8.2)-(-5.5)/(-0.2))))
             z2 <== (((x-(-y)/(-0.5)/(-y))+y/(-x))-y-((3.4/(-8.2)-(-5.5)/(-0.2))))
-            wr [I 600; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 600)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 601
         !"test601"
         //let z0 = (-y)
@@ -6896,11 +6896,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 601; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 601)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 602
         !"test602"
         //let z0 = (((-x)*y+(-y))-(-y))
@@ -6909,11 +6909,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)*y+(-y))-(-y))).Expr.eval (programList[prIndex])
+        let s = ((((-x)*y+(-y))-(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)*q+(-q))-(-q))
             z2 <== (((-x)*y+(-y))-(-y))
-            wr [I 602; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 602)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 603
         !"test603"
         //let z0 = (5.7/8.4*x)
@@ -6922,11 +6922,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.7/8.4*x)).Expr.eval (programList[prIndex])
+        let s = ((5.7/8.4*x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.7/8.4*p)
             z2 <== (5.7/8.4*x)
-            wr [I 603; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 603)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 604
         !"test604"
         //let z0 = y+x+(-x)+5.3-(-8.7)*(-y)/(6.3+x-(-8.5))-8.5/8.7-((-5.4)-((-0.0)-(-x)-(-x)*(-x)))/2.7
@@ -6935,11 +6935,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y+x+(-x)+5.3-(-8.7)*(-y)/(6.3+x-(-8.5))-8.5/8.7-((-5.4)-((-0.0)-(-x)-(-x)*(-x)))/2.7).Expr.eval (programList[prIndex])
+        let s = (y+x+(-x)+5.3-(-8.7)*(-y)/(6.3+x-(-8.5))-8.5/8.7-((-5.4)-((-0.0)-(-x)-(-x)*(-x)))/2.7).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q+p+(-p)+5.3-(-8.7)*(-q)/(6.3+p-(-8.5))-8.5/8.7-((-5.4)-((-0.0)-(-p)-(-p)*(-p)))/2.7
             z2 <== y+x+(-x)+5.3-(-8.7)*(-y)/(6.3+x-(-8.5))-8.5/8.7-((-5.4)-((-0.0)-(-x)-(-x)*(-x)))/2.7
-            wr [I 604; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 604)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 605
         !"test605"
         //let z0 = 7.4
@@ -6956,11 +6956,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 606; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 606)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 607
         !"test607"
         //let z0 = (-y)
@@ -6969,11 +6969,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 607; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 607)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 608
         !"test608"
         //let z0 = ((y-(-0.4)-7.4/(-y)-y)*(-5.8))
@@ -6982,11 +6982,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y-(-0.4)-7.4/(-y)-y)*(-5.8))).Expr.eval (programList[prIndex])
+        let s = (((y-(-0.4)-7.4/(-y)-y)*(-5.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q-(-0.4)-7.4/(-q)-q)*(-5.8))
             z2 <== ((y-(-0.4)-7.4/(-y)-y)*(-5.8))
-            wr [I 608; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 608)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 609
         !"test609"
         //let z0 = ((-y)+0.5*((-y)+(-x)+(-8.7)+7.7)+(-0.5)+y*(-y)+6.4-(y+0.5+y/(-x)-y)*((-6.3)/8.5/x)*(-x))
@@ -6995,11 +6995,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)+0.5*((-y)+(-x)+(-8.7)+7.7)+(-0.5)+y*(-y)+6.4-(y+0.5+y/(-x)-y)*((-6.3)/8.5/x)*(-x))).Expr.eval (programList[prIndex])
+        let s = (((-y)+0.5*((-y)+(-x)+(-8.7)+7.7)+(-0.5)+y*(-y)+6.4-(y+0.5+y/(-x)-y)*((-6.3)/8.5/x)*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)+0.5*((-q)+(-p)+(-8.7)+7.7)+(-0.5)+q*(-q)+6.4-(q+0.5+q/(-p)-q)*((-6.3)/8.5/p)*(-p))
             z2 <== ((-y)+0.5*((-y)+(-x)+(-8.7)+7.7)+(-0.5)+y*(-y)+6.4-(y+0.5+y/(-x)-y)*((-6.3)/8.5/x)*(-x))
-            wr [I 609; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 609)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 610
         !"test610"
         //let z0 = (-5.5)
@@ -7024,11 +7024,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-6.8*(-0.0)*y*x-7.1/(6.1-3.2/(-2.7)))-(-x)/(((-0.0)/(-y)+(-y)/(-x)*7.8)/(-0.8)+(-x)+(-2.1)/7.3-(-6.3)-(-x)*(-0.6)-(-6.0))-((-2.0)/((-8.5)-5.0*1.1-(-5.0))/y)+y).Expr.eval (programList[prIndex])
+        let s = ((y-6.8*(-0.0)*y*x-7.1/(6.1-3.2/(-2.7)))-(-x)/(((-0.0)/(-y)+(-y)/(-x)*7.8)/(-0.8)+(-x)+(-2.1)/7.3-(-6.3)-(-x)*(-0.6)-(-6.0))-((-2.0)/((-8.5)-5.0*1.1-(-5.0))/y)+y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-6.8*(-0.0)*q*p-7.1/(6.1-3.2/(-2.7)))-(-p)/(((-0.0)/(-q)+(-q)/(-p)*7.8)/(-0.8)+(-p)+(-2.1)/7.3-(-6.3)-(-p)*(-0.6)-(-6.0))-((-2.0)/((-8.5)-5.0*1.1-(-5.0))/q)+q
             z2 <== (y-6.8*(-0.0)*y*x-7.1/(6.1-3.2/(-2.7)))-(-x)/(((-0.0)/(-y)+(-y)/(-x)*7.8)/(-0.8)+(-x)+(-2.1)/7.3-(-6.3)-(-x)*(-0.6)-(-6.0))-((-2.0)/((-8.5)-5.0*1.1-(-5.0))/y)+y
-            wr [I 612; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 612)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 613
         !"test613"
         //let z0 = ((x+(-y))*(-x)/6.6-(-3.6)-(-5.6))
@@ -7037,11 +7037,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x+(-y))*(-x)/6.6-(-3.6)-(-5.6))).Expr.eval (programList[prIndex])
+        let s = (((x+(-y))*(-x)/6.6-(-3.6)-(-5.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p+(-q))*(-p)/6.6-(-3.6)-(-5.6))
             z2 <== ((x+(-y))*(-x)/6.6-(-3.6)-(-5.6))
-            wr [I 613; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 613)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 614
         !"test614"
         //let z0 = (-5.7)
@@ -7058,11 +7058,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)+(-0.3)*(-x)/((-x))))).Expr.eval (programList[prIndex])
+        let s = ((((-x)+(-0.3)*(-x)/((-x))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)+(-0.3)*(-p)/((-p))))
             z2 <== (((-x)+(-0.3)*(-x)/((-x))))
-            wr [I 615; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 615)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 616
         !"test616"
         //let z0 = (7.5+(-x)-1.6)
@@ -7071,11 +7071,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.5+(-x)-1.6)).Expr.eval (programList[prIndex])
+        let s = ((7.5+(-x)-1.6)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.5+(-p)-1.6)
             z2 <== (7.5+(-x)-1.6)
-            wr [I 616; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 616)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 617
         !"test617"
         //let z0 = y
@@ -7084,11 +7084,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 617; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 617)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 618
         !"test618"
         //let z0 = (y*(x/1.2+((-x)-x+(-x))))
@@ -7097,11 +7097,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*(x/1.2+((-x)-x+(-x))))).Expr.eval (programList[prIndex])
+        let s = ((y*(x/1.2+((-x)-x+(-x))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*(p/1.2+((-p)-p+(-p))))
             z2 <== (y*(x/1.2+((-x)-x+(-x))))
-            wr [I 618; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 618)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 619
         !"test619"
         //let z0 = y
@@ -7110,11 +7110,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 619; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 619)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 620
         !"test620"
         //let z0 = (-x)
@@ -7123,11 +7123,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 620; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 620)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 621
         !"test621"
         //let z0 = (y-(x/y+((-2.0)/(-y)*x+(-5.4)*(-y))/((-0.3)*(-x)+4.5))/(-y)*7.3/(y-(-6.1)-(-x)))
@@ -7136,11 +7136,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-(x/y+((-2.0)/(-y)*x+(-5.4)*(-y))/((-0.3)*(-x)+4.5))/(-y)*7.3/(y-(-6.1)-(-x)))).Expr.eval (programList[prIndex])
+        let s = ((y-(x/y+((-2.0)/(-y)*x+(-5.4)*(-y))/((-0.3)*(-x)+4.5))/(-y)*7.3/(y-(-6.1)-(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-(p/q+((-2.0)/(-q)*p+(-5.4)*(-q))/((-0.3)*(-p)+4.5))/(-q)*7.3/(q-(-6.1)-(-p)))
             z2 <== (y-(x/y+((-2.0)/(-y)*x+(-5.4)*(-y))/((-0.3)*(-x)+4.5))/(-y)*7.3/(y-(-6.1)-(-x)))
-            wr [I 621; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 621)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 622
         !"test622"
         //let z0 = (-y)
@@ -7149,11 +7149,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 622; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 622)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 623
         !"test623"
         //let z0 = (-2.0)
@@ -7170,11 +7170,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.4)*((x+0.3/y+(-y)-(-x))-(-y)-(y)/(-0.0)+((-2.3)/x))+(-x))).Expr.eval (programList[prIndex])
+        let s = (((-4.4)*((x+0.3/y+(-y)-(-x))-(-y)-(y)/(-0.0)+((-2.3)/x))+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.4)*((p+0.3/q+(-q)-(-p))-(-q)-(q)/(-0.0)+((-2.3)/p))+(-p))
             z2 <== ((-4.4)*((x+0.3/y+(-y)-(-x))-(-y)-(y)/(-0.0)+((-2.3)/x))+(-x))
-            wr [I 624; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 624)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 625
         !"test625"
         //let z0 = x-(-x)/(-x)*0.0+((-x)-x+2.0*x)/(-8.4)+((-5.5))/x
@@ -7183,11 +7183,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x-(-x)/(-x)*0.0+((-x)-x+2.0*x)/(-8.4)+((-5.5))/x).Expr.eval (programList[prIndex])
+        let s = (x-(-x)/(-x)*0.0+((-x)-x+2.0*x)/(-8.4)+((-5.5))/x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p-(-p)/(-p)*0.0+((-p)-p+2.0*p)/(-8.4)+((-5.5))/p
             z2 <== x-(-x)/(-x)*0.0+((-x)-x+2.0*x)/(-8.4)+((-5.5))/x
-            wr [I 625; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 625)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 626
         !"test626"
         //let z0 = ((8.4-((-y)*x+(-6.2)*(-x)))*(-x)+(y+(-7.5)/y*y)*(y)/x*(-4.3)+(-y)-(-3.8)/(-8.6)-1.6)
@@ -7196,11 +7196,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((8.4-((-y)*x+(-6.2)*(-x)))*(-x)+(y+(-7.5)/y*y)*(y)/x*(-4.3)+(-y)-(-3.8)/(-8.6)-1.6)).Expr.eval (programList[prIndex])
+        let s = (((8.4-((-y)*x+(-6.2)*(-x)))*(-x)+(y+(-7.5)/y*y)*(y)/x*(-4.3)+(-y)-(-3.8)/(-8.6)-1.6)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((8.4-((-q)*p+(-6.2)*(-p)))*(-p)+(q+(-7.5)/q*q)*(q)/p*(-4.3)+(-q)-(-3.8)/(-8.6)-1.6)
             z2 <== ((8.4-((-y)*x+(-6.2)*(-x)))*(-x)+(y+(-7.5)/y*y)*(y)/x*(-4.3)+(-y)-(-3.8)/(-8.6)-1.6)
-            wr [I 626; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 626)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 627
         !"test627"
         //let z0 = ((x)+((-5.6))-(-4.4)*3.1)
@@ -7209,11 +7209,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x)+((-5.6))-(-4.4)*3.1)).Expr.eval (programList[prIndex])
+        let s = (((x)+((-5.6))-(-4.4)*3.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p)+((-5.6))-(-4.4)*3.1)
             z2 <== ((x)+((-5.6))-(-4.4)*3.1)
-            wr [I 627; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 627)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 628
         !"test628"
         //let z0 = x
@@ -7222,11 +7222,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 628; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 628)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 629
         !"test629"
         //let z0 = (x)
@@ -7235,11 +7235,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x)).Expr.eval (programList[prIndex])
+        let s = ((x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p)
             z2 <== (x)
-            wr [I 629; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 629)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 630
         !"test630"
         //let z0 = y
@@ -7248,11 +7248,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 630; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 630)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 631
         !"test631"
         //let z0 = (((x+3.3*x+x))+((-x)/(2.5*4.3/(-y)-x+y))*((-2.0)+3.4+5.8-((-4.5)+2.8+(-7.4)/3.2*y))/((y*(-y)/(-8.2))+(-5.4)/(1.7)/((-4.2)-x)*(4.1-(-x)-6.4-5.8/(-y)))*(-x))
@@ -7261,11 +7261,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x+3.3*x+x))+((-x)/(2.5*4.3/(-y)-x+y))*((-2.0)+3.4+5.8-((-4.5)+2.8+(-7.4)/3.2*y))/((y*(-y)/(-8.2))+(-5.4)/(1.7)/((-4.2)-x)*(4.1-(-x)-6.4-5.8/(-y)))*(-x))).Expr.eval (programList[prIndex])
+        let s = ((((x+3.3*x+x))+((-x)/(2.5*4.3/(-y)-x+y))*((-2.0)+3.4+5.8-((-4.5)+2.8+(-7.4)/3.2*y))/((y*(-y)/(-8.2))+(-5.4)/(1.7)/((-4.2)-x)*(4.1-(-x)-6.4-5.8/(-y)))*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p+3.3*p+p))+((-p)/(2.5*4.3/(-q)-p+q))*((-2.0)+3.4+5.8-((-4.5)+2.8+(-7.4)/3.2*q))/((q*(-q)/(-8.2))+(-5.4)/(1.7)/((-4.2)-p)*(4.1-(-p)-6.4-5.8/(-q)))*(-p))
             z2 <== (((x+3.3*x+x))+((-x)/(2.5*4.3/(-y)-x+y))*((-2.0)+3.4+5.8-((-4.5)+2.8+(-7.4)/3.2*y))/((y*(-y)/(-8.2))+(-5.4)/(1.7)/((-4.2)-x)*(4.1-(-x)-6.4-5.8/(-y)))*(-x))
-            wr [I 631; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 631)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 632
         !"test632"
         //let z0 = 4.0/y
@@ -7274,11 +7274,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (4.0/y).Expr.eval (programList[prIndex])
+        let s = (4.0/y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 4.0/q
             z2 <== 4.0/y
-            wr [I 632; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 632)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 633
         !"test633"
         //let z0 = (8.0/((0.1)-(x-(-x)-(-x)-5.8*(-y))-(-3.2)+(-x))+x/y+(-2.1)/3.6+(8.3/(-5.4)/(-2.0)*x/x)+6.0/(-6.0)/x-x)
@@ -7287,11 +7287,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((8.0/((0.1)-(x-(-x)-(-x)-5.8*(-y))-(-3.2)+(-x))+x/y+(-2.1)/3.6+(8.3/(-5.4)/(-2.0)*x/x)+6.0/(-6.0)/x-x)).Expr.eval (programList[prIndex])
+        let s = ((8.0/((0.1)-(x-(-x)-(-x)-5.8*(-y))-(-3.2)+(-x))+x/y+(-2.1)/3.6+(8.3/(-5.4)/(-2.0)*x/x)+6.0/(-6.0)/x-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (8.0/((0.1)-(p-(-p)-(-p)-5.8*(-q))-(-3.2)+(-p))+p/q+(-2.1)/3.6+(8.3/(-5.4)/(-2.0)*p/p)+6.0/(-6.0)/p-p)
             z2 <== (8.0/((0.1)-(x-(-x)-(-x)-5.8*(-y))-(-3.2)+(-x))+x/y+(-2.1)/3.6+(8.3/(-5.4)/(-2.0)*x/x)+6.0/(-6.0)/x-x)
-            wr [I 633; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 633)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 634
         !"test634"
         //let z0 = (-1.5)
@@ -7308,11 +7308,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((5.2+y/2.2/(-y))+(x-(-8.2)*7.5+(-y)+(-8.5))+(-6.7)/(-7.0)*2.3+(-x)-x-y+(-2.8))).Expr.eval (programList[prIndex])
+        let s = (((5.2+y/2.2/(-y))+(x-(-8.2)*7.5+(-y)+(-8.5))+(-6.7)/(-7.0)*2.3+(-x)-x-y+(-2.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((5.2+q/2.2/(-q))+(p-(-8.2)*7.5+(-q)+(-8.5))+(-6.7)/(-7.0)*2.3+(-p)-p-q+(-2.8))
             z2 <== ((5.2+y/2.2/(-y))+(x-(-8.2)*7.5+(-y)+(-8.5))+(-6.7)/(-7.0)*2.3+(-x)-x-y+(-2.8))
-            wr [I 635; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 635)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 636
         !"test636"
         //let z0 = 1.3+x/(-2.1)*(-x)*y+(-x)/(-x)+(-x)+((0.1-(-x))-(y/x+(-8.4))/(-6.4)/((-y)))+(((-5.8)/(-6.4)-(-y))+(-x)/2.6*x/(-3.8)/((-y)/(-5.8))/(-y))
@@ -7321,11 +7321,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (1.3+x/(-2.1)*(-x)*y+(-x)/(-x)+(-x)+((0.1-(-x))-(y/x+(-8.4))/(-6.4)/((-y)))+(((-5.8)/(-6.4)-(-y))+(-x)/2.6*x/(-3.8)/((-y)/(-5.8))/(-y))).Expr.eval (programList[prIndex])
+        let s = (1.3+x/(-2.1)*(-x)*y+(-x)/(-x)+(-x)+((0.1-(-x))-(y/x+(-8.4))/(-6.4)/((-y)))+(((-5.8)/(-6.4)-(-y))+(-x)/2.6*x/(-3.8)/((-y)/(-5.8))/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 1.3+p/(-2.1)*(-p)*q+(-p)/(-p)+(-p)+((0.1-(-p))-(q/p+(-8.4))/(-6.4)/((-q)))+(((-5.8)/(-6.4)-(-q))+(-p)/2.6*p/(-3.8)/((-q)/(-5.8))/(-q))
             z2 <== 1.3+x/(-2.1)*(-x)*y+(-x)/(-x)+(-x)+((0.1-(-x))-(y/x+(-8.4))/(-6.4)/((-y)))+(((-5.8)/(-6.4)-(-y))+(-x)/2.6*x/(-3.8)/((-y)/(-5.8))/(-y))
-            wr [I 636; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 636)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 637
         !"test637"
         //let z0 = y
@@ -7334,11 +7334,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 637; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 637)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 638
         !"test638"
         //let z0 = (((-2.6)+(y+(-6.4)/(-5.6))+(6.8)*y/(-y))/((-6.7)/(-x)/(6.1-4.6-(-y)*x))+((y-x+(-y)))-(-y))
@@ -7347,11 +7347,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-2.6)+(y+(-6.4)/(-5.6))+(6.8)*y/(-y))/((-6.7)/(-x)/(6.1-4.6-(-y)*x))+((y-x+(-y)))-(-y))).Expr.eval (programList[prIndex])
+        let s = ((((-2.6)+(y+(-6.4)/(-5.6))+(6.8)*y/(-y))/((-6.7)/(-x)/(6.1-4.6-(-y)*x))+((y-x+(-y)))-(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-2.6)+(q+(-6.4)/(-5.6))+(6.8)*q/(-q))/((-6.7)/(-p)/(6.1-4.6-(-q)*p))+((q-p+(-q)))-(-q))
             z2 <== (((-2.6)+(y+(-6.4)/(-5.6))+(6.8)*y/(-y))/((-6.7)/(-x)/(6.1-4.6-(-y)*x))+((y-x+(-y)))-(-y))
-            wr [I 638; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 638)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 639
         !"test639"
         //let z0 = (5.6+y+((-0.4))-(2.3+3.5-(-x)*x-(-y))*(-5.8)+x)
@@ -7360,11 +7360,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.6+y+((-0.4))-(2.3+3.5-(-x)*x-(-y))*(-5.8)+x)).Expr.eval (programList[prIndex])
+        let s = ((5.6+y+((-0.4))-(2.3+3.5-(-x)*x-(-y))*(-5.8)+x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.6+q+((-0.4))-(2.3+3.5-(-p)*p-(-q))*(-5.8)+p)
             z2 <== (5.6+y+((-0.4))-(2.3+3.5-(-x)*x-(-y))*(-5.8)+x)
-            wr [I 639; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 639)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 640
         !"test640"
         //let z0 = ((x/(5.7/(-6.8)*(-6.2)+0.6*(-y)))*(-x)+((-x)/1.5-(-y)/(x-3.1-y/(-y))+((-y)/1.7*(-4.3))))
@@ -7373,11 +7373,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x/(5.7/(-6.8)*(-6.2)+0.6*(-y)))*(-x)+((-x)/1.5-(-y)/(x-3.1-y/(-y))+((-y)/1.7*(-4.3))))).Expr.eval (programList[prIndex])
+        let s = (((x/(5.7/(-6.8)*(-6.2)+0.6*(-y)))*(-x)+((-x)/1.5-(-y)/(x-3.1-y/(-y))+((-y)/1.7*(-4.3))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p/(5.7/(-6.8)*(-6.2)+0.6*(-q)))*(-p)+((-p)/1.5-(-q)/(p-3.1-q/(-q))+((-q)/1.7*(-4.3))))
             z2 <== ((x/(5.7/(-6.8)*(-6.2)+0.6*(-y)))*(-x)+((-x)/1.5-(-y)/(x-3.1-y/(-y))+((-y)/1.7*(-4.3))))
-            wr [I 640; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 640)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 641
         !"test641"
         //let z0 = (-x)
@@ -7386,11 +7386,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 641; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 641)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 642
         !"test642"
         //let z0 = 7.4
@@ -7407,11 +7407,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((4.2-y/(7.3-y/(-x))*(-8.8)-((-8.0)/y*y*(-y)))).Expr.eval (programList[prIndex])
+        let s = ((4.2-y/(7.3-y/(-x))*(-8.8)-((-8.0)/y*y*(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (4.2-q/(7.3-q/(-p))*(-8.8)-((-8.0)/q*q*(-q)))
             z2 <== (4.2-y/(7.3-y/(-x))*(-8.8)-((-8.0)/y*y*(-y)))
-            wr [I 643; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 643)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 644
         !"test644"
         //let z0 = (3.4)
@@ -7428,11 +7428,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-4.0)*(x/x+(-y))-((-6.8)/(-y))*(x))-((x/8.3/(-y))))).Expr.eval (programList[prIndex])
+        let s = ((((-4.0)*(x/x+(-y))-((-6.8)/(-y))*(x))-((x/8.3/(-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-4.0)*(p/p+(-q))-((-6.8)/(-q))*(p))-((p/8.3/(-q))))
             z2 <== (((-4.0)*(x/x+(-y))-((-6.8)/(-y))*(x))-((x/8.3/(-y))))
-            wr [I 645; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 645)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 646
         !"test646"
         //let z0 = (((8.3+(-0.3)*(-y))+y+(-x)*(-y)-3.0/(8.6/(-5.1)*x/(-y)))+((x-(-x))/y+((-y)+y/3.4*(-y)))+(-6.8))
@@ -7441,11 +7441,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((8.3+(-0.3)*(-y))+y+(-x)*(-y)-3.0/(8.6/(-5.1)*x/(-y)))+((x-(-x))/y+((-y)+y/3.4*(-y)))+(-6.8))).Expr.eval (programList[prIndex])
+        let s = ((((8.3+(-0.3)*(-y))+y+(-x)*(-y)-3.0/(8.6/(-5.1)*x/(-y)))+((x-(-x))/y+((-y)+y/3.4*(-y)))+(-6.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((8.3+(-0.3)*(-q))+q+(-p)*(-q)-3.0/(8.6/(-5.1)*p/(-q)))+((p-(-p))/q+((-q)+q/3.4*(-q)))+(-6.8))
             z2 <== (((8.3+(-0.3)*(-y))+y+(-x)*(-y)-3.0/(8.6/(-5.1)*x/(-y)))+((x-(-x))/y+((-y)+y/3.4*(-y)))+(-6.8))
-            wr [I 646; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 646)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 647
         !"test647"
         //let z0 = y
@@ -7454,11 +7454,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 647; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 647)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 648
         !"test648"
         //let z0 = (((-7.6)-1.5*x)*(-6.2))
@@ -7467,11 +7467,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-7.6)-1.5*x)*(-6.2))).Expr.eval (programList[prIndex])
+        let s = ((((-7.6)-1.5*x)*(-6.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-7.6)-1.5*p)*(-6.2))
             z2 <== (((-7.6)-1.5*x)*(-6.2))
-            wr [I 648; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 648)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 649
         !"test649"
         //let z0 = 1.5
@@ -7504,11 +7504,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-(-x)-(-5.1)+x/(-3.7))*(-x))/(x*y)/7.1+y+(-3.4)).Expr.eval (programList[prIndex])
+        let s = (((x-(-x)-(-5.1)+x/(-3.7))*(-x))/(x*y)/7.1+y+(-3.4)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-(-p)-(-5.1)+p/(-3.7))*(-p))/(p*q)/7.1+q+(-3.4)
             z2 <== ((x-(-x)-(-5.1)+x/(-3.7))*(-x))/(x*y)/7.1+y+(-3.4)
-            wr [I 652; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 652)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 653
         !"test653"
         //let z0 = (-x)
@@ -7517,11 +7517,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 653; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 653)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 654
         !"test654"
         //let z0 = (2.7)
@@ -7538,11 +7538,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((5.0/(-1.0)+(-y)/(-y)/(-y))/(1.4+8.0)/((-0.2)+y*(-y))/(x*y+y)*(-y)+4.3+(-x)/(-7.4)-y)+(-2.3)/8.2/(5.6*(-x)/4.0+x)+(-1.5))).Expr.eval (programList[prIndex])
+        let s = ((((5.0/(-1.0)+(-y)/(-y)/(-y))/(1.4+8.0)/((-0.2)+y*(-y))/(x*y+y)*(-y)+4.3+(-x)/(-7.4)-y)+(-2.3)/8.2/(5.6*(-x)/4.0+x)+(-1.5))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((5.0/(-1.0)+(-q)/(-q)/(-q))/(1.4+8.0)/((-0.2)+q*(-q))/(p*q+q)*(-q)+4.3+(-p)/(-7.4)-q)+(-2.3)/8.2/(5.6*(-p)/4.0+p)+(-1.5))
             z2 <== (((5.0/(-1.0)+(-y)/(-y)/(-y))/(1.4+8.0)/((-0.2)+y*(-y))/(x*y+y)*(-y)+4.3+(-x)/(-7.4)-y)+(-2.3)/8.2/(5.6*(-x)/4.0+x)+(-1.5))
-            wr [I 655; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 655)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 656
         !"test656"
         //let z0 = 2.8
@@ -7559,11 +7559,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((y*(-0.3)-7.1)/(-5.2)+(-7.8)+(x)*((-3.0)/y*(-x)))+6.4*7.6)).Expr.eval (programList[prIndex])
+        let s = ((((y*(-0.3)-7.1)/(-5.2)+(-7.8)+(x)*((-3.0)/y*(-x)))+6.4*7.6)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((q*(-0.3)-7.1)/(-5.2)+(-7.8)+(p)*((-3.0)/q*(-p)))+6.4*7.6)
             z2 <== (((y*(-0.3)-7.1)/(-5.2)+(-7.8)+(x)*((-3.0)/y*(-x)))+6.4*7.6)
-            wr [I 657; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 657)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 658
         !"test658"
         //let z0 = (2.4*(2.6-(-0.1))*(-2.0))
@@ -7580,11 +7580,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.7)+(x*7.4-4.1)))).Expr.eval (programList[prIndex])
+        let s = ((((-5.7)+(x*7.4-4.1)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.7)+(p*7.4-4.1)))
             z2 <== (((-5.7)+(x*7.4-4.1)))
-            wr [I 659; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 659)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 660
         !"test660"
         //let z0 = y
@@ -7593,11 +7593,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 660; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 660)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 661
         !"test661"
         //let z0 = 7.4
@@ -7614,11 +7614,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((8.4-3.4+(8.8/y+x)-((-0.1)+y*(-x)-(-y)/y)-y)*(4.7-((-1.3)-1.5-y-1.4/(-6.7))*((-0.6)+(-2.5)+(-x)))-(-x)+((-y)+(-x)-y/(y*(-7.0))*(-y)))).Expr.eval (programList[prIndex])
+        let s = (((8.4-3.4+(8.8/y+x)-((-0.1)+y*(-x)-(-y)/y)-y)*(4.7-((-1.3)-1.5-y-1.4/(-6.7))*((-0.6)+(-2.5)+(-x)))-(-x)+((-y)+(-x)-y/(y*(-7.0))*(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((8.4-3.4+(8.8/q+p)-((-0.1)+q*(-p)-(-q)/q)-q)*(4.7-((-1.3)-1.5-q-1.4/(-6.7))*((-0.6)+(-2.5)+(-p)))-(-p)+((-q)+(-p)-q/(q*(-7.0))*(-q)))
             z2 <== ((8.4-3.4+(8.8/y+x)-((-0.1)+y*(-x)-(-y)/y)-y)*(4.7-((-1.3)-1.5-y-1.4/(-6.7))*((-0.6)+(-2.5)+(-x)))-(-x)+((-y)+(-x)-y/(y*(-7.0))*(-y)))
-            wr [I 662; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 662)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 663
         !"test663"
         //let z0 = (-7.0)
@@ -7635,11 +7635,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-(y/x))).Expr.eval (programList[prIndex])
+        let s = (((-y)-(y/x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-(q/p))
             z2 <== ((-y)-(y/x))
-            wr [I 664; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 664)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 665
         !"test665"
         //let z0 = 1.1
@@ -7656,11 +7656,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-6.7)*(-1.2)+(((-0.5)-(-y))+0.0*(-y)*(x*8.5+x)/(0.6+(-y)))*x).Expr.eval (programList[prIndex])
+        let s = ((-6.7)*(-1.2)+(((-0.5)-(-y))+0.0*(-y)*(x*8.5+x)/(0.6+(-y)))*x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-6.7)*(-1.2)+(((-0.5)-(-q))+0.0*(-q)*(p*8.5+p)/(0.6+(-q)))*p
             z2 <== (-6.7)*(-1.2)+(((-0.5)-(-y))+0.0*(-y)*(x*8.5+x)/(0.6+(-y)))*x
-            wr [I 666; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 666)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 667
         !"test667"
         //let z0 = (((-4.1)-7.8))
@@ -7677,11 +7677,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((2.8-x-(-x)))).Expr.eval (programList[prIndex])
+        let s = (((2.8-x-(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((2.8-p-(-p)))
             z2 <== ((2.8-x-(-x)))
-            wr [I 668; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 668)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 669
         !"test669"
         //let z0 = (((-1.0)*((-8.5)*8.1)+((-5.2)/6.0-4.0/y/y))-5.1)
@@ -7690,11 +7690,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-1.0)*((-8.5)*8.1)+((-5.2)/6.0-4.0/y/y))-5.1)).Expr.eval (programList[prIndex])
+        let s = ((((-1.0)*((-8.5)*8.1)+((-5.2)/6.0-4.0/y/y))-5.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-1.0)*((-8.5)*8.1)+((-5.2)/6.0-4.0/q/q))-5.1)
             z2 <== (((-1.0)*((-8.5)*8.1)+((-5.2)/6.0-4.0/y/y))-5.1)
-            wr [I 669; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 669)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 670
         !"test670"
         //let z0 = y
@@ -7703,11 +7703,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 670; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 670)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 671
         !"test671"
         //let z0 = ((-x)*(-4.2)*y-((y+(-3.1))-4.1+(-y)/(-1.8)+3.7)*(-6.0)*(-1.3))
@@ -7716,11 +7716,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)*(-4.2)*y-((y+(-3.1))-4.1+(-y)/(-1.8)+3.7)*(-6.0)*(-1.3))).Expr.eval (programList[prIndex])
+        let s = (((-x)*(-4.2)*y-((y+(-3.1))-4.1+(-y)/(-1.8)+3.7)*(-6.0)*(-1.3))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)*(-4.2)*q-((q+(-3.1))-4.1+(-q)/(-1.8)+3.7)*(-6.0)*(-1.3))
             z2 <== ((-x)*(-4.2)*y-((y+(-3.1))-4.1+(-y)/(-1.8)+3.7)*(-6.0)*(-1.3))
-            wr [I 671; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 671)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 672
         !"test672"
         //let z0 = (-0.1)
@@ -7745,11 +7745,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 674; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 674)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 675
         !"test675"
         //let z0 = 6.4
@@ -7766,11 +7766,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 676; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 676)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 677
         !"test677"
         //let z0 = (-y)
@@ -7779,11 +7779,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 677; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 677)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 678
         !"test678"
         //let z0 = ((((-x)*(-5.4)*(-y)+(-0.5)*6.5)-(-0.7)*y)+7.7+((y/(-y)+(-0.1)-y))*(-x)-(x+((-7.1)-(-0.7))))
@@ -7792,11 +7792,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)*(-5.4)*(-y)+(-0.5)*6.5)-(-0.7)*y)+7.7+((y/(-y)+(-0.1)-y))*(-x)-(x+((-7.1)-(-0.7))))).Expr.eval (programList[prIndex])
+        let s = (((((-x)*(-5.4)*(-y)+(-0.5)*6.5)-(-0.7)*y)+7.7+((y/(-y)+(-0.1)-y))*(-x)-(x+((-7.1)-(-0.7))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)*(-5.4)*(-q)+(-0.5)*6.5)-(-0.7)*q)+7.7+((q/(-q)+(-0.1)-q))*(-p)-(p+((-7.1)-(-0.7))))
             z2 <== ((((-x)*(-5.4)*(-y)+(-0.5)*6.5)-(-0.7)*y)+7.7+((y/(-y)+(-0.1)-y))*(-x)-(x+((-7.1)-(-0.7))))
-            wr [I 678; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 678)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 679
         !"test679"
         //let z0 = (-y)
@@ -7805,11 +7805,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 679; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 679)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 680
         !"test680"
         //let z0 = 1.4
@@ -7826,11 +7826,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 681; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 681)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 682
         !"test682"
         //let z0 = (y)
@@ -7839,11 +7839,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y)).Expr.eval (programList[prIndex])
+        let s = ((y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q)
             z2 <== (y)
-            wr [I 682; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 682)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 683
         !"test683"
         //let z0 = (-2.6)
@@ -7892,11 +7892,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.0)*(-2.5)-(-5.6)-((-2.8)-y-(-y)/y*((-x)-(-7.2)/4.4-(-x))-(y/(-7.4)*(-1.0)/(-y)-(-6.1))+((-x)*8.7/y+4.6-y)))).Expr.eval (programList[prIndex])
+        let s = (((-0.0)*(-2.5)-(-5.6)-((-2.8)-y-(-y)/y*((-x)-(-7.2)/4.4-(-x))-(y/(-7.4)*(-1.0)/(-y)-(-6.1))+((-x)*8.7/y+4.6-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.0)*(-2.5)-(-5.6)-((-2.8)-q-(-q)/q*((-p)-(-7.2)/4.4-(-p))-(q/(-7.4)*(-1.0)/(-q)-(-6.1))+((-p)*8.7/q+4.6-q)))
             z2 <== ((-0.0)*(-2.5)-(-5.6)-((-2.8)-y-(-y)/y*((-x)-(-7.2)/4.4-(-x))-(y/(-7.4)*(-1.0)/(-y)-(-6.1))+((-x)*8.7/y+4.6-y)))
-            wr [I 688; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 688)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 689
         !"test689"
         //let z0 = 5.6
@@ -7913,11 +7913,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)*(((-x))+0.7-6.7/(-y)-(-y)*(-0.0)-2.6-(-x)*(7.5-(-x)))+x).Expr.eval (programList[prIndex])
+        let s = ((-y)*(((-x))+0.7-6.7/(-y)-(-y)*(-0.0)-2.6-(-x)*(7.5-(-x)))+x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)*(((-p))+0.7-6.7/(-q)-(-q)*(-0.0)-2.6-(-p)*(7.5-(-p)))+p
             z2 <== (-y)*(((-x))+0.7-6.7/(-y)-(-y)*(-0.0)-2.6-(-x)*(7.5-(-x)))+x
-            wr [I 690; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 690)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 691
         !"test691"
         //let z0 = (7.3/(((-1.0)-y-(-2.1)+x-(-y))-(-5.8)/2.8)*(y+(-y)*x)/(((-x)+(-5.5)/(-5.6))*(-x)-(-1.3))*(x/(-y)))
@@ -7926,11 +7926,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((7.3/(((-1.0)-y-(-2.1)+x-(-y))-(-5.8)/2.8)*(y+(-y)*x)/(((-x)+(-5.5)/(-5.6))*(-x)-(-1.3))*(x/(-y)))).Expr.eval (programList[prIndex])
+        let s = ((7.3/(((-1.0)-y-(-2.1)+x-(-y))-(-5.8)/2.8)*(y+(-y)*x)/(((-x)+(-5.5)/(-5.6))*(-x)-(-1.3))*(x/(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (7.3/(((-1.0)-q-(-2.1)+p-(-q))-(-5.8)/2.8)*(q+(-q)*p)/(((-p)+(-5.5)/(-5.6))*(-p)-(-1.3))*(p/(-q)))
             z2 <== (7.3/(((-1.0)-y-(-2.1)+x-(-y))-(-5.8)/2.8)*(y+(-y)*x)/(((-x)+(-5.5)/(-5.6))*(-x)-(-1.3))*(x/(-y)))
-            wr [I 691; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 691)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 692
         !"test692"
         //let z0 = (x*((8.5+(-x)-x)+(-x)))
@@ -7939,11 +7939,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*((8.5+(-x)-x)+(-x)))).Expr.eval (programList[prIndex])
+        let s = ((x*((8.5+(-x)-x)+(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*((8.5+(-p)-p)+(-p)))
             z2 <== (x*((8.5+(-x)-x)+(-x)))
-            wr [I 692; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 692)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 693
         !"test693"
         //let z0 = (((1.8*(-7.0)*(-6.7)+(-1.6))+(1.8*3.7*0.8)-2.2)-(-y))
@@ -7952,11 +7952,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((1.8*(-7.0)*(-6.7)+(-1.6))+(1.8*3.7*0.8)-2.2)-(-y))).Expr.eval (programList[prIndex])
+        let s = ((((1.8*(-7.0)*(-6.7)+(-1.6))+(1.8*3.7*0.8)-2.2)-(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((1.8*(-7.0)*(-6.7)+(-1.6))+(1.8*3.7*0.8)-2.2)-(-q))
             z2 <== (((1.8*(-7.0)*(-6.7)+(-1.6))+(1.8*3.7*0.8)-2.2)-(-y))
-            wr [I 693; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 693)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 694
         !"test694"
         //let z0 = 6.7
@@ -7973,11 +7973,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.7)+(x/((-x)-x*(-2.6)*x)*(-4.8)+((-x)*3.7))+5.4*(-x)+x/(-4.0)*(3.8/y+(-7.1)+(-3.8)+(-2.8))-(-2.4))).Expr.eval (programList[prIndex])
+        let s = (((-7.7)+(x/((-x)-x*(-2.6)*x)*(-4.8)+((-x)*3.7))+5.4*(-x)+x/(-4.0)*(3.8/y+(-7.1)+(-3.8)+(-2.8))-(-2.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.7)+(p/((-p)-p*(-2.6)*p)*(-4.8)+((-p)*3.7))+5.4*(-p)+p/(-4.0)*(3.8/q+(-7.1)+(-3.8)+(-2.8))-(-2.4))
             z2 <== ((-7.7)+(x/((-x)-x*(-2.6)*x)*(-4.8)+((-x)*3.7))+5.4*(-x)+x/(-4.0)*(3.8/y+(-7.1)+(-3.8)+(-2.8))-(-2.4))
-            wr [I 695; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 695)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 696
         !"test696"
         //let z0 = (((-y)-(-0.8)*((-x)*(-7.6)/1.3+(-x))-(-8.7)+(x/(-y)-(-1.2)+y)/(-4.6))/(-4.5)-(-y)/5.2)
@@ -7986,11 +7986,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)-(-0.8)*((-x)*(-7.6)/1.3+(-x))-(-8.7)+(x/(-y)-(-1.2)+y)/(-4.6))/(-4.5)-(-y)/5.2)).Expr.eval (programList[prIndex])
+        let s = ((((-y)-(-0.8)*((-x)*(-7.6)/1.3+(-x))-(-8.7)+(x/(-y)-(-1.2)+y)/(-4.6))/(-4.5)-(-y)/5.2)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)-(-0.8)*((-p)*(-7.6)/1.3+(-p))-(-8.7)+(p/(-q)-(-1.2)+q)/(-4.6))/(-4.5)-(-q)/5.2)
             z2 <== (((-y)-(-0.8)*((-x)*(-7.6)/1.3+(-x))-(-8.7)+(x/(-y)-(-1.2)+y)/(-4.6))/(-4.5)-(-y)/5.2)
-            wr [I 696; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 696)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 697
         !"test697"
         //let z0 = (5.6)*5.6+(-x)/1.3
@@ -7999,11 +7999,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.6)*5.6+(-x)/1.3).Expr.eval (programList[prIndex])
+        let s = ((5.6)*5.6+(-x)/1.3).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.6)*5.6+(-p)/1.3
             z2 <== (5.6)*5.6+(-x)/1.3
-            wr [I 697; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 697)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 698
         !"test698"
         //let z0 = ((y/((-x)+(-0.5)))*6.7/((-3.0)))
@@ -8012,11 +8012,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y/((-x)+(-0.5)))*6.7/((-3.0)))).Expr.eval (programList[prIndex])
+        let s = (((y/((-x)+(-0.5)))*6.7/((-3.0)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q/((-p)+(-0.5)))*6.7/((-3.0)))
             z2 <== ((y/((-x)+(-0.5)))*6.7/((-3.0)))
-            wr [I 698; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 698)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 699
         !"test699"
         //let z0 = ((x*(-y)-y*((-7.7)-(-4.2))))
@@ -8025,11 +8025,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x*(-y)-y*((-7.7)-(-4.2))))).Expr.eval (programList[prIndex])
+        let s = (((x*(-y)-y*((-7.7)-(-4.2))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p*(-q)-q*((-7.7)-(-4.2))))
             z2 <== ((x*(-y)-y*((-7.7)-(-4.2))))
-            wr [I 699; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 699)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 700
         !"test700"
         //let z0 = 7.8
@@ -8046,11 +8046,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x)*(-7.7)-(-4.0))/(8.4/((-x)-x+(-7.3)-x-(-y))+((-7.6)-1.5-(-y))+((-4.0)/8.8/(-5.0)+x-y)+((-4.6)))+((-y)*(-6.2)-(-3.7)-(y-4.4))*(-x))).Expr.eval (programList[prIndex])
+        let s = ((((x)*(-7.7)-(-4.0))/(8.4/((-x)-x+(-7.3)-x-(-y))+((-7.6)-1.5-(-y))+((-4.0)/8.8/(-5.0)+x-y)+((-4.6)))+((-y)*(-6.2)-(-3.7)-(y-4.4))*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p)*(-7.7)-(-4.0))/(8.4/((-p)-p+(-7.3)-p-(-q))+((-7.6)-1.5-(-q))+((-4.0)/8.8/(-5.0)+p-q)+((-4.6)))+((-q)*(-6.2)-(-3.7)-(q-4.4))*(-p))
             z2 <== (((x)*(-7.7)-(-4.0))/(8.4/((-x)-x+(-7.3)-x-(-y))+((-7.6)-1.5-(-y))+((-4.0)/8.8/(-5.0)+x-y)+((-4.6)))+((-y)*(-6.2)-(-3.7)-(y-4.4))*(-x))
-            wr [I 701; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 701)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 702
         !"test702"
         //let z0 = (-x)
@@ -8059,11 +8059,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 702; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 702)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 703
         !"test703"
         //let z0 = (2.4+5.6-(-4.4)*7.6)
@@ -8088,11 +8088,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 705; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 705)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 706
         !"test706"
         //let z0 = x
@@ -8101,11 +8101,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 706; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 706)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 707
         !"test707"
         //let z0 = 4.0
@@ -8130,11 +8130,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-1.4)/y+(-y)*4.1)+(((-2.2)-(-x)*(-8.1)+y)/6.6/(-6.6)/(-3.3)*(-y)/3.7/x+(-y))-(-y)*(y/(-x)*(y)*4.1)/(-y))).Expr.eval (programList[prIndex])
+        let s = ((((-1.4)/y+(-y)*4.1)+(((-2.2)-(-x)*(-8.1)+y)/6.6/(-6.6)/(-3.3)*(-y)/3.7/x+(-y))-(-y)*(y/(-x)*(y)*4.1)/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-1.4)/q+(-q)*4.1)+(((-2.2)-(-p)*(-8.1)+q)/6.6/(-6.6)/(-3.3)*(-q)/3.7/p+(-q))-(-q)*(q/(-p)*(q)*4.1)/(-q))
             z2 <== (((-1.4)/y+(-y)*4.1)+(((-2.2)-(-x)*(-8.1)+y)/6.6/(-6.6)/(-3.3)*(-y)/3.7/x+(-y))-(-y)*(y/(-x)*(y)*4.1)/(-y))
-            wr [I 709; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 709)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 710
         !"test710"
         //let z0 = ((x-(4.2*y*(-x))+(6.1/(-x)+x)*(-x)*(-y)*x+(-y)/(-3.6))*(-y)+((-x)/x*((-y)/3.0/0.6/7.3)*(-8.2)*(-5.2)/y+6.5-x*y)+((-1.4)-6.7))
@@ -8143,11 +8143,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-(4.2*y*(-x))+(6.1/(-x)+x)*(-x)*(-y)*x+(-y)/(-3.6))*(-y)+((-x)/x*((-y)/3.0/0.6/7.3)*(-8.2)*(-5.2)/y+6.5-x*y)+((-1.4)-6.7))).Expr.eval (programList[prIndex])
+        let s = (((x-(4.2*y*(-x))+(6.1/(-x)+x)*(-x)*(-y)*x+(-y)/(-3.6))*(-y)+((-x)/x*((-y)/3.0/0.6/7.3)*(-8.2)*(-5.2)/y+6.5-x*y)+((-1.4)-6.7))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-(4.2*q*(-p))+(6.1/(-p)+p)*(-p)*(-q)*p+(-q)/(-3.6))*(-q)+((-p)/p*((-q)/3.0/0.6/7.3)*(-8.2)*(-5.2)/q+6.5-p*q)+((-1.4)-6.7))
             z2 <== ((x-(4.2*y*(-x))+(6.1/(-x)+x)*(-x)*(-y)*x+(-y)/(-3.6))*(-y)+((-x)/x*((-y)/3.0/0.6/7.3)*(-8.2)*(-5.2)/y+6.5-x*y)+((-1.4)-6.7))
-            wr [I 710; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 710)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 711
         !"test711"
         //let z0 = ((-7.7)*(3.2*((-y)*(-y)+6.7)+(-3.6))+(((-y)/(-y))+(-1.2)/(-y))+(-6.3)-(((-1.6)/(-4.7)*(-y)-8.8/(-x))/y*(8.1+(-5.4)/y/(-y)/(-0.6))))
@@ -8156,11 +8156,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.7)*(3.2*((-y)*(-y)+6.7)+(-3.6))+(((-y)/(-y))+(-1.2)/(-y))+(-6.3)-(((-1.6)/(-4.7)*(-y)-8.8/(-x))/y*(8.1+(-5.4)/y/(-y)/(-0.6))))).Expr.eval (programList[prIndex])
+        let s = (((-7.7)*(3.2*((-y)*(-y)+6.7)+(-3.6))+(((-y)/(-y))+(-1.2)/(-y))+(-6.3)-(((-1.6)/(-4.7)*(-y)-8.8/(-x))/y*(8.1+(-5.4)/y/(-y)/(-0.6))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.7)*(3.2*((-q)*(-q)+6.7)+(-3.6))+(((-q)/(-q))+(-1.2)/(-q))+(-6.3)-(((-1.6)/(-4.7)*(-q)-8.8/(-p))/q*(8.1+(-5.4)/q/(-q)/(-0.6))))
             z2 <== ((-7.7)*(3.2*((-y)*(-y)+6.7)+(-3.6))+(((-y)/(-y))+(-1.2)/(-y))+(-6.3)-(((-1.6)/(-4.7)*(-y)-8.8/(-x))/y*(8.1+(-5.4)/y/(-y)/(-0.6))))
-            wr [I 711; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 711)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 712
         !"test712"
         //let z0 = (((x-(-y))*2.4/(y)+((-y)+y)))
@@ -8169,11 +8169,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x-(-y))*2.4/(y)+((-y)+y)))).Expr.eval (programList[prIndex])
+        let s = ((((x-(-y))*2.4/(y)+((-y)+y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p-(-q))*2.4/(q)+((-q)+q)))
             z2 <== (((x-(-y))*2.4/(y)+((-y)+y)))
-            wr [I 712; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 712)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 713
         !"test713"
         //let z0 = x
@@ -8182,11 +8182,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 713; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 713)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 714
         !"test714"
         //let z0 = x
@@ -8195,11 +8195,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 714; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 714)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 715
         !"test715"
         //let z0 = ((-y)*3.0)
@@ -8208,11 +8208,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)*3.0)).Expr.eval (programList[prIndex])
+        let s = (((-y)*3.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)*3.0)
             z2 <== ((-y)*3.0)
-            wr [I 715; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 715)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 716
         !"test716"
         //let z0 = (((-5.5)+x*x*3.8*((-7.2)*(-8.6)*(-x))/(x))-4.3/(((-7.7)/2.8)+7.7/y+(-x))-(x+x+x)/(-x))
@@ -8221,11 +8221,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.5)+x*x*3.8*((-7.2)*(-8.6)*(-x))/(x))-4.3/(((-7.7)/2.8)+7.7/y+(-x))-(x+x+x)/(-x))).Expr.eval (programList[prIndex])
+        let s = ((((-5.5)+x*x*3.8*((-7.2)*(-8.6)*(-x))/(x))-4.3/(((-7.7)/2.8)+7.7/y+(-x))-(x+x+x)/(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.5)+p*p*3.8*((-7.2)*(-8.6)*(-p))/(p))-4.3/(((-7.7)/2.8)+7.7/q+(-p))-(p+p+p)/(-p))
             z2 <== (((-5.5)+x*x*3.8*((-7.2)*(-8.6)*(-x))/(x))-4.3/(((-7.7)/2.8)+7.7/y+(-x))-(x+x+x)/(-x))
-            wr [I 716; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 716)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 717
         !"test717"
         //let z0 = 5.7
@@ -8242,11 +8242,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((6.2*3.8-(y+(-x)+(-1.6))/7.1-(-y)*(-3.1)+((2.8/(-6.5)*x-(-6.7)-(-0.1))))).Expr.eval (programList[prIndex])
+        let s = ((6.2*3.8-(y+(-x)+(-1.6))/7.1-(-y)*(-3.1)+((2.8/(-6.5)*x-(-6.7)-(-0.1))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (6.2*3.8-(q+(-p)+(-1.6))/7.1-(-q)*(-3.1)+((2.8/(-6.5)*p-(-6.7)-(-0.1))))
             z2 <== (6.2*3.8-(y+(-x)+(-1.6))/7.1-(-y)*(-3.1)+((2.8/(-6.5)*x-(-6.7)-(-0.1))))
-            wr [I 718; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 718)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 719
         !"test719"
         //let z0 = (x*(-1.6)*1.6*(x/x/x+(-2.4)/3.1)-(-2.8)+y*(y+(-y))/((-y)-y-x+(4.1*y*6.5)+(-7.2)/x+(-7.6)*(-2.1)-(-y)))
@@ -8255,11 +8255,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*(-1.6)*1.6*(x/x/x+(-2.4)/3.1)-(-2.8)+y*(y+(-y))/((-y)-y-x+(4.1*y*6.5)+(-7.2)/x+(-7.6)*(-2.1)-(-y)))).Expr.eval (programList[prIndex])
+        let s = ((x*(-1.6)*1.6*(x/x/x+(-2.4)/3.1)-(-2.8)+y*(y+(-y))/((-y)-y-x+(4.1*y*6.5)+(-7.2)/x+(-7.6)*(-2.1)-(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*(-1.6)*1.6*(p/p/p+(-2.4)/3.1)-(-2.8)+q*(q+(-q))/((-q)-q-p+(4.1*q*6.5)+(-7.2)/p+(-7.6)*(-2.1)-(-q)))
             z2 <== (x*(-1.6)*1.6*(x/x/x+(-2.4)/3.1)-(-2.8)+y*(y+(-y))/((-y)-y-x+(4.1*y*6.5)+(-7.2)/x+(-7.6)*(-2.1)-(-y)))
-            wr [I 719; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 719)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 720
         !"test720"
         //let z0 = ((-y)*1.6-8.5/(8.1-(-y)+6.4))+8.5-y*y/y*(y/(6.4+(-x)/0.1)/((-0.4)))
@@ -8268,11 +8268,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)*1.6-8.5/(8.1-(-y)+6.4))+8.5-y*y/y*(y/(6.4+(-x)/0.1)/((-0.4)))).Expr.eval (programList[prIndex])
+        let s = (((-y)*1.6-8.5/(8.1-(-y)+6.4))+8.5-y*y/y*(y/(6.4+(-x)/0.1)/((-0.4)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)*1.6-8.5/(8.1-(-q)+6.4))+8.5-q*q/q*(q/(6.4+(-p)/0.1)/((-0.4)))
             z2 <== ((-y)*1.6-8.5/(8.1-(-y)+6.4))+8.5-y*y/y*(y/(6.4+(-x)/0.1)/((-0.4)))
-            wr [I 720; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 720)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 721
         !"test721"
         //let z0 = (3.2+((-1.2))-4.2-(-3.2)/x-x/y*y)*(-y)-1.6*(y)-x
@@ -8281,11 +8281,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((3.2+((-1.2))-4.2-(-3.2)/x-x/y*y)*(-y)-1.6*(y)-x).Expr.eval (programList[prIndex])
+        let s = ((3.2+((-1.2))-4.2-(-3.2)/x-x/y*y)*(-y)-1.6*(y)-x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (3.2+((-1.2))-4.2-(-3.2)/p-p/q*q)*(-q)-1.6*(q)-p
             z2 <== (3.2+((-1.2))-4.2-(-3.2)/x-x/y*y)*(-y)-1.6*(y)-x
-            wr [I 721; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 721)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 722
         !"test722"
         //let z0 = (-y)+(((-y))-0.7-x+y/y-(-6.1))
@@ -8294,11 +8294,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)+(((-y))-0.7-x+y/y-(-6.1))).Expr.eval (programList[prIndex])
+        let s = ((-y)+(((-y))-0.7-x+y/y-(-6.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)+(((-q))-0.7-p+q/q-(-6.1))
             z2 <== (-y)+(((-y))-0.7-x+y/y-(-6.1))
-            wr [I 722; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 722)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 723
         !"test723"
         //let z0 = (-2.1)
@@ -8315,11 +8315,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((2.0*(1.7+y+(-2.7))*(-4.4)/x)/(8.2*(-y))+(((-y)/0.2+(-8.4)*(-2.4)+y))/(-4.7)*(-x))).Expr.eval (programList[prIndex])
+        let s = (((2.0*(1.7+y+(-2.7))*(-4.4)/x)/(8.2*(-y))+(((-y)/0.2+(-8.4)*(-2.4)+y))/(-4.7)*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((2.0*(1.7+q+(-2.7))*(-4.4)/p)/(8.2*(-q))+(((-q)/0.2+(-8.4)*(-2.4)+q))/(-4.7)*(-p))
             z2 <== ((2.0*(1.7+y+(-2.7))*(-4.4)/x)/(8.2*(-y))+(((-y)/0.2+(-8.4)*(-2.4)+y))/(-4.7)*(-x))
-            wr [I 724; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 724)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 725
         !"test725"
         //let z0 = ((((-x)*4.7/(-y)-(-4.3))+((-0.0)*y+y)+y*2.0)+((-x)-(-x)/(x*6.0-(-3.0))-3.1+(1.6-y/y)*(-6.6))+3.6-4.4-(-y))
@@ -8328,11 +8328,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)*4.7/(-y)-(-4.3))+((-0.0)*y+y)+y*2.0)+((-x)-(-x)/(x*6.0-(-3.0))-3.1+(1.6-y/y)*(-6.6))+3.6-4.4-(-y))).Expr.eval (programList[prIndex])
+        let s = (((((-x)*4.7/(-y)-(-4.3))+((-0.0)*y+y)+y*2.0)+((-x)-(-x)/(x*6.0-(-3.0))-3.1+(1.6-y/y)*(-6.6))+3.6-4.4-(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)*4.7/(-q)-(-4.3))+((-0.0)*q+q)+q*2.0)+((-p)-(-p)/(p*6.0-(-3.0))-3.1+(1.6-q/q)*(-6.6))+3.6-4.4-(-q))
             z2 <== ((((-x)*4.7/(-y)-(-4.3))+((-0.0)*y+y)+y*2.0)+((-x)-(-x)/(x*6.0-(-3.0))-3.1+(1.6-y/y)*(-6.6))+3.6-4.4-(-y))
-            wr [I 725; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 725)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 726
         !"test726"
         //let z0 = y
@@ -8341,11 +8341,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 726; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 726)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 727
         !"test727"
         //let z0 = (-y)
@@ -8354,11 +8354,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 727; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 727)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 728
         !"test728"
         //let z0 = (((-4.8)+(-2.5)+1.4*((-7.1))/(x/6.7+(-x)))/5.6*(6.6-(-y)-(-0.3)/(-4.0)-(-0.1)))
@@ -8367,11 +8367,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-4.8)+(-2.5)+1.4*((-7.1))/(x/6.7+(-x)))/5.6*(6.6-(-y)-(-0.3)/(-4.0)-(-0.1)))).Expr.eval (programList[prIndex])
+        let s = ((((-4.8)+(-2.5)+1.4*((-7.1))/(x/6.7+(-x)))/5.6*(6.6-(-y)-(-0.3)/(-4.0)-(-0.1)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-4.8)+(-2.5)+1.4*((-7.1))/(p/6.7+(-p)))/5.6*(6.6-(-q)-(-0.3)/(-4.0)-(-0.1)))
             z2 <== (((-4.8)+(-2.5)+1.4*((-7.1))/(x/6.7+(-x)))/5.6*(6.6-(-y)-(-0.3)/(-4.0)-(-0.1)))
-            wr [I 728; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 728)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 729
         !"test729"
         //let z0 = (-1.0)
@@ -8396,11 +8396,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))).Expr.eval (programList[prIndex])
+        let s = (((-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))
             z2 <== ((-y))
-            wr [I 731; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 731)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 732
         !"test732"
         //let z0 = (y+((-1.4)-(-y)+x+(-4.0)*((-1.5)-5.2))+(-y)-x)
@@ -8409,11 +8409,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+((-1.4)-(-y)+x+(-4.0)*((-1.5)-5.2))+(-y)-x)).Expr.eval (programList[prIndex])
+        let s = ((y+((-1.4)-(-y)+x+(-4.0)*((-1.5)-5.2))+(-y)-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+((-1.4)-(-q)+p+(-4.0)*((-1.5)-5.2))+(-q)-p)
             z2 <== (y+((-1.4)-(-y)+x+(-4.0)*((-1.5)-5.2))+(-y)-x)
-            wr [I 732; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 732)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 733
         !"test733"
         //let z0 = (-x)
@@ -8422,11 +8422,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 733; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 733)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 734
         !"test734"
         //let z0 = 3.4
@@ -8451,11 +8451,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)*(-y)/(8.8)+((-1.6)*(-0.4)+y/y-(-y))*(x+x+(-5.0))))).Expr.eval (programList[prIndex])
+        let s = ((((-y)*(-y)/(8.8)+((-1.6)*(-0.4)+y/y-(-y))*(x+x+(-5.0))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)*(-q)/(8.8)+((-1.6)*(-0.4)+q/q-(-q))*(p+p+(-5.0))))
             z2 <== (((-y)*(-y)/(8.8)+((-1.6)*(-0.4)+y/y-(-y))*(x+x+(-5.0))))
-            wr [I 736; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 736)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 737
         !"test737"
         //let z0 = 6.7
@@ -8472,11 +8472,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 738; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 738)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 739
         !"test739"
         //let z0 = (((-y)*y/(y)-y/y)*2.5/(y-1.2-5.1/(-5.6)/x/y+(-5.0))/(3.2))
@@ -8485,11 +8485,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)*y/(y)-y/y)*2.5/(y-1.2-5.1/(-5.6)/x/y+(-5.0))/(3.2))).Expr.eval (programList[prIndex])
+        let s = ((((-y)*y/(y)-y/y)*2.5/(y-1.2-5.1/(-5.6)/x/y+(-5.0))/(3.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)*q/(q)-q/q)*2.5/(q-1.2-5.1/(-5.6)/p/q+(-5.0))/(3.2))
             z2 <== (((-y)*y/(y)-y/y)*2.5/(y-1.2-5.1/(-5.6)/x/y+(-5.0))/(3.2))
-            wr [I 739; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 739)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 740
         !"test740"
         //let z0 = ((-y))
@@ -8498,11 +8498,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))).Expr.eval (programList[prIndex])
+        let s = (((-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))
             z2 <== ((-y))
-            wr [I 740; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 740)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 741
         !"test741"
         //let z0 = 7.4
@@ -8519,11 +8519,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-0.7)/x*(2.4+y+(-2.6)-(-7.8)-y)).Expr.eval (programList[prIndex])
+        let s = ((-0.7)/x*(2.4+y+(-2.6)-(-7.8)-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-0.7)/p*(2.4+q+(-2.6)-(-7.8)-q)
             z2 <== (-0.7)/x*(2.4+y+(-2.6)-(-7.8)-y)
-            wr [I 742; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 742)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 743
         !"test743"
         //let z0 = 7.0
@@ -8540,11 +8540,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-6.6)+(-y))*(7.6*(-0.3)+x*(-7.2)*y)*y+(-2.8)+y+4.0-(-3.5))+(2.5)/0.4-(-7.5)-(-y)+(-4.6)*(-3.6)-(0.8-4.4+8.2*y*1.0)*(-y)/((-y)))).Expr.eval (programList[prIndex])
+        let s = (((((-6.6)+(-y))*(7.6*(-0.3)+x*(-7.2)*y)*y+(-2.8)+y+4.0-(-3.5))+(2.5)/0.4-(-7.5)-(-y)+(-4.6)*(-3.6)-(0.8-4.4+8.2*y*1.0)*(-y)/((-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-6.6)+(-q))*(7.6*(-0.3)+p*(-7.2)*q)*q+(-2.8)+q+4.0-(-3.5))+(2.5)/0.4-(-7.5)-(-q)+(-4.6)*(-3.6)-(0.8-4.4+8.2*q*1.0)*(-q)/((-q)))
             z2 <== ((((-6.6)+(-y))*(7.6*(-0.3)+x*(-7.2)*y)*y+(-2.8)+y+4.0-(-3.5))+(2.5)/0.4-(-7.5)-(-y)+(-4.6)*(-3.6)-(0.8-4.4+8.2*y*1.0)*(-y)/((-y)))
-            wr [I 744; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 744)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 745
         !"test745"
         //let z0 = (-x)
@@ -8553,11 +8553,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 745; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 745)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 746
         !"test746"
         //let z0 = 0.8
@@ -8582,11 +8582,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 748; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 748)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 749
         !"test749"
         //let z0 = ((-6.1)-(y)+(x)+((4.8)*(-1.0)/((-y)/(-0.5)*(-y)+8.7-6.1)/y*2.1)-x)
@@ -8595,11 +8595,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-6.1)-(y)+(x)+((4.8)*(-1.0)/((-y)/(-0.5)*(-y)+8.7-6.1)/y*2.1)-x)).Expr.eval (programList[prIndex])
+        let s = (((-6.1)-(y)+(x)+((4.8)*(-1.0)/((-y)/(-0.5)*(-y)+8.7-6.1)/y*2.1)-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-6.1)-(q)+(p)+((4.8)*(-1.0)/((-q)/(-0.5)*(-q)+8.7-6.1)/q*2.1)-p)
             z2 <== ((-6.1)-(y)+(x)+((4.8)*(-1.0)/((-y)/(-0.5)*(-y)+8.7-6.1)/y*2.1)-x)
-            wr [I 749; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 749)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 750
         !"test750"
         //let z0 = (-y)
@@ -8608,11 +8608,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 750; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 750)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 751
         !"test751"
         //let z0 = ((y*(-2.2)+(-4.5)-(-3.8))*(-x))
@@ -8621,11 +8621,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y*(-2.2)+(-4.5)-(-3.8))*(-x))).Expr.eval (programList[prIndex])
+        let s = (((y*(-2.2)+(-4.5)-(-3.8))*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q*(-2.2)+(-4.5)-(-3.8))*(-p))
             z2 <== ((y*(-2.2)+(-4.5)-(-3.8))*(-x))
-            wr [I 751; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 751)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 752
         !"test752"
         //let z0 = (-4.3)
@@ -8642,11 +8642,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 753; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 753)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 754
         !"test754"
         //let z0 = ((((-1.6)*6.6*1.8+(-6.2)/(-4.7))+((-y)-(-8.7)+(-1.1)+(-x))/(-y)-8.0)*((-7.7)*8.4/(-3.8)+(-3.6))-(2.6/x*(-x)*(-y)))
@@ -8655,11 +8655,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-1.6)*6.6*1.8+(-6.2)/(-4.7))+((-y)-(-8.7)+(-1.1)+(-x))/(-y)-8.0)*((-7.7)*8.4/(-3.8)+(-3.6))-(2.6/x*(-x)*(-y)))).Expr.eval (programList[prIndex])
+        let s = (((((-1.6)*6.6*1.8+(-6.2)/(-4.7))+((-y)-(-8.7)+(-1.1)+(-x))/(-y)-8.0)*((-7.7)*8.4/(-3.8)+(-3.6))-(2.6/x*(-x)*(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-1.6)*6.6*1.8+(-6.2)/(-4.7))+((-q)-(-8.7)+(-1.1)+(-p))/(-q)-8.0)*((-7.7)*8.4/(-3.8)+(-3.6))-(2.6/p*(-p)*(-q)))
             z2 <== ((((-1.6)*6.6*1.8+(-6.2)/(-4.7))+((-y)-(-8.7)+(-1.1)+(-x))/(-y)-8.0)*((-7.7)*8.4/(-3.8)+(-3.6))-(2.6/x*(-x)*(-y)))
-            wr [I 754; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 754)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 755
         !"test755"
         //let z0 = (-8.4)
@@ -8676,11 +8676,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x-(((-x)/x/(-x)+x-(-3.8))-4.8/y/((-3.6)*3.5)-5.6)-(-8.7)-(-5.2)/((-y)/(-y)/8.7*(-y)-y)/x)).Expr.eval (programList[prIndex])
+        let s = ((x-(((-x)/x/(-x)+x-(-3.8))-4.8/y/((-3.6)*3.5)-5.6)-(-8.7)-(-5.2)/((-y)/(-y)/8.7*(-y)-y)/x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p-(((-p)/p/(-p)+p-(-3.8))-4.8/q/((-3.6)*3.5)-5.6)-(-8.7)-(-5.2)/((-q)/(-q)/8.7*(-q)-q)/p)
             z2 <== (x-(((-x)/x/(-x)+x-(-3.8))-4.8/y/((-3.6)*3.5)-5.6)-(-8.7)-(-5.2)/((-y)/(-y)/8.7*(-y)-y)/x)
-            wr [I 756; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 756)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 757
         !"test757"
         //let z0 = 8.7
@@ -8697,11 +8697,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 758; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 758)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 759
         !"test759"
         //let z0 = (((-8.7)-x-(y/(-y))+((-1.1)/x*y-(-x)*3.1)))
@@ -8710,11 +8710,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-8.7)-x-(y/(-y))+((-1.1)/x*y-(-x)*3.1)))).Expr.eval (programList[prIndex])
+        let s = ((((-8.7)-x-(y/(-y))+((-1.1)/x*y-(-x)*3.1)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-8.7)-p-(q/(-q))+((-1.1)/p*q-(-p)*3.1)))
             z2 <== (((-8.7)-x-(y/(-y))+((-1.1)/x*y-(-x)*3.1)))
-            wr [I 759; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 759)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 760
         !"test760"
         //let z0 = (3.0/3.1*(2.5))
@@ -8731,11 +8731,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y/(-y)+x+(-5.6)*1.3+y*(-y))).Expr.eval (programList[prIndex])
+        let s = ((y/(-y)+x+(-5.6)*1.3+y*(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q/(-q)+p+(-5.6)*1.3+q*(-q))
             z2 <== (y/(-y)+x+(-5.6)*1.3+y*(-y))
-            wr [I 761; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 761)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 762
         !"test762"
         //let z0 = y
@@ -8744,11 +8744,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 762; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 762)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 763
         !"test763"
         //let z0 = (6.6/1.5-(y-(6.8))*(8.6-x*0.1))
@@ -8757,11 +8757,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((6.6/1.5-(y-(6.8))*(8.6-x*0.1))).Expr.eval (programList[prIndex])
+        let s = ((6.6/1.5-(y-(6.8))*(8.6-x*0.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (6.6/1.5-(q-(6.8))*(8.6-p*0.1))
             z2 <== (6.6/1.5-(y-(6.8))*(8.6-x*0.1))
-            wr [I 763; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 763)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 764
         !"test764"
         //let z0 = x
@@ -8770,11 +8770,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 764; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 764)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 765
         !"test765"
         //let z0 = x
@@ -8783,11 +8783,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 765; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 765)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 766
         !"test766"
         //let z0 = (y-(-2.8))
@@ -8796,11 +8796,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-(-2.8))).Expr.eval (programList[prIndex])
+        let s = ((y-(-2.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-(-2.8))
             z2 <== (y-(-2.8))
-            wr [I 766; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 766)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 767
         !"test767"
         //let z0 = (4.2)
@@ -8825,11 +8825,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.0+((-x)/3.8/((-x)-x+(-4.6)-y))*(2.7+(-8.6)-y)*(y+(-3.2)-(-y)/(-7.2)+1.4)-x+(-2.6))).Expr.eval (programList[prIndex])
+        let s = ((0.0+((-x)/3.8/((-x)-x+(-4.6)-y))*(2.7+(-8.6)-y)*(y+(-3.2)-(-y)/(-7.2)+1.4)-x+(-2.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.0+((-p)/3.8/((-p)-p+(-4.6)-q))*(2.7+(-8.6)-q)*(q+(-3.2)-(-q)/(-7.2)+1.4)-p+(-2.6))
             z2 <== (0.0+((-x)/3.8/((-x)-x+(-4.6)-y))*(2.7+(-8.6)-y)*(y+(-3.2)-(-y)/(-7.2)+1.4)-x+(-2.6))
-            wr [I 769; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 769)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 770
         !"test770"
         //let z0 = ((-y)/(-x)*(5.4+y-4.8*x)*(-y)*(-y)-((-x)*(-x)+(y/3.0)+2.7-y)/(((-y))/y))
@@ -8838,11 +8838,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)/(-x)*(5.4+y-4.8*x)*(-y)*(-y)-((-x)*(-x)+(y/3.0)+2.7-y)/(((-y))/y))).Expr.eval (programList[prIndex])
+        let s = (((-y)/(-x)*(5.4+y-4.8*x)*(-y)*(-y)-((-x)*(-x)+(y/3.0)+2.7-y)/(((-y))/y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)/(-p)*(5.4+q-4.8*p)*(-q)*(-q)-((-p)*(-p)+(q/3.0)+2.7-q)/(((-q))/q))
             z2 <== ((-y)/(-x)*(5.4+y-4.8*x)*(-y)*(-y)-((-x)*(-x)+(y/3.0)+2.7-y)/(((-y))/y))
-            wr [I 770; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 770)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 771
         !"test771"
         //let z0 = ((-7.4)*2.3/(-y)*y+x)
@@ -8851,11 +8851,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.4)*2.3/(-y)*y+x)).Expr.eval (programList[prIndex])
+        let s = (((-7.4)*2.3/(-y)*y+x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.4)*2.3/(-q)*q+p)
             z2 <== ((-7.4)*2.3/(-y)*y+x)
-            wr [I 771; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 771)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 772
         !"test772"
         //let z0 = ((-y)-x-((-y)+5.0*x))
@@ -8864,11 +8864,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y)-x-((-y)+5.0*x))).Expr.eval (programList[prIndex])
+        let s = (((-y)-x-((-y)+5.0*x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q)-p-((-q)+5.0*p))
             z2 <== ((-y)-x-((-y)+5.0*x))
-            wr [I 772; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 772)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 773
         !"test773"
         //let z0 = (-x)-(2.5*(y-x*(-y)/y+(-y))*((-0.1)/y))+(-x)*(-4.1)+y
@@ -8877,11 +8877,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)-(2.5*(y-x*(-y)/y+(-y))*((-0.1)/y))+(-x)*(-4.1)+y).Expr.eval (programList[prIndex])
+        let s = ((-x)-(2.5*(y-x*(-y)/y+(-y))*((-0.1)/y))+(-x)*(-4.1)+y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)-(2.5*(q-p*(-q)/q+(-q))*((-0.1)/q))+(-p)*(-4.1)+q
             z2 <== (-x)-(2.5*(y-x*(-y)/y+(-y))*((-0.1)/y))+(-x)*(-4.1)+y
-            wr [I 773; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 773)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 774
         !"test774"
         //let z0 = ((((-2.5)*3.5/(-x)+(-1.3))-(y-(-6.3)-7.0/y))/((y))+1.8/y)
@@ -8890,11 +8890,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-2.5)*3.5/(-x)+(-1.3))-(y-(-6.3)-7.0/y))/((y))+1.8/y)).Expr.eval (programList[prIndex])
+        let s = (((((-2.5)*3.5/(-x)+(-1.3))-(y-(-6.3)-7.0/y))/((y))+1.8/y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-2.5)*3.5/(-p)+(-1.3))-(q-(-6.3)-7.0/q))/((q))+1.8/q)
             z2 <== ((((-2.5)*3.5/(-x)+(-1.3))-(y-(-6.3)-7.0/y))/((y))+1.8/y)
-            wr [I 774; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 774)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 775
         !"test775"
         //let z0 = 3.8
@@ -8911,11 +8911,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 776; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 776)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 777
         !"test777"
         //let z0 = 3.5
@@ -8932,11 +8932,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x)).Expr.eval (programList[prIndex])
+        let s = ((x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p)
             z2 <== (x)
-            wr [I 778; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 778)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 779
         !"test779"
         //let z0 = (((-y))*((-y)+y+y*(-y))-(5.7/((-7.0)+(-y)+x-(-x))+y+(y+1.4/3.4/y))*((-y)*4.8+7.0/y)*(-y)-(-y)*(-4.1)*(-1.2)+((-x)-x*x-x)+(-8.1)-(3.4*(-x))+((-6.7)-(-y)))
@@ -8945,11 +8945,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y))*((-y)+y+y*(-y))-(5.7/((-7.0)+(-y)+x-(-x))+y+(y+1.4/3.4/y))*((-y)*4.8+7.0/y)*(-y)-(-y)*(-4.1)*(-1.2)+((-x)-x*x-x)+(-8.1)-(3.4*(-x))+((-6.7)-(-y)))).Expr.eval (programList[prIndex])
+        let s = ((((-y))*((-y)+y+y*(-y))-(5.7/((-7.0)+(-y)+x-(-x))+y+(y+1.4/3.4/y))*((-y)*4.8+7.0/y)*(-y)-(-y)*(-4.1)*(-1.2)+((-x)-x*x-x)+(-8.1)-(3.4*(-x))+((-6.7)-(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q))*((-q)+q+q*(-q))-(5.7/((-7.0)+(-q)+p-(-p))+q+(q+1.4/3.4/q))*((-q)*4.8+7.0/q)*(-q)-(-q)*(-4.1)*(-1.2)+((-p)-p*p-p)+(-8.1)-(3.4*(-p))+((-6.7)-(-q)))
             z2 <== (((-y))*((-y)+y+y*(-y))-(5.7/((-7.0)+(-y)+x-(-x))+y+(y+1.4/3.4/y))*((-y)*4.8+7.0/y)*(-y)-(-y)*(-4.1)*(-1.2)+((-x)-x*x-x)+(-8.1)-(3.4*(-x))+((-6.7)-(-y)))
-            wr [I 779; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 779)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 780
         !"test780"
         //let z0 = (-y)
@@ -8958,11 +8958,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 780; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 780)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 781
         !"test781"
         //let z0 = 3.4
@@ -8979,11 +8979,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/y+((x-(-y)-(-5.0)+3.5)*(-y)))).Expr.eval (programList[prIndex])
+        let s = ((x/y+((x-(-y)-(-5.0)+3.5)*(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/q+((p-(-q)-(-5.0)+3.5)*(-q)))
             z2 <== (x/y+((x-(-y)-(-5.0)+3.5)*(-y)))
-            wr [I 782; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 782)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 783
         !"test783"
         //let z0 = y-x*7.3+(3.1/(-3.7))/(-x)/(-y)/x-(-y)*(-4.1)/(y)*((-y)*7.2)/(x)
@@ -8992,11 +8992,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y-x*7.3+(3.1/(-3.7))/(-x)/(-y)/x-(-y)*(-4.1)/(y)*((-y)*7.2)/(x)).Expr.eval (programList[prIndex])
+        let s = (y-x*7.3+(3.1/(-3.7))/(-x)/(-y)/x-(-y)*(-4.1)/(y)*((-y)*7.2)/(x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q-p*7.3+(3.1/(-3.7))/(-p)/(-q)/p-(-q)*(-4.1)/(q)*((-q)*7.2)/(p)
             z2 <== y-x*7.3+(3.1/(-3.7))/(-x)/(-y)/x-(-y)*(-4.1)/(y)*((-y)*7.2)/(x)
-            wr [I 783; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 783)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 784
         !"test784"
         //let z0 = (-y)
@@ -9005,11 +9005,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 784; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 784)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 785
         !"test785"
         //let z0 = (-x)
@@ -9018,11 +9018,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 785; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 785)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 786
         !"test786"
         //let z0 = (-x)
@@ -9031,11 +9031,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 786; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 786)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 787
         !"test787"
         //let z0 = (-y)
@@ -9044,11 +9044,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 787; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 787)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 788
         !"test788"
         //let z0 = ((-3.4)*(-x)-(-x)+((-y)/(-3.6)-6.0*(-x)-(-3.2)/(-1.2))*((y-(-y)/2.8-(-y))*((-x)*x/(-7.6)/(-1.7)-(-8.7))*x))
@@ -9057,11 +9057,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-3.4)*(-x)-(-x)+((-y)/(-3.6)-6.0*(-x)-(-3.2)/(-1.2))*((y-(-y)/2.8-(-y))*((-x)*x/(-7.6)/(-1.7)-(-8.7))*x))).Expr.eval (programList[prIndex])
+        let s = (((-3.4)*(-x)-(-x)+((-y)/(-3.6)-6.0*(-x)-(-3.2)/(-1.2))*((y-(-y)/2.8-(-y))*((-x)*x/(-7.6)/(-1.7)-(-8.7))*x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-3.4)*(-p)-(-p)+((-q)/(-3.6)-6.0*(-p)-(-3.2)/(-1.2))*((q-(-q)/2.8-(-q))*((-p)*p/(-7.6)/(-1.7)-(-8.7))*p))
             z2 <== ((-3.4)*(-x)-(-x)+((-y)/(-3.6)-6.0*(-x)-(-3.2)/(-1.2))*((y-(-y)/2.8-(-y))*((-x)*x/(-7.6)/(-1.7)-(-8.7))*x))
-            wr [I 788; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 788)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 789
         !"test789"
         //let z0 = ((x-y+6.1-(x)+(-x))/(-6.6)/(4.3-x)-(-1.2)-(7.3)/(-x)-0.7)
@@ -9070,11 +9070,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x-y+6.1-(x)+(-x))/(-6.6)/(4.3-x)-(-1.2)-(7.3)/(-x)-0.7)).Expr.eval (programList[prIndex])
+        let s = (((x-y+6.1-(x)+(-x))/(-6.6)/(4.3-x)-(-1.2)-(7.3)/(-x)-0.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p-q+6.1-(p)+(-p))/(-6.6)/(4.3-p)-(-1.2)-(7.3)/(-p)-0.7)
             z2 <== ((x-y+6.1-(x)+(-x))/(-6.6)/(4.3-x)-(-1.2)-(7.3)/(-x)-0.7)
-            wr [I 789; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 789)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 790
         !"test790"
         //let z0 = (6.6/(-y)+3.8-(-8.5)/6.2)+x
@@ -9083,11 +9083,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((6.6/(-y)+3.8-(-8.5)/6.2)+x).Expr.eval (programList[prIndex])
+        let s = ((6.6/(-y)+3.8-(-8.5)/6.2)+x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (6.6/(-q)+3.8-(-8.5)/6.2)+p
             z2 <== (6.6/(-y)+3.8-(-8.5)/6.2)+x
-            wr [I 790; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 790)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 791
         !"test791"
         //let z0 = (-1.5)
@@ -9104,11 +9104,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((x*x-(-1.6))))).Expr.eval (programList[prIndex])
+        let s = ((((x*x-(-1.6))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((p*p-(-1.6))))
             z2 <== (((x*x-(-1.6))))
-            wr [I 792; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 792)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 793
         !"test793"
         //let z0 = x
@@ -9117,11 +9117,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 793; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 793)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 794
         !"test794"
         //let z0 = (((8.7-1.4-(-x)*(-6.1)-(-y))-1.2+(-y))+(7.2-(-x)/(-x))+((y+1.5)-(y+y))*((6.3*(-x)/(-6.8))-7.6*((-y)-(-y))-((-4.4)*(-1.7)-(-y)*(-4.6)))-y)
@@ -9130,11 +9130,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((8.7-1.4-(-x)*(-6.1)-(-y))-1.2+(-y))+(7.2-(-x)/(-x))+((y+1.5)-(y+y))*((6.3*(-x)/(-6.8))-7.6*((-y)-(-y))-((-4.4)*(-1.7)-(-y)*(-4.6)))-y)).Expr.eval (programList[prIndex])
+        let s = ((((8.7-1.4-(-x)*(-6.1)-(-y))-1.2+(-y))+(7.2-(-x)/(-x))+((y+1.5)-(y+y))*((6.3*(-x)/(-6.8))-7.6*((-y)-(-y))-((-4.4)*(-1.7)-(-y)*(-4.6)))-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((8.7-1.4-(-p)*(-6.1)-(-q))-1.2+(-q))+(7.2-(-p)/(-p))+((q+1.5)-(q+q))*((6.3*(-p)/(-6.8))-7.6*((-q)-(-q))-((-4.4)*(-1.7)-(-q)*(-4.6)))-q)
             z2 <== (((8.7-1.4-(-x)*(-6.1)-(-y))-1.2+(-y))+(7.2-(-x)/(-x))+((y+1.5)-(y+y))*((6.3*(-x)/(-6.8))-7.6*((-y)-(-y))-((-4.4)*(-1.7)-(-y)*(-4.6)))-y)
-            wr [I 794; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 794)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 795
         !"test795"
         //let z0 = ((y+4.4-x*0.1*(-7.3)-(-3.8)*((-y)*0.2+(-7.1))+2.8)-((8.4+x)+(0.4)/(y-(-x)/5.0+1.6-(-1.1))+(2.2-(-4.0)))+(x+y/5.7+(1.6+(-x))/((-y)*x)))
@@ -9143,11 +9143,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y+4.4-x*0.1*(-7.3)-(-3.8)*((-y)*0.2+(-7.1))+2.8)-((8.4+x)+(0.4)/(y-(-x)/5.0+1.6-(-1.1))+(2.2-(-4.0)))+(x+y/5.7+(1.6+(-x))/((-y)*x)))).Expr.eval (programList[prIndex])
+        let s = (((y+4.4-x*0.1*(-7.3)-(-3.8)*((-y)*0.2+(-7.1))+2.8)-((8.4+x)+(0.4)/(y-(-x)/5.0+1.6-(-1.1))+(2.2-(-4.0)))+(x+y/5.7+(1.6+(-x))/((-y)*x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q+4.4-p*0.1*(-7.3)-(-3.8)*((-q)*0.2+(-7.1))+2.8)-((8.4+p)+(0.4)/(q-(-p)/5.0+1.6-(-1.1))+(2.2-(-4.0)))+(p+q/5.7+(1.6+(-p))/((-q)*p)))
             z2 <== ((y+4.4-x*0.1*(-7.3)-(-3.8)*((-y)*0.2+(-7.1))+2.8)-((8.4+x)+(0.4)/(y-(-x)/5.0+1.6-(-1.1))+(2.2-(-4.0)))+(x+y/5.7+(1.6+(-x))/((-y)*x)))
-            wr [I 795; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 795)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 796
         !"test796"
         //let z0 = 8.8+(((-3.3)+y)-3.1/x/(-y))
@@ -9156,11 +9156,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (8.8+(((-3.3)+y)-3.1/x/(-y))).Expr.eval (programList[prIndex])
+        let s = (8.8+(((-3.3)+y)-3.1/x/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 8.8+(((-3.3)+q)-3.1/p/(-q))
             z2 <== 8.8+(((-3.3)+y)-3.1/x/(-y))
-            wr [I 796; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 796)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 797
         !"test797"
         //let z0 = ((-x)+x/x-((-x)-(-x)*(-3.6))*8.0-(((-2.6)*(-y)*y)+((-y)/x)/1.8-8.3+(-8.6)/y/(-y)+((-y)*6.4-y*y+x))/((-2.1)/1.0*5.1-(-x)+7.7*x/((-y)))/((-x)*(-x)/(-y)))
@@ -9169,11 +9169,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)+x/x-((-x)-(-x)*(-3.6))*8.0-(((-2.6)*(-y)*y)+((-y)/x)/1.8-8.3+(-8.6)/y/(-y)+((-y)*6.4-y*y+x))/((-2.1)/1.0*5.1-(-x)+7.7*x/((-y)))/((-x)*(-x)/(-y)))).Expr.eval (programList[prIndex])
+        let s = (((-x)+x/x-((-x)-(-x)*(-3.6))*8.0-(((-2.6)*(-y)*y)+((-y)/x)/1.8-8.3+(-8.6)/y/(-y)+((-y)*6.4-y*y+x))/((-2.1)/1.0*5.1-(-x)+7.7*x/((-y)))/((-x)*(-x)/(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)+p/p-((-p)-(-p)*(-3.6))*8.0-(((-2.6)*(-q)*q)+((-q)/p)/1.8-8.3+(-8.6)/q/(-q)+((-q)*6.4-q*q+p))/((-2.1)/1.0*5.1-(-p)+7.7*p/((-q)))/((-p)*(-p)/(-q)))
             z2 <== ((-x)+x/x-((-x)-(-x)*(-3.6))*8.0-(((-2.6)*(-y)*y)+((-y)/x)/1.8-8.3+(-8.6)/y/(-y)+((-y)*6.4-y*y+x))/((-2.1)/1.0*5.1-(-x)+7.7*x/((-y)))/((-x)*(-x)/(-y)))
-            wr [I 797; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 797)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 798
         !"test798"
         //let z0 = (-y)
@@ -9182,11 +9182,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 798; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 798)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 799
         !"test799"
         //let z0 = (y+(-y)/(-2.2))
@@ -9195,11 +9195,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+(-y)/(-2.2))).Expr.eval (programList[prIndex])
+        let s = ((y+(-y)/(-2.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+(-q)/(-2.2))
             z2 <== (y+(-y)/(-2.2))
-            wr [I 799; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 799)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 800
         !"test800"
         //let z0 = 8.7
@@ -9224,11 +9224,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-7.6)-(-6.5)-(-x)*0.6*(-y)/(-x)+5.4+(1.6-(-7.5))*((-8.2)-6.6-1.4/(-x)/(y+(-5.3)/(-7.5)+(-2.0)-(-x))*(-4.1))).Expr.eval (programList[prIndex])
+        let s = ((-7.6)-(-6.5)-(-x)*0.6*(-y)/(-x)+5.4+(1.6-(-7.5))*((-8.2)-6.6-1.4/(-x)/(y+(-5.3)/(-7.5)+(-2.0)-(-x))*(-4.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-7.6)-(-6.5)-(-p)*0.6*(-q)/(-p)+5.4+(1.6-(-7.5))*((-8.2)-6.6-1.4/(-p)/(q+(-5.3)/(-7.5)+(-2.0)-(-p))*(-4.1))
             z2 <== (-7.6)-(-6.5)-(-x)*0.6*(-y)/(-x)+5.4+(1.6-(-7.5))*((-8.2)-6.6-1.4/(-x)/(y+(-5.3)/(-7.5)+(-2.0)-(-x))*(-4.1))
-            wr [I 802; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 802)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 803
         !"test803"
         //let z0 = ((8.4+(-x))/(y-(-1.2)*y+5.7)-(3.4*5.2)*5.6+5.3)*((-8.1))/x*(-y)
@@ -9237,11 +9237,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((8.4+(-x))/(y-(-1.2)*y+5.7)-(3.4*5.2)*5.6+5.3)*((-8.1))/x*(-y)).Expr.eval (programList[prIndex])
+        let s = (((8.4+(-x))/(y-(-1.2)*y+5.7)-(3.4*5.2)*5.6+5.3)*((-8.1))/x*(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((8.4+(-p))/(q-(-1.2)*q+5.7)-(3.4*5.2)*5.6+5.3)*((-8.1))/p*(-q)
             z2 <== ((8.4+(-x))/(y-(-1.2)*y+5.7)-(3.4*5.2)*5.6+5.3)*((-8.1))/x*(-y)
-            wr [I 803; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 803)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 804
         !"test804"
         //let z0 = ((-0.4)/(((-x)/(-y)*5.8)*(-7.7)-1.5/(-x)*(-x)-y)-8.7)
@@ -9250,11 +9250,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.4)/(((-x)/(-y)*5.8)*(-7.7)-1.5/(-x)*(-x)-y)-8.7)).Expr.eval (programList[prIndex])
+        let s = (((-0.4)/(((-x)/(-y)*5.8)*(-7.7)-1.5/(-x)*(-x)-y)-8.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.4)/(((-p)/(-q)*5.8)*(-7.7)-1.5/(-p)*(-p)-q)-8.7)
             z2 <== ((-0.4)/(((-x)/(-y)*5.8)*(-7.7)-1.5/(-x)*(-x)-y)-8.7)
-            wr [I 804; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 804)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 805
         !"test805"
         //let z0 = (((-y)+(-x)-(-3.2)*4.6)+(x/(-8.1))+y+y+x)/(-x)-(7.6/(-x)-6.4*(-x)-y)*(-x)*(((-6.4)*1.4-y*(-0.7))+((-x)))+(-3.6)*(y)
@@ -9263,11 +9263,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)+(-x)-(-3.2)*4.6)+(x/(-8.1))+y+y+x)/(-x)-(7.6/(-x)-6.4*(-x)-y)*(-x)*(((-6.4)*1.4-y*(-0.7))+((-x)))+(-3.6)*(y)).Expr.eval (programList[prIndex])
+        let s = ((((-y)+(-x)-(-3.2)*4.6)+(x/(-8.1))+y+y+x)/(-x)-(7.6/(-x)-6.4*(-x)-y)*(-x)*(((-6.4)*1.4-y*(-0.7))+((-x)))+(-3.6)*(y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)+(-p)-(-3.2)*4.6)+(p/(-8.1))+q+q+p)/(-p)-(7.6/(-p)-6.4*(-p)-q)*(-p)*(((-6.4)*1.4-q*(-0.7))+((-p)))+(-3.6)*(q)
             z2 <== (((-y)+(-x)-(-3.2)*4.6)+(x/(-8.1))+y+y+x)/(-x)-(7.6/(-x)-6.4*(-x)-y)*(-x)*(((-6.4)*1.4-y*(-0.7))+((-x)))+(-3.6)*(y)
-            wr [I 805; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 805)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 806
         !"test806"
         //let z0 = (-y)
@@ -9276,11 +9276,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 806; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 806)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 807
         !"test807"
         //let z0 = (y/2.2-(-y)-(-6.5)/x/(-8.4)-5.8-5.6/(-y)*((-x)+1.1)/(y-4.0/0.5+(-x)))
@@ -9289,11 +9289,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y/2.2-(-y)-(-6.5)/x/(-8.4)-5.8-5.6/(-y)*((-x)+1.1)/(y-4.0/0.5+(-x)))).Expr.eval (programList[prIndex])
+        let s = ((y/2.2-(-y)-(-6.5)/x/(-8.4)-5.8-5.6/(-y)*((-x)+1.1)/(y-4.0/0.5+(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q/2.2-(-q)-(-6.5)/p/(-8.4)-5.8-5.6/(-q)*((-p)+1.1)/(q-4.0/0.5+(-p)))
             z2 <== (y/2.2-(-y)-(-6.5)/x/(-8.4)-5.8-5.6/(-y)*((-x)+1.1)/(y-4.0/0.5+(-x)))
-            wr [I 807; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 807)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 808
         !"test808"
         //let z0 = y
@@ -9302,11 +9302,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 808; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 808)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 809
         !"test809"
         //let z0 = (((-y))/((-4.2)*7.0-(-x)-((-y)-(-y))*x))
@@ -9315,11 +9315,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y))/((-4.2)*7.0-(-x)-((-y)-(-y))*x))).Expr.eval (programList[prIndex])
+        let s = ((((-y))/((-4.2)*7.0-(-x)-((-y)-(-y))*x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q))/((-4.2)*7.0-(-p)-((-q)-(-q))*p))
             z2 <== (((-y))/((-4.2)*7.0-(-x)-((-y)-(-y))*x))
-            wr [I 809; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 809)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 810
         !"test810"
         //let z0 = (-7.4)
@@ -9336,11 +9336,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y)).Expr.eval (programList[prIndex])
+        let s = ((y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q)
             z2 <== (y)
-            wr [I 811; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 811)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 812
         !"test812"
         //let z0 = (4.5/4.3*(-y)+(-1.5)+((x+0.4-1.1)*(-8.6)))
@@ -9349,11 +9349,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((4.5/4.3*(-y)+(-1.5)+((x+0.4-1.1)*(-8.6)))).Expr.eval (programList[prIndex])
+        let s = ((4.5/4.3*(-y)+(-1.5)+((x+0.4-1.1)*(-8.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (4.5/4.3*(-q)+(-1.5)+((p+0.4-1.1)*(-8.6)))
             z2 <== (4.5/4.3*(-y)+(-1.5)+((x+0.4-1.1)*(-8.6)))
-            wr [I 812; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 812)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 813
         !"test813"
         //let z0 = y
@@ -9362,11 +9362,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 813; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 813)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 814
         !"test814"
         //let z0 = ((-8.8))
@@ -9383,11 +9383,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))).Expr.eval (programList[prIndex])
+        let s = (((-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))
             z2 <== ((-y))
-            wr [I 815; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 815)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 816
         !"test816"
         //let z0 = x
@@ -9396,11 +9396,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 816; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 816)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 817
         !"test817"
         //let z0 = ((-2.3)/(-x)+(-8.4))
@@ -9409,11 +9409,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-2.3)/(-x)+(-8.4))).Expr.eval (programList[prIndex])
+        let s = (((-2.3)/(-x)+(-8.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-2.3)/(-p)+(-8.4))
             z2 <== ((-2.3)/(-x)+(-8.4))
-            wr [I 817; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 817)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 818
         !"test818"
         //let z0 = (-x)
@@ -9422,11 +9422,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 818; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 818)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 819
         !"test819"
         //let z0 = (-y)
@@ -9435,11 +9435,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 819; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 819)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 820
         !"test820"
         //let z0 = (y*(-7.6)-3.1)
@@ -9448,11 +9448,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*(-7.6)-3.1)).Expr.eval (programList[prIndex])
+        let s = ((y*(-7.6)-3.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*(-7.6)-3.1)
             z2 <== (y*(-7.6)-3.1)
-            wr [I 820; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 820)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 821
         !"test821"
         //let z0 = (8.5)
@@ -9469,11 +9469,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((2.4)+(-2.2)-8.7+x).Expr.eval (programList[prIndex])
+        let s = ((2.4)+(-2.2)-8.7+x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (2.4)+(-2.2)-8.7+p
             z2 <== (2.4)+(-2.2)-8.7+x
-            wr [I 822; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 822)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 823
         !"test823"
         //let z0 = ((2.7)+(-1.5))
@@ -9490,11 +9490,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((2.5-y*6.6)+0.0*((-x)-3.3-y*(-y))))).Expr.eval (programList[prIndex])
+        let s = ((((2.5-y*6.6)+0.0*((-x)-3.3-y*(-y))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((2.5-q*6.6)+0.0*((-p)-3.3-q*(-q))))
             z2 <== (((2.5-y*6.6)+0.0*((-x)-3.3-y*(-y))))
-            wr [I 824; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 824)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 825
         !"test825"
         //let z0 = (y*(7.1)*(3.2*(6.4)-(-x)+(-y))-(x))
@@ -9503,11 +9503,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y*(7.1)*(3.2*(6.4)-(-x)+(-y))-(x))).Expr.eval (programList[prIndex])
+        let s = ((y*(7.1)*(3.2*(6.4)-(-x)+(-y))-(x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q*(7.1)*(3.2*(6.4)-(-p)+(-q))-(p))
             z2 <== (y*(7.1)*(3.2*(6.4)-(-x)+(-y))-(x))
-            wr [I 825; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 825)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 826
         !"test826"
         //let z0 = 7.2
@@ -9524,11 +9524,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*(3.0)-(y-(-x)*(-1.6))+(-x)/(-4.0)/y/(-x)-1.4-(-y)/y)/(-1.6)-(((-x)/2.6*1.4)+((-x))+(8.2*(-x)-y*7.4-6.8)+6.4)/(((-x))-((-x)-0.3/1.8*x)/(x-(-y)/y+(-x)))/6.7).Expr.eval (programList[prIndex])
+        let s = ((x*(3.0)-(y-(-x)*(-1.6))+(-x)/(-4.0)/y/(-x)-1.4-(-y)/y)/(-1.6)-(((-x)/2.6*1.4)+((-x))+(8.2*(-x)-y*7.4-6.8)+6.4)/(((-x))-((-x)-0.3/1.8*x)/(x-(-y)/y+(-x)))/6.7).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*(3.0)-(q-(-p)*(-1.6))+(-p)/(-4.0)/q/(-p)-1.4-(-q)/q)/(-1.6)-(((-p)/2.6*1.4)+((-p))+(8.2*(-p)-q*7.4-6.8)+6.4)/(((-p))-((-p)-0.3/1.8*p)/(p-(-q)/q+(-p)))/6.7
             z2 <== (x*(3.0)-(y-(-x)*(-1.6))+(-x)/(-4.0)/y/(-x)-1.4-(-y)/y)/(-1.6)-(((-x)/2.6*1.4)+((-x))+(8.2*(-x)-y*7.4-6.8)+6.4)/(((-x))-((-x)-0.3/1.8*x)/(x-(-y)/y+(-x)))/6.7
-            wr [I 827; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 827)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 828
         !"test828"
         //let z0 = (-5.5)
@@ -9553,11 +9553,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 830; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 830)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 831
         !"test831"
         //let z0 = (((y/(-3.3))*(-6.7)-(8.6*y+(-6.1)*y/(-y))-x/(-7.5))-(-7.7)/y+(x/(-1.6)*(-7.3)/(-y)*(-x)))
@@ -9566,11 +9566,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((y/(-3.3))*(-6.7)-(8.6*y+(-6.1)*y/(-y))-x/(-7.5))-(-7.7)/y+(x/(-1.6)*(-7.3)/(-y)*(-x)))).Expr.eval (programList[prIndex])
+        let s = ((((y/(-3.3))*(-6.7)-(8.6*y+(-6.1)*y/(-y))-x/(-7.5))-(-7.7)/y+(x/(-1.6)*(-7.3)/(-y)*(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((q/(-3.3))*(-6.7)-(8.6*q+(-6.1)*q/(-q))-p/(-7.5))-(-7.7)/q+(p/(-1.6)*(-7.3)/(-q)*(-p)))
             z2 <== (((y/(-3.3))*(-6.7)-(8.6*y+(-6.1)*y/(-y))-x/(-7.5))-(-7.7)/y+(x/(-1.6)*(-7.3)/(-y)*(-x)))
-            wr [I 831; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 831)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 832
         !"test832"
         //let z0 = y
@@ -9579,11 +9579,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 832; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 832)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 833
         !"test833"
         //let z0 = ((-5.4)-8.4/0.3/((-0.1)/0.1))
@@ -9608,11 +9608,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-5.1)+(((-y)+(-3.4))+(-1.5)*((-y)+(-5.7)/x)*(-8.6))).Expr.eval (programList[prIndex])
+        let s = ((-5.1)+(((-y)+(-3.4))+(-1.5)*((-y)+(-5.7)/x)*(-8.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-5.1)+(((-q)+(-3.4))+(-1.5)*((-q)+(-5.7)/p)*(-8.6))
             z2 <== (-5.1)+(((-y)+(-3.4))+(-1.5)*((-y)+(-5.7)/x)*(-8.6))
-            wr [I 835; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 835)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 836
         !"test836"
         //let z0 = (y-(-8.3)/4.8*(-y)-(-y))
@@ -9621,11 +9621,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-(-8.3)/4.8*(-y)-(-y))).Expr.eval (programList[prIndex])
+        let s = ((y-(-8.3)/4.8*(-y)-(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-(-8.3)/4.8*(-q)-(-q))
             z2 <== (y-(-8.3)/4.8*(-y)-(-y))
-            wr [I 836; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 836)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 837
         !"test837"
         //let z0 = ((-6.0)*y+(((-7.5)-6.3/x)+y+(-3.4)-y)-((-4.4)-5.0)/(6.3-(-5.4)*(-2.6)/((-y)-5.2/(-y)/x/6.7)+((-y)+(-y)+(-x)*5.4-6.6)))
@@ -9634,11 +9634,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-6.0)*y+(((-7.5)-6.3/x)+y+(-3.4)-y)-((-4.4)-5.0)/(6.3-(-5.4)*(-2.6)/((-y)-5.2/(-y)/x/6.7)+((-y)+(-y)+(-x)*5.4-6.6)))).Expr.eval (programList[prIndex])
+        let s = (((-6.0)*y+(((-7.5)-6.3/x)+y+(-3.4)-y)-((-4.4)-5.0)/(6.3-(-5.4)*(-2.6)/((-y)-5.2/(-y)/x/6.7)+((-y)+(-y)+(-x)*5.4-6.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-6.0)*q+(((-7.5)-6.3/p)+q+(-3.4)-q)-((-4.4)-5.0)/(6.3-(-5.4)*(-2.6)/((-q)-5.2/(-q)/p/6.7)+((-q)+(-q)+(-p)*5.4-6.6)))
             z2 <== ((-6.0)*y+(((-7.5)-6.3/x)+y+(-3.4)-y)-((-4.4)-5.0)/(6.3-(-5.4)*(-2.6)/((-y)-5.2/(-y)/x/6.7)+((-y)+(-y)+(-x)*5.4-6.6)))
-            wr [I 837; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 837)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 838
         !"test838"
         //let z0 = (1.1+(-y)-x*1.2/(-4.4)+7.1+y*8.7-(0.5-(y*4.8/(-6.4)+x/4.5))-x+(-6.6)+x-y*(-y))
@@ -9647,11 +9647,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((1.1+(-y)-x*1.2/(-4.4)+7.1+y*8.7-(0.5-(y*4.8/(-6.4)+x/4.5))-x+(-6.6)+x-y*(-y))).Expr.eval (programList[prIndex])
+        let s = ((1.1+(-y)-x*1.2/(-4.4)+7.1+y*8.7-(0.5-(y*4.8/(-6.4)+x/4.5))-x+(-6.6)+x-y*(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (1.1+(-q)-p*1.2/(-4.4)+7.1+q*8.7-(0.5-(q*4.8/(-6.4)+p/4.5))-p+(-6.6)+p-q*(-q))
             z2 <== (1.1+(-y)-x*1.2/(-4.4)+7.1+y*8.7-(0.5-(y*4.8/(-6.4)+x/4.5))-x+(-6.6)+x-y*(-y))
-            wr [I 838; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 838)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 839
         !"test839"
         //let z0 = (((-6.6))-(y+2.2/(-3.0))+(-6.2)-(((-y)-(-y)-2.5/(-y)+y))/(-5.0)/(-x)*(-5.8)*(8.6*y*6.5/6.7)+((-5.1)+(-0.7)+(-3.3)+(-y)*1.7))
@@ -9660,11 +9660,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-6.6))-(y+2.2/(-3.0))+(-6.2)-(((-y)-(-y)-2.5/(-y)+y))/(-5.0)/(-x)*(-5.8)*(8.6*y*6.5/6.7)+((-5.1)+(-0.7)+(-3.3)+(-y)*1.7))).Expr.eval (programList[prIndex])
+        let s = ((((-6.6))-(y+2.2/(-3.0))+(-6.2)-(((-y)-(-y)-2.5/(-y)+y))/(-5.0)/(-x)*(-5.8)*(8.6*y*6.5/6.7)+((-5.1)+(-0.7)+(-3.3)+(-y)*1.7))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-6.6))-(q+2.2/(-3.0))+(-6.2)-(((-q)-(-q)-2.5/(-q)+q))/(-5.0)/(-p)*(-5.8)*(8.6*q*6.5/6.7)+((-5.1)+(-0.7)+(-3.3)+(-q)*1.7))
             z2 <== (((-6.6))-(y+2.2/(-3.0))+(-6.2)-(((-y)-(-y)-2.5/(-y)+y))/(-5.0)/(-x)*(-5.8)*(8.6*y*6.5/6.7)+((-5.1)+(-0.7)+(-3.3)+(-y)*1.7))
-            wr [I 839; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 839)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 840
         !"test840"
         //let z0 = ((-7.7)+x)
@@ -9673,11 +9673,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.7)+x)).Expr.eval (programList[prIndex])
+        let s = (((-7.7)+x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.7)+p)
             z2 <== ((-7.7)+x)
-            wr [I 840; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 840)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 841
         !"test841"
         //let z0 = 2.2
@@ -9694,11 +9694,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.4)/4.3+(-y)*((-6.2)))).Expr.eval (programList[prIndex])
+        let s = (((-7.4)/4.3+(-y)*((-6.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.4)/4.3+(-q)*((-6.2)))
             z2 <== ((-7.4)/4.3+(-y)*((-6.2)))
-            wr [I 842; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 842)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 843
         !"test843"
         //let z0 = (-x)
@@ -9707,11 +9707,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 843; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 843)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 844
         !"test844"
         //let z0 = y
@@ -9720,11 +9720,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 844; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 844)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 845
         !"test845"
         //let z0 = (y/y)
@@ -9733,11 +9733,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y/y)).Expr.eval (programList[prIndex])
+        let s = ((y/y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q/q)
             z2 <== (y/y)
-            wr [I 845; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 845)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 846
         !"test846"
         //let z0 = ((-5.2)+(-x))
@@ -9746,11 +9746,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-5.2)+(-x))).Expr.eval (programList[prIndex])
+        let s = (((-5.2)+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-5.2)+(-p))
             z2 <== ((-5.2)+(-x))
-            wr [I 846; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 846)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 847
         !"test847"
         //let z0 = (y)
@@ -9759,11 +9759,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y)).Expr.eval (programList[prIndex])
+        let s = ((y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q)
             z2 <== (y)
-            wr [I 847; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 847)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 848
         !"test848"
         //let z0 = y
@@ -9772,11 +9772,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 848; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 848)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 849
         !"test849"
         //let z0 = (((-4.1)*(-7.5))*(0.4+y/(-0.6)/3.4-1.2/(-7.4))-1.2-y)
@@ -9785,11 +9785,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-4.1)*(-7.5))*(0.4+y/(-0.6)/3.4-1.2/(-7.4))-1.2-y)).Expr.eval (programList[prIndex])
+        let s = ((((-4.1)*(-7.5))*(0.4+y/(-0.6)/3.4-1.2/(-7.4))-1.2-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-4.1)*(-7.5))*(0.4+q/(-0.6)/3.4-1.2/(-7.4))-1.2-q)
             z2 <== (((-4.1)*(-7.5))*(0.4+y/(-0.6)/3.4-1.2/(-7.4))-1.2-y)
-            wr [I 849; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 849)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 850
         !"test850"
         //let z0 = ((6.2/(-y)-(-8.5)-(-y)/0.8*0.5*(y+3.8))-(-0.3)+x-(-x))
@@ -9798,11 +9798,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((6.2/(-y)-(-8.5)-(-y)/0.8*0.5*(y+3.8))-(-0.3)+x-(-x))).Expr.eval (programList[prIndex])
+        let s = (((6.2/(-y)-(-8.5)-(-y)/0.8*0.5*(y+3.8))-(-0.3)+x-(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((6.2/(-q)-(-8.5)-(-q)/0.8*0.5*(q+3.8))-(-0.3)+p-(-p))
             z2 <== ((6.2/(-y)-(-8.5)-(-y)/0.8*0.5*(y+3.8))-(-0.3)+x-(-x))
-            wr [I 850; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 850)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 851
         !"test851"
         //let z0 = (x-(-1.3)+(((-3.7)+x*4.7*(-x)/(-y))*(x/6.5))/(8.6-y-(-x)))
@@ -9811,11 +9811,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x-(-1.3)+(((-3.7)+x*4.7*(-x)/(-y))*(x/6.5))/(8.6-y-(-x)))).Expr.eval (programList[prIndex])
+        let s = ((x-(-1.3)+(((-3.7)+x*4.7*(-x)/(-y))*(x/6.5))/(8.6-y-(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p-(-1.3)+(((-3.7)+p*4.7*(-p)/(-q))*(p/6.5))/(8.6-q-(-p)))
             z2 <== (x-(-1.3)+(((-3.7)+x*4.7*(-x)/(-y))*(x/6.5))/(8.6-y-(-x)))
-            wr [I 851; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 851)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 852
         !"test852"
         //let z0 = ((y-(-x)-(-5.6))*(-y)*(-3.8))
@@ -9824,11 +9824,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y-(-x)-(-5.6))*(-y)*(-3.8))).Expr.eval (programList[prIndex])
+        let s = (((y-(-x)-(-5.6))*(-y)*(-3.8))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q-(-p)-(-5.6))*(-q)*(-3.8))
             z2 <== ((y-(-x)-(-5.6))*(-y)*(-3.8))
-            wr [I 852; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 852)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 853
         !"test853"
         //let z0 = (-1.8)
@@ -9845,11 +9845,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 854; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 854)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 855
         !"test855"
         //let z0 = ((x)+(-1.1))
@@ -9858,11 +9858,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x)+(-1.1))).Expr.eval (programList[prIndex])
+        let s = (((x)+(-1.1))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p)+(-1.1))
             z2 <== ((x)+(-1.1))
-            wr [I 855; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 855)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 856
         !"test856"
         //let z0 = (-4.5)
@@ -9887,11 +9887,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.3)*7.2-(-6.1))/8.5/y+0.0/y+((-x)*5.3)-2.3-(-5.8)+2.3*1.6)+(-x)).Expr.eval (programList[prIndex])
+        let s = ((((-5.3)*7.2-(-6.1))/8.5/y+0.0/y+((-x)*5.3)-2.3-(-5.8)+2.3*1.6)+(-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.3)*7.2-(-6.1))/8.5/q+0.0/q+((-p)*5.3)-2.3-(-5.8)+2.3*1.6)+(-p)
             z2 <== (((-5.3)*7.2-(-6.1))/8.5/y+0.0/y+((-x)*5.3)-2.3-(-5.8)+2.3*1.6)+(-x)
-            wr [I 858; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 858)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 859
         !"test859"
         //let z0 = 5.0
@@ -9908,11 +9908,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-7.1)*(((-3.5)))+(-8.4)*(-5.2)/(-y)).Expr.eval (programList[prIndex])
+        let s = ((-7.1)*(((-3.5)))+(-8.4)*(-5.2)/(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-7.1)*(((-3.5)))+(-8.4)*(-5.2)/(-q)
             z2 <== (-7.1)*(((-3.5)))+(-8.4)*(-5.2)/(-y)
-            wr [I 860; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 860)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 861
         !"test861"
         //let z0 = ((1.0*((-x)+(-3.0)+(-x)*3.3)+(-y)-(8.3*(-y)-y/(-x)))/y+((-y)+(-2.6)+((-5.2))))
@@ -9921,11 +9921,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((1.0*((-x)+(-3.0)+(-x)*3.3)+(-y)-(8.3*(-y)-y/(-x)))/y+((-y)+(-2.6)+((-5.2))))).Expr.eval (programList[prIndex])
+        let s = (((1.0*((-x)+(-3.0)+(-x)*3.3)+(-y)-(8.3*(-y)-y/(-x)))/y+((-y)+(-2.6)+((-5.2))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((1.0*((-p)+(-3.0)+(-p)*3.3)+(-q)-(8.3*(-q)-q/(-p)))/q+((-q)+(-2.6)+((-5.2))))
             z2 <== ((1.0*((-x)+(-3.0)+(-x)*3.3)+(-y)-(8.3*(-y)-y/(-x)))/y+((-y)+(-2.6)+((-5.2))))
-            wr [I 861; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 861)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 862
         !"test862"
         //let z0 = (0.6+(-4.3)*7.6/y-(-4.3)+(-x)-(-4.8)-y)*1.1/x
@@ -9934,11 +9934,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.6+(-4.3)*7.6/y-(-4.3)+(-x)-(-4.8)-y)*1.1/x).Expr.eval (programList[prIndex])
+        let s = ((0.6+(-4.3)*7.6/y-(-4.3)+(-x)-(-4.8)-y)*1.1/x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.6+(-4.3)*7.6/q-(-4.3)+(-p)-(-4.8)-q)*1.1/p
             z2 <== (0.6+(-4.3)*7.6/y-(-4.3)+(-x)-(-4.8)-y)*1.1/x
-            wr [I 862; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 862)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 863
         !"test863"
         //let z0 = (x*((-0.4)/(-y)-(-x)+(-y))-((-x)+(-2.2)*4.8*y)*8.3+((-3.2))+(-x)-(x+3.8*y-(-y)+(-4.3))/(-x)/(-0.2)/((-y)*2.8*(-5.6)/(-5.8)-(-7.5))-((-3.2)))
@@ -9947,11 +9947,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x*((-0.4)/(-y)-(-x)+(-y))-((-x)+(-2.2)*4.8*y)*8.3+((-3.2))+(-x)-(x+3.8*y-(-y)+(-4.3))/(-x)/(-0.2)/((-y)*2.8*(-5.6)/(-5.8)-(-7.5))-((-3.2)))).Expr.eval (programList[prIndex])
+        let s = ((x*((-0.4)/(-y)-(-x)+(-y))-((-x)+(-2.2)*4.8*y)*8.3+((-3.2))+(-x)-(x+3.8*y-(-y)+(-4.3))/(-x)/(-0.2)/((-y)*2.8*(-5.6)/(-5.8)-(-7.5))-((-3.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p*((-0.4)/(-q)-(-p)+(-q))-((-p)+(-2.2)*4.8*q)*8.3+((-3.2))+(-p)-(p+3.8*q-(-q)+(-4.3))/(-p)/(-0.2)/((-q)*2.8*(-5.6)/(-5.8)-(-7.5))-((-3.2)))
             z2 <== (x*((-0.4)/(-y)-(-x)+(-y))-((-x)+(-2.2)*4.8*y)*8.3+((-3.2))+(-x)-(x+3.8*y-(-y)+(-4.3))/(-x)/(-0.2)/((-y)*2.8*(-5.6)/(-5.8)-(-7.5))-((-3.2)))
-            wr [I 863; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 863)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 864
         !"test864"
         //let z0 = 1.2
@@ -9968,11 +9968,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))-((-y)-(-y)+y-(2.6))*(-x)/(6.7*(-y)/y+3.2/(-x)+x+(x+(-x)*(-x)))).Expr.eval (programList[prIndex])
+        let s = (((-y))-((-y)-(-y)+y-(2.6))*(-x)/(6.7*(-y)/y+3.2/(-x)+x+(x+(-x)*(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))-((-q)-(-q)+q-(2.6))*(-p)/(6.7*(-q)/q+3.2/(-p)+p+(p+(-p)*(-p)))
             z2 <== ((-y))-((-y)-(-y)+y-(2.6))*(-x)/(6.7*(-y)/y+3.2/(-x)+x+(x+(-x)*(-x)))
-            wr [I 865; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 865)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 866
         !"test866"
         //let z0 = (-5.5)
@@ -9989,11 +9989,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)+(-y)-(-y)))).Expr.eval (programList[prIndex])
+        let s = ((((-y)+(-y)-(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)+(-q)-(-q)))
             z2 <== (((-y)+(-y)-(-y)))
-            wr [I 867; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 867)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 868
         !"test868"
         //let z0 = (-5.4)
@@ -10010,11 +10010,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 869; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 869)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 870
         !"test870"
         //let z0 = (1.8-(-3.6)*(-y)-(-x)+(x*(-y)-5.2)/(-y))
@@ -10023,11 +10023,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((1.8-(-3.6)*(-y)-(-x)+(x*(-y)-5.2)/(-y))).Expr.eval (programList[prIndex])
+        let s = ((1.8-(-3.6)*(-y)-(-x)+(x*(-y)-5.2)/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (1.8-(-3.6)*(-q)-(-p)+(p*(-q)-5.2)/(-q))
             z2 <== (1.8-(-3.6)*(-y)-(-x)+(x*(-y)-5.2)/(-y))
-            wr [I 870; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 870)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 871
         !"test871"
         //let z0 = (-4.0)+(-8.3)
@@ -10044,11 +10044,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 872; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 872)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 873
         !"test873"
         //let z0 = ((-1.8)-(3.8/(-y)-(6.3-(-2.6)/(-y)/(-1.6))*x-y-(-y)))
@@ -10057,11 +10057,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-1.8)-(3.8/(-y)-(6.3-(-2.6)/(-y)/(-1.6))*x-y-(-y)))).Expr.eval (programList[prIndex])
+        let s = (((-1.8)-(3.8/(-y)-(6.3-(-2.6)/(-y)/(-1.6))*x-y-(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-1.8)-(3.8/(-q)-(6.3-(-2.6)/(-q)/(-1.6))*p-q-(-q)))
             z2 <== ((-1.8)-(3.8/(-y)-(6.3-(-2.6)/(-y)/(-1.6))*x-y-(-y)))
-            wr [I 873; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 873)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 874
         !"test874"
         //let z0 = ((((-8.8)+(-5.3)-(-8.3)*(-4.2)/(-y))+(-x))*(0.5+x*(-5.7)-x-7.5*(5.7+x+(-4.8)-(-1.7))/(3.5/y)))
@@ -10070,11 +10070,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-8.8)+(-5.3)-(-8.3)*(-4.2)/(-y))+(-x))*(0.5+x*(-5.7)-x-7.5*(5.7+x+(-4.8)-(-1.7))/(3.5/y)))).Expr.eval (programList[prIndex])
+        let s = (((((-8.8)+(-5.3)-(-8.3)*(-4.2)/(-y))+(-x))*(0.5+x*(-5.7)-x-7.5*(5.7+x+(-4.8)-(-1.7))/(3.5/y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-8.8)+(-5.3)-(-8.3)*(-4.2)/(-q))+(-p))*(0.5+p*(-5.7)-p-7.5*(5.7+p+(-4.8)-(-1.7))/(3.5/q)))
             z2 <== ((((-8.8)+(-5.3)-(-8.3)*(-4.2)/(-y))+(-x))*(0.5+x*(-5.7)-x-7.5*(5.7+x+(-4.8)-(-1.7))/(3.5/y)))
-            wr [I 874; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 874)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 875
         !"test875"
         //let z0 = (x/5.2/x+6.6)
@@ -10083,11 +10083,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/5.2/x+6.6)).Expr.eval (programList[prIndex])
+        let s = ((x/5.2/x+6.6)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/5.2/p+6.6)
             z2 <== (x/5.2/x+6.6)
-            wr [I 875; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 875)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 876
         !"test876"
         //let z0 = (-4.7)
@@ -10120,11 +10120,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 879; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 879)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 880
         !"test880"
         //let z0 = 8.7
@@ -10141,11 +10141,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-y))).Expr.eval (programList[prIndex])
+        let s = (((-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-q))
             z2 <== ((-y))
-            wr [I 881; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 881)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 882
         !"test882"
         //let z0 = y+(-y)
@@ -10154,11 +10154,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y+(-y)).Expr.eval (programList[prIndex])
+        let s = (y+(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q+(-q)
             z2 <== y+(-y)
-            wr [I 882; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 882)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 883
         !"test883"
         //let z0 = (((-2.2))+(y-5.5-(-5.4)*3.3+(-y)))
@@ -10167,11 +10167,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-2.2))+(y-5.5-(-5.4)*3.3+(-y)))).Expr.eval (programList[prIndex])
+        let s = ((((-2.2))+(y-5.5-(-5.4)*3.3+(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-2.2))+(q-5.5-(-5.4)*3.3+(-q)))
             z2 <== (((-2.2))+(y-5.5-(-5.4)*3.3+(-y)))
-            wr [I 883; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 883)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 884
         !"test884"
         //let z0 = (((-4.4)+(-0.0)*(0.7+(-5.3)+(-4.1)/x+0.6)))
@@ -10180,11 +10180,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-4.4)+(-0.0)*(0.7+(-5.3)+(-4.1)/x+0.6)))).Expr.eval (programList[prIndex])
+        let s = ((((-4.4)+(-0.0)*(0.7+(-5.3)+(-4.1)/x+0.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-4.4)+(-0.0)*(0.7+(-5.3)+(-4.1)/p+0.6)))
             z2 <== (((-4.4)+(-0.0)*(0.7+(-5.3)+(-4.1)/x+0.6)))
-            wr [I 884; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 884)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 885
         !"test885"
         //let z0 = (((-1.6))-(-x)*(4.6-(-y)*1.5/(-1.7)+(-x))*(((-0.5)+(-6.4)*8.0+(-7.6)*y)*((-y))+(y+y+(-x)-(-y)/(-x))))
@@ -10193,11 +10193,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-1.6))-(-x)*(4.6-(-y)*1.5/(-1.7)+(-x))*(((-0.5)+(-6.4)*8.0+(-7.6)*y)*((-y))+(y+y+(-x)-(-y)/(-x))))).Expr.eval (programList[prIndex])
+        let s = ((((-1.6))-(-x)*(4.6-(-y)*1.5/(-1.7)+(-x))*(((-0.5)+(-6.4)*8.0+(-7.6)*y)*((-y))+(y+y+(-x)-(-y)/(-x))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-1.6))-(-p)*(4.6-(-q)*1.5/(-1.7)+(-p))*(((-0.5)+(-6.4)*8.0+(-7.6)*q)*((-q))+(q+q+(-p)-(-q)/(-p))))
             z2 <== (((-1.6))-(-x)*(4.6-(-y)*1.5/(-1.7)+(-x))*(((-0.5)+(-6.4)*8.0+(-7.6)*y)*((-y))+(y+y+(-x)-(-y)/(-x))))
-            wr [I 885; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 885)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 886
         !"test886"
         //let z0 = (1.3-((-1.3))-x+y-(-6.0)*(-x))*y/(((-x)+x/8.5/(-x)))*x-2.0
@@ -10206,11 +10206,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((1.3-((-1.3))-x+y-(-6.0)*(-x))*y/(((-x)+x/8.5/(-x)))*x-2.0).Expr.eval (programList[prIndex])
+        let s = ((1.3-((-1.3))-x+y-(-6.0)*(-x))*y/(((-x)+x/8.5/(-x)))*x-2.0).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (1.3-((-1.3))-p+q-(-6.0)*(-p))*q/(((-p)+p/8.5/(-p)))*p-2.0
             z2 <== (1.3-((-1.3))-x+y-(-6.0)*(-x))*y/(((-x)+x/8.5/(-x)))*x-2.0
-            wr [I 886; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 886)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 887
         !"test887"
         //let z0 = (((-y)/(-y))*(((-x)*(-x)-(-x)-(-x)+(-7.3))-x-(-y)+y-x*(-x))/(y/(x+0.0/3.3)+(4.1+y/(-6.1)-(-y)-(-y))*(-6.4))*(((-x))-y+5.7-(-2.8)/(-y))-6.2*(y+6.6)-(-y)-((-0.1)*y))
@@ -10219,11 +10219,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)/(-y))*(((-x)*(-x)-(-x)-(-x)+(-7.3))-x-(-y)+y-x*(-x))/(y/(x+0.0/3.3)+(4.1+y/(-6.1)-(-y)-(-y))*(-6.4))*(((-x))-y+5.7-(-2.8)/(-y))-6.2*(y+6.6)-(-y)-((-0.1)*y))).Expr.eval (programList[prIndex])
+        let s = ((((-y)/(-y))*(((-x)*(-x)-(-x)-(-x)+(-7.3))-x-(-y)+y-x*(-x))/(y/(x+0.0/3.3)+(4.1+y/(-6.1)-(-y)-(-y))*(-6.4))*(((-x))-y+5.7-(-2.8)/(-y))-6.2*(y+6.6)-(-y)-((-0.1)*y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)/(-q))*(((-p)*(-p)-(-p)-(-p)+(-7.3))-p-(-q)+q-p*(-p))/(q/(p+0.0/3.3)+(4.1+q/(-6.1)-(-q)-(-q))*(-6.4))*(((-p))-q+5.7-(-2.8)/(-q))-6.2*(q+6.6)-(-q)-((-0.1)*q))
             z2 <== (((-y)/(-y))*(((-x)*(-x)-(-x)-(-x)+(-7.3))-x-(-y)+y-x*(-x))/(y/(x+0.0/3.3)+(4.1+y/(-6.1)-(-y)-(-y))*(-6.4))*(((-x))-y+5.7-(-2.8)/(-y))-6.2*(y+6.6)-(-y)-((-0.1)*y))
-            wr [I 887; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 887)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 888
         !"test888"
         //let z0 = 2.3
@@ -10240,11 +10240,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 889; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 889)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 890
         !"test890"
         //let z0 = (-3.5)
@@ -10261,11 +10261,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)+y/(-5.1)/(-8.5)-(-y)*y-((-y)*0.1))/(-y))).Expr.eval (programList[prIndex])
+        let s = ((((-x)+y/(-5.1)/(-8.5)-(-y)*y-((-y)*0.1))/(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)+q/(-5.1)/(-8.5)-(-q)*q-((-q)*0.1))/(-q))
             z2 <== (((-x)+y/(-5.1)/(-8.5)-(-y)*y-((-y)*0.1))/(-y))
-            wr [I 891; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 891)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 892
         !"test892"
         //let z0 = (((-6.4)-x+(-x)*(1.1*(-y)-2.6/3.2/1.5))+(-y)/3.1)
@@ -10274,11 +10274,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-6.4)-x+(-x)*(1.1*(-y)-2.6/3.2/1.5))+(-y)/3.1)).Expr.eval (programList[prIndex])
+        let s = ((((-6.4)-x+(-x)*(1.1*(-y)-2.6/3.2/1.5))+(-y)/3.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-6.4)-p+(-p)*(1.1*(-q)-2.6/3.2/1.5))+(-q)/3.1)
             z2 <== (((-6.4)-x+(-x)*(1.1*(-y)-2.6/3.2/1.5))+(-y)/3.1)
-            wr [I 892; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 892)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 893
         !"test893"
         //let z0 = (y+2.1+x)
@@ -10287,11 +10287,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+2.1+x)).Expr.eval (programList[prIndex])
+        let s = ((y+2.1+x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+2.1+p)
             z2 <== (y+2.1+x)
-            wr [I 893; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 893)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 894
         !"test894"
         //let z0 = ((-2.7)/0.0-0.1-y)+y+(-2.4)*1.5+(-y)-(-y)
@@ -10300,11 +10300,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-2.7)/0.0-0.1-y)+y+(-2.4)*1.5+(-y)-(-y)).Expr.eval (programList[prIndex])
+        let s = (((-2.7)/0.0-0.1-y)+y+(-2.4)*1.5+(-y)-(-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-2.7)/0.0-0.1-q)+q+(-2.4)*1.5+(-q)-(-q)
             z2 <== ((-2.7)/0.0-0.1-y)+y+(-2.4)*1.5+(-y)-(-y)
-            wr [I 894; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 894)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 895
         !"test895"
         //let z0 = (-6.1)+(-y)+(-0.5)
@@ -10313,11 +10313,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-6.1)+(-y)+(-0.5)).Expr.eval (programList[prIndex])
+        let s = ((-6.1)+(-y)+(-0.5)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-6.1)+(-q)+(-0.5)
             z2 <== (-6.1)+(-y)+(-0.5)
-            wr [I 895; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 895)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 896
         !"test896"
         //let z0 = ((((-x)/(-y)/(-1.8))/x+2.5+(-1.4)+(-x)*y/((-4.4)*(-y)+(-y)-(-y)*y)/(-3.6)))
@@ -10326,11 +10326,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-x)/(-y)/(-1.8))/x+2.5+(-1.4)+(-x)*y/((-4.4)*(-y)+(-y)-(-y)*y)/(-3.6)))).Expr.eval (programList[prIndex])
+        let s = (((((-x)/(-y)/(-1.8))/x+2.5+(-1.4)+(-x)*y/((-4.4)*(-y)+(-y)-(-y)*y)/(-3.6)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-p)/(-q)/(-1.8))/p+2.5+(-1.4)+(-p)*q/((-4.4)*(-q)+(-q)-(-q)*q)/(-3.6)))
             z2 <== ((((-x)/(-y)/(-1.8))/x+2.5+(-1.4)+(-x)*y/((-4.4)*(-y)+(-y)-(-y)*y)/(-3.6)))
-            wr [I 896; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 896)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 897
         !"test897"
         //let z0 = (-7.2)
@@ -10363,11 +10363,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)-y-(8.4+0.6-(-x)))*(((-0.7)-4.0)*(-4.2))/(0.0-(-6.6)/y/y)/(-7.8)/((-1.7)*x/(-6.7)*8.4/(-0.8)-4.0-(-0.5)))).Expr.eval (programList[prIndex])
+        let s = ((((-x)-y-(8.4+0.6-(-x)))*(((-0.7)-4.0)*(-4.2))/(0.0-(-6.6)/y/y)/(-7.8)/((-1.7)*x/(-6.7)*8.4/(-0.8)-4.0-(-0.5)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)-q-(8.4+0.6-(-p)))*(((-0.7)-4.0)*(-4.2))/(0.0-(-6.6)/q/q)/(-7.8)/((-1.7)*p/(-6.7)*8.4/(-0.8)-4.0-(-0.5)))
             z2 <== (((-x)-y-(8.4+0.6-(-x)))*(((-0.7)-4.0)*(-4.2))/(0.0-(-6.6)/y/y)/(-7.8)/((-1.7)*x/(-6.7)*8.4/(-0.8)-4.0-(-0.5)))
-            wr [I 900; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 900)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 901
         !"test901"
         //let z0 = x-(-2.0)
@@ -10376,11 +10376,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x-(-2.0)).Expr.eval (programList[prIndex])
+        let s = (x-(-2.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p-(-2.0)
             z2 <== x-(-2.0)
-            wr [I 901; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 901)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 902
         !"test902"
         //let z0 = x
@@ -10389,11 +10389,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 902; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 902)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 903
         !"test903"
         //let z0 = (-6.6)
@@ -10410,11 +10410,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 904; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 904)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 905
         !"test905"
         //let z0 = y
@@ -10423,11 +10423,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 905; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 905)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 906
         !"test906"
         //let z0 = (-8.4)
@@ -10444,11 +10444,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (4.1*(-y)/(-x)/(x+(-2.3)*x*7.7)/(5.4+(-y)-1.1+(-6.5)/y)/x+x+3.2/(-1.0)).Expr.eval (programList[prIndex])
+        let s = (4.1*(-y)/(-x)/(x+(-2.3)*x*7.7)/(5.4+(-y)-1.1+(-6.5)/y)/x+x+3.2/(-1.0)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 4.1*(-q)/(-p)/(p+(-2.3)*p*7.7)/(5.4+(-q)-1.1+(-6.5)/q)/p+p+3.2/(-1.0)
             z2 <== 4.1*(-y)/(-x)/(x+(-2.3)*x*7.7)/(5.4+(-y)-1.1+(-6.5)/y)/x+x+3.2/(-1.0)
-            wr [I 907; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 907)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 908
         !"test908"
         //let z0 = (-x)
@@ -10457,11 +10457,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 908; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 908)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 909
         !"test909"
         //let z0 = (x-(((-y)/0.1*x)*(-6.2)))
@@ -10470,11 +10470,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x-(((-y)/0.1*x)*(-6.2)))).Expr.eval (programList[prIndex])
+        let s = ((x-(((-y)/0.1*x)*(-6.2)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p-(((-q)/0.1*p)*(-6.2)))
             z2 <== (x-(((-y)/0.1*x)*(-6.2)))
-            wr [I 909; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 909)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 910
         !"test910"
         //let z0 = (-x)+x*(-3.5)/y/(-3.1)+y/y-(((-x)))/(-y)-((x)/(7.7/8.7/4.4))
@@ -10483,11 +10483,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)+x*(-3.5)/y/(-3.1)+y/y-(((-x)))/(-y)-((x)/(7.7/8.7/4.4))).Expr.eval (programList[prIndex])
+        let s = ((-x)+x*(-3.5)/y/(-3.1)+y/y-(((-x)))/(-y)-((x)/(7.7/8.7/4.4))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)+p*(-3.5)/q/(-3.1)+q/q-(((-p)))/(-q)-((p)/(7.7/8.7/4.4))
             z2 <== (-x)+x*(-3.5)/y/(-3.1)+y/y-(((-x)))/(-y)-((x)/(7.7/8.7/4.4))
-            wr [I 910; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 910)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 911
         !"test911"
         //let z0 = y
@@ -10496,11 +10496,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 911; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 911)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 912
         !"test912"
         //let z0 = (-4.1)
@@ -10517,11 +10517,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.6)+(-y)*(-y)+(-0.2))).Expr.eval (programList[prIndex])
+        let s = (((-0.6)+(-y)*(-y)+(-0.2))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.6)+(-q)*(-q)+(-0.2))
             z2 <== ((-0.6)+(-y)*(-y)+(-0.2))
-            wr [I 913; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 913)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 914
         !"test914"
         //let z0 = ((-4.5)-1.3+(y-((-1.4)/x/x-(-y)*(-x))*(-5.8)-(1.5*1.8-(-x)-4.6))+(x-(-x)+x*(-x)))
@@ -10530,11 +10530,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.5)-1.3+(y-((-1.4)/x/x-(-y)*(-x))*(-5.8)-(1.5*1.8-(-x)-4.6))+(x-(-x)+x*(-x)))).Expr.eval (programList[prIndex])
+        let s = (((-4.5)-1.3+(y-((-1.4)/x/x-(-y)*(-x))*(-5.8)-(1.5*1.8-(-x)-4.6))+(x-(-x)+x*(-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.5)-1.3+(q-((-1.4)/p/p-(-q)*(-p))*(-5.8)-(1.5*1.8-(-p)-4.6))+(p-(-p)+p*(-p)))
             z2 <== ((-4.5)-1.3+(y-((-1.4)/x/x-(-y)*(-x))*(-5.8)-(1.5*1.8-(-x)-4.6))+(x-(-x)+x*(-x)))
-            wr [I 914; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 914)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 915
         !"test915"
         //let z0 = (x/(y+7.3-(-y))/1.7+x/8.4/(x+(-6.6)-((-4.5)-y-y*(-8.2))))
@@ -10543,11 +10543,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x/(y+7.3-(-y))/1.7+x/8.4/(x+(-6.6)-((-4.5)-y-y*(-8.2))))).Expr.eval (programList[prIndex])
+        let s = ((x/(y+7.3-(-y))/1.7+x/8.4/(x+(-6.6)-((-4.5)-y-y*(-8.2))))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p/(q+7.3-(-q))/1.7+p/8.4/(p+(-6.6)-((-4.5)-q-q*(-8.2))))
             z2 <== (x/(y+7.3-(-y))/1.7+x/8.4/(x+(-6.6)-((-4.5)-y-y*(-8.2))))
-            wr [I 915; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 915)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 916
         !"test916"
         //let z0 = ((3.1/(-x)*(-x)/(-2.8)/(-1.5))/x)-(-0.3)*(((-3.3)-7.2*(-3.5))-y-(8.0/(-0.5)/y))
@@ -10556,11 +10556,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((3.1/(-x)*(-x)/(-2.8)/(-1.5))/x)-(-0.3)*(((-3.3)-7.2*(-3.5))-y-(8.0/(-0.5)/y))).Expr.eval (programList[prIndex])
+        let s = (((3.1/(-x)*(-x)/(-2.8)/(-1.5))/x)-(-0.3)*(((-3.3)-7.2*(-3.5))-y-(8.0/(-0.5)/y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((3.1/(-p)*(-p)/(-2.8)/(-1.5))/p)-(-0.3)*(((-3.3)-7.2*(-3.5))-q-(8.0/(-0.5)/q))
             z2 <== ((3.1/(-x)*(-x)/(-2.8)/(-1.5))/x)-(-0.3)*(((-3.3)-7.2*(-3.5))-y-(8.0/(-0.5)/y))
-            wr [I 916; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 916)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 917
         !"test917"
         //let z0 = ((1.5-(-2.0)/(-y))*(-y)-((-x)))
@@ -10569,11 +10569,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((1.5-(-2.0)/(-y))*(-y)-((-x)))).Expr.eval (programList[prIndex])
+        let s = (((1.5-(-2.0)/(-y))*(-y)-((-x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((1.5-(-2.0)/(-q))*(-q)-((-p)))
             z2 <== ((1.5-(-2.0)/(-y))*(-y)-((-x)))
-            wr [I 917; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 917)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 918
         !"test918"
         //let z0 = (((-y)-y/y+x/(-3.2)*(-x)*x))
@@ -10582,11 +10582,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)-y/y+x/(-3.2)*(-x)*x))).Expr.eval (programList[prIndex])
+        let s = ((((-y)-y/y+x/(-3.2)*(-x)*x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)-q/q+p/(-3.2)*(-p)*p))
             z2 <== (((-y)-y/y+x/(-3.2)*(-x)*x))
-            wr [I 918; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 918)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 919
         !"test919"
         //let z0 = 2.8
@@ -10603,11 +10603,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 920; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 920)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 921
         !"test921"
         //let z0 = (-y)
@@ -10616,11 +10616,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 921; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 921)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 922
         !"test922"
         //let z0 = (-x)
@@ -10629,11 +10629,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 922; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 922)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 923
         !"test923"
         //let z0 = x
@@ -10642,11 +10642,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 923; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 923)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 924
         !"test924"
         //let z0 = (-1.0)
@@ -10671,11 +10671,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((x+(-8.3)-(-0.3)/7.3)+x*(7.7)).Expr.eval (programList[prIndex])
+        let s = ((x+(-8.3)-(-0.3)/7.3)+x*(7.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (p+(-8.3)-(-0.3)/7.3)+p*(7.7)
             z2 <== (x+(-8.3)-(-0.3)/7.3)+x*(7.7)
-            wr [I 926; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 926)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 927
         !"test927"
         //let z0 = (-x)
@@ -10684,11 +10684,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 927; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 927)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 928
         !"test928"
         //let z0 = (-0.7)
@@ -10705,11 +10705,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 929; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 929)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 930
         !"test930"
         //let z0 = (y+(x/(y-(-7.0))-1.0-(y*4.3))-7.1)
@@ -10718,11 +10718,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+(x/(y-(-7.0))-1.0-(y*4.3))-7.1)).Expr.eval (programList[prIndex])
+        let s = ((y+(x/(y-(-7.0))-1.0-(y*4.3))-7.1)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+(p/(q-(-7.0))-1.0-(q*4.3))-7.1)
             z2 <== (y+(x/(y-(-7.0))-1.0-(y*4.3))-7.1)
-            wr [I 930; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 930)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 931
         !"test931"
         //let z0 = y
@@ -10731,11 +10731,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 931; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 931)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 932
         !"test932"
         //let z0 = ((-2.7))
@@ -10760,11 +10760,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-3.4)+x-4.8+x)-(-x)/(3.3/3.5-(-y)/1.3)+(-y))-((-x)/((-5.7)-(-1.3)*x-(-2.3)*6.8)*(5.4+x-(-5.5)+(-y)))+(-x))).Expr.eval (programList[prIndex])
+        let s = (((((-3.4)+x-4.8+x)-(-x)/(3.3/3.5-(-y)/1.3)+(-y))-((-x)/((-5.7)-(-1.3)*x-(-2.3)*6.8)*(5.4+x-(-5.5)+(-y)))+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-3.4)+p-4.8+p)-(-p)/(3.3/3.5-(-q)/1.3)+(-q))-((-p)/((-5.7)-(-1.3)*p-(-2.3)*6.8)*(5.4+p-(-5.5)+(-q)))+(-p))
             z2 <== ((((-3.4)+x-4.8+x)-(-x)/(3.3/3.5-(-y)/1.3)+(-y))-((-x)/((-5.7)-(-1.3)*x-(-2.3)*6.8)*(5.4+x-(-5.5)+(-y)))+(-x))
-            wr [I 934; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 934)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 935
         !"test935"
         //let z0 = (((-y)+(-7.1)*(-1.6))/8.8)
@@ -10773,11 +10773,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)+(-7.1)*(-1.6))/8.8)).Expr.eval (programList[prIndex])
+        let s = ((((-y)+(-7.1)*(-1.6))/8.8)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)+(-7.1)*(-1.6))/8.8)
             z2 <== (((-y)+(-7.1)*(-1.6))/8.8)
-            wr [I 935; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 935)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 936
         !"test936"
         //let z0 = (-7.7)
@@ -10810,11 +10810,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y)).Expr.eval (programList[prIndex])
+        let s = ((y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q)
             z2 <== (y)
-            wr [I 939; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 939)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 940
         !"test940"
         //let z0 = (-1.8)
@@ -10839,11 +10839,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-0.7)+(-1.6)-2.7+(-y)-x)).Expr.eval (programList[prIndex])
+        let s = (((-0.7)+(-1.6)-2.7+(-y)-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-0.7)+(-1.6)-2.7+(-q)-p)
             z2 <== ((-0.7)+(-1.6)-2.7+(-y)-x)
-            wr [I 942; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 942)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 943
         !"test943"
         //let z0 = (y+(-7.8)*((y/y/(-y)+y+3.1)-x*((-x))*(x-x))-(-x)-(-x))
@@ -10852,11 +10852,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y+(-7.8)*((y/y/(-y)+y+3.1)-x*((-x))*(x-x))-(-x)-(-x))).Expr.eval (programList[prIndex])
+        let s = ((y+(-7.8)*((y/y/(-y)+y+3.1)-x*((-x))*(x-x))-(-x)-(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q+(-7.8)*((q/q/(-q)+q+3.1)-p*((-p))*(p-p))-(-p)-(-p))
             z2 <== (y+(-7.8)*((y/y/(-y)+y+3.1)-x*((-x))*(x-x))-(-x)-(-x))
-            wr [I 943; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 943)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 944
         !"test944"
         //let z0 = (((-y)/(-x)+((-y)))/(-6.3)-((y+2.2-4.8+6.4*(-2.2))*y))
@@ -10865,11 +10865,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)/(-x)+((-y)))/(-6.3)-((y+2.2-4.8+6.4*(-2.2))*y))).Expr.eval (programList[prIndex])
+        let s = ((((-y)/(-x)+((-y)))/(-6.3)-((y+2.2-4.8+6.4*(-2.2))*y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)/(-p)+((-q)))/(-6.3)-((q+2.2-4.8+6.4*(-2.2))*q))
             z2 <== (((-y)/(-x)+((-y)))/(-6.3)-((y+2.2-4.8+6.4*(-2.2))*y))
-            wr [I 944; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 944)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 945
         !"test945"
         //let z0 = 4.8-((2.2-(-y)-3.4/4.4+y)+y-y/((-2.3)-(-y)/8.1-(-2.2)))+((-y)+x)
@@ -10878,11 +10878,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (4.8-((2.2-(-y)-3.4/4.4+y)+y-y/((-2.3)-(-y)/8.1-(-2.2)))+((-y)+x)).Expr.eval (programList[prIndex])
+        let s = (4.8-((2.2-(-y)-3.4/4.4+y)+y-y/((-2.3)-(-y)/8.1-(-2.2)))+((-y)+x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 4.8-((2.2-(-q)-3.4/4.4+q)+q-q/((-2.3)-(-q)/8.1-(-2.2)))+((-q)+p)
             z2 <== 4.8-((2.2-(-y)-3.4/4.4+y)+y-y/((-2.3)-(-y)/8.1-(-2.2)))+((-y)+x)
-            wr [I 945; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 945)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 946
         !"test946"
         //let z0 = y
@@ -10891,11 +10891,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 946; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 946)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 947
         !"test947"
         //let z0 = ((-4.8)/((y-(-y)/(-x)*(-1.7)/(-x))-(-x)+6.5)-1.1/(((-x)*(-y)/1.7*(-2.2))*4.2+1.1/y+y+y-x*3.5))
@@ -10904,11 +10904,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-4.8)/((y-(-y)/(-x)*(-1.7)/(-x))-(-x)+6.5)-1.1/(((-x)*(-y)/1.7*(-2.2))*4.2+1.1/y+y+y-x*3.5))).Expr.eval (programList[prIndex])
+        let s = (((-4.8)/((y-(-y)/(-x)*(-1.7)/(-x))-(-x)+6.5)-1.1/(((-x)*(-y)/1.7*(-2.2))*4.2+1.1/y+y+y-x*3.5))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-4.8)/((q-(-q)/(-p)*(-1.7)/(-p))-(-p)+6.5)-1.1/(((-p)*(-q)/1.7*(-2.2))*4.2+1.1/q+q+q-p*3.5))
             z2 <== ((-4.8)/((y-(-y)/(-x)*(-1.7)/(-x))-(-x)+6.5)-1.1/(((-x)*(-y)/1.7*(-2.2))*4.2+1.1/y+y+y-x*3.5))
-            wr [I 947; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 947)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 948
         !"test948"
         //let z0 = (-7.1)
@@ -10925,11 +10925,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 949; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 949)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 950
         !"test950"
         //let z0 = (-7.1)
@@ -10946,11 +10946,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 951; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 951)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 952
         !"test952"
         //let z0 = 2.7
@@ -10975,11 +10975,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 954; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 954)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 955
         !"test955"
         //let z0 = (-1.1)
@@ -10996,11 +10996,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)/3.6).Expr.eval (programList[prIndex])
+        let s = ((-x)/3.6).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)/3.6
             z2 <== (-x)/3.6
-            wr [I 956; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 956)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 957
         !"test957"
         //let z0 = (0.1+(-x))
@@ -11009,11 +11009,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((0.1+(-x))).Expr.eval (programList[prIndex])
+        let s = ((0.1+(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (0.1+(-p))
             z2 <== (0.1+(-x))
-            wr [I 957; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 957)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 958
         !"test958"
         //let z0 = x
@@ -11022,11 +11022,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 958; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 958)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 959
         !"test959"
         //let z0 = ((((-y)-x)+((-y)/(-0.2)/(-4.7))-(-x)+y))
@@ -11035,11 +11035,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((((-y)-x)+((-y)/(-0.2)/(-4.7))-(-x)+y))).Expr.eval (programList[prIndex])
+        let s = (((((-y)-x)+((-y)/(-0.2)/(-4.7))-(-x)+y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((((-q)-p)+((-q)/(-0.2)/(-4.7))-(-p)+q))
             z2 <== ((((-y)-x)+((-y)/(-0.2)/(-4.7))-(-x)+y))
-            wr [I 959; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 959)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 960
         !"test960"
         //let z0 = (-y)
@@ -11048,11 +11048,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 960; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 960)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 961
         !"test961"
         //let z0 = 7.2
@@ -11077,11 +11077,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((y-y)).Expr.eval (programList[prIndex])
+        let s = ((y-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (q-q)
             z2 <== (y-y)
-            wr [I 963; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 963)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 964
         !"test964"
         //let z0 = ((0.1+(-8.2)/(-4.6)+y+8.2))/(y*(-4.5))-(-2.4)/(y)-(x)+x
@@ -11090,11 +11090,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((0.1+(-8.2)/(-4.6)+y+8.2))/(y*(-4.5))-(-2.4)/(y)-(x)+x).Expr.eval (programList[prIndex])
+        let s = (((0.1+(-8.2)/(-4.6)+y+8.2))/(y*(-4.5))-(-2.4)/(y)-(x)+x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((0.1+(-8.2)/(-4.6)+q+8.2))/(q*(-4.5))-(-2.4)/(q)-(p)+p
             z2 <== ((0.1+(-8.2)/(-4.6)+y+8.2))/(y*(-4.5))-(-2.4)/(y)-(x)+x
-            wr [I 964; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 964)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 965
         !"test965"
         //let z0 = (-4.1)
@@ -11111,11 +11111,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-x)/(4.8/(-x))+x/(-x))*(-5.2)-(((-y)-(-5.3))*3.7-x*(y*y*y)*x))).Expr.eval (programList[prIndex])
+        let s = ((((-x)/(4.8/(-x))+x/(-x))*(-5.2)-(((-y)-(-5.3))*3.7-x*(y*y*y)*x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-p)/(4.8/(-p))+p/(-p))*(-5.2)-(((-q)-(-5.3))*3.7-p*(q*q*q)*p))
             z2 <== (((-x)/(4.8/(-x))+x/(-x))*(-5.2)-(((-y)-(-5.3))*3.7-x*(y*y*y)*x))
-            wr [I 966; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 966)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 967
         !"test967"
         //let z0 = (-2.0)
@@ -11132,11 +11132,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-5.4)-x+((y*y*(-x)+(-5.8))*((-x)+(-6.3)-6.1))/((-5.1)/(-0.5)+4.1/(-x))/((-y)*1.5/((-2.6)/2.6*y))).Expr.eval (programList[prIndex])
+        let s = ((-5.4)-x+((y*y*(-x)+(-5.8))*((-x)+(-6.3)-6.1))/((-5.1)/(-0.5)+4.1/(-x))/((-y)*1.5/((-2.6)/2.6*y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-5.4)-p+((q*q*(-p)+(-5.8))*((-p)+(-6.3)-6.1))/((-5.1)/(-0.5)+4.1/(-p))/((-q)*1.5/((-2.6)/2.6*q))
             z2 <== (-5.4)-x+((y*y*(-x)+(-5.8))*((-x)+(-6.3)-6.1))/((-5.1)/(-0.5)+4.1/(-x))/((-y)*1.5/((-2.6)/2.6*y))
-            wr [I 968; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 968)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 969
         !"test969"
         //let z0 = (5.3-(-2.8)/(-4.4)/((-2.8)-(3.4*x)*(6.4))+2.3)
@@ -11145,11 +11145,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((5.3-(-2.8)/(-4.4)/((-2.8)-(3.4*x)*(6.4))+2.3)).Expr.eval (programList[prIndex])
+        let s = ((5.3-(-2.8)/(-4.4)/((-2.8)-(3.4*x)*(6.4))+2.3)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (5.3-(-2.8)/(-4.4)/((-2.8)-(3.4*p)*(6.4))+2.3)
             z2 <== (5.3-(-2.8)/(-4.4)/((-2.8)-(3.4*x)*(6.4))+2.3)
-            wr [I 969; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 969)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 970
         !"test970"
         //let z0 = ((-8.2)/(x/8.2-(-x)-(-x)+(-y)*y/y/(-x))*((x)/(y*(-y)/y-(-5.1))+8.7/((-y)-x)/7.8)-(((-y)/8.4*y)-(-0.8)*((-x)-(-5.4)-8.0-(-8.7)))*(-2.6))
@@ -11158,11 +11158,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-8.2)/(x/8.2-(-x)-(-x)+(-y)*y/y/(-x))*((x)/(y*(-y)/y-(-5.1))+8.7/((-y)-x)/7.8)-(((-y)/8.4*y)-(-0.8)*((-x)-(-5.4)-8.0-(-8.7)))*(-2.6))).Expr.eval (programList[prIndex])
+        let s = (((-8.2)/(x/8.2-(-x)-(-x)+(-y)*y/y/(-x))*((x)/(y*(-y)/y-(-5.1))+8.7/((-y)-x)/7.8)-(((-y)/8.4*y)-(-0.8)*((-x)-(-5.4)-8.0-(-8.7)))*(-2.6))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-8.2)/(p/8.2-(-p)-(-p)+(-q)*q/q/(-p))*((p)/(q*(-q)/q-(-5.1))+8.7/((-q)-p)/7.8)-(((-q)/8.4*q)-(-0.8)*((-p)-(-5.4)-8.0-(-8.7)))*(-2.6))
             z2 <== ((-8.2)/(x/8.2-(-x)-(-x)+(-y)*y/y/(-x))*((x)/(y*(-y)/y-(-5.1))+8.7/((-y)-x)/7.8)-(((-y)/8.4*y)-(-0.8)*((-x)-(-5.4)-8.0-(-8.7)))*(-2.6))
-            wr [I 970; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 970)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 971
         !"test971"
         //let z0 = (((-y)+(1.8*0.5))-(-y)*4.6-y/(x+(1.2-(-x)-(-2.6)-(-y))+(1.5)*(-y)))
@@ -11171,11 +11171,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-y)+(1.8*0.5))-(-y)*4.6-y/(x+(1.2-(-x)-(-2.6)-(-y))+(1.5)*(-y)))).Expr.eval (programList[prIndex])
+        let s = ((((-y)+(1.8*0.5))-(-y)*4.6-y/(x+(1.2-(-x)-(-2.6)-(-y))+(1.5)*(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-q)+(1.8*0.5))-(-q)*4.6-q/(p+(1.2-(-p)-(-2.6)-(-q))+(1.5)*(-q)))
             z2 <== (((-y)+(1.8*0.5))-(-y)*4.6-y/(x+(1.2-(-x)-(-2.6)-(-y))+(1.5)*(-y)))
-            wr [I 971; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 971)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 972
         !"test972"
         //let z0 = x
@@ -11184,11 +11184,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 972; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 972)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 973
         !"test973"
         //let z0 = x
@@ -11197,11 +11197,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 973; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 973)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 974
         !"test974"
         //let z0 = 2.3+(8.1+y-5.5/(-7.6)*(x/x)/((-1.6)/y*x/y))
@@ -11210,11 +11210,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (2.3+(8.1+y-5.5/(-7.6)*(x/x)/((-1.6)/y*x/y))).Expr.eval (programList[prIndex])
+        let s = (2.3+(8.1+y-5.5/(-7.6)*(x/x)/((-1.6)/y*x/y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== 2.3+(8.1+q-5.5/(-7.6)*(p/p)/((-1.6)/q*p/q))
             z2 <== 2.3+(8.1+y-5.5/(-7.6)*(x/x)/((-1.6)/y*x/y))
-            wr [I 974; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 974)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 975
         !"test975"
         //let z0 = ((-1.2)/(4.3)/(-x))
@@ -11223,11 +11223,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-1.2)/(4.3)/(-x))).Expr.eval (programList[prIndex])
+        let s = (((-1.2)/(4.3)/(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-1.2)/(4.3)/(-p))
             z2 <== ((-1.2)/(4.3)/(-x))
-            wr [I 975; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 975)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 976
         !"test976"
         //let z0 = (-y)
@@ -11236,11 +11236,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 976; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 976)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 977
         !"test977"
         //let z0 = x
@@ -11249,11 +11249,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 977; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 977)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 978
         !"test978"
         //let z0 = 0.4
@@ -11270,11 +11270,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 979; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 979)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 980
         !"test980"
         //let z0 = ((x*y-1.3*(-6.2))*(-7.5)/(-6.7))
@@ -11283,11 +11283,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x*y-1.3*(-6.2))*(-7.5)/(-6.7))).Expr.eval (programList[prIndex])
+        let s = (((x*y-1.3*(-6.2))*(-7.5)/(-6.7))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p*q-1.3*(-6.2))*(-7.5)/(-6.7))
             z2 <== ((x*y-1.3*(-6.2))*(-7.5)/(-6.7))
-            wr [I 980; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 980)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 981
         !"test981"
         //let z0 = (-2.7)
@@ -11304,11 +11304,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-y)).Expr.eval (programList[prIndex])
+        let s = ((-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-q)
             z2 <== (-y)
-            wr [I 982; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 982)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 983
         !"test983"
         //let z0 = 0.1
@@ -11325,11 +11325,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x).Expr.eval (programList[prIndex])
+        let s = (x).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p
             z2 <== x
-            wr [I 984; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 984)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 985
         !"test985"
         //let z0 = (-x)
@@ -11338,11 +11338,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 985; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 985)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 986
         !"test986"
         //let z0 = (((-5.0)/(-x)+x/3.3*(-y))*(0.1+(-6.2))-((-5.7)*(-y))*(-x))
@@ -11351,11 +11351,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.0)/(-x)+x/3.3*(-y))*(0.1+(-6.2))-((-5.7)*(-y))*(-x))).Expr.eval (programList[prIndex])
+        let s = ((((-5.0)/(-x)+x/3.3*(-y))*(0.1+(-6.2))-((-5.7)*(-y))*(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.0)/(-p)+p/3.3*(-q))*(0.1+(-6.2))-((-5.7)*(-q))*(-p))
             z2 <== (((-5.0)/(-x)+x/3.3*(-y))*(0.1+(-6.2))-((-5.7)*(-y))*(-x))
-            wr [I 986; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 986)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 987
         !"test987"
         //let z0 = ((-7.3)+((-1.0)/y/(-y)+(-x))-((-y)-8.2)*((-x)*(-y)-(-y))+6.8*((y/6.2)+(-3.7)+(x*x-7.6+(-5.3))*x/(-5.0)*(-x)-(-0.6)+(-4.4))+((5.3)/(y-y)-(-y)))
@@ -11364,11 +11364,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-7.3)+((-1.0)/y/(-y)+(-x))-((-y)-8.2)*((-x)*(-y)-(-y))+6.8*((y/6.2)+(-3.7)+(x*x-7.6+(-5.3))*x/(-5.0)*(-x)-(-0.6)+(-4.4))+((5.3)/(y-y)-(-y)))).Expr.eval (programList[prIndex])
+        let s = (((-7.3)+((-1.0)/y/(-y)+(-x))-((-y)-8.2)*((-x)*(-y)-(-y))+6.8*((y/6.2)+(-3.7)+(x*x-7.6+(-5.3))*x/(-5.0)*(-x)-(-0.6)+(-4.4))+((5.3)/(y-y)-(-y)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-7.3)+((-1.0)/q/(-q)+(-p))-((-q)-8.2)*((-p)*(-q)-(-q))+6.8*((q/6.2)+(-3.7)+(p*p-7.6+(-5.3))*p/(-5.0)*(-p)-(-0.6)+(-4.4))+((5.3)/(q-q)-(-q)))
             z2 <== ((-7.3)+((-1.0)/y/(-y)+(-x))-((-y)-8.2)*((-x)*(-y)-(-y))+6.8*((y/6.2)+(-3.7)+(x*x-7.6+(-5.3))*x/(-5.0)*(-x)-(-0.6)+(-4.4))+((5.3)/(y-y)-(-y)))
-            wr [I 987; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 987)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 988
         !"test988"
         //let z0 = ((-x)*(-y)*x+y+x-0.7)
@@ -11377,11 +11377,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((-x)*(-y)*x+y+x-0.7)).Expr.eval (programList[prIndex])
+        let s = (((-x)*(-y)*x+y+x-0.7)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((-p)*(-q)*p+q+p-0.7)
             z2 <== ((-x)*(-y)*x+y+x-0.7)
-            wr [I 988; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 988)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 989
         !"test989"
         //let z0 = 8.1
@@ -11398,11 +11398,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((y*((-6.2)-(-6.8)+y)/y-x+6.5*7.3-(-y)+(y-(-x)+(-4.7)/2.5)+(x))-((-y)+(-x)-(0.0*(-1.1))/(6.3-y))+y)).Expr.eval (programList[prIndex])
+        let s = (((y*((-6.2)-(-6.8)+y)/y-x+6.5*7.3-(-y)+(y-(-x)+(-4.7)/2.5)+(x))-((-y)+(-x)-(0.0*(-1.1))/(6.3-y))+y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((q*((-6.2)-(-6.8)+q)/q-p+6.5*7.3-(-q)+(q-(-p)+(-4.7)/2.5)+(p))-((-q)+(-p)-(0.0*(-1.1))/(6.3-q))+q)
             z2 <== ((y*((-6.2)-(-6.8)+y)/y-x+6.5*7.3-(-y)+(y-(-x)+(-4.7)/2.5)+(x))-((-y)+(-x)-(0.0*(-1.1))/(6.3-y))+y)
-            wr [I 990; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 990)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 991
         !"test991"
         //let z0 = ((6.1*(1.8-x*(-x)))/(-x))
@@ -11411,11 +11411,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((6.1*(1.8-x*(-x)))/(-x))).Expr.eval (programList[prIndex])
+        let s = (((6.1*(1.8-x*(-x)))/(-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((6.1*(1.8-p*(-p)))/(-p))
             z2 <== ((6.1*(1.8-x*(-x)))/(-x))
-            wr [I 991; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 991)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 992
         !"test992"
         //let z0 = 4.2
@@ -11440,11 +11440,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((((-5.3)*y+(-x)+y)*0.5+x/((y+x)))).Expr.eval (programList[prIndex])
+        let s = ((((-5.3)*y+(-x)+y)*0.5+x/((y+x)))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (((-5.3)*q+(-p)+q)*0.5+p/((q+p)))
             z2 <== (((-5.3)*y+(-x)+y)*0.5+x/((y+x)))
-            wr [I 994; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 994)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 995
         !"test995"
         //let z0 = ((-5.8))
@@ -11461,11 +11461,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)).Expr.eval (programList[prIndex])
+        let s = ((-x)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)
             z2 <== (-x)
-            wr [I 996; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 996)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 997
         !"test997"
         //let z0 = ((x/(-7.2)+(x-y*(-x)+3.1/8.0)-x))
@@ -11474,11 +11474,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (((x/(-7.2)+(x-y*(-x)+3.1/8.0)-x))).Expr.eval (programList[prIndex])
+        let s = (((x/(-7.2)+(x-y*(-x)+3.1/8.0)-x))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== ((p/(-7.2)+(p-q*(-p)+3.1/8.0)-p))
             z2 <== ((x/(-7.2)+(x-y*(-x)+3.1/8.0)-x))
-            wr [I 997; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 997)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 998
         !"test998"
         //let z0 = (-x)/5.1+(-y)/(x+(-x)*(-2.2)+5.8+8.5)/0.3-((-x)*5.1)/((-y)-x+3.0-y)
@@ -11487,11 +11487,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = ((-x)/5.1+(-y)/(x+(-x)*(-2.2)+5.8+8.5)/0.3-((-x)*5.1)/((-y)-x+3.0-y)).Expr.eval (programList[prIndex])
+        let s = ((-x)/5.1+(-y)/(x+(-x)*(-2.2)+5.8+8.5)/0.3-((-x)*5.1)/((-y)-x+3.0-y)).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== (-p)/5.1+(-q)/(p+(-p)*(-2.2)+5.8+8.5)/0.3-((-p)*5.1)/((-q)-p+3.0-q)
             z2 <== (-x)/5.1+(-y)/(x+(-x)*(-2.2)+5.8+8.5)/0.3-((-x)*5.1)/((-y)-x+3.0-y)
-            wr [I 998; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 998)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 999
         !"test999"
         //let z0 = x/((1.1-5.6+0.1*y)*7.3)/(y)*(-x)*((-8.6)*0.3)+(y-(-x)/(-3.8)+y)/y+(-x)/(-y)*2.2+6.3+(((-x)/y*(-5.8))*(y/(-y)*y)*(-x)+8.7+(-y))
@@ -11500,11 +11500,11 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (x/((1.1-5.6+0.1*y)*7.3)/(y)*(-x)*((-8.6)*0.3)+(y-(-x)/(-3.8)+y)/y+(-x)/(-y)*2.2+6.3+(((-x)/y*(-5.8))*(y/(-y)*y)*(-x)+8.7+(-y))).Expr.eval (programList[prIndex])
+        let s = (x/((1.1-5.6+0.1*y)*7.3)/(y)*(-x)*((-8.6)*0.3)+(y-(-x)/(-3.8)+y)/y+(-x)/(-y)*2.2+6.3+(((-x)/y*(-5.8))*(y/(-y)*y)*(-x)+8.7+(-y))).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== p/((1.1-5.6+0.1*q)*7.3)/(q)*(-p)*((-8.6)*0.3)+(q-(-p)/(-3.8)+q)/q+(-p)/(-q)*2.2+6.3+(((-p)/q*(-5.8))*(q/(-q)*q)*(-p)+8.7+(-q))
             z2 <== x/((1.1-5.6+0.1*y)*7.3)/(y)*(-x)*((-8.6)*0.3)+(y-(-x)/(-3.8)+y)/y+(-x)/(-y)*2.2+6.3+(((-x)/y*(-5.8))*(y/(-y)*y)*(-x)+8.7+(-y))
-            wr [I 999; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 999)++z1++z2++asm.abs(z1-z2)
         //printfn "%d" 1000
         !"test1000"
         //let z0 = y
@@ -11513,8 +11513,8 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         //printfn "%s" <| z0.Expr.ToString()
         //printfn "simp:"
         //printfn "%s" <| z0.Expr.simp.ToString()
-        let s = (y).Expr.eval (programList[prIndex])
+        let s = (y).Expr.eval()
         if (not <| s.ToString().Contains("NaN")) && (not <| s.ToString().Contains("∞")) then
             z1 <== q
             z2 <== y
-            wr [I 1000; z1; z2; asm.abs(z1-z2);]
+            wr.tt <| (I 1000)++z1++z2++asm.abs(z1-z2)

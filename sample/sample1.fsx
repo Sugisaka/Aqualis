@@ -7,14 +7,14 @@ let version = "186.0.4.0", "1.0.0"
 let outputdir = @"C:\home\work"
 //#############################################################################
 
-#I "C:\\Aqualis\\lib\\186_0_4_0"
+#I @"..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open Aqualis
 
 Compile [C99;Fortran;Python] outputdir projectname version <| fun () ->
     // print text
-    print.t "Hello World!"
+    print.s "Hello World!"
     // provide interger variables
     ch.iii <| fun (x,y,z) ->
         // substitute 1 to x
@@ -24,4 +24,4 @@ Compile [C99;Fortran;Python] outputdir projectname version <| fun () ->
         // substitute x+y to z
         z <== x + y
         // print z
-        print.c z
+        print.t z

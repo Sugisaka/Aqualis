@@ -40,9 +40,9 @@ Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","aaa") <| f
             !"009"
             m <== m./n
             !"010"
-            print.c n
-            print.c n
-            print.c (n+1)
+            print.t n
+            print.t n
+            print.t (n+1)
             !"011"
             n <== -1
             !"012"
@@ -141,79 +141,79 @@ Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","aaa") <| f
     group.h2 "testD" <| fun () ->
         ch.dd <| fun (x,y) ->
             !"001"
-            print.t "001"
+            print.s "001"
             x <== 1
             y <== asm.sin x
-            print.c y
+            print.t y
             y <== asm.cos x
-            print.c y
+            print.t y
             y <== asm.tan x
-            print.c y
+            print.t y
             y <== asm.exp x
-            print.c y
+            print.t y
             y <== asm.log x
-            print.c y
+            print.t y
             y <== asm.log10 x
-            print.c y
+            print.t y
             y <== asm.sqrt x
-            print.c y
+            print.t y
             y <== asm.asin x
-            print.c y
+            print.t y
             y <== asm.acos x
-            print.c y
+            print.t y
             y <== asm.atan x
-            print.c y
+            print.t y
             y <== asm.atan2(x,y)
-            print.c y
+            print.t y
         ch.ddd <| fun (x,x2,y) ->
             !"002"
-            print.t "002"
+            print.s "002"
             x <== 0.28
             y <== asm.sin x
-            print.c y
+            print.t y
             y <== asm.cos x
-            print.c y
+            print.t y
             y <== asm.tan x
-            print.c y
+            print.t y
             y <== asm.exp x
-            print.c y
+            print.t y
             y <== asm.log x
-            print.c y
+            print.t y
             y <== asm.log10 x
-            print.c y
+            print.t y
             y <== asm.sqrt x
-            print.c y
+            print.t y
             y <== asm.asin x
-            print.c y
+            print.t y
             y <== asm.acos x
-            print.c y
+            print.t y
             y <== asm.atan x
-            print.c y
+            print.t y
             y <== asm.atan2(x,x2)
-            print.c y
+            print.t y
             y <== asm.floor x
-            print.c y
+            print.t y
             y <== asm.ceil x
-            print.c y
+            print.t y
         ch.zz <| fun (x,y) ->
             !"003"
-            print.t "003"
+            print.s "003"
             x <== 1.0-asm.uj*2.0
             y <== asm.sin x
-            print.c y
+            print.t y
             y <== asm.cos x
-            print.c y
+            print.t y
             y <== asm.tan x
-            print.c y
+            print.t y
             y <== asm.exp x
-            print.c y
+            print.t y
             y <== asm.log x
-            print.c y
+            print.t y
             y <== asm.sqrt x
-            print.c y
+            print.t y
             y <== asm.asin x
-            print.c y
+            print.t y
             y <== asm.acos x
-            print.c y
+            print.t y
             y <== asm.atan x
-            print.c y
+            print.t y

@@ -45,25 +45,19 @@ freeCanvas outputdir projectname projectname None <| fun cv ->
     let grid_y2c = grid_y2-gap1
     
     //見出しテキスト
-    html.textA 
-        <| Style[font.size 14; font.color "black"; font.weight "bold"]
+    html.text
+        <| Style[font.size 30; font.color "black"; font.weight "bold"]
         <| p0
-        <| 30
-        <| "#000000"
         <| "見出し1"
     //F#コードキャプション
-    html.textA 
-        <| Style[font.size 12; font.color "black"; font.weight "normal"]
+    html.text
+        <| Style[font.size 40; font.color "black"; font.weight "normal"]
         <| p0.shift(grid_x1,grid_y1c)
-        <| 40
-        <| "#000000"
         <| "ソースコード"
     //Cコード(1)キャプション
-    html.textA
-        <| Style[font.size 12; font.color "black"; font.weight "normal"]
+    html.text
+        <| Style[font.size 40; font.color "black"; font.weight "normal"]
         <| p0.shift(grid_x1,grid_y2c)
-        <| 40
-        <| "#000000"
         <| "ソースコード"
     //F#コード
     let a1f = html.blockTextcode style_codeFS

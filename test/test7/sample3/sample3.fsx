@@ -60,25 +60,19 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
         let grid_y2c = grid_y2-gap1
         
         //見出しテキスト
-        html.textA
-            <| Style[font.size 14; font.color "black"; font.weight "bold"]
+        html.text
+            <| Style[font.size 30; font.color "black"; font.weight "bold"]
             <| p0
-            <| 30
-            <| "#000000"
             <| "見出し1"
         //F#コードキャプション
-        html.textA
-            <| Style[font.size 12; font.color "black"; font.weight "normal"]
+        html.text
+            <| Style[font.size 40; font.color "black"; font.weight "normal"]
             <| p0.shift(grid_x1,grid_y1c)
-            <| 40
-            <| "#000000"
             <| "ソースコード"
         //Cコード(1)キャプション
-        html.textA
-            <| Style[font.size 12; font.color "black"; font.weight "normal"]
+        html.text
+            <| Style[font.size 40; font.color "black"; font.weight "normal"]
             <| p0.shift(grid_x1,grid_y2c)
-            <| 40
-            <| "#000000"
             <| "ソースコード"
         //F#コード
         let a1f = html.blockTextcode style_codeFS
@@ -135,15 +129,13 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
         //図形
         html.fig p0 <| fun (f,p) ->
             //矢印：Cコード(1)→F#コード
-            f.linearrow
-                <| Style[stroke.color "black";]
-                <| (2,20)
+            f.lineArrow
+                <| (Style[stroke.color "black";],2.0,20.0)
                 <| position(a1c.Left, grid_y1+codeBoxHeight/2.0)
                 <| position(a1f.Right, grid_y1+codeBoxHeight/2.0)
             //矢印：F#コード→Cコード(2)
-            f.linearrow
-                <| Style[stroke.color "black";]
-                <| (2,20)
+            f.lineArrow
+                <| (Style[stroke.color "black";],2.0,20.0)
                 <| position(grid_x1+codeBoxWidth/2.0, a1f.Bottom)
                 <| position(grid_x1+codeBoxWidth/2.0, a1r.Top)
     writein "BBB"

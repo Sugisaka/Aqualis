@@ -448,7 +448,7 @@ namespace Aqualis
                         ch.i1 npre <| fun ipiv ->
                             ipiv.clear()
                             writein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
-                            br.if1 (info .=/ 0) <| fun () -> print.cc <| "InvMatrix Info: "++info
+                            br.if1 (info .=/ 0) <| fun () -> print.tt <| "InvMatrix Info: "++info
                 |C99 ->
                     ch.ii <| fun (npre,info) ->
                         npre<==mat1.size1
@@ -456,7 +456,7 @@ namespace Aqualis
                             ipiv.clear()
                             (GenerationScope.currentProgram()).elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
                             writein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
-                            br.if1 (info .=/ 0) <| fun () -> print.cc <| "InvMatrix Info: "++info
+                            br.if1 (info .=/ 0) <| fun () -> print.tt <| "InvMatrix Info: "++info
                 |LaTeX ->
                     writein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                 |HTML ->
@@ -498,7 +498,7 @@ namespace Aqualis
                                     rwork.code + ","   +
                                     iwork.code + ", "  +
                                     info.code + ")")
-                                br.if1 (info .=/ 0) <| fun () -> print.cc <| "rank Info: "++info
+                                br.if1 (info .=/ 0) <| fun () -> print.tt <| "rank Info: "++info
                     |C99 ->
                         ch.iii <| fun (npre,info,lwork) ->
                             npre<==mat.size1
@@ -527,7 +527,7 @@ namespace Aqualis
                                         "*" + rwork.code + ", " +
                                         "*" + iwork.code + ", " +
                                         "&" + info.code + ");")
-                                    br.if1 (info .=/ 0) <| fun () -> print.cc <| "rank Info: "++info
+                                    br.if1 (info .=/ 0) <| fun () -> print.tt <| "rank Info: "++info
                                 |_ -> ()
                     |LaTeX ->
                         writein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
@@ -574,7 +574,7 @@ namespace Aqualis
                                     rwork.code + ","   +
                                     iwork.code + ", "  +
                                     info.code + ")")
-                                br.if1 (info .=/ 0) <| fun () -> print.cc <| "rank Info: "++info
+                                br.if1 (info .=/ 0) <| fun () -> print.tt <| "rank Info: "++info
                     |C99 ->
                         ch.iii <| fun (npre,info,lwork) ->
                             npre<==mat.size1
@@ -603,7 +603,7 @@ namespace Aqualis
                                         "*" + rwork.code + ", " +
                                         "*" + iwork.code + ", " +
                                         "&" + info.code + ");")
-                                    br.if1 (info .=/ 0) <| fun () -> print.cc <| "rank Info: "++info
+                                    br.if1 (info .=/ 0) <| fun () -> print.tt <| "rank Info: "++info
                                 |_ -> ()
                     |LaTeX ->
                         writein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
@@ -714,7 +714,7 @@ namespace Aqualis
                                                 lwork.code + ", "  +
                                                 rwork.code + ", "  +
                                                 info.code + ")")
-                                            br.if1 (info .=/ 0) <| fun () -> print.cc <| "Eigenvalue Info: "++info
+                                            br.if1 (info .=/ 0) <| fun () -> print.tt <| "Eigenvalue Info: "++info
                 |C99 ->
                     ch.iii <| fun (npre,ldvldummy,info) ->
                             npre<==mat1.size1
@@ -747,7 +747,7 @@ namespace Aqualis
                                                     "&" + lwork.code + ", " +
                                                     rwork.code + ", " +
                                                     "&" + info.code + ");")
-                                                br.if1 (info .=/ 0) <| fun () -> print.cc <| "Eigenvalue Info: "++info
+                                                br.if1 (info .=/ 0) <| fun () -> print.tt <| "Eigenvalue Info: "++info
                                             |_ -> ()
                 |LaTeX ->
                     writein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
@@ -841,7 +841,7 @@ namespace Aqualis
                                             writein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
                                             writein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
                                         |_ -> ()
-                                        br.if1 (info .=/ 0) <| fun () -> print.cc <| "Eigenvalue Info: "++info
+                                        br.if1 (info .=/ 0) <| fun () -> print.tt <| "Eigenvalue Info: "++info
 
         /// <summary>
         /// 連立方程式の求解(Tikhonovの正則化法)
@@ -1383,7 +1383,7 @@ namespace Aqualis
                 ch.d2 mat.size1 mat.size2 <| fun vt ->
                     La.svd mat (u,s,vt)
                     !"0に近いほど正確な解"
-                    print.cc <| "solve_homogeneq"++s[mat.size1]
+                    print.tt <| "solve_homogeneq"++s[mat.size1]
                     iter.num mat.size1 <| fun i ->
                         f[i] <== vt[mat.size1,i]
 
@@ -1398,6 +1398,6 @@ namespace Aqualis
                 ch.z2 mat.size1 mat.size2 <| fun vt ->
                     La.svd mat (u,s,vt)
                     !"0に近いほど正確な解"
-                    print.cc <| "solve_homogeneq"++s[mat.size1]
+                    print.tt <| "solve_homogeneq"++s[mat.size1]
                     iter.num mat.size1 <| fun i ->
                         f[i] <== asm.conj(vt[mat.size1,i])

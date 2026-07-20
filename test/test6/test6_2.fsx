@@ -17,7 +17,7 @@ open Aqualis
 /// </summary>
 /// <param name="f">2次元データ</param>
 /// <param name="g">2次元データ</param>
-let correlation(f:num2,g:num2) =
+let correlation(f:complex2,g:complex2) =
     // fのフーリエ変換
     fft2.fft("ftplan1", f, f)
     // gのフーリエ変換

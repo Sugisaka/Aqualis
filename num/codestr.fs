@@ -145,7 +145,7 @@ namespace Aqualis
 
         static member h1 (s:string) (code:unit->unit) =
             group.Header '#' s
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("### "+s+" #########################")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("### "+s+" #########################")
             match (GenerationScope.currentProgram()).language with
             |Python ->
                 code()
@@ -153,13 +153,13 @@ namespace Aqualis
                 (GenerationScope.currentProgram()).indentInc()
                 code()
                 (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("### END "+s+" #####################")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("### END "+s+" #####################")
             group.Footer '#' s
             group.blank()
 
         static member h2 (s:string) (code:unit->unit) =
             group.Header '%' s
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("=== "+s+" ===================")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("=== "+s+" ===================")
             match (GenerationScope.currentProgram()).language with
             |Python ->
                 code()
@@ -167,13 +167,13 @@ namespace Aqualis
                 (GenerationScope.currentProgram()).indentInc()
                 code()
                 (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("=== END "+s+" ===============")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("=== END "+s+" ===============")
             group.Footer '%' s
             group.blank()
 
         static member h3 (s:string) (code:unit->unit) =
             group.Header '=' s
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("--- "+s+" --------------")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("--- "+s+" --------------")
             match (GenerationScope.currentProgram()).language with
             |Python ->
                 code()
@@ -181,13 +181,13 @@ namespace Aqualis
                 (GenerationScope.currentProgram()).indentInc()
                 code()
                 (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("--- END "+s+" ----------")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("--- END "+s+" ----------")
             group.Footer '=' s
             group.blank()
 
         static member h4 (s:string) (code:unit->unit) =
             group.Header '+' s
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("... "+s+" ...........")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("... "+s+" ...........")
             match (GenerationScope.currentProgram()).language with
             |Python ->
                 code()
@@ -195,13 +195,13 @@ namespace Aqualis
                 (GenerationScope.currentProgram()).indentInc()
                 code()
                 (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("... END "+s+" .......")
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("... END "+s+" .......")
             group.Footer '+' s
             group.blank()
 
         static member h5 (s:string) (code:unit->unit) =
             group.Header '-' s
-            if (GenerationScope.requireContext()).DisplaySection then print.t s
+            if (GenerationScope.requireContext()).DisplaySection then print.s s
             match (GenerationScope.currentProgram()).language with
             |Python ->
                 code()
@@ -209,7 +209,7 @@ namespace Aqualis
                 (GenerationScope.currentProgram()).indentInc()
                 code()
                 (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.t ("END "+s)
+            if (GenerationScope.requireContext()).DisplaySection then print.s ("END "+s)
             group.Footer '-' s
             group.blank()
 

@@ -25,7 +25,7 @@ type testClass1(sname_,name) =
     member __.farg cm code = fn.addarg (Structure testClass1.sname,A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
     
 Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
-    let f(y:num0,x:num0,n:num0,n1:num1,s:testClass1) =
+    let f(y:double0,x:double0,n:int0,n1:int1,s:testClass1) =
         func "func1" <| fun () ->
             y.farg <| fun y ->
             x.farg <| fun x ->
@@ -33,8 +33,8 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
             n1.farg <| fun n1 ->
             s.farg "" <| fun s ->
                 y <== x + n + n1[0] + s.x1
-                print.c y
-    ch.idz <| fun (n,x,z) ->
+                print.t y
+    ch.idd <| fun (n,x,z) ->
     ch.i1 4 <| fun n1 ->
         n <== 1
         x <== 2
@@ -43,4 +43,4 @@ Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
         let s = testClass1 "ss"
         s.x1 <== 100.0
         f(z,x,n,n1,s)
-        print.c z
+        print.t z

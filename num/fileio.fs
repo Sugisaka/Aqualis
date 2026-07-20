@@ -1946,9 +1946,9 @@ namespace Aqualis
                                         //データ本体
                                         r.b f
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -1963,7 +1963,7 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
                             
         ///<summary>数値をファイルから読み込み</summary>
         static member load (f:double0,filename:exprString) =
@@ -1983,9 +1983,9 @@ namespace Aqualis
                                         //データ本体
                                         r.b f
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2000,7 +2000,7 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>数値をファイルから読み込み</summary>
         static member load (f:complex0,filename:exprString) =
@@ -2023,9 +2023,9 @@ namespace Aqualis
                                             r.b im
                                             f <== re + asm.uj*im
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2040,7 +2040,7 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:int1,filename:exprString) =
@@ -2064,9 +2064,9 @@ namespace Aqualis
                                                 r.b u
                                                 f[i] <== u
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t ": invalid data type"
+                            print.s ": invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2081,7 +2081,7 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:double1,filename:exprString) =
@@ -2105,9 +2105,9 @@ namespace Aqualis
                                                 r.b u
                                                 f[i] <== u
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t ": invalid data type"
+                            print.s ": invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2122,7 +2122,7 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:complex1,filename:exprString) =
@@ -2161,9 +2161,9 @@ namespace Aqualis
                                         |_ ->
                                             ()
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t ": invalid data type"
+                            print.s ": invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2178,7 +2178,7 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
         static member load (f:int2,filename:exprString) =
@@ -2204,10 +2204,10 @@ namespace Aqualis
                                                     r.b u
                                                     f[i,j] <== u
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t ": invalid data type"
-                            print.cc <| n++(I nt)
+                            print.s ": invalid data type"
+                            print.tt <| n++(I nt)
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2222,7 +2222,7 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
         static member load (f:double2,filename:exprString) =
@@ -2248,10 +2248,10 @@ namespace Aqualis
                                                     r.b u
                                                     f[i,j] <== u
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t ": invalid data type"
-                            print.cc <| n++(I nt)
+                            print.s ": invalid data type"
+                            print.tt <| n++(I nt)
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2266,7 +2266,7 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
         static member load (f:complex2,filename:exprString) =
@@ -2309,10 +2309,10 @@ namespace Aqualis
                                         |_ ->
                                             ()
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t ": invalid data type"
-                            print.cc <| n++(I nt)
+                            print.s ": invalid data type"
+                            print.tt <| n++(I nt)
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2327,7 +2327,7 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         ///<summary>3次元データをファイルから読み込み</summary>
         static member load (f:int3,filename:exprString) =
@@ -2355,9 +2355,9 @@ namespace Aqualis
                                                         r.b u
                                                         f[i,j,k] <== u
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2372,7 +2372,7 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         static member load (f:int3,filename:string) = io.load(f,st filename)
         static member load (f:int2,filename:string) = io.load(f,st filename)
@@ -2405,9 +2405,9 @@ namespace Aqualis
                                                         r.b u
                                                         f[i,j,k] <== u
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2422,7 +2422,7 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         static member load (f:double3,filename:string) = io.load(f,st filename)
         static member load (f:double2,filename:string) = io.load(f,st filename)
@@ -2456,9 +2456,9 @@ namespace Aqualis
                                                         r.b im
                                                         f[i,j,k] <== re + asm.uj*im
                                 <| fun () ->
-                                    print.t "invalid data dimension"
+                                    print.s "invalid data dimension"
                         <| fun () ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
@@ -2473,7 +2473,7 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.t "invalid data type"
+                            print.s "invalid data type"
 
         static member load (f:complex3,filename:string) = io.load(f,st filename)
         static member load (f:complex2,filename:string) = io.load(f,st filename)

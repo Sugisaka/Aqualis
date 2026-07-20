@@ -17,11 +17,11 @@ print.t "bbb"
 以下の二つのコードは同じ動作になる。
 ```fsharp
 iter.range (0, n-1) <| fun i ->
-    print.c i
+    print.t i
 ```
 ```fsharp
 iter.num n <| fun i ->
-    print.c i
+    print.t i
 ```
 
 以下のコードでは配列`a`の全要素に1を代入する
@@ -42,7 +42,7 @@ a.foreach <| fun n ->
 ```fsharp
 iter.num 5 <| fun i ->
     iter.num 10 <| fun j ->
-        print.cc i j
+        print.tt i j
 ```
 2次元配列の全要素にアクセスする場合は以下のように記述できる。
 ```fsharp
@@ -66,11 +66,11 @@ iter.whiledo (条件) <| fun ex ->
 リストの各要素に対し処理を行う場合は`iter.list`を使用する。
 ```fsharp
 iter.list [x;y;z] <| fun v ->
-    print.c v
+    print.t v
 ```
 これは以下と同じ動作になる
 ```fsharp
-print.c x
-print.c y
-print.c z
+print.t x
+print.t y
+print.t z
 ```

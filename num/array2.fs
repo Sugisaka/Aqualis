@@ -88,11 +88,11 @@ namespace Aqualis
                     !("***debug array2 access check: "+(GenerationScope.errors()).ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (Or [this.size1 .= -1; this.size2 .= -1]) <| fun () ->
-                            print.t <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " is not allocated"
+                            print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " is not allocated"
                         b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                            print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                            print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                         b.IF (Or [j .< _0; this.size2 .<= j]) <| fun () ->
-                            print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
+                            print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
             match x,language() with
@@ -158,7 +158,7 @@ namespace Aqualis
                         !("***debug array1 allocate check: "+(GenerationScope.errors()).ID+"*****************************")
                         br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
-                                print.t ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated")
+                                print.s ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated")
                         ! "****************************************************"
                     match (GenerationScope.currentProgram()).language with
                     |Fortran ->
@@ -252,7 +252,7 @@ namespace Aqualis
                     !("***debug array1 deallocate check: "+(GenerationScope.errors()).ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            print.t ("ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name)
+                            print.s ("ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name)
                     !("****************************************************")
                 |_ -> ()
             match x with
@@ -350,10 +350,10 @@ namespace Aqualis
                 !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
                 br.branch <| fun b ->
                     b.IF (x.size1 .=/ y.size1) <| fun () ->
-                        print.t ("ERROR"+(GenerationScope.errors()).ID+" array size (first index) mismatch")
+                        print.s ("ERROR"+(GenerationScope.errors()).ID+" array size (first index) mismatch")
                 br.branch <| fun b ->
                     b.IF (x.size2 .=/ y.size2) <| fun () ->
-                        print.t ("ERROR"+(GenerationScope.errors()).ID+" array size (second index) mismatch")
+                        print.s ("ERROR"+(GenerationScope.errors()).ID+" array size (second index) mismatch")
                 ! "****************************************************"
 
     /// Shared implementation for two-dimensional numeric arrays.

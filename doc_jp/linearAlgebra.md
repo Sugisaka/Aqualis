@@ -78,7 +78,7 @@ Compile [Fortran] outputdir projectname fullversion <| fun () ->
             b[1] <== 5.0
             b[2] <== 6.0
             La.solve_simuleq(A,b)
-            b.foreach <| fun i -> print.cc i b[i]
+            b.foreach <| fun i -> print.tt i b[i]
 ```
 
 ### 複数の連立方程式の解

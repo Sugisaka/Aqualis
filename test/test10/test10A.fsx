@@ -19,7 +19,7 @@ Compile [Fortran;C99;Python] outputdir projectname (version,"aaa") <| fun () ->
     /// <param name="p1">始点</param>
     /// <param name="p2">終点</param>
     /// <param name="sv">描画先SVGファイル</param>
-    let zline (p1:num0,p2:num0) (sv:svgfilemaker_aq) =
+    let zline (p1:complex0,p2:complex0) (sv:svgfilemaker_aq) =
         sv.line((p1.re,p1.im),(p2.re,p2.im),color.stroke.black(1.0))
         
     // 市松模様
@@ -30,7 +30,7 @@ Compile [Fortran;C99;Python] outputdir projectname (version,"aaa") <| fun () ->
             iter.num a.size1 <| fun i -> 
                 a[i] <== r*asm.exp((45+90*(i-1))*asm.uj*asm.pi/180)
             /// 単位図形を中心位置cに描画
-            let drawUnit (c:num0) =
+            let drawUnit (c:complex0) =
                 iter.num (a.size1-1) <| fun i -> 
                     zline (c+a[i],c+a[i+1]) sv
                 zline (c+a[a.size1-1],c+a[0]) sv

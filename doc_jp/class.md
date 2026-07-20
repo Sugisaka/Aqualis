@@ -71,7 +71,7 @@ Compile [Fortran] outputdir projectname fullversion <| fun () ->
     u.a <== 1
     u.x <== 2.0
     u.w <== 3.0+asm.uj*4.0
-    print.ccc u.a u.x u.w
+    print.ttc u.a u.x u.w
     
     //classAAA型1次元配列（配列名：xyz）を生成
     let v = classAAA_1 "xyz"
@@ -82,5 +82,5 @@ Compile [Fortran] outputdir projectname fullversion <| fun () ->
         v[i].a <== 1
         v[i].x <== 2.0
         v[i].w <== 3.0+asm.uj*4.0
-        print.ccc v[i].a v[i].x v[i].w
+        print.ttc v[i].a v[i].x v[i].w
 ```

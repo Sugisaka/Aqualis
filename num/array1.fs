@@ -63,9 +63,9 @@ namespace Aqualis
                     !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            print.t <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " is not allocated"
+                            print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " is not allocated"
                         b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                            print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                            print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
             match x,language() with
@@ -73,10 +73,18 @@ namespace Aqualis
             |Var1(_,name),_       -> Idx1(typ,name,i.Expr)
             |Arx1(_,f),_ -> f i
         member this.Idx1(i:int) = this.Idx1(I i)
-        member this.Idx1(a:int0,b:int0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
-        member this.Idx1(a:int0,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
-        member this.Idx1(a:int ,b:int0) = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
-        member this.Idx1(a:int ,b:int)  = Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(n:int0*int0) = 
+            let a,b = n
+            Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(n:int0*int)  =
+            let a,b = n
+            Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(n:int*int0) =
+            let a,b = n
+            Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        member this.Idx1(n:int*int)  =
+            let a,b = n
+            Arx1(b-a+_1,fun i -> this.Idx1(i+a))
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.allocate(n1:int0) =
@@ -87,7 +95,7 @@ namespace Aqualis
                         !("***debug array1 allocate check: "+(GenerationScope.errors()).ID+"*****************************")
                         br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
-                                print.t ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated")
+                                print.s ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated")
                         ! "****************************************************"
                     match (GenerationScope.currentProgram()).language with
                     |Fortran ->
@@ -107,31 +115,31 @@ namespace Aqualis
                     |LaTeX ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}$\\\\\n")
                         |A1 0,Dt   ->
-                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}$\\\\\n")
                         |A1 0,Zt   ->
-                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}$\\\\\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |HTML ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
                         |A1 0,Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
                         |A1 0,Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |HTMLSequenceDiagram ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
                         |A1 0,Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
                         |A1 0,Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval ((GenerationScope.currentProgram()))+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |Python ->
@@ -140,16 +148,16 @@ namespace Aqualis
                             this.size1 <== n1
                             match typ with
                             |Structure sname -> writein(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"))], dtype=object)\n")
-                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+", dtype=int)\n")
-                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+", dtype=numpy.complex128)\n")
-                            |_               -> writein(name+" = "+"numpy.zeros("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+")\n")
+                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (GenerationScope.currentProgram())+", dtype=int)\n")
+                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (GenerationScope.currentProgram())+", dtype=numpy.complex128)\n")
+                            |_               -> writein(name+" = "+"numpy.zeros("+this.size1.Expr.eval (GenerationScope.currentProgram())+")\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |JavaScript ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            writein(name+" = Array(" + this.size1.Expr.eval ((GenerationScope.currentProgram())) + ");\n")
+                            writein(name+" = Array(" + this.size1.Expr.eval (GenerationScope.currentProgram()) + ");\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |PHP ->
@@ -173,7 +181,7 @@ namespace Aqualis
                     !("***debug array1 deallocate check: "+(GenerationScope.errors()).ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            print.t ("ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name)
+                            print.s ("ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name)
                     ! "****************************************************"
                 |_ -> ()
             match x with
@@ -264,7 +272,7 @@ namespace Aqualis
                 !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
                 br.branch <| fun b ->
                     b.IF (x.size1 .=/ y.size1) <| fun () ->
-                        print.t ("ERROR"+(GenerationScope.errors()).ID+" array size (first index) mismatch")
+                        print.s ("ERROR"+(GenerationScope.errors()).ID+" array size (first index) mismatch")
                 ! "****************************************************"
 
     /// Shared implementation for one-dimensional numeric arrays.
@@ -293,13 +301,13 @@ namespace Aqualis
         member this.Item
             with get(i:int) = this.WrapScalar(this.Idx1(I i))
         member this.Item
-            with get(a:int0,b:int0) = this.Create(typ,this.Idx1(a,b))
+            with get(n:int0*int0) = this.Create(typ,this.Idx1 n)
         member this.Item
-            with get(a:int0,b:int) = this.Create(typ,this.Idx1(a,b))
+            with get(n:int0*int) = this.Create(typ,this.Idx1 n)
         member this.Item
-            with get(a:int,b:int0) = this.Create(typ,this.Idx1(a,b))
+            with get(n:int*int0) = this.Create(typ,this.Idx1 n)
         member this.Item
-            with get(a:int,b:int) = this.Create(typ,this.Idx1(a,b))
+            with get(n:int*int) = this.Create(typ,this.Idx1 n)
 
         member private this.New(etype, body) = this.Create(etype,Arx1(this.size1,body))
 

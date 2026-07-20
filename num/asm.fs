@@ -166,19 +166,20 @@ namespace Aqualis
         static member zSum (n1:int, n2:int) = fun (f:int0->complex0) -> complex0(Sum(Zt, Int n1, Int n2, fun (x:expr) -> (f(int0 x)).Expr))
         static member iLet (x:int0) = fun (f:int0->int0) -> int0(Let(It 4, x.Expr, fun (x:expr) -> (f(int0 x)).Expr))
         static member iLet (x:int) = fun (f:int0->int0) -> asm.iLet (I x) f
-        static member dLet (x:int0) = fun (f:int0->double0) -> double0(Let(Dt, x.Expr, fun (x:expr) -> (f(int0 x)).Expr))
         static member dLet (x:double0) = fun (f:double0->double0) -> double0(Let(Dt, x.Expr, fun (x:expr) -> (f(double0 x)).Expr))
-        static member dLet (x:int) = fun (f:int0->double0) -> asm.dLet (I x) f
         static member dLet (x:double) = fun (f:double0->double0) -> asm.dLet (D x) f
-        static member zLet (x:int) = fun (f:int0->complex0) -> asm.zLet (I x) f
-        static member zLet (x:int0) = fun (f:int0->complex0) -> complex0(Let(Zt, x.Expr, fun (x:expr) -> (f(int0 x)).Expr))
-        static member zLet (x:double) = fun (f:double0->complex0) -> asm.zLet (D x) f
-        static member zLet (x:double0) = fun (f:double0->complex0) -> complex0(Let(Zt, x.Expr, fun (x:expr) -> (f(double0 x)).Expr))
+        static member dLet (x:int0) = fun (f:double0->double0) -> double0(Let(Dt, x.Expr, fun (x:expr) -> (f(double0 x)).Expr))
+        static member dLet (x:int) = fun (f:double0->double0) -> asm.dLet (I x) f
         static member zLet (x:complex0) = fun (f:complex0->complex0) -> complex0(Let(Zt, x.Expr, fun (x:expr) -> (f(complex0 x)).Expr))
+        static member zLet (x:double0) = fun (f:complex0->complex0) -> complex0(Let(Zt, x.Expr, fun (x:expr) -> (f(complex0 x)).Expr))
         static member zLet (x:double*double) = fun (f:complex0->complex0) -> asm.zLet (Z x) f
+        static member zLet (x:double) = fun (f:complex0->complex0) -> asm.zLet (D x) f
+        static member zLet (x:int0) = fun (f:complex0->complex0) -> complex0(Let(Zt, x.Expr, fun (x:expr) -> (f(complex0 x)).Expr))
+        static member zLet (x:int) = fun (f:complex0->complex0) -> asm.zLet (I x) f
         static member diff (f:double0,x:double0) = double0(expr.diff f.Expr x.Expr (GenerationScope.currentProgram()))
         static member diff (f:complex0,x:double0) = complex0(expr.diff f.Expr x.Expr (GenerationScope.currentProgram()))
-
+        static member diff (f:double0,x:complex0) = complex0(expr.diff f.Expr x.Expr (GenerationScope.currentProgram()))
+        
     [<AutoOpen>]
     module num0_op =
         type int0 with

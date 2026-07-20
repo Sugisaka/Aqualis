@@ -12,59 +12,55 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
     type testClass1(sname_,name) =
+        inherit structureValue<testClass1>(sname_,name)
         static member sname = "testClass1"
         new(name) =
             str.reg(testClass1.sname,name)
             testClass1(testClass1.sname,name)
+        override _.Rewrap n = testClass1(sname_,n)
         member public __.n1   = str.i0(sname_,name,"n1")
         member public __.x1   = str.d0(sname_,name,"x1")
         member public __.z1   = str.z0(sname_,name,"z1")
         static member str_mem(psname, vname, name, size1) =
             str.addmember(psname,(Structure testClass1.sname,size1,name))
             testClass1(testClass1.sname,str.mem(vname,name))
-        member __.farg code = fn.addarg (Structure testClass1.sname,A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
         
     type testClass1_1(sname_,name,size1) =
-        inherit base1(Structure testClass1.sname,Var1(size1,name))
+        inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1)
         new(name,size1) =
             str.reg(testClass1.sname,name,size1)
             testClass1_1(testClass1.sname,name,A1 size1)
         new(name) = testClass1_1(name,0)
-        member this.Item with get(i:num0) = testClass1(sname_,this.Idx1(i).code)
-        member this.Item with get(i:int ) = testClass1(sname_,this.Idx1(i).code)
-        member public this.allocate(n:num0) = this.allocate n
-        member public this.allocate(n:int) = this.allocate(I n)
+        override _.WrapElement n = testClass1(sname_,n)
+        override _.Rewrap(n,v) = testClass1_1(sname_,n,v)
         static member str_mem(psname, vname, name, size1) =
             str.addmember(psname,(Structure testClass1.sname,size1,name))
             testClass1_1(testClass1.sname,str.mem(vname,name), size1)
-        member __.farg code = fn.addarg (testClass1.sname,size1,name) <| fun (v,n) -> code(testClass1_1(testClass1.sname,n,v))
         
     type testClass2(sname_,name) =
+        inherit structureValue<testClass2>(sname_,name)
         static member sname = "testClass2"
         new(name) =
             str.reg(testClass2.sname,name)
             testClass2(testClass2.sname,name)
+        override _.Rewrap n = testClass2(sname_,n)
         member public __.n1   = str.i0(sname_,name,"n2")
         member public __.x1   = str.d0(sname_,name,"x2")
         member public __.z1   = str.z0(sname_,name,"z2")
         member public __.s1   = testClass1.str_mem(testClass2.sname,name,"s2",A0)
         member public __.t1   = testClass1_1.str_mem(testClass2.sname,name,"t2",A1 0)
-        member __.farg code = fn.addarg (Structure testClass2.sname,A0,name) <| fun (_,n) -> code(testClass2(testClass2.sname,n))
         
     type testClass2_1(sname_,name,size1) =
-        inherit base1(Structure testClass2.sname,Var1(size1,name))
+        inherit structureArray1<testClass2,testClass2_1>(sname_,name,size1)
         new(name,size1) =
             str.reg(testClass2.sname,name,size1)
             testClass2_1(testClass2.sname,name,A1(size1))
         new(name) = testClass2_1(name,0)
-        member this.Item with get(i:num0) = testClass2(sname_,this.Idx1(i).code)
-        member this.Item with get(i:int ) = testClass2(sname_,this.Idx1(i).code)
-        member public this.allocate(n:num0) = this.allocate n
-        member public this.allocate(n:int) = this.allocate(I n)
+        override _.WrapElement n = testClass2(sname_,n)
+        override _.Rewrap(n,v) = testClass2_1(sname_,n,v)
         static member str_mem(psname, vname, name, size1) =
             str.addmember(psname,(Structure testClass2.sname,size1,name))
             testClass2_1(testClass2.sname,str.mem(vname,name), size1)
-        member __.farg code = fn.addarg (testClass2.sname,size1,name) <| fun (v,n) -> code(testClass2_1(testClass2.sname,n,v))
         
 Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","aaa") <| fun () ->
     let dd = testClass1_1("d")
@@ -81,7 +77,7 @@ Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","aaa") <| 
     qq.allocate 5
     qq[0].t1.allocate 2
     qq[0].t1[1].n1 <== 2000
-    print.c qq[0].t1[1].n1
+    print.t qq[0].t1[1].n1
     
     pp.t1[0].n1 <== 1000
     dd.foreach <| fun i ->
@@ -98,6 +94,6 @@ Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","aaa") <| 
         nn[1] <== 1
         nn[2] <== 2
         nn[3] <== 3
-    print.c pp.s1.n1
-    print.c pp.s1.x1
-    print.c pp.s1.z1
+    print.t pp.s1.n1
+    print.t pp.s1.x1
+    print.t pp.s1.z1

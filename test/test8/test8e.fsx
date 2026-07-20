@@ -6,7 +6,7 @@ let version = "1.0.0"
 
 let outputdir = __SOURCE_DIRECTORY__
 
-#I @"C:\Aqualis\lib\186_0_0_0"
+#I @"..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open Aqualis

@@ -32,7 +32,7 @@ Compile [HTMLSequenceDiagram] outputdir "test8" (version,"aaa") <| fun () ->
     //         ColorSectionFrame = "rgb(127,0,255)"
     //     }
     
-    ch.I "x" <| fun x ->
+    ch.D "x" <| fun x ->
     ch.I "x_1" <| fun x1 ->
         group.Section "section title" <| fun () ->
             x <== 0

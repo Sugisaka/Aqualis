@@ -37,7 +37,7 @@ ch.ii <| fun (w,sum) ->
                 a[w] <== i
         iter.num 10000 <| fun i ->
             sum <== sum - a[i]
-        print.c sum
+        print.t sum
 ```
 ほしい結果は50005000だが何度か実行すると間違った結果どころか毎回違う数字が出力されてしまう。
 これは同時に同じ処理を行っている影響で変数wが正しい値とならないことが原因である。
@@ -56,7 +56,7 @@ ch.private_i <| fun w ->
                     a[w] <== i
             iter.num 10000 <| fun i ->
                 sum <== sum + a[i]
-            print.c sum
+            print.t sum
 ```
 
 ## OpenACC

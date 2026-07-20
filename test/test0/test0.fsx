@@ -16,11 +16,11 @@ let step = 2
 group.section 1 step <| fun () ->
     
     let res1 =
-        asm.dLet _2 <| fun x ->
-            asm.dLet _3 <| fun y ->
+        asm.dLet 2 <| fun x ->
+            asm.dLet 3 <| fun y ->
                 asm.dSum (1, 4) <| fun z -> (x+y)*z
                 
-    let aqualis  = new AqualisBuilder<num0>()
+    let aqualis  = new AqualisBuilder<double0>()
     let res2 = aqualis{
         let! x = asm.dLet 2
         let! y = asm.dLet 3
@@ -58,22 +58,20 @@ group.section 2 step <| fun () ->
                         x <== 0
                     y <== 2
                     z <== 3
-                    print.c x
-                    print.ccc x y z
-                    print.t <| "aaa"
-                    print.n [x; y; z]
-                    print.s <| x++y++z
-                    print.s <| x++"aaa"++y++"bbb"++z
+                    print.t x
+                    print.s "aaa"
+                    print.tt <| x++y++z
+                    print.tt <| x++"aaa"++y++"bbb"++z
                     
         io.fileOutput "test.dat" <| fun wr ->
             ch.z <| fun z ->
                 z <== 1+asm.uj*2
-                wr [z]
+                wr.t z
 
         io.fileInput "test.dat" <| fun rd ->
             ch.z <| fun z ->
-                rd [z]
-                print.c z
+                rd.t z
+                print.t z
         ch.i1 10 <| fun x ->
             x[0] <== 0
             

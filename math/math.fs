@@ -161,7 +161,7 @@ namespace Aqualis
             ch.dd <| fun (fact,pll) ->
             ch.ddd <| fun (pmm,pmmp1,somx2) ->
                 br.if1 (Or [m .< 0; m .> l; asm.abs(x) .> 1.0]) <| fun () ->
-                    print.t "Bad arguments in routine plgndr"
+                    print.s "Bad arguments in routine plgndr"
                 pmm <== 1.0
                 br.if1 (m .> 0) <| fun () ->
                     somx2 <== asm.sqrt((1.0-x)*(1.0+x))

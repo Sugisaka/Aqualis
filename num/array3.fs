@@ -111,13 +111,13 @@ namespace Aqualis
                     (GenerationScope.errors()).inc()
                     !("***debug array3 access check: "+(GenerationScope.errors()).ID+"*****************************")
                     br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () ->
-                        print.t ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is not allocated")
+                        print.s <| "ERROR"+(GenerationScope.errors()).ID+" array "+name+" is not allocated"
                     br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                        print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                        print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                     br.if1 (Or [j .< _0; this.size2 .<= j]) <| fun () ->
-                        print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
+                        print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
                     br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
-                        print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
+                        print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
             match x,language() with
@@ -477,7 +477,7 @@ namespace Aqualis
                         !("***debug array1 allocate check: "+(GenerationScope.errors()).ID+"*****************************")
                         br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
-                                print.t ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated")
+                                print.s <| "ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated"
                         ! "****************************************************"
                     match (GenerationScope.currentProgram()).language with
                     |Fortran ->
@@ -580,7 +580,7 @@ namespace Aqualis
                     !("***debug array1 deallocate check: "+(GenerationScope.errors()).ID+"*****************************")
                     br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            print.t ("ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name)
+                            print.s <| "ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name
                     ! "****************************************************"
                 |_ -> ()
             match x with
@@ -684,11 +684,11 @@ namespace Aqualis
                 (GenerationScope.errors()).inc()
                 !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
                 br.if1 (v1.size1 .=/ v2.size1) <| fun () ->
-                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size1 mismatch")
+                    print.s <| "ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size1 mismatch"
                 br.if1 (v1.size2 .=/ v2.size2) <| fun () ->
-                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size2 mismatch")
+                    print.s <| "ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size2 mismatch"
                 br.if1 (v1.size3 .=/ v2.size3) <| fun () ->
-                    print.t ("ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size3 mismatch")
+                    print.s <| "ERROR"+(GenerationScope.errors()).ID+" operator '<==' array size3 mismatch"
                 ! "****************************************************"
 
     /// Shared implementation for three-dimensional numeric arrays.

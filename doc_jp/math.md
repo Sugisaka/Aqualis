@@ -71,7 +71,7 @@ $H^{(2)}_0(x)$を計算。関数の値は`h`に保存されている
 
 ```fsharp
 besselh0 x <| fun h ->
-    print.c h
+    print.t h
 ```
 
 #### 第2種1次ハンケル関数
@@ -80,5 +80,5 @@ $H^{(2)}_1(x)$を計算。関数の値は`h`に保存されている
 
 ```fsharp
 besselh1 x <| fun h ->
-    print.c h
+    print.t h
 ```

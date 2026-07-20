@@ -21,7 +21,7 @@ ch.d <| fun x ->
     //微分値の確認
     iter.num 100 <| fun i ->
         x <== 0.1*i
-        print.ccc x (g x) (4*x+3)
+        print.ttc x (g x) (4*x+3)
 ```
 
 関数を含む式も微分できる。
@@ -44,7 +44,7 @@ ch.d <| fun x ->
     //微分値の確認
     iter.num 100 <| fun i ->
         x <== 0.1*i
-        print.ccc x (g x) (2*asm.sin(3*x)+6*x*asm.cos(3*x))
+        print.ttc x (g x) (2*asm.sin(3*x)+6*x*asm.cos(3*x))
 ```
 
 $$
@@ -65,7 +65,7 @@ ch.d <| fun x ->
     //微分値の確認
     iter.num 100 <| fun i ->
         x <== 0.1*i
-        print.ccc x (g x) (6*asm.cos(3*x)/asm.sqrt(x*x+1) - 2*x*asm.sin(3*x)/asm.pow(x*x+1,1.5))
+        print.ttc x (g x) (6*asm.cos(3*x)/asm.sqrt(x*x+1) - 2*x*asm.sin(3*x)/asm.pow(x*x+1,1.5))
 ```
 
 級数の微分
@@ -88,7 +88,7 @@ ch.d <| fun x ->
     //微分値の確認
     iter.num 100 <| fun i ->
         x <== 0.1*i
-        print.ccc x (g x) (2*asm.sum 1 5 (fun i -> 2*i*x))
+        print.ttc x (g x) (2*asm.sum 1 5 (fun i -> 2*i*x))
 ```
 
 級数を含む式の微分では、同じ級数の計算を何度も行うことがある（以下の例では2回）
@@ -116,7 +116,7 @@ $$
       //微分値の確認
       iter.num 100 <| fun i ->
           x <== 0.1*i
-          print.ccc x (g x) (2*(2*x+asm.sum 1 5 (fun i -> i*x*x+1))*(2+asm.sum 1 5 (fun i -> 2*i*x))/(x+1)-asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/asm.pow(x+1,2))
+          print.ttc x (g x) (2*(2*x+asm.sum 1 5 (fun i -> i*x*x+1))*(2+asm.sum 1 5 (fun i -> 2*i*x))/(x+1)-asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/asm.pow(x+1,2))
 ```
 
 `xlet`を使うと、一度計算した級数の値を変数に保存できる
@@ -133,7 +133,7 @@ $$
           x <== 0.1*i
           //数式内の級数を評価 → 一時変数に保存
           (f x).eval()
-          print.ccc x (g x) (2*(2*x+asm.sum 1 5 (fun i -> i*x*x+1))*(2+asm.sum 1 5 (fun i -> 2*i*x))/(x+1)-asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/asm.pow(x+1,2))
+          print.ttc x (g x) (2*(2*x+asm.sum 1 5 (fun i -> i*x*x+1))*(2+asm.sum 1 5 (fun i -> 2*i*x))/(x+1)-asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/asm.pow(x+1,2))
 ```
 
 配列要素による微分
@@ -154,5 +154,5 @@ $$
             y[j] <== g (x,j)
         //微分値の確認
         iter.num N <| fun j ->
-            print.ccc j y[j] (2*j*2*x[j])
+            print.ttc j y[j] (2*j*2*x[j])
 ```

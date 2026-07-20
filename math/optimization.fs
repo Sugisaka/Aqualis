@@ -74,7 +74,7 @@ type optimization() =
                         x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
                         f f1 x1
                     b.EL <| fun () ->
-                        print.t "error: findmin"
+                        print.s "error: findmin"
             xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])
             
     /// <summary>

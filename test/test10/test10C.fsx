@@ -23,7 +23,7 @@ group.section step 1 <| fun () ->
                     x <== i
                     y1 <== 2*i+1
                     y2 <== 0.5*i*i
-                    wr [x; y1; y2]
+                    wr.tt <| x++y1++y2
         io.fileOutput "data2.dat" <| fun wr ->
             let N = 21
             iter.num N <| fun i ->
@@ -31,7 +31,7 @@ group.section step 1 <| fun () ->
                     x <== i
                     y1 <== -2*(i-10)+1
                     y2 <== 0.5*(i-10)*(i-10)
-                    wr [x; y1; y2]
+                    wr.tt <| x++y1++y2
                     
 group.section step 2 <| fun () ->
     // outputdir：読み込むデータファイルと生成するsvgファイルのディレクトリ

@@ -37,7 +37,7 @@ module memberinfo =
         
     /// メンバー配列（PHP用）
     type _Members(var:PHPdata) =
-        member _.Item with get(i:num0) = _Member(var[i])
+        member _.Item with get(i:int0) = _Member(var[i])
         member _.Item with get(i:PHPdata) = _Member(var[i])
         
     /// メンバーデータ（PHP用）

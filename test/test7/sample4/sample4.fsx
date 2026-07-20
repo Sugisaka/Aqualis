@@ -58,14 +58,14 @@ let textB = Style[font.size 30]
 let textBR = Style[font.size 30; font.color "#ff0000"]
 let lineBlack = Style[stroke.color "#000000";fill.color "none";stroke.width 3.0]
 let arrowBlack = lineBlack,Style[stroke.color "#000000";fill.color "#000000";stroke.width 3.0],3.0,20.0
-let NL = num0(Var(Dt,"",NaN))
+let NL = double0(Var(Dt,"",NaN))
 
 let ff t = 0.2+0.2*t+0.01*cos(2.0*System.Math.PI*t/0.6)+0.1*cos(2.0*System.Math.PI*t/3.4)+0.05*sin(2.0*System.Math.PI*t/2.9)
 let gg t = if abs(t) < 0.4 then 1.0 else 0.0
 
 fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voice=OFF} None <| fun () ->
-    let f(x:num0) = num0(Var(Dt,"f("+x.code+")",NaN))
-    let t = num0(Var(Dt,"t",NaN))
+    let f(x:double0) = double0(Var(Dt,"f("+x.code+")",NaN))
+    let t = double0(Var(Dt,"t",NaN))
     html.page
         [tale.AAA;
          dang.D00;]
@@ -84,8 +84,8 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             ch.D "x" <| fun x ->
                 ch.D "y" <| fun y ->
                     html.text textB  (p+position(180,320)) "x+y"
-                    html.text textBR (p+position(280,320)) <| num0.html (2*x*(-y)*asm.pow(-y,x+1))
-                    html.text textB  (p+position(180,390)) <| num0.html 
+                    html.text textBR (p+position(280,320)) <| double0.html (2*x*(-y)*asm.pow(-y,x+1))
+                    html.text textB  (p+position(180,390)) <| double0.html 
                         [asm.sin(x+y)
                          x-y]
             html.subtitle2 Style[] (p+position(100,520)) "アニメーション1"
@@ -107,10 +107,10 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
 
                 //f.image Style[] (position(0.0,0.0)) @"C:\home\contents\アルミAAA.png"
                 ch.D "t" <| fun t ->
-                    f.eq Style[] (position(0.0,40.0)) (asm.sin t)
+                    f.eqd Style[] (position(0.0,40.0)) (asm.sin t)
                 f.text Style[] (position(0.0,80.0)) "ABC"
                 /// 中心座標
-                let cx,cy = I 350, I 390
+                let cx,cy = D 350, D 390
                 let constCenter = { X = (fun _ -> cx); Y = fun _ -> cy }
                 /// 円弧の半径
                 let R = D 198.0
@@ -125,7 +125,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                 f.seq {FrameTime=6; FrameNumber=100} <| fun s ->
                     elps1.P {
                         center = constCenter
-                        angle1 = fun _ -> I 0
+                        angle1 = fun _ -> D 0
                         angle2 = fun t -> 360*t/(s.FrameNumber-1)
                         radius = fun _ -> R }
     html.page
@@ -144,7 +144,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                 ]
                 <| fun (line,arrow,circle,rectangle,text) ->
                     arrow arrowBlack [position(-0.4,-0.04);position(0.4,-0.04)]
-                    text textB (position(-0.1,-0.04)) <| "幅：" + num0.html _1
+                    text textB (position(-0.1,-0.04)) <| "幅：" + double0.html _1d
 
             html.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
                 /// 中心座標
@@ -159,8 +159,8 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                         center = {
                             X = fun t -> cx + R*asm.cos(2*asm.pi*t/s.FrameNumber)
                             Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber)}
-                        radiusX = fun _ -> I 10
-                        radiusY = fun _ -> I 10}
+                        radiusX = fun _ -> D 10
+                        radiusY = fun _ -> D 10}
     html.page
         [tale.AAA;
          dang.D00;]
@@ -171,8 +171,8 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             html.subtitle1 Style[] (p+position(80,150)) "アニメーション3"
             ch.D "x" <| fun x ->
                 ch.D "y" <| fun y ->
-                    html.text textAM (position(80,400)) <| num0.html [y === x + 1]
-                    html.text textAG (position(80,500)) <| num0.html 
+                    html.text textAM (position(80,400)) <| double0.html [y === x + 1]
+                    html.text textAG (position(80,500)) <| double0.html 
                         [y  =|= x + 1
                          NL =|= (x + 2)
                          NL =|= (x + 3)]
