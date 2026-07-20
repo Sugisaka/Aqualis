@@ -1,7 +1,7 @@
 namespace Aqualis
 
     type int3(typ:Etype,x:Expr3,?context:GenerationContext) as this=
-        inherit NumericArray3<int0,int1,int3>(typ,x,?context=context)
+        inherit NumericArray3<int0,int1,int2,int3>(typ,x,?context=context)
         new(typ,size,name,para)=
             (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
             int3(typ,Var3(size,name),?context=GenerationContext.TryCurrent)
@@ -15,6 +15,7 @@ namespace Aqualis
         new(a:int ,b:int ,c:int ,f:int0*int0*int0->int0) = int3(It 4,Arx3(I a,I b,I c,fun ijk->(f ijk).Expr))
         override _.WrapScalar value=int0 value
         override _.WrapRow value=int1(typ,value)
+        override _.WrapMatrix value=int2(typ,value)
         override _.Create(elementType,value)=int3(elementType,value)
         override _.AssignAt(i,j,k,value)=this[i,j,k] <== int0 value
         override _.clear()=this.AssignScalar(I 0)
