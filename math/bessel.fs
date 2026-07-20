@@ -9,8 +9,8 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_bessel =
         type asm with
-            static member besselj0 (x:num0) = fun code ->
-                let besselj0_ (v:num0) =
+            static member besselj0 (x:double0) = fun code ->
+                let besselj0_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
                     |C99 -> Var(Dt,"j0("+v.code+")",NaN)
@@ -22,10 +22,10 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== num0(besselj0_ x)
+                    bes <== double0(besselj0_ x)
                     code bes
-            static member bessely0 (x:num0) = fun code ->
-                let bessely0_ (v:num0) =
+            static member bessely0 (x:double0) = fun code ->
+                let bessely0_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesy0("+v.code+")",NaN)
                     |C99 -> Var(Dt,"y0("+v.code+")",NaN)
@@ -37,10 +37,10 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== num0(bessely0_(x))
+                    bes <== double0(bessely0_(x))
                     code bes
-            static member besselh0 (x:num0) = fun code ->
-                let besselj0_ (v:num0) =
+            static member besselh0 (x:double0) = fun code ->
+                let besselj0_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
                     |C99 -> Var(Dt,"j0("+v.code+")",NaN)
@@ -51,7 +51,7 @@ namespace Aqualis
                     |JavaScript -> NaN
                     |PHP -> NaN
                     |Numeric -> NaN
-                let bessely0_ (v:num0) =
+                let bessely0_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesy0("+v.code+")",NaN)
                     |C99 -> Var(Dt,"y0("+v.code+")",NaN)
@@ -63,10 +63,10 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
-                    bes <== num0(besselj0_ x)-num0(bessely0_ x)*asm.uj
+                    bes <== double0(besselj0_ x)-double0(bessely0_ x)*asm.uj
                     code bes
-            static member besselj1 (x:num0) = fun code ->
-                let besselj1_ (v:num0) =
+            static member besselj1 (x:double0) = fun code ->
+                let besselj1_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)
                     |C99 -> Var(Dt,"j1("+v.code+")",NaN)
@@ -78,10 +78,10 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== num0(besselj1_(x))
+                    bes <== double0(besselj1_(x))
                     code bes
-            static member bessely1 (x:num0) = fun code ->
-                let bessely1_ (v:num0) =
+            static member bessely1 (x:double0) = fun code ->
+                let bessely1_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesy1("+v.code+")",NaN)
                     |C99 -> Var(Dt,"y1("+v.code+")",NaN)
@@ -93,10 +93,10 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== num0(bessely1_ x)
+                    bes <== double0(bessely1_ x)
                     code bes
-            static member besselh1 (x:num0) = fun code ->
-                let besselj1_ (v:num0) =
+            static member besselh1 (x:double0) = fun code ->
+                let besselj1_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)
                     |C99 -> Var(Dt,"j1("+v.code+")",NaN)
@@ -107,7 +107,7 @@ namespace Aqualis
                     |JavaScript -> NaN
                     |PHP -> NaN
                     |Numeric -> NaN
-                let bessely1_ (v:num0) =
+                let bessely1_ (v:double0) =
                     match (GenerationScope.currentProgram()).language with
                     |Fortran -> Var(Dt,"dbesy1("+v.code+")",NaN)
                     |C99 -> Var(Dt,"y1("+v.code+")",NaN)
@@ -119,5 +119,5 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
-                    bes <== num0(besselj1_ x)-num0(bessely1_ x)*asm.uj
+                    bes <== double0(besselj1_ x)-double0(bessely1_ x)*asm.uj
                     code bes

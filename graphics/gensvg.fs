@@ -45,13 +45,13 @@ type gensvg =
     static member style(fillcolor:color.fill,strokecolor:color.stroke) =
         let style_fill =
             match fillcolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0) -> 
+              |Some(r:int0,g:int0,b:int0,a:double0) -> 
                   "fill:rgb("++r++","++g++","++b++");fill-opacity:"++a++";"
               |None ->
                   st "fill:none;"
         let style_stroke =
             match strokecolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) ->
+              |Some(r:int0,g:int0,b:int0,a:double0,width:double0,dash:double0 list) ->
                   "stroke:rgb("++r++","++g++","++b++");stroke-opacity:"++a++";stroke-width:"++width++
                   (match dash with |[] -> "" |_ -> ";stroke-dasharray:")++
                   (dash |> List.fold (fun acc x -> acc++x++" ") (st " "))++";"
@@ -61,14 +61,14 @@ type gensvg =
     static member style(strokecolor:color.stroke) =
         let style_stroke =
             match strokecolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) -> 
+              |Some(r:int0,g:int0,b:int0,a:double0,width:double0,dash:double0 list) -> 
                   "stroke:rgb("++r++","++g++","++b++");stroke-opacity:"++a++";stroke-width:"++width++
                   (match dash with |[] -> "" |_ -> ";stroke-dasharray:")++
                   (dash |> List.fold (fun acc x -> acc++x++" ") (st " "))++";"
               |None -> st "stroke:none;"
         "style=\""++style_stroke++"\""
         
-    static member line(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,x2:num0,y2:num0,strokecolor) =
+    static member line(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,x2:double0,y2:double0,strokecolor) =
         let x1 = 0.5*cvx+x1
         let y1 = 0.5*cvy-y1
         let x2 = 0.5*cvx+x2
@@ -78,8 +78,8 @@ type gensvg =
         wr <| gensvg.style strokecolor
         wr <| st "/>"
         
-    static member line3D(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,p3D:Setting3D,strokecolor) =
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+    static member line3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,p3D:Setting3D,strokecolor) =
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         let xs,ys = xy3D x1 y1 z1
@@ -106,7 +106,7 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member polygon(cvx,cvy,wr:exprString -> unit,px:num1,py:num1,fillcolor,strokecolor) =
+    static member polygon(cvx,cvy,wr:exprString -> unit,px:double1,py:double1,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         iter.range _1 px.size1 <| fun i ->
             let pxi = 0.5*cvx+px.[i-1]
@@ -120,7 +120,7 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member polygon(cvx,cvy,wr:exprString -> unit,px:num0 list,py:num0 list,fillcolor,strokecolor) =
+    static member polygon(cvx,cvy,wr:exprString -> unit,px:double0 list,py:double0 list,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         for i in 0..px.Length-1 do
             let pxi = 0.5*cvx+px.[i]
@@ -133,7 +133,7 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member polygon(cvx,cvy,wr:exprString -> unit,pxy:(num0*num0) list,fillcolor,strokecolor) =
+    static member polygon(cvx,cvy,wr:exprString -> unit,pxy:(double0*double0) list,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         for i in 0..pxy.Length-1 do
             let (px,py) = pxy[i]
@@ -178,8 +178,8 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member polygon3D(cvx,cvy,wr:exprString -> unit,px:num1,py:num1,pz:num1,p3D:Setting3D,fillcolor,strokecolor) =
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+    static member polygon3D(cvx,cvy,wr:exprString -> unit,px:double1,py:double1,pz:double1,p3D:Setting3D,fillcolor,strokecolor) =
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
@@ -194,7 +194,7 @@ type gensvg =
                 wr <| " L "++pxi++","++pyi
         wr <| st "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member circle(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,r:num0,fillcolor,strokecolor) =
+    static member circle(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,r:double0,fillcolor,strokecolor) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
         wr <| st "<circle "
@@ -204,7 +204,7 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member circle(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,r:num0,t1:num0,t2:num0,strokecolor) =
+    static member circle(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,r:double0,t1:double0,t2:double0,strokecolor) =
         let pi = Math.PI
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
@@ -221,8 +221,8 @@ type gensvg =
         wr <| gensvg.style(color.fill.none,strokecolor)
         wr <| st "/>"
         
-    static member circle3D(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,p3D:Setting3D,fillcolor,strokecolor) =
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+    static member circle3D(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,p3D:Setting3D,fillcolor,strokecolor) =
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         let xs,ys = xy3D cx cy cz
@@ -235,8 +235,8 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member circle3D(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,t1:num0,t2:num0,p3D:Setting3D,fillcolor,strokecolor) =
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+    static member circle3D(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,t1:double0,t2:double0,p3D:Setting3D,fillcolor,strokecolor) =
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         let xs,ys = xy3D cx cy cz
@@ -255,8 +255,8 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member circle3Dxy(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+    static member circle3Dxy(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,n:int0,p3D:Setting3D,fillcolor,strokecolor) =
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
@@ -274,8 +274,8 @@ type gensvg =
                     wr <| " L "++pxi++","++pyi
         wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member circle3Dyz(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+    static member circle3Dyz(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,n:int0,p3D:Setting3D,fillcolor,strokecolor) =
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
@@ -293,8 +293,8 @@ type gensvg =
                     wr <| st " L "++pxi++","++pyi
         wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member circle3Dzx(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,n:num0,p3D:Setting3D,fillcolor,strokecolor) =
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+    static member circle3Dzx(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,n:int0,p3D:Setting3D,fillcolor,strokecolor) =
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
@@ -312,7 +312,7 @@ type gensvg =
                     wr <| " L "++pxi++","++pyi
         wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member ellipse(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,rx:num0,ry:num0,fillcolor,strokecolor) =
+    static member ellipse(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,rx:double0,ry:double0,fillcolor,strokecolor) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
         wr <| st "<ellipse"
@@ -323,7 +323,7 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member rectangle(cvx,cvy,wr:exprString -> unit,x:num0,y:num0,width:num0,height:num0,fillcolor,strokecolor) =
+    static member rectangle(cvx,cvy,wr:exprString -> unit,x:double0,y:double0,width:double0,height:double0,fillcolor,strokecolor) =
         let x = 0.5*cvx+x-0.5*width
         let y = 0.5*cvy-y-0.5*height
         wr <| st "<rect"
@@ -334,9 +334,9 @@ type gensvg =
         wr <| gensvg.style(fillcolor,strokecolor)
         wr <| st "/>"
         
-    static member triangle3D(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3:num0,y3:num0,z3:num0,p3D:Setting3D,fillcolor,strokecolor) =
+    static member triangle3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3:double0,y3:double0,z3:double0,p3D:Setting3D,fillcolor,strokecolor) =
         let pi = Math.PI
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
@@ -358,9 +358,9 @@ type gensvg =
         wr <| " L "++pxi++","++pyi
         wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member quadrangle3D(cvx,cvy,wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3:num0,y3:num0,z3:num0,x4:num0,y4:num0,z4:num0,p3D:Setting3D,fillcolor,strokecolor) =
+    static member quadrangle3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3:double0,y3:double0,z3:double0,x4:double0,y4:double0,z4:double0,p3D:Setting3D,fillcolor,strokecolor) =
         let pi = Math.PI
-        let xy3D (x:num0) (y:num0) (z:num0) = 
+        let xy3D (x:double0) (y:double0) (z:double0) = 
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
@@ -386,16 +386,16 @@ type gensvg =
         wr <| " L "++pxi++","++pyi
         wr <| "\" "++gensvg.style(fillcolor,strokecolor)++"/>"
         
-    static member text(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,text:exprString,size:num0,font:Font,textAnchor:TextAnchor,rotation:double option,fillcolor:color.fill,strokecolor:color.stroke) =
+    static member text(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0,font:Font,textAnchor:TextAnchor,rotation:double option,fillcolor:color.fill,strokecolor:color.stroke) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
         let style_fill =
             match fillcolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0) -> "fill:rgb("++r++","++g++","++b++"); fill-opacity:"++a++"; "
+              |Some(r:int0,g:int0,b:int0,a:double0) -> "fill:rgb("++r++","++g++","++b++"); fill-opacity:"++a++"; "
               |None -> st "fill:none; "
         let style_stroke =
             match strokecolor.col with
-              |Some(r:num0,g:num0,b:num0,a:num0,width:num0,dash:num0 list) -> 
+              |Some(r:int0,g:int0,b:int0,a:double0,width:double0,dash:double0 list) -> 
                   "stroke:rgb("++r++","++g++","++b++"); stroke-opacity:"++a++"; stroke-width:"++
                   width++(match dash with |[] -> "" |_ -> "; stroke-dasharray:")++
                   (dash |> List.fold (fun acc x -> acc++x++" ") (exprString ""))++"; "
@@ -422,7 +422,7 @@ type gensvg =
         wr <| text
         wr <| st "</text>"
         
-    static member text(cvx,cvy,wr:exprString -> unit,cx:num0,cy:num0,text:exprString,size:num0,fillcolor,strokecolor) =
+    static member text(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0,fillcolor,strokecolor) =
         gensvg.text(cvx,cvy,wr,cx,cy,text,size,TimesNewRoman,Left,None,fillcolor,strokecolor)
         
 type svgfilemaker(cvx:double,cvy:double,writer:StreamWriter,scale:double) =
@@ -699,7 +699,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p1">始点</param>
     /// <param name="p2">終点</param>
     /// <param name="strokecolor">線色</param>
-    member this.line(p1:num0*num0, p2:num0*num0, strokecolor:color.stroke) = 
+    member this.line(p1:double0*double0, p2:double0*double0, strokecolor:color.stroke) = 
         let x1, y1 = p1
         let x2, y2 = p2
         gensvg.line(cvx,cvy,wr,scale*x1,scale*y1,scale*x2,scale*y2,strokecolor)
@@ -742,7 +742,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.polygon(pp, fillcolor, strokecolor) = 
-        let (px:num0 list, py:num0 list) = pp
+        let (px:double0 list, py:double0 list) = pp
         let spx = List.map (fun x -> scale*x) px
         let spy = List.map (fun y -> scale*y) py
         gensvg.polygon(cvx,cvy,wr,spx,spy,fillcolor,strokecolor)
@@ -753,7 +753,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.polygon(p, fillcolor, strokecolor) =
-        let (px:num1, py:num1) = p
+        let (px:double1, py:double1) = p
         if scale=1.0 then
             gensvg.polygon(cvx,cvy,wr,px,py,fillcolor,strokecolor)
         else
@@ -783,7 +783,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
     member this.polygon3D(p, p3D:Setting3D, fillcolor, strokecolor) = 
-        let (px:num1, py:num1, pz:num1) = p
+        let (px:double1, py:double1, pz:double1) = p
         if scale=1.0 then
             gensvg.polygon3D(cvx,cvy,wr,px,py,pz,p3D,fillcolor,strokecolor)
         else
@@ -801,7 +801,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p2">終点</param>
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="strokecolor">線色</param>
-    member this.line3D(p1:num0*num0*num0, p2:num0*num0*num0, p3D:Setting3D, strokecolor:color.stroke) = 
+    member this.line3D(p1:double0*double0*double0, p2:double0*double0*double0, p3D:Setting3D, strokecolor:color.stroke) = 
         let x1, y1, z1 = p1
         let x2, y2, z2 = p2
         gensvg.line3D(cvx,cvy,wr,scale*x1,scale*y1,scale*z1,scale*x2,scale*y2,scale*z2,p3D,strokecolor)
@@ -822,7 +822,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="r">半径</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle(c:num0*num0, r:num0, fillcolor, strokecolor) = 
+    member this.circle(c:double0*double0, r:double0, fillcolor, strokecolor) = 
         let cx, cy = c
         gensvg.circle(cvx,cvy,wr,scale*cx,scale*cy,scale*r,fillcolor,strokecolor)
     /// <summary>
@@ -843,7 +843,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="r">半径</param>
     /// <param name="t">開始,終了角[°]</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle(c:num0*num0, r:num0, t, strokecolor) = 
+    member this.circle(c:double0*double0, r:double0, t, strokecolor) = 
         let cx, cy = c
         let t1, t2 = t
         gensvg.circle(cvx,cvy,wr,scale*cx,scale*cy,scale*r,t1,t2,strokecolor)
@@ -867,7 +867,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3D(c:num0*num0*num0, r:num0, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3D(c:double0*double0*double0, r:double0, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         let x3D,y3D,z3D = p3D.DirX,p3D.DirY,p3D.DirZ
         gensvg.circle3D(cvx,cvy,wr,scale*cx,scale*cy,scale*cz,scale*r,p3D,fillcolor,strokecolor)
@@ -893,7 +893,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3D(c:num0*num0*num0, r:num0, t, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3D(c:double0*double0*double0, r:double0, t, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         let t1, t2 = t
         gensvg.circle3D(cvx,cvy,wr,scale*cx,scale*cy,scale*cz,scale*r,t1,t2,p3D,fillcolor,strokecolor)
@@ -906,7 +906,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3Dxy(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3Dxy(c:double0*double0*double0, r:double0, n, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         gensvg.circle3Dxy(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,I n,p3D,fillcolor,strokecolor)
     /// <summary>
@@ -918,7 +918,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3Dxy(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3Dxy(c:double0*double0*double0, r:double0, n, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         gensvg.circle3Dxy(cvx,cvy,wr, scale*cx, scale*cy, scale*cz, scale*r, n, p3D,fillcolor,strokecolor)
     /// <summary>
@@ -930,7 +930,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3Dyz(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3Dyz(c:double0*double0*double0, r:double0, n, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         gensvg.circle3Dyz(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,I n,p3D,fillcolor,strokecolor)
     /// <summary>
@@ -942,7 +942,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3Dyz(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3Dyz(c:double0*double0*double0, r:double0, n, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         gensvg.circle3Dyz(cvx,cvy,wr, scale*cx, scale*cy, scale*cz, scale*r, n, p3D,fillcolor,strokecolor)
     /// <summary>
@@ -954,7 +954,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3Dzx(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3Dzx(c:double0*double0*double0, r:double0, n, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         gensvg.circle3Dzx(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,I n,p3D,fillcolor,strokecolor)
     /// <summary>
@@ -966,7 +966,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.circle3Dzx(c:num0*num0*num0, r:num0, n, p3D:Setting3D, fillcolor,strokecolor) = 
+    member this.circle3Dzx(c:double0*double0*double0, r:double0, n, p3D:Setting3D, fillcolor,strokecolor) = 
         let cx, cy, cz = c
         gensvg.circle3Dzx(cvx,cvy,wr, scale*cx, scale*cy, scale*cz, scale*r, n, p3D,fillcolor,strokecolor)
     /// <summary>
@@ -987,7 +987,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="r">半径[x,y]</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.ellipse(c:num0*num0, r:num0*num0, fillcolor, strokecolor) = 
+    member this.ellipse(c:double0*double0, r:double0*double0, fillcolor, strokecolor) = 
         let cx, cy = c
         let rx, ry = r
         gensvg.ellipse(cvx,cvy,wr,scale*cx,scale*cy,scale*rx,scale*ry,fillcolor,strokecolor)
@@ -1009,7 +1009,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="s">サイズ</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.rectangle(c:num0*num0, s:num0*num0, fillcolor, strokecolor) = 
+    member this.rectangle(c:double0*double0, s:double0*double0, fillcolor, strokecolor) = 
         let cx, cy = c
         let width, height = s
         gensvg.rectangle(cvx,cvy,wr,scale*cx,scale*cy,scale*width,scale*height,fillcolor,strokecolor)
@@ -1021,7 +1021,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="size">サイズ</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.text(c:num0*num0,text:num0,size, fillcolor, strokecolor) = 
+    member this.text(c:double0*double0,text:double0,size, fillcolor, strokecolor) = 
         let cx,cy = c
         gensvg.text(cvx,cvy,wr,scale*cx,scale*cy,exprString text,D size,fillcolor,strokecolor)
     /// <summary>
@@ -1032,7 +1032,7 @@ type svgfilemaker_aq(cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     /// <param name="size">サイズ</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.text(c:num0*num0,text:num0,size, font, textAnchor, rot, fillcolor, strokecolor) = 
+    member this.text(c:double0*double0,text:double0,size, font, textAnchor, rot, fillcolor, strokecolor) = 
         let cx, cy = c
         gensvg.text(cvx,cvy,wr,D scale*cx,D scale*cy,exprString text,D size, font, textAnchor, rot, fillcolor,strokecolor)
         
@@ -1062,8 +1062,8 @@ type svgfile =
     /// </summary>
     /// <param name="filename">ファイル名</param>
     static member make (filename:exprString) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
-        io.codeOutput filename <| fun wr ->
-            let sv = svgfilemaker_aq(cvx,cvy,wr,scale)
+        io.fileOutput filename <| fun wr ->
+            let sv = svgfilemaker_aq(cvx,cvy,wr.cc,scale)
             sv.header <| fun sv ->
                 code sv
 
@@ -1072,7 +1072,7 @@ type svgfile =
     /// </summary>
     /// <param name="filename">ファイル名</param>
     static member make (filename:string) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
-        io.codeOutput filename <| fun wr ->
-            let sv = svgfilemaker_aq(cvx,cvy,wr,scale)
+        io.fileOutput filename <| fun wr ->
+            let sv = svgfilemaker_aq(cvx,cvy,wr.cc,scale)
             sv.header <| fun sv ->
                 code sv

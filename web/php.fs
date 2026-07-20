@@ -17,7 +17,9 @@ type PHPbool(x:string) =
 
 type PHPdata(x:list<reduceExprString>) =
     new(x:string) = PHPdata [RStr x]
-    new(x:num0) = PHPdata [RNvr x.Expr]
+    new(x:int0) = PHPdata [RNvr x.Expr]
+    new(x:double0) = PHPdata [RNvr x.Expr]
+    new(x:complex0) = PHPdata [RNvr x.Expr]
     member _.data with get() = x
     member this.extcode(pr:program) = "<?php echo " + this.code + "; ?>"
     static member var x = PHPdata [RNvr(Var(Nt,"$"+x,NaN))]
@@ -25,7 +27,15 @@ type PHPdata(x:list<reduceExprString>) =
         let v = PHPdata.var x
         v <== init
         v
-    static member var (x,init:num0) =
+    static member var (x,init:int0) =
+        let v = PHPdata.var x
+        v <== init
+        v
+    static member var (x,init:double0) =
+        let v = PHPdata.var x
+        v <== init
+        v
+    static member var (x,init:complex0) =
         let v = PHPdata.var x
         v <== init
         v
@@ -38,12 +48,24 @@ type PHPdata(x:list<reduceExprString>) =
         v <== D init
         v
     static member f(s:string) = PHPdata [RNvr(Var(Nt,s,NaN))]
-    member this.num0 with get() =
+    member this.int0 with get() =
         match x with
-        |[RNvr c] -> num0 c
+        |[RNvr c] -> int0 c
         |_ ->
             printfn "num0に変換できません：%s" <| this.toString(".",StrQuotation)
-            num0 NaN
+            int0 NaN
+    member this.double0 with get() =
+        match x with
+        |[RNvr c] -> double0 c
+        |_ ->
+            printfn "num0に変換できません：%s" <| this.toString(".",StrQuotation)
+            double0 NaN
+    member this.complex0 with get() =
+        match x with
+        |[RNvr c] -> complex0 c
+        |_ ->
+            printfn "num0に変換できません：%s" <| this.toString(".",StrQuotation)
+            complex0 NaN
 
     /// 配列を生成
     static member array() = PHPdata.f "array()"
@@ -79,11 +101,15 @@ type PHPdata(x:list<reduceExprString>) =
     // member this.push (x:num0) = this.push [PHPdata x]
     // member this.push (x:list<exprString>) = writein ("<?php array_push(" + this.code + ", " + String.Join(",",x |> List.map(fun q -> q.toString("",Direct))) + "); ?>")
     ///配列に要素を複数追加
-    member this.push (x:list<num0>) = hwritein ("<?php ", "array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:num0) -> q.code) x) + "); ?>")
+    member this.push (x:list<int0>) = hwritein ("<?php ", "array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:int0) -> q.code) x) + "); ?>")
+    member this.push (x:list<double0>) = hwritein ("<?php ", "array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:double0) -> q.code) x) + "); ?>")
+    member this.push (x:list<complex0>) = hwritein ("<?php ", "array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:complex0) -> q.code) x) + "); ?>")
     ///配列に文字列要素を複数追加
     member this.push (x:list<string>) = this.push (List.map(fun (q:string) -> PHPdata q) x)
     ///配列に要素を追加
-    member this.push (x:num0) = this.push [x]
+    member this.push (x:int0) = this.push [x]
+    member this.push (x:double0) = this.push [x]
+    member this.push (x:complex0) = this.push [x]
     ///配列に文字列要素を追加
     member this.push (x:string) = this.push [x]
     member this.toString(c:string,op:ExprConcatOption) =
@@ -99,14 +125,17 @@ type PHPdata(x:list<reduceExprString>) =
     member this.Item(i:PHPdata) = PHPdata [RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN))]
     member this.Item(i:int) = this[PHPdata [RNvr(Int i)]]
     member this.Item(i:string) = this[PHPdata [RStr i]]
-    member this.Item(i:num0) = this[PHPdata[RNvr i.Expr]]
+    member this.Item(i:int0) = this[PHPdata[RNvr i.Expr]]
+    member this.Item(i:double0) = this[PHPdata[RNvr i.Expr]]
+    member this.Item(i:complex0) = this[PHPdata[RNvr i.Expr]]
     member this.code with get() = this.toString(".",StrQuotation)
     member this.phpcode with get() = "<?php echo " + this.code + " ?>"
     static member (++) (a:PHPdata,b:PHPdata) = PHPdata(a.data@b.data)
     static member (++) (a:string,b:PHPdata) = PHPdata a ++ b
     static member (++) (a:PHPdata,b:string) = a ++ PHPdata b
-    static member (++) (a:PHPdata,b:num0) = a ++ PHPdata b
-
+    static member (++) (a:PHPdata,b:int0) = a ++ PHPdata b
+    static member (++) (a:PHPdata,b:double0) = a ++ PHPdata b
+    static member (++) (a:PHPdata,b:complex0) = a ++ PHPdata b
 
     member this.foreach code =
         ch.i <| fun i ->
@@ -122,25 +151,39 @@ type PHPdata(x:list<reduceExprString>) =
             php.phpcode <| fun () -> writei "endforeach;"
     static member (<==) (a:PHPdata,b:PHPdata) = hwritein ("<?php ", a.code + " = " + b.code + "; ?>")
     static member (<==) (a:PHPdata,b:string) = a <== PHPdata b
-    static member (<==) (a:PHPdata,b:num0) = a <== PHPdata b
+    static member (<==) (a:PHPdata,b:int0) = a <== PHPdata b
+    static member (<==) (a:PHPdata,b:double0) = a <== PHPdata b
+    static member (<==) (a:PHPdata,b:complex0) = a <== PHPdata b
     static member (<==) (a:PHPdata,b:int) = a <== PHPdata (I b)
-    static member (<==) (a:num0,b:PHPdata) = PHPdata a <== b
-    static member (.=) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .= num0(Var(Nt,b.code,NaN))
-    static member (.=) (a:PHPdata,b:num0) = a .= PHPdata b
-    static member (.=) (a:PHPdata,b:int) = a .= PHPdata (I b)
+    static member (<==) (a:int0,b:PHPdata) = PHPdata a <== b
+    static member (<==) (a:double0,b:PHPdata) = PHPdata a <== b
+    static member (<==) (a:complex0,b:PHPdata) = PHPdata a <== b
+    static member (.=) (a:PHPdata,b:PHPdata) = bool0(Eq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    static member (.=) (a:PHPdata,b:int0) = bool0(Eq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.=) (a:PHPdata,b:double0) = bool0(Eq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.=) (a:PHPdata,b:int) = bool0(Eq(Var(Nt,a.code,NaN),Int b))
     static member (.=) (a:PHPdata,b:string) = a .= PHPdata b
-    static member (.=/) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .=/ num0(Var(Nt,b.code,NaN))
-    static member (.=/) (a:PHPdata,b:num0) = a .=/ PHPdata b
-    static member (.=/) (a:PHPdata,b:int) = a .=/ PHPdata (I b)
+    static member (.=/) (a:PHPdata,b:PHPdata) = bool0(NEq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    static member (.=/) (a:PHPdata,b:int0) = bool0(NEq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.=/) (a:PHPdata,b:double0) = bool0(NEq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.=/) (a:PHPdata,b:int) = bool0(NEq(Var(Nt,a.code,NaN),Int b))
     static member (.=/) (a:PHPdata,b:string) = a .=/ PHPdata b
-    static member (.<) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .< num0(Var(Nt,b.code,NaN))
-    static member (.<) (a:PHPdata,b:int) = a .< PHPdata (I b)
-    static member (.<=) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .<= num0(Var(Nt,b.code,NaN))
-    static member (.<=) (a:PHPdata,b:int) = a .<= PHPdata (I b)
-    static member (.>) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .> num0(Var(Nt,b.code,NaN))
-    static member (.>) (a:PHPdata,b:int) = a .> PHPdata (I b)
-    static member (.>=) (a:PHPdata,b:PHPdata) = num0(Var(Nt,a.code,NaN)) .>= num0(Var(Nt,b.code,NaN))
-    static member (.>=) (a:PHPdata,b:int) = a .>= PHPdata (I b)
+    static member (.<) (a:PHPdata,b:PHPdata) = bool0(Less(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    static member (.<) (a:PHPdata,b:int0) = bool0(Less(Var(Nt,a.code,NaN),b.Expr))
+    static member (.<) (a:PHPdata,b:double0) = bool0(Less(Var(Nt,a.code,NaN),b.Expr))
+    static member (.<) (a:PHPdata,b:int) = bool0(Less(Var(Nt,a.code,NaN),Int b))
+    static member (.<=) (a:PHPdata,b:PHPdata) = bool0(LessEq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    static member (.<=) (a:PHPdata,b:int0) = bool0(LessEq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.<=) (a:PHPdata,b:double0) = bool0(LessEq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.<=) (a:PHPdata,b:int) = bool0(LessEq(Var(Nt,a.code,NaN),Int b))
+    static member (.>) (a:PHPdata,b:PHPdata) = bool0(Greater(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    static member (.>) (a:PHPdata,b:int0) = bool0(Greater(Var(Nt,a.code,NaN),b.Expr))
+    static member (.>) (a:PHPdata,b:double0) = bool0(Greater(Var(Nt,a.code,NaN),b.Expr))
+    static member (.>) (a:PHPdata,b:int) = bool0(Greater(Var(Nt,a.code,NaN),Int b))
+    static member (.>=) (a:PHPdata,b:PHPdata) = bool0(GreaterEq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    static member (.>=) (a:PHPdata,b:int0) = bool0(GreaterEq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.>=) (a:PHPdata,b:double0) = bool0(GreaterEq(Var(Nt,a.code,NaN),b.Expr))
+    static member (.>=) (a:PHPdata,b:int) = bool0(GreaterEq(Var(Nt,a.code,NaN),Int b))
 
 and php =
     /// phpファイルを生成
@@ -170,7 +213,9 @@ and php =
     /// 文字列を表示
     static member echo (x:string) = php.echo (PHPdata x)
     /// 変数を表示
-    static member echo (x:num0) = php.echo (PHPdata x)
+    static member echo (x:int0) = php.echo (PHPdata x)
+    static member echo (x:double0) = php.echo (PHPdata x)
+    static member echo (x:complex0) = php.echo (PHPdata x)
     /// ファイル内のテキストを取得
     static member file_get_contents (filename:PHPdata) = PHPdata.f("file_get_contents(" + filename.code + ")")
     static member file_get_contents (filename:string) = php.file_get_contents (PHPdata filename)
@@ -186,7 +231,9 @@ and php =
     static member array_column(data:PHPdata,id:PHPdata) = PHPdata.f("array_column("+data.code+","+id.code+")")
     /// 指定した要素が含まれているか判定
     static member in_array_strict(s:PHPdata, idArray:PHPdata) = bool0(Var(Nt, "in_array("+s.code+", "+idArray.code+", true)",NaN))
-    static member in_array_strict(s:num0, idArray:PHPdata) = php.in_array_strict(PHPdata s, idArray)
+    static member in_array_strict(s:int0, idArray:PHPdata) = php.in_array_strict(PHPdata s, idArray)
+    static member in_array_strict(s:double0, idArray:PHPdata) = php.in_array_strict(PHPdata s, idArray)
+    static member in_array_strict(s:complex0, idArray:PHPdata) = php.in_array_strict(PHPdata s, idArray)
     /// 指定した要素の配列内でのインデックス（キー）を検索
     static member array_search(s:PHPdata, idArray:PHPdata) = PHPdata.f("array_search("+s.code+", "+idArray.code+")")
     /// ファイル内のテキストを配列に格納
@@ -199,7 +246,9 @@ and php =
     /// ファイルに書き込み
     static member fwrite(fp:PHPdata,t:PHPdata) = php.phpcode <| fun () -> writei("fwrite("+fp.code+", "+t.code+");")
     /// ファイルに書き込み
-    static member fwrite(fp:PHPdata,t:num0) = php.fwrite(fp, PHPdata t)
+    static member fwrite(fp:PHPdata,t:int0) = php.fwrite(fp, PHPdata t)
+    static member fwrite(fp:PHPdata,t:double0) = php.fwrite(fp, PHPdata t)
+    static member fwrite(fp:PHPdata,t:complex0) = php.fwrite(fp, PHPdata t)
     /// ファイルに書き込み
     static member fwrite(fp:PHPdata,t:string) = php.fwrite(fp, PHPdata t)
     /// ファイルに書き込み
@@ -207,7 +256,9 @@ and php =
     /// ファイルにShift-JISで書き込み
     static member fwrite_SJIS(fp:PHPdata,t:PHPdata) = php.phpcode <| fun () -> writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
     /// ファイルにShift-JISで書き込み
-    static member fwrite_SJIS(fp:PHPdata,t:num0) = php.phpcode <| fun () -> writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
+    static member fwrite_SJIS(fp:PHPdata,t:int0) = php.phpcode <| fun () -> writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
+    static member fwrite_SJIS(fp:PHPdata,t:double0) = php.phpcode <| fun () -> writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
+    static member fwrite_SJIS(fp:PHPdata,t:complex0) = php.phpcode <| fun () -> writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
     /// ファイルにShift-JISで書き込み
     static member fwrite_SJIS(fp:PHPdata,t:string) = php.phpcode <| fun () -> writei("fwrite("+fp.code+", mb_convert_encoding(\""+t+"\", 'SJIS-win', 'UTF-8'));")
     /// ファイルを閉じる
@@ -246,7 +297,7 @@ and php =
     /// 整数に丸め
     static member round(x:PHPdata) = PHPdata.f("round("+x.code+")")
     /// 整数に丸め
-    static member round(x:num0) = php.round(PHPdata x)
+    static member round(x:double0) = php.round(PHPdata x)
     /// 文字列切り出し
     static member substr(x:PHPdata,n:PHPdata) = PHPdata.f("substr("+x.code+","+n.code+")")
     /// 文字列切り出し
@@ -272,9 +323,9 @@ and php =
     /// 配列のソート
     static member sort(data:PHPdata) = php.phpcode <| fun () -> writei("sort("+data.code+");")
     /// 整数に変換
-    static member toint(x:PHPdata) = num0(Var(It 4, "(int)"+x.code, NaN))
+    static member toint(x:PHPdata) = int0(Var(It 4, "(int)"+x.code, NaN))
     /// 配列要素数
-    static member count(x:PHPdata) = num0(Var(It 4, "count("+x.code+")", NaN))
+    static member count(x:PHPdata) = int0(Var(It 4, "count("+x.code+")", NaN))
     /// 拡張子を除いたファイル名
     static member filename_withoutExtension(x:PHPdata) = PHPdata.f("pathinfo("+x.code+", PATHINFO_FILENAME)")
     /// ファイル削除
@@ -353,7 +404,13 @@ and php =
 [<AutoOpen>]
 module num0ForPHP =
 
-    type num0 with
+    type int0 with
+        member this.phpdata with get() = PHPdata [RNvr this.Expr]
+
+    type double0 with
+        member this.phpdata with get() = PHPdata [RNvr this.Expr]
+        
+    type complex0 with
         member this.phpdata with get() = PHPdata [RNvr this.Expr]
 
     // type num1 with

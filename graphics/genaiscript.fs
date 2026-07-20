@@ -10,7 +10,7 @@ open System.IO
 open System.Text
 
 type genaiscript =
-    static member header(wr:exprString -> unit,scale:num0) =
+    static member header(wr:exprString -> unit,scale:double0) =
         wr <| st "var pi = 3.1415926535897932;"
         wr ("var s = "++scale++";")
         //直線を引く関数
@@ -389,10 +389,10 @@ type genaiscript =
         let st,sr,sg,sb,lw = match strokecolor.col with |None -> "false",_0,_0,_0,_0d |Some(r,g,b,_,lw,da) -> "true",r,g,b,lw
         lw++", "++st++", "++sr++", "++sg++", "++sb++", "
         
-    static member line(wr:exprString -> unit,x1:num0,y1:num0,x2:num0,y2:num0,strokecolor) =
+    static member line(wr:exprString -> unit,x1:double0,y1:double0,x2:double0,y2:double0,strokecolor) =
         wr <| "line("++x1++"*s, "++y1++"*s, "++x2++"*s, "++y2++"*s, "++genaiscript.style strokecolor++");"
 
-    static member line3D(wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3D:num0,y3D:num0,z3D:num0,strokecolor) =
+    static member line3D(wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3D:double0,y3D:double0,z3D:double0,strokecolor) =
         wr <| "line3d("++x1++"*s, "++y1++"*s, "++z1++"*s, "++x2++"*s, "++y2++"*s, "++z2++"*s, "++x3D++", "++y3D++", "++z3D++", "++genaiscript.style strokecolor++");"
 
     static member polygon(wr:exprString -> unit,px:double list,py:double list,fillcolor,strokecolor) =
@@ -406,7 +406,7 @@ type genaiscript =
         wr <| "    "++D py[py.Length-1]++"]"
         wr <| "polygon(apex_x, apex_y, s, "++genaiscript.style(fillcolor,strokecolor)++");"
         
-    static member polygon(wr:exprString -> unit,px:num1,py:num1,fillcolor,strokecolor) =
+    static member polygon(wr:exprString -> unit,px:double1,py:double1,fillcolor,strokecolor) =
         wr <| st "apex_x=["
         iter.range _1 (px.size1-1) <| fun i ->
             wr <| "    "++px[i-1]++","
@@ -417,7 +417,7 @@ type genaiscript =
         wr <| "    "++py[py.size1-1]++"]"
         wr <| "polygon(apex_x, apex_y, s, "++genaiscript.style(fillcolor,strokecolor)++");"
         
-    static member polygon3D(wr:exprString -> unit,px:double list,py:double list,pz:double list,x3D:num0,y3D:num0,z3D:num0,fillcolor,strokecolor) =
+    static member polygon3D(wr:exprString -> unit,px:double list,py:double list,pz:double list,x3D:double0,y3D:double0,z3D:double0,fillcolor,strokecolor) =
         wr <| st "apex_x=["
         for i in 0..px.Length-2 do
             wr <| st "    "++D px[i]++","
@@ -432,7 +432,7 @@ type genaiscript =
         wr <| "    "++D pz[pz.Length-1]++"]"
         wr <| "polygon3D(apex_x, apex_y, apex_z, s, "++x3D++", "++y3D++", "++z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
         
-    static member polygon3D(wr:exprString -> unit,px:num1,py:num1,pz:num1,x3D:num0,y3D:num0,z3D:num0,fillcolor,strokecolor) =
+    static member polygon3D(wr:exprString -> unit,px:double1,py:double1,pz:double1,x3D:double0,y3D:double0,z3D:double0,fillcolor,strokecolor) =
         wr <| st "apex_x=["
         iter.range _1 (px.size1-1) <| fun i ->
             wr <| "    "++px[i-1]++","
@@ -447,34 +447,34 @@ type genaiscript =
         wr <| "    "++pz[pz.size1-1]++"]"
         wr <| "polygon3D(apex_x, apex_y, apex_z, s, "++x3D++", "++y3D++", "++z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
         
-    static member circle(wr:exprString -> unit,cx:num0,cy:num0,r:num0,fillcolor,strokecolor) =
+    static member circle(wr:exprString -> unit,cx:double0,cy:double0,r:double0,fillcolor,strokecolor) =
         wr <| "circle("++cx++"*s, "++cy++"*s, "++r++"*s, "++genaiscript.style(fillcolor,strokecolor)++");"
         
-    static member circle3D(wr:exprString -> unit,cx:num0,cy:num0,cz:num0,r:num0,x3D:num0,y3D:num0,z3D:num0,fillcolor,strokecolor) =
+    static member circle3D(wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,x3D:double0,y3D:double0,z3D:double0,fillcolor,strokecolor) =
         wr <| st "circle3d("++cx++"*s, "++cy++"*s, "++cz++"*s, "++r++"*s, "++x3D++", "++y3D++", ";z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
 
-    static member circle3Dxy(wr:exprString -> unit,x:num0,y:num0,z:num0,r:num0,n:num0,fillcolor,strokecolor) =
+    static member circle3Dxy(wr:exprString -> unit,x:double0,y:double0,z:double0,r:double0,n:int0,fillcolor,strokecolor) =
         wr <| st "circle3Dxy("++x++", "++y++", "++z++", "++r++", ";n++", s, "++genaiscript.style(fillcolor,strokecolor)++");"
         
-    static member circle3Dyz(wr:exprString -> unit,x:num0,y:num0,z:num0,r:num0,n:num0,fillcolor,strokecolor) =
+    static member circle3Dyz(wr:exprString -> unit,x:double0,y:double0,z:double0,r:double0,n:int0,fillcolor,strokecolor) =
         wr <| st "circle3Dyz("++x++", "++y++", "++z++", "++r++", ";n++", s, "++genaiscript.style(fillcolor,strokecolor)++");"
         
-    static member circle3Dzx(wr:exprString -> unit,x:num0,y:num0,z:num0,r:num0,n:num0,fillcolor,strokecolor) =
+    static member circle3Dzx(wr:exprString -> unit,x:double0,y:double0,z:double0,r:double0,n:int0,fillcolor,strokecolor) =
         wr <| st "circle3Dzx("++x++", "++y++", "++z++", "++r++", ";n++", s, "++genaiscript.style(fillcolor,strokecolor)++");"
 
-    static member ring(wr:exprString -> unit,cx:num0,cy:num0,rin:num0,rout:num0,t1:num0,t2:num0,fillcolor,strokecolor) =
+    static member ring(wr:exprString -> unit,cx:double0,cy:double0,rin:double0,rout:double0,t1:double0,t2:double0,fillcolor,strokecolor) =
         wr <| st "ring("++cx++"*s, "++cy++"*s, "++rin++"*s, "++rout++"*s, "++t1++", "++t2++", "++genaiscript.style(fillcolor,strokecolor)++");"
 
-    static member rectangle(wr:exprString -> unit,x:num0,y:num0,width:num0,height:num0,fillcolor,strokecolor) =
+    static member rectangle(wr:exprString -> unit,x:double0,y:double0,width:double0,height:double0,fillcolor,strokecolor) =
         wr <| st "rectangle("++x++"*s, "++y++"*s, "++width++"*s, "++height++"*s, "++genaiscript.style(fillcolor,strokecolor)++");"
 
-    static member triangle3D(wr:exprString -> unit,x1:num0,y1:num0,z1:num0,x2:num0,y2:num0,z2:num0,x3:num0,y3:num0,z3:num0,x3D,y3D,z3D,fillcolor,strokecolor) =
+    static member triangle3D(wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3:double0,y3:double0,z3:double0,x3D,y3D,z3D,fillcolor,strokecolor) =
         wr <| st "triangle3d("++x1++"*s, "++y1++"*s, "++z1++"*s, "++x2++"*s, "++y2++"*s, "++z2++"*s, "++x3++"*s, "++y3++"*s, "++z3++"*s, "++x3D++", "++y3D++", "++z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
 
-    static member quadrangle3D(wr:exprString -> unit,x1:num0,y1:num0,z1:num0,d1x:num0,d1y:num0,d1z:num0,d2x:num0,d2y:num0,d2z:num0,x3D,y3D,z3D,fillcolor,strokecolor) =
+    static member quadrangle3D(wr:exprString -> unit,x1:double0,y1:double0,z1:double0,d1x:double0,d1y:double0,d1z:double0,d2x:double0,d2y:double0,d2z:double0,x3D,y3D,z3D,fillcolor,strokecolor) =
         wr <| st "quadrangle3d("++x1++"*s, "++y1++"*s, "++z1++"*s, "++d1x++"*s, "++d1y++"*s, "++d1z++"*s, "++d2x++"*s, "++d2y++"*s, "++d2z++"*s, "++x3D++", "++y3D++", "++z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
 
-    static member text(wr:exprString -> unit,cx:num0,cy:num0,text:exprString,size:num0) =
+    static member text(wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0) =
         wr <| st "text("++cx++"*s, "++cy++"*s, "++"\""++text++"\","++"\"ArialMT\","++size++");"
         
 type aiscriptmaker(writer:StreamWriter) =
@@ -684,7 +684,7 @@ type aiscriptmaker(writer:StreamWriter) =
     /// <param name="size">フォントサイズ</param>
     member this.text(c,text:int,size) =
         let (cx,cy) = c
-        genaiscript.text(wr,D cx,D cy,nv(I text),D size)
+        genaiscript.text(wr,D cx,D cy,iv(I text),D size)
     /// <summary>
     /// テキストを追加
     /// </summary>
@@ -693,7 +693,7 @@ type aiscriptmaker(writer:StreamWriter) =
     /// <param name="size">フォントサイズ</param>
     member this.text(c,text:double,size) =
         let (cx,cy) = c
-        genaiscript.text(wr,D cx,D cy,nv(D text),D size)
+        genaiscript.text(wr,D cx,D cy,dv(D text),D size)
     /// <summary>
     /// ファイルを手動で閉じる
     /// </summary>
@@ -882,7 +882,7 @@ type aiscriptmaker_aq(wr:exprString -> unit) =
     /// <param name="py">頂点座標[y]</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.polygon(px:num1, py:num1, fillcolor, strokecolor) =
+    member this.polygon(px:double1, py:double1, fillcolor, strokecolor) =
         genaiscript.polygon(wr,px,py,fillcolor,strokecolor)
     /// <summary>
     /// 折れ線を追加
@@ -902,7 +902,7 @@ type aiscriptmaker_aq(wr:exprString -> unit) =
     /// <param name="p3D">3D座標軸の角度</param>
     /// <param name="fillcolor">塗り色</param>
     /// <param name="strokecolor">線色</param>
-    member this.polygon3D(px:num1, py:num1, pz:num1, p3D, fillcolor, strokecolor) =
+    member this.polygon3D(px:double1, py:double1, pz:double1, p3D, fillcolor, strokecolor) =
         let (x3D,y3D,z3D) = p3D
         genaiscript.polygon3D(wr,px,py,pz,x3D,y3D,z3D,fillcolor,strokecolor)
     /// <summary>
@@ -1063,7 +1063,7 @@ type aiscriptmaker_aq(wr:exprString -> unit) =
     /// <param name="size">フォントサイズ</param>
     member this.text(c,text:int,size) =
         let cx,cy = c
-        genaiscript.text(wr,D cx,D cy,nv(I text),D size)
+        genaiscript.text(wr,D cx,D cy,iv(I text),D size)
     /// <summary>
     /// テキストを追加
     /// </summary>
@@ -1072,7 +1072,7 @@ type aiscriptmaker_aq(wr:exprString -> unit) =
     /// <param name="size">フォントサイズ</param>
     member this.text(c,text:double,size) =
         let cx,cy = c
-        genaiscript.text(wr,D cx,D cy,nv(D text),D size)
+        genaiscript.text(wr,D cx,D cy,dv(D text),D size)
         
 type aiscriptfile =
     
@@ -1106,9 +1106,9 @@ type aiscriptfile =
     /// </summary>
     /// <param name="filename">ファイル名</param>
     /// <param name="scale">スケール</param>
-    static member make (filename:exprString, scale:num0) = fun (code:aiscriptmaker_aq->unit) ->
-        io.codeOutput filename <| fun wr ->
-            let sv = aiscriptmaker_aq wr
+    static member make (filename:exprString, scale:double0) = fun (code:aiscriptmaker_aq->unit) ->
+        io.fileOutput filename <| fun wr ->
+            let sv = aiscriptmaker_aq wr.cc
             sv.header scale
             code sv
             
@@ -1118,7 +1118,7 @@ type aiscriptfile =
     /// <param name="filename">ファイル名</param>
     /// <param name="scale">スケール</param>
     static member make (filename:exprString, scale:double) = fun (code:aiscriptmaker_aq->unit) ->
-        io.codeOutput filename <| fun wr ->
-            let sv = aiscriptmaker_aq wr
+        io.fileOutput filename <| fun wr ->
+            let sv = aiscriptmaker_aq wr.cc
             sv.header (D scale)
             code sv

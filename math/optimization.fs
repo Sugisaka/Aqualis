@@ -17,7 +17,7 @@ type optimization() =
     /// <param name="dd">探索幅</param>
     /// <param name="f">目的関数</param>
     /// <param name="xx">fが極小となるベクトル</param>
-    static member findmin (m:int) (x0_:num1,df:num1) (dd:num0) (f:num0->num1->unit) (xx:num1) =
+    static member findmin (m:int) (x0_:double1,df:double1) (dd:double0) (f:double0->double1->unit) (xx:double1) =
         let r = 0.5*(1.0+sqrt(5.0))
         ch.d1 x0_.size1 <| fun xa ->
         ch.d1 x0_.size1 <| fun x1 ->
@@ -87,7 +87,7 @@ type optimization() =
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
     /// <param name="stepProc">各ステップの暫定解に対して行う処理</param>
-    static member findmin_GradientDescent (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:((num0*num1)->unit)option) =
+    static member findmin_GradientDescent (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some(pu) ->
                 pu (_0,x0)
@@ -97,7 +97,7 @@ type optimization() =
             ch.d1 x0.size1 <| fun y ->
                 iter.num_exit (I n) <| fun (ext,i) ->
                     dd0_ <== dd0
-                    ch.d1 x0.size1 <| fun (df0:num1) ->
+                    ch.d1 x0.size1 <| fun (df0:double1) ->
                         df df0 x0
                         //勾配を計算
                         y.foreach <| fun i ->
@@ -123,7 +123,7 @@ type optimization() =
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
     /// <param name="fH">目的関数のヘッセ行列</param>
-    static member findmin_ConjugateGradient1 (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (fH:num2->num1->unit) (stepProc:((num0*num1)->unit)option) =
+    static member findmin_ConjugateGradient1 (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some(pu) ->
                 pu (_0,x0)
@@ -174,7 +174,7 @@ type optimization() =
     /// <param name="dd0">探索間隔</param>
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
-    static member findmin_ConjugateGradient2 (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:((num0*num1)->unit)option) =
+    static member findmin_ConjugateGradient2 (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some pu ->
                 pu (_0,x0)
@@ -189,7 +189,7 @@ type optimization() =
                 b.clear()
                 iter.num_exit (I n) <| fun (ext,i) ->
                     dd0_ <== dd0
-                    ch.d1 x0.size1 <| fun (df0:num1) ->
+                    ch.d1 x0.size1 <| fun (df0:double1) ->
                         df df0 x0
                         br.branch <| fun r ->
                             r.IF (i.=0) <| fun () ->
@@ -232,7 +232,7 @@ type optimization() =
     /// <param name="f"></param>
     /// <param name="df"></param>
     /// <param name="fH"></param>
-    static member findmin_Newton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (fH:num2->num1->unit) (stepProc:((num0*num1)->unit)option) =
+    static member findmin_Newton (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some pu ->
                 pu (_0,x0)
@@ -244,7 +244,7 @@ type optimization() =
                 ch.d2 x0.size1 x0.size1 <| fun ih ->
                     ch.d2 x0.size1 x0.size1 <| fun h ->
                         fH h x0
-                        La.inverse_matrix ih h
+                        La.inverse_matrix (ih, h)
                     ch.d1 x0.size1 <| fun df0 ->
                         df df0 x0
                         La.matmul (ih,df0) <| fun a ->
@@ -268,7 +268,7 @@ type optimization() =
     /// <param name="dd0"></param>
     /// <param name="f"></param>
     /// <param name="df"></param>
-    static member findmin_quasiNewton (n:int,m:int) (x0:num1) (dd0:num0) (f:num0->num1->unit) (df:num1->num1->unit) (stepProc:((num0*num1)->unit)option) =
+    static member findmin_quasiNewton (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some pu ->
                 pu (_0,x0)

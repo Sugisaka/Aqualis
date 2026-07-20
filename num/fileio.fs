@@ -8,6 +8,274 @@ namespace Aqualis
 
     open System
     
+    type TextReader (fp:string,iostat:int0) =
+        member _.tt (lst:exprString) =
+            let rec cpxvarlist list (s:list<reduceExprString>) counter =
+                match s with
+                |a::b ->
+                    match a.etype with
+                    |Zt -> cpxvarlist <| list@[Zt,counter,a] <| b <| counter+1
+                    |t   -> cpxvarlist <| list@[t,0,a] <| b <| counter
+                |[] -> counter,list
+            let Nz,varlist = cpxvarlist [] lst.data 0
+
+            match (GenerationScope.currentProgram()).language with
+            |Fortran ->
+                ch.dx (2*Nz) <| fun tmp ->
+                    let double0string_format_F =
+                        let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                        "E"+a.ToString()+"."+b.ToString()+"e3"
+                    let format =
+                        varlist
+                        |> (fun b ->
+                            [for (t,_,_) in b do
+                                match t with
+                                |It _ ->
+                                    yield "I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                                |Dt ->
+                                    yield double0string_format_F
+                                |Zt ->
+                                    yield double0string_format_F
+                                    yield double0string_format_F
+                                |_ -> ()
+                            ])
+                        |> (fun b ->
+                              [for n in 0..(b.Length-1) do
+                                  yield b.[n]
+                                  if n<(b.Length-1) then yield "A1"
+                              ])
+                        |> fun s -> String.Join(",",s)
+                    ch.ix (varlist.Length+Nz-1) <| fun tab ->
+                        let code =
+                            varlist
+                            |> (fun b ->
+                                [for t,m,b in b do
+                                    match t,b with
+                                    |Zt,RNvr (Var _) ->
+                                        yield tmp[2*m  ].Expr.eval (GenerationScope.currentProgram())
+                                        yield tmp[2*m+1].Expr.eval (GenerationScope.currentProgram())
+                                    |_,RNvr (Var(_,n,_)) ->
+                                        yield n
+                                    |_ ->
+                                        printfn "ファイル読み込みデータの保存先が変数ではありません"
+                                        yield ""
+                                ])
+                            |> (fun b ->
+                                  [for n in 0..(b.Length-1) do
+                                      yield b[n]
+                                      if n<(b.Length-1) then yield tab[n].Expr.eval (GenerationScope.currentProgram())
+                                  ])
+                            |> fun s -> String.Join(",",s)
+                        writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+code+"\n")
+                        for t,m,b in varlist do
+                            match t,b with
+                            |Zt,RNvr v ->
+                                complex0 v <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                            |_ ->
+                                ()
+            |C99 ->
+                ch.dx (2*Nz) <| fun tmp ->
+                    let format =
+                        varlist
+                        |> (fun b ->
+                              [for (t,_,_) in b do
+                                match t with
+                                |It _ ->
+                                    yield "%d"
+                                |Dt ->
+                                    yield "%lf"
+                                |Zt ->
+                                    yield "%lf"
+                                    yield "%lf"
+                                |_ -> ()
+                              ])
+                        |> (fun s -> String.Join("",s))
+                    let code =
+                      varlist
+                      |> (fun b ->
+                            [for t,m,a in b do
+                                match t,a with
+                                |Zt,RNvr (Var _) ->
+                                    yield "&"+tmp[2*m  ].Expr.eval ((GenerationScope.currentProgram()))
+                                    yield "&"+tmp[2*m+1].Expr.eval ((GenerationScope.currentProgram()))
+                                |_,RNvr (Var(_,n,_)) ->
+                                    yield "&"+n
+                                |_ ->
+                                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                                    yield ""
+                            ])
+                      |> fun s -> String.Join(",",s)
+                    writein("fscanf("+fp+",\""+format+"\","+code+");\n")
+                    for t,m,b in varlist do
+                        match t,b with
+                        |Zt,RNvr v ->
+                            complex0 v <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                        |_ ->
+                            ()
+            |LaTeX ->
+                let double0string_format_F =
+                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format =
+                    lst.data
+                    |> List.map (fun b ->
+                        match b.etype with
+                          |It _ ->"I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                          |Dt -> double0string_format_F
+                          |_ -> "")
+                    |> fun s -> String.Join(",",s)
+                let code =
+                    lst.data
+                    |> List.map (fun b ->
+                        match b with
+                        |RNvr (Var(_,n,_)) -> n
+                        |_ -> "")
+                    |> fun s -> String.Join(",",s)
+                writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+code+"\n")
+            |HTML ->
+                let double0string_format_F =
+                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    "E"+a.ToString()+"."+b.ToString()+"e3"
+                let format =
+                    lst.data
+                    |> List.map (fun b ->
+                        match b.etype with
+                        |It _ ->"I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                        |Dt -> double0string_format_F
+                        |_ -> "")
+                    |> fun s -> String.Join(",",s)
+                let code =
+                    lst.data
+                    |> List.map (fun b ->
+                        match b with
+                        |RNvr (Var(_,n,_)) -> n
+                        |_ -> "")
+                    |> fun s -> String.Join("<mo>,</mo>",s)
+                writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
+            |Python ->
+                ch.dx (2*Nz) <| fun tmp ->
+                    let format =
+                        varlist
+                        |> (fun b ->
+                              [for (t,_,_) in b do
+                                match t with
+                                |It _ ->
+                                    yield "%d"
+                                |Dt ->
+                                    yield "%f"
+                                |Zt ->
+                                    yield "%f"
+                                    yield "%f"
+                                |_ -> ()
+                              ])
+                        |> (fun s -> String.Join("",s))
+                    let code =
+                      varlist
+                      |> (fun b ->
+                            [for t,m,a in b do
+                                match t,a with
+                                |Zt,RNvr (Var _) ->
+                                    yield tmp[2*m  ].Expr.eval ((GenerationScope.currentProgram()))
+                                    yield tmp[2*m+1].Expr.eval ((GenerationScope.currentProgram()))
+                                |_,RNvr (Var(_,n,_)) ->
+                                    yield n
+                                |_ ->
+                                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                                    yield ""
+                            ])
+                      |> fun s -> String.Join(",",s)
+                    //書式指定をしてファイルから値を読み込み。まだ、完成してない
+                    writein("lines = " + fp + ".readline()\n")
+                    writein "word_list = re.split(r\'[\\t\\n]\', lines)\n"
+                    let mutable cnt = 0
+                    for t,_,a in varlist do
+                        //let a_string = string a
+                        match t,a with
+                        |It _,RNvr v ->
+                            writein(v.eval (GenerationScope.currentProgram())+" = int(word_list["+cnt.ToString()+"])")
+                            cnt <- cnt + 1
+                        |Dt,RNvr v ->
+                            writein(v.eval (GenerationScope.currentProgram())+"= float(word_list["+cnt.ToString()+"])")
+                            cnt <- cnt + 1
+                        |Zt,RNvr v ->
+                            writein(v.eval (GenerationScope.currentProgram())+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
+                            cnt <- cnt + 2
+                        |_ -> ()
+            |_ -> ()
+
+        member private _.ReadByte (e:expr) =
+            writein("read("+fp+", iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") byte_tmp\n")
+            let ee =
+                match e.etype,e with
+                |It _,Var(_,n,_) -> n
+                |_ -> "byte値を整数型以外の変数に格納できません"
+            writein(ee + "=" + "byte_tmp\n")
+            
+        member this.t (x:int0) = this.tt (iv x)
+        member this.t (x:double0) = this.tt (dv x)
+        member this.t (x:complex0) = this.tt (zv x)
+        member this.b (x:int0) = this.ReadByte x.Expr
+
+    type BinReader (fp:string,iostat:int0) =
+        member private _.ReadBin (v:expr) =
+            match (GenerationScope.currentProgram()).language with
+            |Fortran ->
+                match v.etype,v with
+                |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                        writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                        complex0 v <== re+asm.uj*im
+                |_,Var(_,n,_) ->
+                    writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+n+"\n")
+                |_ ->
+                    Console.WriteLine "ファイル読み込みデータの保存先が変数ではありません"
+            |C99 ->
+                match v.etype,v with
+                |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        writein("fread(&"+re.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+re.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");"+"\n")
+                        writein("fread(&"+im.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+im.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");"+"\n")
+                        complex0 v <== re+asm.uj*im
+                |_,Var(_,n,_) ->
+                    writein("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
+                |_ ->
+                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+            |LaTeX ->
+                match v.etype,v with
+                |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                        writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                        complex0 v <== re+asm.uj*im
+                |_,Var(_,n,_) ->
+                    writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+n+"\n")
+                |_ ->
+                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+            |HTML ->
+                match v with
+                |Var(_,n,_) ->
+                    writein("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
+                |_ ->
+                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+            |Python ->
+                match v.etype,v with
+                |Zt,Var _ ->
+                    ch.dd <| fun (re,im) ->
+                        writein(re.Expr.eval ((GenerationScope.currentProgram()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        writein(im.Expr.eval ((GenerationScope.currentProgram()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        complex0 v <== re+asm.uj*im
+                |It _,Var(_,n,_) ->
+                    writein(n+" = struct.unpack('i', "+fp+".read(4))[0]"+"\n")
+                |Dt,Var(_,n,_) ->
+                    writein(n+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                |_ ->
+                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+            |_ -> ()
+        member this.b (x:int0) = this.ReadBin x.Expr
+        member this.b (x:double0) = this.ReadBin x.Expr
+        member this.b (x:complex0) = this.ReadBin x.Expr
+        
     type TextWriter (fp:string) =
         member _.tt (lst:exprString) =
             match (GenerationScope.currentProgram()).language with
@@ -318,7 +586,7 @@ namespace Aqualis
             |_ -> ()
 
     type BinWriter(fp:string) =
-        member private _.Write_bin (v:expr) =
+        member private _.WriteBin (v:expr) =
             match (GenerationScope.currentProgram()).language with
             |Fortran ->
                 match v.etype,v with
@@ -420,11 +688,11 @@ namespace Aqualis
                 |_ ->
                     ()
             |_ -> ()
-        member this.b (v:int) = this.Write_bin ((I v).Expr)
-        member this.b (v:int0) = this.Write_bin v.Expr
-        member this.b (v:double) = this.Write_bin ((D v).Expr)
-        member this.b (v:double0) = this.Write_bin v.Expr
-        member this.b (v:complex0) = this.Write_bin v.Expr
+        member this.b (v:int) = this.WriteBin ((I v).Expr)
+        member this.b (v:int0) = this.WriteBin v.Expr
+        member this.b (v:double) = this.WriteBin ((D v).Expr)
+        member this.b (v:double0) = this.WriteBin v.Expr
+        member this.b (v:complex0) = this.WriteBin v.Expr
         
     ///<summary>ファイル入出力</summary>
     type io () =
@@ -1287,27 +1555,34 @@ namespace Aqualis
         static member fileInput (filename:exprString) = fun code ->
             ch.i <| fun iostat ->
                 io.fileAccess (filename,None) true false <| fun fp ->
-                    code(io.Read fp iostat)
+                    let reader = TextReader(fp,iostat)
+                    code reader
+                    
         ///<summary>ファイル読み込み</summary>
         static member fileInput (filename:exprString,intDigit:int) = fun code ->
             ch.i <| fun iostat ->
                 io.fileAccess (filename,Some intDigit) true false <| fun fp ->
-                    code(io.Read fp iostat)
-
+                    let reader = TextReader(fp,iostat)
+                    code reader
+                    
         ///<summary>ファイル読み込み</summary>
-        static member fileInput (filename:string) = fun code -> io.fileInput (st filename) code
-
+        static member fileInput (filename:string) = fun code -> 
+            io.fileInput (st filename) code
+            
         ///<summary>バイナリファイルの読み込み</summary>
         static member binfileInput (filename:exprString) = fun code ->
             ch.i <| fun iostat ->
                 io.fileAccess (filename,None) true true <| fun fp ->
-                    code(io.Read_bin fp iostat)
+                    let reader = BinReader(fp,iostat)
+                    code reader
+                    
         ///<summary>バイナリファイルの読み込み</summary>
         static member binfileInput (filename:exprString,intDigit:int) = fun code ->
             ch.i <| fun iostat ->
                 io.fileAccess (filename,Some intDigit) true true <| fun fp ->
-                    code(io.Read_bin fp iostat)
-
+                    let reader = BinReader(fp,iostat)
+                    code reader
+                    
         ///<summary>バイナリファイルの読み込み</summary>
         static member binfileInput (filename:string) = fun code -> io.binfileInput (st filename) code
 
@@ -1322,6 +1597,7 @@ namespace Aqualis
                                 ext()
                             b.EL <| fun () ->
                                 code(i)
+                                
         ///<summary>ファイルの読み込み</summary>
         static member file_Read (filename:exprString,intDigit:int) = fun varlist code ->
             ch.i <| fun iostat ->
@@ -1426,7 +1702,7 @@ namespace Aqualis
                 w.b _1
                 //データ型
                 match f.etype with
-                |Etype.It(4) -> w.b 1004
+                |Etype.It 4  -> w.b 1004
                 |Etype.Dt    -> w.b 2000
                 |Etype.Zt    -> w.b 3000
                 |_           -> w.b 0
@@ -1491,7 +1767,7 @@ namespace Aqualis
                     w.b _1
                     //データ型
                     match f.etype with
-                    |Etype.It(4) -> w.b 1004
+                    |Etype.It 4  -> w.b 1004
                     |Etype.Dt    -> w.b 2000
                     |Etype.Zt    -> w.b 3000
                     |_           -> w.b 0
@@ -1654,36 +1930,29 @@ namespace Aqualis
 
         ///<summary>数値をファイルから読み込み</summary>
         static member load (f:int0,filename:exprString) =
-            let reader (r:int0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=0)
                                 <| fun () ->
                                     ch.i <| fun n1 ->
                                         //データサイズ
-                                        r n1
+                                        r.b n1
                                         //データ本体
-                                        match t with
-                                        |Zt ->
-                                            ch.dd <| fun (re,im) ->
-                                                r re
-                                                r im
-                                                f <== re + asm.uj*im
-                                        |_ ->
-                                            r f
+                                        r.b f
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f.etype with
@@ -1694,40 +1963,33 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
                             
         ///<summary>数値をファイルから読み込み</summary>
         static member load (f:double0,filename:exprString) =
-            let reader (r:int0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=0)
                                 <| fun () ->
                                     ch.i <| fun n1 ->
                                         //データサイズ
-                                        r n1
+                                        r.b n1
                                         //データ本体
-                                        match t with
-                                        |Zt ->
-                                            ch.dd <| fun (re,im) ->
-                                                r re
-                                                r im
-                                                f <== re + asm.uj*im
-                                        |_ ->
-                                            r f
+                                        r.b f
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f.etype with
@@ -1738,40 +2000,36 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>数値をファイルから読み込み</summary>
         static member load (f:complex0,filename:exprString) =
-            let reader (r:int0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=0)
                                 <| fun () ->
                                     ch.i <| fun n1 ->
                                         //データサイズ
-                                        r n1
+                                        r.b n1
                                         //データ本体
-                                        match t with
-                                        |Zt ->
-                                            ch.dd <| fun (re,im) ->
-                                                r re
-                                                r im
-                                                f <== re + asm.uj*im
-                                        |_ ->
-                                            r f
+                                        ch.dd <| fun (re,im) ->
+                                            r.b re
+                                            r.b im
+                                            f <== re + asm.uj*im
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f.etype with
@@ -1782,225 +2040,178 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:int1,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=1)
                                 <| fun () ->
                                     ch.i <| fun n1 ->
                                         //データサイズ
-                                        r n1
+                                        r.b n1
                                         f.allocate n1
                                         //データ本体
-                                        match t with
-                                        |It _ ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.i <| fun u ->
-                                                    r u
-                                                    f[i] <== u
-                                        |Dt ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.d <| fun u ->
-                                                    r u
-                                                    f[i] <== u
-                                        |Zt ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.dd <| fun (re,im) ->
-                                                    r re
-                                                    r im
-                                                    f[i] <== re + asm.uj*im
-                                        |_ ->
-                                            ()
+                                        iter.num f.size1 <| fun i ->
+                                            ch.i <| fun u ->
+                                                r.b u
+                                                f[i] <== u
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c ": invalid data type"
+                            print.t ": invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0].etype with
-                        |Etype.It(4) ->
+                        |Etype.It 4  ->
                             reader r (1004,f[0].etype)
                         |Etype.Dt    ->
                             reader r (2000,f[0].etype)
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:double1,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=1)
                                 <| fun () ->
                                     ch.i <| fun n1 ->
                                         //データサイズ
-                                        r n1
+                                        r.b n1
                                         f.allocate n1
                                         //データ本体
-                                        match t with
-                                        |It _ ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.i <| fun u ->
-                                                    r u
-                                                    f[i] <== u
-                                        |Dt ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.d <| fun u ->
-                                                    r u
-                                                    f[i] <== u
-                                        |Zt ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.dd <| fun (re,im) ->
-                                                    r re
-                                                    r im
-                                                    f[i] <== re + asm.uj*im
-                                        |_ ->
-                                            ()
+                                        iter.num f.size1 <| fun i ->
+                                            ch.d <| fun u ->
+                                                r.b u
+                                                f[i] <== u
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c ": invalid data type"
+                            print.t ": invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0].etype with
-                        |Etype.It(4) ->
+                        |Etype.It 4  ->
                             reader r (1004,f[0].etype)
                         |Etype.Dt    ->
                             reader r (2000,f[0].etype)
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
         static member load (f:complex1,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=1)
                                 <| fun () ->
                                     ch.i <| fun n1 ->
                                         //データサイズ
-                                        r n1
+                                        r.b n1
                                         f.allocate n1
                                         //データ本体
                                         match t with
                                         |It _ ->
                                             iter.num f.size1 <| fun i ->
                                                 ch.i <| fun u ->
-                                                    r u
+                                                    r.b u
                                                     f[i] <== u
                                         |Dt ->
                                             iter.num f.size1 <| fun i ->
                                                 ch.d <| fun u ->
-                                                    r u
+                                                    r.b u
                                                     f[i] <== u
                                         |Zt ->
                                             iter.num f.size1 <| fun i ->
                                                 ch.dd <| fun (re,im) ->
-                                                    r re
-                                                    r im
+                                                    r.b re
+                                                    r.b im
                                                     f[i] <== re + asm.uj*im
                                         |_ ->
                                             ()
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c ": invalid data type"
+                            print.t ": invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0].etype with
-                        |Etype.It(4) ->
+                        |Etype.It 4  ->
                             reader r (1004,f[0].etype)
                         |Etype.Dt    ->
                             reader r (2000,f[0].etype)
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
         static member load (f:int2,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=2)
                                 <| fun () ->
                                     ch.ii <| fun (n1,n2) ->
                                         //データサイズ
-                                        r n1
-                                        r n2
+                                        r.b n1
+                                        r.b n2
                                         f.allocate(n1,n2)
                                         //データ本体
-                                        match t with
-                                        |It _ ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.i <| fun u ->
-                                                        r u
-                                                        f[i,j] <== u
-                                        |Dt ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.d <| fun u ->
-                                                        r u
-                                                        f[i,j] <== u
-                                        |Zt ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.dd <| fun (re,im) ->
-                                                        r re
-                                                        r im
-                                                        f[i,j] <== re + asm.uj*im
-                                        |_ ->
-                                            ()
+                                        iter.num f.size2 <| fun j ->
+                                            iter.num f.size1 <| fun i ->
+                                                ch.i <| fun u ->
+                                                    r.b u
+                                                    f[i,j] <== u
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c ": invalid data type"
-                            print.cc n (I nt)
+                            print.t ": invalid data type"
+                            print.cc <| n++(I nt)
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0,0].etype with
@@ -2011,57 +2222,40 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
         static member load (f:double2,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=2)
                                 <| fun () ->
                                     ch.ii <| fun (n1,n2) ->
                                         //データサイズ
-                                        r n1
-                                        r n2
+                                        r.b n1
+                                        r.b n2
                                         f.allocate(n1,n2)
                                         //データ本体
-                                        match t with
-                                        |It _ ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.i <| fun u ->
-                                                        r u
-                                                        f[i,j] <== u
-                                        |Dt ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.d <| fun u ->
-                                                        r u
-                                                        f[i,j] <== u
-                                        |Zt ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.dd <| fun (re,im) ->
-                                                        r re
-                                                        r im
-                                                        f[i,j] <== re + asm.uj*im
-                                        |_ ->
-                                            ()
+                                        iter.num f.size2 <| fun j ->
+                                            iter.num f.size1 <| fun i ->
+                                                ch.d <| fun u ->
+                                                    r.b u
+                                                    f[i,j] <== u
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c ": invalid data type"
-                            print.cc n (I nt)
+                            print.t ": invalid data type"
+                            print.cc <| n++(I nt)
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0,0].etype with
@@ -2072,24 +2266,24 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
         static member load (f:complex2,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=2)
                                 <| fun () ->
                                     ch.ii <| fun (n1,n2) ->
                                         //データサイズ
-                                        r n1
-                                        r n2
+                                        r.b n1
+                                        r.b n2
                                         f.allocate(n1,n2)
                                         //データ本体
                                         match t with
@@ -2097,32 +2291,32 @@ namespace Aqualis
                                             iter.num f.size2 <| fun j ->
                                                 iter.num f.size1 <| fun i ->
                                                     ch.i <| fun u ->
-                                                        r u
+                                                        r.b u
                                                         f[i,j] <== u
                                         |Dt ->
                                             iter.num f.size2 <| fun j ->
                                                 iter.num f.size1 <| fun i ->
                                                     ch.d <| fun u ->
-                                                        r u
+                                                        r.b u
                                                         f[i,j] <== u
                                         |Zt ->
                                             iter.num f.size2 <| fun j ->
                                                 iter.num f.size1 <| fun i ->
                                                     ch.dd <| fun (re,im) ->
-                                                        r re
-                                                        r im
+                                                        r.b re
+                                                        r.b im
                                                         f[i,j] <== re + asm.uj*im
                                         |_ ->
                                             ()
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c ": invalid data type"
-                            print.cc n (I nt)
+                            print.t ": invalid data type"
+                            print.cc <| n++(I nt)
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0,0].etype with
@@ -2133,71 +2327,52 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         ///<summary>3次元データをファイルから読み込み</summary>
         static member load (f:int3,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=3)
                                 <| fun () ->
                                     ch.iii <| fun (n1,n2,n3) ->
                                         //データサイズ
-                                        r n1
-                                        r n2
-                                        r n3
+                                        r.b n1
+                                        r.b n2
+                                        r.b n3
                                         f.allocate(n1,n2,n3)
                                         //データ本体
-                                        match t with
-                                        |It _ ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.i <| fun u ->
-                                                            r u
-                                                            f[i,j,k] <== u
-                                        |Dt ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.d <| fun u ->
-                                                            r u
-                                                            f[i,j,k] <== u
-                                        |Zt ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.dd <| fun (re,im) ->
-                                                            r re
-                                                            r im
-                                                            f[i,j,k] <== re + asm.uj*im
-                                        |_ ->
-                                            ()
+                                        iter.num f.size3 <| fun k ->
+                                            iter.num f.size2 <| fun j ->
+                                                iter.num f.size1 <| fun i ->
+                                                    ch.i <| fun u ->
+                                                        r.b u
+                                                        f[i,j,k] <== u
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[_0,_0,_0].etype with
-                        |Etype.It(4) ->
+                        |Etype.It 4  ->
                             reader r (1004,f[_0,_0,_0].etype)
                         |Etype.Dt    ->
                             reader r (2000,f[_0,_0,_0].etype)
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         static member load (f:int3,filename:string) = io.load(f,st filename)
         static member load (f:int2,filename:string) = io.load(f,st filename)
@@ -2206,67 +2381,48 @@ namespace Aqualis
 
         ///<summary>3次元データをファイルから読み込み</summary>
         static member load (f:double3,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=3)
                                 <| fun () ->
                                     ch.iii <| fun (n1,n2,n3) ->
                                         //データサイズ
-                                        r n1
-                                        r n2
-                                        r n3
+                                        r.b n1
+                                        r.b n2
+                                        r.b n3
                                         f.allocate(n1,n2,n3)
                                         //データ本体
-                                        match t with
-                                        |It _ ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.i <| fun u ->
-                                                            r u
-                                                            f[i,j,k] <== u
-                                        |Dt ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.d <| fun u ->
-                                                            r u
-                                                            f[i,j,k] <== u
-                                        |Zt ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.dd <| fun (re,im) ->
-                                                            r re
-                                                            r im
-                                                            f[i,j,k] <== re + asm.uj*im
-                                        |_ ->
-                                            ()
+                                        iter.num f.size3 <| fun k ->
+                                            iter.num f.size2 <| fun j ->
+                                                iter.num f.size1 <| fun i ->
+                                                    ch.d <| fun u ->
+                                                        r.b u
+                                                        f[i,j,k] <== u
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[_0,_0,_0].etype with
-                        |Etype.It(4) ->
+                        |Etype.It 4  ->
                             reader r (1004,f[_0,_0,_0].etype)
                         |Etype.Dt    ->
                             reader r (2000,f[_0,_0,_0].etype)
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         static member load (f:double3,filename:string) = io.load(f,st filename)
         static member load (f:double2,filename:string) = io.load(f,st filename)
@@ -2275,67 +2431,49 @@ namespace Aqualis
 
         ///<summary>3次元データをファイルから読み込み</summary>
         static member load (f:complex3,filename:exprString) =
-            let reader (r:num0->unit) (nt:int,t:Etype) =
+            let reader (r:BinReader) (nt:int,t:Etype) =
                 ch.i <| fun n ->
                     //データ型
-                    r n
+                    r.b n
                     br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
-                            r n
+                            r.b n
                             br.if2 (n.=3)
                                 <| fun () ->
                                     ch.iii <| fun (n1,n2,n3) ->
                                         //データサイズ
-                                        r n1
-                                        r n2
-                                        r n3
+                                        r.b n1
+                                        r.b n2
+                                        r.b n3
                                         f.allocate(n1,n2,n3)
                                         //データ本体
-                                        match t with
-                                        |It _ ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.i <| fun u ->
-                                                            r u
-                                                            f[i,j,k] <== u
-                                        |Dt ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.d <| fun u ->
-                                                            r u
-                                                            f[i,j,k] <== u
-                                        |Zt ->
-                                            iter.num f.size3 <| fun k ->
-                                                iter.num f.size2 <| fun j ->
-                                                    iter.num f.size1 <| fun i ->
-                                                        ch.dd <| fun (re,im) ->
-                                                            r re
-                                                            r im
-                                                            f[i,j,k] <== re + asm.uj*im
-                                        |_ ->
-                                            ()
+                                        iter.num f.size3 <| fun k ->
+                                            iter.num f.size2 <| fun j ->
+                                                iter.num f.size1 <| fun i ->
+                                                    ch.dd <| fun (re,im) ->
+                                                        r.b re
+                                                        r.b im
+                                                        f[i,j,k] <== re + asm.uj*im
                                 <| fun () ->
-                                    print.c "Invalid data dimension"
+                                    print.t "invalid data dimension"
                         <| fun () ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
             io.binfileInput filename <| fun r ->
             ch.i <| fun n ->
                 //データフォーマット
-                r n
+                r.b n
                 br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[_0,_0,_0].etype with
-                        |Etype.It(4) ->
+                        |Etype.It 4  ->
                             reader r (1004,f[_0,_0,_0].etype)
                         |Etype.Dt    ->
                             reader r (2000,f[_0,_0,_0].etype)
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.c "invalid data type"
+                            print.t "invalid data type"
 
         static member load (f:complex3,filename:string) = io.load(f,st filename)
         static member load (f:complex2,filename:string) = io.load(f,st filename)

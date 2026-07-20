@@ -65,7 +65,7 @@ namespace Aqualis
                         b.IF (this.size1 .= -1) <| fun () ->
                             print.t <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " is not allocated"
                         b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                            print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                            print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
             match x,language() with

@@ -155,43 +155,117 @@ namespace Aqualis
 
     [<AutoOpen>]
     module num_farg =
-        type num0 with
+        type int0 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg code =
                 fn.addarg (this.etype,A0,this.Expr.eval ((GenerationScope.currentProgram()))) <| fun (v,n) ->
-                    code(num0(Var(this.etype, n, NaN)))
+                    code(int0(Var(this.etype, n, NaN)))
+        type double0 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg code =
+                fn.addarg (this.etype,A0,this.Expr.eval ((GenerationScope.currentProgram()))) <| fun (v,n) ->
+                    code(double0(Var(this.etype, n, NaN)))
+        type complex0 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg code =
+                fn.addarg (this.etype,A0,this.Expr.eval ((GenerationScope.currentProgram()))) <| fun (v,n) ->
+                    code(complex0(Var(this.etype, n, NaN)))
 
-        type num1 with
+        type int1 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(num1(this.etype,Var1(v,n)))
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(int1(this.etype,Var1(v,n)))
+                |_ ->
+                    printfn "部分配列を関数の引数にできません"
+        type double1 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg = fun code ->
+                match this.Expr with
+                |Var1(size,name) ->
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(double1(this.etype,Var1(v,n)))
+                |_ ->
+                    printfn "部分配列を関数の引数にできません"
+        type complex1 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg = fun code ->
+                match this.Expr with
+                |Var1(size,name) ->
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(complex1(this.etype,Var1(v,n)))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
 
-        type num2 with
+        type int2 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(num2(this.etype,Var2(v,n)))
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(int2(this.etype,Var2(v,n)))
+                |_ ->
+                    printfn "部分配列を関数の引数にできません"
+        type double2 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg = fun code ->
+                match this.Expr with
+                |Var2(size,name) ->
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(double2(this.etype,Var2(v,n)))
+                |_ ->
+                    printfn "部分配列を関数の引数にできません"
+        type complex2 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg = fun code ->
+                match this.Expr with
+                |Var2(size,name) ->
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(complex2(this.etype,Var2(v,n)))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
 
-        type num3 with
+        type int3 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(num3(this.etype,Var3(v,n)))
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(int3(this.etype,Var3(v,n)))
+                |_ ->
+                    printfn "部分配列を関数の引数にできません"
+        type double3 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg = fun code ->
+                match this.Expr with
+                |Var3(size,name) ->
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(double3(this.etype,Var3(v,n)))
+                |_ ->
+                    printfn "部分配列を関数の引数にできません"
+        type complex3 with
+            /// <summary>
+            /// この変数を関数内変数に変換
+            /// </summary>
+            member this.farg = fun code ->
+                match this.Expr with
+                |Var3(size,name) ->
+                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(complex3(this.etype,Var3(v,n)))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"

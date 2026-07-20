@@ -8,7 +8,7 @@ namespace Aqualis
 
 type post(id:PHPdata) =
     new(x:string) = post (PHPdata [RStr x])
-    new(x:num0) = post (PHPdata [RNvr x.Expr])
+    new(x:int0) = post (PHPdata [RNvr x.Expr])
     member _.get with get() = PHPdata.f("$_POST["+id.toString(".",StrQuotation)+"]")
     member this.get_html with get() = PHPdata.f("htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")
     ///テキストボックス
@@ -218,7 +218,7 @@ type post(id:PHPdata) =
         )
 
     ///テキストボックス
-    member _.input(value:num0) =
+    member _.input(value:int0) =
         html.taga(
             "input",
             [
@@ -227,7 +227,7 @@ type post(id:PHPdata) =
                 "value", PHPdata value
             ]
         )
-    member _.input(value:num0,a:list<Atr>) =
+    member _.input(value:int0,a:list<Atr>) =
         html.taga(
             "input",
             [
@@ -238,7 +238,7 @@ type post(id:PHPdata) =
         )
 
     ///テキストボックス
-    member _.input_hidden(value:num0) =
+    member _.input_hidden(value:int0) =
         html.taga(
             "input",
             [
@@ -247,7 +247,7 @@ type post(id:PHPdata) =
                 "value", PHPdata value
             ]
         )
-    member _.input_hidden(value:num0,a:list<Atr>) =
+    member _.input_hidden(value:int0,a:list<Atr>) =
         html.taga(
             "input",
             [
@@ -257,7 +257,7 @@ type post(id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
 
-    member _.input_lock(value:num0) =
+    member _.input_lock(value:int0) =
         html.taga(
             "input",
             [
@@ -267,7 +267,79 @@ type post(id:PHPdata) =
                 "value", PHPdata value
             ]
         )
-    member _.input_lock(value:num0,a:list<Atr>) =
+    member _.input_lock(value:int0,a:list<Atr>) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "text"
+                "name", id
+                "readonly",PHPdata "readonly"
+                "value", PHPdata value
+            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
+        )
+        
+    ///パスワード入力テキストボックス
+    member _.password(value:int0) = 
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "password"
+                "name", id
+                "value", PHPdata value
+            ]
+        )
+
+    ///テキストボックス
+    member _.input(value:double0) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "text"
+                "name", id
+                "value", PHPdata value
+            ]
+        )
+    member _.input(value:double0,a:list<Atr>) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "text"
+                "name", id
+                "value", PHPdata value
+            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
+        )
+
+    ///テキストボックス
+    member _.input_hidden(value:double0) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "hidden"
+                "name", id
+                "value", PHPdata value
+            ]
+        )
+    member _.input_hidden(value:double0,a:list<Atr>) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "hidden"
+                "name", id
+                "value", PHPdata value
+            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
+        )
+
+    member _.input_lock(value:double0) =
+        html.taga(
+            "input",
+            [
+                "type", PHPdata "text"
+                "name", id
+                "readonly",PHPdata "readonly"
+                "value", PHPdata value
+            ]
+        )
+    member _.input_lock(value:double0,a:list<Atr>) =
         html.taga(
             "input",
             [
@@ -289,7 +361,7 @@ type post(id:PHPdata) =
             ]
         )
     ///パスワード入力テキストボックス
-    member _.password(value:num0) = 
+    member _.password(value:double0) = 
         html.taga(
             "input",
             [
@@ -298,6 +370,7 @@ type post(id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+
     ///テキストボックス（送信済みのメッセージを表示）
     member this.input_copy() = 
         html.taga(
@@ -462,4 +535,4 @@ type postFile(id:PHPdata) =
     /// ファイルが指定されているか
     member this.isFileSpecified with get() =
         //ファイルが指定されていないとき、post_newfiles.err[0] = 4になる
-        this.err[0] .=/ 4
+        this.err[0].int0 .=/ 4

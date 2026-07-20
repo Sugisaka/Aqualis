@@ -9,7 +9,7 @@ namespace Aqualis
     module geometry =
 
         /// 2次元ベクトル
-        type Point2(x:num0,y:num0) =
+        type Point2(x:double0,y:double0) =
             member public _.x with get() = x
             member public _.y with get() = y
             member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y)
@@ -18,7 +18,8 @@ namespace Aqualis
             static member ( - ) (a:Point2,b:Point2) = new Point2(a.x-b.x, a.y-b.y)
             static member ( * ) (a:double,b:Point2) = new Point2(a*b.x, a*b.y)
             static member ( * ) (a:int,b:Point2) = new Point2(a*b.x, a*b.y)
-            static member ( * ) (a:num0,b:Point2) = new Point2(a*b.x, a*b.y)
+            static member ( * ) (a:int0,b:Point2) = new Point2(a*b.x, a*b.y)
+            static member ( * ) (a:double0,b:Point2) = new Point2(a*b.x, a*b.y)
             static member ( * ) (a:Point2,b:Point2) = a.x*b.x+a.y*b.y
 
         type point2(name) =
@@ -43,7 +44,8 @@ namespace Aqualis
             static member ( - ) (a:Point2,b:point2) = new Point2(a.x-b.x, a.y-b.y)
             static member ( * ) (a:double,b:point2) = new Point2(a*b.x, a*b.y)
             static member ( * ) (a:int,b:point2) = new Point2(a*b.x, a*b.y)
-            static member ( * ) (a:num0,b:point2) = new Point2(a*b.x, a*b.y)
+            static member ( * ) (a:int0,b:point2) = new Point2(a*b.x, a*b.y)
+            static member ( * ) (a:double0,b:point2) = new Point2(a*b.x, a*b.y)
             static member ( * ) (a:point2,b:point2) = a.x*b.x+a.y*b.y
             static member ( * ) (a:point2,b:Point2) = a.x*b.x+a.y*b.y
             static member ( * ) (a:Point2,b:point2) = a.x*b.x+a.y*b.y
@@ -63,15 +65,15 @@ namespace Aqualis
             new(name,size1) =
                 str.reg(point2.sname,name,size1)
                 point2_1(name,A1 size1)
-            member this.Item with get(i:num0) = point2(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
-            member this.Item with get(i:int ) = point2(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
+            member this.Item with get(i:int0) = point2(this.Idx1(i).eval (GenerationScope.currentProgram()))
+            member this.Item with get(i:int ) = point2(this.Idx1(i).eval (GenerationScope.currentProgram()))
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
             static member str_mem(sname, vname, name, size1) =
                 str.addmember(sname,(Structure sname,A1 size1,name))
                 point2_1(str.mem(vname,name),size1)
 
         /// 3次元ベクトル
-        type Point3(x:num0,y:num0,z:num0) =
+        type Point3(x:double0,y:double0,z:double0) =
             member public _.x with get() = x
             member public _.y with get() = y
             member public _.z with get() = z
@@ -81,7 +83,8 @@ namespace Aqualis
             static member ( + ) (a:Point3,b:Point3) = new Point3(a.x+b.x, a.y+b.y, a.z+b.z)
             static member ( - ) (a:Point3,b:Point3) = new Point3(a.x-b.x, a.y-b.y, a.z-b.z)
             static member ( * ) (a:int,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
-            static member ( * ) (a:num0,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            static member ( * ) (a:int0,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            static member ( * ) (a:double0,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
             static member ( * ) (a:double,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
             static member ( * ) (a:Point3,b:Point3) = a.x*b.x+a.y*b.y+a.z*b.z
             static member ( % ) (a:Point3,b:Point3) = new Point3(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x)
@@ -108,7 +111,8 @@ namespace Aqualis
             static member ( - ) (a:point3,b:point3) = new Point3(a.x-b.x, a.y-b.y, a.z-b.z)
             static member ( * ) (a:double,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
             static member ( * ) (a:int,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
-            static member ( * ) (a:num0,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            static member ( * ) (a:int0,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            static member ( * ) (a:double0,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
             static member ( * ) (a:point3,b:point3) = a.x*b.x+a.y*b.y+a.z*b.z
             static member ( * ) (a:point3,b:Point3) = a.x*b.x+a.y*b.y+a.z*b.z
             static member ( * ) (a:Point3,b:point3) = a.x*b.x+a.y*b.y+a.z*b.z
@@ -129,15 +133,15 @@ namespace Aqualis
             new(name,size1) =
                 str.reg(point3.sname,name,size1)
                 point3_1(point3.sname,name,A1 size1)
-            member this.Item with get(i:num0) = point3(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
-            member this.Item with get(i:int ) = point3(this.Idx1(i).Expr.eval ((GenerationScope.currentProgram())))
+            member this.Item with get(i:int0) = point3(this.Idx1(i).eval ((GenerationScope.currentProgram())))
+            member this.Item with get(i:int ) = point3(this.Idx1(i).eval ((GenerationScope.currentProgram())))
 
         ///<summary>
         ///中心(x,y)、1辺の長さdの正方形領域に、中心(center_x,center_y)、半径radiusの円が占める割合を計算
         ///結果はfに保存（0.0≦f≦1.0）
         ///</summary>
-        let circle(x:num0,y:num0,center_x:num0,center_y:num0,radius:num0,d:num0,f:num0):num0 =
-            let rad(y:num0,x:num0,t:num0) =
+        let circle(x:double0,y:double0,center_x:double0,center_y:double0,radius:double0,d:double0,f:double0):double0 =
+            let rad(y:double0,x:double0,t:double0) =
                 br.branch <| fun b ->
                     b.IF (x.=0.0) <| fun () -> t <== 0.500*asm.pi
                     b.IF (x.>0.0) <| fun () -> t <== asm.atan(y/x)

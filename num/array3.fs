@@ -113,11 +113,11 @@ namespace Aqualis
                     br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () ->
                         print.t ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is not allocated")
                     br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                        print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                        print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                     br.if1 (Or [j .< _0; this.size2 .<= j]) <| fun () ->
-                        print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
+                        print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
                     br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
-                        print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
+                        print.cc <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
             match x,language() with

@@ -11,7 +11,7 @@ namespace Aqualis
         ///<param name="hn">球ハンケル関数の値</param>
         ///<param name="n">ハンケル関数の次数</param>
         ///<param name="x">ハンケル関数の引数</param>
-        let hn (hn:num0) (n:num0,x:num0) =
+        let hn (hn:complex0) (n:int0,x:double0) =
             // hn(x) = j * (-1)^n * x^n * [x^(-1) * (d/dx)]^n * [e^(-jx) * (x^(-1))]
             //c1(m): e^(-jx)(x^(-m))の係数
             ch.z1 (2*n+1) <| fun c1 ->
@@ -44,7 +44,7 @@ namespace Aqualis
         ///<param name="N">引数の数(i=1,2,…N)</param>
         ///<param name="n">ハンケル関数の次数</param>
         ///<param name="x">x(i):ハンケル関数の引数</param>
-        let hnarray (hn:num0->num0) (N:num0) (n:num0,x:num0->num0) =
+        let hnarray (hn:int0->complex0) (N:int0) (n:int0,x:int0->double0) =
             // hn(x) = j * (-1)^n * x^n * [x^(-1) * (d/dx)]^n * [e^(-jx) * (x^(-1))]
             //c1(m): e^(-jx)(x^(-m))の係数
             ch.z1 (2*n+1) <| fun c1 ->
@@ -76,7 +76,7 @@ namespace Aqualis
         ///<summary>整数次第2種球ハンケル関数を計算</summary>
         ///<param name="n">ハンケル関数の次数</param>
         ///<param name="code">code(f)：f(hn,x)でhn(x)を計算</param>
-        let hnfunc (n:num0) code =
+        let hnfunc (n:int0) code =
             // hn(x) = j * (-1)^n * x^n * [x^(-1) * (d/dx)]^n * [e^(-jx) * (x^(-1))]
             //c1(m): e^(-jx)(x^(-m))の係数
             ch.z1 (2*n+1) <| fun c1 ->
@@ -99,7 +99,7 @@ namespace Aqualis
                     c1 <== c2
                     c2.clear()
                 //c(m): e^(-jx)(x^(n-m))の係数
-                let f (hn:num0,x:num0) =
+                let f (hn:complex0,x:double0) =
                     hn.clear()
                     iter.range _0 (2*n) <| fun m ->
                         hn <== hn + asm.pow(x,n-m-1)*c1[m+1-1]
@@ -107,7 +107,7 @@ namespace Aqualis
                 code f
                 
         //Legendre多項式 P_l
-        let plgndr (pl:num0) (l:num0,x:num0) =
+        let plgndr (pl:double0) (l:int0,x:double0) =
             group.Section "Legendre多項式を計算" <| fun () ->
                 ch.d <| fun pll ->
                 ch.d <| fun pmm ->
@@ -131,7 +131,7 @@ namespace Aqualis
         //<summary>Legendre多項式を0次からn次まで計算</summary>
         //<param name="pl">pl[i] = i-1次のLegendre多項式を保存</param>
         //<param name="(l,x)">計算するLegendre多項式の最高次数と引数</param>
-        let plgndrarray (pl:num1) (l:num0,x:num0) =
+        let plgndrarray (pl:double1) (l:int0,x:double0) =
             group.Section ("0次から"+l.code+"次までのLegendre多項式を計算") <| fun () ->
                 ch.d <| fun pmm ->
                 ch.d <| fun pmmp1 ->
@@ -157,7 +157,7 @@ namespace Aqualis
         //<param name="l">整数</param>
         //<param name="m">整数</param>
         //<param name="x">実数</param>
-        let aplgndr (pl:num0) (l:num0, m:num0, x:num0) =
+        let aplgndr (pl:double0) (l:int0, m:int0, x:double0) =
             ch.dd <| fun (fact,pll) ->
             ch.ddd <| fun (pmm,pmmp1,somx2) ->
                 br.if1 (Or [m .< 0; m .> l; asm.abs(x) .> 1.0]) <| fun () ->

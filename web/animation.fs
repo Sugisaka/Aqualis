@@ -25,9 +25,9 @@ type AnimationType =
 
 type tposition = {
     /// x座標：時間（フレーム番号）の関数
-    X:num0->num0;
+    X:double0->double0;
     /// y座標：時間（フレーム番号）の関数
-    Y:num0->num0}
+    Y:double0->double0}
 
 type Line = {
     /// 始点
@@ -39,19 +39,19 @@ type Ellipse = {
     /// 中心座標
     center:tposition;
     /// 半径(x)
-    radiusX:num0->num0;
+    radiusX:double0->double0;
     /// 半径(y)
-    radiusY:num0->num0;}
+    radiusY:double0->double0;}
 
 type Arc = {
     /// 円弧の中心座標
     center:tposition;
     /// 開始角（度数法, 反時計回りに描画）
-    angle1:num0->num0;
+    angle1:double0->double0;
     /// 終了角（度数法, 反時計回りに描画）
-    angle2:num0->num0;
+    angle2:double0->double0;
     /// 円弧の半径
-    radius:num0->num0;}
+    radius:double0->double0;}
 
 type Text = {
     /// 中心座標
@@ -59,11 +59,11 @@ type Text = {
     /// 表示するテキスト
     str:string; }
 
-type MathText = {
+type MathText<'a> = {
     /// 中心座標
     center:tposition;
     /// 表示する数式
-    eq:num0; }
+    eq:'a; }
 
 /// <summary>
 /// 線分アニメーションを生成するクラス
@@ -86,7 +86,7 @@ type AnimationLine(s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="f">描画対象となる線分</param>
     member this.P (f:Line) =
-        let t = num0(Var(Dt,"t",NaN))
+        let t = double0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein("    var e = document.getElementById(\""+id+"\");")
             writein("    var x1 = " + (f.Start.X t).code + ";")
@@ -123,7 +123,7 @@ type AnimationEllipse(s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="e">描画対象となる円</param>
     member this.P (e:Ellipse) =
-        let t = num0(Var(Dt,"t",NaN))
+        let t = double0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein("    var e = document.getElementById(\""+id+"\");")
             writein("    var cx = " + (e.center.X t).code + ";")
@@ -160,7 +160,7 @@ type AnimationArc(s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="e">描画対象となる円弧</param>
     member this.P (e:Arc) =
-        let t = num0(Var(Dt,"t",NaN))
+        let t = double0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             let a1 = Math.PI * e.angle1 t / 180
@@ -210,7 +210,7 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="e">対象となるテキスト</param>
     member this.P (e:Text) =
-        let t = num0(Var(Dt,"t",NaN))
+        let t = double0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
@@ -227,8 +227,8 @@ type AnimationText(s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     /// 指定したMathTextオブジェクトをキャンパスに追加する
     /// </summary>
     /// <param name="e">対象となる数式</param>
-    member this.P (e:MathText) =
-        let t = num0(Var(Dt,"t",NaN))
+    member this.P (e:MathText<'a>) =
+        let t = double0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\""+id+"\");")
             writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
@@ -264,7 +264,7 @@ type AnimationPolygon(s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="apex">多角形を構成する頂点座標のリスト</param>
     member this.P (apex:list<tposition>) =
-        let t = num0(Var(Dt,"t",NaN))
+        let t = double0(Var(Dt,"t",NaN))
         switchAnimationSeq <| fun () ->
             writein ("    var e = document.getElementById(\"" + id + "\");")
             writein  "    var p = \"\";"
@@ -509,7 +509,7 @@ module htmlexpr =
         /// 見出し（h1）要素を生成する
         /// </summary>
         /// <param name="t">見出しに表示する内容</param>
-        static member h1 (t:num0) = fun code ->
+        static member h1 (t:int0) = fun code ->
             html.tagb "h1" <| fun () -> php.echo t.code
             code()
         /// <summary>
@@ -517,35 +517,78 @@ module htmlexpr =
         /// </summary>
         /// <param name="t">見出しに表示する内容</param>
         /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
-        static member h1 (t:num0,s:Style) = fun code ->
+        static member h1 (t:int0,s:Style) = fun code ->
             html.tagb ("h1",[s.atr]) <| fun () -> php.echo t.code
             code()
 
-        static member h2 (t:num0) = fun code ->
+        static member h2 (t:int0) = fun code ->
             html.tagb "h2" <| fun () -> php.echo t.code
             code()
-        static member h2 (t:num0,s:Style) = fun code ->
+        static member h2 (t:int0,s:Style) = fun code ->
             html.tagb ("h2",[s.atr]) <| fun () -> php.echo t.code
             code()
 
-        static member h3 (t:num0) = fun code ->
+        static member h3 (t:int0) = fun code ->
             html.tagb "h3" <| fun () -> php.echo t.code
             code()
-        static member h3 (t:num0,s:Style) = fun code ->
+        static member h3 (t:int0,s:Style) = fun code ->
             html.tagb ("h3",[s.atr]) <| fun () -> php.echo t.code
             code()
 
-        static member h4 (t:num0) = fun code ->
+        static member h4 (t:int0) = fun code ->
             html.tagb "h4" <| fun () -> php.echo t.code
             code()
-        static member h4 (t:num0,s:Style) = fun code ->
+        static member h4 (t:int0,s:Style) = fun code ->
             html.tagb ("h4",[s.atr]) <| fun () -> php.echo t.code
             code()
 
-        static member h5 (t:num0) = fun code ->
+        static member h5 (t:int0) = fun code ->
             html.tagb "h5" <| fun () -> php.echo t.code
             code()
-        static member h5 (t:num0,s:Style) = fun code ->
+        static member h5 (t:int0,s:Style) = fun code ->
+            html.tagb ("h5",[s.atr]) <| fun () -> php.echo t.code
+            code()
+        /// <summary>
+        /// 見出し（h1）要素を生成する
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
+        static member h1 (t:double0) = fun code ->
+            html.tagb "h1" <| fun () -> php.echo t.code
+            code()
+        /// <summary>
+        /// 見出し（h1）要素を生成する
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
+        /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
+        static member h1 (t:double0,s:Style) = fun code ->
+            html.tagb ("h1",[s.atr]) <| fun () -> php.echo t.code
+            code()
+
+        static member h2 (t:double0) = fun code ->
+            html.tagb "h2" <| fun () -> php.echo t.code
+            code()
+        static member h2 (t:double0,s:Style) = fun code ->
+            html.tagb ("h2",[s.atr]) <| fun () -> php.echo t.code
+            code()
+
+        static member h3 (t:double0) = fun code ->
+            html.tagb "h3" <| fun () -> php.echo t.code
+            code()
+        static member h3 (t:double0,s:Style) = fun code ->
+            html.tagb ("h3",[s.atr]) <| fun () -> php.echo t.code
+            code()
+
+        static member h4 (t:double0) = fun code ->
+            html.tagb "h4" <| fun () -> php.echo t.code
+            code()
+        static member h4 (t:double0,s:Style) = fun code ->
+            html.tagb ("h4",[s.atr]) <| fun () -> php.echo t.code
+            code()
+
+        static member h5 (t:double0) = fun code ->
+            html.tagb "h5" <| fun () -> php.echo t.code
+            code()
+        static member h5 (t:double0,s:Style) = fun code ->
             html.tagb ("h5",[s.atr]) <| fun () -> php.echo t.code
             code()
         /// <summary>
@@ -864,7 +907,17 @@ module htmlexpr =
         /// <summary>
         /// num0式を評価し、MathJax形式で出力する
         /// </summary>
-        static member eq(text:num0) =
+        static member eq(text:int0) =
+            writein ("\\("+text.Expr.evalL (GenerationScope.currentProgram()) + "\\)")
+        /// <summary>
+        /// num0式を評価し、MathJax形式で出力する
+        /// </summary>
+        static member eq(text:double0) =
+            writein ("\\("+text.Expr.evalL (GenerationScope.currentProgram()) + "\\)")
+        /// <summary>
+        /// num0式を評価し、MathJax形式で出力する
+        /// </summary>
+        static member eq(text:complex0) =
             writein ("\\("+text.Expr.evalL (GenerationScope.currentProgram()) + "\\)")
 
         /// <summary>
@@ -1171,7 +1224,33 @@ type FigureAnimation(figcounter:int,originX:int,originY:int,canvasX:int,canvasY:
     /// 数式を描画
     /// </summary>
     /// <param name="e">表示する数式</param>
-    member this.eq (s:Style) (center:position) (e:num0) =
+    member this.eqi (s:Style) (center:position) (e:int0) =
+        let c = [
+            {Key="display";Value="block"}
+            {Key="position";Value="absolute"}
+            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
+            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+        let ss = Style (s.list@c)
+        html.tagb ("div", [ss.atr]) <| fun () ->
+            writein ("\\(" + e.Expr.evalH (GenerationScope.currentProgram()) + "\\)")
+    /// <summary>
+    /// 数式を描画
+    /// </summary>
+    /// <param name="e">表示する数式</param>
+    member this.eqd (s:Style) (center:position) (e:double0) =
+        let c = [
+            {Key="display";Value="block"}
+            {Key="position";Value="absolute"}
+            {Key="margin-left";Value=(double originX+center.x).ToString()+"px"}
+            {Key="margin-top";Value=(double originY+double canvasY-center.y).ToString()+"px"}]
+        let ss = Style (s.list@c)
+        html.tagb ("div", [ss.atr]) <| fun () ->
+            writein ("\\(" + e.Expr.evalH (GenerationScope.currentProgram()) + "\\)")
+    /// <summary>
+    /// 数式を描画
+    /// </summary>
+    /// <param name="e">表示する数式</param>
+    member this.eqz (s:Style) (center:position) (e:complex0) =
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}

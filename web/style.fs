@@ -13,7 +13,9 @@ open System.Text.Encodings.Web
 
 type Serif(subtitle:string,hatsuon:string) =
     new(subtitle:string) = Serif(subtitle,subtitle)
-    new(subtitle:num0) = Serif("\\("+subtitle.Expr.eval ((GenerationScope.currentProgram()))+"\\)",subtitle.Expr.evalT())
+    new(subtitle:int0) = Serif("\\("+subtitle.Expr.eval ((GenerationScope.currentProgram()))+"\\)",subtitle.Expr.evalT())
+    new(subtitle:double0) = Serif("\\("+subtitle.Expr.eval ((GenerationScope.currentProgram()))+"\\)",subtitle.Expr.evalT())
+    new(subtitle:complex0) = Serif("\\("+subtitle.Expr.eval ((GenerationScope.currentProgram()))+"\\)",subtitle.Expr.evalT())
     new(subtitle:bool0) = Serif("\\("+subtitle.Expr.eval ((GenerationScope.currentProgram()))+"\\)",subtitle.Expr.evalT())
     member _.Subtitle with get() = subtitle
     member _.Hatsuon with get() = hatsuon
@@ -99,4 +101,6 @@ type Character(scriptDataDir:string,name:string) =
         let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+x.evalT()) ""
         this.script(subtitle,script)
     member this.script(text:string) = this.script (exprString text)
-    member this.script(text:num0) = this.script (exprString text)
+    member this.script(text:int0) = this.script (exprString text)
+    member this.script(text:double0) = this.script (exprString text)
+    member this.script(text:complex0) = this.script (exprString text)

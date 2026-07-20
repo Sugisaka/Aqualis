@@ -21,7 +21,7 @@ module AssignmentTests =
 
             secondContext.Activate(fun () ->
                 let target =
-                    num0(Var(Dt, "target", NaN), context=secondContext)
+                    double0(Var(Dt, "target", NaN), context=secondContext)
                 target <== constant)
 
             secondContext.CurrentProgram.close()
@@ -63,9 +63,9 @@ module AssignmentTests =
 
         try
             let left =
-                num0(Var(It 4, "left", NaN), context=leftContext)
+                int0(Var(It 4, "left", NaN), context=leftContext)
             let right =
-                num0(Var(It 4, "right", NaN), context=rightContext)
+                int0(Var(It 4, "right", NaN), context=rightContext)
 
             Assert.Throws<InvalidOperationException>(Action(fun () ->
                 left <== right))

@@ -695,6 +695,3 @@ namespace Aqualis
             static member log(x:int3) = int3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.log(x[i,j,k]).Expr))
             static member log10(x:int3) = int3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.log10(x[i,j,k]).Expr))
             static member sqrt(x:int3) = int3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.sqrt(x[i,j,k]).Expr))
-            static member floor(x:int3) = int3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.floor(x[i,j,k]).Expr))
-            static member ceil(typ,x:int3) = int3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.ceil(x[i,j,k]).Expr))
-            static member conj(typ,x:int3) = int3(x.etype, Arx3(x.size1,x.size2,x.size3,fun (i,j,k) -> asm.conj(x[i,j,k]).Expr))

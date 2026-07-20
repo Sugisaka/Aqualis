@@ -15,15 +15,15 @@ namespace Aqualis
         /// <param name="max_iteration">最大反復回数</param>
         /// <param name="integralequation_matmul">行列－ベクトル積実行関数</param>
         /// <param name="prec">前処理行列</param>
-        let BiCGSTAB (b:num1) (x:num1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(num1->num1->unit)option) =
+        let BiCGSTAB (b:complex1) (x:complex1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(complex1->complex1->unit)option) =
             group.Section "Bi-CGSTAB法" <| fun () ->
                 //ベクトルのノルム
-                let norm(norm_:num0,b:num1) =
+                let norm(norm_:double0,b:complex1) =
                   norm_ <== 0.0
                   iter.num b.size1 <| fun i -> norm_ <== norm_+asm.pow(asm.abs(b.[i]),2)
                   norm_ <== asm.sqrt(norm_)
                 //ベクトルの内積
-                let dot_product2(dot_product2_:num0,a:num1,b:num1) =
+                let dot_product2(dot_product2_:complex0,a:complex1,b:complex1) =
                   dot_product2_ <== 0
                   iter.num a.size1 <| fun i -> 
                       dot_product2_ <== dot_product2_ + asm.conj(a[i]) * b[i]
@@ -39,7 +39,7 @@ namespace Aqualis
                             ch.d <| fun norm_ ->
                                 norm(norm_,r)
                                 err <== norm_/bnrm2
-                                print.n [_0;err;]
+                                print.cc <| _0++err
                             br.if1 (err .> tol) <| fun () ->
                                 ch.z <| fun omega ->
                                     omega <== 1
@@ -84,7 +84,7 @@ namespace Aqualis
                                             ch.d <| fun norm_ ->
                                                 norm(norm_,r)
                                                 err <== norm_/bnrm2
-                                            print.n [i;err]
+                                            print.cc <| i++err
                                             //収束判定
                                             br.if1 (err .<= tol) <| fun () -> 
                                                 print.t "converged"

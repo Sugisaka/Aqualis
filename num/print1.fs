@@ -173,7 +173,7 @@ namespace Aqualis
                     |RNvr (Cpx (re,im)) -> printf "%e %e " re im
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
-        static member c (str:string) =
+        static member t (str:string) =
             match (GenerationScope.currentProgram()).language with
             |Fortran ->
                 writein("print *, "+"\""+str+"\""+"\n")

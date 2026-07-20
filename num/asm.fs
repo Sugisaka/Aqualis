@@ -133,7 +133,7 @@ namespace Aqualis
         ///<summary>絶対値</summary>
         static member abs (v:int0) = double0(Abs(Dt,v.Expr))
         static member abs (v:double0) = double0(Abs(Dt,v.Expr))
-        static member abs (v:complex0) = complex0(Abs(Dt,v.Expr))
+        static member abs (v:complex0) = double0(Abs(Dt,v.Expr))
         ///<summary>自然対数</summary>
         static member log (v:int0) = double0(Log(v.etype,v.Expr))
         static member log (v:double0) = double0(Log(v.etype,v.Expr))
@@ -147,19 +147,11 @@ namespace Aqualis
         static member sqrt (v:double0) = double0(Sqrt(v.etype,v.Expr))
         static member sqrt (v:complex0) = complex0(Sqrt(v.etype,v.Expr))
         ///<summary>小数点以下切り捨て</summary>
-        static member floor (v:int0) = double0(Floor v.Expr)
-        static member floor (v:double0) = double0(Floor v.Expr)
-        static member floor (v:complex0) = complex0(Floor v.Expr)
+        static member floor (v:double0) = asm.toint(double0(Floor v.Expr))
         ///<summary>小数点以下切り上げ</summary>
-        static member ceil (v:int0) = double0(Ceil v.Expr)
-        static member ceil (v:double0) = double0(Ceil v.Expr)
-        static member ceil (v:complex0) = complex0(Ceil v.Expr)
+        static member ceil (v:double0) = asm.toint(double0(Ceil v.Expr))
         ///<summary>共役複素数</summary>
-        static member conj (v:int0) = double0(Conj v.Expr)
-        static member conj (v:double0) = double0(Conj v.Expr)
         static member conj (v:complex0) = complex0(Conj v.Expr)
-
-
         static member iSum (n1:int0, n2:int0, f:int0->int0) = int0(Sum(It 4, n1.Expr, n2.Expr, fun (x:expr) -> (f(int0 x)).Expr))
         static member iSum (n1:int, n2:int0, f:int0->int0) = int0(Sum(It 4, Int n1, n2.Expr, fun (x:expr) -> (f(int0 x)).Expr))
         static member iSum (n1:int0, n2:int, f:int0->int0) = int0(Sum(It 4, n1.Expr, Int n2, fun (x:expr) -> (f(int0 x)).Expr))

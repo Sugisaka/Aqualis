@@ -39,7 +39,7 @@ namespace Aqualis
             this.eqReturn()
 
         ///<summary>空白の左辺</summary>
-        member _.nl with get() = num0(Var(Zt,"",NaN))
+        member _.nl with get() = complex0(Var(Zt,"",NaN))
 
     ///<summary>変数宣言</summary>
     type doc () =
@@ -121,22 +121,26 @@ namespace Aqualis
 
         ///<summary>変数（変数リストに追加しない）</summary>
         static member var (tp,name:string) =
-            num0(Var(tp,name,NaN))
+            Var(tp,name,NaN)
 
         ///<summary>単独の数式</summary>
-        static member f (a:num0) = a.code
+        static member f (a:int0) = a.code
+        static member f (a:double0) = a.code
+        static member f (a:complex0) = a.code
 
         ///<summary>単独の数式</summary>
         static member f (a:bool0) = a.code
 
         ///<summary>単独の数式(インライン)</summary>
-        static member fi (a:num0) = "$"+a.code+"$"
+        static member fi (a:int0) = "$"+a.code+"$"
+        static member fi (a:double0) = "$"+a.code+"$"
+        static member fi (a:complex0) = "$"+a.code+"$"
 
         ///<summary>単独の数式(インライン)</summary>
         static member fi (a:bool0) = "$"+a.code+"$"
 
         ///<summary>総和</summary>
-        static member sum (a:num0,i:num0) = fun (b:num0) (c:num0) ->
+        static member sum (a:int0,i:int0,b:int0,c:double0) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
@@ -148,16 +152,28 @@ namespace Aqualis
                         "\\left[" + c.code + "\\right]"
                     |_ ->
                         c.code
-                num0(Var(c.etype,"\\sum_{"+ta+"="+ti+"}^{"+tb+"} "+tc,NaN))
+                double0(Var(c.etype,"\\sum_{"+ta+"="+ti+"}^{"+tb+"} "+tc,NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
+        ///<summary>総和</summary>
+        static member sum (a:int0,i:int0,b:int0,c:complex0) =
+            match (GenerationScope.currentProgram()).language with
+            |LaTeX|HTML|HTMLSequenceDiagram ->
+                let ta = a.code
+                let ti = i.code
+                let tb = b.code
+                let tc =
+                    match c.Expr with
+                    |Add _ |Sub _ ->
+                        "\\left[" + c.code + "\\right]"
+                    |_ ->
+                        c.code
+                complex0(Var(c.etype,"\\sum_{"+ta+"="+ti+"}^{"+tb+"} "+tc,NaN))
+            |_ ->
+                complex0 NaN
 
         ///<summary>総和</summary>
-        static member sum (a:num0,i:int) = fun (b:num0) (c:num0) ->
-            doc.sum (a,I i) b c
-
-        ///<summary>総和</summary>
-        static member sum (a:num0) = fun (b:num0) (c:num0) ->
+        static member sum (a:int0,b:int0,c:double0) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
@@ -168,12 +184,27 @@ namespace Aqualis
                         "\\left[" + c.code + "\\right]"
                     |_ ->
                         c.code
-                num0(Var(c.etype,"\\sum_{"+ta+"}^{"+tb+"} "+tc,NaN))
+                double0(Var(c.etype,"\\sum_{"+ta+"}^{"+tb+"} "+tc,NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
+        ///<summary>総和</summary>
+        static member sum (a:int0,b:int0,c:complex0) =
+            match (GenerationScope.currentProgram()).language with
+            |LaTeX|HTML|HTMLSequenceDiagram ->
+                let ta = a.code
+                let tb = b.code
+                let tc =
+                    match c.Expr with
+                    |Add _ |Sub _ ->
+                        "\\left[" + c.code + "\\right]"
+                    |_ ->
+                        c.code
+                complex0(Var(c.etype,"\\sum_{"+ta+"}^{"+tb+"} "+tc,NaN))
+            |_ ->
+                complex0 NaN
 
         ///<summary>積分</summary>
-        static member integral (a:num0,b:num0) = fun (eq:num0) (x:num0) ->
+        static member integral (a:double0,b:double0,eq:double0,x:double0) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
@@ -185,98 +216,114 @@ namespace Aqualis
                     |_ ->
                         eq.code
                 let tx = x.code
-                num0(Var(x.etype,"\\int_{"+ta+"}^{"+tb+"} "+te+"\\mathrm{d}"+tx,NaN))
+                double0(Var(eq.etype,"\\int_{"+ta+"}^{"+tb+"} "+te+"\\mathrm{d}"+tx,NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
+        ///<summary>積分</summary>
+        static member integral (a:double0,b:double0,eq:complex0,x:double0) =
+            match (GenerationScope.currentProgram()).language with
+            |LaTeX|HTML|HTMLSequenceDiagram ->
+                let ta = a.code
+                let tb = b.code
+                let te =
+                    match eq.Expr with
+                    |Add _ |Sub _ ->
+                        "\\left[" + eq.code + "\\right]"
+                    |_ ->
+                        eq.code
+                let tx = x.code
+                complex0(Var(eq.etype,"\\int_{"+ta+"}^{"+tb+"} "+te+"\\mathrm{d}"+tx,NaN))
+            |_ ->
+                complex0 NaN
 
         ///<summary>積分</summary>
-        static member integral (a:int,b:num0) = fun (eq:num0) (x:num0) ->
-            doc.integral (I a,b) eq x
+        static member integral (a:int,b:double0,eq:double0,x:double0) =
+            doc.integral (D a,b,eq, x)
 
         ///<summary>積分</summary>
-        static member integral (a:num0,b:int) = fun (eq:num0) (x:num0) ->
-            doc.integral (a,I b) eq x
+        static member integral (a:double0,b:int,eq:double0,x:double0) =
+            doc.integral (a,D b,eq, x)
 
         ///<summary>積分</summary>
-        static member integral (a:int,b:int) = fun (eq:num0) (x:num0) ->
-            doc.integral (I a,I b) eq x
+        static member integral (a:int,b:int,eq:double0,x:double0) =
+            doc.integral (D a,D b,eq, x)
 
         ///<summary>微分</summary>
-        static member diff (f:num0) (x:num0) =
+        static member diff (f:double0,x:double0) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let tf = f.code
                 let tx = x.code
-                num0(Var(f.etype,"\\frac{\\mathrm{d}"+tf+"}^{\\mathrm{d}"+tx+"}",NaN))
+                double0(Var(f.etype,"\\frac{\\mathrm{d}"+tf+"}^{\\mathrm{d}"+tx+"}",NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
 
         ///<summary>偏微分</summary>
-        static member pdiff (f:num0) (x:num0) =
+        static member pdiff (f:double0,x:double0) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let tf = f.code
                 let tx = x.code
-                num0(Var(f.etype,"\\frac{\\partial "+tf+"}^{\\partial "+tx+"}",NaN))
+                double0(Var(f.etype,"\\frac{\\partial "+tf+"}^{\\partial "+tx+"}",NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
 
         ///<summary>場合分け</summary>
-        static member cases (lst:(num0*string)list) =
+        static member cases (lst:(double0*string)list) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c =
                     lst
                     |> List.map (fun (f,x) -> f.code + " & \\left(" + x + "\\right)\n")
                     |> fun s -> String.Join ("\\\\",s)
-                num0(Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN))
+                double0(Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
 
         ///<summary>場合分け</summary>
-        static member cases (lst:(num0*num0)list) =
+        static member cases (lst:(double0*double0)list) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c =
                     lst
                     |> List.map (fun (f,x) -> f.code + " & " + x.code + "\n")
                     |> fun s -> String.Join ("\\\\",s)
-                num0(Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN))
+                double0(Var(Nt,"\\begin{dcases}\n" + c + "\\end{dcases}",NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
 
         ///<summary>場合分け</summary>
-        static member cases (lst:(num0*bool0)list) =
+        static member cases (lst:(double0*bool0)list) =
             match (GenerationScope.currentProgram()).language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c =
                     lst
                     |> List.map (fun (f,x) -> f.code + " & \\left(" + x.code + "\\right)\n")
                     |> fun s -> String.Join ("\\\\",s)
-                num0(Var(Nt,"\\begin{dcases}"+"\n"+c+"\\end{dcases}",NaN))
+                double0(Var(Nt,"\\begin{dcases}"+"\n"+c+"\\end{dcases}",NaN))
             |_ ->
-                num0 NaN
+                double0 NaN
 
         ///<summary>括弧「()」</summary>
-        static member par1 (v:num0) = num0(Var(v.etype,"\\left("+v.code+"\\right)",NaN))
+        static member par1 (v:double0) = double0(Var(v.etype,"\\left("+v.code+"\\right)",NaN))
 
         ///<summary>括弧「[]」</summary>
-        static member par2 (v:num0) = num0(Var(v.etype,"\\left["+v.code+"\\right]",NaN))
+        static member par2 (v:double0) = double0(Var(v.etype,"\\left["+v.code+"\\right]",NaN))
 
         ///<summary>括弧「[]」+下付き・上付き文字</summary>
-        static member par2 (v:num0,a:num0,b:num0) = num0(Var(v.etype,"\\left["+v.code+"\\right]_{"+a.code+"}^{"+b.code+"}",NaN))
+        static member par2 (v:double0,a:double0,b:double0) = double0(Var(v.etype,"\\left["+v.code+"\\right]_{"+a.code+"}^{"+b.code+"}",NaN))
 
         ///<summary>括弧「[]」+下付き・上付き文字</summary>
-        static member par2 (v:num0,a:int,b:num0) =
-            doc.par2 (v,I a,b)
+        static member par2 (v:double0,a:int,b:double0) =
+            doc.par2 (v,D a,b)
 
         ///<summary>括弧「[]」+下付き・上付き文字</summary>
-        static member par2 (v:num0,a:num0,b:int) =
-            doc.par2 (v,a,I b)
+        static member par2 (v:double0,a:double0,b:int) =
+            doc.par2 (v,a,D b)
 
         ///<summary>括弧「[]」+下付き・上付き文字</summary>
-        static member par2 (v:num0,a:int,b:int) =
-            doc.par2 (v,I a,I b)
+        static member par2 (v:double0,a:int,b:int) =
+            doc.par2 (v,D a,D b)
 
         ///<summary>括弧「{}」</summary>
-        static member par3 (v:num0) = num0(Var(v.etype,"\\left\\{"+v.code+"\\right\\}",NaN))
+        static member par3 (v:double0) = double0(Var(v.etype,"\\left\\{"+v.code+"\\right\\}",NaN))

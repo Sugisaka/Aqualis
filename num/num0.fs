@@ -242,11 +242,11 @@ namespace Aqualis
         static member ( * ) (x:int,y:int0) = int0(Int x)*y
 
         ///<summary>除算</summary>
-        static member ( / ) (x:int0,y:int0) = int0(Div(Dt%%x.etype%%y.etype, x.Expr, y.Expr))
+        static member ( / ) (x:int0,y:int0) = double0(Div(Dt%%x.etype%%y.etype, x.Expr, y.Expr))
         static member ( / ) (x:int0,y:double) = x/int0(Dbl y)
         static member ( / ) (x:int0,y:int) = x/int0(Dbl(double y))
-        static member ( / ) (x:double,y:int0) = int0(Dbl x)/y
-        static member ( / ) (x:int,y:int0) = int0(Dbl(double x))/y
+        static member ( / ) (x:double,y:int0) = double0(Dbl x)/y
+        static member ( / ) (x:int,y:int0) = double0(Dbl(double x))/y
 
         ///<summary>整数同士の除算(剰余無視)</summary>
         static member ( ./ ) (x:int0,y:int0) = int0(Div(It 4, x.Expr, y.Expr))
@@ -417,7 +417,7 @@ namespace Aqualis
 
         ///<summary>除算</summary>
         static member ( / ) (x:int0,y:double0) = double0(Div(Dt%%x.etype%%y.etype, x.Expr, y.Expr))
-        static member ( / ) (x:double0,y:int0) = double0(Div(Dt%%x.etype%%y.etype, x.Expr, y.Expr))
+        static member ( / ) (x:double0,y:int0):double0 = double0(Div(Dt%%x.etype%%y.etype, x.Expr, y.Expr))
         static member ( / ) (x:double0,y:double0) = double0(Div(Dt%%x.etype%%y.etype, x.Expr, y.Expr))
         static member ( / ) (x:double0,y:double) = x/double0(Dbl y)
         static member ( / ) (x:double0,y:int) = x/double0(Dbl(double y))

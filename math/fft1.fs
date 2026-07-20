@@ -15,7 +15,7 @@ namespace Aqualis
                 fftw_plan1(fftw_plan1.sname,name)
             member __.code = name
 
-        let fftshift_odd(a:num1) =
+        let fftshift_odd(a:complex1) =
             let n2 = a.size1./2 + 1
             ch.iiz <| fun (c1,c2,tmp) ->
                 c1 <== 0
@@ -28,7 +28,7 @@ namespace Aqualis
                     c1 <== c2
                 a[c1+n2-1] <== tmp
 
-        let fftshift_even(a:num1) =
+        let fftshift_even(a:complex1) =
             let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
@@ -36,7 +36,7 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
-        let ifftshift_odd(a:num1) =
+        let ifftshift_odd(a:complex1) =
             let n2 = a.size1./2
             ch.iiz <| fun (c1,c2,tmp) ->
                 c1 <== 0
@@ -49,7 +49,7 @@ namespace Aqualis
                     c1 <== c2
                 a[c1+n2+1] <== tmp
 
-        let ifftshift_even(a:num1) =
+        let ifftshift_even(a:complex1) =
             let n2 = a.size1./2
             ch.z <| fun tmp ->
                 iter.num n2 <| fun i ->
@@ -57,7 +57,7 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
-        let fftshift1(x:num1) =
+        let fftshift1(x:complex1) =
             br.if1 (x.size1 .> 1) <| fun () ->
                 br.if2 (x.size1%2 .= 0)
                 <| fun () ->
@@ -65,7 +65,7 @@ namespace Aqualis
                 <| fun () ->
                     fftshift_odd x
 
-        let ifftshift1(x:num1) =
+        let ifftshift1(x:complex1) =
             br.if1 (x.size1 .> 1) <| fun () ->
                 br.if2 (x.size1%2 .= 0)
                 <| fun () ->
@@ -73,7 +73,7 @@ namespace Aqualis
                 <| fun () ->
                     ifftshift_odd x
 
-        let private fft1(planname:string,data1:num1,data2:num1,fftdir:int) =
+        let private fft1(planname:string,data1:complex1,data2:complex1,fftdir:int) =
             (GenerationScope.currentProgram()).olist.add "-lfftw3"
             (GenerationScope.currentProgram()).olist.add "-I/usr/local/include"
             ch.ii <| fun (N,N2) ->
@@ -145,8 +145,8 @@ namespace Aqualis
                     iter.num N <| fun i ->
                         data2.[i]<==data2.[i]/N
 
-        let fft(planname:string,data1:num1,data2:num1) =
+        let fft(planname:string,data1:complex1,data2:complex1) =
                 fft1(planname,data1,data2,1)
 
-        let ifft(planname:string,data1:num1,data2:num1) =
+        let ifft(planname:string,data1:complex1,data2:complex1) =
                 fft1(planname,data1,data2,-1)
