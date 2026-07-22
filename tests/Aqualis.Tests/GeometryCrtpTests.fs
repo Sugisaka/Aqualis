@@ -12,8 +12,8 @@ module GeometryCrtpTests =
             [output.Path, "geometry.c", C99]
             (fun context ->
                 try
-                    let points2 = geometry.point2_1("points2", 2)
-                    let points3 = geometry.point3_1("points3", 3)
+                    let points2 = geometry.point2_1("points2", 2, context)
+                    let points3 = geometry.point3_1("points3", 3, context)
                     let element2: geometry.point2 = points2[0]
                     let element3: geometry.point3 = points3[0]
 

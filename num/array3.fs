@@ -14,15 +14,16 @@ namespace Aqualis
         |Arx3 of (int0*int0*int0*((int0*int0*int0)->expr))
 
     ///<summary>3次元配列</summary>
-    type base3 (typ:Etype,x:Expr3) =
+    type base3 (typ:Etype,x:Expr3, ?context:GenerationContext) =
         ///<summary>変数を作成しリストに追加</summary>
         new (typ,size,name,para) =
             (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
-            base3(typ,Var3(size,name))
+            base3(typ,Var3(size,name), context=GenerationScope.requireContext())
         ///<summary>変数を作成しリストに追加</summary>
         new(sname,size,name) =
             (GenerationScope.currentProgram()).var.setVar(Structure sname,size,name,"")
-            base3(Structure sname,Var3(size,name))
+            base3(Structure sname,Var3(size,name), context=GenerationScope.requireContext())
+        member internal _.GenerationContext = context
         member _.Expr with get() = x
         member _.code with get() =
             match x with
@@ -105,6 +106,7 @@ namespace Aqualis
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:int0,j:int0,k:int0) =
+            GenerationContextMerge.mergeMany [context;i.Context;j.Context;k.Context] |> ignore
             if (GenerationScope.debug()).debugMode then
                 match x with
                 |Var3(_,name) ->
@@ -120,7 +122,8 @@ namespace Aqualis
                         print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
-            match x,language() with
+            let targetLanguage = context |> Option.map (fun value -> value.CurrentProgram.language) |> Option.defaultValue Numeric
+            match x,targetLanguage with
             |Var3(_,name),Fortran -> Idx3(typ,name,(i+1).Expr,(j+1).Expr,(k+1).Expr)
             |Var3(_,name),C99 -> Idx1(typ,name,(i + j * this.size1 + k * this.size1 * this.size2).Expr)
             |Var3(_,name),_ -> Idx3(typ,name,i.Expr,j.Expr,k.Expr)
@@ -697,16 +700,22 @@ namespace Aqualis
         when 'Scalar :> INum0
         and 'Self :> NumericArray3<'Scalar,'Row,'Matrix,'Self>>
         (typ:Etype,x:Expr3,?context:GenerationContext) =
-        inherit base3(typ,x)
+        inherit base3(typ,x,?context=context)
 
-        let context=defaultArg(context|>Option.map Some) GenerationContext.TryCurrent
+        let context =
+            match context,x with
+            |Some value,_ -> Some value
+            |None,Arx3(size1,size2,size3,_) ->
+                GenerationContextMerge.mergeMany [size1.Context;size2.Context;size3.Context]
+            |None,Var3 _ -> None
         member _.Context=context
         member _.etype=typ
         abstract member WrapScalar:expr->'Scalar
         abstract member WrapRow:Expr1->'Row
         abstract member WrapMatrix:Expr2->'Matrix
-        abstract member Create:Etype*Expr3->'Self
+        abstract member CreateWithContext:Etype*Expr3*GenerationContext option->'Self
         abstract member AssignAt:int0*int0*int0*expr->unit
+        member this.Create(elementType,value)=this.CreateWithContext(elementType,value,context)
 
         member this.Item with get(i1:int0,i2:int0,i3:int0) = this.WrapScalar(this.Idx3(i1,i2,i3))
         member this.Item with get(i1:int0,i2:int0,i3:int) = this.WrapScalar(this.Idx3(i1,i2,I i3))
@@ -1051,18 +1060,22 @@ namespace Aqualis
         member this.Item with get(_:unit,_:unit,(a3:int,b3:int0)) = this.Create(typ,this.Idx3((),(),(I a3,b3)))
         member this.Item with get(_:unit,_:unit,(a3:int,b3:int)) = this.Create(typ,this.Idx3((),(),(I a3,I b3)))
 
-        member private this.New(elementType,body)=this.Create(elementType,Arx3(this.size1,this.size2,this.size3,body))
+        member private this.New(elementType,body,resultContext)=
+            this.CreateWithContext(elementType,Arx3(this.size1,this.size2,this.size3,body),resultContext)
         static member private Binary(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
             base3.sizeMismatchError(x,y)
-            x.New(x.etype%%y.etype,fun(i,j,k)->make(x.etype%%y.etype,(x[i,j,k]:>INum0).Expr,(y[i,j,k]:>INum0).Expr))
+            let resultContext=GenerationContextMerge.merge x.Context y.Context
+            x.New(x.etype%%y.etype,(fun (i:int0,j:int0,k:int0)->make(x.etype%%y.etype,(x[i,j,k]:>INum0).Expr,(y[i,j,k]:>INum0).Expr)),resultContext)
         static member private ScalarLeft(value:INum0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
-            y.New(value.Etype%%y.etype,fun(i,j,k)->make(value.Etype%%y.etype,value.Expr,(y[i,j,k]:>INum0).Expr))
+            let resultContext=GenerationContextMerge.merge value.Context y.Context
+            y.New(value.Etype%%y.etype,(fun (i:int0,j:int0,k:int0)->make(value.Etype%%y.etype,value.Expr,(y[i,j,k]:>INum0).Expr)),resultContext)
         static member private ScalarRight(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,value:INum0,make:Etype*expr*expr->expr)=
-            x.New(x.etype%%value.Etype,fun(i,j,k)->make(x.etype%%value.Etype,(x[i,j,k]:>INum0).Expr,value.Expr))
+            let resultContext=GenerationContextMerge.merge x.Context value.Context
+            x.New(x.etype%%value.Etype,(fun (i:int0,j:int0,k:int0)->make(x.etype%%value.Etype,(x[i,j,k]:>INum0).Expr,value.Expr)),resultContext)
         static member private PrimitiveLeft(elementType,value,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
-            y.New(elementType%%y.etype,fun(i,j,k)->make(elementType%%y.etype,value,(y[i,j,k]:>INum0).Expr))
+            y.New(elementType%%y.etype,(fun (i:int0,j:int0,k:int0)->make(elementType%%y.etype,value,(y[i,j,k]:>INum0).Expr)),y.Context)
         static member private PrimitiveRight(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,elementType,value,make:Etype*expr*expr->expr)=
-            x.New(x.etype%%elementType,fun(i,j,k)->make(x.etype%%elementType,(x[i,j,k]:>INum0).Expr,value))
+            x.New(x.etype%%elementType,(fun (i:int0,j:int0,k:int0)->make(x.etype%%elementType,(x[i,j,k]:>INum0).Expr,value)),x.Context)
 
         static member (+)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.Binary(x,y,fun(t,a,b)->Add(t,a,b))
         static member (+)(x:int0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
@@ -1094,13 +1107,8 @@ namespace Aqualis
         static member (/)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:double)=NumericArray3.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Div(t,a,b))
 
         member this.AssignArray(other:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=
-            let ctx=
-                match context with
-                |Some left->
-                    match other.Context with
-                    |Some right when not(obj.ReferenceEquals(left,right))->invalidOp "Values from different GenerationContext instances cannot be assigned."
-                    |_->left
-                |None->invalidOp "The assignment target is not associated with a GenerationContext."
+            let ctx = GenerationContextMerge.requireTarget context
+            GenerationContextMerge.merge context other.Context |> ignore
             let writein text=ctx.CurrentProgram.codewritein text
             base3.sizeMismatchError(this,other)
             let elementwise()=iter.num this.size1 <| fun i->iter.num this.size2 <| fun j->iter.num this.size3 <| fun k->this.AssignAt(i,j,k,(other[i,j,k]:>INum0).Expr)
@@ -1115,10 +1123,8 @@ namespace Aqualis
             |_->elementwise()
 
         member this.AssignScalar(value:INum0)=
-            let ctx=context|>Option.defaultWith(fun()->invalidOp "The assignment target is not associated with a GenerationContext.")
-            match value.Context with
-            |Some right when not(obj.ReferenceEquals(ctx,right))->invalidOp "Values from different GenerationContext instances cannot be assigned."
-            |_->()
+            let ctx = GenerationContextMerge.requireTarget context
+            GenerationContextMerge.merge context value.Context |> ignore
             let writein text=ctx.CurrentProgram.codewritein text
             let elementwise()=iter.num this.size1 <| fun i->iter.num this.size2 <| fun j->iter.num this.size3 <| fun k->this.AssignAt(i,j,k,value.Expr)
             match this.Expr with

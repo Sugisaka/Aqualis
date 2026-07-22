@@ -12,7 +12,7 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
 Compile [HTMLSequenceDiagram] outputdir 
-    "test8b" (version,"aaa") <| fun () ->
+    "test8b" (version,"aaa") <| fun ctx ->
 
     //反復処理
     ch.I "x" <| fun x ->

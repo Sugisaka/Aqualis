@@ -11,8 +11,8 @@ namespace Aqualis
     ///<summary>画面表示</summary>
     type print () =
         ///<summary>変数リストを画面表示</summary>
-        static member tt (lst:exprString)  =
-            match (GenerationScope.currentProgram()).language with
+        static member internal ttWith (program:program) (lst:exprString) =
+            match program.language with
             |Fortran ->
                 let clist =
                     [for q in lst.data do
@@ -20,16 +20,16 @@ namespace Aqualis
                         |RStr x ->
                             yield "\""+x+"\""
                         |RNvr x when x.etype = Zt ->
-                            yield (Re x).eval ((GenerationScope.currentProgram()))
-                            yield (Im x).eval ((GenerationScope.currentProgram()))
+                            yield (Re x).eval (program)
+                            yield (Im x).eval (program)
                         |RNvr x ->
-                            yield x.eval ((GenerationScope.currentProgram())) ]
-                writein("print *, " + String.concat "," clist + "\n")
+                            yield x.eval (program) ]
+                program.codewritein("print *, " + String.concat "," clist + "\n")
             |C99 ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+program.numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = program.numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst.data
@@ -47,48 +47,48 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr _ -> ""
-                        |RNvr x when x.etype = Zt -> (Re x).eval ((GenerationScope.currentProgram())) + "," + (Im x).eval ((GenerationScope.currentProgram()))
-                        |RNvr x -> x.eval ((GenerationScope.currentProgram())))
+                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr x -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                writein("printf(\""+format+"\\n\","+code+");\n")
+                program.codewritein("printf(\""+format+"\\n\","+code+");\n")
             |LaTeX ->
                 let code =
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x -> x.eval ((GenerationScope.currentProgram())))
+                        |RNvr x -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                writein("print, " + code + "\n")
+                program.codewritein("print, " + code + "\n")
             |HTML ->
                 let code =
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x -> x.eval ((GenerationScope.currentProgram())))
+                        |RNvr x -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                writein("Print \\("+code+"\\)\n")
-                writein "<br/>\n"
+                program.codewritein("Print \\("+code+"\\)\n")
+                program.codewritein "<br/>\n"
             |HTMLSequenceDiagram ->
                 let code =
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x -> x.eval ((GenerationScope.currentProgram())))
+                        |RNvr x -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                writein("Print \\("+code+"\\)\n")
-                writein "<br/>\n"
+                program.codewritein("Print \\("+code+"\\)\n")
+                program.codewritein "<br/>\n"
             |Python ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+program.numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = program.numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst.data
@@ -105,17 +105,17 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RNvr x when x.etype = Zt -> (Re x).eval ((GenerationScope.currentProgram())) + "," + (Im x).eval ((GenerationScope.currentProgram()))
-                        |RNvr x -> x.eval ((GenerationScope.currentProgram()))
+                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr x -> x.eval (program)
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                writein("print(\"" + format + "\" %(" + code + "))\n")
+                program.codewritein("print(\"" + format + "\" %(" + code + "))\n")
             |JavaScript ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+program.numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = program.numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst.data
@@ -132,17 +132,17 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RNvr x when x.etype = Zt -> (Re x).eval ((GenerationScope.currentProgram())) + "," + (Im x).eval ((GenerationScope.currentProgram()))
-                        |RNvr x -> x.eval ((GenerationScope.currentProgram()))
+                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr x -> x.eval (program)
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                writein("print(" + code + ");\n")
+                program.codewritein("print(" + code + ");\n")
             |PHP ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+program.numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = program.numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst.data
@@ -159,12 +159,12 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RNvr x when x.etype = Zt -> (Re x).eval ((GenerationScope.currentProgram())) + "," + (Im x).eval ((GenerationScope.currentProgram()))
-                        |RNvr x -> x.eval ((GenerationScope.currentProgram()))
+                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr x -> x.eval (program)
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                writein("print(" + code + ");\n")
+                program.codewritein("print(" + code + ");\n")
             |Numeric ->
                 for v in lst.data do
                     match v with
@@ -173,30 +173,65 @@ namespace Aqualis
                     |RNvr (Cpx (re,im)) -> printf "%e %e " re im
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
-        static member s (str:string) =
-            match (GenerationScope.currentProgram()).language with
+        static member tt (lst:exprString) =
+            print.ttWith (GenerationScope.currentProgram()) lst
+
+        static member internal sWith (program:program) (str:string) =
+            match program.language with
             |Fortran ->
-                writein("print *, "+"\""+str+"\""+"\n")
+                program.codewritein("print *, "+"\""+str+"\""+"\n")
             |C99 ->
-                writein("printf(\""+str+"\""+");\n")
+                program.codewritein("printf(\""+str+"\""+");\n")
             |LaTeX ->
-                writein("print, \""+str+"\"\n")
+                program.codewritein("print, \""+str+"\"\n")
             |HTML ->
-                writein("Print \\("+str+"\\)\n")
-                writein "<br/>\n"
+                program.codewritein("Print \\("+str+"\\)\n")
+                program.codewritein "<br/>\n"
             |HTMLSequenceDiagram ->
-                writein("Print \\("+str+"\\)\n")
-                writein "<br/>\n"
+                program.codewritein("Print \\("+str+"\\)\n")
+                program.codewritein "<br/>\n"
             |Python ->
-                writein("print(\""+str+"\")\n")
+                program.codewritein("print(\""+str+"\")\n")
             |JavaScript ->
-                writein("print(\""+str+"\")\n")
+                program.codewritein("print(\""+str+"\")\n")
             |PHP ->
-                writein("print(\""+str+"\")\n")
+                program.codewritein("print(\""+str+"\")\n")
             |Numeric ->
                 printfn "%s" str
 
         ///<summary>1個の項目を画面表示</summary>
+        static member s (str:string) =
+            print.sWith (GenerationScope.currentProgram()) str
+
         static member t (s:int0) = print.tt (iv s)
         static member t (s:double0) = print.tt (dv s)
         static member t (s:complex0) = print.tt (zv s)
+
+    type ContextPrint internal (environment:CompilationEnvironment) =
+        member _.s(str:string) =
+            match environment.GenerationContext with
+            |Some context -> print.sWith context.CurrentProgram str
+            |None -> printfn "%s" str
+
+        member _.tt(value:exprString) =
+            match environment.GenerationContext with
+            |Some context ->
+                GenerationContextMerge.merge (Some context) value.Context |> ignore
+                print.ttWith context.CurrentProgram value
+            |None ->
+                for item in value.data do
+                    match item with
+                    |RNvr (Int x) -> printf "%d " x
+                    |RNvr (Dbl x) -> printf "%e " x
+                    |RNvr (Cpx(re,im)) -> printf "%e %e " re im
+                    |RStr text -> printf "%s" text
+                    |_ -> ()
+
+        member this.t(value:int0) = this.tt(iv value)
+        member this.t(value:double0) = this.tt(dv value)
+        member this.t(value:complex0) = this.tt(zv value)
+
+    [<AutoOpen>]
+    module CompilationEnvironmentPrintExtensions =
+        type CompilationEnvironment with
+            member this.print = ContextPrint(this)

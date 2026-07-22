@@ -16,9 +16,9 @@ namespace Aqualis
         new(a:int0,f:int0->double0) = double1(Dt,Arx1(a,fun i -> (f i).Expr))
         new(a:int ,f:int0->double0) = double1(Dt,Arx1(I a,fun i -> (f i).Expr))
 
-        override _.WrapScalar value = double0 value
-        override _.Create(elementType,value) = double1(elementType,value)
-        override _.AssignAt(index,value) = this[index] <== double0 value
+        override _.WrapScalar(value,resultContext) = double0(value,?context=resultContext)
+        override _.Create(elementType,value,resultContext) = double1(elementType,value,?context=resultContext)
+        override _.AssignAt(index,value) = this[index] <== double0(value,?context=this.Context)
         override _.clear() = this.AssignScalar(D 0.0)
         override _.sizeinit() = this.size1 <== -1
 

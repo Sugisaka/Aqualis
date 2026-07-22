@@ -22,7 +22,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== double0(besselj0_ x)
+                    bes <== double0(besselj0_ x, ?context=x.Context)
                     code bes
             static member bessely0 (x:double0) = fun code ->
                 let bessely0_ (v:double0) =
@@ -37,7 +37,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== double0(bessely0_(x))
+                    bes <== double0(bessely0_(x), ?context=x.Context)
                     code bes
             static member besselh0 (x:double0) = fun code ->
                 let besselj0_ (v:double0) =
@@ -63,7 +63,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
-                    bes <== double0(besselj0_ x)-double0(bessely0_ x)*asm.uj
+                    bes <== double0(besselj0_ x, ?context=x.Context)-double0(bessely0_ x, ?context=x.Context)*asm.uj
                     code bes
             static member besselj1 (x:double0) = fun code ->
                 let besselj1_ (v:double0) =
@@ -78,7 +78,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== double0(besselj1_(x))
+                    bes <== double0(besselj1_(x), ?context=x.Context)
                     code bes
             static member bessely1 (x:double0) = fun code ->
                 let bessely1_ (v:double0) =
@@ -93,7 +93,7 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.d <| fun bes ->
-                    bes <== double0(bessely1_ x)
+                    bes <== double0(bessely1_ x, ?context=x.Context)
                     code bes
             static member besselh1 (x:double0) = fun code ->
                 let besselj1_ (v:double0) =
@@ -119,5 +119,5 @@ namespace Aqualis
                     |PHP -> NaN
                     |Numeric -> NaN
                 ch.z <| fun bes ->
-                    bes <== double0(besselj1_ x)-double0(bessely1_ x)*asm.uj
+                    bes <== double0(besselj1_ x, ?context=x.Context)-double0(bessely1_ x, ?context=x.Context)*asm.uj
                     code bes

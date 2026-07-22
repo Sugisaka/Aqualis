@@ -63,7 +63,7 @@ type classAAA_1(sname_, name, size1) =
 ### 使用例
 
 ```fsharp
-Compile [Fortran] outputdir projectname fullversion <| fun () ->
+Compile [Fortran] outputdir projectname fullversion <| fun ctx ->
     
     //classAAA型変数（変数名：abc）を生成
     let u = classAAA "abc"

@@ -68,7 +68,7 @@ let fullversion = preprocess.backup outputdir __SOURCE_DIRECTORY__ __SOURCE_FILE
  
 open Aqualis
  
-Compile [Fortran] outputdir projectname fullversion <| fun () ->
+Compile [Fortran] outputdir projectname fullversion <| fun ctx ->
     ch.d2 2 2 <| fun A ->
         ch.d1 2 <| fun b ->
             A[1,1] <== 1.0

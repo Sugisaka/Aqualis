@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
  
-Compile [Fortran;C99;Python] outputdir (projectname+"tw") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"tw") ("aaa","aaa") <| fun ctx ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2
@@ -25,7 +25,7 @@ Compile [Fortran;C99;Python] outputdir (projectname+"tw") ("aaa","aaa") <| fun (
             wr.tt <| x++asm.cos x
             wr.tt <| z.abs++z.pow
             
-Compile [Fortran;C99;Python] outputdir (projectname+"tr") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"tr") ("aaa","aaa") <| fun ctx ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2
@@ -54,7 +54,7 @@ Compile [Fortran;C99;Python] outputdir (projectname+"tr") ("aaa","aaa") <| fun (
             print.tt <| z.abs++x1
             print.tt <| z.pow++x2
             
-Compile [Fortran;C99;Python] outputdir (projectname+"bw") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"bw") ("aaa","aaa") <| fun ctx ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2
@@ -75,7 +75,7 @@ Compile [Fortran;C99;Python] outputdir (projectname+"bw") ("aaa","aaa") <| fun (
             wr.b z.abs
             wr.b z.pow
             
-Compile [Fortran;C99;Python] outputdir (projectname+"br") ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir (projectname+"br") ("aaa","aaa") <| fun ctx ->
     ch.iidz <| fun (n,m,x,z) ->
         n <== 1
         m <== 2

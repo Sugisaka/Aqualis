@@ -9,10 +9,10 @@ namespace Aqualis
         new(a:int ,b:int0,f:int0*int0->double0) = double2(Dt,Arx2(I a, b, fun ij -> (f ij).Expr))
         new(a:int0,b:int ,f:int0*int0->double0) = double2(Dt,Arx2(a, I b, fun ij -> (f ij).Expr))
         new(a:int ,b:int ,f:int0*int0->double0) = double2(Dt,Arx2(I a, I b, fun ij -> (f ij).Expr))
-        override _.WrapScalar value=double0 value
-        override _.WrapRow value=double1(typ,value)
-        override _.Create(elementType,value)=double2(elementType,value)
-        override _.AssignAt(i,j,value)=this[i,j] <== double0 value
+        override _.WrapScalar value=double0(value,?context=this.Context)
+        override _.WrapRow value=double1(typ,value,?context=this.Context)
+        override _.CreateWithContext(elementType,value,resultContext)=double2(elementType,value,?context=resultContext)
+        override _.AssignAt(i,j,value)=this[i,j] <== double0(value,?context=this.Context)
         override _.clear()=this.AssignScalar(D 0.0)
         override _.sizeinit()=this.size1<== -1;this.size2<== -1
         static member (<==)(x:double2,y:double2)=x.AssignArray y

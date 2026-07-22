@@ -12,11 +12,13 @@ let outputdir = @"C:\home\work"
 
 open Aqualis
 
-Compile [C99;Fortran;Python] outputdir projectname version <| fun () ->
+Compile [C99;Fortran;Python] outputdir projectname version <| fun ctx ->
     // print text
-    print.s "Hello World!"
+    ctx.print.s "Hello World!"
     // provide interger variables
-    ch.iii <| fun (x,y,z) ->
+    ctx.ch.i <| fun x ->
+    ctx.ch.i <| fun y ->
+    ctx.ch.i <| fun z ->
         // substitute 1 to x
         x <== 1
         // substitute 2 to y
@@ -24,4 +26,4 @@ Compile [C99;Fortran;Python] outputdir projectname version <| fun () ->
         // substitute x+y to z
         z <== x + y
         // print z
-        print.t z
+        ctx.print.t z

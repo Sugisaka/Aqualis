@@ -41,6 +41,12 @@ module num0Const =
     let _0d = double0(Dbl 0.0)
     ///<summary>1.0(num0型)</summary>
     let _1d = double0(Dbl 1.0)
-    let And (s:list<bool0>) = bool0(AND(s |> List.map (fun p -> p.Expr)))
-    let Or (s:list<bool0>) = bool0(OR(s |> List.map (fun p -> p.Expr)))
+    let And (s:list<bool0>) =
+        bool0(
+            AND(s |> List.map (fun value -> value.Expr)),
+            ?context=(s |> Seq.map _.Context |> GenerationContextMerge.mergeMany))
+    let Or (s:list<bool0>) =
+        bool0(
+            OR(s |> List.map (fun value -> value.Expr)),
+            ?context=(s |> Seq.map _.Context |> GenerationContextMerge.mergeMany))
     let inf = double0(Var(Dt,"\\infty",NaN))

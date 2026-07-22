@@ -6,6 +6,51 @@ open Aqualis
 
 module AssignmentTests =
     [<Fact>]
+    let ``numeric constants ignore an explicitly supplied generation context`` () =
+        use output = new TemporaryDirectory()
+        let context = GenerationContext [new program(output.Path, "constants.c", C99)]
+
+        try
+            Assert.True(int0(Int 1, context=context).Context.IsNone)
+            Assert.True(double0(Dbl 0.0, context=context).Context.IsNone)
+            Assert.True(complex0(Cpx(0.0, 1.0), context=context).Context.IsNone)
+        finally
+            context.CurrentProgram.close()
+
+    [<Fact>]
+    let ``operators merge constant and variable contexts`` () =
+        use output = new TemporaryDirectory()
+        let context = GenerationContext [new program(output.Path, "merge.c", C99)]
+
+        try
+            let variable = int0(Var(It 4, "value", NaN), context=context)
+            let result = variable + int0(Int 1)
+            Assert.Same(context, result.Context.Value)
+        finally
+            context.CurrentProgram.close()
+
+    [<Fact>]
+    let ``operators reject operands from different output contexts`` () =
+        use output = new TemporaryDirectory()
+        let first = GenerationContext [new program(output.Path, "first-op.c", C99)]
+        let second = GenerationContext [new program(output.Path, "second-op.c", C99)]
+
+        try
+            let left = int0(Var(It 4, "left", NaN), context=first)
+            let right = int0(Var(It 4, "right", NaN), context=second)
+            Assert.Throws<InvalidOperationException>(Action(fun () -> left + right |> ignore))
+            |> ignore
+        finally
+            first.CurrentProgram.close()
+            second.CurrentProgram.close()
+
+    [<Fact>]
+    let ``assignment rejects a target without a generation context`` () =
+        let target = int0(Var(It 4, "target", NaN))
+        Assert.Throws<InvalidOperationException>(Action(fun () -> target <== 1))
+        |> ignore
+
+    [<Fact>]
     let ``numeric constants do not capture the active generation context`` () =
         use output = new TemporaryDirectory()
         let firstContext =
@@ -42,7 +87,7 @@ module AssignmentTests =
         makeProgramWithContext
             [output.Path, "assignment.c", C99]
             (fun context ->
-                let value = var.i0 "value"
+                let value = CompilationEnvironment(Some context).var.i0 "value"
                 value <== 42
                 context.CurrentProgram.close())
 
@@ -81,9 +126,10 @@ module AssignmentTests =
         makeProgramWithContext
             [output.Path, "arrays.c", C99]
             (fun context ->
-                let values1 = var.i1("values1", 2)
-                let values2 = var.i2("values2", 2, 2)
-                let values3 = var.i3("values3", 2, 2, 2)
+                let variables = CompilationEnvironment(Some context).var
+                let values1 = variables.i1("values1", 2)
+                let values2 = variables.i2("values2", 2, 2)
+                let values3 = variables.i3("values3", 2, 2, 2)
 
                 Assert.Same(context, values1.Context.Value)
                 Assert.Same(context, values2.Context.Value)

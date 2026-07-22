@@ -21,14 +21,15 @@ namespace Aqualis
     type structureArray1<'Element,'Self
         when 'Element :> structureValue<'Element>
         and 'Self :> structureArray1<'Element,'Self>>
-        (sname_,name,size1) =
+        (sname_,name,size1,?context:GenerationContext) =
         inherit base1(Structure sname_,Var1(size1,name))
 
         abstract member WrapElement : string -> 'Element
         abstract member Rewrap : string * VarType -> 'Self
 
         member this.Item with get(i:int0) =
-            this.WrapElement(int0(this.Idx1 i).code)
+            let resultContext = GenerationContextMerge.merge context i.Context
+            this.WrapElement(int0(this.Idx1 i,?context=resultContext).code)
         member this.Item with get(i:int ) = this[i |> I]
         member this.farg code =
             fn.addarg (sname_,size1,name) <| fun (v,n) ->
@@ -39,14 +40,15 @@ namespace Aqualis
     type structureArray2<'Element,'Self
         when 'Element :> structureValue<'Element>
         and 'Self :> structureArray2<'Element,'Self>>
-        (sname_,name,size2) =
+        (sname_,name,size2,?context:GenerationContext) =
         inherit base2(Structure sname_,Var2(size2,name))
 
         abstract member WrapElement : string -> 'Element
         abstract member Rewrap : string * VarType -> 'Self
 
         member this.Item with get(i:int0,j:int0) =
-            this.WrapElement(int0(this.Idx2(i,j)).code)
+            let resultContext = GenerationContextMerge.mergeMany [context;i.Context;j.Context]
+            this.WrapElement(int0(this.Idx2(i,j),?context=resultContext).code)
         member this.Item with get(i:int0,j:int) = this[i,I j]
         member this.Item with get(i:int,j:int0) = this[I i,j]
         member this.Item with get(i:int,j:int) = this[I i,I j]
@@ -59,14 +61,15 @@ namespace Aqualis
     type structureArray3<'Element,'Self
         when 'Element :> structureValue<'Element>
         and 'Self :> structureArray3<'Element,'Self>>
-        (sname_,name,size3) =
+        (sname_,name,size3,?context:GenerationContext) =
         inherit base3(Structure sname_,Var3(size3,name))
 
         abstract member WrapElement : string -> 'Element
         abstract member Rewrap : string * VarType -> 'Self
 
         member this.Item with get(i:int0,j:int0,k:int0) =
-            this.WrapElement(int0(this.Idx3(i,j,k)).code)
+            let resultContext = GenerationContextMerge.mergeMany [context;i.Context;j.Context;k.Context]
+            this.WrapElement(int0(this.Idx3(i,j,k),?context=resultContext).code)
         member this.Item with get(i:int0,j:int0,k:int) = this[i,j,I k]
         member this.Item with get(i:int0,j:int,k:int0) = this[i,I j,k]
         member this.Item with get(i:int0,j:int,k:int) = this[i,I j,I k]

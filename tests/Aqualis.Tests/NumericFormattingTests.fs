@@ -69,8 +69,8 @@ module NumericFormattingTests =
                 output.Path
                 "culture"
                 ("test", "1.0")
-                (fun () ->
-                    let value = var.d0 "value"
+                (fun environment ->
+                    let value = environment.var.d0 "value"
                     value <== 1.5)
 
         let fortran = File.ReadAllText(Path.Combine(output.Path, "culture.f90"))
@@ -93,8 +93,8 @@ module NumericFormattingTests =
             output.Path
             "nonfinite"
             ("test", "1.0")
-            (fun () ->
-                let value = var.d0 "value"
+            (fun environment ->
+                let value = environment.var.d0 "value"
                 value <== Double.NaN)
 
         let generated =

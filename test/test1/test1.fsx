@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun ctx ->
     io.fileOutput "result.dat" <| fun wr ->
     ch.dddd <| fun (x,y,z1,z2) ->
         let p = 1.1

@@ -13,11 +13,11 @@ namespace Aqualis
         new(a:int ,b:int0,c:int ,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(I a,b,I c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int0,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(I a,I b,c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int ,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(I a,I b,I c,fun ijk->(f ijk).Expr))
-        override _.WrapScalar value=complex0 value
-        override _.WrapRow value=complex1(typ,value)
-        override _.WrapMatrix value=complex2(typ,value)
-        override _.Create(elementType,value)=complex3(elementType,value)
-        override _.AssignAt(i,j,k,value)=this[i,j,k] <== complex0 value
+        override _.WrapScalar value=complex0(value,?context=this.Context)
+        override _.WrapRow value=complex1(typ,value,?context=this.Context)
+        override _.WrapMatrix value=complex2(typ,value,?context=this.Context)
+        override _.CreateWithContext(elementType,value,resultContext)=complex3(elementType,value,?context=resultContext)
+        override _.AssignAt(i,j,k,value)=this[i,j,k] <== complex0(value,?context=this.Context)
         override _.clear()=this.AssignScalar(complex0(Int 0))
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
         static member (<==)(x:complex3,y:complex3)=x.AssignArray y

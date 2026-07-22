@@ -359,6 +359,8 @@ namespace Aqualis
         {
             Gate: obj
             Programs: program array
+            ContextIds: System.Guid array
+            mutable Active: int
             mutable DisplaySection: int
             mutable IsOpenMpUsed: int
             mutable IsOpenAccUsed: int
@@ -391,6 +393,8 @@ namespace Aqualis
             {
                 Gate = obj()
                 Programs = programArray
+                ContextIds = Array.init programArray.Length (fun _ -> System.Guid.NewGuid())
+                Active = 1
                 DisplaySection = 0
                 IsOpenMpUsed = 0
                 IsOpenAccUsed = 0
@@ -417,14 +421,36 @@ namespace Aqualis
                 GenerationContext.CreateState(programs, movieSetting)
             GenerationContext(state, 0, state.Debug, false)
 
+        member private _.EnsureActive() =
+            if System.Threading.Volatile.Read(&state.Active) = 0 then
+                invalidOp "This GenerationContext is no longer active. Values created in a Compile callback cannot be used outside that callback."
+
+        member internal _.Deactivate() =
+            System.Threading.Interlocked.Exchange(&state.Active, 0) |> ignore
+
         /// <summary>Gets the output programs owned by this generation operation.</summary>
-        member _.Programs = state.Programs
+        member this.Programs =
+            this.EnsureActive()
+            state.Programs
 
         /// <summary>Gets the index of the active output program for this scoped context.</summary>
-        member _.CurrentIndex = currentIndex
+        member this.CurrentIndex =
+            this.EnsureActive()
+            currentIndex
 
         /// <summary>Gets the active output program.</summary>
-        member _.CurrentProgram = state.Programs[currentIndex]
+        member this.CurrentProgram =
+            this.EnsureActive()
+            state.Programs[currentIndex]
+
+        /// <summary>
+        /// Gets the stable identity of the output target represented by this context.
+        /// Scoped debug/parallel views retain this identity, while another program has
+        /// a different identity.
+        /// </summary>
+        member this.ContextId =
+            this.EnsureActive()
+            state.ContextIds[currentIndex]
 
         /// <summary>Gets or sets whether generated code should display section information.</summary>
         member _.DisplaySection
@@ -605,7 +631,8 @@ namespace Aqualis
                     state.SequenceDiagramBuilder.Branches <- value)
 
         /// <summary>Creates a scoped context that targets the output program at the specified index.</summary>
-        member _.ForProgram(index:int) =
+        member this.ForProgram(index:int) =
+            this.EnsureActive()
             if index < 0 || index >= state.Programs.Length then
                 invalidArg (nameof index) $"Program index {index} is outside the valid range."
             GenerationContext(state, index, debug, parallelMode)
@@ -632,6 +659,7 @@ namespace Aqualis
 
         /// <summary>Makes this context current for the duration of an operation.</summary>
         member this.Activate(code: unit -> 'T) : 'T =
+            this.EnsureActive()
             let previous = current.Value
             try
                 current.Value <- Some this
@@ -640,7 +668,43 @@ namespace Aqualis
                 current.Value <- previous
 
         /// <summary>Gets the current asynchronous generation context, if one is active.</summary>
-        static member TryCurrent = current.Value
+        static member internal TryCurrent = current.Value
+
+    /// <summary>
+    /// The explicit environment passed to a Compile callback. Numeric execution has
+    /// no code-generation context; every other mode exposes one through this wrapper.
+    /// </summary>
+    type CompilationEnvironment (context:GenerationContext option) =
+        member _.GenerationContext = context
+        member _.IsNumeric = context.IsNone
+
+        member internal _.RequireGenerationContext() =
+            context
+            |> Option.defaultWith (fun () ->
+                invalidOp "This operation is not available during Numeric execution.")
+
+    /// Shared rules for propagating and validating contexts carried by DSL values.
+    module internal GenerationContextMerge =
+        let sameTarget (left:GenerationContext) (right:GenerationContext) =
+            left.ContextId = right.ContextId
+
+        let merge left right =
+            match left, right with
+            |None, None -> None
+            |Some context, None
+            |None, Some context -> Some context
+            |Some leftContext, Some rightContext
+                when sameTarget leftContext rightContext -> Some leftContext
+            |Some _, Some _ ->
+                invalidOp "Values from different GenerationContext instances cannot be combined."
+
+        let mergeMany contexts =
+            contexts |> Seq.fold merge None
+
+        let requireTarget context =
+            context
+            |> Option.defaultWith (fun () ->
+                invalidOp "The assignment target is not associated with a GenerationContext.")
 
     module internal GenerationScope =
         let requireContext() =
@@ -725,6 +789,7 @@ namespace Aqualis
             try
                 context.Activate(fun () -> code context)
             finally
+                context.Deactivate()
                 disposePrograms programs
 
         let makeProgramWithMovieSetting
@@ -741,6 +806,7 @@ namespace Aqualis
             try
                 context.Activate(code)
             finally
+                context.Deactivate()
                 disposePrograms programs
 
         /// Backward-compatible entry point. New code should prefer

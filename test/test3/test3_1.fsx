@@ -40,7 +40,7 @@ open Aqualis
             str.addmember(psname,(Structure(testClass1.sname),size1,name))
             testClass1_1(testClass1.sname,str.mem(vname,name), size1)
         
-Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","aaa") <| fun ctx ->
     let cc = testClass1 "c"
     cc.n1 <== 1
     cc.x1 <== 2.0

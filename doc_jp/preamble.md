@@ -19,7 +19,7 @@ let fullversion = preprocess.backup outputdir __SOURCE_DIRECTORY__ __SOURCE_FILE
  
 open Aqualis
  
-Compile [Fortran] outputdir projectname fullversion <| fun () ->
+Compile [Fortran] outputdir projectname fullversion <| fun ctx ->
     (コード本体)
 ```
 
@@ -41,7 +41,7 @@ Compile [Fortran] outputdir projectname fullversion <| fun () ->
 
 以下のコードでは、「`print.t "aaa"`」と「`print.t "bbb"`」がFortranのコードに変換される。「`print.t "ccc"`」はインデントが戻っているので出力の対象外となる。
 ```fsharp
-Compile [Fortran] outputdir projectname fullversion <| fun () ->
+Compile [Fortran] outputdir projectname fullversion <| fun ctx ->
     print.t "aaa"
     print.t "bbb"
 print.t "ccc"

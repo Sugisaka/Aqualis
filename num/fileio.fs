@@ -2508,3 +2508,42 @@ namespace Aqualis
         static member array (f:complex2,filename) = ()
         static member array (f:complex1,filename) = ()
         static member array (f:complex0,filename) = ()
+
+    /// File I/O entry points bound to the explicit Compile environment.
+    type ContextIo internal (environment:CompilationEnvironment) =
+        let run (filename:exprString) action =
+            match environment.GenerationContext with
+            |Some context ->
+                GenerationContextMerge.merge (Some context) filename.Context |> ignore
+                context.Activate action
+            |None -> ()
+
+        member _.fileOutput(filename:exprString) code =
+            run filename (fun () -> io.fileOutput filename code)
+        member _.fileOutputWithDigits(filename:exprString,intDigit:int) code =
+            run filename (fun () -> io.fileOutput(filename,intDigit) code)
+
+        member _.binfileOutput(filename:exprString) code =
+            run filename (fun () -> io.binfileOutput filename code)
+        member _.binfileOutputWithDigits(filename:exprString,intDigit:int) code =
+            run filename (fun () -> io.binfileOutput(filename,intDigit) code)
+
+        member _.fileInput(filename:exprString) code =
+            run filename (fun () -> io.fileInput filename code)
+        member _.fileInputWithDigits(filename:exprString,intDigit:int) code =
+            run filename (fun () -> io.fileInput(filename,intDigit) code)
+
+        member _.binfileInput(filename:exprString) code =
+            run filename (fun () -> io.binfileInput filename code)
+        member _.binfileInputWithDigits(filename:exprString,intDigit:int) code =
+            run filename (fun () -> io.binfileInput(filename,intDigit) code)
+
+        member _.file_Read(filename:exprString) varlist code =
+            run filename (fun () -> io.file_Read filename varlist code)
+        member _.fileReadWithDigits(filename:exprString,intDigit:int) varlist code =
+            run filename (fun () -> io.file_Read(filename,intDigit) varlist code)
+
+    [<AutoOpen>]
+    module CompilationEnvironmentIoExtensions =
+        type CompilationEnvironment with
+            member this.io = ContextIo(this)

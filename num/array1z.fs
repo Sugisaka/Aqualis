@@ -16,9 +16,9 @@ namespace Aqualis
         new(a:int0,f:int0->complex0) = complex1(Zt,Arx1(a,fun i -> (f i).Expr))
         new(a:int ,f:int0->complex0) = complex1(Zt,Arx1(I a,fun i -> (f i).Expr))
 
-        override _.WrapScalar value = complex0 value
-        override _.Create(elementType,value) = complex1(elementType,value)
-        override _.AssignAt(index,value) = this[index] <== complex0 value
+        override _.WrapScalar(value,resultContext) = complex0(value,?context=resultContext)
+        override _.Create(elementType,value,resultContext) = complex1(elementType,value,?context=resultContext)
+        override _.AssignAt(index,value) = this[index] <== complex0(value,?context=this.Context)
         override _.clear() = this.AssignScalar(complex0(Int 0))
         override _.sizeinit() = this.size1 <== -1
 

@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun ctx ->
     let dd = 1E-5
     ch.dddd <| fun (x,y1,y2,dy) ->
     ch.d <| fun c1 ->

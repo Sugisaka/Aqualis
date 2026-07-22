@@ -64,14 +64,17 @@ namespace Aqualis
                 str.addmember(psname,(Structure point2.sname,A0,name))
                 point2(point2.sname,str.mem(vname,name))
 
-        type point2_1(sname_,name,size1) =
-            inherit structureArray1<point2,point2_1>(sname_,name,size1)
+        type point2_1(sname_,name,size1,?context:GenerationContext) =
+            inherit structureArray1<point2,point2_1>(sname_,name,size1,?context=context)
             //変数宣言を行う場合
             new(name,size1) =
                 str.reg(point2.sname,name,size1)
                 point2_1(point2.sname,name,A1 size1)
+            new(name,size1,context:GenerationContext) =
+                str.reg(point2.sname,name,size1)
+                point2_1(point2.sname,name,A1 size1,context=context)
             override _.WrapElement n = point2(sname_,n)
-            override _.Rewrap(n,v) = point2_1(sname_,n,v)
+            override _.Rewrap(n,v) = point2_1(sname_,n,v,?context=context)
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
             static member str_mem(psname, vname, name, size1) =
                 str.addmember(psname,(Structure point2.sname,A1 size1,name))
@@ -135,13 +138,16 @@ namespace Aqualis
                 str.addmember(psname,(Structure(point3.sname),A0,name))
                 point3(point3.sname,str.mem(vname,name))
 
-        type point3_1(sname_,name,size1) =
-            inherit structureArray1<point3,point3_1>(sname_,name,size1)
+        type point3_1(sname_,name,size1,?context:GenerationContext) =
+            inherit structureArray1<point3,point3_1>(sname_,name,size1,?context=context)
             new(name,size1) =
                 str.reg(point3.sname,name,size1)
                 point3_1(point3.sname,name,A1 size1)
+            new(name,size1,context:GenerationContext) =
+                str.reg(point3.sname,name,size1)
+                point3_1(point3.sname,name,A1 size1,context=context)
             override _.WrapElement n = point3(sname_,n)
-            override _.Rewrap(n,v) = point3_1(sname_,n,v)
+            override _.Rewrap(n,v) = point3_1(sname_,n,v,?context=context)
 
         ///<summary>
         ///中心(x,y)、1辺の長さdの正方形領域に、中心(center_x,center_y)、半径radiusの円が占める割合を計算

@@ -10,6 +10,106 @@ module GenerationContextTests =
         GenerationContext [new program(path, name, language)]
 
     [<Fact>]
+    let ``scoped views keep the output context id and programs have distinct ids`` () =
+        use output = new TemporaryDirectory()
+        let context =
+            GenerationContext [
+                new program(output.Path, "id-main.c", C99)
+                new program(output.Path, "id-body.c", C99)
+            ]
+
+        try
+            Assert.Equal(context.ContextId, context.ForProgram(0).ContextId)
+            Assert.NotEqual(context.ContextId, context.ForProgram(1).ContextId)
+        finally
+            context.Programs |> Array.iter _.close()
+
+    [<Fact>]
+    let ``Compile supplies an explicit environment to generated and Numeric code`` () =
+        use output = new TemporaryDirectory()
+        let mutable numericIterations = 0
+        let mutable generatedVariable = ""
+
+        Compile [C99] output.Path "explicit-environment" ("test", "1") <| fun environment ->
+            Assert.True(environment.GenerationContext.IsSome)
+            environment.ch.i <| fun value ->
+                generatedVariable <- value.code
+                value <== 0
+
+        Compile [Numeric] output.Path "numeric-environment" ("test", "1") <| fun environment ->
+            Assert.True(environment.GenerationContext.IsNone)
+            environment.iter.range(0, 2) <| fun _ -> numericIterations <- numericIterations + 1
+
+        Assert.Equal(3, numericIterations)
+        let generated =
+            System.IO.File.ReadAllText(
+                System.IO.Path.Combine(output.Path, "explicit-environment.c"))
+        Assert.Contains(generatedVariable + " = 0;", generated)
+
+    [<Fact>]
+    let ``math strings booleans and indexers use the shared context merge`` () =
+        use output = new TemporaryDirectory()
+        let first = createContext output.Path "merge-first.c" C99
+        let second = createContext output.Path "merge-second.c" C99
+
+        try
+            let x = double0(Var(Dt,"x",NaN), context=first)
+            let y = double0(Var(Dt,"y",NaN), context=second)
+            let rounded = asm.floor x
+            Assert.Equal(first.ContextId, rounded.Context.Value.ContextId)
+
+            Assert.Throws<InvalidOperationException>(fun () -> dv x ++ dv y |> ignore)
+            |> ignore
+            Assert.Throws<InvalidOperationException>(fun () -> Or [x .< 0.0; y .< 0.0] |> ignore)
+            |> ignore
+
+            let values = int2(It 4,Var2(A2(2,2),"values"),context=first)
+            let foreignIndex = int0(Var(It 4,"index",NaN),context=second)
+            Assert.Throws<InvalidOperationException>(fun () -> values[foreignIndex,0] |> ignore)
+            |> ignore
+
+            let neutral2 = int2(It 4,Arx2(I 2,I 2,fun _ -> Int 1))
+            let inherited2 = neutral2 + int0(Var(It 4,"value2",NaN),context=first)
+            Assert.Equal(first.ContextId,inherited2.Context.Value.ContextId)
+            let neutral3 = int3(It 4,Arx3(I 2,I 2,I 2,fun _ -> Int 1))
+            let inherited3 = neutral3 + int0(Var(It 4,"value3",NaN),context=first)
+            Assert.Equal(first.ContextId,inherited3.Context.Value.ContextId)
+        finally
+            first.CurrentProgram.close()
+            second.CurrentProgram.close()
+
+    [<Fact>]
+    let ``HTML sequence callback receives the switched body context`` () =
+        use output = new TemporaryDirectory()
+        let mutable callbackIndex = -1
+        let mutable bodyHasDistinctId = false
+
+        Compile [HTMLSequenceDiagram] output.Path "sequence-context" ("test", "1") <| fun environment ->
+            let context = environment.GenerationContext.Value
+            callbackIndex <- context.CurrentIndex
+            bodyHasDistinctId <- context.ContextId <> context.ForProgram(0).ContextId
+
+        Assert.Equal(1, callbackIndex)
+        Assert.True(bodyHasDistinctId)
+
+    [<Fact>]
+    let ``values captured from Compile are invalid after the callback scope`` () =
+        use output = new TemporaryDirectory()
+        let mutable escapedValue:int0 option = None
+        let mutable escapedContext:GenerationContext option = None
+
+        Compile [C99] output.Path "escaped-context" ("test", "1") <| fun environment ->
+            escapedContext <- environment.GenerationContext
+            environment.ch.i <| fun value -> escapedValue <- Some value
+
+        Assert.Throws<InvalidOperationException>(fun () -> escapedValue.Value.code |> ignore)
+        |> ignore
+        Assert.Throws<InvalidOperationException>(fun () -> escapedValue.Value <== 1)
+        |> ignore
+        Assert.Throws<InvalidOperationException>(fun () -> escapedContext.Value.ContextId |> ignore)
+        |> ignore
+
+    [<Fact>]
     let ``Activate restores the outer context after normal completion`` () =
         use output = new TemporaryDirectory()
         let outer = createContext output.Path "outer.tmp" C99
@@ -115,7 +215,7 @@ module GenerationContextTests =
                     [output.Path, filename, C99]
                     (fun context ->
                         try
-                            let variable = var.i0 variableName
+                            let variable = CompilationEnvironment(Some context).var.i0 variableName
                             variable <== value
                         finally
                             context.CurrentProgram.close())))

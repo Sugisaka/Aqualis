@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-Compile [HTMLSequenceDiagram] outputdir "test8" (version,"aaa") <| fun () ->
+Compile [HTMLSequenceDiagram] outputdir "test8" (version,"aaa") <| fun ctx ->
     // スタイル変更
     // setSequenceDiagramStyle
     //     {

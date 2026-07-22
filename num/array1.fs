@@ -14,15 +14,16 @@ namespace Aqualis
         |Arx1 of (int0*(int0->expr))
 
     ///<summary>1次元配列</summary>
-    type base1 (typ:Etype,x:Expr1) =
+    type base1 (typ:Etype,x:Expr1, ?context:GenerationContext) =
         ///<summary>変数を作成しリストに追加</summary>
         new (typ,size,name,para) =
             (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
-            base1(typ,Var1(size,name))
+            base1(typ,Var1(size,name), context=GenerationScope.requireContext())
         ///<summary>変数を作成しリストに追加</summary>
         new(sname,size,name) =
             (GenerationScope.currentProgram()).var.setVar(Structure sname,size,name,"")
-            base1(Structure sname,Var1(size,name))
+            base1(Structure sname,Var1(size,name), context=GenerationScope.requireContext())
+        member internal _.GenerationContext = context
         member _.Etype with get() = typ
         member _.Expr with get() = x
         member _.code with get() =
@@ -56,6 +57,7 @@ namespace Aqualis
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:int0) =
+            GenerationContextMerge.merge context i.Context |> ignore
             if (GenerationScope.debug()).debugMode then
                 match x with
                 |Var1(_,name) ->
@@ -68,7 +70,8 @@ namespace Aqualis
                             print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
                     ! "****************************************************"
                 |_ -> ()
-            match x,language() with
+            let targetLanguage = context |> Option.map (fun value -> value.CurrentProgram.language) |> Option.defaultValue Numeric
+            match x,targetLanguage with
             |Var1(_,name),Fortran -> Idx1(typ,name,(i+1).Expr)
             |Var1(_,name),_       -> Idx1(typ,name,i.Expr)
             |Arx1(_,f),_ -> f i
@@ -282,55 +285,68 @@ namespace Aqualis
         when 'Scalar :> INum0
         and 'Self :> NumericArray1<'Scalar,'Self>>
         (typ:Etype, x:Expr1, ?context:GenerationContext) =
-        inherit base1(typ,x)
+        inherit base1(typ,x,?context=context)
 
         let context =
-            match context with
-            |Some value -> Some value
-            |None -> GenerationContext.TryCurrent
+            match context,x with
+            |Some value,_ -> Some value
+            |None,Arx1(size,_) -> size.Context
+            |None,Var1 _ -> None
 
         member _.Context = context
         member _.etype = typ
 
-        abstract member WrapScalar : expr -> 'Scalar
-        abstract member Create : Etype * Expr1 -> 'Self
+        abstract member WrapScalar : expr * GenerationContext option -> 'Scalar
+        abstract member Create : Etype * Expr1 * GenerationContext option -> 'Self
         abstract member AssignAt : int0 * expr -> unit
 
         member this.Item
-            with get(i:int0) = this.WrapScalar(this.Idx1 i)
+            with get(i:int0) =
+                let resultContext = GenerationContextMerge.merge context i.Context
+                this.WrapScalar(this.Idx1 i, resultContext)
         member this.Item
-            with get(i:int) = this.WrapScalar(this.Idx1(I i))
+            with get(i:int) = this.WrapScalar(this.Idx1(I i), context)
         member this.Item
-            with get(n:int0*int0) = this.Create(typ,this.Idx1 n)
+            with get(n:int0*int0) =
+                let i,j = n
+                let resultContext = GenerationContextMerge.mergeMany [context;i.Context;j.Context]
+                this.Create(typ,this.Idx1 n,resultContext)
         member this.Item
-            with get(n:int0*int) = this.Create(typ,this.Idx1 n)
+            with get(n:int0*int) =
+                let i,_ = n
+                this.Create(typ,this.Idx1 n,GenerationContextMerge.merge context i.Context)
         member this.Item
-            with get(n:int*int0) = this.Create(typ,this.Idx1 n)
+            with get(n:int*int0) =
+                let _,j = n
+                this.Create(typ,this.Idx1 n,GenerationContextMerge.merge context j.Context)
         member this.Item
-            with get(n:int*int) = this.Create(typ,this.Idx1 n)
+            with get(n:int*int) = this.Create(typ,this.Idx1 n,context)
 
-        member private this.New(etype, body) = this.Create(etype,Arx1(this.size1,body))
+        member private this.New(etype, body, resultContext) = this.Create(etype,Arx1(this.size1,body),resultContext)
 
         static member private Binary
             (x:NumericArray1<'Scalar,'Self>, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
             base1.sizeMismatchError(x,y)
-            x.New(x.etype%%y.etype, fun i -> make(x.etype%%y.etype,(x[i] :> INum0).Expr,(y[i] :> INum0).Expr))
+            let resultContext = GenerationContextMerge.merge x.Context y.Context
+            x.New(x.etype%%y.etype, (fun i -> make(x.etype%%y.etype,(x[i] :> INum0).Expr,(y[i] :> INum0).Expr)), resultContext)
 
         static member private ScalarLeft
             (scalar:INum0, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
-            y.New(scalar.Etype%%y.etype, fun i -> make(scalar.Etype%%y.etype,scalar.Expr,(y[i] :> INum0).Expr))
+            let resultContext = GenerationContextMerge.merge scalar.Context y.Context
+            y.New(scalar.Etype%%y.etype, (fun i -> make(scalar.Etype%%y.etype,scalar.Expr,(y[i] :> INum0).Expr)), resultContext)
 
         static member private ScalarRight
             (x:NumericArray1<'Scalar,'Self>, scalar:INum0, make:Etype*expr*expr->expr) =
-            x.New(x.etype%%scalar.Etype, fun i -> make(x.etype%%scalar.Etype,(x[i] :> INum0).Expr,scalar.Expr))
+            let resultContext = GenerationContextMerge.merge x.Context scalar.Context
+            x.New(x.etype%%scalar.Etype, (fun i -> make(x.etype%%scalar.Etype,(x[i] :> INum0).Expr,scalar.Expr)), resultContext)
 
         static member private PrimitiveLeft
             (etype:Etype, value:expr, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
-            y.New(etype%%y.etype, fun i -> make(etype%%y.etype,value,(y[i] :> INum0).Expr))
+            y.New(etype%%y.etype, (fun i -> make(etype%%y.etype,value,(y[i] :> INum0).Expr)), y.Context)
 
         static member private PrimitiveRight
             (x:NumericArray1<'Scalar,'Self>, etype:Etype, value:expr, make:Etype*expr*expr->expr) =
-            x.New(x.etype%%etype, fun i -> make(x.etype%%etype,(x[i] :> INum0).Expr,value))
+            x.New(x.etype%%etype, (fun i -> make(x.etype%%etype,(x[i] :> INum0).Expr,value)), x.Context)
 
         static member (+) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
             NumericArray1.Binary(x,y,fun(t,a,b)->Add(t,a,b))
@@ -385,14 +401,8 @@ namespace Aqualis
         static member (/) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Div(t,a,b))
 
         member this.AssignArray(other:NumericArray1<'Scalar,'Self>) =
-            let ctx =
-                match context with
-                |Some left ->
-                    match other.Context with
-                    |Some right when not (obj.ReferenceEquals(left,right)) ->
-                        invalidOp "Values from different GenerationContext instances cannot be assigned."
-                    |_ -> left
-                |None -> invalidOp "The assignment target is not associated with a GenerationContext."
+            let ctx = GenerationContextMerge.requireTarget context
+            GenerationContextMerge.merge context other.Context |> ignore
             let writein text = ctx.CurrentProgram.codewritein text
             base1.sizeMismatchError(this,other)
             match this.Expr,other.Expr with
@@ -406,10 +416,8 @@ namespace Aqualis
             |_ -> iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
 
         member this.AssignScalar(value:INum0) =
-            let ctx = context |> Option.defaultWith(fun()->invalidOp "The assignment target is not associated with a GenerationContext.")
-            match value.Context with
-            |Some right when not(obj.ReferenceEquals(ctx,right)) -> invalidOp "Values from different GenerationContext instances cannot be assigned."
-            |_ -> ()
+            let ctx = GenerationContextMerge.requireTarget context
+            GenerationContextMerge.merge context value.Context |> ignore
             let writein text = ctx.CurrentProgram.codewritein text
             match this.Expr with
             |Var1(_,name) ->

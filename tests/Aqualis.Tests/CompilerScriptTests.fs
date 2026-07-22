@@ -23,8 +23,8 @@ module CompilerScriptTests =
             outputDirectory
             projectName
             ("test", "1.0")
-            (fun () ->
-                let context = GenerationContext.TryCurrent.Value
+            (fun environment ->
+                let context = environment.GenerationContext.Value
                 context.CurrentProgram.slist.add "extra source.c"
                 configure context)
 
@@ -39,8 +39,8 @@ module CompilerScriptTests =
             outputDirectory
             projectName
             ("test", "1.0")
-            (fun () ->
-                let context = GenerationContext.TryCurrent.Value
+            (fun environment ->
+                let context = environment.GenerationContext.Value
                 context.CurrentProgram.slist.add "extra source.f90"
                 context.CurrentProgram.slist.add "quote'source.f90"
                 context.CurrentProgram.slist.add "$generated`source.f90"
@@ -138,7 +138,7 @@ module CompilerScriptTests =
             output.Path
             "distributed"
             ("test", "1.0")
-            (fun () ->
+            (fun _ ->
                 use scripts = new shellscript.Shell(output.Path, "distributed", 2)
                 scripts.AddProcess()
                 scripts.AddProcess())

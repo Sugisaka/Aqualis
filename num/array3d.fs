@@ -13,11 +13,11 @@ namespace Aqualis
         new(a:int ,b:int0,c:int ,f:int0*int0*int0->double0) = double3(Dt,Arx3(I a,b,I c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int0,f:int0*int0*int0->double0) = double3(Dt,Arx3(I a,I b,c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int ,f:int0*int0*int0->double0) = double3(Dt,Arx3(I a,I b,I c,fun ijk->(f ijk).Expr))
-        override _.WrapScalar value=double0 value
-        override _.WrapRow value=double1(typ,value)
-        override _.WrapMatrix value=double2(typ,value)
-        override _.Create(elementType,value)=double3(elementType,value)
-        override _.AssignAt(i,j,k,value)=this[i,j,k] <== double0 value
+        override _.WrapScalar value=double0(value,?context=this.Context)
+        override _.WrapRow value=double1(typ,value,?context=this.Context)
+        override _.WrapMatrix value=double2(typ,value,?context=this.Context)
+        override _.CreateWithContext(elementType,value,resultContext)=double3(elementType,value,?context=resultContext)
+        override _.AssignAt(i,j,k,value)=this[i,j,k] <== double0(value,?context=this.Context)
         override _.clear()=this.AssignScalar(D 0.0)
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
         static member (<==)(x:double3,y:double3)=x.AssignArray y

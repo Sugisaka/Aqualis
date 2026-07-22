@@ -34,7 +34,7 @@ group.section 1 step <| fun () ->
     printfn "--------------------------------------------"
     
 group.section 2 step <| fun () ->
-    Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","bbb") <| fun () ->
+    Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","bbb") <| fun ctx ->
         let x = var.i0 "x"
         let y = var.d0 "y"
         let z = var.z0 "z"
@@ -76,7 +76,7 @@ group.section 2 step <| fun () ->
             x[0] <== 0
             
 group.section 3 step <| fun () ->
-    Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","bbb") <| fun () ->
+    Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","bbb") <| fun ctx ->
         let x = var.d0 "x"
         let y = var.d0 "y"
         x <== asm.pi

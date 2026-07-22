@@ -109,3 +109,57 @@ namespace Aqualis
                 context.CurrentProgram.z0.getVar
                 (fun name -> complex0(Var(Zt, name, NaN), context=context))
                 code
+
+    /// Explicit temporary-variable factory owned by one compilation environment.
+    type ContextCh internal (environment:CompilationEnvironment) =
+        let context() = environment.RequireGenerationContext()
+
+        member _.i code =
+            let ctx = context()
+            TemporaryVariableScope.useOne
+                ctx.CurrentProgram.i0.getVar
+                (fun name -> int0(Var(It 4, name, NaN), context=ctx))
+                code
+
+        member _.d code =
+            let ctx = context()
+            TemporaryVariableScope.useOne
+                ctx.CurrentProgram.d0.getVar
+                (fun name -> double0(Var(Dt, name, NaN), context=ctx))
+                code
+
+        member _.z code =
+            let ctx = context()
+            TemporaryVariableScope.useOne
+                ctx.CurrentProgram.z0.getVar
+                (fun name -> complex0(Var(Zt, name, NaN), context=ctx))
+                code
+
+        member _.ix count code =
+            let ctx = context()
+            TemporaryVariableScope.useMany
+                count
+                ctx.CurrentProgram.i0.getVar
+                (fun name -> int0(Var(It 4, name, NaN), context=ctx))
+                code
+
+        member _.dx count code =
+            let ctx = context()
+            TemporaryVariableScope.useMany
+                count
+                ctx.CurrentProgram.d0.getVar
+                (fun name -> double0(Var(Dt, name, NaN), context=ctx))
+                code
+
+        member _.zx count code =
+            let ctx = context()
+            TemporaryVariableScope.useMany
+                count
+                ctx.CurrentProgram.z0.getVar
+                (fun name -> complex0(Var(Zt, name, NaN), context=ctx))
+                code
+
+    [<AutoOpen>]
+    module CompilationEnvironmentChExtensions =
+        type CompilationEnvironment with
+            member this.ch = ContextCh(this)

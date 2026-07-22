@@ -24,7 +24,7 @@ type testClass1(sname_,name) =
         testClass1(testClass1.sname,str.mem(vname,name))
     member __.farg cm code = fn.addarg (Structure testClass1.sname,A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
     
-Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun () ->
+Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun ctx ->
     let f(y:double0,x:double0,n:int0,n1:int1,s:testClass1) =
         func "func1" <| fun () ->
             y.farg <| fun y ->
