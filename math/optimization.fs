@@ -142,7 +142,7 @@ type ContextOptimization internal (environment:CompilationEnvironment) =
                             r.IF (i.=0) <| fun () ->
                                 a <== 0
                             r.EL <| fun () ->
-                                environment.ch.d2 x0.size1 x0.size1 <| fun h ->
+                                environment.ch.d2 (x0.size1, x0.size1) <| fun h ->
                                     fH h x0
                                     environment.la.matmul (h,df0) <| fun p1 ->
                                         environment.la.matmul (h,b) <| fun p2 ->
@@ -241,8 +241,8 @@ type ContextOptimization internal (environment:CompilationEnvironment) =
         environment.ch.d <| fun dd0_ ->
             environment.iter.num_exit (I n) <| fun (ext,i) ->
                 dd0_ <== dd0
-                environment.ch.d2 x0.size1 x0.size1 <| fun ih ->
-                    environment.ch.d2 x0.size1 x0.size1 <| fun h ->
+                environment.ch.d2 (x0.size1, x0.size1) <| fun ih ->
+                    environment.ch.d2 (x0.size1, x0.size1) <| fun h ->
                         fH h x0
                         environment.la.inverse_matrix (ih, h)
                     environment.ch.d1 x0.size1 <| fun df0 ->
@@ -278,7 +278,7 @@ type ContextOptimization internal (environment:CompilationEnvironment) =
         environment.ch.d1 x0.size1 <| fun df1 ->
         environment.ch.d1 x0.size1 <| fun y ->
         environment.ch.d1 x0.size1 <| fun s ->
-        environment.ch.d2 x0.size1 x0.size1 <| fun B ->
+        environment.ch.d2 (x0.size1, x0.size1) <| fun B ->
             B.clear()
             environment.iter.num x0.size1 <| fun i ->
                 B.[i,i] <== 1.0
@@ -291,11 +291,11 @@ type ContextOptimization internal (environment:CompilationEnvironment) =
                         environment.ch.d <| fun p ->
                             p.clear()
                             y.foreach <| fun j -> p <== p + y.[j] * s.[j]
-                            environment.ch.d2 x0.size1 x0.size1 <| fun t ->
+                            environment.ch.d2 (x0.size1, x0.size1) <| fun t ->
                                 t.clear()
                                 environment.iter.num x0.size1 <| fun j -> t.[j,j] <== 1.0
                                 t.foreach <| fun (j1,j2) -> t.[j1,j2] <== t.[j1,j2] - y.[j1] * s.[j2] / p
-                                environment.ch.d2 x0.size1 x0.size1 <| fun u ->
+                                environment.ch.d2 (x0.size1, x0.size1) <| fun u ->
                                     environment.la.matmul (u,t,B)
                                     environment.la.matmul (B,u,t)
                                     t.foreach <| fun (j1,j2) ->

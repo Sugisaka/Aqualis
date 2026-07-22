@@ -140,7 +140,7 @@ namespace Aqualis
         /// <param name="b">b</param>
         /// <param name="code">a×bに対する処理</param>
         member this.matmul (a:double2,b:double2) = fun code ->
-            environment.ch.d2 a.size1 b.size2 <| fun u ->
+            environment.ch.d2 (a.size1, b.size2) <| fun u ->
                 this.matmul (u,a,b)
                 code u
         /// <summary>
@@ -150,7 +150,7 @@ namespace Aqualis
         /// <param name="b">b</param>
         /// <param name="code">a×bに対する処理</param>
         member this.matmul (a:double2,b:complex2) = fun code ->
-            environment.ch.z2 a.size1 b.size2 <| fun u ->
+            environment.ch.z2 (a.size1, b.size2) <| fun u ->
                 this.matmul (u,a,b)
                 code u
         /// <summary>
@@ -160,7 +160,7 @@ namespace Aqualis
         /// <param name="b">b</param>
         /// <param name="code">a×bに対する処理</param>
         member this.matmul (a:complex2,b:double2) = fun code ->
-            environment.ch.z2 a.size1 b.size2 <| fun u ->
+            environment.ch.z2 (a.size1, b.size2) <| fun u ->
                 this.matmul (u,a,b)
                 code u
         /// <summary>
@@ -170,7 +170,7 @@ namespace Aqualis
         /// <param name="b">b</param>
         /// <param name="code">a×bに対する処理</param>
         member this.matmul (a:complex2,b:complex2) = fun code ->
-            environment.ch.z2 a.size1 b.size2 <| fun u ->
+            environment.ch.z2 (a.size1, b.size2) <| fun u ->
                 this.matmul (u,a,b)
                 code u
 
@@ -475,7 +475,7 @@ namespace Aqualis
             program.olist.add "-llapack"
             program.olist.add "-lblas"
             environment.group.section "行列の階数" <| fun () ->
-                environment.ch.d1 mat.size1 <| fun s -> environment.ch.z2 mat.size1 mat.size1 <| fun u -> environment.ch.z2 mat.size1 mat.size1 <| fun vt ->
+                environment.ch.d1 mat.size1 <| fun s -> environment.ch.z2 (mat.size1, mat.size1) <| fun u -> environment.ch.z2 (mat.size1, mat.size1) <| fun vt ->
                     //特異値分解を利用
                     match program.language with
                     |Fortran ->
@@ -551,7 +551,7 @@ namespace Aqualis
             program.olist.add "-llapack"
             program.olist.add "-lblas"
             environment.group.section "行列の階数" <| fun () ->
-                environment.ch.d1 mat.size1 <| fun s -> environment.ch.z2 mat.size1 mat.size1 <| fun u -> environment.ch.z2 mat.size1 mat.size1 <| fun vt ->
+                environment.ch.d1 mat.size1 <| fun s -> environment.ch.z2 (mat.size1, mat.size1) <| fun u -> environment.ch.z2 (mat.size1, mat.size1) <| fun vt ->
                     //特異値分解を利用
                     match program.language with
                     |Fortran ->
@@ -635,9 +635,9 @@ namespace Aqualis
                     <| fun () ->
                         ns <== mat.size2
                     environment.ch.d1 ns <| fun s ->
-                    environment.ch.z2 mat.size1 mat.size1 <| fun u ->
-                    environment.ch.z2 mat.size2 mat.size2 <| fun vt ->
-                    environment.ch.z2 mat.size2 mat.size1 <| fun u2 ->
+                    environment.ch.z2 (mat.size1, mat.size1) <| fun u ->
+                    environment.ch.z2 (mat.size2, mat.size2) <| fun vt ->
+                    environment.ch.z2 (mat.size2, mat.size1) <| fun u2 ->
                         this.svd mat (u,s,vt)
                         //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
                         u2.clear()
@@ -665,9 +665,9 @@ namespace Aqualis
                     <| fun () ->
                         ns <== mat.size2
                     environment.ch.d1 ns <| fun s ->
-                    environment.ch.d2 mat.size1 mat.size1 <| fun u ->
-                    environment.ch.d2 mat.size2 mat.size2 <| fun vt ->
-                    environment.ch.d2 mat.size2 mat.size1 <| fun u2 ->
+                    environment.ch.d2 (mat.size1, mat.size1) <| fun u ->
+                    environment.ch.d2 (mat.size2, mat.size2) <| fun vt ->
+                    environment.ch.d2 (mat.size2, mat.size1) <| fun u2 ->
                         this.svd mat (u,s,vt)
                         //特異値分解した行列をもとに、疑似逆行列は (v^*)×(s^-1)×(u^*)
                         u2.clear()
@@ -696,7 +696,7 @@ namespace Aqualis
                 |Fortran ->
                     environment.ch.iii <| fun (npre,ldvldummy,info) ->
                             npre<==mat1.size1
-                            environment.ch.z2 _1 _1 <| fun dummy ->
+                            environment.ch.z2 (_1, _1) <| fun dummy ->
                                 environment.ch.i <| fun lwork ->
                                     lwork <== 2*npre
                                     environment.ch.z1 lwork <| fun work ->
@@ -720,7 +720,7 @@ namespace Aqualis
                 |C99 ->
                     environment.ch.iii <| fun (npre,ldvldummy,info) ->
                             npre<==mat1.size1
-                            environment.ch.z2 _1 _1 <| fun dummy ->
+                            environment.ch.z2 (_1, _1) <| fun dummy ->
                                 environment.ch.i <| fun lwork ->
                                     lwork <== 2*npre
                                     environment.ch.z1 lwork <| fun work ->
@@ -774,7 +774,7 @@ namespace Aqualis
                     eigenvectors.clear()
                     environment.ch.iii <| fun (npre,ldvldummy,info) ->
                         npre<==mat1.size1
-                        environment.ch.z2 _1 _1 <| fun dummy ->
+                        environment.ch.z2 (_1, _1) <| fun dummy ->
                             environment.ch.i <| fun lwork ->
                                 lwork <== npre + 64 * npre
                                 environment.ch.z1 lwork <| fun work ->
@@ -853,7 +853,7 @@ namespace Aqualis
         /// <param name="code">解に対して行う処理</param>
         member this.solve_simuleq_t(fu_mat:double2,fu_cst:double1) = fun code ->
             environment.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
-                environment.ch.d2 fu_mat.size2 fu_mat.size2 <| fun FF ->
+                environment.ch.d2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
                 environment.ch.d1 fu_mat.size2 <| fun bb ->
                     let lambda = 1E-6 //正則化パラメータ
                     FF.clear()
@@ -888,7 +888,7 @@ namespace Aqualis
         /// <param name="code">解に対して行う処理</param>
         member this.solve_simuleq_t(fu_mat:complex2,fu_cst:complex1) = fun code ->
             environment.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
-                environment.ch.z2 fu_mat.size2 fu_mat.size2 <| fun FF ->
+                environment.ch.z2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
                 environment.ch.z1 fu_mat.size2 <| fun bb ->
                     let lambda = 1E-6 //正則化パラメータ
                     FF.clear()
@@ -924,7 +924,7 @@ namespace Aqualis
         /// <param name="code">解に対して行う処理</param>
         member this.solve_simuleq_tt(fu_mat:complex2,fu_cst:complex1,lambda:double) = fun code ->
             environment.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
-                environment.ch.z2 fu_mat.size2 fu_mat.size2 <| fun FF ->
+                environment.ch.z2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
                 environment.ch.z1 fu_mat.size2 <| fun bb ->
                     //let lambda = 1E-6 //正則化パラメータ
                     FF.clear()
@@ -959,7 +959,7 @@ namespace Aqualis
         /// <param name="code">解に対して行う処理</param>
         member this.solve_simuleq_tt(fu_mat:double2,fu_cst:double1,lambda:double) = fun code ->
             environment.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
-                environment.ch.d2 fu_mat.size2 fu_mat.size2 <| fun FF ->
+                environment.ch.d2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
                 environment.ch.d1 fu_mat.size2 <| fun bb ->
                     //let lambda = 1E-6 //正則化パラメータ
                     FF.clear()
@@ -994,7 +994,7 @@ namespace Aqualis
         /// <param name="code">解に対して行う処理</param>
         member this.solve_simuleq_tt2(fu_mat:complex2,fu_cst:complex2,lambda:double0) code =
             environment.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
-                environment.ch.z2 fu_mat.size2 fu_mat.size2 <| fun FF ->
+                environment.ch.z2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
                 environment.ch.z1 fu_mat.size2 <| fun bb ->
                     FF.clear()
                     //FF = fu_mat^T * fu_mat
@@ -1381,8 +1381,8 @@ namespace Aqualis
         /// <param name="f">連立方程式の解</param>
         member this.solve_homogeneq (mat:double2,f:double1) =
                 environment.ch.d1 mat.size1 <| fun s ->
-                environment.ch.d2 mat.size1 mat.size2 <| fun u ->
-                environment.ch.d2 mat.size1 mat.size2 <| fun vt ->
+                environment.ch.d2 (mat.size1, mat.size2) <| fun u ->
+                environment.ch.d2 (mat.size1, mat.size2) <| fun vt ->
                     this.svd mat (u,s,vt)
                     environment.group.comment "0に近いほど正確な解"
                     environment.print.tt <| "solve_homogeneq"++s[mat.size1]
@@ -1396,8 +1396,8 @@ namespace Aqualis
         /// <param name="f">連立方程式の解</param>
         member this.solve_homogeneq (mat:complex2,f:complex1) =
                 environment.ch.d1 mat.size1 <| fun s ->
-                environment.ch.z2 mat.size1 mat.size2 <| fun u ->
-                environment.ch.z2 mat.size1 mat.size2 <| fun vt ->
+                environment.ch.z2 (mat.size1, mat.size2) <| fun u ->
+                environment.ch.z2 (mat.size1, mat.size2) <| fun vt ->
                     this.svd mat (u,s,vt)
                     environment.group.comment "0に近いほど正確な解"
                     environment.print.tt <| "solve_homogeneq"++s[mat.size1]
