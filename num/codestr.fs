@@ -100,5 +100,14 @@ type ContextGroup internal (environment:CompilationEnvironment) =
 
 [<AutoOpen>]
 module CompilationEnvironmentGroupExtensions =
+    type group =
+        static member section (id1:int,id2:int) = fun code -> if id1=id2 then code() else ()
+        static member section (id1:string,id2:string) = fun code -> if id1=id2 then code() else ()
+        static member section (label:string) = fun code -> code()
+    type dummy_group =
+        static member section (id1:int,id2:int) = fun code -> ()
+        static member section (id1:string,id2:string) = fun code -> ()
+        static member section (label:string) = fun code -> ()
+        
     type CompilationEnvironment with
         member this.group = ContextGroup(this)
