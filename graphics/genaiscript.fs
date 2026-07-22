@@ -1,9 +1,9 @@
-﻿// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
 
 open System.IO
@@ -373,22 +373,22 @@ type genaiscript =
         wr <| st "}"
         wr <| st ""
         wr <| st "docObj = activeDocument;"
-        
+
     static member layer(wr:exprString -> unit,layername:string) = fun code ->
         wr <| st "var docObj = activeDocument.layers.add();"
         wr <| st ("docObj.name = \"plane("+layername+")\";")
         wr <| st ("app.activeDocument.activeLayer = app.activeDocument.layers[\"plane("+layername+")\"];")
         code()
-        
+
     static member style(fillcolor:color.fill,strokecolor:color.stroke) =
         let ft,fr,fg,fb = match fillcolor.col with |None -> "false",_0,_0,_0 |Some(r,g,b,_) -> "true",r,g,b
         let st,sr,sg,sb,lw = match strokecolor.col with |None -> "false",_0,_0,_0,_0d |Some(r,g,b,_,lw,da) -> "true",r,g,b,lw
         lw++", "++st++", "++sr++", "++sg++", "++sb++", "++ft++", "++fr++", "++fg++", "++fb
-        
+
     static member style(strokecolor:color.stroke) =
         let st,sr,sg,sb,lw = match strokecolor.col with |None -> "false",_0,_0,_0,_0d |Some(r,g,b,_,lw,da) -> "true",r,g,b,lw
         lw++", "++st++", "++sr++", "++sg++", "++sb++", "
-        
+
     static member line(wr:exprString -> unit,x1:double0,y1:double0,x2:double0,y2:double0,strokecolor) =
         wr <| "line("++x1++"*s, "++y1++"*s, "++x2++"*s, "++y2++"*s, "++genaiscript.style strokecolor++");"
 
@@ -405,18 +405,19 @@ type genaiscript =
             wr <| "    "++D py[i]++","
         wr <| "    "++D py[py.Length-1]++"]"
         wr <| "polygon(apex_x, apex_y, s, "++genaiscript.style(fillcolor,strokecolor)++");"
-        
+
     static member polygon(wr:exprString -> unit,px:double1,py:double1,fillcolor,strokecolor) =
+        let environment = CompilationEnvironment(GenerationContextMerge.merge px.Context py.Context)
         wr <| st "apex_x=["
-        iter.range _1 (px.size1-1) <| fun i ->
+        environment.iter.range (_1, px.size1-1) <| fun i ->
             wr <| "    "++px[i-1]++","
         wr <| "    "++px[px.size1-1]++"]"
         wr <| st "apex_y=["
-        iter.range _1 (py.size1-1) <| fun i ->
+        environment.iter.range (_1, py.size1-1) <| fun i ->
             wr <| "    "++py[i-1]++","
         wr <| "    "++py[py.size1-1]++"]"
         wr <| "polygon(apex_x, apex_y, s, "++genaiscript.style(fillcolor,strokecolor)++");"
-        
+
     static member polygon3D(wr:exprString -> unit,px:double list,py:double list,pz:double list,x3D:double0,y3D:double0,z3D:double0,fillcolor,strokecolor) =
         wr <| st "apex_x=["
         for i in 0..px.Length-2 do
@@ -431,34 +432,35 @@ type genaiscript =
             wr <| "    "++D pz[i]++","
         wr <| "    "++D pz[pz.Length-1]++"]"
         wr <| "polygon3D(apex_x, apex_y, apex_z, s, "++x3D++", "++y3D++", "++z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
-        
+
     static member polygon3D(wr:exprString -> unit,px:double1,py:double1,pz:double1,x3D:double0,y3D:double0,z3D:double0,fillcolor,strokecolor) =
+        let environment = CompilationEnvironment(GenerationContextMerge.mergeMany [px.Context;py.Context;pz.Context])
         wr <| st "apex_x=["
-        iter.range _1 (px.size1-1) <| fun i ->
+        environment.iter.range (_1, px.size1-1) <| fun i ->
             wr <| "    "++px[i-1]++","
         wr <| "    "++px[px.size1-1]++"]"
         wr <| st "apex_y=["
-        iter.range _1 (py.size1-1) <| fun i ->
+        environment.iter.range (_1, py.size1-1) <| fun i ->
             wr <| "    "++py[i-1]++","
         wr <| "    "++py[py.size1-1]++"]"
         wr <| st "apex_z=["
-        iter.range _1 (pz.size1-1) <| fun i ->
+        environment.iter.range (_1, pz.size1-1) <| fun i ->
             wr <| "    "++pz[i-1]++","
         wr <| "    "++pz[pz.size1-1]++"]"
         wr <| "polygon3D(apex_x, apex_y, apex_z, s, "++x3D++", "++y3D++", "++z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
-        
+
     static member circle(wr:exprString -> unit,cx:double0,cy:double0,r:double0,fillcolor,strokecolor) =
         wr <| "circle("++cx++"*s, "++cy++"*s, "++r++"*s, "++genaiscript.style(fillcolor,strokecolor)++");"
-        
+
     static member circle3D(wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,x3D:double0,y3D:double0,z3D:double0,fillcolor,strokecolor) =
         wr <| st "circle3d("++cx++"*s, "++cy++"*s, "++cz++"*s, "++r++"*s, "++x3D++", "++y3D++", ";z3D++", "++genaiscript.style(fillcolor,strokecolor)++");"
 
     static member circle3Dxy(wr:exprString -> unit,x:double0,y:double0,z:double0,r:double0,n:int0,fillcolor,strokecolor) =
         wr <| st "circle3Dxy("++x++", "++y++", "++z++", "++r++", ";n++", s, "++genaiscript.style(fillcolor,strokecolor)++");"
-        
+
     static member circle3Dyz(wr:exprString -> unit,x:double0,y:double0,z:double0,r:double0,n:int0,fillcolor,strokecolor) =
         wr <| st "circle3Dyz("++x++", "++y++", "++z++", "++r++", ";n++", s, "++genaiscript.style(fillcolor,strokecolor)++");"
-        
+
     static member circle3Dzx(wr:exprString -> unit,x:double0,y:double0,z:double0,r:double0,n:int0,fillcolor,strokecolor) =
         wr <| st "circle3Dzx("++x++", "++y++", "++z++", "++r++", ";n++", s, "++genaiscript.style(fillcolor,strokecolor)++");"
 
@@ -476,14 +478,14 @@ type genaiscript =
 
     static member text(wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0) =
         wr <| st "text("++cx++"*s, "++cy++"*s, "++"\""++text++"\","++"\"ArialMT\","++size++");"
-        
+
 type aiscriptmaker(writer:StreamWriter) =
     let wr (x:exprString) =
         let rec write (xx:exprString) =
             for x in xx.data do
                 match x with
                 |RStr s -> writer.Write s
-                |RNvr s -> 
+                |RNvr s ->
                     let p = s.simp
                     match p with
                     |Inv(_,Int s) -> writer.Write((-s).ToString())
@@ -493,7 +495,7 @@ type aiscriptmaker(writer:StreamWriter) =
                     |_ -> printfn "出力できない値です：%s" <| p.ToString()
             writer.Write "\n"
         write x
-        
+
     member this.header scale =
         genaiscript.header (wr,D scale)
     /// <summary>
@@ -1073,16 +1075,16 @@ type aiscriptmaker_aq(wr:exprString -> unit) =
     member this.text(c,text:double,size) =
         let cx,cy = c
         genaiscript.text(wr,D cx,D cy,dv(D text),D size)
-        
-type aiscriptfile =
-    
+
+type ContextAiScriptFile internal (environment:CompilationEnvironment) =
+
     /// <summary>
     /// jsxファイルを作成
     /// </summary>
     /// <param name="dir">出力先ディレクトリ</param>
     /// <param name="filename">ファイル名</param>
     /// <param name="scale">スケール</param>
-    static member make (dir:string, filename:string, scale:double) = fun code ->
+    member _.make (dir:string, filename:string, scale:double) = fun code ->
         let outputPath = Path.Combine(dir, filename)
         let temporaryPath = outputPath + ".tmp"
         try
@@ -1100,25 +1102,30 @@ type aiscriptfile =
             if File.Exists temporaryPath then
                 File.Delete temporaryPath
             reraise()
-        
+
     /// <summary>
     /// jsxファイルを作成
     /// </summary>
     /// <param name="filename">ファイル名</param>
     /// <param name="scale">スケール</param>
-    static member make (filename:exprString, scale:double0) = fun (code:aiscriptmaker_aq->unit) ->
-        io.fileOutput filename <| fun wr ->
+    member _.make (filename:exprString, scale:double0) = fun (code:aiscriptmaker_aq->unit) ->
+        environment.io.fileOutput filename <| fun wr ->
             let sv = aiscriptmaker_aq wr.cc
             sv.header scale
             code sv
-            
+
     /// <summary>
     /// jsxファイルを作成
     /// </summary>
     /// <param name="filename">ファイル名</param>
     /// <param name="scale">スケール</param>
-    static member make (filename:exprString, scale:double) = fun (code:aiscriptmaker_aq->unit) ->
-        io.fileOutput filename <| fun wr ->
+    member _.make (filename:exprString, scale:double) = fun (code:aiscriptmaker_aq->unit) ->
+        environment.io.fileOutput filename <| fun wr ->
             let sv = aiscriptmaker_aq wr.cc
             sv.header (D scale)
             code sv
+
+[<AutoOpen>]
+module CompilationEnvironmentAiScriptExtensions =
+    type CompilationEnvironment with
+        member this.aiscriptfile = ContextAiScriptFile(this)

@@ -10,9 +10,9 @@ namespace Aqualis
     type int1 (typ:Etype,x:Expr1, ?context:GenerationContext) as this =
         inherit NumericArray1<int0,int1>(typ,x,?context=context)
 
-        new (typ,size,name,para) =
-            (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
-            int1(typ,Var1(size,name),?context=GenerationContext.TryCurrent)
+        new (context:GenerationContext,typ,size,name,para) =
+            context.CurrentProgram.var.setVar(typ,size,name,para)
+            int1(typ,Var1(size,name),context=context)
         new(a:int0,f:int0->int0) = int1(It 4,Arx1(a,fun i -> (f i).Expr))
         new(a:int ,f:int0->int0) = int1(It 4,Arx1(I a,fun i -> (f i).Expr))
         override _.WrapScalar(value,resultContext) = int0(value,?context=resultContext)

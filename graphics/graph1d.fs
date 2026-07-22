@@ -163,64 +163,64 @@ type GraphSetting =
         LegendLineLength: float
     }
 type Greek =
-    static member alpha with get() = "α"
-    static member beta with get() = "β"
-    static member gamma with get() = "γ"
-    static member delta with get() = "δ"
-    static member epsilon with get() = "ε"
-    static member zeta with get() = "ζ"
-    static member eta with get() = "η"
-    static member theta with get() = "θ"
-    static member iota with get() = "ι"
-    static member kappa with get() = "κ"
-    static member lambda with get() = "λ"
-    static member mu with get() = "μ"
-    static member nu with get() = "ν"
-    static member xi with get() = "ξ"
-    static member omicron with get() = "ο"
-    static member pi with get() = "π"
-    static member rho with get() = "ρ"
-    static member finalSigma with get() = "ς"
-    static member sigma with get() = "σ"
-    static member tau with get() = "τ"
-    static member upsilon with get() = "υ"
-    static member phi with get() = "φ"
-    static member chi with get() = "χ"
-    static member psi with get() = "ψ"
-    static member omega with get() = "ω"
-    static member Alpha with get() = "Α"
-    static member Beta with get() = "Β"
-    static member Gamma with get() = "Γ"
-    static member Delta with get() = "Δ"
-    static member Epsilon with get() = "Ε"
-    static member Zeta with get() = "Ζ"
-    static member Eta with get() = "Η"
-    static member Theta with get() = "Θ"
-    static member Iota with get() = "Ι"
-    static member Kappa with get() = "Κ"
-    static member Lambda with get() = "Λ"
-    static member Mu with get() = "Μ"
-    static member Nu with get() = "Ν"
-    static member Xi with get() = "Ξ"
-    static member Omicron with get() = "Ο"
-    static member Pi with get() = "Π"
-    static member Rho with get() = "Ρ"
-    static member Sigma with get() = "Σ"
-    static member Tau with get() = "Τ"
-    static member Upsilon with get() = "Υ"
-    static member Phi with get() = "Φ"
-    static member Chi with get() = "Χ"
-    static member Psi with get() = "Ψ"
-    static member Omega with get() = "Ω"
+    member this.alpha with get() = "α"
+    member this.beta with get() = "β"
+    member this.gamma with get() = "γ"
+    member this.delta with get() = "δ"
+    member this.epsilon with get() = "ε"
+    member this.zeta with get() = "ζ"
+    member this.eta with get() = "η"
+    member this.theta with get() = "θ"
+    member this.iota with get() = "ι"
+    member this.kappa with get() = "κ"
+    member this.lambda with get() = "λ"
+    member this.mu with get() = "μ"
+    member this.nu with get() = "ν"
+    member this.xi with get() = "ξ"
+    member this.omicron with get() = "ο"
+    member this.pi with get() = "π"
+    member this.rho with get() = "ρ"
+    member this.finalSigma with get() = "ς"
+    member this.sigma with get() = "σ"
+    member this.tau with get() = "τ"
+    member this.upsilon with get() = "υ"
+    member this.phi with get() = "φ"
+    member this.chi with get() = "χ"
+    member this.psi with get() = "ψ"
+    member this.omega with get() = "ω"
+    member this.Alpha with get() = "Α"
+    member this.Beta with get() = "Β"
+    member this.Gamma with get() = "Γ"
+    member this.Delta with get() = "Δ"
+    member this.Epsilon with get() = "Ε"
+    member this.Zeta with get() = "Ζ"
+    member this.Eta with get() = "Η"
+    member this.Theta with get() = "Θ"
+    member this.Iota with get() = "Ι"
+    member this.Kappa with get() = "Κ"
+    member this.Lambda with get() = "Λ"
+    member this.Mu with get() = "Μ"
+    member this.Nu with get() = "Ν"
+    member this.Xi with get() = "Ξ"
+    member this.Omicron with get() = "Ο"
+    member this.Pi with get() = "Π"
+    member this.Rho with get() = "Ρ"
+    member this.Sigma with get() = "Σ"
+    member this.Tau with get() = "Τ"
+    member this.Upsilon with get() = "Υ"
+    member this.Phi with get() = "Φ"
+    member this.Chi with get() = "Χ"
+    member this.Psi with get() = "Ψ"
+    member this.Omega with get() = "Ω"
 type TextStyle =
-    static member Italic t = "<tspan font-style=\"italic\">"+t+"</tspan>"
-    static member Bold t = "<tspan font-weight=\"bold\">"+t+"</tspan>"
-    static member Sub t = "<tspan font-size=\"7\" baseline-shift=\"sub\">"+t+"</tspan>"
-    static member Sup t = "<tspan font-size=\"7\" baseline-shift=\"super\">"+t+"</tspan>"
+    member this.Italic t = "<tspan font-style=\"italic\">"+t+"</tspan>"
+    member this.Bold t = "<tspan font-weight=\"bold\">"+t+"</tspan>"
+    member this.Sub t = "<tspan font-size=\"7\" baseline-shift=\"sub\">"+t+"</tspan>"
+    member this.Sup t = "<tspan font-size=\"7\" baseline-shift=\"super\">"+t+"</tspan>"
 
-type graph1d =
+type ContextGraph1d internal (environment:CompilationEnvironment) =
     ///<summary>A4縦2段組ドキュメント内の図：横2枚、縦ny枚配置</summary>
-    static member A4PTwoColDouble (ny:int) = {
+    member this.A4PTwoColDouble (ny:int) = {
         CanvasSize=(80.0, float ny*43.0);
         Interval=(40.0, 43.0);
         Origin=(-40.0+8.5, -0.5*float ny*43.0+7.5);
@@ -236,7 +236,7 @@ type graph1d =
         LegendLineLength = 4.0;
         }
     ///<summary>A4縦2段組ドキュメント内の図：横1枚、縦ny枚配置</summary>
-    static member A4PTwoColSingle (ny:int) = {
+    member this.A4PTwoColSingle (ny:int) = {
         CanvasSize=(80.0, float ny*43.0);
         Interval=(80.0, 43.0);
         Origin=(-40.0+8.5, -0.5*float ny*43.0+7.5);
@@ -252,9 +252,9 @@ type graph1d =
         LegendLineLength = 4.0;
         }
     ///<summary>グラフ生成(ダミー)</summary>
-    static member dummy_makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code = ()
+    member this.dummy_makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code = ()
     ///<summary>データファイルの読み込み</summary>
-    static member readdata (filename:string) (colx:(int->double)->double,coly:(int->double)->double) =
+    member this.readdata (filename:string) (colx:(int->double)->double,coly:(int->double)->double) =
         //データファイルの行数
         let nline =
             let mutable counter:int = 0
@@ -295,7 +295,7 @@ type graph1d =
     /// <param name="filename">出力ファイル名</param>
     /// <param name="setting">グラフプロット設定</param>
     /// <param name="code">グラフのプロット</param>
-    static member makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code =
+    member this.makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code =
         let cLx,cLy = setting.CanvasSize
         let dx,dy = setting.Interval
         let cx0,cy0 = setting.Origin
@@ -308,7 +308,7 @@ type graph1d =
         printfn "-----------------------------------------"
         printfn "Plot %s" (outputdir+"\\"+filename)
         //SVGファイル生成
-        svgfile.make (outputdir,filename) (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
+        environment.svgfile.make (outputdir,filename) (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
             let addGraph (ix:int,iy:int) (subcaption:option<string>) (gstyle:GraphStyle) (data:list<Plot>) =
                 printfn "Subplot: (%d,%d)" ix iy
                 let gLx0,gLy0 = match subcaption with |None -> gLx,gLy |Some _ -> gLx,gLy-setting.SubCaptionShiftY
@@ -371,7 +371,7 @@ type graph1d =
                             |Function _ -> None,None
                             |Datafile s ->
                                 if File.Exists(outputdir+"\\"+s.FileName) then
-                                    let xdata,ydata = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
+                                    let xdata,ydata = this.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
                                     let xr = 
                                         List.fold (fun (acc:option<double*double>) (i:int) -> 
                                             match acc with
@@ -536,7 +536,7 @@ type graph1d =
                             let datxy = xylist [] None 1
                             sv.polygon(List.map (fun (x,y) -> mmtopt <| fx x,mmtopt <| fy y) datxy, color.fill.none, s.Style.lineStroke)
                         |Datafile s ->
-                            let (xdata,ydata) = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
+                            let (xdata,ydata) = this.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
                             /// (x,y)がプロット範囲内にあるか判定
                             let inside (x,y) = (xr1<=x && x<=xr2 && yr1<=y && y<=yr2)
                             // 線のプロット
@@ -635,3 +635,8 @@ type graph1d =
                             plotall lst0 <| dataplot d (xl,yl)
                     plotall data (fx xr2-setting.LegendPositionX,fy yr2-setting.LegendPositionY)
             code addGraph
+
+[<AutoOpen>]
+module CompilationEnvironmentGraph1dExtensions =
+    type CompilationEnvironment with
+        member this.graph1d = ContextGraph1d(this)

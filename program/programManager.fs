@@ -16,6 +16,51 @@ namespace Aqualis
         /// 構造体
         let structData = structure()
 
+        // HTML sequence-diagram state belongs to the concrete output program.
+        // Keeping it here makes program switching explicit and removes any need
+        // for an ambient web-generation scope.
+        let sequenceGate = obj()
+        let mutable sequenceTopMargin = 40.0
+        let mutable sequenceLeftMargin = 40.0
+        let mutable sequenceVariableInterval = 150.0
+        let mutable sequenceSingleArrowLength = 37.5
+        let mutable sequenceVariableHeaderWidth = 50.0
+        let mutable sequenceVariableHeaderHeight = 20.0
+        let mutable sequenceLineWidth = 2.0
+        let mutable sequenceActiveLineWidth = 10.0
+        let mutable sequenceFrameMargin = 10.0
+        let mutable sequenceTimeStep = 10.0
+        let mutable sequenceFrameBorder = 2.0
+        let mutable sequenceActiveLineColor = "rgba(0, 191, 255, 0.5)"
+        let mutable sequenceLoopFrameColor = "rgb(255, 0, 0)"
+        let mutable sequenceBranchFrameColor = "rgb(0, 180, 0)"
+        let mutable sequenceSectionFrameColor = "rgb(127,0,255)"
+        let mutable terminalLifeLine = 0.0
+        let mutable sequenceVariables : (string*int*float) list = []
+        let mutable sequenceFrames : (float*float*float*float) list = []
+        let mutable sequenceBranches : ((string*float) list) list = []
+
+        member internal _.SequenceGate = sequenceGate
+        member internal _.SequenceTopMargin with get() = sequenceTopMargin and set v = sequenceTopMargin <- v
+        member internal _.SequenceLeftMargin with get() = sequenceLeftMargin and set v = sequenceLeftMargin <- v
+        member internal _.SequenceVariableInterval with get() = sequenceVariableInterval and set v = sequenceVariableInterval <- v
+        member internal _.SequenceSingleArrowLength with get() = sequenceSingleArrowLength and set v = sequenceSingleArrowLength <- v
+        member internal _.SequenceVariableHeaderWidth with get() = sequenceVariableHeaderWidth and set v = sequenceVariableHeaderWidth <- v
+        member internal _.SequenceVariableHeaderHeight with get() = sequenceVariableHeaderHeight and set v = sequenceVariableHeaderHeight <- v
+        member internal _.SequenceLineWidth with get() = sequenceLineWidth and set v = sequenceLineWidth <- v
+        member internal _.SequenceActiveLineWidth with get() = sequenceActiveLineWidth and set v = sequenceActiveLineWidth <- v
+        member internal _.SequenceFrameMargin with get() = sequenceFrameMargin and set v = sequenceFrameMargin <- v
+        member internal _.SequenceTimeStep with get() = sequenceTimeStep and set v = sequenceTimeStep <- v
+        member internal _.SequenceFrameBorder with get() = sequenceFrameBorder and set v = sequenceFrameBorder <- v
+        member internal _.SequenceActiveLineColor with get() = sequenceActiveLineColor and set v = sequenceActiveLineColor <- v
+        member internal _.SequenceLoopFrameColor with get() = sequenceLoopFrameColor and set v = sequenceLoopFrameColor <- v
+        member internal _.SequenceBranchFrameColor with get() = sequenceBranchFrameColor and set v = sequenceBranchFrameColor <- v
+        member internal _.SequenceSectionFrameColor with get() = sequenceSectionFrameColor and set v = sequenceSectionFrameColor <- v
+        member internal _.TerminalLifeLine with get() = lock sequenceGate (fun () -> terminalLifeLine) and set v = lock sequenceGate (fun () -> terminalLifeLine <- v)
+        member internal _.SequenceVariables with get() = lock sequenceGate (fun () -> sequenceVariables) and set v = lock sequenceGate (fun () -> sequenceVariables <- v)
+        member internal _.SequenceFrames with get() = lock sequenceGate (fun () -> sequenceFrames) and set v = lock sequenceGate (fun () -> sequenceFrames <- v)
+        member internal _.SequenceBranches with get() = lock sequenceGate (fun () -> sequenceBranches) and set v = lock sequenceGate (fun () -> sequenceBranches <- v)
+
         ///<summary>言語設定</summary>
         member val language = lang with get
 
@@ -352,9 +397,9 @@ namespace Aqualis
 
     /// State owned by one code-generation operation.
     ///
-    /// The current context is stored in AsyncLocal only to keep the existing DSL
-    /// syntax (for example, x <== y) source-compatible. Values created by the DSL
-    /// capture this instance and assignments use the captured context.
+    /// DSL values capture an explicit scoped view of this state. No ambient or
+    /// thread-local context is used; assignments write through the context carried
+    /// by their left-hand value.
     type private GenerationState =
         {
             Gate: obj
@@ -383,8 +428,6 @@ namespace Aqualis
             debug:debugController,
             parallelMode:bool
         ) =
-        static let current = AsyncLocal<GenerationContext option>()
-
         /// <summary>Creates the state shared by all scoped views of a generation context.</summary>
         static member private CreateState(programs:program list, movieSetting:MovieSetting) =
             let programArray = programs |> List.toArray
@@ -420,6 +463,9 @@ namespace Aqualis
             let state =
                 GenerationContext.CreateState(programs, movieSetting)
             GenerationContext(state, 0, state.Debug, false)
+
+        static member internal ForInternalProgram(program:program) =
+            GenerationContext [program]
 
         member private _.EnsureActive() =
             if System.Threading.Volatile.Read(&state.Active) = 0 then
@@ -486,18 +532,20 @@ namespace Aqualis
         member _.IsParallelMode = parallelMode
 
         /// <summary>Runs an operation in a child context with parallel mode enabled.</summary>
-        member this.WithParallelMode(code: unit -> 'T) : 'T =
-            GenerationContext(state, currentIndex, debug, true).Activate(code)
+        member this.WithParallelMode(code: GenerationContext -> 'T) : 'T =
+            this.EnsureActive()
+            code (GenerationContext(state, currentIndex, debug, true))
 
         /// <summary>Runs an operation in a child context with the specified debug mode.</summary>
-        member _.WithDebugMode(enabled:bool, code: unit -> 'T) : 'T =
+        member this.WithDebugMode(enabled:bool, code: GenerationContext -> 'T) : 'T =
+            this.EnsureActive()
             let scopedDebug = debugController()
             scopedDebug.setDebugMode enabled
-            GenerationContext(
+            code (GenerationContext(
                 state,
                 currentIndex,
                 scopedDebug,
-                parallelMode).Activate(code)
+                parallelMode))
 
         /// <summary>Gets a snapshot of the registered function names.</summary>
         member _.Functions =
@@ -638,9 +686,9 @@ namespace Aqualis
             GenerationContext(state, index, debug, parallelMode)
 
         /// <summary>Runs an operation against the specified output program under the context lock.</summary>
-        member this.WithProgram(index: int, code: unit -> 'T) : 'T =
+        member this.WithProgram(index: int, code: GenerationContext -> 'T) : 'T =
             lock state.Gate (fun () ->
-                this.ForProgram(index).Activate(code))
+                code (this.ForProgram(index)))
 
         /// <summary>
         /// Runs one synchronous DSL-generation transaction under the context lock.
@@ -649,26 +697,13 @@ namespace Aqualis
         /// interleave. Do not wait for another transaction on this context from
         /// inside the callback.
         /// </summary>
-        member this.GenerateAtomically(code: unit -> 'T) : 'T =
-            lock state.Gate (fun () ->
-                this.Activate(code))
+        member this.GenerateAtomically(code: GenerationContext -> 'T) : 'T =
+            this.EnsureActive()
+            lock state.Gate (fun () -> code this)
 
         /// <summary>Runs an operation while holding the generation context lock.</summary>
-        member internal this.Synchronize(code: unit -> 'T) =
+        member internal this.Synchronize(code: GenerationContext -> 'T) =
             this.GenerateAtomically(code)
-
-        /// <summary>Makes this context current for the duration of an operation.</summary>
-        member this.Activate(code: unit -> 'T) : 'T =
-            this.EnsureActive()
-            let previous = current.Value
-            try
-                current.Value <- Some this
-                code ()
-            finally
-                current.Value <- previous
-
-        /// <summary>Gets the current asynchronous generation context, if one is active.</summary>
-        static member internal TryCurrent = current.Value
 
     /// <summary>
     /// The explicit environment passed to a Compile callback. Numeric execution has
@@ -706,71 +741,12 @@ namespace Aqualis
             |> Option.defaultWith (fun () ->
                 invalidOp "The assignment target is not associated with a GenerationContext.")
 
-    module internal GenerationScope =
-        let requireContext() =
-            GenerationContext.TryCurrent
-            |> Option.defaultWith (fun () ->
-                invalidOp "This operation must run inside a GenerationContext.")
-
-        let currentProgram() =
-            (requireContext()).CurrentProgram
-
-        let gotoLabels() =
-            (requireContext()).GotoLabels
-
-        let errors() =
-            (requireContext()).Errors
-
-        let debug() =
-            (requireContext()).Debug
-
-    module internal WebGenerationScope =
-        let private context() = GenerationScope.requireContext()
-
-        let nextContentsNumber() = (context()).NextContentsNumber()
-        let nextAnimationSequenceNumber() =
-            (context()).NextAnimationSequenceNumber()
-        let nextAnimationGroupNumber() =
-            (context()).NextAnimationGroupNumber()
-        let nextFigureNumber() = (context()).NextFigureNumber()
-        let nextAnimationNumber() = (context()).NextAnimationNumber()
-        let animationCount() = (context()).AnimationCount
-        let addAnimationButton button = (context()).AddAnimationButton(button)
-        let clearAnimationButtons() = (context()).ClearAnimationButtons()
-        let tryLastAnimationButton() =
-            (context()).TryLastAnimationButton()
-        let addAudioFile audioFile = (context()).AddAudioFile(audioFile)
-        let audioFiles() = (context()).AudioFiles
-        let contentsDirectory() = (context()).ContentsDirectory
-        let setContentsDirectory value =
-            (context()).ContentsDirectory <- value
-
-        let characterEnabled() = (context()).CharacterEnabled
-        let subtitleEnabled() = (context()).SubtitleEnabled
-        let voiceEnabled() = (context()).VoiceEnabled
-
-        let sequenceDiagramStyle() = (context()).SequenceDiagramStyle
-        let setSequenceDiagramStyle style =
-            (context()).SetSequenceDiagramStyle(style)
-        let terminalLifeLine() = (context()).TerminalLifeLine
-        let setTerminalLifeLine value =
-            (context()).TerminalLifeLine <- value
-        let sequenceVariables() = (context()).SequenceVariables
-        let setSequenceVariables value =
-            (context()).SequenceVariables <- value
-        let sequenceFrames() = (context()).SequenceFrames
-        let setSequenceFrames value =
-            (context()).SequenceFrames <- value
-        let sequenceBranches() = (context()).SequenceBranches
-        let setSequenceBranches value =
-            (context()).SequenceBranches <- value
-
     [<AutoOpen>]
     module aqualisProgram =
 
         ///<summary>現在生成中のプログラミング言語</summary>
-        let funlist_nonoverlap() =
-            (GenerationScope.requireContext()).DistinctFunctions
+        let funlist_nonoverlap(context:GenerationContext) =
+            context.DistinctFunctions
         let private disposePrograms (programs:program list) =
             programs
             |> List.iter (fun item ->
@@ -787,7 +763,7 @@ namespace Aqualis
             let context = GenerationContext programs
 
             try
-                context.Activate(fun () -> code context)
+                code context
             finally
                 context.Deactivate()
                 disposePrograms programs
@@ -795,7 +771,7 @@ namespace Aqualis
         let makeProgramWithMovieSetting
             (movieSetting:MovieSetting)
             (programInfo: list<string * string * Language>)
-            (code: unit -> 'T)
+            (code: GenerationContext -> 'T)
             : 'T =
             let programs =
                 programInfo
@@ -804,80 +780,77 @@ namespace Aqualis
             let context = GenerationContext(programs, movieSetting)
 
             try
-                context.Activate(code)
+                code context
             finally
                 context.Deactivate()
                 disposePrograms programs
 
-        /// Backward-compatible entry point. New code should prefer
-        /// makeProgramWithContext when it needs direct access to the context.
-        let makeProgram (programInfo: list<string * string * Language>) (code: unit -> 'T) : 'T =
-            makeProgramWithContext programInfo (fun _ -> code ())
-
-        let write(s:string) = GenerationScope.currentProgram().codewrite s
-        let writei(s:string) = GenerationScope.currentProgram().codewritei s
-        let writen(s:string) = GenerationScope.currentProgram().codewriten s
-        let writein(s:string) = GenerationScope.currentProgram().codewritein s
-        let hwritein(h:string,s:string) = GenerationScope.currentProgram().codewritein (h,s)
-        let eqbr() = writein "\\\\"
-        let language() = GenerationScope.currentProgram().language
+        let write(context:GenerationContext) (s:string) = context.CurrentProgram.codewrite s
+        let writei(context:GenerationContext) (s:string) = context.CurrentProgram.codewritei s
+        let writen(context:GenerationContext) (s:string) = context.CurrentProgram.codewriten s
+        let writein(context:GenerationContext) (s:string) = context.CurrentProgram.codewritein s
+        let hwritein(context:GenerationContext) (h:string,s:string) = context.CurrentProgram.codewritein (h,s)
+        let eqbr(context:GenerationContext) = writein context "\\\\"
+        let language(context:GenerationContext) = context.CurrentProgram.language
 
         ///<summary>コメント文を生成</summary>
-        let (!) s = GenerationScope.currentProgram().comment s
+        let comment(context:GenerationContext) s = context.CurrentProgram.comment s
 
     ///<summary>コード生成の設定</summary>
-    type AqualisCompiler () =
+    type ContextCompiler internal (environment:CompilationEnvironment) =
+        let context() = environment.RequireGenerationContext()
 
         ///<summary>言語</summary>
-        static member language with get() = GenerationScope.currentProgram().language
+        member _.language = (context()).CurrentProgram.language
 
         ///<summary>プロジェクト名</summary>
-        static member projectName with get() = GenerationScope.currentProgram().projectName
+        member _.projectName = (context()).CurrentProgram.projectName
 
         ///<summary>整数を文字列に変換した時の桁数</summary>
-        static member intFormat with get() = GenerationScope.currentProgram().numFormat.iFormat
+        member _.intFormat = (context()).CurrentProgram.numFormat.iFormat
 
         ///<summary>整数をn桁の文字列で変換するように設定</summary>
-        static member intFormatSet d = GenerationScope.currentProgram().numFormat.setIFormat d
+        member _.intFormatSet d = (context()).CurrentProgram.numFormat.setIFormat d
 
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member doubleFormat with get() = GenerationScope.currentProgram().numFormat.dFormat
+        member _.doubleFormat = (context()).CurrentProgram.numFormat.dFormat
 
         ///<summary>倍精度浮動小数点をn桁（小数点以下m桁）の文字列で変換するように設定</summary>
-        static member doubleFormatSet(n,d) = GenerationScope.currentProgram().numFormat.setDFormat(n,d)
+        member _.doubleFormatSet(n,d) = (context()).CurrentProgram.numFormat.setDFormat(n,d)
 
         ///<summary>デバッグモードの切り替え</summary>
-        static member set_DebugMode (x:Switch) =
+        member _.set_DebugMode (x:Switch) =
             match x with
-            |ON  -> (GenerationScope.debug()).setDebugMode true
-            |OFF -> (GenerationScope.debug()).setDebugMode false
+            |ON  -> (context()).Debug.setDebugMode true
+            |OFF -> (context()).Debug.setDebugMode false
 
         ///<summary>デバッグモードの切り替え</summary>
-        static member set_DisplaySection (x:Switch) =
+        member _.set_DisplaySection (x:Switch) =
             match x with
-            |ON  -> (GenerationScope.requireContext()).DisplaySection <- true
-            |OFF -> (GenerationScope.requireContext()).DisplaySection <- false
+            |ON  -> (context()).DisplaySection <- true
+            |OFF -> (context()).DisplaySection <- false
 
         ///<summary>codeをデバッグモードで実行</summary>
-        static member debug code =
-            let context = GenerationScope.requireContext()
-            context.WithDebugMode(true, code)
+        member _.debug code =
+            let ctx = context()
+            ctx.WithDebugMode(true, fun child -> code (CompilationEnvironment(Some child)))
 
         ///<summary>プログラムの実行を強制終了</summary>
-        static member abort() =
-            match language() with
+        member _.abort() =
+            let ctx = context()
+            match ctx.CurrentProgram.language with
             |Fortran ->
-                writein "stop"
+                writein ctx "stop"
             |C99 ->
-                writein "return 1;"
+                writein ctx "return 1;"
             |LaTeX ->
-                writein "stop"
+                writein ctx "stop"
             |HTML ->
-                writein "stop"
+                writein ctx "stop"
             |HTMLSequenceDiagram ->
-                writein "stop"
+                writein ctx "stop"
             |Python ->
-                writein "sys.exit(1)"
+                writein ctx "sys.exit(1)"
             |JavaScript ->
                 ()
             |PHP ->
@@ -886,20 +859,21 @@ namespace Aqualis
                 ()
 
         ///<summary>何かのキーを押すまで実行を一時停止</summary>
-        static member stop() =
-            match language() with
+        member _.stop() =
+            let ctx = context()
+            match ctx.CurrentProgram.language with
             |Fortran ->
-                writein "read *, \n"
+                writein ctx "read *, \n"
             |C99 ->
-                writein "getchar();\n"
+                writein ctx "getchar();\n"
             |LaTeX ->
-                writein "stop\n"
+                writein ctx "stop\n"
             |HTML ->
-                writein "stop\n"
+                writein ctx "stop\n"
             |HTMLSequenceDiagram ->
-                writein "stop\n"
+                writein ctx "stop\n"
             |Python ->
-                writein "input()"
+                writein ctx "input()"
             |JavaScript ->
                 ()
             |PHP ->
@@ -911,12 +885,17 @@ namespace Aqualis
         /// インクルードファイル追加（TeXの場合はプリアンブル部挿入コード）
         /// </summary>
         /// <param name="t">オプション</param>
-        static member incld(s:string) =
-            GenerationScope.currentProgram().hlist.add s
+        member _.incld(s:string) =
+            (context()).CurrentProgram.hlist.add s
 
         /// <summary>
         /// コンパイルオプションを追加
         /// </summary>
         /// <param name="t">オプション</param>
-        static member option(t:string) =
-            GenerationScope.currentProgram().olist.add("-"+t)
+        member _.option(t:string) =
+            (context()).CurrentProgram.olist.add("-"+t)
+
+    [<AutoOpen>]
+    module CompilationEnvironmentCompilerExtensions =
+        type CompilationEnvironment with
+            member this.compiler = ContextCompiler(this)

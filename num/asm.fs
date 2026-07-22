@@ -11,67 +11,9 @@ namespace Aqualis
     ///<summary>数学関数</summary>
     type asm =
         ///<summary>虚数単位</summary>
-        static member uj with get() =
-            if GenerationContext.TryCurrent.IsNone then
-                complex0(Cpx(0.0,1.0))
-            else
-                match (GenerationScope.currentProgram()).language with
-                |Fortran ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
-                    complex0(Var(Zt,"uj",NaN))
-                |C99 ->
-                    //#defineで定義済み
-                    complex0(Var(Zt,"uj",NaN))
-                |LaTeX ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                    complex0(Var(Zt,"\\mathrm{j}",NaN))
-                |HTML ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                    complex0(Var(Zt,"\\mathrm{j}",NaN))
-                |HTMLSequenceDiagram ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Zt,A0,"\\mathrm{j}","(0d0,1d0)")
-                    complex0(Var(Zt,"\\mathrm{j}",NaN))
-                |Python ->
-                    complex0(Var(Zt,"1.0j",NaN))
-                |JavaScript ->
-                    complex0(Cpx(0.0,1.0))
-                |PHP ->
-                    complex0(Cpx(0.0,1.0))
-                |Numeric ->
-                    complex0(Cpx(0.0,1.0))
-        ///<summary>円周率</summary>
-        static member pi with get() =
-            if GenerationContext.TryCurrent.IsNone then
-                double0(Dbl Math.PI)
-            else
-                match (GenerationScope.currentProgram()).language with
-                |Fortran ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979d0")
-                    double0(Var(Dt,"pi",NaN))
-                |C99 ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                    double0(Var(Dt,"pi",NaN))
-                |LaTeX ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                    double0(Var(Dt,"\\pi",NaN))
-                |HTML ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                    double0(Var(Dt,"\\pi",NaN))
-                |HTMLSequenceDiagram ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"\\pi","3.14159265358979")
-                    double0(Var(Dt,"\\pi",NaN))
-                |Python ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                    double0(Var(Dt,"pi",NaN))
-                |JavaScript ->
-                    double0(Dbl Math.PI)
-                |PHP ->
-                    (GenerationScope.currentProgram()).var.setUniqVar(Dt,A0,"pi","3.14159265358979")
-                    double0(Var(Dt,"pi",NaN))
-                |Numeric ->
-                    double0(Dbl Math.PI)
-        ///<summary>2πj</summary>
-        static member j2p with get() = 2*asm.pi*asm.uj
+        static member uj = complex0(Cpx(0.0,1.0))
+        static member pi = double0(Dbl Math.PI)
+        static member j2p = 2 * asm.pi * asm.uj
         static member todouble(x:int0) = double0(ToDbl x.Expr, ?context=x.Context)
         static member toint(x:double0) = int0(ToInt x.Expr, ?context=x.Context)
         ///<summary>累乗</summary>
@@ -227,6 +169,8 @@ namespace Aqualis
     /// to derive their context from those operands through NumericContext.
     type ContextAsm internal (environment:CompilationEnvironment) =
         let context() = environment.RequireGenerationContext()
+
+        member internal _.Environment = environment
 
         member _.uj =
             let ctx = context()

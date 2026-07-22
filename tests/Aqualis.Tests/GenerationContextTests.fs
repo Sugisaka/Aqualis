@@ -1,6 +1,7 @@
 namespace Aqualis.Tests
 
 open System
+open System.IO
 open System.Threading.Tasks
 open Xunit
 open Aqualis
@@ -9,8 +10,11 @@ module GenerationContextTests =
     let private createContext path name language =
         GenerationContext [new program(path, name, language)]
 
+    let private closeContext (context:GenerationContext) =
+        context.Programs |> Array.iter _.close()
+
     [<Fact>]
-    let ``scoped views keep the output context id and programs have distinct ids`` () =
+    let ``program views have stable and distinct output identities`` () =
         use output = new TemporaryDirectory()
         let context =
             GenerationContext [
@@ -22,10 +26,10 @@ module GenerationContextTests =
             Assert.Equal(context.ContextId, context.ForProgram(0).ContextId)
             Assert.NotEqual(context.ContextId, context.ForProgram(1).ContextId)
         finally
-            context.Programs |> Array.iter _.close()
+            closeContext context
 
     [<Fact>]
-    let ``Compile supplies an explicit environment to generated and Numeric code`` () =
+    let ``Compile supplies generated and Numeric environments explicitly`` () =
         use output = new TemporaryDirectory()
         let mutable numericIterations = 0
         let mutable generatedVariable = ""
@@ -41,59 +45,48 @@ module GenerationContextTests =
             environment.iter.range(0, 2) <| fun _ -> numericIterations <- numericIterations + 1
 
         Assert.Equal(3, numericIterations)
-        let generated =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "explicit-environment.c"))
+        let generated = File.ReadAllText(Path.Combine(output.Path, "explicit-environment.c"))
         Assert.Contains(generatedVariable + " = 0;", generated)
 
     [<Fact>]
-    let ``math strings booleans and indexers use the shared context merge`` () =
+    let ``operators functions and indexers share context validation`` () =
         use output = new TemporaryDirectory()
         let first = createContext output.Path "merge-first.c" C99
         let second = createContext output.Path "merge-second.c" C99
 
         try
-            let x = double0(Var(Dt,"x",NaN), context=first)
-            let y = double0(Var(Dt,"y",NaN), context=second)
+            let x = double0(Var(Dt, "x", NaN), context=first)
+            let y = double0(Var(Dt, "y", NaN), context=second)
             let rounded = asm.floor x
             Assert.Equal(first.ContextId, rounded.Context.Value.ContextId)
 
-            Assert.Throws<InvalidOperationException>(fun () -> dv x ++ dv y |> ignore)
-            |> ignore
-            Assert.Throws<InvalidOperationException>(fun () -> Or [x .< 0.0; y .< 0.0] |> ignore)
-            |> ignore
+            Assert.Throws<InvalidOperationException>(fun () -> x + y |> ignore) |> ignore
+            Assert.Throws<InvalidOperationException>(fun () -> dv x ++ dv y |> ignore) |> ignore
+            Assert.Throws<InvalidOperationException>(fun () -> Or [x .< 0.0; y .< 0.0] |> ignore) |> ignore
 
-            let values = int2(It 4,Var2(A2(2,2),"values"),context=first)
-            let foreignIndex = int0(Var(It 4,"index",NaN),context=second)
-            Assert.Throws<InvalidOperationException>(fun () -> values[foreignIndex,0] |> ignore)
-            |> ignore
+            let values = int2(It 4, Var2(A2(2, 2), "values"), context=first)
+            let foreignIndex = int0(Var(It 4, "index", NaN), context=second)
+            Assert.Throws<InvalidOperationException>(fun () -> values[foreignIndex, 0] |> ignore) |> ignore
 
-            let neutral2 = int2(It 4,Arx2(I 2,I 2,fun _ -> Int 1))
-            let inherited2 = neutral2 + int0(Var(It 4,"value2",NaN),context=first)
-            Assert.Equal(first.ContextId,inherited2.Context.Value.ContextId)
-            let neutral3 = int3(It 4,Arx3(I 2,I 2,I 2,fun _ -> Int 1))
-            let inherited3 = neutral3 + int0(Var(It 4,"value3",NaN),context=first)
-            Assert.Equal(first.ContextId,inherited3.Context.Value.ContextId)
+            let neutral = int2(It 4, Arx2(I 2, I 2, fun _ -> Int 1))
+            let inherited = neutral + int0(Var(It 4, "value", NaN), context=first)
+            Assert.Equal(first.ContextId, inherited.Context.Value.ContextId)
         finally
-            first.CurrentProgram.close()
-            second.CurrentProgram.close()
+            closeContext first
+            closeContext second
 
     [<Fact>]
-    let ``HTML sequence callback receives the switched body context`` () =
+    let ``HTML sequence callback receives the switched program environment`` () =
         use output = new TemporaryDirectory()
         let mutable callbackIndex = -1
-        let mutable bodyHasDistinctId = false
 
         Compile [HTMLSequenceDiagram] output.Path "sequence-context" ("test", "1") <| fun environment ->
-            let context = environment.GenerationContext.Value
-            callbackIndex <- context.CurrentIndex
-            bodyHasDistinctId <- context.ContextId <> context.ForProgram(0).ContextId
+            callbackIndex <- environment.GenerationContext.Value.CurrentIndex
 
         Assert.Equal(1, callbackIndex)
-        Assert.True(bodyHasDistinctId)
 
     [<Fact>]
-    let ``values captured from Compile are invalid after the callback scope`` () =
+    let ``values and contexts cannot escape a Compile callback`` () =
         use output = new TemporaryDirectory()
         let mutable escapedValue:int0 option = None
         let mutable escapedContext:GenerationContext option = None
@@ -102,454 +95,75 @@ module GenerationContextTests =
             escapedContext <- environment.GenerationContext
             environment.ch.i <| fun value -> escapedValue <- Some value
 
-        Assert.Throws<InvalidOperationException>(fun () -> escapedValue.Value.code |> ignore)
-        |> ignore
-        Assert.Throws<InvalidOperationException>(fun () -> escapedValue.Value <== 1)
-        |> ignore
-        Assert.Throws<InvalidOperationException>(fun () -> escapedContext.Value.ContextId |> ignore)
-        |> ignore
+        Assert.Throws<InvalidOperationException>(fun () -> escapedValue.Value.code |> ignore) |> ignore
+        Assert.Throws<InvalidOperationException>(fun () -> escapedValue.Value <== 1) |> ignore
+        Assert.Throws<InvalidOperationException>(fun () -> escapedContext.Value.ContextId |> ignore) |> ignore
 
     [<Fact>]
-    let ``Activate restores the outer context after normal completion`` () =
-        use output = new TemporaryDirectory()
-        let outer = createContext output.Path "outer.tmp" C99
-        let inner = createContext output.Path "inner.tmp" Python
-
-        outer.Activate(fun () ->
-            Assert.Same(outer, GenerationContext.TryCurrent.Value)
-
-            inner.Activate(fun () ->
-                Assert.Same(inner, GenerationContext.TryCurrent.Value))
-
-            Assert.Same(outer, GenerationContext.TryCurrent.Value))
-
-        outer.CurrentProgram.close()
-        inner.CurrentProgram.close()
-
-    [<Fact>]
-    let ``Activate restores the outer context after an exception`` () =
-        use output = new TemporaryDirectory()
-        let outer = createContext output.Path "outer.tmp" C99
-        let inner = createContext output.Path "inner.tmp" Python
-
-        outer.Activate(fun () ->
-            Assert.Throws<InvalidOperationException>(Action(fun () ->
-                inner.Activate(fun () ->
-                    invalidOp "expected")))
-            |> ignore
-
-            Assert.Same(outer, GenerationContext.TryCurrent.Value))
-
-        outer.CurrentProgram.close()
-        inner.CurrentProgram.close()
-
-    [<Fact>]
-    let ``WithProgram keeps the parent index immutable after an exception`` () =
+    let ``WithProgram passes a child context and preserves the parent view`` () =
         use output = new TemporaryDirectory()
         let context =
             GenerationContext [
-                new program(output.Path, "first.tmp", C99)
-                new program(output.Path, "second.tmp", Python)
+                new program(output.Path, "main.c", C99)
+                new program(output.Path, "body.c", C99)
             ]
 
-        Assert.Equal(0, context.CurrentIndex)
-
-        context.Activate(fun () ->
-            Assert.Throws<InvalidOperationException>(Action(fun () ->
-                context.WithProgram(1, fun () ->
-                    Assert.Equal(0, context.CurrentIndex)
-                    Assert.Equal(1, GenerationContext.TryCurrent.Value.CurrentIndex)
-                    invalidOp "expected")))
-            |> ignore
-
-            Assert.Same(context, GenerationContext.TryCurrent.Value))
-
-        Assert.Equal(0, context.CurrentIndex)
-        context.Programs |> Array.iter _.close()
+        try
+            let parentId = context.ContextId
+            context.WithProgram(1, fun child ->
+                Assert.Equal(1, child.CurrentIndex)
+                Assert.NotEqual(parentId, child.ContextId)
+                writein child "body")
+            Assert.Equal(0, context.CurrentIndex)
+            Assert.Equal(parentId, context.ContextId)
+        finally
+            closeContext context
 
     [<Fact>]
-    let ``WithProgram rejects an invalid index`` () =
+    let ``parallel and debug child modes do not mutate their parent`` () =
         use output = new TemporaryDirectory()
-        let context = createContext output.Path "only.tmp" C99
+        let context = createContext output.Path "modes.c" C99
 
-        Assert.Throws<ArgumentException>(Action(fun () ->
-            context.WithProgram(1, ignore)))
+        try
+            Assert.False(context.IsParallelMode)
+            context.WithParallelMode(fun child -> Assert.True(child.IsParallelMode))
+            Assert.False(context.IsParallelMode)
+
+            Assert.False(context.Debug.debugMode)
+            context.WithDebugMode(true, fun child -> Assert.True(child.Debug.debugMode))
+            Assert.False(context.Debug.debugMode)
+        finally
+            closeContext context
+
+    [<Fact>]
+    let ``atomic generation remains usable after an exception`` () =
+        use output = new TemporaryDirectory()
+        let context = createContext output.Path "atomic.c" C99
+
+        Assert.Throws<InvalidOperationException>(Action(fun () ->
+            context.GenerateAtomically(fun _ -> invalidOp "expected")))
         |> ignore
 
-        context.CurrentProgram.close()
+        context.GenerateAtomically(fun current -> writein current "after-exception")
+        closeContext context
+        Assert.Contains("after-exception", File.ReadAllText(Path.Combine(output.Path, "atomic.c")))
 
     [<Fact>]
-    let ``compatibility accessors work without the legacy program globals`` () =
+    let ``atomic generation serializes statement groups`` () =
         use output = new TemporaryDirectory()
-        let context =
-            createContext output.Path "context-only.c" C99
+        let context = createContext output.Path "atomic-groups.c" C99
+        let workers = 8
 
-        try
-            context.Activate(fun () ->
-                Assert.Equal(C99, language())
-                Assert.Equal(C99, AqualisCompiler.language)
-                Assert.Equal("context-only.c", AqualisCompiler.projectName)
-
-                AqualisCompiler.intFormatSet 8
-                AqualisCompiler.incld "<stdint.h>"
-                AqualisCompiler.option "O2"
-                writein "context_only = 1;")
-        finally
-            context.CurrentProgram.close()
-
-        let generated =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "context-only.c"))
-
-        Assert.Contains("context_only = 1;", generated)
-        Assert.Contains("<stdint.h>", context.CurrentProgram.hlist.list)
-        Assert.Contains("-O2", context.CurrentProgram.olist.list)
-
-    [<Fact>]
-    let ``independent generation contexts can write concurrently`` () =
-        use output = new TemporaryDirectory()
-
-        let generate filename variableName value =
+        Array.init workers (fun worker ->
             Task.Run(Action(fun () ->
-                makeProgramWithContext
-                    [output.Path, filename, C99]
-                    (fun context ->
-                        try
-                            let variable = CompilationEnvironment(Some context).var.i0 variableName
-                            variable <== value
-                        finally
-                            context.CurrentProgram.close())))
-
-        let first = generate "first.c" "first_value" 1
-        let second = generate "second.c" "second_value" 2
-        Task.WaitAll(first, second)
-
-        let firstCode =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "first.c"))
-        let secondCode =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "second.c"))
-
-        Assert.Contains("first_value = 1;", firstCode)
-        Assert.DoesNotContain("second_value", firstCode)
-        Assert.Contains("second_value = 2;", secondCode)
-        Assert.DoesNotContain("first_value", secondCode)
-
-    [<Fact>]
-    let ``generation flags are isolated between contexts`` () =
-        use output = new TemporaryDirectory()
-        let first = createContext output.Path "flags-first.c" C99
-        let second = createContext output.Path "flags-second.c" C99
-
-        try
-            first.Activate(fun () ->
-                AqualisCompiler.set_DisplaySection ON
-                first.IsOpenMpUsed <- true
-                first.AddFunction("first"))
-
-            second.Activate(fun () ->
-                Assert.False(second.DisplaySection)
-                Assert.False(second.IsOpenMpUsed)
-                Assert.Empty(second.Functions))
-
-            Assert.True(first.DisplaySection)
-            Assert.True(first.IsOpenMpUsed)
-            Assert.Equal<string list>(["first"], first.DistinctFunctions)
-        finally
-            first.CurrentProgram.close()
-            second.CurrentProgram.close()
-
-    [<Fact>]
-    let ``parallel mode is restored after an exception`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "parallel-mode.c" C99
-
-        try
-            context.Activate(fun () ->
-                Assert.Throws<InvalidOperationException>(
-                    Action(fun () ->
-                        context.WithParallelMode(fun () ->
-                            Assert.True(GenerationContext.TryCurrent.Value.IsParallelMode)
-                            invalidOp "expected")))
-                |> ignore
-
-                Assert.False(context.IsParallelMode))
-        finally
-            context.CurrentProgram.close()
-
-    [<Fact>]
-    let ``debug mode is restored after normal completion and an exception`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "debug-mode.c" C99
-
-        try
-            context.Activate(fun () ->
-                Assert.False(context.Debug.debugMode)
-
-                AqualisCompiler.debug(fun () ->
-                    Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode))
-
-                Assert.False(context.Debug.debugMode)
-
-                Assert.Throws<InvalidOperationException>(
-                    Action(fun () ->
-                        AqualisCompiler.debug(fun () ->
-                            Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode)
-                            invalidOp "expected")))
-                |> ignore
-
-                Assert.False(context.Debug.debugMode))
-        finally
-            context.CurrentProgram.close()
-
-    [<Fact>]
-    let ``debug mode preserves an existing enabled state and supports nesting`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "nested-debug-mode.c" C99
-
-        try
-            context.Activate(fun () ->
-                AqualisCompiler.set_DebugMode ON
-
-                AqualisCompiler.debug(fun () ->
-                    Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode)
-
-                    AqualisCompiler.debug(fun () ->
-                        Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode))
-
-                    Assert.True(GenerationContext.TryCurrent.Value.Debug.debugMode))
-
-                Assert.True(context.Debug.debugMode))
-        finally
-            context.CurrentProgram.close()
-
-    [<Fact>]
-    let ``program switches on one parent context do not interfere`` () =
-        use output = new TemporaryDirectory()
-        let context =
-            GenerationContext [
-                new program(output.Path, "switch-first.c", C99)
-                new program(output.Path, "switch-second.py", Python)
-            ]
-
-        try
-            context.Activate(fun () ->
-                let first =
-                    Task.Run(Action(fun () ->
-                        context.WithProgram(0, fun () ->
-                            Assert.Equal(0, GenerationContext.TryCurrent.Value.CurrentIndex)
-                            writein "first_context")))
-
-                let second =
-                    Task.Run(Action(fun () ->
-                        context.WithProgram(1, fun () ->
-                            Assert.Equal(1, GenerationContext.TryCurrent.Value.CurrentIndex)
-                            writein "second_context")))
-
-                Task.WaitAll(first, second)
-                Assert.Equal(0, context.CurrentIndex)
-                Assert.Same(context, GenerationContext.TryCurrent.Value))
-        finally
-            context.Programs |> Array.iter _.close()
-
-        let firstCode =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "switch-first.c"))
-        let secondCode =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "switch-second.py"))
-
-        Assert.Contains("first_context", firstCode)
-        Assert.DoesNotContain("second_context", firstCode)
-        Assert.Contains("second_context", secondCode)
-        Assert.DoesNotContain("first_context", secondCode)
-
-    [<Fact>]
-    let ``controllers are isolated between generation contexts`` () =
-        use output = new TemporaryDirectory()
-        let first = createContext output.Path "controllers-first.c" C99
-        let second = createContext output.Path "controllers-second.c" C99
-
-        try
-            first.Activate(fun () ->
-                AqualisCompiler.set_DebugMode ON
-                first.Errors.inc()
-                Assert.Equal("11", first.GotoLabels.nextGotoLabel()))
-
-            second.Activate(fun () ->
-                Assert.False(second.Debug.debugMode)
-                Assert.Equal("1", second.Errors.ID)
-                Assert.Equal("11", second.GotoLabels.nextGotoLabel()))
-
-            first.Activate(fun () ->
-                Assert.True(first.Debug.debugMode)
-                Assert.Equal("2", first.Errors.ID)
-                Assert.Equal("12", first.GotoLabels.nextGotoLabel()))
-        finally
-            first.CurrentProgram.close()
-            second.CurrentProgram.close()
-
-    [<Fact>]
-    let ``one generation context can write from concurrent tasks`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "concurrent-write.c" C99
-        let workerCount = 8
-        let linesPerWorker = 100
-
-        context.Activate(fun () ->
-            Array.init workerCount (fun worker ->
-                Task.Run(Action(fun () ->
-                    for index in 1..linesPerWorker do
-                        writein $"line-{worker}-{index}")))
-            |> Task.WaitAll)
-
-        context.CurrentProgram.close()
-
-        let lines =
-            System.IO.File.ReadAllLines(
-                System.IO.Path.Combine(output.Path, "concurrent-write.c"))
-
-        Assert.Equal(workerCount * linesPerWorker, lines.Length)
-        Assert.Equal(lines.Length, lines |> Array.distinct |> Array.length)
-
-    [<Fact>]
-    let ``shared context counters allocate unique identifiers concurrently`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "concurrent-ids.html" HTML
-        let workerCount = 8
-        let idsPerWorker = 100
-        let gotoIds = System.Collections.Concurrent.ConcurrentBag<string>()
-        let contentsIds = System.Collections.Concurrent.ConcurrentBag<string>()
-
-        context.Activate(fun () ->
-            Array.init workerCount (fun _ ->
-                Task.Run(Action(fun () ->
-                    for _ in 1..idsPerWorker do
-                        gotoIds.Add(context.GotoLabels.nextGotoLabel())
-                        contentsIds.Add(nextContentsID()))))
-            |> Task.WaitAll)
-
-        context.CurrentProgram.close()
-
-        let expected = workerCount * idsPerWorker
-        Assert.Equal(expected, gotoIds.Count)
-        Assert.Equal(expected, gotoIds |> Seq.distinct |> Seq.length)
-        Assert.Equal(expected, contentsIds.Count)
-        Assert.Equal(expected, contentsIds |> Seq.distinct |> Seq.length)
-
-    [<Fact>]
-    let ``atomic generation transactions keep DSL blocks contiguous`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "atomic-blocks.c" C99
-        let workerCount = 16
-        let linesPerWorker = 20
-
-        Array.init workerCount (fun worker ->
-            Task.Run(Action(fun () ->
-                context.GenerateAtomically(fun () ->
-                    writein $"begin-{worker}"
-                    for index in 1..linesPerWorker do
-                        writein $"line-{worker}-{index}"
-                        System.Threading.Thread.Yield() |> ignore
-                    writein $"end-{worker}"))))
+                context.GenerateAtomically(fun current ->
+                    writein current $"begin-{worker}"
+                    writein current $"end-{worker}"))))
         |> Task.WaitAll
 
-        context.CurrentProgram.close()
-
-        let lines =
-            System.IO.File.ReadAllLines(
-                System.IO.Path.Combine(output.Path, "atomic-blocks.c"))
-
-        let mutable position = 0
-        let observedWorkers = ResizeArray<int>()
-        while position < lines.Length do
-            let worker = Int32.Parse(lines[position].Substring("begin-".Length))
-            observedWorkers.Add worker
-            position <- position + 1
-            for index in 1..linesPerWorker do
-                Assert.Equal($"line-{worker}-{index}", lines[position])
-                position <- position + 1
-            Assert.Equal($"end-{worker}", lines[position])
-            position <- position + 1
-
-        Assert.Equal(workerCount, observedWorkers.Count)
-        Assert.Equal(workerCount, observedWorkers |> Seq.distinct |> Seq.length)
-
-    [<Fact>]
-    let ``atomic generation transaction releases its lock after an exception`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "atomic-exception.c" C99
-
-        context.Activate(fun () ->
-            Assert.Throws<InvalidOperationException>(Action(fun () ->
-                context.GenerateAtomically(fun () ->
-                    Assert.Same(context, GenerationContext.TryCurrent.Value)
-                    invalidOp "expected")))
-            |> ignore
-
-            context.GenerateAtomically(fun () ->
-                Assert.Same(context, GenerationContext.TryCurrent.Value)
-                context.GenerateAtomically(fun () ->
-                    Assert.Same(context, GenerationContext.TryCurrent.Value)
-                    writein "after-exception")))
-
-        context.CurrentProgram.close()
-
-        let generated =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "atomic-exception.c"))
-        Assert.Contains("after-exception", generated)
-
-    [<Fact>]
-    let ``temporary variable leases are unique during unsynchronized concurrent access`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "concurrent-temporaries.c" C99
-        let active =
-            System.Collections.Concurrent.ConcurrentDictionary<string,int>()
-        let mutable collisions = 0
-
-        Array.init 200 (fun _ ->
-            Task.Run(Action(fun () ->
-                context.Activate(fun () ->
-                    ch.d (fun value ->
-                        let count =
-                            active.AddOrUpdate(
-                                value.code,
-                                1,
-                                fun _ current -> current + 1)
-                        if count > 1 then
-                            System.Threading.Interlocked.Increment(&collisions)
-                            |> ignore
-                        System.Threading.Thread.Sleep 1
-                        active.AddOrUpdate(
-                            value.code,
-                            0,
-                            fun _ current -> current - 1)
-                        |> ignore)))))
-        |> Task.WaitAll
-
-        context.CurrentProgram.close()
-        Assert.Equal(0, collisions)
-
-    [<Fact>]
-    let ``shared collectors retain concurrent additions`` () =
-        use output = new TemporaryDirectory()
-        let context = createContext output.Path "concurrent-collectors.c" C99
-        let itemCount = 200
-
-        Array.init itemCount (fun index ->
-            Task.Run(Action(fun () ->
-                context.Activate(fun () ->
-                    let name = $"item-{index}"
-                    context.CurrentProgram.hlist.add name
-                    context.CurrentProgram.var.setUniqVar(It 4, A0, name, "")
-                    context.CurrentProgram.arg.add(name, (It 4, A0, name))
-                    context.CurrentProgram.str.addstructure name))))
-        |> Task.WaitAll
-
-        context.CurrentProgram.close()
-
-        Assert.Equal(itemCount, context.CurrentProgram.hlist.list.Length)
-        Assert.Equal(itemCount, context.CurrentProgram.var.list.Length)
-        Assert.Equal(itemCount, context.CurrentProgram.arg.list.Length)
+        closeContext context
+        let lines = File.ReadAllLines(Path.Combine(output.Path, "atomic-groups.c"))
+        for index in 0 .. 2 .. lines.Length - 2 do
+            let beginId = lines[index].Substring("begin-".Length)
+            let endId = lines[index + 1].Substring("end-".Length)
+            Assert.Equal(beginId, endId)

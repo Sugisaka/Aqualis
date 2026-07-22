@@ -57,7 +57,8 @@ namespace Aqualis
                 |Fortran ->
                     makeProgramWithContext [dir,projectname,Fortran] <| fun context ->
                         //メインコード生成
-                        code (CompilationEnvironment(Some context))
+                        let environment = CompilationEnvironment(Some context)
+                        code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".f90", 2, Fortran)
@@ -77,9 +78,9 @@ namespace Aqualis
                         //ヘッダファイルのインクルード
                         List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| context.CurrentProgram.hlist.list
                         //構造体の定義
-                        str.Def_Structure writer
+                        environment.str.Def_Structure writer
                         //グローバル変数の定義
-                        declareall writer
+                        declareall context writer
                         //メインコード
                         writer.codewritein(context.CurrentProgram.allCodes)
                         //サブルーチン
@@ -129,7 +130,8 @@ namespace Aqualis
                     makeProgramWithContext [dir,projectname,C99] <| fun context ->
                         //メインコード生成
                         context.CurrentProgram.indentInc()
-                        code (CompilationEnvironment(Some context))
+                        let environment = CompilationEnvironment(Some context)
+                        code environment
                         context.CurrentProgram.olist.add "-lm"
                         context.CurrentProgram.indentDec()
                         context.CurrentProgram.close()
@@ -152,9 +154,9 @@ namespace Aqualis
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
-                        str.Def_Structure writer
+                        environment.str.Def_Structure writer
                         //グローバル変数の宣言
-                        declareall writer
+                        declareall context writer
                         //extern指定子
                         for s in context.CurrentProgram.elist.list do
                             writer.codewritein ("extern " + s + ";\n")
@@ -203,7 +205,8 @@ namespace Aqualis
                 |LaTeX ->
                     makeProgramWithContext [dir,projectname,LaTeX] <| fun context ->
                         //メインコード生成
-                        code (CompilationEnvironment(Some context))
+                        let environment = CompilationEnvironment(Some context)
+                        code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".tex", 2, LaTeX)
@@ -224,7 +227,7 @@ namespace Aqualis
                         writer.codewritein("{\\Large " + projectname.Replace("_","\\_") + "}\n")
                         //構造体の定義
                         writer.codewritein "\\section{structures}\n"
-                        str.Def_Structure writer
+                        environment.str.Def_Structure writer
                         //関数定義
                         writer.codewritein "\\section{subroutines}\n"
                         for funname in context.CurrentProgram.flist.list do
@@ -234,7 +237,7 @@ namespace Aqualis
                         //グローバル変数の定義
                         writer.codewritein "\\section{global variables}\n"
                         writer.codewritein "\\begin{itemize}\n"
-                        declareall writer
+                        declareall context writer
                         writer.codewritein "\\end{itemize}\n"
                         //メインコード
                         writer.codewritein "\\section{main code}\n"
@@ -246,7 +249,8 @@ namespace Aqualis
                 |HTML ->
                     makeProgramWithContext [dir,projectname,HTML] <| fun context ->
                         //メインコード生成
-                        code (CompilationEnvironment(Some context))
+                        let environment = CompilationEnvironment(Some context)
+                        code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".html", 2, HTML)
@@ -379,7 +383,7 @@ namespace Aqualis
                         //構造体の定義
                         writer.codewritein "\t\t<div id=\"defstr\">\n"
                         writer.codewritein "\t\t<h2>構造体定義</h2>\n"
-                        str.Def_Structure writer
+                        environment.str.Def_Structure writer
                         writer.codewritein "\t\t</div>\n"
                         //関数定義
                         writer.codewritein "\t\t<div id=\"deffunc\">\n"
@@ -393,7 +397,7 @@ namespace Aqualis
                         writer.codewritein "\t\t<div id=\"defvar\">\n"
                         writer.codewritein "\t\t<h2>グローバル変数</h2>\n"
                         writer.codewritein "\t\t<ul>\n"
-                        declareall writer
+                        declareall context writer
                         writer.codewritein "\t\t</ul>\n"
                         writer.codewritein "\t\t</div>\n"
                         //メインコード
@@ -422,44 +426,45 @@ namespace Aqualis
                             dir, projectname + "_body", HTMLSequenceDiagram
                         ]
                         <| fun context ->
+                            let environment = CompilationEnvironment(Some context)
                             context.ContentsDirectory <-
                                 dir + "\\" + "contents_" + projectname
-                            switchBody <| fun () ->
-                                let bodyContext = context.ForProgram(1)
-                                code (CompilationEnvironment(Some bodyContext))
-                            let codeBody = switchBody <| fun () ->
-                                context.ForProgram(1).CurrentProgram.allCodes
+                            environment.htmlio.switchBody <| fun bodyEnvironment ->
+                                code bodyEnvironment
+                            let codeBody = environment.htmlio.switchBody <| fun bodyEnvironment ->
+                                bodyEnvironment.RequireGenerationContext().CurrentProgram.allCodes
                             // html書き込みストリーム作成
-                            switchMain <| fun () ->
-                                writein "<!DOCTYPE html>"
+                            environment.htmlio.switchMain <| fun environment ->
+                                let context = environment.RequireGenerationContext()
+                                writein context "<!DOCTYPE html>"
                                 // html要素
-                                html.tagb ("html", "lang=\"ja\"") <| fun () ->
+                                environment.html.tagb ("html", "lang=\"ja\"") <| fun () ->
                                     // head要素
-                                    html.tagb ("head", "") <| fun () ->
+                                    environment.html.tagb ("head", "") <| fun () ->
                                         // titleタグ
-                                        writein("<title>"+projectname+"</title>")
+                                        writein context ("<title>"+projectname+"</title>")
                                         // metaタグ
-                                        writein "<meta charset=\"UTF-8\">"
+                                        writein context "<meta charset=\"UTF-8\">"
                                         //追加（5/29）viewportタブ
-                                        writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                                        writein context "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
                                         // titleタグ
-                                        html.tagb ("title", "") <| fun () ->
-                                            writein projectname
+                                        environment.html.tagb ("title", "") <| fun () ->
+                                            writein context projectname
                                         // MathJax
-                                        html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
-                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeq.js\"") <| fun () -> ()
-                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeqReset.js\"") <| fun () -> ()
-                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationStart.js\"") <| fun () -> ()
-                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationReset.js\"") <| fun () -> ()
-                                        html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/autoAnimation.js\"") <| fun () -> ()
+                                        environment.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
+                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeq.js\"") <| fun () -> ()
+                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeqReset.js\"") <| fun () -> ()
+                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationStart.js\"") <| fun () -> ()
+                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationReset.js\"") <| fun () -> ()
+                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/autoAnimation.js\"") <| fun () -> ()
                                         // webフォント取得
-                                        writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                                        writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                                        writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                                        writein context "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                                        writein context "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                                        writein context "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
                                     // body要素
                                     let s0 = Style [area.backGroundColor "#ffffff"]
-                                    html.tagb ("body", [s0.atr]) <| fun () ->
-                                        writein codeBody
+                                    environment.html.tagb ("body", [s0.atr]) <| fun () ->
+                                        writein context codeBody
                             for i in 0..1 do
                                 context.Programs[i].close()
                             // bodyタグ一時コード削除
@@ -467,7 +472,8 @@ namespace Aqualis
                 |Python ->
                     makeProgramWithContext [dir,projectname,Python] <| fun context ->
                         //メインコード生成
-                        code (CompilationEnvironment(Some context))
+                        let environment = CompilationEnvironment(Some context)
+                        code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".py", 2, Python)
@@ -493,9 +499,9 @@ namespace Aqualis
                         //ヘッダファイルのインクルード
                         List.iter (fun (s:string) -> writer.codewritein("import " + s + "\n")) <| context.CurrentProgram.hlist.list
                         //構造体の定義
-                        str.Def_Structure writer
+                        environment.str.Def_Structure writer
                         //グローバル変数の定義
-                        declareall writer
+                        declareall context writer
                         //関数定義
                         for funname in context.CurrentProgram.flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
@@ -514,7 +520,8 @@ namespace Aqualis
                     makeProgramWithContext [dir,projectname,JavaScript] <| fun context ->
                         //メインコード生成
                         context.CurrentProgram.indentInc()
-                        code (CompilationEnvironment(Some context))
+                        let environment = CompilationEnvironment(Some context)
+                        code environment
                         context.CurrentProgram.indentDec()
                         context.CurrentProgram.close()
                         //ソースファイル出力
@@ -536,9 +543,9 @@ namespace Aqualis
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
-                        str.Def_Structure writer
+                        environment.str.Def_Structure writer
                         //グローバル変数の宣言
-                        declareall writer
+                        declareall context writer
                         //extern指定子
                         for s in context.CurrentProgram.elist.list do
                             writer.codewritein ("extern " + s + ";\n")
@@ -556,7 +563,8 @@ namespace Aqualis
                     makeProgramWithContext [dir,projectname,PHP] <| fun context ->
                         //メインコード生成
                         context.CurrentProgram.indentInc()
-                        code (CompilationEnvironment(Some context))
+                        let environment = CompilationEnvironment(Some context)
+                        code environment
                         context.CurrentProgram.indentDec()
                         context.CurrentProgram.close()
                         //ソースファイル出力
@@ -578,9 +586,9 @@ namespace Aqualis
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
-                        str.Def_Structure writer
+                        environment.str.Def_Structure writer
                         //グローバル変数の宣言
-                        declareall writer
+                        declareall context writer
                         //extern指定子
                         for s in context.CurrentProgram.elist.list do
                             writer.codewritein ("extern " + s + ";\n")

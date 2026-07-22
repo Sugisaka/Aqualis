@@ -1,83 +1,37 @@
-//
-// Copyright (c) 2026 Jun-ichiro Sugisaka
-//
-// This software is released under the MIT License.
-// http://opensource.org/licenses/mit-license.php
-//
 namespace Aqualis
 
-open System
-open System.IO
+type ContextHtmlIo internal (environment:CompilationEnvironment) =
+    let context = environment.RequireGenerationContext()
+
+    member private _.WithProgram index code =
+        context.WithProgram(index, fun child -> code (CompilationEnvironment(Some child)))
+
+    member this.switchMain code = this.WithProgram 0 code
+    member this.switchBody code = this.WithProgram 1 code
+    member this.switchJSMain code = this.WithProgram 2 code
+    member this.switchAnimationSeq code = this.WithProgram 3 code
+    member this.switchJSAnimationStart code = this.WithProgram 4 code
+    member this.switchJSAnimationSeqReset code = this.WithProgram 5 code
+    member this.switchJSAnimationReset code = this.WithProgram 6 code
+    member this.switchAutoAnimation code = this.WithProgram 7 code
+
+    member _.nextContentsID() =
+        "contentsID" + context.NextContentsNumber().ToString()
+
+    member _.nextAnimationSeqID() =
+        let number = context.NextAnimationSequenceNumber()
+        "animationSeqID" + number.ToString(), "animationSeqResetID" + number.ToString()
+
+    member _.nextAnimationGroup() = context.NextAnimationGroupNumber().ToString()
+    member _.animationButtonReset() = context.ClearAnimationButtons()
+    member _.addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
+        context.AddAnimationButton(fnameStart,fnameReset,buttonX,buttonY)
+
+    member this.addAutoAnimation(fnameStart,_) =
+        this.switchAutoAnimation(fun child ->
+            child.RequireGenerationContext().CurrentProgram.codewritein("animationStartMap['"+fnameStart+"']();"))
 
 [<AutoOpen>]
-module htmlio =
-    /// 変数カウンタ
-    /// draw関数のコード出力先ファイル名
-    /// HTML本体のコード出力先ファイル名
-    /// コンテンツディレクトリ
-    // /// draw関数内のコード
-    // let mutable wrDraw = OptionWriter()
-    // /// body要素内のコード
-    // let mutable wrBody = OptionWriter()
-    // let mutable wrJS = OptionWriter()
-
-    let private withProgramIndex index code =
-        let context = GenerationScope.requireContext()
-        if context.CurrentIndex = index then
-            code()
-        else
-            context.WithProgram(index, code)
-
-    /// HTMLファイルへの書き込み
-    let switchMain code = withProgramIndex 0 code
-    /// HTMLファイルbodyタグ内への書き込み
-    let switchBody code = withProgramIndex 1 code
-    /// HTMLファイルdraw関数への書き込み
-    let switchJSMain code = withProgramIndex 2 code
-    /// HTMLファイルJavaScriptコードの書き込み
-    let switchAnimationSeq code = withProgramIndex 3 code
-    /// アニメーション開始コードの書き込み
-    let switchJSAnimationStart code = withProgramIndex 4 code
-    /// アニメーション連結コードの書き込み
-    let switchJSAnimationSeqReset code = withProgramIndex 5 code
-    /// アニメーション初期化コードの書き込み
-    let switchJSAnimationReset code = withProgramIndex 6 code
-    /// 自動開始アニメーション実行コードの書き込み
-    let switchAutoAnimation code = withProgramIndex 7 code
-
-    /// 図面カウンタ
-    /// アニメーションカウンタ
-
-    let nextContentsID() =
-        "contentsID" + WebGenerationScope.nextContentsNumber().ToString()
-
-    let nextAnimationSeqID() =
-        let number = WebGenerationScope.nextAnimationSequenceNumber()
-        "animationSeqID" + number.ToString(),
-        "animationSeqResetID" + number.ToString()
-
-    let nextAnimationGroup() =
-        WebGenerationScope.nextAnimationGroupNumber().ToString()
-
-    let animationButtonReset() =
-        WebGenerationScope.clearAnimationButtons()
-
-    let addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
-       WebGenerationScope.addAnimationButton(
-           fnameStart, fnameReset, buttonX, buttonY)
-
-    let addAutoAnimation(fnameStart,fnameReset) =
-        switchAutoAnimation <| fun () ->
-            writein("animationStartMap['"+fnameStart+"']();")
-
-    // /// ファイル書き込み
-    // let write (t:string) = wrBody.Write t
-    // let fileOpen (t:string) = wrBody.FileSet t
-    // let fileClose (t:string) = wrBody.Close()
-
-    // /// ファイルを閉じて書き込んだコードを取得
-    // let read() =
-    //     let drawcode = wrDraw.Read()
-    //     let bodycode = wrBody.Read()
-    //     let jscode = wrJS.Read()
-    //     drawcode,bodycode,jscode
+module CompilationEnvironmentHtmlIoExtensions =
+    type CompilationEnvironment with
+        member this.htmlio = ContextHtmlIo(this)

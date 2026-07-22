@@ -1,245 +1,104 @@
-//
-// Copyright (c) 2026 Jun-ichiro Sugisaka
-//
-// This software is released under the MIT License.
-// http://opensource.org/licenses/mit-license.php
-//
 namespace Aqualis
 
-    /// コードのグループ化
-    type group =
+/// Explicit code-grouping and section controls for one compilation environment.
+type ContextGroup internal (environment:CompilationEnvironment) =
+    let context() = environment.RequireGenerationContext()
+    let program() = (context()).CurrentProgram
+    let write line = (program()).codewritein(line + "\n")
+    let emitComment line = (program()).comment line
 
-        /// <summary>
-        /// swがtrueの時のみcodeを実行
-        /// </summary>
-        /// <param name="sw">実行切り替えスイッチ</param>
-        /// <param name="label">ヘッダー</param>
-        /// <param name="code">内部処理</param>
-        static member section (label:string) = fun code -> code()
+    member _.section (label:string) code = code()
+    member _.comment (text:string) = emitComment text
+    member _.whenEnabled enabled code = if enabled then code()
+    member this.whenSwitched (enabled:Switch) code = this.whenEnabled (enabled = ON) code
+    member this.whenStep step id code = this.whenEnabled (step = id) code
 
-        /// <summary>
-        /// swがtrueの時のみcodeを実行
-        /// </summary>
-        /// <param name="sw">実行切り替えスイッチ</param>
-        /// <param name="code">内部処理</param>
-        static member section (sw:bool) = fun code -> match sw with |true -> code() |false -> ()
-
-        /// <summary>
-        /// swがONの時のみcodeを実行
-        /// </summary>
-        /// <param name="sw">実行切り替えスイッチ</param>
-        /// <param name="code">内部処理</param>
-        static member section (sw:Switch) = group.section (sw=ON)
-
-        /// <summary>
-        /// stepがidに等しい時のみcodeを実行
-        /// </summary>
-        /// <param name="step">IDに等しいときのみ内部を実行</param>
-        /// <param name="id">グループID</param>
-        /// <param name="code">内部処理</param>
-        static member section (step:int) = fun (id:int) -> group.section ((step = id))
-
-        static member Section (s:string) (code:unit->unit) =
-            match (GenerationScope.currentProgram()).language with
-            |Fortran |C99 |JavaScript ->
-                ! ("===" + s.PadRight(76,'='))
-                (GenerationScope.currentProgram()).indentInc()
-                code()
-                (GenerationScope.currentProgram()).indentDec()
-                ! ("=== end " + s.PadRight(76,'='))
-                writein "\n"
-            |Python ->
-                ! ("===" + s.PadRight(76,'='))
-                code()
-                ! ("=== end " + s.PadRight(76,'='))
-                writein "\n"
-            |LaTeX ->
-                writein("\\section{"+s+"}")
-                code()
-            |HTML ->
-                writein "<details open>"
-                writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                writein "<div class=\"insidecode-section\">"
-                (GenerationScope.currentProgram()).indentInc()
-                code()
-                (GenerationScope.currentProgram()).indentDec()
-                writein "</div>"
-                writein "</details>"
-            |HTMLSequenceDiagram ->
-                expr.sectionHS s code
-            |Numeric |PHP -> code()
-
-        static member subSection (s:string) (code:unit->unit) =
-            let (!===) (s:string) =
-                match (GenerationScope.currentProgram()).language with
-                |LaTeX ->
-                    writein("\\subsection{"+s+"}")
-                |HTML ->
-                    writein "<details open>"
-                    writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                    writein "<div class=\"insidecode-section\">"
-                |_ ->
-                    ! ("---" + s.PadRight(76,'-'))
-            (!===)s
-            match (GenerationScope.currentProgram()).language with
-            |Python ->
-                ()
-            |_ ->
-                (GenerationScope.currentProgram()).indentInc()
+    member _.Section (label:string) (code:unit -> unit) =
+        let ctx = context()
+        let current = ctx.CurrentProgram
+        match current.language with
+        |Fortran|C99|JavaScript ->
+            emitComment ("===" + label.PadRight(76,'='))
+            current.indentInc()
+            try code() finally current.indentDec()
+            emitComment ("=== end " + label.PadRight(76,'='))
+            write ""
+        |Python ->
+            emitComment ("===" + label.PadRight(76,'='))
             code()
-            match (GenerationScope.currentProgram()).language with
-            |Python ->
-                ()
-            |_ ->
-                (GenerationScope.currentProgram()).indentDec()
-            match (GenerationScope.currentProgram()).language with
-            |Fortran |C99 ->
-                (!===)("end "+s)
-                writein "\n"
-            |Python ->
-                (!===)("end "+s)
-            |HTML   ->
-                writein "</div>"
-                writein "</details>"
-            |_  -> ()
+            emitComment ("=== end " + label.PadRight(76,'='))
+            write ""
+        |LaTeX ->
+            write ("\\section{" + label + "}")
+            code()
+        |HTML ->
+            write "<details open>"
+            write ("<summary><span class=\"op-section\">section</span>" + label + "</summary>")
+            write "<div class=\"insidecode-section\">"
+            current.indentInc()
+            try code() finally current.indentDec()
+            write "</div>"
+            write "</details>"
+        |HTMLSequenceDiagram -> expr.sectionHS(current,label) code
+        |Numeric|PHP -> code()
 
-        static member private Header (c:char) (s:string) =
-            match (GenerationScope.currentProgram()).language with
-            |Fortran ->
-                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |C99 ->
-                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |Python ->
-                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |JavaScript ->
-                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |PHP ->
-                ! (c.ToString()+c.ToString()+c.ToString()+(s.PadRight(76,c)))
-            |LaTeX ->
-                writein("\\section{"+s+"}")
+    member _.subSection (label:string) (code:unit -> unit) =
+        let current = program()
+        let header text =
+            match current.language with
+            |LaTeX -> write ("\\subsection{" + text + "}")
             |HTML ->
-                writein "<details open>"
-                writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                writein "<div class=\"insidecode-section\">"
-            |HTMLSequenceDiagram ->
-                writein "<details open>"
-                writein("<summary><span class=\"op-section\">section</span>"+s+"</summary>")
-                writein "<div class=\"insidecode-section\">"
-            |Numeric -> ()
+                write "<details open>"
+                write ("<summary><span class=\"op-section\">section</span>" + text + "</summary>")
+                write "<div class=\"insidecode-section\">"
+            |_ -> emitComment ("---" + text.PadRight(76,'-'))
+        header label
+        if current.language <> Python then current.indentInc()
+        try code() finally if current.language <> Python then current.indentDec()
+        match current.language with
+        |Fortran|C99 -> header ("end " + label); write ""
+        |Python -> header ("end " + label)
+        |HTML -> write "</div>"; write "</details>"
+        |_ -> ()
 
-        static member private Footer (c:char) (s:string) =
-            match (GenerationScope.currentProgram()).language with
-            |Fortran   -> ! (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |C99 -> ! (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |Python -> ! (c.ToString()+c.ToString()+c.ToString()+(("end " + s).PadRight(76,c)))
-            |HTML   ->
-                writein "</div>"
-                writein "</details>"
-            |HTMLSequenceDiagram   ->
-                writein "</div>"
-                writein "</details>"
-            |_   -> ()
+    member private _.Header (marker:char) (label:string) =
+        let current = program()
+        match current.language with
+        |Fortran|C99|Python|JavaScript|PHP ->
+            emitComment (System.String(marker,3) + label.PadRight(76,marker))
+        |LaTeX -> write ("\\section{" + label + "}")
+        |HTML|HTMLSequenceDiagram ->
+            write "<details open>"
+            write ("<summary><span class=\"op-section\">section</span>" + label + "</summary>")
+            write "<div class=\"insidecode-section\">"
+        |Numeric -> ()
 
-        static member private blank () =
-            writein "\n"
+    member private _.Footer marker label =
+        match (program()).language with
+        |Fortran|C99|Python -> emitComment (System.String(marker,3) + ("end " + label).PadRight(76,marker))
+        |HTML|HTMLSequenceDiagram -> write "</div>"; write "</details>"
+        |_ -> ()
 
-        static member h1 (s:string) (code:unit->unit) =
-            group.Header '#' s
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("### "+s+" #########################")
-            match (GenerationScope.currentProgram()).language with
-            |Python ->
-                code()
-            |_ ->
-                (GenerationScope.currentProgram()).indentInc()
-                code()
-                (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("### END "+s+" #####################")
-            group.Footer '#' s
-            group.blank()
+    member private this.Heading marker displayPrefix displaySuffix label code =
+        let ctx = context()
+        let current = ctx.CurrentProgram
+        this.Header marker label
+        if ctx.DisplaySection then environment.print.s (displayPrefix + label)
+        if current.language = Python then code()
+        else
+            current.indentInc()
+            try code() finally current.indentDec()
+        if ctx.DisplaySection then environment.print.s (displaySuffix + label)
+        this.Footer marker label
+        write ""
 
-        static member h2 (s:string) (code:unit->unit) =
-            group.Header '%' s
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("=== "+s+" ===================")
-            match (GenerationScope.currentProgram()).language with
-            |Python ->
-                code()
-            |_ ->
-                (GenerationScope.currentProgram()).indentInc()
-                code()
-                (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("=== END "+s+" ===============")
-            group.Footer '%' s
-            group.blank()
+    member this.h1 label code = this.Heading '#' "### " "### END " label code
+    member this.h2 label code = this.Heading '%' "=== " "=== END " label code
+    member this.h3 label code = this.Heading '=' "--- " "--- END " label code
+    member this.h4 label code = this.Heading '+' "... " "... END " label code
+    member this.h5 label code = this.Heading '-' "" "END " label code
 
-        static member h3 (s:string) (code:unit->unit) =
-            group.Header '=' s
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("--- "+s+" --------------")
-            match (GenerationScope.currentProgram()).language with
-            |Python ->
-                code()
-            |_ ->
-                (GenerationScope.currentProgram()).indentInc()
-                code()
-                (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("--- END "+s+" ----------")
-            group.Footer '=' s
-            group.blank()
-
-        static member h4 (s:string) (code:unit->unit) =
-            group.Header '+' s
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("... "+s+" ...........")
-            match (GenerationScope.currentProgram()).language with
-            |Python ->
-                code()
-            |_ ->
-                (GenerationScope.currentProgram()).indentInc()
-                code()
-                (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("... END "+s+" .......")
-            group.Footer '+' s
-            group.blank()
-
-        static member h5 (s:string) (code:unit->unit) =
-            group.Header '-' s
-            if (GenerationScope.requireContext()).DisplaySection then print.s s
-            match (GenerationScope.currentProgram()).language with
-            |Python ->
-                code()
-            |_ ->
-                (GenerationScope.currentProgram()).indentInc()
-                code()
-                (GenerationScope.currentProgram()).indentDec()
-            if (GenerationScope.requireContext()).DisplaySection then print.s ("END "+s)
-            group.Footer '-' s
-            group.blank()
-
-    ///<summary>コードの階層構造を作成。dummy_codestr→codestrで内部コード有効化</summary>
-    type dummy_group () =
-
-        static member section (label:string) = fun code -> ()
-
-        static member section (sw:bool) = fun code -> ()
-
-        static member section (sw:Switch) = ()
-
-        static member section (step:int) = fun (id:int) -> ()
-
-        static member Section (s:string) (code:unit->unit) = ()
-
-        static member subSection (s:string) (code:unit->unit) = ()
-
-        static member private Header (c:char) (s:string) = ()
-
-        static member private Footer (c:char) (s:string) = ()
-
-        static member private blank () = ()
-
-        static member h1 (s:string) (code:unit->unit) = ()
-
-        static member h2 (s:string) (code:unit->unit) = ()
-
-        static member h3 (s:string) (code:unit->unit) = ()
-
-        static member h4 (s:string) (code:unit->unit) = ()
-
-        static member h5 (s:string) (code:unit->unit) = ()
+[<AutoOpen>]
+module CompilationEnvironmentGroupExtensions =
+    type CompilationEnvironment with
+        member this.group = ContextGroup(this)

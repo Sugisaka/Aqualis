@@ -138,8 +138,8 @@ module CompilerScriptTests =
             output.Path
             "distributed"
             ("test", "1.0")
-            (fun _ ->
-                use scripts = new shellscript.Shell(output.Path, "distributed", 2)
+            (fun environment ->
+                use scripts = new shellscript.Shell(environment, output.Path, "distributed", 2)
                 scripts.AddProcess()
                 scripts.AddProcess())
 

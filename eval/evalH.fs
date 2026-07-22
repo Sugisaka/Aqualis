@@ -26,7 +26,8 @@ namespace Aqualis
             static member equivAlignH (x:expr) (y:expr) (c:program) =
                 c.codewritein (x.evalL c  + " =& " + y.evalL c)
                 
-            static member forLoopH (c:program) (n1:expr,n2:expr) code =
+            static member forLoopH (context:GenerationContext) (n1:expr,n2:expr) code =
+                let c = context.CurrentProgram
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalH c
@@ -44,10 +45,11 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>無限ループ</summary>
-            static member loopH (c:program) code =
+            static member loopH (context:GenerationContext) code =
+                let c = context.CurrentProgram
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = (GenerationScope.gotoLabels()).nextGotoLabel()
+                let label = context.GotoLabels.nextGotoLabel()
                 let exit() = c.codewritein("goto " + label)
                 expr.substH i (Int 1) c
                 c.codewritein "<div class=\"codeblock\">"
@@ -65,7 +67,8 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledoH (c:program) (cond:expr) = fun code ->
+            static member whiledoH (context:GenerationContext) (cond:expr) = fun code ->
+                let c = context.CurrentProgram
                 c.codewritein "<div class=\"codeblock\">"
                 c.codewritein "<details open>"
                 c.codewritein("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalH c + "\\)</summary>")
@@ -78,7 +81,8 @@ namespace Aqualis
                 c.codewritein "</div>"
                 
             ///<summary>指定した範囲でループ</summary>
-            static member rangeH (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member rangeH (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let c = context.CurrentProgram
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -110,12 +114,13 @@ namespace Aqualis
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitH (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member range_exitH (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let c = context.CurrentProgram
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
+                    let label = context.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.comment "<div class=\"codeblock\">"
                     c.comment "<details open>"
@@ -133,7 +138,7 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
+                    let label = context.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.codewritein "<div class=\"codeblock\">"
                     c.codewritein "<details open>"
@@ -149,7 +154,8 @@ namespace Aqualis
                     c.codewritein(label+" continue")
                     returnVar()
                     
-            static member branchH (c:program) code =
+            static member branchH (context:GenerationContext) code =
+                let c = context.CurrentProgram
                 c.codewritein "<div class=\"codeblock\">"
                 c.codewritein "<details open>"
                 let ifcode (cond:expr) code =
@@ -417,13 +423,13 @@ namespace Aqualis
                     |Sum(t, n1, n2, f) ->
                         // 合計値格納用変数
                         eval (Let(t, Int 0, fun u ->
-                            expr.forLoopH c (n1,n2) <| fun i ->
+                            expr.forLoopH (GenerationContext.ForInternalProgram c) (n1,n2) <| fun i ->
                                 // 加算・代入処理
                                 expr.substH u (Add(t,u, f i)) c
                             u)) pl
                     |IfEl(cond,n1,n2) -> 
                         eval (Let(n1.etype, NaN, fun x -> 
-                            expr.branchH c <| fun (ifcode,_,elsecode) ->
+                            expr.branchH (GenerationContext.ForInternalProgram c) <| fun (ifcode,_,elsecode) ->
                                 ifcode cond <| fun () ->
                                     expr.substH x n1 c
                                 elsecode <| fun () ->

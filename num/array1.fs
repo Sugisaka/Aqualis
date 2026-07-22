@@ -15,14 +15,19 @@ namespace Aqualis
 
     ///<summary>1次元配列</summary>
     type base1 (typ:Etype,x:Expr1, ?context:GenerationContext) =
+        let requireContext() = GenerationContextMerge.requireTarget context
+        let currentProgram() = (requireContext()).CurrentProgram
+        let writein text = currentProgram().codewritein text
+        let comment text = currentProgram().comment text
+        let environment() = CompilationEnvironment context
         ///<summary>変数を作成しリストに追加</summary>
-        new (typ,size,name,para) =
-            (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
-            base1(typ,Var1(size,name), context=GenerationScope.requireContext())
+        new (context:GenerationContext,typ,size,name,para) =
+            context.CurrentProgram.var.setVar(typ,size,name,para)
+            base1(typ,Var1(size,name), context=context)
         ///<summary>変数を作成しリストに追加</summary>
-        new(sname,size,name) =
-            (GenerationScope.currentProgram()).var.setVar(Structure sname,size,name,"")
-            base1(Structure sname,Var1(size,name), context=GenerationScope.requireContext())
+        new(context:GenerationContext,sname,size,name) =
+            context.CurrentProgram.var.setVar(Structure sname,size,name,"")
+            base1(Structure sname,Var1(size,name), context=context)
         member internal _.GenerationContext = context
         member _.Etype with get() = typ
         member _.Expr with get() = x
@@ -35,7 +40,7 @@ namespace Aqualis
           with get() =
             match x with
             |Var1(_,name) ->
-                match (GenerationScope.currentProgram()).language with
+                match currentProgram().language with
                 |Fortran ->
                     int0(Var(It 4,name+"_size(1)",NaN))
                 |C99 ->
@@ -58,17 +63,17 @@ namespace Aqualis
         ///<summary>インデクサ</summary>
         member this.Idx1(i:int0) =
             GenerationContextMerge.merge context i.Context |> ignore
-            if (GenerationScope.debug()).debugMode then
+            if context |> Option.exists (fun value -> value.Debug.debugMode) then
                 match x with
                 |Var1(_,name) ->
-                    (GenerationScope.errors()).inc()
-                    !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
-                    br.branch <| fun b ->
+                    (requireContext()).Errors.inc()
+                    comment ("***debug array1 access check: "+(requireContext()).Errors.ID+"*****************************")
+                    (environment()).br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            print.s <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " is not allocated"
+                            (environment()).print.s <| "ERROR" + (requireContext()).Errors.ID + " array " + name + " is not allocated"
                         b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                            print.tt <| "ERROR" + (GenerationScope.errors()).ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
-                    ! "****************************************************"
+                            (environment()).print.tt <| "ERROR" + (requireContext()).Errors.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                    comment "****************************************************"
                 |_ -> ()
             let targetLanguage = context |> Option.map (fun value -> value.CurrentProgram.language) |> Option.defaultValue Numeric
             match x,targetLanguage with
@@ -93,56 +98,56 @@ namespace Aqualis
         member this.allocate(n1:int0) =
                 match x with
                 |Var1(size1,name) ->
-                    if (GenerationScope.debug()).debugMode then
-                        (GenerationScope.errors()).inc()
-                        !("***debug array1 allocate check: "+(GenerationScope.errors()).ID+"*****************************")
-                        br.branch <| fun b ->
+                    if (requireContext()).Debug.debugMode then
+                        (requireContext()).Errors.inc()
+                        comment ("***debug array1 allocate check: "+(requireContext()).Errors.ID+"*****************************")
+                        (environment()).br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
-                                print.s ("ERROR"+(GenerationScope.errors()).ID+" array "+name+" is already allocated")
-                        ! "****************************************************"
-                    match (GenerationScope.currentProgram()).language with
+                                (environment()).print.s ("ERROR"+(requireContext()).Errors.ID+" array "+name+" is already allocated")
+                        comment "****************************************************"
+                    match currentProgram().language with
                     |Fortran ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            writein("allocate("+name+"(1:"+this.size1.Expr.eval ((GenerationScope.currentProgram()))+")"+")"+"\n")
+                            writein("allocate("+name+"(1:"+this.size1.Expr.eval (currentProgram())+")"+")"+"\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |C99 ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            writein(name+" = "+"("+typ.tostring (GenerationScope.currentProgram()).language+" *)"+"malloc("+"sizeof("+typ.tostring (GenerationScope.currentProgram()).language+")*"+this.size1.Expr.eval ((GenerationScope.currentProgram()))+");\n")
+                            writein(name+" = "+"("+typ.tostring (currentProgram()).language+" *)"+"malloc("+"sizeof("+typ.tostring (currentProgram()).language+")*"+this.size1.Expr.eval (currentProgram())+");\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |LaTeX ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (currentProgram())+"}$\\\\\n")
                         |A1 0,Dt   ->
-                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (currentProgram())+"}$\\\\\n")
                         |A1 0,Zt   ->
-                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (currentProgram())+"}$\\\\\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |HTML ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (currentProgram())+"}\\)<br>\n")
                         |A1 0,Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (currentProgram())+"}\\)<br>\n")
                         |A1 0,Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (currentProgram())+"}\\)<br>\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |HTMLSequenceDiagram ->
                         match size1,typ with
                         |A1 0,It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (currentProgram())+"}\\)<br>\n")
                         |A1 0,Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (currentProgram())+"}\\)<br>\n")
                         |A1 0,Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (GenerationScope.currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (currentProgram())+"}\\)<br>\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |Python ->
@@ -150,17 +155,17 @@ namespace Aqualis
                         |A1 0 ->
                             this.size1 <== n1
                             match typ with
-                            |Structure sname -> writein(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval ((GenerationScope.currentProgram()))+"))], dtype=object)\n")
-                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (GenerationScope.currentProgram())+", dtype=int)\n")
-                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (GenerationScope.currentProgram())+", dtype=numpy.complex128)\n")
-                            |_               -> writein(name+" = "+"numpy.zeros("+this.size1.Expr.eval (GenerationScope.currentProgram())+")\n")
+                            |Structure sname -> writein(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval (currentProgram())+"))], dtype=object)\n")
+                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (currentProgram())+", dtype=int)\n")
+                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (currentProgram())+", dtype=numpy.complex128)\n")
+                            |_               -> writein(name+" = "+"numpy.zeros("+this.size1.Expr.eval (currentProgram())+")\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |JavaScript ->
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            writein(name+" = Array(" + this.size1.Expr.eval (GenerationScope.currentProgram()) + ");\n")
+                            writein(name+" = Array(" + this.size1.Expr.eval (currentProgram()) + ");\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |PHP ->
@@ -177,19 +182,19 @@ namespace Aqualis
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
-            if (GenerationScope.debug()).debugMode then
+            if (requireContext()).Debug.debugMode then
                 match x with
                 |Var1(_,name) ->
-                    (GenerationScope.errors()).inc()
-                    !("***debug array1 deallocate check: "+(GenerationScope.errors()).ID+"*****************************")
-                    br.branch <| fun b ->
+                    (requireContext()).Errors.inc()
+                    comment ("***debug array1 deallocate check: "+(requireContext()).Errors.ID+"*****************************")
+                    (environment()).br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            print.s ("ERROR"+(GenerationScope.errors()).ID+" cannot deallocate array "+name)
-                    ! "****************************************************"
+                            (environment()).print.s ("ERROR"+(requireContext()).Errors.ID+" cannot deallocate array "+name)
+                    comment "****************************************************"
                 |_ -> ()
             match x with
             |Var1(size,name) ->
-                match (GenerationScope.currentProgram()).language with
+                match currentProgram().language with
                 |Fortran ->
                     match size with
                     |A1 0 ->
@@ -251,32 +256,35 @@ namespace Aqualis
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach code =
-            iter.num this.size1 <| fun i ->
+            (environment()).iter.num this.size1 <| fun i ->
                 code i
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.Foreach (counterName:string) code =
-            iter.num (this.size1,counterName) <| fun i ->
+            (environment()).iter.num (this.size1,counterName) <| fun i ->
                 code i
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach_exit code =
-            iter.num_exit this.size1 <| fun (ext,i) ->
+            (environment()).iter.num_exit this.size1 <| fun (ext,i) ->
                 code(ext,i)
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.Foreach_exit (counterName:string) code =
-            iter.num_exit (this.size1,counterName) <| fun (ext,i) ->
+            (environment()).iter.num_exit (this.size1,counterName) <| fun (ext,i) ->
                 code(ext,i)
 
         static member sizeMismatchError(x:base1,y:base1) =
-            if (GenerationScope.debug()).debugMode then
-                (GenerationScope.errors()).inc()
-                !("***debug array1 access check: "+(GenerationScope.errors()).ID+"*****************************")
-                br.branch <| fun b ->
-                    b.IF (x.size1 .=/ y.size1) <| fun () ->
-                        print.s ("ERROR"+(GenerationScope.errors()).ID+" array size (first index) mismatch")
-                ! "****************************************************"
+            let context = GenerationContextMerge.merge x.GenerationContext y.GenerationContext
+            context |> Option.iter (fun ctx ->
+                let environment = CompilationEnvironment context
+                if ctx.Debug.debugMode then
+                    ctx.Errors.inc()
+                    ctx.CurrentProgram.comment ("***debug array1 access check: "+ctx.Errors.ID+"*****************************")
+                    environment.br.branch <| fun b ->
+                        b.IF (x.size1 .=/ y.size1) <| fun () ->
+                            environment.print.s ("ERROR"+ctx.Errors.ID+" array size (first index) mismatch")
+                    ctx.CurrentProgram.comment "****************************************************")
 
     /// Shared implementation for one-dimensional numeric arrays.
     /// The self type preserves the public int1/double1/complex1 result type.
@@ -292,6 +300,7 @@ namespace Aqualis
             |Some value,_ -> Some value
             |None,Arx1(size,_) -> size.Context
             |None,Var1 _ -> None
+        let environment() = CompilationEnvironment context
 
         member _.Context = context
         member _.etype = typ
@@ -411,9 +420,9 @@ namespace Aqualis
                 |Fortran|LaTeX -> writein(left+"="+right)
                 |HTML|HTMLSequenceDiagram -> writein(left+" \\leftarrow "+right)
                 |Python -> writein(left+" = copy.deepcopy("+right+")")
-                |C99|JavaScript|PHP -> iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
+                |C99|JavaScript|PHP -> (environment()).iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
                 |Numeric -> ()
-            |_ -> iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
+            |_ -> (environment()).iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
 
         member this.AssignScalar(value:INum0) =
             let ctx = GenerationContextMerge.requireTarget context
@@ -428,6 +437,6 @@ namespace Aqualis
                     match typ with
                     |Structure sname -> writein(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval ctx.CurrentProgram+"))], dtype=object)\n")
                     |_ -> writein(name+"[:]="+value.Expr.eval ctx.CurrentProgram+"\n")
-                |C99|JavaScript|PHP -> iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)
+                |C99|JavaScript|PHP -> (environment()).iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)
                 |Numeric -> ()
-            |Arx1 _ -> iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)
+            |Arx1 _ -> (environment()).iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)

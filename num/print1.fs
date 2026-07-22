@@ -9,7 +9,7 @@ namespace Aqualis
     open System
 
     ///<summary>画面表示</summary>
-    type print () =
+    type internal PrintEmitter () =
         ///<summary>変数リストを画面表示</summary>
         static member internal ttWith (program:program) (lst:exprString) =
             match program.language with
@@ -173,9 +173,6 @@ namespace Aqualis
                     |RNvr (Cpx (re,im)) -> printf "%e %e " re im
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
-        static member tt (lst:exprString) =
-            print.ttWith (GenerationScope.currentProgram()) lst
-
         static member internal sWith (program:program) (str:string) =
             match program.language with
             |Fortran ->
@@ -200,24 +197,19 @@ namespace Aqualis
                 printfn "%s" str
 
         ///<summary>1個の項目を画面表示</summary>
-        static member s (str:string) =
-            print.sWith (GenerationScope.currentProgram()) str
-
-        static member t (s:int0) = print.tt (iv s)
-        static member t (s:double0) = print.tt (dv s)
-        static member t (s:complex0) = print.tt (zv s)
-
     type ContextPrint internal (environment:CompilationEnvironment) =
+        member internal _.Environment = environment
+
         member _.s(str:string) =
             match environment.GenerationContext with
-            |Some context -> print.sWith context.CurrentProgram str
+            |Some context -> PrintEmitter.sWith context.CurrentProgram str
             |None -> printfn "%s" str
 
         member _.tt(value:exprString) =
             match environment.GenerationContext with
             |Some context ->
                 GenerationContextMerge.merge (Some context) value.Context |> ignore
-                print.ttWith context.CurrentProgram value
+                PrintEmitter.ttWith context.CurrentProgram value
             |None ->
                 for item in value.data do
                     match item with

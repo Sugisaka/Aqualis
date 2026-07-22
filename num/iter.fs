@@ -7,136 +7,13 @@
 namespace Aqualis
 
     ///<summary>反復処理</summary>
-    type iter () =
-
-        ///<summary>無限ループ</summary>
-        static member loop code = expr.loop (GenerationScope.currentProgram()) (fun (ex,i:expr) -> code(ex,int0 i))
-
-        ///<summary>条件を満たす間ループ</summary>
-        static member whiledo (cond:bool0) = fun code -> expr.whiledo (GenerationScope.currentProgram()) cond.Expr code
-
-        ///<summary>指定した範囲でループ</summary>
-        static member range (i1:int0) = fun (i2:int0) -> fun code ->
-            if GenerationContext.TryCurrent.IsNone then
-                expr.rangeN i1.Expr i2.Expr (fun (i:expr) -> code (int0 i))
-            else
-                expr.range (GenerationScope.currentProgram()) None i1.Expr i2.Expr (fun (i:expr) -> code (int0 i))
-
-        ///<summary>指定した範囲でループ(途中脱出可)</summary>
-        static member range_exit (i1:int0) = fun (i2:int0) -> fun code -> expr.range_exit (GenerationScope.currentProgram()) None i1.Expr i2.Expr (fun (ex,i:expr) -> code (ex,int0 i))
-
-        static member range (counterName:string) = fun (i1:int0) (i2:int0) code ->
-            if GenerationContext.TryCurrent.IsNone then
-                expr.rangeN i1.Expr i2.Expr (fun (i:expr) -> code (int0 i))
-            else
-                expr.range (GenerationScope.currentProgram()) (Some counterName) i1.Expr i2.Expr (fun (i:expr) -> code (int0 i))
-
-        ///<summary>指定した範囲でループ(途中脱出可)</summary>
-        static member range_exit (counterName:string) = fun (i1:int0) (i2:int0) code -> expr.range_exit (GenerationScope.currentProgram()) (Some counterName) i1.Expr i2.Expr (fun (ex,i:expr) -> code (ex,int0 i))
-
-        ///<summary>指定した範囲でループ</summary>
-        static member range (i1:int0,i2:int0) = fun code -> iter.range i1 i2 code
-        static member range (i1:int0,i2:int) = fun code -> iter.range (i1,I i2) code
-        static member range (i1:int,i2:int0) = fun code -> iter.range (I i1,i2) code
-        static member range (i1:int,i2:int) = fun code -> iter.range (I i1,I i2) code
-
-        ///<summary>指定した範囲でループ</summary>
-        static member range_exit (i1:int0,i2:int0) = fun code -> iter.range_exit i1 i2 code
-        static member range_exit (i1:int0,i2:int) = fun code -> iter.range_exit (i1,I i2) code
-        static member range_exit (i1:int,i2:int0) = fun code -> iter.range_exit (I i1,i2) code
-        static member range_exit (i1:int,i2:int) = fun code -> iter.range_exit (I i1,I i2) code
-
-        ///<summary>指定した範囲でループ</summary>
-        static member range (i1:int0,i2:int0,counterName:string) = fun code -> iter.range counterName i1 i2 code
-        static member range (i1:int0,i2:int,counterName:string) = fun code -> iter.range (i1,I i2,counterName) code
-        static member range (i1:int,i2:int0,counterName:string) = fun code -> iter.range (I i1,i2,counterName) code
-        static member range (i1:int,i2:int,counterName:string) = fun code -> iter.range (I i1,I i2,counterName) code
-
-        ///<summary>指定した範囲でループ</summary>
-        static member range_exit (i1:int0,i2:int0,counterName:string) = fun code -> iter.range_exit counterName i1 i2 code
-        static member range_exit (i1:int0,i2:int,counterName:string) = fun code -> iter.range_exit (i1,I i2,counterName) code
-        static member range_exit (i1:int,i2:int0,counterName:string) = fun code -> iter.range_exit (I i1,i2,counterName) code
-        static member range_exit (i1:int,i2:int,counterName:string) = fun code -> iter.range_exit (I i1,I i2,counterName) code
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int0) = fun code ->
-            iter.range _0 (n1-1) code
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int0,n2:int0) = fun code ->
-            iter.num n1 <| fun i ->
-                iter.num n2 <| fun j ->
-                    code(i,j)
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int0,n2:int0,n3:int0) = fun code ->
-            iter.num n1 <| fun i ->
-                iter.num n2 <| fun j ->
-                    iter.num n3 <| fun k ->
-                        code(i,j,k)
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int) = fun code ->
-            iter.num (I n1) code
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int,n2:int) = fun code ->
-            iter.num (I n1,I n2) code
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int,n2:int,n3:int) = fun code ->
-            iter.num (I n1,I n2,I n3) code
-
-        ///<summary>0から指定した回数ループ(途中脱出可)</summary>
-        static member num_exit (n1:int0) = fun code ->
-            iter.range_exit _0 (n1-1) code
-
-        ///<summary>lstの各要素に対しcodeを実行</summary>
-        static member list (lst:seq<'a>) (code:'a->unit) =
-            for a in lst do
-                code a
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int0,counterName:string) = fun code ->
-            iter.range counterName _0 (n1-1) code
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int0,counterName1:string,n2:int0,counterName2:string) = fun code ->
-            iter.num (n1,counterName1) <| fun i ->
-                iter.num (n2,counterName2) <| fun j ->
-                    code(i,j)
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int0,counterName1:string,n2:int0,counterName2:string,n3:int0,counterName3:string) = fun code ->
-            iter.num (n1,counterName1) <| fun i ->
-                iter.num (n2,counterName2) <| fun j ->
-                    iter.num (n3,counterName3) <| fun k ->
-                        code(i,j,k)
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int,counterName:string) = fun code ->
-            iter.num (I n1,counterName) code
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int,counterName1:string,n2:int,counterName2:string) = fun code ->
-            iter.num (I n1,counterName1,I n2,counterName2) code
-
-        ///<summary>0から指定した回数ループ</summary>
-        static member num (n1:int,counterName1:string,n2:int,counterName2:string,n3:int,counterName3:string) = fun code ->
-            iter.num (I n1,counterName1,I n2,counterName2,I n3,counterName3) code
-
-        ///<summary>0から指定した回数ループ(途中脱出可)</summary>
-        static member num_exit (n1:int0,counterName:string) = fun code ->
-            iter.range_exit counterName _0 (n1-1) code
-
-    /// Explicit loop/control-flow surface for one compilation environment.
     type ContextIter internal (environment:CompilationEnvironment) =
         let context = environment.GenerationContext
 
         member _.loop code =
             match context with
             |Some ctx ->
-                expr.loop ctx.CurrentProgram (fun (exitLoop, index) ->
+                expr.loop ctx (fun (exitLoop, index) ->
                     code(exitLoop, int0(index, context=ctx)))
             |None -> invalidOp "An unbounded loop is not supported during Numeric execution."
 
@@ -144,7 +21,7 @@ namespace Aqualis
             match context with
             |Some ctx ->
                 GenerationContextMerge.merge (Some ctx) condition.Context |> ignore
-                expr.whiledo ctx.CurrentProgram condition.Expr code
+                expr.whiledo ctx condition.Expr code
             |None ->
                 let mutable keepRunning = true
                 while keepRunning do
@@ -157,7 +34,7 @@ namespace Aqualis
             match context with
             |Some ctx ->
                 GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
-                expr.range ctx.CurrentProgram None first.Expr last.Expr (fun index ->
+                expr.range ctx None first.Expr last.Expr (fun index ->
                     code (int0(index, context=ctx)))
             |None ->
                 GenerationContextMerge.merge first.Context last.Context |> ignore
@@ -176,11 +53,27 @@ namespace Aqualis
             match context with
             |Some ctx ->
                 GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
-                expr.range ctx.CurrentProgram (Some counterName) first.Expr last.Expr (fun index ->
+                expr.range ctx (Some counterName) first.Expr last.Expr (fun index ->
                     code (int0(index, context=ctx)))
             |None ->
                 GenerationContextMerge.merge first.Context last.Context |> ignore
                 expr.rangeN first.Expr last.Expr (fun index -> code (int0 index))
+
+        member _.range_exit (first:int0, last:int0) = fun code ->
+            match context with
+            |Some ctx ->
+                GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
+                expr.range_exit ctx None first.Expr last.Expr (fun (exitLoop,index) ->
+                    code(exitLoop,int0(index,context=ctx)))
+            |None -> invalidOp "An early-exit loop is not supported during Numeric execution."
+
+        member _.range_exit (counterName:string, first:int0, last:int0) = fun code ->
+            match context with
+            |Some ctx ->
+                GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
+                expr.range_exit ctx (Some counterName) first.Expr last.Expr (fun (exitLoop,index) ->
+                    code(exitLoop,int0(index,context=ctx)))
+            |None -> invalidOp "An early-exit loop is not supported during Numeric execution."
 
         member this.num (count:int0) = fun code ->
             this.range (int0(Int 0), count - 1) code
@@ -188,61 +81,18 @@ namespace Aqualis
         member this.num (count:int) = fun code ->
             this.num (int0(Int count)) code
 
+        member this.num (count:int0,counterName:string) = fun code ->
+            this.range (counterName,int0(Int 0),count - 1) code
+
+        member this.num_exit (count:int0) = fun code ->
+            this.range_exit (int0(Int 0),count - 1) code
+
+        member this.num_exit (count:int0,counterName:string) = fun code ->
+            this.range_exit (counterName,int0(Int 0),count - 1) code
+
     [<AutoOpen>]
     module CompilationEnvironmentIterExtensions =
         type CompilationEnvironment with
             member this.iter = ContextIter(this)
 
     ///<summary>反復処理（処理スキップ）</summary>
-    type dummy_iter () =
-
-        ///<summary>無限ループ</summary>
-        static member loop code = ()
-
-        ///<summary>条件を満たす間ループ</summary>
-        static member whiledo (l:bool0) = fun code -> ()
-
-        ///<summary>指定した範囲でループ</summary>
-        static member range (i1:int0) = fun (i2:int0) -> fun code -> ()
-
-        ///<summary>指定した範囲でループ(途中脱出可)</summary>
-        static member range_exit (i1:int0) = fun (i2:int0) -> fun code -> ()
-
-        ///<summary>指定した範囲i=i1->i2,j=j1->j2に対しcode(i,j)を実行</summary>
-        static member range (i1:int0,j1:int0) = fun (i2:int0,j2:int0) -> fun code -> ()
-
-        ///<summary>指定した範囲i=i1->i2,j=j1->j2に対しcode(i,j)を実行</summary>
-        static member range (i1:int0,j1:int0,k1:int0) = fun (i2:int0,j2:int0,k2:int0) -> fun code -> ()
-
-        ///<summary>指定した範囲でループ</summary>
-        static member range (i1:int) = fun (i2:int) -> fun code -> ()
-
-        ///<summary>指定した範囲i=i1->i2,j=j1->j2に対しcode(i,j)を実行</summary>
-        static member range (i1:int,j1:int) = fun (i2:int,j2:int) -> fun code -> ()
-
-        ///<summary>指定した範囲i=i1->i2,j=j1->j2に対しcode(i,j)を実行</summary>
-        static member range (i1:int,j1:int,k1:int) = fun (i2:int,j2:int,k2:int) -> fun code -> ()
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int0) = fun code -> ()
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int0,n2:int0) = fun code -> ()
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int0,n2:int0,n3:int0) = fun code -> ()
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int) = fun code -> ()
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int,n2:int) = fun code -> ()
-
-        ///<summary>1から指定した回数ループ</summary>
-        static member num (n1:int,n2:int,n3:int) = fun code -> ()
-
-        ///<summary>1から指定した回数ループ(途中脱出可)</summary>
-        static member num_exit (n1:int0) = fun code -> ()
-
-        ///<summary>lstの各要素に対しcodeを実行</summary>
-        static member list (lst:seq<'a>) (code:'a->unit) = ()

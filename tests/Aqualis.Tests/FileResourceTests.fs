@@ -39,21 +39,28 @@ module FileResourceTests =
         File.WriteAllText(svgPath, "old-svg")
         File.WriteAllText(aiPath, "old-ai")
 
-        Assert.Throws<InvalidOperationException>(
-            Action(fun () ->
-                svgfile.make
-                    (output.Path, "image.svg")
-                    (100.0, 100.0)
-                    1.0
-                    (fun _ -> invalidOp "expected")))
-        |> ignore
+        let context = GenerationContext [new program(output.Path, "resources.c", C99)]
+        let environment = CompilationEnvironment(Some context)
 
-        Assert.Throws<InvalidOperationException>(
-            Action(fun () ->
-                aiscriptfile.make
-                    (output.Path, "image.jsx", 1.0)
-                    (fun _ -> invalidOp "expected")))
-        |> ignore
+        try
+            Assert.Throws<InvalidOperationException>(
+                Action(fun () ->
+                    environment.svgfile.make
+                        (output.Path, "image.svg")
+                        (100.0, 100.0)
+                        1.0
+                        (fun _ -> invalidOp "expected")))
+            |> ignore
+
+            Assert.Throws<InvalidOperationException>(
+                Action(fun () ->
+                    environment.aiscriptfile.make
+                        (output.Path, "image.jsx", 1.0)
+                        (fun _ -> invalidOp "expected")))
+            |> ignore
+        finally
+            context.CurrentProgram.close()
+            context.Deactivate()
 
         Assert.Equal("old-svg", File.ReadAllText(svgPath))
         Assert.Equal("old-ai", File.ReadAllText(aiPath))
@@ -66,14 +73,22 @@ module FileResourceTests =
     let ``shell writer arrays are released when generation throws`` () =
         use output = new TemporaryDirectory()
 
-        Assert.Throws<InvalidOperationException>(
-            Action(fun () ->
-                shellscript.makeShellScript
-                    output.Path
-                    "resource"
-                    2
-                    (fun _ -> invalidOp "expected")))
-        |> ignore
+        let context = GenerationContext [new program(output.Path, "resource.c", C99)]
+        let environment = CompilationEnvironment(Some context)
+
+        try
+            Assert.Throws<InvalidOperationException>(
+                Action(fun () ->
+                    shellscript.makeShellScript
+                        environment
+                        output.Path
+                        "resource"
+                        2
+                        (fun _ -> invalidOp "expected")))
+            |> ignore
+        finally
+            context.CurrentProgram.close()
+            context.Deactivate()
 
         for index in 1..2 do
             let path =
@@ -97,8 +112,11 @@ module FileResourceTests =
             |> Array.map (fun path ->
                 WriteLabel(new StreamWriter(path)))
 
+        let context = GenerationContext [new program(output.Path, "document.c", C99)]
+
         use document =
             new TeXWriter(
+                context,
                 labels[0],
                 labels[1],
                 labels[2],
@@ -107,5 +125,7 @@ module FileResourceTests =
                 output.Path)
 
         (document :> IDisposable).Dispose()
+        context.CurrentProgram.close()
+        context.Deactivate()
 
         paths |> Array.iter assertUnlocked

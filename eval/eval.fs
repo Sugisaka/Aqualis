@@ -47,80 +47,86 @@ namespace Aqualis
                 |HTMLSequenceDiagram -> expr.equivAlignHS x y c
                 |Numeric -> ()
                 
-            static member forLoop (c:program) (n1:expr,n2:expr) code =
+            static member forLoop (context:GenerationContext) (n1:expr,n2:expr) code =
+                let c = context.CurrentProgram
                 match c.language with
-                |Fortran -> expr.forLoopF c (n1,n2) code
-                |C99 -> expr.forLoopC c (n1,n2) code
-                |Python -> expr.forLoopPy c (n1,n2) code
-                |JavaScript -> expr.forLoopJ c (n1,n2) code
-                |PHP -> expr.forLoopPh c (n1,n2) code
-                |LaTeX -> expr.forLoopL c (n1,n2) code
-                |HTML -> expr.forLoopH c (n1,n2) code
-                |HTMLSequenceDiagram -> expr.forLoopHS c (n1,n2) code
+                |Fortran -> expr.forLoopF context (n1,n2) code
+                |C99 -> expr.forLoopC context (n1,n2) code
+                |Python -> expr.forLoopPy context (n1,n2) code
+                |JavaScript -> expr.forLoopJ context (n1,n2) code
+                |PHP -> expr.forLoopPh context (n1,n2) code
+                |LaTeX -> expr.forLoopL context (n1,n2) code
+                |HTML -> expr.forLoopH context (n1,n2) code
+                |HTMLSequenceDiagram -> expr.forLoopHS context (n1,n2) code
                 |Numeric -> ()
                 
             ///<summary>無限ループ</summary>
-            static member loop (c:program) code =
+            static member loop (context:GenerationContext) code =
+                let c = context.CurrentProgram
                 match c.language with
-                |Fortran -> expr.loopF c code
-                |C99 -> expr.loopC c code
-                |Python -> expr.loopPy c code
-                |JavaScript-> expr.loopJ c code
-                |PHP -> expr.loopPh c code
-                |LaTeX -> expr.loopL c code
-                |HTML -> expr.loopH c code
-                |HTMLSequenceDiagram -> expr.loopHS c code
+                |Fortran -> expr.loopF context code
+                |C99 -> expr.loopC context code
+                |Python -> expr.loopPy context code
+                |JavaScript-> expr.loopJ context code
+                |PHP -> expr.loopPh context code
+                |LaTeX -> expr.loopL context code
+                |HTML -> expr.loopH context code
+                |HTMLSequenceDiagram -> expr.loopHS context code
                 |Numeric -> ()
                 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledo (c:program) (cond:expr) = fun code ->
+            static member whiledo (context:GenerationContext) (cond:expr) = fun code ->
+                let c = context.CurrentProgram
                 match c.language with
-                |Fortran -> expr.whiledoF c cond code
-                |C99 -> expr.whiledoC c cond code
-                |Python -> expr.whiledoPy c cond code
-                |JavaScript -> expr.whiledoJ c cond code
-                |PHP -> expr.whiledoPh c cond code
-                |LaTeX -> expr.whiledoL c cond code
-                |HTML -> expr.whiledoH c cond code
-                |HTMLSequenceDiagram -> expr.whiledoHS c cond code
+                |Fortran -> expr.whiledoF context cond code
+                |C99 -> expr.whiledoC context cond code
+                |Python -> expr.whiledoPy context cond code
+                |JavaScript -> expr.whiledoJ context cond code
+                |PHP -> expr.whiledoPh context cond code
+                |LaTeX -> expr.whiledoL context cond code
+                |HTML -> expr.whiledoH context cond code
+                |HTMLSequenceDiagram -> expr.whiledoHS context cond code
                 |Numeric -> ()
                 
             ///<summary>指定した範囲でループ</summary>
-            static member range (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member range (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let c = context.CurrentProgram
                 match c.language with
-                |Fortran -> expr.rangeF c counter i1 i2 code
-                |C99 -> expr.rangeC c counter i1 i2 code
-                |Python -> expr.rangePy c counter i1 i2 code
-                |JavaScript -> expr.rangeJ c counter i1 i2 code
-                |PHP -> expr.rangePh c counter i1 i2 code
-                |LaTeX -> expr.rangeL c counter i1 i2 code
-                |HTML -> expr.rangeH c counter i1 i2 code
-                |HTMLSequenceDiagram -> expr.rangeHS c counter i1 i2 code
+                |Fortran -> expr.rangeF context counter i1 i2 code
+                |C99 -> expr.rangeC context counter i1 i2 code
+                |Python -> expr.rangePy context counter i1 i2 code
+                |JavaScript -> expr.rangeJ context counter i1 i2 code
+                |PHP -> expr.rangePh context counter i1 i2 code
+                |LaTeX -> expr.rangeL context counter i1 i2 code
+                |HTML -> expr.rangeH context counter i1 i2 code
+                |HTMLSequenceDiagram -> expr.rangeHS context counter i1 i2 code
                 |Numeric -> expr.rangeN i1 i2 code
                 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exit (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member range_exit (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let c = context.CurrentProgram
                 match c.language with
-                |Fortran -> expr.range_exitF c counter i1 i2 code
-                |C99 -> expr.range_exitC c counter i1 i2 code
-                |Python -> expr.range_exitPy c counter i1 i2 code
-                |JavaScript -> expr.range_exitJ c counter i1 i2 code
-                |PHP -> expr.range_exitPh c counter i1 i2 code
-                |LaTeX -> expr.range_exitL c counter i1 i2 code
-                |HTML -> expr.range_exitH c counter i1 i2 code
-                |HTMLSequenceDiagram -> expr.range_exitHS c counter i1 i2 code
+                |Fortran -> expr.range_exitF context counter i1 i2 code
+                |C99 -> expr.range_exitC context counter i1 i2 code
+                |Python -> expr.range_exitPy context counter i1 i2 code
+                |JavaScript -> expr.range_exitJ context counter i1 i2 code
+                |PHP -> expr.range_exitPh context counter i1 i2 code
+                |LaTeX -> expr.range_exitL context counter i1 i2 code
+                |HTML -> expr.range_exitH context counter i1 i2 code
+                |HTMLSequenceDiagram -> expr.range_exitHS context counter i1 i2 code
                 |Numeric -> ()
                 
-            static member branch (c:program) code =
+            static member branch (context:GenerationContext) code =
+                let c = context.CurrentProgram
                 match c.language with
-                |Fortran -> expr.branchF c code
-                |C99 -> expr.branchC c code
-                |Python -> expr.branchPy c code
-                |JavaScript -> expr.branchJ c code
-                |PHP -> expr.branchPh c code
-                |LaTeX -> expr.branchL c code
-                |HTML -> expr.branchH c code
-                |HTMLSequenceDiagram -> expr.branchHS c code
+                |Fortran -> expr.branchF context code
+                |C99 -> expr.branchC context code
+                |Python -> expr.branchPy context code
+                |JavaScript -> expr.branchJ context code
+                |PHP -> expr.branchPh context code
+                |LaTeX -> expr.branchL context code
+                |HTML -> expr.branchH context code
+                |HTMLSequenceDiagram -> expr.branchHS context code
                 |Numeric -> ()
                 
             member this.eval (c:program) =

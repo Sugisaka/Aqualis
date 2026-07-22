@@ -7,8 +7,11 @@
 namespace Aqualis
 
     open System
-    
-    type TextReader (fp:string,iostat:int0) =
+
+    type TextReader internal (environment:CompilationEnvironment,fp:string,iostat:int0) =
+        let context() = environment.RequireGenerationContext()
+        let program() = (context()).CurrentProgram
+        let writein text = (program()).codewritein(text + "\n")
         member _.tt (lst:exprString) =
             let rec cpxvarlist list (s:list<reduceExprString>) counter =
                 match s with
@@ -19,11 +22,11 @@ namespace Aqualis
                 |[] -> counter,list
             let Nz,varlist = cpxvarlist [] lst.data 0
 
-            match (GenerationScope.currentProgram()).language with
+            match (program()).language with
             |Fortran ->
-                ch.dx (2*Nz) <| fun tmp ->
+                environment.ch.dx (2*Nz) <| fun tmp ->
                     let double0string_format_F =
-                        let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                        let a,b = (program()).numFormat.dFormat
                         "E"+a.ToString()+"."+b.ToString()+"e3"
                     let format =
                         varlist
@@ -31,7 +34,7 @@ namespace Aqualis
                             [for (t,_,_) in b do
                                 match t with
                                 |It _ ->
-                                    yield "I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                                    yield "I"+(program()).numFormat.iFormat.ToString()
                                 |Dt ->
                                     yield double0string_format_F
                                 |Zt ->
@@ -45,15 +48,15 @@ namespace Aqualis
                                   if n<(b.Length-1) then yield "A1"
                               ])
                         |> fun s -> String.Join(",",s)
-                    ch.ix (varlist.Length+Nz-1) <| fun tab ->
+                    environment.ch.ix (varlist.Length+Nz-1) <| fun tab ->
                         let code =
                             varlist
                             |> (fun b ->
                                 [for t,m,b in b do
                                     match t,b with
                                     |Zt,RNvr (Var _) ->
-                                        yield tmp[2*m  ].Expr.eval (GenerationScope.currentProgram())
-                                        yield tmp[2*m+1].Expr.eval (GenerationScope.currentProgram())
+                                        yield tmp[2*m  ].Expr.eval (program())
+                                        yield tmp[2*m+1].Expr.eval (program())
                                     |_,RNvr (Var(_,n,_)) ->
                                         yield n
                                     |_ ->
@@ -63,10 +66,10 @@ namespace Aqualis
                             |> (fun b ->
                                   [for n in 0..(b.Length-1) do
                                       yield b[n]
-                                      if n<(b.Length-1) then yield tab[n].Expr.eval (GenerationScope.currentProgram())
+                                      if n<(b.Length-1) then yield tab[n].Expr.eval (program())
                                   ])
                             |> fun s -> String.Join(",",s)
-                        writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+code+"\n")
+                        writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval (program())+") "+code+"\n")
                         for t,m,b in varlist do
                             match t,b with
                             |Zt,RNvr v ->
@@ -74,7 +77,7 @@ namespace Aqualis
                             |_ ->
                                 ()
             |C99 ->
-                ch.dx (2*Nz) <| fun tmp ->
+                environment.ch.dx (2*Nz) <| fun tmp ->
                     let format =
                         varlist
                         |> (fun b ->
@@ -96,8 +99,8 @@ namespace Aqualis
                             [for t,m,a in b do
                                 match t,a with
                                 |Zt,RNvr (Var _) ->
-                                    yield "&"+tmp[2*m  ].Expr.eval ((GenerationScope.currentProgram()))
-                                    yield "&"+tmp[2*m+1].Expr.eval ((GenerationScope.currentProgram()))
+                                    yield "&"+tmp[2*m  ].Expr.eval ((program()))
+                                    yield "&"+tmp[2*m+1].Expr.eval ((program()))
                                 |_,RNvr (Var(_,n,_)) ->
                                     yield "&"+n
                                 |_ ->
@@ -114,13 +117,13 @@ namespace Aqualis
                             ()
             |LaTeX ->
                 let double0string_format_F =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format =
                     lst.data
                     |> List.map (fun b ->
                         match b.etype with
-                          |It _ ->"I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                          |It _ ->"I"+(program()).numFormat.iFormat.ToString()
                           |Dt -> double0string_format_F
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -131,16 +134,16 @@ namespace Aqualis
                         |RNvr (Var(_,n,_)) -> n
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
-                writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+code+"\n")
+                writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ((program()))+") "+code+"\n")
             |HTML ->
                 let double0string_format_F =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format =
                     lst.data
                     |> List.map (fun b ->
                         match b.etype with
-                        |It _ ->"I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                        |It _ ->"I"+(program()).numFormat.iFormat.ToString()
                         |Dt -> double0string_format_F
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -153,7 +156,7 @@ namespace Aqualis
                     |> fun s -> String.Join("<mo>,</mo>",s)
                 writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
             |Python ->
-                ch.dx (2*Nz) <| fun tmp ->
+                environment.ch.dx (2*Nz) <| fun tmp ->
                     let format =
                         varlist
                         |> (fun b ->
@@ -175,8 +178,8 @@ namespace Aqualis
                             [for t,m,a in b do
                                 match t,a with
                                 |Zt,RNvr (Var _) ->
-                                    yield tmp[2*m  ].Expr.eval ((GenerationScope.currentProgram()))
-                                    yield tmp[2*m+1].Expr.eval ((GenerationScope.currentProgram()))
+                                    yield tmp[2*m  ].Expr.eval ((program()))
+                                    yield tmp[2*m+1].Expr.eval ((program()))
                                 |_,RNvr (Var(_,n,_)) ->
                                     yield n
                                 |_ ->
@@ -192,50 +195,53 @@ namespace Aqualis
                         //let a_string = string a
                         match t,a with
                         |It _,RNvr v ->
-                            writein(v.eval (GenerationScope.currentProgram())+" = int(word_list["+cnt.ToString()+"])")
+                            writein(v.eval (program())+" = int(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
                         |Dt,RNvr v ->
-                            writein(v.eval (GenerationScope.currentProgram())+"= float(word_list["+cnt.ToString()+"])")
+                            writein(v.eval (program())+"= float(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
                         |Zt,RNvr v ->
-                            writein(v.eval (GenerationScope.currentProgram())+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
+                            writein(v.eval (program())+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
                             cnt <- cnt + 2
                         |_ -> ()
             |_ -> ()
 
         member private _.ReadByte (e:expr) =
-            writein("read("+fp+", iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") byte_tmp\n")
+            writein("read("+fp+", iostat="+iostat.Expr.eval ((program()))+") byte_tmp\n")
             let ee =
                 match e.etype,e with
                 |It _,Var(_,n,_) -> n
                 |_ -> "byte値を整数型以外の変数に格納できません"
             writein(ee + "=" + "byte_tmp\n")
-            
+
         member this.t (x:int0) = this.tt (iv x)
         member this.t (x:double0) = this.tt (dv x)
         member this.t (x:complex0) = this.tt (zv x)
         member this.b (x:int0) = this.ReadByte x.Expr
 
-    type BinReader (fp:string,iostat:int0) =
+    type BinReader internal (environment:CompilationEnvironment,fp:string,iostat:int0) =
+        let context() = environment.RequireGenerationContext()
+        let program() = (context()).CurrentProgram
+        let writein text = (program()).codewritein(text + "\n")
         member private _.ReadBin (v:expr) =
-            match (GenerationScope.currentProgram()).language with
+            match (program()).language with
             |Fortran ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
-                        writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+re.Expr.eval ((program()))+"\n")
+                        writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+im.Expr.eval ((program()))+"\n")
                         complex0 v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+n+"\n")
+                    writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+n+"\n")
                 |_ ->
                     Console.WriteLine "ファイル読み込みデータの保存先が変数ではありません"
             |C99 ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein("fread(&"+re.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+re.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");"+"\n")
-                        writein("fread(&"+im.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+im.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");"+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein("fread(&"+re.Expr.eval ((program()))+",sizeof("+re.Expr.eval ((program()))+"),1,"+fp+");"+"\n")
+                        writein("fread(&"+im.Expr.eval ((program()))+",sizeof("+im.Expr.eval ((program()))+"),1,"+fp+");"+"\n")
                         complex0 v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
                     writein("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
@@ -244,12 +250,12 @@ namespace Aqualis
             |LaTeX ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
-                        writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+re.Expr.eval ((program()))+"\n")
+                        writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+im.Expr.eval ((program()))+"\n")
                         complex0 v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+n+"\n")
+                    writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+n+"\n")
                 |_ ->
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |HTML ->
@@ -261,9 +267,9 @@ namespace Aqualis
             |Python ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein(re.Expr.eval ((GenerationScope.currentProgram()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
-                        writein(im.Expr.eval ((GenerationScope.currentProgram()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein(re.Expr.eval ((program()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        writein(im.Expr.eval ((program()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                         complex0 v <== re+asm.uj*im
                 |It _,Var(_,n,_) ->
                     writein(n+" = struct.unpack('i', "+fp+".read(4))[0]"+"\n")
@@ -275,14 +281,17 @@ namespace Aqualis
         member this.b (x:int0) = this.ReadBin x.Expr
         member this.b (x:double0) = this.ReadBin x.Expr
         member this.b (x:complex0) = this.ReadBin x.Expr
-        
-    type TextWriter (fp:string) =
+
+    type TextWriter internal (environment:CompilationEnvironment,fp:string) =
+        let context() = environment.RequireGenerationContext()
+        let program() = (context()).CurrentProgram
+        let writein text = (program()).codewritein(text + "\n")
         member _.tt (lst:exprString) =
-            match (GenerationScope.currentProgram()).language with
+            match (program()).language with
             |Fortran ->
-                let tab = var.ip0_noWarning("tab",2313)
+                let tab = environment.var.i0NoWarning("tab",2313)
                 let double0string_format_F =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format =
                     lst
@@ -292,7 +301,7 @@ namespace Aqualis
                             |RStr _,_ ->
                                 yield "A1"
                             |RNvr _, It 4 ->
-                                yield "I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                                yield "I"+(program()).numFormat.iFormat.ToString()
                             |RNvr _, Dt ->
                                 yield double0string_format_F
                             |RNvr _, Zt ->
@@ -311,28 +320,28 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in b.data do
                             match n.etype,n with
-                            |It _,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS(v)
-                            |Dt  ,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                            |_   ,RNvr (Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                            |It _,RNvr (Int v) -> yield (program()).numFormat.ItoS(v)
+                            |Dt  ,RNvr (Int v) -> yield (program()).numFormat.DtoS(double v)
+                            |_   ,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
                             |Zt  ,RNvr v ->
                                 let z = complex0 v
-                                yield z.re.Expr.eval (GenerationScope.currentProgram())
-                                yield z.im.Expr.eval (GenerationScope.currentProgram())
-                            |It _,RNvr v -> yield v.eval (GenerationScope.currentProgram())
-                            |Dt  ,RNvr v -> yield v.eval (GenerationScope.currentProgram())
+                                yield z.re.Expr.eval (program())
+                                yield z.im.Expr.eval (program())
+                            |It _,RNvr v -> yield v.eval (program())
+                            |Dt  ,RNvr v -> yield v.eval (program())
                             |_ -> ()])
                     |> (fun b ->
                           [for n in 0..(b.Length-1) do
                               yield b.[n]
-                              if n<(b.Length-1) then yield tab.Expr.eval ((GenerationScope.currentProgram()))
+                              if n<(b.Length-1) then yield tab.Expr.eval ((program()))
                           ])
                     |> fun s -> String.Join(",",s)
                 writein("write("+fp+",\"("+format+")\") "+code+"\n")
             |C99 ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+(program()).numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst
@@ -357,13 +366,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
                         |Zt,RNvr v ->
                             let z = complex0 v
-                            yield z.re.Expr.eval (GenerationScope.currentProgram())
-                            yield z.im.Expr.eval (GenerationScope.currentProgram())
-                        |(It _|Dt),RNvr v -> yield v.eval ((GenerationScope.currentProgram()))
+                            yield z.re.Expr.eval (program())
+                            yield z.im.Expr.eval (program())
+                        |(It _|Dt),RNvr v -> yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -372,12 +381,12 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |Zt,RNvr v -> 
+                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
+                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr v ->
                               let z = complex0 v
-                              z.re.Expr.eval (GenerationScope.currentProgram())+","+z.im.Expr.eval (GenerationScope.currentProgram())
-                          |(It _|Dt),RNvr v -> v.eval (GenerationScope.currentProgram())
+                              z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
+                          |(It _|Dt),RNvr v -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)\n")
@@ -386,20 +395,20 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |Zt,RNvr v -> 
+                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
+                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr v ->
                               let z = complex0 v
-                              z.re.Expr.eval (GenerationScope.currentProgram())+","+z.im.Expr.eval (GenerationScope.currentProgram())
-                          |(It _ |Dt),RNvr v -> v.eval (GenerationScope.currentProgram())
+                              z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
+                          |(It _ |Dt),RNvr v -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
             |Python ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+(program()).numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst.data
@@ -424,27 +433,27 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
                         |Zt,RNvr v ->
                             let z = complex0 v
-                            yield z.re.Expr.eval (GenerationScope.currentProgram())
-                            yield z.im.Expr.eval (GenerationScope.currentProgram())
-                        |(It _|Dt),RNvr v -> yield v.eval (GenerationScope.currentProgram())
+                            yield z.re.Expr.eval (program())
+                            yield z.im.Expr.eval (program())
+                        |(It _|Dt),RNvr v -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
-            
+
         member this.t (x:string) = this.tt (st x)
         member this.t (x:int0) = this.tt (iv x)
         member this.t (x:double0) = this.tt (dv x)
         member this.t (x:complex0) = this.tt (zv x)
-        
+
         member _.cc (lst:exprString) =
-            match (GenerationScope.currentProgram()).language with
+            match (program()).language with
             |Fortran ->
-                let tab = var.ip0_noWarning("tab",2313)
+                let tab = environment.var.i0NoWarning("tab",2313)
                 let int0string_format_F = "I0"
                 let double0string_format_F = "G0"
                 let format =
@@ -469,13 +478,13 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
                             match b[n],b[n].etype with
-                            |RNvr(Int v), It _ -> yield (GenerationScope.currentProgram()).numFormat.ItoS(v)
-                            |RNvr(Int v), Dt   -> yield (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                            |RNvr(Dbl v), _    -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                            |RNvr(Int v), It _ -> yield (program()).numFormat.ItoS(v)
+                            |RNvr(Int v), Dt   -> yield (program()).numFormat.DtoS(double v)
+                            |RNvr(Dbl v), _    -> yield (program()).numFormat.DtoS v
                             |RNvr v, Zt   ->
-                                yield (Re v).eval ((GenerationScope.currentProgram()))
-                                yield (Im v).eval ((GenerationScope.currentProgram()))
-                            |RNvr v,(It _|Dt) -> yield v.eval ((GenerationScope.currentProgram()))
+                                yield (Re v).eval ((program()))
+                                yield (Im v).eval ((program()))
+                            |RNvr v,(It _|Dt) -> yield v.eval ((program()))
                             |RStr v,_ -> yield "\"" + v.Replace("\"","\"\"") + "\""
                             |_ -> ()])
                     |> fun s -> String.Join(",",s)
@@ -504,16 +513,16 @@ namespace Aqualis
                     [for b in lst.data do
                         match b.etype,b with
                         |It _,RNvr(Int v) ->
-                            yield (GenerationScope.currentProgram()).numFormat.ItoS v
+                            yield (program()).numFormat.ItoS v
                         |Dt ,RNvr(Int v) ->
-                            yield (GenerationScope.currentProgram()).numFormat.DtoS (double v)
+                            yield (program()).numFormat.DtoS (double v)
                         |_ ,RNvr(Dbl v) ->
-                            yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                            yield (program()).numFormat.DtoS v
                         |Zt ,RNvr v ->
-                            yield (Re v).eval ((GenerationScope.currentProgram()))
-                            yield (Im v).eval ((GenerationScope.currentProgram()))
+                            yield (Re v).eval ((program()))
+                            yield (Im v).eval ((program()))
                         |(It _|Dt),RNvr v ->
-                            yield v.eval ((GenerationScope.currentProgram()))
+                            yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -522,11 +531,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (GenerationScope.currentProgram()).numFormat.DtoS (double v)
-                          |RNvr(Dbl v),_ -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((GenerationScope.currentProgram()))+","+(Im v).eval ((GenerationScope.currentProgram()))
-                          |RNvr v,(It _|Dt) -> v.eval ((GenerationScope.currentProgram()))
+                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS (double v)
+                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
+                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr v,(It _|Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -536,11 +545,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                          |RNvr(Dbl v),_ -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((GenerationScope.currentProgram()))+","+(Im v).eval ((GenerationScope.currentProgram()))
-                          |RNvr v,(It _ |Dt) -> v.eval ((GenerationScope.currentProgram()))
+                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS(double v)
+                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
+                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr v,(It _ |Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -573,118 +582,121 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |It _,RNvr(Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS v
-                        |Dt,RNvr(Int v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                        |_,RNvr(Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                        |It _,RNvr(Int v) -> yield (program()).numFormat.ItoS v
+                        |Dt,RNvr(Int v) -> yield (program()).numFormat.DtoS(double v)
+                        |_,RNvr(Dbl v) -> yield (program()).numFormat.DtoS v
                         |Zt,RNvr v ->
-                            yield (Re v).eval (GenerationScope.currentProgram())
-                            yield (Im v).eval (GenerationScope.currentProgram())
-                        |(It _|Dt),RNvr v -> yield v.eval (GenerationScope.currentProgram())
+                            yield (Re v).eval (program())
+                            yield (Im v).eval (program())
+                        |(It _|Dt),RNvr v -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
 
-    type BinWriter(fp:string) =
+    type BinWriter internal (environment:CompilationEnvironment,fp:string) =
+        let context() = environment.RequireGenerationContext()
+        let program() = (context()).CurrentProgram
+        let writein text = (program()).codewritein(text + "\n")
         member private _.WriteBin (v:expr) =
-            match (GenerationScope.currentProgram()).language with
+            match (program()).language with
             |Fortran ->
                 match v.etype,v with
                 |_,Int v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.ItoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.ItoS(v)+"\n")
                 |_,Dbl v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.DtoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.DtoS(v)+"\n")
                 |Zt,_ ->
                     let z = complex0 v
-                    writein("write("+fp+") "+z.re.Expr.eval (GenerationScope.currentProgram())+"\n")
-                    writein("write("+fp+") "+z.im.Expr.eval (GenerationScope.currentProgram())+"\n")
+                    writein("write("+fp+") "+z.re.Expr.eval (program())+"\n")
+                    writein("write("+fp+") "+z.im.Expr.eval (program())+"\n")
                 |It _,_ ->
-                    writein("write("+fp+") "+v.eval (GenerationScope.currentProgram())+"\n")
+                    writein("write("+fp+") "+v.eval (program())+"\n")
                 |Dt,_ ->
-                    writein("write("+fp+") "+v.eval (GenerationScope.currentProgram())+"\n")
+                    writein("write("+fp+") "+v.eval (program())+"\n")
                 |_ -> ()
             |C99 ->
                 match v.etype,v with
                 |_,Int _ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein("fwrite(&"+tmp.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval (program())+",sizeof("+tmp.Expr.eval (program())+"),1,"+fp+");\n")
                 |_,Dbl _ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein("fwrite(&"+tmp.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval (program())+",sizeof("+tmp.Expr.eval (program())+"),1,"+fp+");\n")
                 |Zt,_ ->
-                    ch.dd <| fun (tmp_r,tmp_i) ->
+                    environment.ch.dd <| fun (tmp_r,tmp_i) ->
                         let z = complex0 v
                         tmp_r <== z.re
                         tmp_i <== z.im
-                        writein("fwrite(&"+tmp_r.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp_r.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
-                        writein("fwrite(&"+tmp_i.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp_i.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp_r.Expr.eval (program())+",sizeof("+tmp_r.Expr.eval (program())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp_i.Expr.eval (program())+",sizeof("+tmp_i.Expr.eval (program())+"),1,"+fp+");\n")
                 |It _,_ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein("fwrite(&"+tmp.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+tmp.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval ((program()))+",sizeof("+tmp.Expr.eval ((program()))+"),1,"+fp+");\n")
                 |Dt,_ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein("fwrite(&"+tmp.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+tmp.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval ((program()))+",sizeof("+tmp.Expr.eval ((program()))+"),1,"+fp+");\n")
                 |_ ->
                     ()
             |LaTeX ->
                 match v.etype,v with
                 |_,Int v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.ItoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.ItoS(v)+"\n")
                 |_,Dbl v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.DtoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.DtoS(v)+"\n")
                 |Zt,_ ->
                     let z = complex0 v
-                    writein("write("+fp+") "+z.re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
-                    writein("write("+fp+") "+z.im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                    writein("write("+fp+") "+z.re.Expr.eval ((program()))+"\n")
+                    writein("write("+fp+") "+z.im.Expr.eval ((program()))+"\n")
                 |It _,_ ->
-                    writein("write("+fp+") "+v.eval ((GenerationScope.currentProgram()))+"\n")
+                    writein("write("+fp+") "+v.eval ((program()))+"\n")
                 |Dt,_ ->
-                    writein("write("+fp+") "+v.eval ((GenerationScope.currentProgram()))+"\n")
+                    writein("write("+fp+") "+v.eval ((program()))+"\n")
                 |_ -> ()
             |HTML ->
                 match v.etype,v with
                 |_,Int v ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+(GenerationScope.currentProgram()).numFormat.ItoS(v)+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+(program()).numFormat.ItoS(v)+"\\)<br/>\n")
                 |_,Dbl v ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+(GenerationScope.currentProgram()).numFormat.DtoS(v)+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+(program()).numFormat.DtoS(v)+"\\)<br/>\n")
                 |Zt,_ ->
                     let z = complex0 v
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.re.Expr.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.im.Expr.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.re.Expr.eval (program())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.im.Expr.eval (program())+"\\)<br/>\n")
                 |It _,_ ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (program())+"\\)<br/>\n")
                 |Dt,_ ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (program())+"\\)<br/>\n")
                 |_ -> ()
             |Python ->
                 match v.etype,v with
                 |_,Int _ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (program())+"))\n")
                 |_,Dbl _ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (program())+"))\n")
                 |Zt,_ ->
-                    ch.dd <| fun (tmp_r,tmp_i) ->
+                    environment.ch.dd <| fun (tmp_r,tmp_i) ->
                         let z = complex0 v
                         tmp_r <== z.re
                         tmp_i <== z.im
-                        writein(fp+".write(struct.pack('d', "+tmp_r.Expr.eval (GenerationScope.currentProgram())+"))\n")
-                        writein(fp+".write(struct.pack('d', "+tmp_i.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp_r.Expr.eval (program())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp_i.Expr.eval (program())+"))\n")
                 |It _,_ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (program())+"))\n")
                 |Dt,_ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (program())+"))\n")
                 |_ ->
                     ()
             |_ -> ()
@@ -693,14 +705,17 @@ namespace Aqualis
         member this.b (v:double) = this.WriteBin ((D v).Expr)
         member this.b (v:double0) = this.WriteBin v.Expr
         member this.b (v:complex0) = this.WriteBin v.Expr
-        
-    ///<summary>ファイル入出力</summary>
-    type io () =
 
-        static member private fileAccess (filename:exprString,intDigit:option<int>) readmode isbinary code =
-            match (GenerationScope.currentProgram()).language with
+    ///<summary>ファイル入出力</summary>
+    type ContextIo internal (environment:CompilationEnvironment) =
+        let context() = environment.RequireGenerationContext()
+        let program() = (context()).CurrentProgram
+        let writein text = (program()).codewritein(text + "\n")
+
+        member private this.fileAccess (filename:exprString,intDigit:option<int>) readmode isbinary code =
+            match (program()).language with
             |Fortran ->
-                ch.f <| fun fp ->
+                environment.ch.f <| fun fp ->
                     let f =
                         filename.data
                         |> List.map (fun s ->
@@ -708,7 +723,7 @@ namespace Aqualis
                             |RStr _ ->
                                 "A"
                             |RNvr x when x.etype = It 4 ->
-                                "I" + match intDigit with |None -> (GenerationScope.currentProgram()).numFormat.iFormat.ToString() |Some n -> n.ToString()
+                                "I" + match intDigit with |None -> (program()).numFormat.iFormat.ToString() |Some n -> n.ToString()
                             |_ ->
                                 "")
                         |> fun s -> String.Join(",",s)
@@ -719,17 +734,17 @@ namespace Aqualis
                             |RStr t ->
                                 "\""+t+"\""
                             |RNvr x when x.etype = It 4 ->
-                                x.eval ((GenerationScope.currentProgram()))
+                                x.eval ((program()))
                             |_ ->
                                 "")
                         |> fun s -> String.Join(",",s)
-                    ch.t <| A0 <| fun id ->
+                    environment.ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                        (GenerationScope.currentProgram()).var.setUniqVar(Structure "integer(1)",A0,btname,"")
+                        (program()).var.setUniqVar(Structure "integer(1)",A0,btname,"")
                         writein("write("+id+",\"("+f+")\") "+s+"\n")
-                        ch.i <| fun counter ->
-                            let c = counter.Expr.eval ((GenerationScope.currentProgram()))
+                        environment.ch.i <| fun counter ->
+                            let c = counter.Expr.eval ((program()))
                             writein("do "+c+" = 1, len_trim("+id+")"+"\n")
                             writein("  if ( "+id+"( "+c+":"+c+" ).EQ.\" \" ) "+id+"( "+c+":"+c+" ) = \"0\""+"\n")
                             writein("end do"+"\n")
@@ -740,7 +755,7 @@ namespace Aqualis
                         code fp
                         writein("close("+fp+")"+"\n")
             |C99 ->
-                ch.f <| fun fp ->
+                environment.ch.f <| fun fp ->
                     let f =
                         filename.data
                         |> List.map (fun s ->
@@ -748,7 +763,7 @@ namespace Aqualis
                             |RStr t ->
                                 t
                             |RNvr x when x.etype = It 4 ->
-                                "%0" + (match intDigit with |None -> (GenerationScope.currentProgram()).numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
+                                "%0" + (match intDigit with |None -> (program()).numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
@@ -760,15 +775,15 @@ namespace Aqualis
                             |RStr _ ->
                                 ""
                             |RNvr x when x.etype = It 4 ->
-                                x.eval ((GenerationScope.currentProgram()))
+                                x.eval ((program()))
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
                         |> fun s -> String.Join(",",s)
-                    ch.t <| A0 <| fun id ->
+                    environment.ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                        (GenerationScope.currentProgram()).var.setUniqVar(Structure "char",A0,btname,"")
+                        (program()).var.setUniqVar(Structure "char",A0,btname,"")
                         writein("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
                         if isbinary then
                             writein(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
@@ -777,7 +792,7 @@ namespace Aqualis
                         code fp
                         writein("fclose("+fp+")"+";\n")
             |LaTeX ->
-                ch.f <| fun fp ->
+                environment.ch.f <| fun fp ->
                     let s =
                         filename.data
                         |> List.map (fun s ->
@@ -785,12 +800,12 @@ namespace Aqualis
                             |RStr t ->
                                 "\""+t+"\""
                             |RNvr x when x.etype = It 4 ->
-                                x.eval ((GenerationScope.currentProgram()))
+                                x.eval ((program()))
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
                         |> fun s -> String.Join("+",s)
-                    ch.t <| A0 <| fun id ->
+                    environment.ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         if isbinary then
                             writein(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
@@ -799,7 +814,7 @@ namespace Aqualis
                         code fp
                         writein("close("+fp+")"+";\n")
             |HTML ->
-                ch.f <| fun fp ->
+                environment.ch.f <| fun fp ->
                     let s =
                         filename.data
                         |> List.map (fun s ->
@@ -807,12 +822,12 @@ namespace Aqualis
                             |RStr t ->
                                 "\""+t+"\""
                             |RNvr x when x.etype = It 4 ->
-                                x.eval ((GenerationScope.currentProgram()))
+                                x.eval ((program()))
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
                         |> fun s -> String.Join("+",s)
-                    ch.t <| A0 <| fun id ->
+                    environment.ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         if isbinary then
                             writein(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
@@ -821,7 +836,7 @@ namespace Aqualis
                         code fp
                         writein("close("+fp+")"+";\n")
             |Python ->
-                ch.f <| fun fp ->
+                environment.ch.f <| fun fp ->
                     let f =
                         filename.data
                         |> List.map (fun s ->
@@ -829,7 +844,7 @@ namespace Aqualis
                             |RStr t ->
                                 t
                             |RNvr x when x.etype = It 4 ->
-                                "%0" + (match intDigit with |None -> (GenerationScope.currentProgram()).numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
+                                "%0" + (match intDigit with |None -> (program()).numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
@@ -841,15 +856,15 @@ namespace Aqualis
                             |RStr _ ->
                                 ""
                             |RNvr x when x.etype = It 4 ->
-                                x.eval ((GenerationScope.currentProgram()))
+                                x.eval ((program()))
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
                         |> fun s -> String.Join(",",s)
-                    ch.t <| A0 <| fun id ->
+                    environment.ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
-                        (GenerationScope.currentProgram()).var.setUniqVar(Structure "char",A0,btname,"")
+                        (program()).var.setUniqVar(Structure "char",A0,btname,"")
                         writein(id+"= \""+f+"\"%("+s+")\n")
                         if isbinary then
                             writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
@@ -859,12 +874,12 @@ namespace Aqualis
                         writein(fp+".close()"+"\n")
             |_ -> ()
 
-        static member private Write1 (fp:string) (lst:exprString) =
-            match (GenerationScope.currentProgram()).language with
+        member private this.Write1 (fp:string) (lst:exprString) =
+            match (program()).language with
             |Fortran ->
-                let tab = var.ip0_noWarning("tab",2313)
+                let tab = environment.var.i0NoWarning("tab",2313)
                 let double0string_format_F =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format =
                     lst
@@ -874,7 +889,7 @@ namespace Aqualis
                             |RStr _,_ ->
                                 yield "A1"
                             |RNvr _, It 4 ->
-                                yield "I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                                yield "I"+(program()).numFormat.iFormat.ToString()
                             |RNvr _, Dt ->
                                 yield double0string_format_F
                             |RNvr _, Zt ->
@@ -893,28 +908,28 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in b.data do
                             match n.etype,n with
-                            |It _,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS(v)
-                            |Dt  ,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                            |_   ,RNvr (Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                            |It _,RNvr (Int v) -> yield (program()).numFormat.ItoS(v)
+                            |Dt  ,RNvr (Int v) -> yield (program()).numFormat.DtoS(double v)
+                            |_   ,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
                             |Zt  ,RNvr v ->
                                 let z = complex0 v
-                                yield z.re.Expr.eval (GenerationScope.currentProgram())
-                                yield z.im.Expr.eval (GenerationScope.currentProgram())
-                            |It _,RNvr v -> yield v.eval (GenerationScope.currentProgram())
-                            |Dt  ,RNvr v -> yield v.eval (GenerationScope.currentProgram())
+                                yield z.re.Expr.eval (program())
+                                yield z.im.Expr.eval (program())
+                            |It _,RNvr v -> yield v.eval (program())
+                            |Dt  ,RNvr v -> yield v.eval (program())
                             |_ -> ()])
                     |> (fun b ->
                           [for n in 0..(b.Length-1) do
                               yield b.[n]
-                              if n<(b.Length-1) then yield tab.Expr.eval ((GenerationScope.currentProgram()))
+                              if n<(b.Length-1) then yield tab.Expr.eval ((program()))
                           ])
                     |> fun s -> String.Join(",",s)
                 writein("write("+fp+",\"("+format+")\") "+code+"\n")
             |C99 ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+(program()).numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst
@@ -939,13 +954,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
                         |Zt,RNvr v ->
                             let z = complex0 v
-                            yield z.re.Expr.eval (GenerationScope.currentProgram())
-                            yield z.im.Expr.eval (GenerationScope.currentProgram())
-                        |(It _|Dt),RNvr v -> yield v.eval ((GenerationScope.currentProgram()))
+                            yield z.re.Expr.eval (program())
+                            yield z.im.Expr.eval (program())
+                        |(It _|Dt),RNvr v -> yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -954,12 +969,12 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |Zt,RNvr v -> 
+                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
+                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr v ->
                               let z = complex0 v
-                              z.re.Expr.eval (GenerationScope.currentProgram())+","+z.im.Expr.eval (GenerationScope.currentProgram())
-                          |(It _|Dt),RNvr v -> v.eval (GenerationScope.currentProgram())
+                              z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
+                          |(It _|Dt),RNvr v -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)\n")
@@ -968,20 +983,20 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |Zt,RNvr v -> 
+                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
+                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr v ->
                               let z = complex0 v
-                              z.re.Expr.eval (GenerationScope.currentProgram())+","+z.im.Expr.eval (GenerationScope.currentProgram())
-                          |(It _ |Dt),RNvr v -> v.eval (GenerationScope.currentProgram())
+                              z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
+                          |(It _ |Dt),RNvr v -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
             |Python ->
                 let int0string_format_C =
-                    "%"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()+"d"
+                    "%"+(program()).numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "%"+a.ToString()+"."+b.ToString()+"e"
                 let format =
                     lst.data
@@ -1006,22 +1021,22 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
                         |Zt,RNvr v ->
                             let z = complex0 v
-                            yield z.re.Expr.eval (GenerationScope.currentProgram())
-                            yield z.im.Expr.eval (GenerationScope.currentProgram())
-                        |(It _|Dt),RNvr v -> yield v.eval (GenerationScope.currentProgram())
+                            yield z.re.Expr.eval (program())
+                            yield z.im.Expr.eval (program())
+                        |(It _|Dt),RNvr v -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
 
-        static member private Write2 (fp:string) (lst:exprString) =
-            match (GenerationScope.currentProgram()).language with
+        member private this.Write2 (fp:string) (lst:exprString) =
+            match (program()).language with
             |Fortran ->
-                let tab = var.ip0_noWarning("tab",2313)
+                let tab = environment.var.i0NoWarning("tab",2313)
                 let int0string_format_F = "I0"
                 let double0string_format_F = "G0"
                 let format =
@@ -1046,13 +1061,13 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
                             match b[n],b[n].etype with
-                            |RNvr(Int v), It _ -> yield (GenerationScope.currentProgram()).numFormat.ItoS(v)
-                            |RNvr(Int v), Dt   -> yield (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                            |RNvr(Dbl v), _    -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                            |RNvr(Int v), It _ -> yield (program()).numFormat.ItoS(v)
+                            |RNvr(Int v), Dt   -> yield (program()).numFormat.DtoS(double v)
+                            |RNvr(Dbl v), _    -> yield (program()).numFormat.DtoS v
                             |RNvr v, Zt   ->
-                                yield (Re v).eval ((GenerationScope.currentProgram()))
-                                yield (Im v).eval ((GenerationScope.currentProgram()))
-                            |RNvr v,(It _|Dt) -> yield v.eval ((GenerationScope.currentProgram()))
+                                yield (Re v).eval ((program()))
+                                yield (Im v).eval ((program()))
+                            |RNvr v,(It _|Dt) -> yield v.eval ((program()))
                             |RStr v,_ -> yield "\"" + v.Replace("\"","\"\"") + "\""
                             |_ -> ()])
                     |> fun s -> String.Join(",",s)
@@ -1081,16 +1096,16 @@ namespace Aqualis
                     [for b in lst.data do
                         match b.etype,b with
                         |It _,RNvr(Int v) ->
-                            yield (GenerationScope.currentProgram()).numFormat.ItoS v
+                            yield (program()).numFormat.ItoS v
                         |Dt ,RNvr(Int v) ->
-                            yield (GenerationScope.currentProgram()).numFormat.DtoS (double v)
+                            yield (program()).numFormat.DtoS (double v)
                         |_ ,RNvr(Dbl v) ->
-                            yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                            yield (program()).numFormat.DtoS v
                         |Zt ,RNvr v ->
-                            yield (Re v).eval ((GenerationScope.currentProgram()))
-                            yield (Im v).eval ((GenerationScope.currentProgram()))
+                            yield (Re v).eval ((program()))
+                            yield (Im v).eval ((program()))
                         |(It _|Dt),RNvr v ->
-                            yield v.eval ((GenerationScope.currentProgram()))
+                            yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -1099,11 +1114,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (GenerationScope.currentProgram()).numFormat.DtoS (double v)
-                          |RNvr(Dbl v),_ -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((GenerationScope.currentProgram()))+","+(Im v).eval ((GenerationScope.currentProgram()))
-                          |RNvr v,(It _|Dt) -> v.eval ((GenerationScope.currentProgram()))
+                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS (double v)
+                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
+                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr v,(It _|Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -1113,11 +1128,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (GenerationScope.currentProgram()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                          |RNvr(Dbl v),_ -> (GenerationScope.currentProgram()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((GenerationScope.currentProgram()))+","+(Im v).eval ((GenerationScope.currentProgram()))
-                          |RNvr v,(It _ |Dt) -> v.eval ((GenerationScope.currentProgram()))
+                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS(double v)
+                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
+                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr v,(It _ |Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -1150,122 +1165,122 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |It _,RNvr(Int v) -> yield (GenerationScope.currentProgram()).numFormat.ItoS v
-                        |Dt,RNvr(Int v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS(double v)
-                        |_,RNvr(Dbl v) -> yield (GenerationScope.currentProgram()).numFormat.DtoS v
+                        |It _,RNvr(Int v) -> yield (program()).numFormat.ItoS v
+                        |Dt,RNvr(Int v) -> yield (program()).numFormat.DtoS(double v)
+                        |_,RNvr(Dbl v) -> yield (program()).numFormat.DtoS v
                         |Zt,RNvr v ->
-                            yield (Re v).eval (GenerationScope.currentProgram())
-                            yield (Im v).eval (GenerationScope.currentProgram())
-                        |(It _|Dt),RNvr v -> yield v.eval (GenerationScope.currentProgram())
+                            yield (Re v).eval (program())
+                            yield (Im v).eval (program())
+                        |(It _|Dt),RNvr v -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
 
-        static member private Write_bin (fp:string) (v:expr) =
-            match (GenerationScope.currentProgram()).language with
+        member private this.Write_bin (fp:string) (v:expr) =
+            match (program()).language with
             |Fortran ->
                 match v.etype,v with
                 |_,Int v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.ItoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.ItoS(v)+"\n")
                 |_,Dbl v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.DtoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.DtoS(v)+"\n")
                 |Zt,_ ->
                     let z = complex0 v
-                    writein("write("+fp+") "+z.re.Expr.eval (GenerationScope.currentProgram())+"\n")
-                    writein("write("+fp+") "+z.im.Expr.eval (GenerationScope.currentProgram())+"\n")
+                    writein("write("+fp+") "+z.re.Expr.eval (program())+"\n")
+                    writein("write("+fp+") "+z.im.Expr.eval (program())+"\n")
                 |It _,_ ->
-                    writein("write("+fp+") "+v.eval (GenerationScope.currentProgram())+"\n")
+                    writein("write("+fp+") "+v.eval (program())+"\n")
                 |Dt,_ ->
-                    writein("write("+fp+") "+v.eval (GenerationScope.currentProgram())+"\n")
+                    writein("write("+fp+") "+v.eval (program())+"\n")
                 |_ -> ()
             |C99 ->
                 match v.etype,v with
                 |_,Int _ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein("fwrite(&"+tmp.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval (program())+",sizeof("+tmp.Expr.eval (program())+"),1,"+fp+");\n")
                 |_,Dbl _ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein("fwrite(&"+tmp.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval (program())+",sizeof("+tmp.Expr.eval (program())+"),1,"+fp+");\n")
                 |Zt,_ ->
-                    ch.dd <| fun (tmp_r,tmp_i) ->
+                    environment.ch.dd <| fun (tmp_r,tmp_i) ->
                         let z = complex0 v
                         tmp_r <== z.re
                         tmp_i <== z.im
-                        writein("fwrite(&"+tmp_r.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp_r.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
-                        writein("fwrite(&"+tmp_i.Expr.eval (GenerationScope.currentProgram())+",sizeof("+tmp_i.Expr.eval (GenerationScope.currentProgram())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp_r.Expr.eval (program())+",sizeof("+tmp_r.Expr.eval (program())+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp_i.Expr.eval (program())+",sizeof("+tmp_i.Expr.eval (program())+"),1,"+fp+");\n")
                 |It _,_ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein("fwrite(&"+tmp.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+tmp.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval ((program()))+",sizeof("+tmp.Expr.eval ((program()))+"),1,"+fp+");\n")
                 |Dt,_ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein("fwrite(&"+tmp.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+tmp.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");\n")
+                        writein("fwrite(&"+tmp.Expr.eval ((program()))+",sizeof("+tmp.Expr.eval ((program()))+"),1,"+fp+");\n")
                 |_ ->
                     ()
             |LaTeX ->
                 match v.etype,v with
                 |_,Int v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.ItoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.ItoS(v)+"\n")
                 |_,Dbl v ->
-                    writein("write("+fp+") "+(GenerationScope.currentProgram()).numFormat.DtoS(v)+"\n")
+                    writein("write("+fp+") "+(program()).numFormat.DtoS(v)+"\n")
                 |Zt,_ ->
                     let z = complex0 v
-                    writein("write("+fp+") "+z.re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
-                    writein("write("+fp+") "+z.im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                    writein("write("+fp+") "+z.re.Expr.eval ((program()))+"\n")
+                    writein("write("+fp+") "+z.im.Expr.eval ((program()))+"\n")
                 |It _,_ ->
-                    writein("write("+fp+") "+v.eval ((GenerationScope.currentProgram()))+"\n")
+                    writein("write("+fp+") "+v.eval ((program()))+"\n")
                 |Dt,_ ->
-                    writein("write("+fp+") "+v.eval ((GenerationScope.currentProgram()))+"\n")
+                    writein("write("+fp+") "+v.eval ((program()))+"\n")
                 |_ -> ()
             |HTML ->
                 match v.etype,v with
                 |_,Int v ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+(GenerationScope.currentProgram()).numFormat.ItoS(v)+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+(program()).numFormat.ItoS(v)+"\\)<br/>\n")
                 |_,Dbl v ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+(GenerationScope.currentProgram()).numFormat.DtoS(v)+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+(program()).numFormat.DtoS(v)+"\\)<br/>\n")
                 |Zt,_ ->
                     let z = complex0 v
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.re.Expr.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.im.Expr.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.re.Expr.eval (program())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+z.im.Expr.eval (program())+"\\)<br/>\n")
                 |It _,_ ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (program())+"\\)<br/>\n")
                 |Dt,_ ->
-                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (GenerationScope.currentProgram())+"\\)<br/>\n")
+                    writein("Write(binary): \\("+fp+" \\leftarrow "+v.eval (program())+"\\)<br/>\n")
                 |_ -> ()
             |Python ->
                 match v.etype,v with
                 |_,Int _ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (program())+"))\n")
                 |_,Dbl _ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (program())+"))\n")
                 |Zt,_ ->
-                    ch.dd <| fun (tmp_r,tmp_i) ->
+                    environment.ch.dd <| fun (tmp_r,tmp_i) ->
                         let z = complex0 v
                         tmp_r <== z.re
                         tmp_i <== z.im
-                        writein(fp+".write(struct.pack('d', "+tmp_r.Expr.eval (GenerationScope.currentProgram())+"))\n")
-                        writein(fp+".write(struct.pack('d', "+tmp_i.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp_r.Expr.eval (program())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp_i.Expr.eval (program())+"))\n")
                 |It _,_ ->
-                    ch.i <| fun tmp ->
+                    environment.ch.i <| fun tmp ->
                         tmp <== int0 v
-                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('i', "+tmp.Expr.eval (program())+"))\n")
                 |Dt,_ ->
-                    ch.d <| fun tmp ->
+                    environment.ch.d <| fun tmp ->
                         tmp <== double0 v
-                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (GenerationScope.currentProgram())+"))\n")
+                        writein(fp+".write(struct.pack('d', "+tmp.Expr.eval (program())+"))\n")
                 |_ ->
                     ()
             |_ -> ()
 
-        static member private Read (fp:string) (iostat:int0) (lst:exprString) =
+        member private this.Read (fp:string) (iostat:int0) (lst:exprString) =
             let rec cpxvarlist list (s:list<reduceExprString>) counter =
                 match s with
                 |a::b ->
@@ -1275,11 +1290,11 @@ namespace Aqualis
                 |[] -> counter,list
             let Nz,varlist = cpxvarlist [] lst.data 0
 
-            match (GenerationScope.currentProgram()).language with
+            match (program()).language with
             |Fortran ->
-                ch.dx (2*Nz) <| fun tmp ->
+                environment.ch.dx (2*Nz) <| fun tmp ->
                     let double0string_format_F =
-                        let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                        let a,b = (program()).numFormat.dFormat
                         "E"+a.ToString()+"."+b.ToString()+"e3"
                     let format =
                         varlist
@@ -1287,7 +1302,7 @@ namespace Aqualis
                             [for (t,_,_) in b do
                                 match t with
                                 |It _ ->
-                                    yield "I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                                    yield "I"+(program()).numFormat.iFormat.ToString()
                                 |Dt ->
                                     yield double0string_format_F
                                 |Zt ->
@@ -1301,15 +1316,15 @@ namespace Aqualis
                                   if n<(b.Length-1) then yield "A1"
                               ])
                         |> fun s -> String.Join(",",s)
-                    ch.ix (varlist.Length+Nz-1) <| fun tab ->
+                    environment.ch.ix (varlist.Length+Nz-1) <| fun tab ->
                         let code =
                             varlist
                             |> (fun b ->
                                 [for t,m,b in b do
                                     match t,b with
                                     |Zt,RNvr (Var _) ->
-                                        yield tmp[2*m  ].Expr.eval (GenerationScope.currentProgram())
-                                        yield tmp[2*m+1].Expr.eval (GenerationScope.currentProgram())
+                                        yield tmp[2*m  ].Expr.eval (program())
+                                        yield tmp[2*m+1].Expr.eval (program())
                                     |_,RNvr (Var(_,n,_)) ->
                                         yield n
                                     |_ ->
@@ -1319,10 +1334,10 @@ namespace Aqualis
                             |> (fun b ->
                                   [for n in 0..(b.Length-1) do
                                       yield b[n]
-                                      if n<(b.Length-1) then yield tab[n].Expr.eval (GenerationScope.currentProgram())
+                                      if n<(b.Length-1) then yield tab[n].Expr.eval (program())
                                   ])
                             |> fun s -> String.Join(",",s)
-                        writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+code+"\n")
+                        writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval (program())+") "+code+"\n")
                         for t,m,b in varlist do
                             match t,b with
                             |Zt,RNvr v ->
@@ -1330,7 +1345,7 @@ namespace Aqualis
                             |_ ->
                                 ()
             |C99 ->
-                ch.dx (2*Nz) <| fun tmp ->
+                environment.ch.dx (2*Nz) <| fun tmp ->
                     let format =
                         varlist
                         |> (fun b ->
@@ -1352,8 +1367,8 @@ namespace Aqualis
                             [for t,m,a in b do
                                 match t,a with
                                 |Zt,RNvr (Var _) ->
-                                    yield "&"+tmp[2*m  ].Expr.eval ((GenerationScope.currentProgram()))
-                                    yield "&"+tmp[2*m+1].Expr.eval ((GenerationScope.currentProgram()))
+                                    yield "&"+tmp[2*m  ].Expr.eval ((program()))
+                                    yield "&"+tmp[2*m+1].Expr.eval ((program()))
                                 |_,RNvr (Var(_,n,_)) ->
                                     yield "&"+n
                                 |_ ->
@@ -1370,13 +1385,13 @@ namespace Aqualis
                             ()
             |LaTeX ->
                 let double0string_format_F =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format =
                     lst.data
                     |> List.map (fun b ->
                         match b.etype with
-                          |It _ ->"I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                          |It _ ->"I"+(program()).numFormat.iFormat.ToString()
                           |Dt -> double0string_format_F
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -1387,16 +1402,16 @@ namespace Aqualis
                         |RNvr (Var(_,n,_)) -> n
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
-                writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+code+"\n")
+                writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ((program()))+") "+code+"\n")
             |HTML ->
                 let double0string_format_F =
-                    let a,b = (GenerationScope.currentProgram()).numFormat.dFormat
+                    let a,b = (program()).numFormat.dFormat
                     "E"+a.ToString()+"."+b.ToString()+"e3"
                 let format =
                     lst.data
                     |> List.map (fun b ->
                         match b.etype with
-                        |It _ ->"I"+(GenerationScope.currentProgram()).numFormat.iFormat.ToString()
+                        |It _ ->"I"+(program()).numFormat.iFormat.ToString()
                         |Dt -> double0string_format_F
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -1409,7 +1424,7 @@ namespace Aqualis
                     |> fun s -> String.Join("<mo>,</mo>",s)
                 writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
             |Python ->
-                ch.dx (2*Nz) <| fun tmp ->
+                environment.ch.dx (2*Nz) <| fun tmp ->
                     let format =
                         varlist
                         |> (fun b ->
@@ -1431,8 +1446,8 @@ namespace Aqualis
                             [for t,m,a in b do
                                 match t,a with
                                 |Zt,RNvr (Var _) ->
-                                    yield tmp[2*m  ].Expr.eval ((GenerationScope.currentProgram()))
-                                    yield tmp[2*m+1].Expr.eval ((GenerationScope.currentProgram()))
+                                    yield tmp[2*m  ].Expr.eval ((program()))
+                                    yield tmp[2*m+1].Expr.eval ((program()))
                                 |_,RNvr (Var(_,n,_)) ->
                                     yield n
                                 |_ ->
@@ -1448,36 +1463,36 @@ namespace Aqualis
                         //let a_string = string a
                         match t,a with
                         |It _,RNvr v ->
-                            writein(v.eval (GenerationScope.currentProgram())+" = int(word_list["+cnt.ToString()+"])")
+                            writein(v.eval (program())+" = int(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
                         |Dt,RNvr v ->
-                            writein(v.eval (GenerationScope.currentProgram())+"= float(word_list["+cnt.ToString()+"])")
+                            writein(v.eval (program())+"= float(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
                         |Zt,RNvr v ->
-                            writein(v.eval (GenerationScope.currentProgram())+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
+                            writein(v.eval (program())+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
                             cnt <- cnt + 2
                         |_ -> ()
             |_ -> ()
 
-        static member private Read_bin (fp:string) (iostat:int0) (v:expr) =
-            match (GenerationScope.currentProgram()).language with
+        member private this.Read_bin (fp:string) (iostat:int0) (v:expr) =
+            match (program()).language with
             |Fortran ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
-                        writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+re.Expr.eval ((program()))+"\n")
+                        writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+im.Expr.eval ((program()))+"\n")
                         complex0 v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    writein("read("+fp+",iostat="+iostat.Expr.eval (GenerationScope.currentProgram())+") "+n+"\n")
+                    writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+n+"\n")
                 |_ ->
                     Console.WriteLine "ファイル読み込みデータの保存先が変数ではありません"
             |C99 ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein("fread(&"+re.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+re.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");"+"\n")
-                        writein("fread(&"+im.Expr.eval ((GenerationScope.currentProgram()))+",sizeof("+im.Expr.eval ((GenerationScope.currentProgram()))+"),1,"+fp+");"+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein("fread(&"+re.Expr.eval ((program()))+",sizeof("+re.Expr.eval ((program()))+"),1,"+fp+");"+"\n")
+                        writein("fread(&"+im.Expr.eval ((program()))+",sizeof("+im.Expr.eval ((program()))+"),1,"+fp+");"+"\n")
                         complex0 v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
                     writein("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
@@ -1486,12 +1501,12 @@ namespace Aqualis
             |LaTeX ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+re.Expr.eval ((GenerationScope.currentProgram()))+"\n")
-                        writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+im.Expr.eval ((GenerationScope.currentProgram()))+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+re.Expr.eval ((program()))+"\n")
+                        writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+im.Expr.eval ((program()))+"\n")
                         complex0 v <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    writein("read("+fp+",iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") "+n+"\n")
+                    writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+n+"\n")
                 |_ ->
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |HTML ->
@@ -1503,9 +1518,9 @@ namespace Aqualis
             |Python ->
                 match v.etype,v with
                 |Zt,Var _ ->
-                    ch.dd <| fun (re,im) ->
-                        writein(re.Expr.eval ((GenerationScope.currentProgram()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
-                        writein(im.Expr.eval ((GenerationScope.currentProgram()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                    environment.ch.dd <| fun (re,im) ->
+                        writein(re.Expr.eval ((program()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
+                        writein(im.Expr.eval ((program()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                         complex0 v <== re+asm.uj*im
                 |It _,Var(_,n,_) ->
                     writein(n+" = struct.unpack('i', "+fp+".read(4))[0]"+"\n")
@@ -1515,8 +1530,8 @@ namespace Aqualis
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |_ -> ()
 
-        static member private Read_byte (fp:string) (iostat:int0) (e:expr) =
-            writein("read("+fp+", iostat="+iostat.Expr.eval ((GenerationScope.currentProgram()))+") byte_tmp\n")
+        member private this.Read_byte (fp:string) (iostat:int0) (e:expr) =
+            writein("read("+fp+", iostat="+iostat.Expr.eval ((program()))+") byte_tmp\n")
             let ee =
                 match e.etype,e with
                 |It _,Var(_,n,_) -> n
@@ -1524,180 +1539,180 @@ namespace Aqualis
             writein(ee + "=" + "byte_tmp\n")
 
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
-        static member fileOutput (filename:exprString) = fun code ->
-            io.fileAccess (filename,None) false false <| fun fp ->
-                let writer = TextWriter fp
+        member this.fileOutput (filename:exprString) = fun code ->
+            this.fileAccess (filename,None) false false <| fun fp ->
+                let writer = TextWriter(environment,fp)
                 code writer
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
-        static member fileOutput (filename:exprString,intDigit:int) = fun code ->
-            io.fileAccess (filename,Some intDigit) false false <| fun fp ->
-                let writer = TextWriter fp
+        member this.fileOutput (filename:exprString,intDigit:int) = fun code ->
+            this.fileAccess (filename,Some intDigit) false false <| fun fp ->
+                let writer = TextWriter(environment,fp)
                 code writer
 
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
-        static member fileOutput (filename:string) = fun code -> io.fileOutput (st filename) code
-        
+        member this.fileOutput (filename:string) = fun code -> this.fileOutput (st filename) code
+
         ///<summary>バイナリファイル出力</summary>
-        static member binfileOutput (filename:exprString) = fun code ->
-            io.fileAccess (filename,None) false true <| fun fp ->
-                let writer = BinWriter fp
+        member this.binfileOutput (filename:exprString) = fun code ->
+            this.fileAccess (filename,None) false true <| fun fp ->
+                let writer = BinWriter(environment,fp)
                 code writer
         ///<summary>バイナリファイル出力</summary>
-        static member binfileOutput (filename:exprString,intDigit:int) = fun code ->
-            io.fileAccess (filename,Some intDigit) false true <| fun fp ->
-                let writer = BinWriter fp
+        member this.binfileOutput (filename:exprString,intDigit:int) = fun code ->
+            this.fileAccess (filename,Some intDigit) false true <| fun fp ->
+                let writer = BinWriter(environment,fp)
                 code writer
 
         ///<summary>バイナリファイル出力</summary>
-        static member binfileOutput (filename:string) = fun code -> io.binfileOutput (st filename) code
+        member this.binfileOutput (filename:string) = fun code -> this.binfileOutput (st filename) code
 
         ///<summary>ファイル読み込み</summary>
-        static member fileInput (filename:exprString) = fun code ->
-            ch.i <| fun iostat ->
-                io.fileAccess (filename,None) true false <| fun fp ->
-                    let reader = TextReader(fp,iostat)
+        member this.fileInput (filename:exprString) = fun code ->
+            environment.ch.i <| fun iostat ->
+                this.fileAccess (filename,None) true false <| fun fp ->
+                    let reader = TextReader(environment,fp,iostat)
                     code reader
-                    
+
         ///<summary>ファイル読み込み</summary>
-        static member fileInput (filename:exprString,intDigit:int) = fun code ->
-            ch.i <| fun iostat ->
-                io.fileAccess (filename,Some intDigit) true false <| fun fp ->
-                    let reader = TextReader(fp,iostat)
+        member this.fileInput (filename:exprString,intDigit:int) = fun code ->
+            environment.ch.i <| fun iostat ->
+                this.fileAccess (filename,Some intDigit) true false <| fun fp ->
+                    let reader = TextReader(environment,fp,iostat)
                     code reader
-                    
+
         ///<summary>ファイル読み込み</summary>
-        static member fileInput (filename:string) = fun code -> 
-            io.fileInput (st filename) code
-            
+        member this.fileInput (filename:string) = fun code ->
+            this.fileInput (st filename) code
+
         ///<summary>バイナリファイルの読み込み</summary>
-        static member binfileInput (filename:exprString) = fun code ->
-            ch.i <| fun iostat ->
-                io.fileAccess (filename,None) true true <| fun fp ->
-                    let reader = BinReader(fp,iostat)
+        member this.binfileInput (filename:exprString) = fun code ->
+            environment.ch.i <| fun iostat ->
+                this.fileAccess (filename,None) true true <| fun fp ->
+                    let reader = BinReader(environment,fp,iostat)
                     code reader
-                    
+
         ///<summary>バイナリファイルの読み込み</summary>
-        static member binfileInput (filename:exprString,intDigit:int) = fun code ->
-            ch.i <| fun iostat ->
-                io.fileAccess (filename,Some intDigit) true true <| fun fp ->
-                    let reader = BinReader(fp,iostat)
+        member this.binfileInput (filename:exprString,intDigit:int) = fun code ->
+            environment.ch.i <| fun iostat ->
+                this.fileAccess (filename,Some intDigit) true true <| fun fp ->
+                    let reader = BinReader(environment,fp,iostat)
                     code reader
-                    
+
         ///<summary>バイナリファイルの読み込み</summary>
-        static member binfileInput (filename:string) = fun code -> io.binfileInput (st filename) code
+        member this.binfileInput (filename:string) = fun code -> this.binfileInput (st filename) code
 
         ///<summary>ファイルの読み込み</summary>
-        static member file_Read (filename:exprString) = fun varlist code ->
-            ch.i <| fun iostat ->
-                io.fileAccess (filename,None) true false <| fun fp ->
-                    iter.loop <| fun (ext,i) ->
-                        io.Read fp iostat varlist
-                        br.branch <| fun b ->
-                            b.IF (iostat .< 0) <| fun () ->
-                                ext()
-                            b.EL <| fun () ->
-                                code(i)
-                                
-        ///<summary>ファイルの読み込み</summary>
-        static member file_Read (filename:exprString,intDigit:int) = fun varlist code ->
-            ch.i <| fun iostat ->
-                io.fileAccess (filename,Some intDigit) true false <| fun fp ->
-                    iter.loop <| fun (ext,i) ->
-                        io.Read fp iostat varlist
-                        br.branch <| fun b ->
+        member this.file_Read (filename:exprString) = fun varlist code ->
+            environment.ch.i <| fun iostat ->
+                this.fileAccess (filename,None) true false <| fun fp ->
+                    environment.iter.loop <| fun (ext,i) ->
+                        this.Read fp iostat varlist
+                        environment.br.branch <| fun b ->
                             b.IF (iostat .< 0) <| fun () ->
                                 ext()
                             b.EL <| fun () ->
                                 code(i)
 
+        ///<summary>ファイルの読み込み</summary>
+        member this.file_Read (filename:exprString,intDigit:int) = fun varlist code ->
+            environment.ch.i <| fun iostat ->
+                this.fileAccess (filename,Some intDigit) true false <| fun fp ->
+                    environment.iter.loop <| fun (ext,i) ->
+                        this.Read fp iostat varlist
+                        environment.br.branch <| fun b ->
+                            b.IF (iostat .< 0) <| fun () ->
+                                ext()
+                            b.EL <| fun () ->
+                                code(i)
+
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:int3,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:int3,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun (i,j,k) ->
                     w.tt <| i++j++k++f[i,j,k]
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:int2,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:int2,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun (i,j) ->
                     w.tt <| i++j++f[i,j]
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:int1,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:int1,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun i ->
                     w.tt <| i++f[i]
 
         ///<summary>数値をファイルに保存</summary>
-        static member save_text (f:int0,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:int0,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 w.t f
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:double3,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:double3,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun (i,j,k) ->
                     w.tt <| i++j++k++f[i,j,k]
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:double2,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:double2,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun (i,j) ->
                     w.tt <| i++j++f[i,j]
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:double1,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:double1,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun i ->
                     w.tt <| i++f[i]
 
         ///<summary>数値をファイルに保存</summary>
-        static member save_text (f:double0,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:double0,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 w.t f
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:complex3,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:complex3,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun (i,j,k) ->
                     w.tt <| i++j++k++f[i,j,k]
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:complex2,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:complex2,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun (i,j) ->
                     w.tt <| i++j++f[i,j]
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:complex1,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:complex1,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 f.foreach <| fun i ->
                     w.tt <| i++f[i]
 
         ///<summary>数値をファイルに保存</summary>
-        static member save_text (f:complex0,filename:exprString) =
-            io.fileOutput filename <| fun w ->
+        member this.save_text (f:complex0,filename:exprString) =
+            this.fileOutput filename <| fun w ->
                 w.t f
 
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:int3,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:int2,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:int1,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:int0,filename:string) = io.save_text(f,st filename)
+        member this.save_text (f:int3,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:int2,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:int1,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:int0,filename:string) = this.save_text(f,st filename)
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:double3,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:double2,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:double1,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:double0,filename:string) = io.save_text(f,st filename)
+        member this.save_text (f:double3,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:double2,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:double1,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:double0,filename:string) = this.save_text(f,st filename)
         ///<summary>配列をファイルに保存</summary>
-        static member save_text (f:complex3,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:complex2,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:complex1,filename:string) = io.save_text(f,st filename)
-        static member save_text (f:complex0,filename:string) = io.save_text(f,st filename)
+        member this.save_text (f:complex3,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:complex2,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:complex1,filename:string) = this.save_text(f,st filename)
+        member this.save_text (f:complex0,filename:string) = this.save_text(f,st filename)
 
         ///<summary>数値をファイルに保存</summary>
-        static member private save (f:expr,filename:exprString) =
-            io.binfileOutput filename <| fun w ->
+        member private this.save (f:expr,filename:exprString) =
+            this.binfileOutput filename <| fun w ->
                 //データフォーマット
                 w.b _1
                 //データ型
@@ -1720,13 +1735,13 @@ namespace Aqualis
                 |It 4 ->
                     w.b (int0 f)
                 |_ -> ()
-        static member private save (f:int0,filename:exprString) = io.save (f.Expr,filename)
-        static member private save (f:double0,filename:exprString) = io.save (f.Expr,filename)
-        static member private save (f:complex0,filename:exprString) = io.save (f.Expr,filename)
+        member private this.save (f:int0,filename:exprString) = this.save (f.Expr,filename)
+        member private this.save (f:double0,filename:exprString) = this.save (f.Expr,filename)
+        member private this.save (f:complex0,filename:exprString) = this.save (f.Expr,filename)
 
         ///<summary>1次元データをファイルに保存</summary>
-        static member save (f:int1,filename:exprString) =
-                io.binfileOutput filename <| fun w ->
+        member this.save (f:int1,filename:exprString) =
+                this.binfileOutput filename <| fun w ->
                     //データフォーマット
                     w.b _1
                     //データ型
@@ -1740,11 +1755,11 @@ namespace Aqualis
                     //データサイズ
                     w.b f.size1
                     //データ本体
-                    iter.num f.size1 <| fun i ->
+                    environment.iter.num f.size1 <| fun i ->
                         w.b f[i]
         ///<summary>1次元データをファイルに保存</summary>
-        static member save (f:double1,filename:exprString) =
-                io.binfileOutput filename <| fun w ->
+        member this.save (f:double1,filename:exprString) =
+                this.binfileOutput filename <| fun w ->
                     //データフォーマット
                     w.b _1
                     //データ型
@@ -1758,11 +1773,11 @@ namespace Aqualis
                     //データサイズ
                     w.b f.size1
                     //データ本体
-                    iter.num f.size1 <| fun i ->
+                    environment.iter.num f.size1 <| fun i ->
                         w.b f[i]
         ///<summary>1次元データをファイルに保存</summary>
-        static member save (f:complex1,filename:exprString) =
-                io.binfileOutput filename <| fun w ->
+        member this.save (f:complex1,filename:exprString) =
+                this.binfileOutput filename <| fun w ->
                     //データフォーマット
                     w.b _1
                     //データ型
@@ -1776,13 +1791,13 @@ namespace Aqualis
                     //データサイズ
                     w.b f.size1
                     //データ本体
-                    iter.num f.size1 <| fun i ->
+                    environment.iter.num f.size1 <| fun i ->
                         w.b f[i].re
                         w.b f[i].im
 
         ///<summary>2次元データをファイルに保存</summary>
-        static member save (f:int2,filename:exprString) =
-            io.binfileOutput filename <| fun w ->
+        member this.save (f:int2,filename:exprString) =
+            this.binfileOutput filename <| fun w ->
                 //データフォーマット
                 w.b _1
                 //データ型
@@ -1797,14 +1812,14 @@ namespace Aqualis
                 w.b f.size1
                 w.b f.size2
                 //データ本体
-                iter.num f.size2 <| fun j ->
-                    iter.num f.size1 <| fun i ->
+                environment.iter.num f.size2 <| fun j ->
+                    environment.iter.num f.size1 <| fun i ->
                         w.b f[i,j]
 
 
         ///<summary>2次元データをファイルに保存</summary>
-        static member save (f:double2,filename:exprString) =
-            io.binfileOutput filename <| fun w ->
+        member this.save (f:double2,filename:exprString) =
+            this.binfileOutput filename <| fun w ->
                 //データフォーマット
                 w.b _1
                 //データ型
@@ -1819,14 +1834,14 @@ namespace Aqualis
                 w.b f.size1
                 w.b f.size2
                 //データ本体
-                iter.num f.size2 <| fun j ->
-                    iter.num f.size1 <| fun i ->
+                environment.iter.num f.size2 <| fun j ->
+                    environment.iter.num f.size1 <| fun i ->
                         w.b f[i,j]
-                            
+
 
         ///<summary>2次元データをファイルに保存</summary>
-        static member save (f:complex2,filename:exprString) =
-            io.binfileOutput filename <| fun w ->
+        member this.save (f:complex2,filename:exprString) =
+            this.binfileOutput filename <| fun w ->
                 //データフォーマット
                 w.b _1
                 //データ型
@@ -1841,14 +1856,14 @@ namespace Aqualis
                 w.b f.size1
                 w.b f.size2
                 //データ本体
-                iter.num f.size2 <| fun j ->
-                    iter.num f.size1 <| fun i ->
+                environment.iter.num f.size2 <| fun j ->
+                    environment.iter.num f.size1 <| fun i ->
                         w.b f[i,j].re
                         w.b f[i,j].im
 
         ///<summary>3次元データをファイルに保存</summary>
-        static member save (f:int3,filename:exprString) =
-            io.binfileOutput filename <| fun w ->
+        member this.save (f:int3,filename:exprString) =
+            this.binfileOutput filename <| fun w ->
                 //データフォーマット
                 w.b _1
                 //データ型
@@ -1864,14 +1879,14 @@ namespace Aqualis
                 w.b f.size2
                 w.b f.size3
                 //データ本体
-                iter.num f.size3 <| fun k ->
-                    iter.num f.size2 <| fun j ->
-                        iter.num f.size1 <| fun i ->
+                environment.iter.num f.size3 <| fun k ->
+                    environment.iter.num f.size2 <| fun j ->
+                        environment.iter.num f.size1 <| fun i ->
                             w.b f[i,j,k]
 
         ///<summary>3次元データをファイルに保存</summary>
-        static member save (f:double3,filename:exprString) =
-            io.binfileOutput filename <| fun w ->
+        member this.save (f:double3,filename:exprString) =
+            this.binfileOutput filename <| fun w ->
                 //データフォーマット
                 w.b _1
                 //データ型
@@ -1887,14 +1902,14 @@ namespace Aqualis
                 w.b f.size2
                 w.b f.size3
                 //データ本体
-                iter.num f.size3 <| fun k ->
-                    iter.num f.size2 <| fun j ->
-                        iter.num f.size1 <| fun i ->
+                environment.iter.num f.size3 <| fun k ->
+                    environment.iter.num f.size2 <| fun j ->
+                        environment.iter.num f.size1 <| fun i ->
                             w.b f[i,j,k]
-                                
+
         ///<summary>3次元データをファイルに保存</summary>
-        static member save (f:complex3,filename:exprString) =
-            io.binfileOutput filename <| fun w ->
+        member this.save (f:complex3,filename:exprString) =
+            this.binfileOutput filename <| fun w ->
                 //データフォーマット
                 w.b _1
                 //データ型
@@ -1910,50 +1925,50 @@ namespace Aqualis
                 w.b f.size2
                 w.b f.size3
                 //データ本体
-                iter.num f.size3 <| fun k ->
-                    iter.num f.size2 <| fun j ->
-                        iter.num f.size1 <| fun i ->
+                environment.iter.num f.size3 <| fun k ->
+                    environment.iter.num f.size2 <| fun j ->
+                        environment.iter.num f.size1 <| fun i ->
                             w.b f[i,j,k].re
                             w.b f[i,j,k].im
-        static member save (f:int3,filename:string) = io.save(f,st filename)
-        static member save (f:int2,filename:string) = io.save(f,st filename)
-        static member save (f:int1,filename:string) = io.save(f,st filename)
-        static member save (f:int0,filename:string) = io.save(f,st filename)
-        static member save (f:double3,filename:string) = io.save(f,st filename)
-        static member save (f:double2,filename:string) = io.save(f,st filename)
-        static member save (f:double1,filename:string) = io.save(f,st filename)
-        static member save (f:double0,filename:string) = io.save(f,st filename)
-        static member save (f:complex3,filename:string) = io.save(f,st filename)
-        static member save (f:complex2,filename:string) = io.save(f,st filename)
-        static member save (f:complex1,filename:string) = io.save(f,st filename)
-        static member save (f:complex0,filename:string) = io.save(f,st filename)
+        member this.save (f:int3,filename:string) = this.save(f,st filename)
+        member this.save (f:int2,filename:string) = this.save(f,st filename)
+        member this.save (f:int1,filename:string) = this.save(f,st filename)
+        member this.save (f:int0,filename:string) = this.save(f,st filename)
+        member this.save (f:double3,filename:string) = this.save(f,st filename)
+        member this.save (f:double2,filename:string) = this.save(f,st filename)
+        member this.save (f:double1,filename:string) = this.save(f,st filename)
+        member this.save (f:double0,filename:string) = this.save(f,st filename)
+        member this.save (f:complex3,filename:string) = this.save(f,st filename)
+        member this.save (f:complex2,filename:string) = this.save(f,st filename)
+        member this.save (f:complex1,filename:string) = this.save(f,st filename)
+        member this.save (f:complex0,filename:string) = this.save(f,st filename)
 
         ///<summary>数値をファイルから読み込み</summary>
-        static member load (f:int0,filename:exprString) =
+        member this.load (f:int0,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=0)
+                            environment.br.if2 (n.=0)
                                 <| fun () ->
-                                    ch.i <| fun n1 ->
+                                    environment.ch.i <| fun n1 ->
                                         //データサイズ
                                         r.b n1
                                         //データ本体
                                         r.b f
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s "invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s "invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f.etype with
                         |It 4 ->
@@ -1963,34 +1978,34 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.s "invalid data type"
-                            
+                            environment.print.s "invalid data type"
+
         ///<summary>数値をファイルから読み込み</summary>
-        static member load (f:double0,filename:exprString) =
+        member this.load (f:double0,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=0)
+                            environment.br.if2 (n.=0)
                                 <| fun () ->
-                                    ch.i <| fun n1 ->
+                                    environment.ch.i <| fun n1 ->
                                         //データサイズ
                                         r.b n1
                                         //データ本体
                                         r.b f
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s "invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s "invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f.etype with
                         |It 4 ->
@@ -2000,37 +2015,37 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>数値をファイルから読み込み</summary>
-        static member load (f:complex0,filename:exprString) =
+        member this.load (f:complex0,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=0)
+                            environment.br.if2 (n.=0)
                                 <| fun () ->
-                                    ch.i <| fun n1 ->
+                                    environment.ch.i <| fun n1 ->
                                         //データサイズ
                                         r.b n1
                                         //データ本体
-                                        ch.dd <| fun (re,im) ->
+                                        environment.ch.dd <| fun (re,im) ->
                                             r.b re
                                             r.b im
                                             f <== re + asm.uj*im
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s "invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s "invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f.etype with
                         |It 4 ->
@@ -2040,38 +2055,38 @@ namespace Aqualis
                         |Zt    ->
                             reader r (3000,f.etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
-        static member load (f:int1,filename:exprString) =
+        member this.load (f:int1,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=1)
+                            environment.br.if2 (n.=1)
                                 <| fun () ->
-                                    ch.i <| fun n1 ->
+                                    environment.ch.i <| fun n1 ->
                                         //データサイズ
                                         r.b n1
                                         f.allocate n1
                                         //データ本体
-                                        iter.num f.size1 <| fun i ->
-                                            ch.i <| fun u ->
+                                        environment.iter.num f.size1 <| fun i ->
+                                            environment.ch.i <| fun u ->
                                                 r.b u
                                                 f[i] <== u
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s ": invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s ": invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0].etype with
                         |Etype.It 4  ->
@@ -2081,38 +2096,38 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
-        static member load (f:double1,filename:exprString) =
+        member this.load (f:double1,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=1)
+                            environment.br.if2 (n.=1)
                                 <| fun () ->
-                                    ch.i <| fun n1 ->
+                                    environment.ch.i <| fun n1 ->
                                         //データサイズ
                                         r.b n1
                                         f.allocate n1
                                         //データ本体
-                                        iter.num f.size1 <| fun i ->
-                                            ch.d <| fun u ->
+                                        environment.iter.num f.size1 <| fun i ->
+                                            environment.ch.d <| fun u ->
                                                 r.b u
                                                 f[i] <== u
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s ": invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s ": invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0].etype with
                         |Etype.It 4  ->
@@ -2122,53 +2137,53 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>1次元データをファイルから読み込み</summary>
-        static member load (f:complex1,filename:exprString) =
+        member this.load (f:complex1,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=1)
+                            environment.br.if2 (n.=1)
                                 <| fun () ->
-                                    ch.i <| fun n1 ->
+                                    environment.ch.i <| fun n1 ->
                                         //データサイズ
                                         r.b n1
                                         f.allocate n1
                                         //データ本体
                                         match t with
                                         |It _ ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.i <| fun u ->
+                                            environment.iter.num f.size1 <| fun i ->
+                                                environment.ch.i <| fun u ->
                                                     r.b u
                                                     f[i] <== u
                                         |Dt ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.d <| fun u ->
+                                            environment.iter.num f.size1 <| fun i ->
+                                                environment.ch.d <| fun u ->
                                                     r.b u
                                                     f[i] <== u
                                         |Zt ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.dd <| fun (re,im) ->
+                                            environment.iter.num f.size1 <| fun i ->
+                                                environment.ch.dd <| fun (re,im) ->
                                                     r.b re
                                                     r.b im
                                                     f[i] <== re + asm.uj*im
                                         |_ ->
                                             ()
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s ": invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s ": invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0].etype with
                         |Etype.It 4  ->
@@ -2178,41 +2193,41 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
-        static member load (f:int2,filename:exprString) =
+        member this.load (f:int2,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=2)
+                            environment.br.if2 (n.=2)
                                 <| fun () ->
-                                    ch.ii <| fun (n1,n2) ->
+                                    environment.ch.ii <| fun (n1,n2) ->
                                         //データサイズ
                                         r.b n1
                                         r.b n2
                                         f.allocate(n1,n2)
                                         //データ本体
-                                        iter.num f.size2 <| fun j ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.i <| fun u ->
+                                        environment.iter.num f.size2 <| fun j ->
+                                            environment.iter.num f.size1 <| fun i ->
+                                                environment.ch.i <| fun u ->
                                                     r.b u
                                                     f[i,j] <== u
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s ": invalid data type"
-                            print.tt <| n++(I nt)
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s ": invalid data type"
+                            environment.print.tt <| n++(I nt)
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0,0].etype with
                         |It 4 ->
@@ -2222,41 +2237,41 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
-        static member load (f:double2,filename:exprString) =
+        member this.load (f:double2,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=2)
+                            environment.br.if2 (n.=2)
                                 <| fun () ->
-                                    ch.ii <| fun (n1,n2) ->
+                                    environment.ch.ii <| fun (n1,n2) ->
                                         //データサイズ
                                         r.b n1
                                         r.b n2
                                         f.allocate(n1,n2)
                                         //データ本体
-                                        iter.num f.size2 <| fun j ->
-                                            iter.num f.size1 <| fun i ->
-                                                ch.d <| fun u ->
+                                        environment.iter.num f.size2 <| fun j ->
+                                            environment.iter.num f.size1 <| fun i ->
+                                                environment.ch.d <| fun u ->
                                                     r.b u
                                                     f[i,j] <== u
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s ": invalid data type"
-                            print.tt <| n++(I nt)
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s ": invalid data type"
+                            environment.print.tt <| n++(I nt)
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0,0].etype with
                         |It 4 ->
@@ -2266,21 +2281,21 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>2次元データをファイルから読み込み</summary>
-        static member load (f:complex2,filename:exprString) =
+        member this.load (f:complex2,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=2)
+                            environment.br.if2 (n.=2)
                                 <| fun () ->
-                                    ch.ii <| fun (n1,n2) ->
+                                    environment.ch.ii <| fun (n1,n2) ->
                                         //データサイズ
                                         r.b n1
                                         r.b n2
@@ -2288,36 +2303,36 @@ namespace Aqualis
                                         //データ本体
                                         match t with
                                         |It _ ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.i <| fun u ->
+                                            environment.iter.num f.size2 <| fun j ->
+                                                environment.iter.num f.size1 <| fun i ->
+                                                    environment.ch.i <| fun u ->
                                                         r.b u
                                                         f[i,j] <== u
                                         |Dt ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.d <| fun u ->
+                                            environment.iter.num f.size2 <| fun j ->
+                                                environment.iter.num f.size1 <| fun i ->
+                                                    environment.ch.d <| fun u ->
                                                         r.b u
                                                         f[i,j] <== u
                                         |Zt ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.dd <| fun (re,im) ->
+                                            environment.iter.num f.size2 <| fun j ->
+                                                environment.iter.num f.size1 <| fun i ->
+                                                    environment.ch.dd <| fun (re,im) ->
                                                         r.b re
                                                         r.b im
                                                         f[i,j] <== re + asm.uj*im
                                         |_ ->
                                             ()
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s ": invalid data type"
-                            print.tt <| n++(I nt)
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s ": invalid data type"
+                            environment.print.tt <| n++(I nt)
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[0,0].etype with
                         |It 4 ->
@@ -2327,42 +2342,42 @@ namespace Aqualis
                         |Zt   ->
                             reader r (3000,f[0,0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
         ///<summary>3次元データをファイルから読み込み</summary>
-        static member load (f:int3,filename:exprString) =
+        member this.load (f:int3,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=3)
+                            environment.br.if2 (n.=3)
                                 <| fun () ->
-                                    ch.iii <| fun (n1,n2,n3) ->
+                                    environment.ch.iii <| fun (n1,n2,n3) ->
                                         //データサイズ
                                         r.b n1
                                         r.b n2
                                         r.b n3
                                         f.allocate(n1,n2,n3)
                                         //データ本体
-                                        iter.num f.size3 <| fun k ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.i <| fun u ->
+                                        environment.iter.num f.size3 <| fun k ->
+                                            environment.iter.num f.size2 <| fun j ->
+                                                environment.iter.num f.size1 <| fun i ->
+                                                    environment.ch.i <| fun u ->
                                                         r.b u
                                                         f[i,j,k] <== u
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s "invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s "invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[_0,_0,_0].etype with
                         |Etype.It 4  ->
@@ -2372,47 +2387,47 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
-        static member load (f:int3,filename:string) = io.load(f,st filename)
-        static member load (f:int2,filename:string) = io.load(f,st filename)
-        static member load (f:int1,filename:string) = io.load(f,st filename)
-        static member load (f:int0,filename:string) = io.load(f,st filename)
+        member this.load (f:int3,filename:string) = this.load(f,st filename)
+        member this.load (f:int2,filename:string) = this.load(f,st filename)
+        member this.load (f:int1,filename:string) = this.load(f,st filename)
+        member this.load (f:int0,filename:string) = this.load(f,st filename)
 
         ///<summary>3次元データをファイルから読み込み</summary>
-        static member load (f:double3,filename:exprString) =
+        member this.load (f:double3,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=3)
+                            environment.br.if2 (n.=3)
                                 <| fun () ->
-                                    ch.iii <| fun (n1,n2,n3) ->
+                                    environment.ch.iii <| fun (n1,n2,n3) ->
                                         //データサイズ
                                         r.b n1
                                         r.b n2
                                         r.b n3
                                         f.allocate(n1,n2,n3)
                                         //データ本体
-                                        iter.num f.size3 <| fun k ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.d <| fun u ->
+                                        environment.iter.num f.size3 <| fun k ->
+                                            environment.iter.num f.size2 <| fun j ->
+                                                environment.iter.num f.size1 <| fun i ->
+                                                    environment.ch.d <| fun u ->
                                                         r.b u
                                                         f[i,j,k] <== u
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s "invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s "invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[_0,_0,_0].etype with
                         |Etype.It 4  ->
@@ -2422,48 +2437,48 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
-        static member load (f:double3,filename:string) = io.load(f,st filename)
-        static member load (f:double2,filename:string) = io.load(f,st filename)
-        static member load (f:double1,filename:string) = io.load(f,st filename)
-        static member load (f:double0,filename:string) = io.load(f,st filename)
+        member this.load (f:double3,filename:string) = this.load(f,st filename)
+        member this.load (f:double2,filename:string) = this.load(f,st filename)
+        member this.load (f:double1,filename:string) = this.load(f,st filename)
+        member this.load (f:double0,filename:string) = this.load(f,st filename)
 
         ///<summary>3次元データをファイルから読み込み</summary>
-        static member load (f:complex3,filename:exprString) =
+        member this.load (f:complex3,filename:exprString) =
             let reader (r:BinReader) (nt:int,t:Etype) =
-                ch.i <| fun n ->
+                environment.ch.i <| fun n ->
                     //データ型
                     r.b n
-                    br.if2 (n.=nt)
+                    environment.br.if2 (n.=nt)
                         <| fun () ->
                             //データ次元
                             r.b n
-                            br.if2 (n.=3)
+                            environment.br.if2 (n.=3)
                                 <| fun () ->
-                                    ch.iii <| fun (n1,n2,n3) ->
+                                    environment.ch.iii <| fun (n1,n2,n3) ->
                                         //データサイズ
                                         r.b n1
                                         r.b n2
                                         r.b n3
                                         f.allocate(n1,n2,n3)
                                         //データ本体
-                                        iter.num f.size3 <| fun k ->
-                                            iter.num f.size2 <| fun j ->
-                                                iter.num f.size1 <| fun i ->
-                                                    ch.dd <| fun (re,im) ->
+                                        environment.iter.num f.size3 <| fun k ->
+                                            environment.iter.num f.size2 <| fun j ->
+                                                environment.iter.num f.size1 <| fun i ->
+                                                    environment.ch.dd <| fun (re,im) ->
                                                         r.b re
                                                         r.b im
                                                         f[i,j,k] <== re + asm.uj*im
                                 <| fun () ->
-                                    print.s "invalid data dimension"
+                                    environment.print.s "invalid data dimension"
                         <| fun () ->
-                            print.s "invalid data type"
-            io.binfileInput filename <| fun r ->
-            ch.i <| fun n ->
+                            environment.print.s "invalid data type"
+            this.binfileInput filename <| fun r ->
+            environment.ch.i <| fun n ->
                 //データフォーマット
                 r.b n
-                br.branch <| fun b ->
+                environment.br.branch <| fun b ->
                     b.IF (n.=1) <| fun () ->
                         match f[_0,_0,_0].etype with
                         |Etype.It 4  ->
@@ -2473,76 +2488,14 @@ namespace Aqualis
                         |Etype.Zt    ->
                             reader r (3000,f[_0,_0,_0].etype)
                         |_ ->
-                            print.s "invalid data type"
+                            environment.print.s "invalid data type"
 
-        static member load (f:complex3,filename:string) = io.load(f,st filename)
-        static member load (f:complex2,filename:string) = io.load(f,st filename)
-        static member load (f:complex1,filename:string) = io.load(f,st filename)
-        static member load (f:complex0,filename:string) = io.load(f,st filename)
+        member this.load (f:complex3,filename:string) = this.load(f,st filename)
+        member this.load (f:complex2,filename:string) = this.load(f,st filename)
+        member this.load (f:complex1,filename:string) = this.load(f,st filename)
+        member this.load (f:complex0,filename:string) = this.load(f,st filename)
 
     ///<summary>ファイル入出力（処理スキップ）</summary>
-    type dummy_io () =
-
-        static member fileOutput (filename:exprString) code = ()
-
-        static member fileInput (filename:exprString) code = ()
-
-        static member binfileInput (filename:exprString) code = ()
-
-        static member file_Read (filename:exprString) varlist code = ()
-
-        ///<summary>配列をファイルに保存</summary>
-        static member array (f:int3,filename) = ()
-        static member array (f:int2,filename) = ()
-        static member array (f:int1,filename) = ()
-        static member array (f:int0,filename) = ()
-
-        ///<summary>配列をファイルに保存</summary>
-        static member array (f:double3,filename) = ()
-        static member array (f:double2,filename) = ()
-        static member array (f:double1,filename) = ()
-        static member array (f:double0,filename) = ()
-        
-        ///<summary>配列をファイルに保存</summary>
-        static member array (f:complex3,filename) = ()
-        static member array (f:complex2,filename) = ()
-        static member array (f:complex1,filename) = ()
-        static member array (f:complex0,filename) = ()
-
-    /// File I/O entry points bound to the explicit Compile environment.
-    type ContextIo internal (environment:CompilationEnvironment) =
-        let run (filename:exprString) action =
-            match environment.GenerationContext with
-            |Some context ->
-                GenerationContextMerge.merge (Some context) filename.Context |> ignore
-                context.Activate action
-            |None -> ()
-
-        member _.fileOutput(filename:exprString) code =
-            run filename (fun () -> io.fileOutput filename code)
-        member _.fileOutputWithDigits(filename:exprString,intDigit:int) code =
-            run filename (fun () -> io.fileOutput(filename,intDigit) code)
-
-        member _.binfileOutput(filename:exprString) code =
-            run filename (fun () -> io.binfileOutput filename code)
-        member _.binfileOutputWithDigits(filename:exprString,intDigit:int) code =
-            run filename (fun () -> io.binfileOutput(filename,intDigit) code)
-
-        member _.fileInput(filename:exprString) code =
-            run filename (fun () -> io.fileInput filename code)
-        member _.fileInputWithDigits(filename:exprString,intDigit:int) code =
-            run filename (fun () -> io.fileInput(filename,intDigit) code)
-
-        member _.binfileInput(filename:exprString) code =
-            run filename (fun () -> io.binfileInput filename code)
-        member _.binfileInputWithDigits(filename:exprString,intDigit:int) code =
-            run filename (fun () -> io.binfileInput(filename,intDigit) code)
-
-        member _.file_Read(filename:exprString) varlist code =
-            run filename (fun () -> io.file_Read filename varlist code)
-        member _.fileReadWithDigits(filename:exprString,intDigit:int) varlist code =
-            run filename (fun () -> io.file_Read(filename,intDigit) varlist code)
-
     [<AutoOpen>]
     module CompilationEnvironmentIoExtensions =
         type CompilationEnvironment with

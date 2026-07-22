@@ -333,8 +333,8 @@ module graph =
     let layoutA4_twocol(height:double) = {sizeX=226.749; sizeY=height*2.8343625; marginXl=10.0; marginXr=10.0; marginYb=10.0; marginYt=10.0; dX=10.0; dY=10.0; mX=10.0; mY=10.0}
     
     /// 指定したレイアウトでグラフ作成
-    let make (L:Layout) (outputdir:string) filename (nX:int,nY:int) code =
-        svgfile.make (outputdir,filename) (L.sizeX,L.sizeY) 1.0 <| fun sv ->
+    let make (environment:CompilationEnvironment) (L:Layout) (outputdir:string) filename (nX:int,nY:int) code =
+        environment.svgfile.make (outputdir,filename) (L.sizeX,L.sizeY) 1.0 <| fun sv ->
             //グラフの描画領域
             let sx = (L.sizeX-double(nX-1)*L.dX-L.marginXl-L.marginXr)/double nX
             let sy = (L.sizeY-double(nY-1)*L.dY-L.marginYb-L.marginYt)/double nY

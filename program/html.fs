@@ -138,8 +138,16 @@ namespace Aqualis
         static member (+) (p1:position,p2:position) = position(p1.x+p2.x, p1.y+p2.y)
         static member (-) (p1:position,p2:position) = position(p1.x-p2.x, p1.y-p2.y)
 
-    type html =
-        static member head title = fun code ->
+    type html internal (program:program, environment:CompilationEnvironment option) =
+        let write(s:string) = program.codewrite s
+        let writei(s:string) = program.codewritei s
+        let writen(s:string) = program.codewriten s
+        let writein(s:string) = program.codewritein s
+        new(program:program) = html(program, None)
+        member internal _.Environment =
+            environment
+            |> Option.defaultWith (fun () -> invalidOp "This HTML writer is not associated with a CompilationEnvironment.")
+        member this.head title = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
@@ -157,7 +165,7 @@ namespace Aqualis
             code()
             writein "</body>"
             writein "</html>"
-        static member head (title,refresh:int) = fun code ->
+        member this.head (title,refresh:int) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
@@ -176,7 +184,7 @@ namespace Aqualis
             code()
             writein "</body>"
             writein "</html>"
-        static member head (title,cssfile,jsfile,refresh:int) = fun code ->
+        member this.head (title,cssfile,jsfile,refresh:int) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
@@ -196,7 +204,7 @@ namespace Aqualis
             code()
             writein "</body>"
             writein "</html>"
-        static member head (title,cssfile,jsfile) = fun code ->
+        member this.head (title,cssfile,jsfile) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
@@ -215,7 +223,7 @@ namespace Aqualis
             code()
             writein "</body>"
             writein "</html>"
-        static member head (title,cssfile) = fun code ->
+        member this.head (title,cssfile) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
@@ -234,26 +242,26 @@ namespace Aqualis
             writein "</body>"
             writein "</html>"
         // /// 内部要素のないタグ
-        // static member taga (t:string,s:Style) =
+        // member this.taga (t:string,s:Style) =
         //     writein("<"+t+" "+s.code+" />")
         /// 内部要素のないタグ
-        static member taga (t:string,atr:list<Atr>) =
+        member this.taga (t:string,atr:list<Atr>) =
             writein("<"+t+" "+Atr.list atr+" />")
         // 内部要素のないタグ
-        // static member taga (t:string,lst:list<string*string>) =
+        // member this.taga (t:string,lst:list<string*string>) =
         //     writein("<"+t+" ")
         //     for a,s in lst do
         //         writein(a + "=" + s + " ")
         //     writein " />"
         /// 内部要素のないタグ
-        static member taga (t:string) =
+        member this.taga (t:string) =
             writein("<"+t+" ")
             writein " />"
         /// 内部要素のないタグ
-        static member taga (t:string,a:string) =
+        member this.taga (t:string,a:string) =
             writein("<"+t+" "+a+" />")
         // /// 内部要素のあるタグ
-        // static member tagb (t:string,atr:Style) = fun code ->
+        // member this.tagb (t:string,atr:Style) = fun code ->
         //     let a = atr.code
         //     if a = "" then
         //         writein("<"+t+">")
@@ -262,7 +270,7 @@ namespace Aqualis
         //     code()
         //     writein ("</"+t+">")
         /// 内部要素のあるタグ
-        static member tagb (t:string,atr:list<Atr>) = fun code ->
+        member this.tagb (t:string,atr:list<Atr>) = fun code ->
             let a = Atr.list atr
             if a = "" then
                 writein("<"+t+">")
@@ -272,7 +280,7 @@ namespace Aqualis
             writein ("</"+t+">")
 
         // /// 内部要素のあるタグ
-        // static member tagb (t:string,lst:list<string*string>) = fun code ->
+        // member this.tagb (t:string,lst:list<string*string>) = fun code ->
         //     if lst.Length=0 then
         //         writein("<"+t+">")
         //     else
@@ -283,7 +291,7 @@ namespace Aqualis
         //     code()
         //     writein ("</"+t+">")
         /// 内部要素のあるタグ
-        static member tagb (t:string,a:string) = fun code ->
+        member this.tagb (t:string,a:string) = fun code ->
             if a="" then
                 writein("<"+t+">")
             else
@@ -291,70 +299,68 @@ namespace Aqualis
             code()
             writein ("</"+t+">")
         /// 内部要素のあるタグ
-        static member tagb (t:string) = fun code ->
+        member this.tagb (t:string) = fun code ->
             writein("<"+t+">")
             code()
             writein ("</"+t+">")
 
         // /// 内部要素のあるタグ
-        // static member tagb0 (t:string,lst:list<string*string>) = fun code ->
+        // member this.tagb0 (t:string,lst:list<string*string>) = fun code ->
         //     if lst.Length=0 then
         //         write("<"+t+">")
         //     else
         //         writen("<"+t+" ")
-        //         (GenerationScope.currentProgram()).indentInc()
         //         for a,s in lst do
         //             writen(a + " = \"" + s + "\"")
-        //         (GenerationScope.currentProgram()).indentDec()
         //         write ">"
         //     code()
         //     writen ("</"+t+">")
 
-        static member tagv (t:string,atr:list<Atr>) =
+        member this.tagv (t:string,atr:list<Atr>) =
             writein("<" + t + " " + Atr.list atr + ">")
 
-        static member tage (t:string) =
+        member this.tage (t:string) =
             writein("</" + t + ">")
 
-        static member h1 (t:string) = fun code ->
-            html.tagb "h1" <| fun () -> writein t
+        member this.h1 (t:string) = fun code ->
+            this.tagb "h1" <| fun () -> writein t
             code()
 
-        static member h1 (t:string,s:Style) = fun code ->
-            html.tagb ("h1",[s.atr]) <| fun () -> writein t
+        member this.h1 (t:string,s:Style) = fun code ->
+            this.tagb ("h1",[s.atr]) <| fun () -> writein t
             code()
 
-        static member h2 (t:string) = fun code ->
-            html.tagb "h2" <| fun () -> writein t
+        member this.h2 (t:string) = fun code ->
+            this.tagb "h2" <| fun () -> writein t
             code()
 
-        static member h2 (t:string,s:Style) = fun code ->
-            html.tagb ("h2",[s.atr]) <| fun () -> writein t
+        member this.h2 (t:string,s:Style) = fun code ->
+            this.tagb ("h2",[s.atr]) <| fun () -> writein t
             code()
-        static member h3 (t:string) = fun code ->
-            html.tagb "h3" <| fun () -> writein t
+        member this.h3 (t:string) = fun code ->
+            this.tagb "h3" <| fun () -> writein t
             code()
-        static member h3 (t:string,s:Style) = fun code ->
-            html.tagb ("h3",[s.atr]) <| fun () -> writein t
+        member this.h3 (t:string,s:Style) = fun code ->
+            this.tagb ("h3",[s.atr]) <| fun () -> writein t
             code()
-        static member h4 (t:string) = fun code ->
-            html.tagb "h4" <| fun () -> writein t
+        member this.h4 (t:string) = fun code ->
+            this.tagb "h4" <| fun () -> writein t
             code()
-        static member h4 (t:string,s:Style) = fun code ->
-            html.tagb ("h4",[s.atr]) <| fun () -> writein t
+        member this.h4 (t:string,s:Style) = fun code ->
+            this.tagb ("h4",[s.atr]) <| fun () -> writein t
             code()
-        static member h5 (t:string) = fun code ->
-            html.tagb "h5" <| fun () -> writein t
+        member this.h5 (t:string) = fun code ->
+            this.tagb "h5" <| fun () -> writein t
             code()
-        static member h5 (t:string,s:Style) = fun code ->
-            html.tagb ("h5",[s.atr]) <| fun () -> writein t
+        member this.h5 (t:string,s:Style) = fun code ->
+            this.tagb ("h5",[s.atr]) <| fun () -> writein t
             code()
-        static member form (action:string) = fun code -> html.tagb ("form",[Atr("method","post"); Atr("action",action);]) code
-        static member form_fileUpload (action:string) = fun code -> html.tagb ("form",[Atr("method","post"); Atr("enctype","multipart/form-data"); Atr("action",action);]) code
-        static member submit(url:string,name:string,value:string) = html.taga("input",[Atr("type","submit"); Atr("name",name); Atr("value",value); Atr("formaction",url)])
-        // static member table_ code = html.tagb "table" code
-        static member table (a:list<Atr>) = fun code -> html.tagb ("table",a) code
-        static member tableData (lst:list<list<string>>) = fun (p:position) (size:int) ->
+        member this.form (action:string) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("action",action);]) code
+        member this.form_fileUpload (action:string) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("enctype","multipart/form-data"); Atr("action",action);]) code
+        member this.submit(url:string,name:string,value:string) = this.taga("input",[Atr("type","submit"); Atr("name",name); Atr("value",value); Atr("formaction",url)])
+        // member this.table_ code = this.tagb "table" code
+        member this.table (a:list<Atr>) = fun code -> this.tagb ("table",a) code
+        member this.tableData (lst:list<list<string>>) = fun (p:position) (size:int) ->
             writein ("<table style =\"margin-left: "+InvariantFormat.number p.x+"px; margin-top: "+InvariantFormat.number p.y+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
             for m in 0..lst.Length-1 do
                 writein "<tr>"
@@ -365,65 +371,65 @@ namespace Aqualis
                 writein "</tr>"
             writein "</table>"
             writein "</div>"
-        // static member tr code = html.tagb "tr" code
-        static member tr (a:list<Atr>) = fun code -> html.tagb ("tr",a) code
-        static member th (a:list<Atr>) code = html.tagb ("th",a) code
-        static member td (a:list<Atr>) code = html.tagb ("td",a) code
-        // static member td (a:list<string*string>) = fun code -> html.tagb ("td",a) code
-        static member strong(t:string) = html.tagb "strong" <| fun () -> writein t
-        // static member enumerate code = html.tagb "ol" code
-        static member enumerate (a:list<Atr>) = fun code -> html.tagb ("ol",a) code
-        // static member enumerate (a:Style) = fun code -> html.tagb ("ol",a) code
-        static member enumerateList (a:list<Atr>) (c:list<unit->unit>) =
-            html.tagb "ol" <| fun () ->
+        // member this.tr code = this.tagb "tr" code
+        member this.tr (a:list<Atr>) = fun code -> this.tagb ("tr",a) code
+        member this.th (a:list<Atr>) code = this.tagb ("th",a) code
+        member this.td (a:list<Atr>) code = this.tagb ("td",a) code
+        // member this.td (a:list<string*string>) = fun code -> this.tagb ("td",a) code
+        member this.strong(t:string) = this.tagb "strong" <| fun () -> writein t
+        // member this.enumerate code = this.tagb "ol" code
+        member this.enumerate (a:list<Atr>) = fun code -> this.tagb ("ol",a) code
+        // member this.enumerate (a:Style) = fun code -> this.tagb ("ol",a) code
+        member this.enumerateList (a:list<Atr>) (c:list<unit->unit>) =
+            this.tagb "ol" <| fun () ->
                 for x in c do
-                    html.item a x
-        static member itemize code = html.tagb "ul" code
-        static member itemize (a:list<Atr>) = fun code -> html.tagb ("ul",a) code
-        // static member itemize (a:Style) = fun code -> html.tagb ("ul",a) code
-        static member itemizeList (a:list<Atr>) (c:list<unit->unit>) =
-            html.tagb "ul" <| fun () ->
+                    this.item a x
+        member this.itemize code = this.tagb "ul" code
+        member this.itemize (a:list<Atr>) = fun code -> this.tagb ("ul",a) code
+        // member this.itemize (a:Style) = fun code -> this.tagb ("ul",a) code
+        member this.itemizeList (a:list<Atr>) (c:list<unit->unit>) =
+            this.tagb "ul" <| fun () ->
                 for x in c do
-                    html.item a x
-        // static member item code = html.tagb "li" code
-        // static member item (a:Style) = fun code -> html.tagb ("li",a) code
-        static member item (a:list<Atr>) = fun code -> html.tagb ("li",a) code
-        static member para code = html.tagb "p" code
-        static member para (a:list<Atr>) = html.tagb ("p",a)
-        static member para (t:string) = html.tagb "p" <| fun () -> writein(t)
-        static member span(cls:string,t) = html.tagb ("span",[Atr("class",cls)]) <| fun () -> writein(t)
-        static member span(cls:string) = fun code -> html.tagb ("span",[Atr("class",cls)]) code
-        static member span(cls:string, s:Style) = fun code -> html.tagb ("span",[s.atr; Atr("class",cls)]) code
-        static member link(url:string) = fun code -> html.tagb ("a",[Atr("href",url);]) code
-        static member link(url:string, s:Style) = fun code -> html.tagb ("a",[s.atr; Atr("href",url)]) code
-        static member link_newtab(url:string) = fun code -> html.tagb ("a",[Atr("href",url); Atr("target","_blank")]) code
-        static member select_disabled(x:string) = fun code -> html.tagb ("select",[Atr("name",x); Atr("disabled","disabled")]) code
-        static member time(datatime:string, s:Style) = fun code -> html.tagb ("time",[s.atr; Atr("datatime",datatime)]) code
-        static member article(cls:string) = fun code -> html.tagb ("article", [Atr("class", cls)]) code
-        static member aside (cls:string, s:Style) = fun code -> html.tagb ("aside", [s.atr; Atr("class", cls)]) code
-        static member aside (a:list<Atr>) = fun code -> html.tagb ("aside",a) code
-        static member section(cls:string, s:Style) = fun code -> html.tagb ("section", [s.atr; Atr("class", cls)]) code
-        static member option(value:string) = fun code -> html.tagb ("option",[Atr("value",value);]) code
-        static member option_selected(value:string) = fun code -> html.tagb ("option",[Atr("value",value);Atr("selected","selected");]) code
-        // static member div (a:list<Atr>) = fun code -> html.tagb ("div",a) code
-        static member button(value:string,onclick:string) = html.taga("input",[Atr("type","button"); Atr("value",value); Atr("onclick",onclick);])
-        static member bold code = html.tagb "b" code
-        static member latexTag (tagname:string) code =
+                    this.item a x
+        // member this.item code = this.tagb "li" code
+        // member this.item (a:Style) = fun code -> this.tagb ("li",a) code
+        member this.item (a:list<Atr>) = fun code -> this.tagb ("li",a) code
+        member this.para code = this.tagb "p" code
+        member this.para (a:list<Atr>) = this.tagb ("p",a)
+        member this.para (t:string) = this.tagb "p" <| fun () -> writein(t)
+        member this.span(cls:string,t) = this.tagb ("span",[Atr("class",cls)]) <| fun () -> writein(t)
+        member this.span(cls:string) = fun code -> this.tagb ("span",[Atr("class",cls)]) code
+        member this.span(cls:string, s:Style) = fun code -> this.tagb ("span",[s.atr; Atr("class",cls)]) code
+        member this.link(url:string) = fun code -> this.tagb ("a",[Atr("href",url);]) code
+        member this.link(url:string, s:Style) = fun code -> this.tagb ("a",[s.atr; Atr("href",url)]) code
+        member this.link_newtab(url:string) = fun code -> this.tagb ("a",[Atr("href",url); Atr("target","_blank")]) code
+        member this.select_disabled(x:string) = fun code -> this.tagb ("select",[Atr("name",x); Atr("disabled","disabled")]) code
+        member this.time(datatime:string, s:Style) = fun code -> this.tagb ("time",[s.atr; Atr("datatime",datatime)]) code
+        member this.article(cls:string) = fun code -> this.tagb ("article", [Atr("class", cls)]) code
+        member this.aside (cls:string, s:Style) = fun code -> this.tagb ("aside", [s.atr; Atr("class", cls)]) code
+        member this.aside (a:list<Atr>) = fun code -> this.tagb ("aside",a) code
+        member this.section(cls:string, s:Style) = fun code -> this.tagb ("section", [s.atr; Atr("class", cls)]) code
+        member this.option(value:string) = fun code -> this.tagb ("option",[Atr("value",value);]) code
+        member this.option_selected(value:string) = fun code -> this.tagb ("option",[Atr("value",value);Atr("selected","selected");]) code
+        // member this.div (a:list<Atr>) = fun code -> this.tagb ("div",a) code
+        member this.button(value:string,onclick:string) = this.taga("input",[Atr("type","button"); Atr("value",value); Atr("onclick",onclick);])
+        member this.bold code = this.tagb "b" code
+        member this.latexTag (tagname:string) code =
             writein("\\begin{"+tagname+"}")
             code()
             writein("\\end{"+tagname+"}")
-        static member eq (q:string) = "\\("+q+"\\)"
-        static member align code =
+        member this.eq (q:string) = "\\("+q+"\\)"
+        member this.align code =
             writein "\\[\\begin{align}"
             code()
             writein "\\end{align}\\]"
-        static member footer code = html.tagb ("footer", [Atr("class","footer")]) <| fun () -> code()
-        static member footer (s:Style) = fun code -> html.tagb ("footer", [s.atr]) <| fun () -> code()
-        static member br() = writein "<br>"
-        static member hr() = writein "<hr>"
-        static member setjs filename =
-            html.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
-        static member title (s:Style) (p:position) (text:string) =
+        member this.footer code = this.tagb ("footer", [Atr("class","footer")]) <| fun () -> code()
+        member this.footer (s:Style) = fun code -> this.tagb ("footer", [s.atr]) <| fun () -> code()
+        member this.br() = writein "<br>"
+        member this.hr() = writein "<hr>"
+        member this.setjs filename =
+            this.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
+        member this.title (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
@@ -432,9 +438,9 @@ namespace Aqualis
                             {Key = "font-weight"; Value = "bold";}
                             {Key = "white-space"; Value = "nowrap";}
                             {Key = "font-size"; Value = "90px";}]
-            html.tagb ("div",[(s1+s).atr]) <| fun () ->
+            this.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
-        static member contents (s:Style) (p:position) (text:string) =
+        member this.contents (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
@@ -446,9 +452,9 @@ namespace Aqualis
                             {Key = "border-left-width"; Value= "25px";}
                             {Key = "border-left-color"; Value= "#1e6eff";}
                             {Key = "padding-left"; Value="10px";}]
-            html.tagb ("div",[(s1+s).atr]) <| fun () ->
+            this.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
-        static member subtitle1 (s:Style) (p:position) (text:string) =
+        member this.subtitle1 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
@@ -460,9 +466,9 @@ namespace Aqualis
                             {Key = "border-left-width"; Value= "15px";}
                             {Key = "border-left-color"; Value= "#1e6eff";}
                             {Key = "padding-left"; Value="10px";}]
-            html.tagb ("div",[(s1+s).atr]) <| fun () ->
+            this.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
-        static member subtitle2 (s:Style) (p:position) (text:string) =
+        member this.subtitle2 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
@@ -478,38 +484,38 @@ namespace Aqualis
                             {Key = "border-bottom-color"; Value= "#1e6eff";}
                             {Key = "padding-left"; Value="10px";}
                             {Key = "display"; Value="inline-block";}]
-            html.tagb ("div",[(s1+s).atr]) <| fun () ->
+            this.tagb ("div",[(s1+s).atr]) <| fun () ->
                 writein text
-        static member div (s:Style) = fun (p:position) code ->
+        member this.div (s:Style) = fun (p:position) code ->
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}]
-            html.tagb ("div", [(s1+s).atr]) code
-        static member text (s:Style) = fun (p:position) (text:string) ->
+            this.tagb ("div", [(s1+s).atr]) code
+        member this.text (s:Style) = fun (p:position) (text:string) ->
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}]
-            html.tagb ("div", [(s1+s).atr]) <| fun () ->
+            this.tagb ("div", [(s1+s).atr]) <| fun () ->
                 writein text
 
-        static member canvas (s:Style) code =
-            html.tagb ("div", [s.atr]) <| fun () ->
+        member this.canvas (s:Style) code =
+            this.tagb ("div", [s.atr]) <| fun () ->
                 code ()
 
-        static member div (cls:string, s:Style) = fun code ->
-            html.tagb ("div", [s.atr; Atr("class", cls)]) code
+        member this.div (cls:string, s:Style) = fun code ->
+            this.tagb ("div", [s.atr; Atr("class", cls)]) code
 
-        static member div (s:list<Atr>) = fun code ->
-            html.tagb ("div", s) code
+        member this.div (s:list<Atr>) = fun code ->
+            this.tagb ("div", s) code
 
-        static member tag (tagname:string) (s:string) code =
-            html.tagb (tagname, s) code
+        member this.tag (tagname:string) (s:string) code =
+            this.tagb (tagname, s) code
 
-        static member tag_ (tagname:string) (s:string) =
-            html.taga (tagname, s)
+        member this.tag_ (tagname:string) (s:string) =
+            this.taga (tagname, s)
 
-        static member fig (p:position) code =
-            let f = figure()
+        member this.fig (p:position) code =
+            let f = figure(this.taga)
             code(f,p)
             let sx,sy,mx,my = f.setWriteMode()
             writein (
@@ -524,7 +530,7 @@ namespace Aqualis
             code(f,p)
             writein "</svg>"
 
-        static member blockTextcode (s:Style) (p:position) (width:float,height:float) (borderWidth:float,borderStyle:string,borderColor:string) (text:list<string>) =
+        member this.blockTextcode (s:Style) (p:position) (width:float,height:float) (borderWidth:float,borderStyle:string,borderColor:string) (text:list<string>) =
             let padding = 5
             let s1 = Style [size.width (InvariantFormat.number width+"px")
                             size.height (InvariantFormat.number height+"px")
@@ -536,7 +542,7 @@ namespace Aqualis
                             {Key = "border-width"; Value = InvariantFormat.number borderWidth + "px";}
                             {Key = "border-style"; Value = borderStyle;}
                             {Key = "border-width"; Value = borderColor;}]
-            html.tagb ("div", [(s1+s).atr])
+            this.tagb ("div", [(s1+s).atr])
                 <| fun () ->
                     text |> List.iter (fun s -> writein (s+"<br>"))
                     writein ""
@@ -545,47 +551,47 @@ namespace Aqualis
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding+2.0*double borderWidth;}
 
-        static member textFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
+        member this.textFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
                             {Key = "font-size"; Value = size.ToString()+"px";}
                             {Key = "color"; Value = color.ToString();}]
-            html.tagb ("div", [(s1+s).atr]) <| fun () ->
+            this.tagb ("div", [(s1+s).atr]) <| fun () ->
                 code()
 
-        static member equationFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
-            html.textFrame s p size color <| fun () ->
+        member this.equationFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
+            this.textFrame s p size color <| fun () ->
                 writein "\\("
                 code()
                 writein "\\)"
 
-        static member alignFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
-            html.textFrame s p size color <| fun () ->
+        member this.alignFrame (s:Style) = fun (p:position) (size:int) (color:string) code ->
+            this.textFrame s p size color <| fun () ->
                 writein "\\["
                 writein "\\begin{align}"
                 code()
                 writein "\\end{align}"
                 writein "\\]"
 
-        static member line (s:Style) (pp:list<position>) =
-            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+        member this.line (s:Style) (pp:list<position>) =
+            this.fig (position(0.0,0.0)) <| fun (f,p) ->
                 f.polyLine s pp
-        static member polyLine (s:Style) (pp:list<position>) =
-            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+        member this.polyLine (s:Style) (pp:list<position>) =
+            this.fig (position(0.0,0.0)) <| fun (f,p) ->
                 f.polyLine s pp
-        static member arrow (lineStyle:Style,arrowStyle:Style,width,arrowsize) (pp:list<position>) =
-            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+        member this.arrow (lineStyle:Style,arrowStyle:Style,width,arrowsize) (pp:list<position>) =
+            this.fig (position(0.0,0.0)) <| fun (f,p) ->
                 f.polyLineTriangleArrow (lineStyle,arrowStyle,width,arrowsize) pp
-        static member circle (s:Style) (ps:position) (r:int) =
-            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+        member this.circle (s:Style) (ps:position) (r:int) =
+            this.fig (position(0.0,0.0)) <| fun (f,p) ->
                 f.ellipse s (p + ps) r r
-        static member rectangle (s:Style) (ps:position) (w:int,h:int) =
-            html.fig (position(0.0,0.0)) <| fun (f,p) ->
+        member this.rectangle (s:Style) (ps:position) (w:int,h:int) =
+            this.fig (position(0.0,0.0)) <| fun (f,p) ->
                 f.rect s (p + ps) w h
 
-        static member graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
-            html.fig (position(px0,py0)) <| fun (f,p) ->
+        member this.graph (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double) (y1:double,y2:double) code =
+            this.fig (position(px0,py0)) <| fun (f,p) ->
                 if x1*x2<0.0 then
                     let x0 = (0.0-x1)/(x2-x1)*sizeX
                     f.triangleArrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(x0,sizeY)) (p+position(x0,0.0))
@@ -593,8 +599,8 @@ namespace Aqualis
                     let y0 = sizeY-(0.0-y1)/(y2-y1)*sizeY
                     f.triangleArrow Style[stroke.color "#000000"; fill.color "#000000";] (3.0,20) (p+position(0.0,y0)) (p+position(sizeX,y0))
                 code(f,p)
-        static member graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
-            html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
+        member this.graphEq (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) =
+            this.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
                 for s,fc in fn do
                     let pol =
                         [
@@ -606,9 +612,9 @@ namespace Aqualis
                                 p+position(X,Y)
                         ]
                     f.polyLine s pol
-        static member graphEqs (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) code =
+        member this.graphEqs (px0:double,py0:double) (sizeX:double,sizeY:double) (x1:double,x2:double,N:int) (y1:double,y2:double) (fn:list<Style*(double->double)>) code =
             let T (p:position) = position((p.x-x1)/(x2-x1)*sizeX, sizeY-(p.y-y1)/(y2-y1)*sizeY)
-            html.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
+            this.graph (px0,py0) (sizeX,sizeY) (x1,x2) (y1,y2) <| fun (f,p) ->
                 for s,fc in fn do
                     let pol =
                         [
@@ -635,10 +641,10 @@ namespace Aqualis
             let circle (s:Style) (ps:position) (r:int) = ()
             let rectangle (s:Style) (ps:position) (w:float,h:float) = ()
             let text (s:Style) (ps:position) text =
-                html.text (Style[font.family "'Noto Sans JP', sans-serif";font.weight "600"; zindex 3]+s) (position(px0,py0) + T ps) text
+                this.text (Style[font.family "'Noto Sans JP', sans-serif";font.weight "600"; zindex 3]+s) (position(px0,py0) + T ps) text
             code(line,arrow,circle,rectangle,text)
 
-    and figure() =
+    and figure(writeTag:(string * list<Atr>) -> unit) =
         let padding = 10.0
         let mutable xmin:option<double> = None
         let mutable xmax:option<double> = None
@@ -687,7 +693,7 @@ namespace Aqualis
 
         member this.line (s:Style) = fun (startP:position) (endP:position) ->
             if writeMode then
-                html.taga ("line", [
+                writeTag ("line", [
                     Atr("x1",InvariantFormat.number (startP.x-this.Xmin+this.Padding));
                     Atr("y1",InvariantFormat.number (startP.y-this.Ymin+this.Padding));
                     Atr("x2",InvariantFormat.number (endP.x-this.Xmin+this.Padding));
@@ -698,7 +704,7 @@ namespace Aqualis
 
         member this.line (id:string) = fun (s:Style) (startP:position) (endP:position) ->
             if writeMode then
-                html.taga ("line", [
+                writeTag ("line", [
                     Atr("id",id);
                     Atr("x1",InvariantFormat.number (startP.x-this.Xmin+this.Padding));
                     Atr("y1",InvariantFormat.number (startP.y-this.Ymin+this.Padding));
@@ -710,7 +716,7 @@ namespace Aqualis
 
         member this.rect (s:Style) (startP:position) (sx:int) (sy:int) =
             if writeMode then
-                html.taga ("rect", [
+                writeTag ("rect", [
                     Atr("x", InvariantFormat.number (startP.x-this.Xmin+this.Padding));
                     Atr("y", InvariantFormat.number (startP.y-this.Ymin+this.Padding));
                     Atr("width",InvariantFormat.number sx)
@@ -721,7 +727,7 @@ namespace Aqualis
 
         member this.ellipse (s:Style) (center:position) (radiusX:int) (radiusY:int) =
             if writeMode then
-                html.taga ("ellipse", [
+                writeTag ("ellipse", [
                     Atr("cx", InvariantFormat.number (center.x-this.Xmin+this.Padding));
                     Atr("cy", InvariantFormat.number (center.y-this.Ymin+this.Padding));
                     Atr("rx", InvariantFormat.number radiusX);
@@ -735,7 +741,7 @@ namespace Aqualis
         member this.polygon (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> InvariantFormat.number (p.x-this.Xmin+this.Padding)+","+InvariantFormat.number (p.y-this.Ymin+this.Padding)) apex
-                html.taga ("polygon", [Atr("points",pp)]@[s.atr])
+                writeTag ("polygon", [Atr("points",pp)]@[s.atr])
             else
                 for q in apex do
                     this.updateRange q
@@ -743,7 +749,7 @@ namespace Aqualis
         member this.polyLine (s:Style) (apex:list<position>) =
             if writeMode then
                 let pp = String.concat " " <| List.map (fun (p:position) -> InvariantFormat.number (p.x-this.Xmin+this.Padding)+","+InvariantFormat.number (p.y-this.Ymin+this.Padding)) apex
-                html.taga ("polyline", [Atr("points", pp)]@[s.atr])
+                writeTag ("polyline", [Atr("points", pp)]@[s.atr])
             else
                 for q in apex do
                     this.updateRange q
@@ -809,3 +815,8 @@ namespace Aqualis
                 this.updateRange(position(q1x,q1y))
                 this.updateRange(position(q2x,q2y))
             this.polyLine s [position(q1x,q1y);endP;position(q2x,q2y)]
+
+    [<AutoOpen>]
+    module CompilationEnvironmentHtmlExtensions =
+        type CompilationEnvironment with
+            member this.html = html((this.RequireGenerationContext()).CurrentProgram, Some this)

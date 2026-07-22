@@ -8,145 +8,156 @@ namespace Aqualis
 
     module fft1 =
 
-        type fftw_plan1(sname_,name) =
+        type fftw_plan1(sname_,name,context:GenerationContext) =
             static member sname = "fftw_plan"
-            new(name) =
-                str.regWithoutAddStructure(fftw_plan1.sname,name)
-                fftw_plan1(fftw_plan1.sname,name)
+            new(name,context:GenerationContext) =
+                CompilationEnvironment(Some context).str.regWithoutAddStructure(fftw_plan1.sname,name)
+                fftw_plan1(fftw_plan1.sname,name,context)
             member __.code = name
 
-        let fftshift_odd(a:complex1) =
+        let fftshift_odd (environment:CompilationEnvironment) (a:complex1) =
             let n2 = a.size1./2 + 1
-            ch.iiz <| fun (c1,c2,tmp) ->
+            environment.ch.iiz <| fun (c1,c2,tmp) ->
                 c1 <== 0
                 tmp <== a[c1]
-                iter.num a.size1 <| fun i ->
-                    br.if2 (c1+n2 .>= a.size1)
+                environment.iter.num a.size1 <| fun i ->
+                    environment.br.if2 (c1+n2 .>= a.size1)
                     <| fun () -> c2 <== c1+n2-a.size1
                     <| fun () -> c2 <== c1+n2
                     a[c1] <== a[c2]
                     c1 <== c2
                 a[c1+n2-1] <== tmp
 
-        let fftshift_even(a:complex1) =
+        let fftshift_even (environment:CompilationEnvironment) (a:complex1) =
             let n2 = a.size1./2
-            ch.z <| fun tmp ->
-                iter.num n2 <| fun i ->
+            environment.ch.z <| fun tmp ->
+                environment.iter.num n2 <| fun i ->
                     tmp <== a[i+n2]
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
-        let ifftshift_odd(a:complex1) =
+        let ifftshift_odd (environment:CompilationEnvironment) (a:complex1) =
             let n2 = a.size1./2
-            ch.iiz <| fun (c1,c2,tmp) ->
+            environment.ch.iiz <| fun (c1,c2,tmp) ->
                 c1 <== 0
                 tmp <== a[c1]
-                iter.num a.size1 <| fun i ->
-                    br.if2 (c1+n2 .>= a.size1)
+                environment.iter.num a.size1 <| fun i ->
+                    environment.br.if2 (c1+n2 .>= a.size1)
                     <| fun () -> c2 <== c1+n2-a.size1
                     <| fun () -> c2 <== c1+n2
                     a[c1] <== a[c2]
                     c1 <== c2
                 a[c1+n2+1] <== tmp
 
-        let ifftshift_even(a:complex1) =
+        let ifftshift_even (environment:CompilationEnvironment) (a:complex1) =
             let n2 = a.size1./2
-            ch.z <| fun tmp ->
-                iter.num n2 <| fun i ->
+            environment.ch.z <| fun tmp ->
+                environment.iter.num n2 <| fun i ->
                     tmp <== a[i+n2]
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
-        let fftshift1(x:complex1) =
-            br.if1 (x.size1 .> 1) <| fun () ->
-                br.if2 (x.size1%2 .= 0)
+        let fftshift1 (environment:CompilationEnvironment) (x:complex1) =
+            environment.br.if1 (x.size1 .> 1) <| fun () ->
+                environment.br.if2 (x.size1%2 .= 0)
                 <| fun () ->
-                    fftshift_even x
+                    fftshift_even environment x
                 <| fun () ->
-                    fftshift_odd x
+                    fftshift_odd environment x
 
-        let ifftshift1(x:complex1) =
-            br.if1 (x.size1 .> 1) <| fun () ->
-                br.if2 (x.size1%2 .= 0)
+        let ifftshift1 (environment:CompilationEnvironment) (x:complex1) =
+            environment.br.if1 (x.size1 .> 1) <| fun () ->
+                environment.br.if2 (x.size1%2 .= 0)
                 <| fun () ->
-                    ifftshift_even x
+                    ifftshift_even environment x
                 <| fun () ->
-                    ifftshift_odd x
+                    ifftshift_odd environment x
 
-        let private fft1(planname:string,data1:complex1,data2:complex1,fftdir:int) =
-            (GenerationScope.currentProgram()).olist.add "-lfftw3"
-            (GenerationScope.currentProgram()).olist.add "-I/usr/local/include"
-            ch.ii <| fun (N,N2) ->
+        let private transform (environment:CompilationEnvironment) (planname:string,data1:complex1,data2:complex1,fftdir:int) =
+            let context = environment.RequireGenerationContext()
+            let program = context.CurrentProgram
+            program.olist.add "-lfftw3"
+            program.olist.add "-I/usr/local/include"
+            environment.ch.ii <| fun (N,N2) ->
                 N <== data1.size1
                 N2 <== asm.floor(N/2.0)
-                match (GenerationScope.currentProgram()).language with
+                match program.language with
                 |Fortran ->
-                    (GenerationScope.currentProgram()).hlist.add "'fftw3.f'"
-                    let plan = var.i1(planname, 8)
+                    program.hlist.add "'fftw3.f'"
+                    let plan = environment.var.i1(planname, 8)
                     if fftdir=1 then
-                        writein("call dfftw_plan_dft_1d(" + plan.code + ", " + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
-                        fftshift1 data1
-                        !"FFTを実行"
-                        writein("call dfftw_execute(" + plan.code + ")")
-                        fftshift1 data2
-                        writein("call dfftw_destroy_plan(" + plan.code + ")")
+                        program.codewritein("call dfftw_plan_dft_1d(" + plan.code + ", " + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
+                        fftshift1 environment data1
+                        environment.group.comment "FFT"
+                        program.codewritein("call dfftw_execute(" + plan.code + ")")
+                        fftshift1 environment data2
+                        program.codewritein("call dfftw_destroy_plan(" + plan.code + ")")
                     else
-                        writein("call dfftw_plan_dft_1d(" + plan.code + ", " + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
-                        ifftshift1 data1
-                        !"FFTを実行"
-                        writein("call dfftw_execute(" + plan.code + ")")
-                        ifftshift1 data2
-                        writein("call dfftw_destroy_plan(" + plan.code + ")")
+                        program.codewritein("call dfftw_plan_dft_1d(" + plan.code + ", " + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
+                        ifftshift1 environment data1
+                        environment.group.comment "FFT"
+                        program.codewritein("call dfftw_execute(" + plan.code + ")")
+                        ifftshift1 environment data2
+                        program.codewritein("call dfftw_destroy_plan(" + plan.code + ")")
                 |C99 ->
-                    (GenerationScope.currentProgram()).hlist.add "\"fftw3.h\""
-                    let plan = fftw_plan1(planname)
+                    program.hlist.add "\"fftw3.h\""
+                    let plan = fftw_plan1(planname,context)
                     if fftdir=1 then
-                        writein(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
-                        fftshift1 data1
-                        !"FFTを実行"
-                        writein("fftw_execute(" + plan.code + ");")
-                        fftshift1 data2
-                        writein("fftw_destroy_plan(" + plan.code + ");")
+                        program.codewritein(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
+                        fftshift1 environment data1
+                        environment.group.comment "FFT"
+                        program.codewritein("fftw_execute(" + plan.code + ");")
+                        fftshift1 environment data2
+                        program.codewritein("fftw_destroy_plan(" + plan.code + ");")
                     else
-                        writein(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
-                        ifftshift1 data1
-                        !"FFTを実行"
-                        writein("fftw_execute(" + plan.code + ");")
-                        ifftshift1 data2
-                        writein("fftw_destroy_plan(" + plan.code + ");")
+                        program.codewritein(plan.code + " = fftw_plan_dft_1d(" + N.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
+                        ifftshift1 environment data1
+                        environment.group.comment "FFT"
+                        program.codewritein("fftw_execute(" + plan.code + ");")
+                        ifftshift1 environment data2
+                        program.codewritein("fftw_destroy_plan(" + plan.code + ");")
                 |LaTeX ->
-                    writein(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
+                    program.codewritein(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                 |HTML ->
-                    writein(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
+                    program.codewritein(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                 |Python ->
-                    (GenerationScope.currentProgram()).hlist.add "pyfftw"
-                    let plan = var.i1(planname, 8)
+                    program.hlist.add "pyfftw"
+                    let plan = environment.var.i1(planname, 8)
                     if fftdir=1 then
-                        writein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
-                        writein(plan.code+" = pyfftw.builders.fft("+data1.code+"_empty)")
-                        fftshift1 data1
-                        writein(data1.code+"_empty[:] = "+data1.code+"[:]")
-                        !"FFTを実行"
-                        writein(data2.code+" = "+plan.code+"()")
-                        fftshift1 data2
-                        writein("del "+plan.code+"")
+                        program.codewritein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
+                        program.codewritein(plan.code+" = pyfftw.builders.fft("+data1.code+"_empty)")
+                        fftshift1 environment data1
+                        program.codewritein(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        environment.group.comment "FFT"
+                        program.codewritein(data2.code+" = "+plan.code+"()")
+                        fftshift1 environment data2
+                        program.codewritein("del "+plan.code+"")
                     else
-                        writein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
-                        writein(plan.code+" = pyfftw.builders.ifft("+data1.code+"_empty)")
-                        ifftshift1 data1
-                        writein(data1.code+"_empty[:] = "+data1.code+"[:]")
-                        !"FFTを実行"
-                        writein(data2.code+" = "+plan.code+"()")
-                        ifftshift1 data2
-                        writein("del "+plan.code+"")
+                        program.codewritein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
+                        program.codewritein(plan.code+" = pyfftw.builders.ifft("+data1.code+"_empty)")
+                        ifftshift1 environment data1
+                        program.codewritein(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        environment.group.comment "FFT"
+                        program.codewritein(data2.code+" = "+plan.code+"()")
+                        ifftshift1 environment data2
+                        program.codewritein("del "+plan.code+"")
                 |_ -> ()
                 if fftdir=1 then
-                    !"規格化"
-                    iter.num N <| fun i ->
+                    environment.group.comment "normalize"
+                    environment.iter.num N <| fun i ->
                         data2.[i]<==data2.[i]/N
 
-        let fft(planname:string,data1:complex1,data2:complex1) =
-                fft1(planname,data1,data2,1)
+        let fft environment (planname:string,data1:complex1,data2:complex1) =
+                transform environment (planname,data1,data2,1)
 
-        let ifft(planname:string,data1:complex1,data2:complex1) =
-                fft1(planname,data1,data2,-1)
+        let ifft environment (planname:string,data1:complex1,data2:complex1) =
+                transform environment (planname,data1,data2,-1)
+
+    type ContextFft1 internal (environment:CompilationEnvironment) =
+        member _.fft args = fft1.fft environment args
+        member _.ifft args = fft1.ifft environment args
+
+    [<AutoOpen>]
+    module CompilationEnvironmentFft1Extensions =
+        type CompilationEnvironment with
+            member this.fft1 = ContextFft1(this)

@@ -10,9 +10,9 @@ namespace Aqualis
     type double1 (typ:Etype,x:Expr1, ?context:GenerationContext) as this =
         inherit NumericArray1<double0,double1>(typ,x,?context=context)
 
-        new (typ,size,name,para) =
-            (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
-            double1(typ,Var1(size,name),?context=GenerationContext.TryCurrent)
+        new (context:GenerationContext,typ,size,name,para) =
+            context.CurrentProgram.var.setVar(typ,size,name,para)
+            double1(typ,Var1(size,name),context=context)
         new(a:int0,f:int0->double0) = double1(Dt,Arx1(a,fun i -> (f i).Expr))
         new(a:int ,f:int0->double0) = double1(Dt,Arx1(I a,fun i -> (f i).Expr))
 

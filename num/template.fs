@@ -11,7 +11,8 @@ namespace Aqualis
 
     type Label = |WriteLabel of StreamWriter |ReadLabel of list<string*string>
 
-    type TeXWriter(figlabel:Label,equlabel:Label,tablabel:Label,codelabel:Label,lang:Language,figdir:string) =
+    type TeXWriter(context:GenerationContext,figlabel:Label,equlabel:Label,tablabel:Label,codelabel:Label,lang:Language,figdir:string) =
+        let writein text = context.CurrentProgram.codewritein(text + "\n")
         let mutable equnum = 0
         let mutable fignum = 0
         let mutable tabnum = 0
@@ -600,7 +601,8 @@ namespace Aqualis
                         read []
                 match lang with
                 |HTML ->
-                    makeProgram [outputdir,filename+".html",HTML] <| fun () ->
+                    makeProgramWithContext [outputdir,filename+".html",HTML] <| fun context ->
+                        let writein text = context.CurrentProgram.codewritein(text + "\n")
                         writein "<!DOCTYPE html>"
                         writein "<html lang='ja'>"
                         writein "    <head>"
@@ -648,6 +650,7 @@ namespace Aqualis
                         writein("    <span class='headtitle'>"+titlelong+"</span>")
                         use document =
                             new TeXWriter(
+                                context,
                                 figlabel,
                                 equlabel,
                                 tablabel,
@@ -657,13 +660,14 @@ namespace Aqualis
                         code document
                         writein "    </body>"
                         writein "</html>"
-                        (GenerationScope.currentProgram()).close()
+                        context.CurrentProgram.close()
                 |LaTeX ->
-                    makeProgram [outputdir,filename+".tex",LaTeX; outputdir,filename+"_temp.tex",LaTeX] <| fun () ->
-                        let context = GenerationScope.requireContext()
-                        context.WithProgram(1, fun () ->
+                    makeProgramWithContext [outputdir,filename+".tex",LaTeX; outputdir,filename+"_temp.tex",LaTeX] <| fun context ->
+                        let writein text = context.CurrentProgram.codewritein(text + "\n")
+                        context.WithProgram(1, fun child ->
                             use document =
                                 new TeXWriter(
+                                    child,
                                     figlabel,
                                     equlabel,
                                     tablabel,
@@ -742,7 +746,7 @@ namespace Aqualis
                         writein "\\begin{document}"
                         writein(context.Programs[1].allCodes)
                         writein "\\end{document}"
-                        (GenerationScope.currentProgram()).close()
+                        context.CurrentProgram.close()
                         context.Programs[1].delete()
                 |_ -> ()
                 match figlabel with

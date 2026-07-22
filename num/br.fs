@@ -28,69 +28,12 @@ namespace Aqualis
             con <- 0
 
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
-        static member branch code =
-            expr.branch (GenerationScope.currentProgram()) <| fun q ->
-            let ib = br q
-            code ib
-
-        ///<summary>条件分岐式(if式)</summary>
-        static member if1 (cond:bool0) code =
-            if GenerationContext.TryCurrent.IsNone then
-                let c = cond.Expr.simp
-                match c with
-                |True -> code()
-                |False -> ()
-                |_ -> printfn "条件式 %s を評価できません" <| c.ToString()
-            else
-                match (GenerationScope.currentProgram()).language with
-                |LaTeX|HTML ->
-                    br.branch <| fun b ->
-                        b.IF cond <| fun () ->
-                            code()
-                |_ ->
-                    match cond.Expr.simp with
-                    |True -> code()
-                    |False -> ()
-                    |_ ->
-                        br.branch <| fun b ->
-                            b.IF cond <| fun () ->
-                                code()
-
-        ///<summary>条件分岐式(if...else...式)</summary>
-        static member if2 (cond:bool0) code1 code2 =
-            if GenerationContext.TryCurrent.IsNone then
-                let c = cond.Expr.simp
-                match c with
-                |True -> code1()
-                |False -> code2()
-                |_ -> printfn "条件式 %s を評価できません" <| c.ToString()
-            else
-                match (GenerationScope.currentProgram()).language with
-                |LaTeX|HTML ->
-                    br.branch <| fun b ->
-                        b.IF cond <| fun () ->
-                            code1()
-                        b.EL <| fun () ->
-                            code2()
-                |_ ->
-                    match cond.Expr.simp with
-                    |True -> code1()
-                    |False -> code2()
-                    |_ ->
-                        br.branch <| fun b ->
-                            b.IF cond <| fun () ->
-                                code1()
-                            b.EL <| fun () ->
-                                code2()
-
-    ///<summary>条件分岐（処理スキップ）</summary>
-    /// Explicit conditional-control surface for one compilation environment.
     type ContextBr internal (environment:CompilationEnvironment) =
         let context = environment.GenerationContext
 
         member _.branch code =
             match context with
-            |Some ctx -> expr.branch ctx.CurrentProgram (fun callbacks -> code (br callbacks))
+            |Some ctx -> expr.branch ctx (fun callbacks -> code (br callbacks))
             |None -> invalidOp "A symbolic branch builder is not available during Numeric execution."
 
         member this.if1 (condition:bool0) code =
@@ -133,16 +76,4 @@ namespace Aqualis
     module CompilationEnvironmentBrExtensions =
         type CompilationEnvironment with
             member this.br = ContextBr(this)
-
-    type dummy_br () =
-        ///<summary>条件式(if)</summary>
-        member __.IF (cond:bool0) code = ()
-        ///<summary>条件式(else)</summary>
-        member __.EL code = ()
-        ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
-        static member branch code = ()
-        ///<summary>条件分岐式(if式)</summary>
-        static member if1 cond code = ()
-        ///<summary>条件分岐式(if...else...式)</summary>
-        static member if2 cond code1 code2 = ()
 

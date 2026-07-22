@@ -32,8 +32,8 @@ module GeometryCrtpTests =
             [output.Path, "geometry.c", C99]
             (fun context ->
                 try
-                    let value2 = geometry.point2 "value2"
-                    let value3 = geometry.point3 "value3"
+                    let value2 = geometry.point2("value2", context)
+                    let value3 = geometry.point3("value3", context)
                     let rewrapped2: geometry.point2 = value2.Rewrap "other2"
                     let rewrapped3: geometry.point3 = value3.Rewrap "other3"
 

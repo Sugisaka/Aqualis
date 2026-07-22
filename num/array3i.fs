@@ -2,9 +2,9 @@ namespace Aqualis
 
     type int3(typ:Etype,x:Expr3,?context:GenerationContext) as this=
         inherit NumericArray3<int0,int1,int2,int3>(typ,x,?context=context)
-        new(typ,size,name,para)=
-            (GenerationScope.currentProgram()).var.setVar(typ,size,name,para)
-            int3(typ,Var3(size,name),?context=GenerationContext.TryCurrent)
+        new(context:GenerationContext,typ,size,name,para)=
+            context.CurrentProgram.var.setVar(typ,size,name,para)
+            int3(typ,Var3(size,name),context=context)
         new(a:int0,b:int0,c:int0,f:int0*int0*int0->int0) = int3(It 4,Arx3(a,b,c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int0,c:int0,f:int0*int0*int0->int0) = int3(It 4,Arx3(I a,b,c,fun ijk->(f ijk).Expr))
         new(a:int0,b:int ,c:int0,f:int0*int0*int0->int0) = int3(It 4,Arx3(a,I b,c,fun ijk->(f ijk).Expr))

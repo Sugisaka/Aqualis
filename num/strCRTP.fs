@@ -8,12 +8,13 @@ namespace Aqualis
 
     /// CRTP base for a structure value.
     [<AbstractClass>]
-    type structureValue<'Self when 'Self :> structureValue<'Self>>(sname_,name) =
+    type structureValue<'Self when 'Self :> structureValue<'Self>>(sname_,name,?context:GenerationContext) =
         member _.StructureName = sname_
         member _.Name = name
+        member _.Context = context
         abstract member Rewrap : string -> 'Self
         member this.farg code =
-            fn.addarg (Structure sname_,A0,name) <| fun (_,n) ->
+            fn.addarg (GenerationContextMerge.requireTarget context,Structure sname_,A0,name) <| fun (_,n) ->
                 code(this.Rewrap n)
 
     /// CRTP base for a one-dimensional array of structure values.
@@ -22,7 +23,7 @@ namespace Aqualis
         when 'Element :> structureValue<'Element>
         and 'Self :> structureArray1<'Element,'Self>>
         (sname_,name,size1,?context:GenerationContext) =
-        inherit base1(Structure sname_,Var1(size1,name))
+        inherit base1(Structure sname_,Var1(size1,name),?context=context)
 
         abstract member WrapElement : string -> 'Element
         abstract member Rewrap : string * VarType -> 'Self
@@ -32,7 +33,7 @@ namespace Aqualis
             this.WrapElement(int0(this.Idx1 i,?context=resultContext).code)
         member this.Item with get(i:int ) = this[i |> I]
         member this.farg code =
-            fn.addarg (sname_,size1,name) <| fun (v,n) ->
+            fn.addarg (GenerationContextMerge.requireTarget context,sname_,size1,name) <| fun (v,n) ->
                 code(this.Rewrap(n,v))
 
     /// CRTP base for a two-dimensional array of structure values.
@@ -41,7 +42,7 @@ namespace Aqualis
         when 'Element :> structureValue<'Element>
         and 'Self :> structureArray2<'Element,'Self>>
         (sname_,name,size2,?context:GenerationContext) =
-        inherit base2(Structure sname_,Var2(size2,name))
+        inherit base2(Structure sname_,Var2(size2,name),?context=context)
 
         abstract member WrapElement : string -> 'Element
         abstract member Rewrap : string * VarType -> 'Self
@@ -53,7 +54,7 @@ namespace Aqualis
         member this.Item with get(i:int,j:int0) = this[I i,j]
         member this.Item with get(i:int,j:int) = this[I i,I j]
         member this.farg code =
-            fn.addarg (sname_,size2,name) <| fun (v,n) ->
+            fn.addarg (GenerationContextMerge.requireTarget context,sname_,size2,name) <| fun (v,n) ->
                 code(this.Rewrap(n,v))
 
     /// CRTP base for a three-dimensional array of structure values.
@@ -62,7 +63,7 @@ namespace Aqualis
         when 'Element :> structureValue<'Element>
         and 'Self :> structureArray3<'Element,'Self>>
         (sname_,name,size3,?context:GenerationContext) =
-        inherit base3(Structure sname_,Var3(size3,name))
+        inherit base3(Structure sname_,Var3(size3,name),?context=context)
 
         abstract member WrapElement : string -> 'Element
         abstract member Rewrap : string * VarType -> 'Self
@@ -78,5 +79,5 @@ namespace Aqualis
         member this.Item with get(i:int,j:int,k:int0) = this[I i,I j,k]
         member this.Item with get(i:int,j:int,k:int) = this[I i,I j,I k]
         member this.farg code =
-            fn.addarg (sname_,size3,name) <| fun (v,n) ->
+            fn.addarg (GenerationContextMerge.requireTarget context,sname_,size3,name) <| fun (v,n) ->
                 code(this.Rewrap(n,v))

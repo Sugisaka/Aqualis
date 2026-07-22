@@ -53,8 +53,8 @@ module CodeWriterTests =
 
         Assert.Throws<InvalidOperationException>(
             Action(fun () ->
-                makeProgram [output.Path, "exception.c", C99] <| fun () ->
-                    writein "before_exception"
+                makeProgramWithContext [output.Path, "exception.c", C99] <| fun context ->
+                    writein context "before_exception"
                     invalidOp "expected"))
         |> ignore
 

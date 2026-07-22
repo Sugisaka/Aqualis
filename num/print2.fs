@@ -1,61 +1,58 @@
-// 
+//
 // Copyright (c) 2026 Jun-ichiro Sugisaka
-// 
+//
 // This software is released under the MIT License.
 // http://opensource.org/licenses/mit-license.php
-// 
+//
 namespace Aqualis
-    
+
     [<AutoOpen>]
-    module print_ax =
-        ///<summary>画面表示</summary>
-        type print with
-            
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:int1) = 
-                iter.num s.size1 <| fun i -> 
-                    print.tt <| i++s[i]
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:double1) = 
-                iter.num s.size1 <| fun i -> 
-                    print.tt <| i++s[i]
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:complex1) = 
-                iter.num s.size1 <| fun i -> 
-                    print.tt <| i++s[i]
-                    
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:int2) = 
-                iter.num s.size1 <| fun i -> 
-                    iter.num s.size2 <| fun j -> 
-                        print.tt <| i++j++s[i,j]
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:double2) = 
-                iter.num s.size1 <| fun i -> 
-                    iter.num s.size2 <| fun j -> 
-                        print.tt <| i++j++s[i,j]
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:complex2) = 
-                iter.num s.size1 <| fun i -> 
-                    iter.num s.size2 <| fun j -> 
-                        print.tt <| i++j++s[i,j]
-                        
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:int3) = 
-                iter.num s.size1 <| fun i -> 
-                    iter.num s.size2 <| fun j -> 
-                        iter.num s.size3 <| fun k -> 
-                            print.tt <| i++j++k++s[i,j,k]
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:double3) = 
-                iter.num s.size1 <| fun i -> 
-                    iter.num s.size2 <| fun j -> 
-                        iter.num s.size3 <| fun k -> 
-                            print.tt <| i++j++k++s[i,j,k]
-            ///<summary>1個の項目を画面表示</summary>
-            static member t (s:complex3) = 
-                iter.num s.size1 <| fun i -> 
-                    iter.num s.size2 <| fun j -> 
-                        iter.num s.size3 <| fun k -> 
-                            print.tt <| i++j++k++s[i,j,k]
-                            
+    module ContextPrintArrayExtensions =
+        type ContextPrint with
+            member private this.ValidateContext context =
+                GenerationContextMerge.merge this.Environment.GenerationContext context |> ignore
+
+            member this.t(s:int1) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i -> this.tt <| i++s[i]
+
+            member this.t(s:double1) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i -> this.tt <| i++s[i]
+
+            member this.t(s:complex1) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i -> this.tt <| i++s[i]
+
+            member this.t(s:int2) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i ->
+                    this.Environment.iter.num s.size2 <| fun j -> this.tt <| i++j++s[i,j]
+
+            member this.t(s:double2) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i ->
+                    this.Environment.iter.num s.size2 <| fun j -> this.tt <| i++j++s[i,j]
+
+            member this.t(s:complex2) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i ->
+                    this.Environment.iter.num s.size2 <| fun j -> this.tt <| i++j++s[i,j]
+
+            member this.t(s:int3) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i ->
+                    this.Environment.iter.num s.size2 <| fun j ->
+                        this.Environment.iter.num s.size3 <| fun k -> this.tt <| i++j++k++s[i,j,k]
+
+            member this.t(s:double3) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i ->
+                    this.Environment.iter.num s.size2 <| fun j ->
+                        this.Environment.iter.num s.size3 <| fun k -> this.tt <| i++j++k++s[i,j,k]
+
+            member this.t(s:complex3) =
+                this.ValidateContext s.Context
+                this.Environment.iter.num s.size1 <| fun i ->
+                    this.Environment.iter.num s.size2 <| fun j ->
+                        this.Environment.iter.num s.size3 <| fun k -> this.tt <| i++j++k++s[i,j,k]

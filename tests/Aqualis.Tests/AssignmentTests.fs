@@ -53,21 +53,17 @@ module AssignmentTests =
     [<Fact>]
     let ``numeric constants do not capture the active generation context`` () =
         use output = new TemporaryDirectory()
-        let firstContext =
-            GenerationContext [new program(output.Path, "first.c", C99)]
         let secondContext =
             GenerationContext [new program(output.Path, "second.c", C99)]
 
         try
-            let constant =
-                firstContext.Activate(fun () -> _0d)
+            let constant = _0d
 
             Assert.True(constant.Context.IsNone)
 
-            secondContext.Activate(fun () ->
-                let target =
-                    double0(Var(Dt, "target", NaN), context=secondContext)
-                target <== constant)
+            let target =
+                double0(Var(Dt, "target", NaN), context=secondContext)
+            target <== constant
 
             secondContext.CurrentProgram.close()
             let generated =
@@ -77,7 +73,6 @@ module AssignmentTests =
 
             Assert.Equal("target = 0.0E0;", generated)
         finally
-            firstContext.CurrentProgram.close()
             secondContext.CurrentProgram.close()
 
     [<Fact>]

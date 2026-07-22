@@ -15,29 +15,29 @@ namespace Aqualis
         /// <param name="typ">変数の型</param>
         /// <param name="vtp">変数の次元</param>
         /// <param name="n">変数名</param>
-        static member addarg (typ:Etype,vtp:VarType,n:string) =
+        static member addarg (context:GenerationContext,typ:Etype,vtp:VarType,n:string) =
             fun code ->
-                match (GenerationScope.currentProgram()).language with
+                match context.CurrentProgram.language with
                 |Fortran ->
                     //関数内ではこの変数名を使用
                     let name =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                         |_ ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -48,21 +48,21 @@ namespace Aqualis
                     let name =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                         |_ ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> "(*"+name+")"
@@ -73,21 +73,21 @@ namespace Aqualis
                     let name =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                         |_ ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -98,21 +98,21 @@ namespace Aqualis
                     let name =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                         |_ ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -123,21 +123,21 @@ namespace Aqualis
                     let name =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                         |_ ->
-                            "arg"+((GenerationScope.currentProgram()).arg.list.Length+1).ToString("00")
+                            "arg"+(context.CurrentProgram.arg.list.Length+1).ToString("00")
                     match vtp with
                     |A0 ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
                     |A1 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(1),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(1),name+"_size"))
                     |A2 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(2),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(2),name+"_size"))
                     |A3 _ ->
-                        (GenerationScope.currentProgram()).arg.add(n,(typ,vtp,name))
-                        (GenerationScope.currentProgram()).arg.add(n+"_size",(It 4,A1(3),name+"_size"))
+                        context.CurrentProgram.arg.add(n,(typ,vtp,name))
+                        context.CurrentProgram.arg.add(n+"_size",(It 4,A1(3),name+"_size"))
                     let argname =
                         match typ,vtp with
                         |(It _|Dt|Zt|Structure _),A0 -> name
@@ -151,7 +151,7 @@ namespace Aqualis
         /// <param name="sname">構造体名</param>
         /// <param name="vtp">変数の次元</param>
         /// <param name="n">変数名</param>
-        static member addarg (sname:string,vtp:VarType,n:string) = fn.addarg(Structure sname,vtp,n)
+        static member addarg (context:GenerationContext,sname:string,vtp:VarType,n:string) = fn.addarg(context,Structure sname,vtp,n)
 
     [<AutoOpen>]
     module num_farg =
@@ -160,22 +160,22 @@ namespace Aqualis
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg code =
-                fn.addarg (this.etype,A0,this.Expr.eval ((GenerationScope.currentProgram()))) <| fun (v,n) ->
-                    code(int0(Var(this.etype, n, NaN)))
+                fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,A0,this.Expr.eval ((GenerationContextMerge.requireTarget this.Context).CurrentProgram)) <| fun (v,n) ->
+                    code(int0(Var(this.etype,n,NaN), context=GenerationContextMerge.requireTarget this.Context))
         type double0 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg code =
-                fn.addarg (this.etype,A0,this.Expr.eval ((GenerationScope.currentProgram()))) <| fun (v,n) ->
-                    code(double0(Var(this.etype, n, NaN)))
+                fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,A0,this.Expr.eval ((GenerationContextMerge.requireTarget this.Context).CurrentProgram)) <| fun (v,n) ->
+                    code(double0(Var(this.etype,n,NaN), context=GenerationContextMerge.requireTarget this.Context))
         type complex0 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg code =
-                fn.addarg (this.etype,A0,this.Expr.eval ((GenerationScope.currentProgram()))) <| fun (v,n) ->
-                    code(complex0(Var(this.etype, n, NaN)))
+                fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,A0,this.Expr.eval ((GenerationContextMerge.requireTarget this.Context).CurrentProgram)) <| fun (v,n) ->
+                    code(complex0(Var(this.etype,n,NaN), context=GenerationContextMerge.requireTarget this.Context))
 
         type int1 with
             /// <summary>
@@ -184,7 +184,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(int1(this.etype,Var1(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(int1(this.etype,Var1(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type double1 with
@@ -194,7 +194,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(double1(this.etype,Var1(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(double1(this.etype,Var1(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type complex1 with
@@ -204,7 +204,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(complex1(this.etype,Var1(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(complex1(this.etype,Var1(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
 
@@ -215,7 +215,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(int2(this.etype,Var2(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(int2(this.etype,Var2(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type double2 with
@@ -225,7 +225,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(double2(this.etype,Var2(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(double2(this.etype,Var2(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type complex2 with
@@ -235,7 +235,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(complex2(this.etype,Var2(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(complex2(this.etype,Var2(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
 
@@ -246,7 +246,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(int3(this.etype,Var3(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(int3(this.etype,Var3(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type double3 with
@@ -256,7 +256,7 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(double3(this.etype,Var3(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(double3(this.etype,Var3(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type complex3 with
@@ -266,6 +266,6 @@ namespace Aqualis
             member this.farg = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
-                    fn.addarg (this.etype,size,name) <| fun (v,n) -> code(complex3(this.etype,Var3(v,n)))
+                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(complex3(this.etype,Var3(v,n), context=GenerationContextMerge.requireTarget this.Context))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"

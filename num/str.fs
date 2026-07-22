@@ -9,68 +9,69 @@ namespace Aqualis
 [<AutoOpen>]
 module Aqualis_str =
 
-    type str =
+    type ContextStr internal (environment:CompilationEnvironment) =
+        let context() = environment.RequireGenerationContext()
 
         ///<summary>構造体定義のコードを作成</summary>
-        static member Def_Structure(writer:codeWriter) =
-            let this = (GenerationScope.currentProgram()).str
-            match (GenerationScope.currentProgram()).language with
+        member this.Def_Structure(writer:codeWriter) =
+            let definitions = (context()).CurrentProgram.str
+            match (context()).CurrentProgram.language with
             |Fortran ->
-                for s in this.sort() do
+                for s in definitions.sort() do
                     writer.codewritein("type "+s.sname+"\n")
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewritein((GenerationScope.currentProgram()).var.declare(typ,vtp,name,"",(GenerationScope.currentProgram()).numFormat)+"\n")
+                        writer.codewritein((context()).CurrentProgram.var.declare(typ,vtp,name,"",(context()).CurrentProgram.numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewritein("end type "+s.sname+"\n")
             |C99 ->
-                for s in this.sort() do
+                for s in definitions.sort() do
                     writer.codewritein("typedef struct "+"_"+s.sname+"\n")
                     writer.codewritein("{"+"\n")
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewritein((GenerationScope.currentProgram()).var.declare(typ,vtp,name,"",(GenerationScope.currentProgram()).numFormat)+"\n")
+                        writer.codewritein((context()).CurrentProgram.var.declare(typ,vtp,name,"",(context()).CurrentProgram.numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewritein("} "+s.sname+";\n")
             |LaTeX ->
-                for s in this.sort() do
+                for s in definitions.sort() do
                     writer.codewritein("\\subsection{"+s.sname+"}")
                     writer.codewritein "\\begin{itemize}\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewritein((GenerationScope.currentProgram()).var.declare(typ,vtp,name,"",(GenerationScope.currentProgram()).numFormat)+"\n")
+                        writer.codewritein((context()).CurrentProgram.var.declare(typ,vtp,name,"",(context()).CurrentProgram.numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewritein "\\end{itemize}\n"
             |HTML ->
-                for s in this.sort() do
+                for s in definitions.sort() do
                     writer.codewritein("<h3>"+s.sname+"</h3>\n")
                     writer.codewritein "<ul>\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewritein((GenerationScope.currentProgram()).var.declare(typ,vtp,name,"",(GenerationScope.currentProgram()).numFormat)+"\n")
+                        writer.codewritein((context()).CurrentProgram.var.declare(typ,vtp,name,"",(context()).CurrentProgram.numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewritein "</ul>\n"
             |HTMLSequenceDiagram ->
-                for s in this.sort() do
+                for s in definitions.sort() do
                     writer.codewritein("<h3>"+s.sname+"</h3>\n")
                     writer.codewritein "<ul>\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewritein((GenerationScope.currentProgram()).var.declare(typ,vtp,name,"",(GenerationScope.currentProgram()).numFormat)+"\n")
+                        writer.codewritein((context()).CurrentProgram.var.declare(typ,vtp,name,"",(context()).CurrentProgram.numFormat)+"\n")
                     writer.indent.dec()
                     writer.codewritein "</ul>\n"
             |Python ->
-                for s in this.sort() do
+                for s in definitions.sort() do
                     writer.codewritein("class "+s.sname+":\n")
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
                         let typ,vtp,name = s.memlist.[s.memlist.Length-1-i]
-                        writer.codewritein((GenerationScope.currentProgram()).var.declare(typ,vtp,name,"",(GenerationScope.currentProgram()).numFormat)+"\n")
+                        writer.codewritein((context()).CurrentProgram.var.declare(typ,vtp,name,"",(context()).CurrentProgram.numFormat)+"\n")
                     writer.indent.dec()
             |JavaScript ->
                 ()
@@ -80,9 +81,9 @@ module Aqualis_str =
                 ()
 
         ///<summary>構造体メンバへのアクセス</summary>
-        static member mem(vname,name) =
-            let this = (GenerationScope.currentProgram()).str
-            match (GenerationScope.currentProgram()).language with
+        member this.mem(vname,name) =
+            let definitions = (context()).CurrentProgram.str
+            match (context()).CurrentProgram.language with
             |Fortran ->
                 vname+"%"+name
             |C99 ->
@@ -102,162 +103,168 @@ module Aqualis_str =
             |Numeric ->
                 vname+"."+name
 
-        static member addmember(sname,(typ,vtp,name)) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(typ,vtp,name))
+        member this.addmember(sname,(typ,vtp,name)) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(typ,vtp,name))
 
-        static member i0 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(It 4,A0,name))
-            int0(Var(It 4,str.mem(vname,name),NaN))
-        static member d0 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Dt,A0,name))
-            double0(Var(Dt,str.mem(vname,name),NaN))
-        static member z0 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Zt,A0,name))
-            complex0(Var(Zt,str.mem(vname,name),NaN))
-        static member i1 (sname, vname, name, size1) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(It 4,A1(size1),name))
-            this.addmember(sname,(It 4,A1(1),name+"_size"))
-            int1(It 4,Var1(A1(size1),str.mem(vname,name)))
-        static member d1 (sname, vname, name, size1) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Dt,A1(size1),name))
-            this.addmember(sname,(It 4,A1(1),name+"_size"))
-            double1(Dt,Var1(A1(size1),str.mem(vname,name)))
-        static member z1 (sname, vname, name, size1) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Zt,A1(size1),name))
-            this.addmember(sname,(It 4,A1(1),name+"_size"))
-            complex1(Zt,Var1(A1(size1),str.mem(vname,name)))
-        static member i2 (sname, vname, name, size1, size2) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(It 4,A2(size1,size2),name))
-            this.addmember(sname,(It 4,A1(2),name+"_size"))
-            int2(It 4,Var2(A2(size1,size2),str.mem(vname,name)))
-        static member d2 (sname, vname, name, size1, size2) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Dt,A2(size1,size2),name))
-            this.addmember(sname,(It 4,A1(2),name+"_size"))
-            double2(Dt,Var2(A2(size1,size2),str.mem(vname,name)))
-        static member z2 (sname, vname, name, size1, size2) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Zt,A2(size1,size2),name))
-            this.addmember(sname,(It 4,A1(2),name+"_size"))
-            complex2(Zt,Var2(A2(size1,size2),str.mem(vname,name)))
-        static member i3 (sname, vname, name, size1, size2, size3) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(It 4,A3(size1,size2,size3),name))
-            this.addmember(sname,(It 4,A1(3),name+"_size"))
-            int3(It 4,Var3(A3(size1,size2,size3),str.mem(vname,name)))
-        static member d3 (sname, vname, name, size1, size2, size3) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Dt,A3(size1,size2,size3),name))
-            this.addmember(sname,(It 4,A1(3),name+"_size"))
-            double3(Dt,Var3(A3(size1,size2,size3),str.mem(vname,name)))
-        static member z3 (sname, vname, name, size1, size2, size3) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Zt,A3(size1,size2,size3),name))
-            this.addmember(sname,(It 4,A1(3),name+"_size"))
-            complex3(Zt,Var3(A3(size1,size2,size3),str.mem(vname,name)))
-        static member i1 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(It 4,A1(0),name))
-            this.addmember(sname,(It 4,A1(1),name+"_size"))
-            int1(It 4,Var1(A1(0),str.mem(vname,name)))
-        static member d1 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Dt,A1(0),name))
-            this.addmember(sname,(It 4,A1(1),name+"_size"))
-            double1(Dt,Var1(A1(0),str.mem(vname,name)))
-        static member z1 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Zt,A1(0),name))
-            this.addmember(sname,(It 4,A1(1),name+"_size"))
-            complex1(Zt,Var1(A1(0),str.mem(vname,name)))
-        static member i2 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(It 4,A2(0,0),name))
-            this.addmember(sname,(It 4,A1(2),name+"_size"))
-            int2(It 4,Var2(A2(0,0),str.mem(vname,name)))
-        static member d2 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Dt,A2(0,0),name))
-            this.addmember(sname,(It 4,A1(2),name+"_size"))
-            double2(Dt,Var2(A2(0,0),str.mem(vname,name)))
-        static member z2 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Zt,A2(0,0),name))
-            this.addmember(sname,(It 4,A1(2),name+"_size"))
-            complex2(Zt,Var2(A2(0,0),str.mem(vname,name)))
-        static member i3 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(It 4,A3(0,0,0),name))
-            this.addmember(sname,(It 4,A1(3),name+"_size"))
-            int3(It 4,Var3(A3(0,0,0),str.mem(vname,name)))
-        static member d3 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Dt,A3(0,0,0),name))
-            this.addmember(sname,(It 4,A1(3),name+"_size"))
-            double3(Dt,Var3(A3(0,0,0),str.mem(vname,name)))
-        static member z3 (sname, vname, name) =
-            let this = (GenerationScope.currentProgram()).str
-            this.addmember(sname,(Zt,A3(0,0,0),name))
-            this.addmember(sname,(It 4,A1(3),name+"_size"))
-            complex3(Zt,Var3(A3(0,0,0),str.mem(vname,name)))
+        member this.i0 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(It 4,A0,name))
+            int0(Var(It 4,this.mem(vname,name),NaN), context=context())
+        member this.d0 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Dt,A0,name))
+            double0(Var(Dt,this.mem(vname,name),NaN), context=context())
+        member this.z0 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Zt,A0,name))
+            complex0(Var(Zt,this.mem(vname,name),NaN), context=context())
+        member this.i1 (sname, vname, name, size1) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(It 4,A1(size1),name))
+            definitions.addmember(sname,(It 4,A1(1),name+"_size"))
+            int1(It 4,Var1(A1(size1),this.mem(vname,name)), context=context())
+        member this.d1 (sname, vname, name, size1) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Dt,A1(size1),name))
+            definitions.addmember(sname,(It 4,A1(1),name+"_size"))
+            double1(Dt,Var1(A1(size1),this.mem(vname,name)), context=context())
+        member this.z1 (sname, vname, name, size1) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Zt,A1(size1),name))
+            definitions.addmember(sname,(It 4,A1(1),name+"_size"))
+            complex1(Zt,Var1(A1(size1),this.mem(vname,name)), context=context())
+        member this.i2 (sname, vname, name, size1, size2) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(It 4,A2(size1,size2),name))
+            definitions.addmember(sname,(It 4,A1(2),name+"_size"))
+            int2(It 4,Var2(A2(size1,size2),this.mem(vname,name)), context=context())
+        member this.d2 (sname, vname, name, size1, size2) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Dt,A2(size1,size2),name))
+            definitions.addmember(sname,(It 4,A1(2),name+"_size"))
+            double2(Dt,Var2(A2(size1,size2),this.mem(vname,name)), context=context())
+        member this.z2 (sname, vname, name, size1, size2) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Zt,A2(size1,size2),name))
+            definitions.addmember(sname,(It 4,A1(2),name+"_size"))
+            complex2(Zt,Var2(A2(size1,size2),this.mem(vname,name)), context=context())
+        member this.i3 (sname, vname, name, size1, size2, size3) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(It 4,A3(size1,size2,size3),name))
+            definitions.addmember(sname,(It 4,A1(3),name+"_size"))
+            int3(It 4,Var3(A3(size1,size2,size3),this.mem(vname,name)), context=context())
+        member this.d3 (sname, vname, name, size1, size2, size3) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Dt,A3(size1,size2,size3),name))
+            definitions.addmember(sname,(It 4,A1(3),name+"_size"))
+            double3(Dt,Var3(A3(size1,size2,size3),this.mem(vname,name)), context=context())
+        member this.z3 (sname, vname, name, size1, size2, size3) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Zt,A3(size1,size2,size3),name))
+            definitions.addmember(sname,(It 4,A1(3),name+"_size"))
+            complex3(Zt,Var3(A3(size1,size2,size3),this.mem(vname,name)), context=context())
+        member this.i1 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(It 4,A1(0),name))
+            definitions.addmember(sname,(It 4,A1(1),name+"_size"))
+            int1(It 4,Var1(A1(0),this.mem(vname,name)), context=context())
+        member this.d1 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Dt,A1(0),name))
+            definitions.addmember(sname,(It 4,A1(1),name+"_size"))
+            double1(Dt,Var1(A1(0),this.mem(vname,name)), context=context())
+        member this.z1 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Zt,A1(0),name))
+            definitions.addmember(sname,(It 4,A1(1),name+"_size"))
+            complex1(Zt,Var1(A1(0),this.mem(vname,name)), context=context())
+        member this.i2 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(It 4,A2(0,0),name))
+            definitions.addmember(sname,(It 4,A1(2),name+"_size"))
+            int2(It 4,Var2(A2(0,0),this.mem(vname,name)), context=context())
+        member this.d2 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Dt,A2(0,0),name))
+            definitions.addmember(sname,(It 4,A1(2),name+"_size"))
+            double2(Dt,Var2(A2(0,0),this.mem(vname,name)), context=context())
+        member this.z2 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Zt,A2(0,0),name))
+            definitions.addmember(sname,(It 4,A1(2),name+"_size"))
+            complex2(Zt,Var2(A2(0,0),this.mem(vname,name)), context=context())
+        member this.i3 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(It 4,A3(0,0,0),name))
+            definitions.addmember(sname,(It 4,A1(3),name+"_size"))
+            int3(It 4,Var3(A3(0,0,0),this.mem(vname,name)), context=context())
+        member this.d3 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Dt,A3(0,0,0),name))
+            definitions.addmember(sname,(It 4,A1(3),name+"_size"))
+            double3(Dt,Var3(A3(0,0,0),this.mem(vname,name)), context=context())
+        member this.z3 (sname, vname, name) =
+            let definitions = (context()).CurrentProgram.str
+            definitions.addmember(sname,(Zt,A3(0,0,0),name))
+            definitions.addmember(sname,(It 4,A1(3),name+"_size"))
+            complex3(Zt,Var3(A3(0,0,0),this.mem(vname,name)), context=context())
 
-        static member reg(sname,name:string) =
-            let this = (GenerationScope.currentProgram()).str
-            let str_ac = match (GenerationScope.currentProgram()).language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
+        member this.reg(sname,name:string) =
+            let definitions = (context()).CurrentProgram.str
+            let str_ac = match (context()).CurrentProgram.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
-                this.addstructure sname
+                definitions.addstructure sname
                 //構造体変数の宣言
-                let name_ = match (GenerationScope.currentProgram()).language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                (GenerationScope.currentProgram()).var.setVar(Structure sname,A0,name_,"")
+                let name_ = match (context()).CurrentProgram.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                (context()).CurrentProgram.var.setVar(Structure sname,A0,name_,"")
 
-        static member regWithoutAddStructure(sname,name:string) =
-            let this = (GenerationScope.currentProgram()).str
-            let str_ac = match (GenerationScope.currentProgram()).language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
+        member this.regWithoutAddStructure(sname,name:string) =
+            let definitions = (context()).CurrentProgram.str
+            let str_ac = match (context()).CurrentProgram.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体変数の宣言
-                let name_ = match (GenerationScope.currentProgram()).language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                (GenerationScope.currentProgram()).var.setVar(Structure sname,A0,name_,"")
+                let name_ = match (context()).CurrentProgram.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                (context()).CurrentProgram.var.setVar(Structure sname,A0,name_,"")
 
-        static member reg(sname,name:string,size1) =
-            let this = (GenerationScope.currentProgram()).str
-            let str_ac = match (GenerationScope.currentProgram()).language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
-            //構造体のメンバの場合はリスト登録不要
-            if name.Contains(str_ac)=false then
-                //構造体の定義を追加
-                this.addstructure sname
-                //構造体変数の宣言
-                let name_ = match (GenerationScope.currentProgram()).language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                (GenerationScope.currentProgram()).var.setVar(Structure sname,A1(size1),name_,"")
-
-        static member reg(sname,name:string,size1,size2) =
-            let this = (GenerationScope.currentProgram()).str
-            let str_ac = match (GenerationScope.currentProgram()).language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
+        member this.reg(sname,name:string,size1) =
+            let definitions = (context()).CurrentProgram.str
+            let str_ac = match (context()).CurrentProgram.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
-                this.addstructure sname
+                definitions.addstructure sname
                 //構造体変数の宣言
-                let name_ = match (GenerationScope.currentProgram()).language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                (GenerationScope.currentProgram()).var.setVar(Structure sname,A2(size1,size2),name_,"")
+                let name_ = match (context()).CurrentProgram.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                (context()).CurrentProgram.var.setVar(Structure sname,A1(size1),name_,"")
 
-        static member reg(sname,name:string,size1,size2,size3) =
-            let this = (GenerationScope.currentProgram()).str
-            let str_ac = match (GenerationScope.currentProgram()).language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
+        member this.reg(sname,name:string,size1,size2) =
+            let definitions = (context()).CurrentProgram.str
+            let str_ac = match (context()).CurrentProgram.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
                 //構造体の定義を追加
-                this.addstructure sname
+                definitions.addstructure sname
                 //構造体変数の宣言
-                let name_ = match (GenerationScope.currentProgram()).language with |HTML |HTMLSequenceDiagram -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
-                (GenerationScope.currentProgram()).var.setVar(Structure sname,A3(size1,size2,size3),name_,"")
+                let name_ = match (context()).CurrentProgram.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                (context()).CurrentProgram.var.setVar(Structure sname,A2(size1,size2),name_,"")
+
+        member this.reg(sname,name:string,size1,size2,size3) =
+            let definitions = (context()).CurrentProgram.str
+            let str_ac = match (context()).CurrentProgram.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
+            //構造体のメンバの場合はリスト登録不要
+            if name.Contains(str_ac)=false then
+                //構造体の定義を追加
+                definitions.addstructure sname
+                //構造体変数の宣言
+                let name_ = match (context()).CurrentProgram.language with |HTML |HTMLSequenceDiagram -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
+                (context()).CurrentProgram.var.setVar(Structure sname,A3(size1,size2,size3),name_,"")
+
+
+    [<AutoOpen>]
+    module CompilationEnvironmentStrExtensions =
+        type CompilationEnvironment with
+            member this.str = ContextStr(this)

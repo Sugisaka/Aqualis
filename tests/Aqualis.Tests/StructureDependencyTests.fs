@@ -11,7 +11,7 @@ module StructureDependencyTests =
 
     let private writeStructures (context:GenerationContext) path =
         use writer = new codeWriter(path, 2, C99)
-        str.Def_Structure writer
+        CompilationEnvironment(Some context).str.Def_Structure writer
         writer.close()
 
     [<Fact>]
@@ -21,7 +21,7 @@ module StructureDependencyTests =
         let structurePath = Path.Combine(output.Path, "acyclic-structures.c")
 
         try
-            context.GenerateAtomically(fun () ->
+            context.GenerateAtomically(fun _ ->
                 context.CurrentProgram.str.addstructure "leaf"
                 context.CurrentProgram.str.addmember(
                     "leaf",
@@ -50,7 +50,7 @@ module StructureDependencyTests =
         let error =
             try
                 Assert.Throws<InvalidOperationException>(Action(fun () ->
-                    context.GenerateAtomically(fun () ->
+                    context.GenerateAtomically(fun _ ->
                         context.CurrentProgram.str.addstructure "node"
                         context.CurrentProgram.str.addmember(
                             "node",
@@ -73,7 +73,7 @@ module StructureDependencyTests =
         let error =
             try
                 Assert.Throws<InvalidOperationException>(Action(fun () ->
-                    context.GenerateAtomically(fun () ->
+                    context.GenerateAtomically(fun _ ->
                         context.CurrentProgram.str.addstructure "independent"
                         context.CurrentProgram.str.addmember(
                             "independent",

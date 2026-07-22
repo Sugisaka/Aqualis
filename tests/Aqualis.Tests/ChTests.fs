@@ -13,18 +13,19 @@ module ChTests =
             [output.Path, "temporary.c", C99]
             (fun context ->
                 try
+                    let environment = CompilationEnvironment(Some context)
                     let mutable firstName = ""
 
                     Assert.Throws<InvalidOperationException>(
                         Action(fun () ->
-                            ch.i (fun value ->
+                            environment.ch.i (fun value ->
                                 firstName <- value.code
                                 invalidOp "expected")))
                     |> ignore
 
                     Assert.Empty(context.CurrentProgram.i0.OnlineNumList)
 
-                    ch.i (fun value ->
+                    environment.ch.i (fun value ->
                         Assert.Equal(firstName, value.code))
                 finally
                     context.CurrentProgram.close())
@@ -37,9 +38,10 @@ module ChTests =
             [output.Path, "temporary-list.c", C99]
             (fun context ->
                 try
+                    let environment = CompilationEnvironment(Some context)
                     Assert.Throws<InvalidOperationException>(
                         Action(fun () ->
-                            ch.ix 3 (fun _ ->
+                            environment.ch.ix 3 (fun _ ->
                                 invalidOp "expected")))
                     |> ignore
 
@@ -56,9 +58,10 @@ module ChTests =
             [output.Path, "temporary-array.c", C99]
             (fun context ->
                 try
+                    let environment = CompilationEnvironment(Some context)
                     Assert.Throws<InvalidOperationException>(
                         Action(fun () ->
-                            ch.i01 (fun _ ->
+                            environment.ch.i01 (fun _ ->
                                 invalidOp "expected")))
                     |> ignore
 
@@ -67,8 +70,8 @@ module ChTests =
                     context.CurrentProgram.close())
 
     [<Fact>]
-    let ``ch outside a generation context fails clearly`` () =
+    let ``ch in a numeric environment fails clearly`` () =
         Assert.Throws<InvalidOperationException>(
             Action(fun () ->
-                ch.i ignore))
+                CompilationEnvironment(None).ch.i ignore))
         |> ignore

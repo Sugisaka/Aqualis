@@ -22,7 +22,8 @@ namespace Aqualis
             static member equivAlignPy (x:expr) (y:expr) (c:program) =
                 printfn "Pythonでこの文は使用できません"
                 
-            static member forLoopPy (c:program) (n1:expr,n2:expr) code =
+            static member forLoopPy (context:GenerationContext) (n1:expr,n2:expr) code =
+                let c = context.CurrentProgram
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalPy c
@@ -34,10 +35,11 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>無限ループ</summary>
-            static member loopPy (c:program) code =
+            static member loopPy (context:GenerationContext) code =
+                let c = context.CurrentProgram
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = (GenerationScope.gotoLabels()).nextGotoLabel()
+                let label = context.GotoLabels.nextGotoLabel()
                 let exit() = c.codewritein("goto "+label)
                 expr.substPy i (Int 1) c
                 c.codewritein "while True:"
@@ -47,7 +49,7 @@ namespace Aqualis
                 expr.substPy i (Add(It 4, i, Int 1)) c
                 c.indentDec()
                 if label = "10" then
-                    (GenerationScope.gotoLabels()).exit_reset()
+                    context.GotoLabels.exit_reset()
                 else 
                     c.codewritein("if flag < " + label + ":")
                     c.indentInc()
@@ -56,14 +58,16 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledoPy (c:program) (cond:expr) = fun code ->
+            static member whiledoPy (context:GenerationContext) (cond:expr) = fun code ->
+                let c = context.CurrentProgram
                 c.codewritein("while(" + cond.evalPy c + ")")
                 c.indentInc()
                 code()
                 c.indentDec()
                 
             ///<summary>指定した範囲でループ</summary>
-            static member rangePy (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member rangePy (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let c = context.CurrentProgram
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -83,19 +87,20 @@ namespace Aqualis
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitPy (c:program) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code -> 
+            static member range_exitPy (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let c = context.CurrentProgram
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
+                    let label = context.GotoLabels.nextGotoLabel()
                     let exit() = c.comment("goto "+label)
                     c.comment("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
                     if label = "10" then
-                        (GenerationScope.gotoLabels()).exit_reset()
+                        context.GotoLabels.exit_reset()
                     else 
                         c.comment("if flag < "+label)
                         c.indentInc()
@@ -105,14 +110,14 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = (GenerationScope.gotoLabels()).nextGotoLabel()
+                    let label = context.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.codewritein("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
                     if label = "10" then
-                        (GenerationScope.gotoLabels()).exit_reset()
+                        context.GotoLabels.exit_reset()
                     else 
                         c.codewritein("if flag < "+label+":")
                         c.indentInc()
@@ -120,7 +125,8 @@ namespace Aqualis
                         c.indentDec()
                     returnVar()
                     
-            static member branchPy (c:program) code =
+            static member branchPy (context:GenerationContext) code =
+                let c = context.CurrentProgram
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPy c
                     c.codewritein("if " + cond + ":")
@@ -248,13 +254,13 @@ namespace Aqualis
                 |Sum(t, n1, n2, f) ->
                     // 合計値格納用変数
                     (Let(t, Int 0, fun u ->
-                        expr.forLoopPy c (n1,n2) <| fun i ->
+                        expr.forLoopPy (GenerationContext.ForInternalProgram c) (n1,n2) <| fun i ->
                             // 加算・代入処理
                             expr.substPy u (Add(t,u, f i)) c
                         u)).evalPy c
                 |IfEl(cond,n1,n2) -> 
                     (Let(n1.etype, NaN, fun x -> 
-                        expr.branchPy c <| fun (ifcode,_,elsecode) ->
+                        expr.branchPy (GenerationContext.ForInternalProgram c) <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substPy x n1 c
                             elsecode <| fun () ->
