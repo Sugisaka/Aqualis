@@ -82,7 +82,6 @@
     <Compile Include="math\aqualisBuilder.fs" />
     <Compile Include="graphics\color.fs" />
     <Compile Include="graphics\gensvg.fs" />
-    <Compile Include="graphics\genaiscript.fs" />
     <Compile Include="graphics\mathgraph.fs" />
     <Compile Include="graphics\graph1d.fs" />
     <Compile Include="graphics\plot2d.fs" />
