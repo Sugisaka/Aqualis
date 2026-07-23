@@ -712,6 +712,7 @@ namespace Aqualis
     type CompilationEnvironment (context:GenerationContext option) =
         member _.GenerationContext = context
         member _.IsNumeric = context.IsNone
+        member _.Version = "188.0.0.0"
         member _.comment(text:string) = 
             match context with
             |Some c -> c.CurrentProgram.comment text

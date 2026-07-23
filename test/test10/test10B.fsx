@@ -24,8 +24,7 @@ let zline (p1:double*double,p2:double*double) (sv:svgfilemaker) =
     sv.line((x1,y1),(x2,y2),color.stroke.black 1.0)
     
 // 市松模様
-let ctx = CompilationEnvironment(None)
-ctx.svgfile.make (outputdir,"ichimatsuB.svg") (400.0,400.0) 1.0 <| fun sv ->
+svgfile.make (outputdir+"//ichimatsuB.svg") (400.0,400.0) 1.0 <| fun sv ->
         let r = 20.0
         // 単位図形の中心が原点にあるときの各頂点
         let a =

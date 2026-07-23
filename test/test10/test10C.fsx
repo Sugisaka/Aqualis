@@ -15,7 +15,7 @@ let step = 2
 
 //データファイルの作成
 group.section (step, 1) <| fun () ->
-    Compile [Fortran] outputdir projectname (version,"aaa") <| fun ctx ->
+    Compile [Fortran] outputdir projectname version <| fun ctx ->
         ctx.io.fileOutput "data1.dat" <| fun wr ->
             let N = 21
             ctx.iter.num N <| fun i ->

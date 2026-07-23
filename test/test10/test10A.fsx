@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-Compile [Fortran;C99;Python] outputdir projectname (version,"aaa") <| fun ctx ->
+Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
     
     /// <summary>
     /// 始点p1、終点p2の線分を複素平面に描画

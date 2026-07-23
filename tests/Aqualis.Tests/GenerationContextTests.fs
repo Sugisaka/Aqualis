@@ -34,14 +34,14 @@ module GenerationContextTests =
         let mutable numericIterations = 0
         let mutable generatedVariable = ""
 
-        Compile [C99] output.Path "explicit-environment" ("test", "1") <| fun environment ->
+        Compile [C99] output.Path "explicit-environment" "1" <| fun environment ->
             Assert.True(environment.GenerationContext.IsSome)
             environment.emit.writein "/* emitted through context */"
             environment.ch.i <| fun value ->
                 generatedVariable <- value.code
                 value <== 0
 
-        Compile [Numeric] output.Path "numeric-environment" ("test", "1") <| fun environment ->
+        Compile [Numeric] output.Path "numeric-environment" "1" <| fun environment ->
             Assert.True(environment.GenerationContext.IsNone)
             environment.iter.range(0, 2) <| fun _ -> numericIterations <- numericIterations + 1
 
@@ -60,7 +60,7 @@ module GenerationContextTests =
     let ``PHP compilation writes a php file through explicit services`` () =
         use output = new TemporaryDirectory()
 
-        Compile [PHP] output.Path "page" ("test", "1") <| fun environment ->
+        Compile [PHP] output.Path "page" "1" <| fun environment ->
             let value = environment.php.var "value"
             value <== environment.php.file_get_contents "data.json"
             let input = environment.form.textBox "user"
@@ -105,7 +105,7 @@ module GenerationContextTests =
         use output = new TemporaryDirectory()
         let mutable callbackIndex = -1
 
-        Compile [HTMLSequenceDiagram] output.Path "sequence-context" ("test", "1") <| fun environment ->
+        Compile [HTMLSequenceDiagram] output.Path "sequence-context" "1" <| fun environment ->
             callbackIndex <- environment.GenerationContext.Value.CurrentIndex
 
         Assert.Equal(1, callbackIndex)
@@ -116,7 +116,7 @@ module GenerationContextTests =
         let mutable escapedValue:int0 option = None
         let mutable escapedContext:GenerationContext option = None
 
-        Compile [C99] output.Path "escaped-context" ("test", "1") <| fun environment ->
+        Compile [C99] output.Path "escaped-context" "1" <| fun environment ->
             escapedContext <- environment.GenerationContext
             environment.ch.i <| fun value -> escapedValue <- Some value
 

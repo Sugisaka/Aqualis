@@ -120,7 +120,7 @@ module FileResourceTests =
         assertUnlocked path
 
     [<Fact>]
-    let ``SVG and AI generators remove temporary files after an exception`` () =
+    let ``SVG generators remove temporary files after an exception`` () =
         use output = new TemporaryDirectory()
         let svgPath = Path.Combine(output.Path, "image.svg")
         let aiPath = Path.Combine(output.Path, "image.jsx")
@@ -133,17 +133,10 @@ module FileResourceTests =
         try
             Assert.Throws<InvalidOperationException>(
                 Action(fun () ->
-                    environment.svgfile.make
-                        (output.Path, "image.svg")
+                    svgfile.make
+                        (output.Path+"//image.svg")
                         (100.0, 100.0)
                         1.0
-                        (fun _ -> invalidOp "expected")))
-            |> ignore
-
-            Assert.Throws<InvalidOperationException>(
-                Action(fun () ->
-                    environment.aiscriptfile.make
-                        (output.Path, "image.jsx", 1.0)
                         (fun _ -> invalidOp "expected")))
             |> ignore
         finally

@@ -3,7 +3,7 @@
 //#############################################################################
 
 let outputdir = __SOURCE_DIRECTORY__
-let version = "186.0.4.0", "1.0.0"
+let version = "1.0.0"
 
 #I @"..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"

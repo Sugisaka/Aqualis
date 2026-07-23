@@ -28,7 +28,7 @@ let correlation(f:complex2,g:complex2,ctx:CompilationEnvironment) =
     // fの逆フーリエ変換
     ctx.fft2.ifft("ftplan3", f, f)
     
-Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun ctx ->
+Compile [Fortran;C99;Python] outputdir projectname "aaa" <| fun ctx ->
     let N = 101
     ctx.ch.z2 (N, N) <| fun f ->
     ctx.ch.z2 (N, N) <| fun g ->

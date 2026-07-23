@@ -11,8 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-Compile [HTMLSequenceDiagram] outputdir 
-    "test8e" (version,"aaa") <| fun ctx ->
+Compile [HTMLSequenceDiagram] outputdir "test8e" version <| fun ctx ->
     
     //結果(間違った代入)
     ctx.ch.I "x" <| fun x ->

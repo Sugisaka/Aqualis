@@ -54,7 +54,7 @@ module CompilerScriptTests =
             [C99]
             outputDirectory
             projectName
-            ("test", "1.0")
+            "1.0"
             (fun environment ->
                 let context = environment.GenerationContext.Value
                 context.CurrentProgram.slist.add "extra source.c"
@@ -70,7 +70,7 @@ module CompilerScriptTests =
             [Fortran]
             outputDirectory
             projectName
-            ("test", "1.0")
+            "1.0"
             (fun environment ->
                 let context = environment.GenerationContext.Value
                 context.CurrentProgram.slist.add "extra source.f90"
@@ -162,14 +162,14 @@ module CompilerScriptTests =
             [Python]
             output.Path
             "python-script"
-            ("test", "1.0")
+            "1.0"
             ignore
 
         Compile
             [C99]
             output.Path
             "distributed"
-            ("test", "1.0")
+            "1.0"
             (fun environment ->
                 use scripts = new shellscript.Shell(environment, output.Path, "distributed", 2)
                 scripts.AddProcess()
@@ -193,7 +193,7 @@ module CompilerScriptTests =
             [Fortran; C99; Python]
             output.Path
             "function-context"
-            ("test", "1.0")
+            "1.0"
             (fun environment ->
                 environment.ch.dd <| fun (result,value) ->
                 environment.ch.i1 2 <| fun values ->

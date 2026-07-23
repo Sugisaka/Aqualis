@@ -11,7 +11,7 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
  
-Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","aaa") <| fun ctx ->
+Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname "aaa" <| fun ctx ->
     ctx.compiler.set_DebugMode OFF
     ctx.group.h2 "testA" <| fun () ->
         ctx.ch.i <| fun m ->

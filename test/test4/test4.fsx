@@ -25,7 +25,7 @@ open Aqualis
         member public __.x1 = ctx.str.d0(sname_,name,"y1")
         member public __.z1 = ctx.str.z0(sname_,name,"x2")
         
-Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun ctx ->
+Compile [Fortran;C99;Python] outputdir projectname "aaa" <| fun ctx ->
     let f(y:double0,x:double0,n:int0,n1:int1,s:testClass1) =
         ctx.func "func1" <| fun c ->
             y.farg c <| fun y ->

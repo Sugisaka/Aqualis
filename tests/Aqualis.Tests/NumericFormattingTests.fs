@@ -98,7 +98,7 @@ module NumericFormattingTests =
                 [Fortran; C99; Python]
                 output.Path
                 "culture"
-                ("test", "1.0")
+                "1.0"
                 (fun environment ->
                     let value = environment.var.d0 "value"
                     value <== 1.5)
@@ -122,7 +122,7 @@ module NumericFormattingTests =
             [Fortran]
             output.Path
             "nonfinite"
-            ("test", "1.0")
+            "1.0"
             (fun environment ->
                 let value = environment.var.d0 "value"
                 value <== Double.NaN)

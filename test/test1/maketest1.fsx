@@ -19,7 +19,7 @@ wr.WriteLine "#r \"Aqualis.dll\""
 wr.WriteLine ""
 wr.WriteLine "open Aqualis"
 wr.WriteLine ""
-wr.WriteLine "Compile [Fortran;C99;Python] outputdir projectname (\"aaa\",\"aaa\") <| fun ctx ->"
+wr.WriteLine "Compile [Fortran;C99;Python] outputdir projectname \"aaa\" <| fun ctx ->"
 wr.WriteLine "    ctx.io.fileOutput \"result.dat\" <| fun wr ->"
 wr.WriteLine "    ctx.ch.dddd <| fun (x,y,z1,z2) ->"
 wr.WriteLine("        let p = " + r.Next(9).ToString() + "." + r.Next(9).ToString())
