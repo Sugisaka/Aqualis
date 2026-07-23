@@ -712,7 +712,7 @@ namespace Aqualis
     type Aqualis (context:GenerationContext option) =
         member _.GenerationContext = context
         member _.IsNumeric = context.IsNone
-        member _.Version = "188.0.0.0"
+        static member Version = "188.0.0.0"
         member internal _.RequireGenerationContext() =
             context
             |> Option.defaultWith (fun () ->
