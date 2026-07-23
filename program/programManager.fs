@@ -712,11 +712,27 @@ namespace Aqualis
     type CompilationEnvironment (context:GenerationContext option) =
         member _.GenerationContext = context
         member _.IsNumeric = context.IsNone
+        member _.comment(text:string) = 
+            match context with
+            |Some c -> c.CurrentProgram.comment text
+            |None -> ()
 
         member internal _.RequireGenerationContext() =
             context
             |> Option.defaultWith (fun () ->
                 invalidOp "This operation is not available during Numeric execution.")
+
+    /// Emits raw source text through the output program selected by this environment.
+    type ContextEmit internal (environment:CompilationEnvironment) =
+        let context = environment.RequireGenerationContext()
+
+        member _.writein(text:string) =
+            context.CurrentProgram.codewritein text
+
+    [<AutoOpen>]
+    module CompilationEnvironmentEmitExtensions =
+        type CompilationEnvironment with
+            member this.emit = ContextEmit(this)
 
     /// Shared rules for propagating and validating contexts carried by DSL values.
     module internal GenerationContextMerge =
