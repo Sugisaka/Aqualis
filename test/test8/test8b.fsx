@@ -15,8 +15,8 @@ Compile [HTMLSequenceDiagram] outputdir
     "test8b" (version,"aaa") <| fun ctx ->
 
     //反復処理
-    ch.I "x" <| fun x ->
+    ctx.ch.I "x" <| fun x ->
         x <== 0
-        iter.range (0,3) <| fun i ->
+        ctx.iter.range (0,3) <| fun i ->
             x <== x + 1
             x <== 2 * x

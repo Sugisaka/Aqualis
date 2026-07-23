@@ -15,9 +15,9 @@ Compile [HTMLSequenceDiagram] outputdir
     "test8e" (version,"aaa") <| fun ctx ->
     
     //結果(間違った代入)
-    ch.I "x" <| fun x ->
-    ch.I "x_1" <| fun x1 ->
+    ctx.ch.I "x" <| fun x ->
+    ctx.ch.I "x_1" <| fun x1 ->
         x <== 0
         x1 <== 0
-        iter.range (1,10) <| fun i ->
+        ctx.iter.range (1,10) <| fun i ->
             x <== x1 + i

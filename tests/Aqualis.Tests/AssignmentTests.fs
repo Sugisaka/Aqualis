@@ -142,3 +142,27 @@ module AssignmentTests =
         Assert.Contains("values1", generated)
         Assert.Contains("values2", generated)
         Assert.Contains("values3", generated)
+
+    [<Fact>]
+    let ``array size values retain their generation context`` () =
+        use output = new TemporaryDirectory()
+        let context =
+            GenerationContext [
+                new program(output.Path, "array-sizes.c", C99)
+            ]
+        let variables = CompilationEnvironment(Some context).var
+
+        try
+            let values1 = variables.i1("values1", 2)
+            let values2 = variables.i2("values2", 2, 3)
+            let values3 = variables.i3("values3", 2, 3, 4)
+
+            Assert.Same(context, values1.size1.Context.Value)
+            Assert.Same(context, values2.size1.Context.Value)
+            Assert.Same(context, values2.size2.Context.Value)
+            Assert.Same(context, values3.size1.Context.Value)
+            Assert.Same(context, values3.size2.Context.Value)
+            Assert.Same(context, values3.size3.Context.Value)
+        finally
+            context.CurrentProgram.close()
+            context.Deactivate()

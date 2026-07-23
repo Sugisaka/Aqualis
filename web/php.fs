@@ -21,13 +21,13 @@ type PHPbool(x:string, ?context:GenerationContext) =
 
 type PHPdata(x:list<reduceExprString>, ?context:GenerationContext) =
     new(x:string) = PHPdata [RStr x]
-    new(x:int0) = PHPdata([RNvr x.Expr], ?context=x.Context)
-    new(x:double0) = PHPdata([RNvr x.Expr], ?context=x.Context)
-    new(x:complex0) = PHPdata([RNvr x.Expr], ?context=x.Context)
+    new(x:int0) = PHPdata([RNvr(x.Expr,x.Context)], ?context=x.Context)
+    new(x:double0) = PHPdata([RNvr(x.Expr,x.Context)], ?context=x.Context)
+    new(x:complex0) = PHPdata([RNvr(x.Expr,x.Context)], ?context=x.Context)
     member _.data with get() = x
     member _.Context = context
     member this.extcode(pr:program) = "<?php echo " + this.code + "; ?>"
-    static member var (context:GenerationContext,x) = PHPdata([RNvr(Var(Nt,"$"+x,NaN))], context)
+    static member var (context:GenerationContext,x) = PHPdata([RNvr(Var(Nt,"$"+x,NaN),Some context)], context)
     static member var (context:GenerationContext,x,init:PHPdata) =
         let v = PHPdata.var(context,x)
         v <== init
@@ -52,23 +52,23 @@ type PHPdata(x:list<reduceExprString>, ?context:GenerationContext) =
         let v = PHPdata.var(context,x)
         v <== D init
         v
-    static member f(s:string, ?context:GenerationContext) = PHPdata([RNvr(Var(Nt,s,NaN))], ?context=context)
-    static member f(context:GenerationContext,s:string) = PHPdata([RNvr(Var(Nt,s,NaN))], context)
+    static member f(s:string, ?context:GenerationContext) = PHPdata([RNvr(Var(Nt,s,NaN),context)], ?context=context)
+    static member f(context:GenerationContext,s:string) = PHPdata([RNvr(Var(Nt,s,NaN),Some context)], context)
     member this.int0 with get() =
         match x with
-        |[RNvr c] -> int0(c, ?context=context)
+        |[RNvr (c,valueContext)] -> int0(c, ?context=valueContext)
         |_ ->
             printfn "%s" (this.toString(".",StrQuotation))
             int0 NaN
     member this.double0 with get() =
         match x with
-        |[RNvr c] -> double0(c, ?context=context)
+        |[RNvr (c,valueContext)] -> double0(c, ?context=valueContext)
         |_ ->
             printfn "%s" (this.toString(".",StrQuotation))
             double0 NaN
     member this.complex0 with get() =
         match x with
-        |[RNvr c] -> complex0(c, ?context=context)
+        |[RNvr (c,valueContext)] -> complex0(c, ?context=valueContext)
         |_ ->
             printfn "%s" (this.toString(".",StrQuotation))
             complex0 NaN
@@ -130,7 +130,7 @@ type PHPdata(x:list<reduceExprString>, ?context:GenerationContext) =
                 |Direct -> x
                 |StrQuotation -> "\""+x+"\""
                 |CodeStrQuotation -> "\\\""+x+"\\\""
-            |RNvr value ->
+            |RNvr (value,_) ->
                 match context, value with
                 |Some ctx, _ -> value.eval ctx.CurrentProgram
                 |None, Int value -> string value
@@ -140,8 +140,8 @@ type PHPdata(x:list<reduceExprString>, ?context:GenerationContext) =
         |> fun s -> String.Join(c,s)
     member this.Item(i:PHPdata) =
         let resultContext = GenerationContextMerge.merge context i.Context
-        PHPdata([RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN))], ?context=resultContext)
-    member this.Item(i:int) = this[PHPdata [RNvr(Int i)]]
+        PHPdata([RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN),resultContext)], ?context=resultContext)
+    member this.Item(i:int) = this[PHPdata [RNvr(Int i,None)]]
     member this.Item(i:string) = this[PHPdata [RStr i]]
     member this.Item(i:int0) = this[PHPdata i]
     member this.Item(i:double0) = this[PHPdata i]
@@ -430,13 +430,13 @@ and ContextPhp internal (environment:CompilationEnvironment) =
 module num0ForPHP =
 
     type int0 with
-        member this.phpdata with get() = PHPdata([RNvr this.Expr], ?context=this.Context)
+        member this.phpdata with get() = PHPdata([RNvr(this.Expr,this.Context)], ?context=this.Context)
 
     type double0 with
-        member this.phpdata with get() = PHPdata([RNvr this.Expr], ?context=this.Context)
+        member this.phpdata with get() = PHPdata([RNvr(this.Expr,this.Context)], ?context=this.Context)
 
     type complex0 with
-        member this.phpdata with get() = PHPdata([RNvr this.Expr], ?context=this.Context)
+        member this.phpdata with get() = PHPdata([RNvr(this.Expr,this.Context)], ?context=this.Context)
 
     // type num1 with
     //     member this.phpdata with get() = PHPdata [RNvr this.Expr]

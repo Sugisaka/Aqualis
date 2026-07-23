@@ -31,6 +31,36 @@ module NumericFormattingTests =
             Assert.Equal("1.5", InvariantFormat.number 1.5)
 
     [<Fact>]
+    let ``complex literals render without recursively simplifying their expansion`` () =
+        use output = new TemporaryDirectory()
+        let value = Cpx(1.0, 2.0)
+        let cases : (Language * (expr -> program -> string)) list =
+            [
+                C99, fun expression target -> expression.evalC target
+                Fortran, fun expression target -> expression.evalF target
+                JavaScript, fun expression target -> expression.evalJ target
+                PHP, fun expression target -> expression.evalPh target
+                Python, fun expression target -> expression.evalPy target
+            ]
+
+        for language, render in cases do
+            let target =
+                new program(
+                    output.Path,
+                    "complex-" + language.ToString(),
+                    language)
+
+            try
+                let format = numericFormatController language
+                let expected =
+                    format.DtoS 1.0 + "+uj*" + format.DtoS 2.0
+
+                Assert.Equal(expected, render value target)
+            finally
+                target.close()
+                target.delete()
+
+    [<Fact>]
     let ``non-finite numeric literals have explicit language representations`` () =
         Assert.Equal("NAN", numericFormatController(C99).DtoS Double.NaN)
         Assert.Equal("INFINITY", numericFormatController(C99).DtoS Double.PositiveInfinity)

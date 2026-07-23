@@ -15,6 +15,94 @@ module FileResourceTests =
                 FileShare.None)
         Assert.True(stream.CanWrite)
 
+    let private withEnvironment outputPath name code =
+        let context =
+            GenerationContext [new program(outputPath, name, C99)]
+        let environment = CompilationEnvironment(Some context)
+
+        try
+            code context environment
+        finally
+            context.CurrentProgram.close()
+            context.Deactivate()
+
+    [<Fact>]
+    let ``complex text input retains the target context`` () =
+        use output = new TemporaryDirectory()
+
+        withEnvironment output.Path "complex-read.c" <| fun context environment ->
+            let target = environment.var.z0 "target"
+
+            environment.io.fileInput "input.dat" <| fun reader ->
+                reader.t target
+
+            context.CurrentProgram.close()
+            let generated =
+                File.ReadAllText(
+                    Path.Combine(output.Path, "complex-read.c"))
+                |> TestHelpers.normalizeGeneratedCode
+
+            Assert.Contains("target =", generated)
+
+    [<Fact>]
+    let ``file input rejects a target without a context`` () =
+        use output = new TemporaryDirectory()
+
+        withEnvironment output.Path "constant-read.c" <| fun _ environment ->
+            let error =
+                Assert.Throws<InvalidOperationException>(fun () ->
+                    environment.io.fileInput "input.dat" <| fun reader ->
+                        reader.t (complex0(Cpx(1.0, 2.0))))
+
+            Assert.Equal(
+                "A file-read target is not associated with a GenerationContext.",
+                error.Message)
+
+    [<Fact>]
+    let ``file input rejects an expression target`` () =
+        use output = new TemporaryDirectory()
+
+        withEnvironment output.Path "expression-read.c" <| fun _ environment ->
+            let variable = environment.var.z0 "target"
+            let expression = variable + 1
+
+            let error =
+                Assert.Throws<InvalidOperationException>(fun () ->
+                    environment.io.fileInput "input.dat" <| fun reader ->
+                        reader.t expression)
+
+            Assert.Equal(
+                "A file-read target must be a variable.",
+                error.Message)
+
+    [<Fact>]
+    let ``file input rejects a variable from another context`` () =
+        use output = new TemporaryDirectory()
+        let first =
+            GenerationContext [
+                new program(output.Path, "first-read.c", C99)
+            ]
+        let second =
+            GenerationContext [
+                new program(output.Path, "second-read.c", C99)
+            ]
+        let environment = CompilationEnvironment(Some first)
+        let target =
+            complex0(
+                Var(Zt, "target", NaN),
+                context=second)
+
+        try
+            Assert.Throws<InvalidOperationException>(fun () ->
+                environment.io.fileInput "input.dat" <| fun reader ->
+                    reader.t target)
+            |> ignore
+        finally
+            first.CurrentProgram.close()
+            first.Deactivate()
+            second.CurrentProgram.close()
+            second.Deactivate()
+
     [<Fact>]
     let ``CSS generation preserves the previous file when its callback throws`` () =
         use output = new TemporaryDirectory()

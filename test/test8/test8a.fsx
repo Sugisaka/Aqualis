@@ -15,8 +15,8 @@ Compile [HTMLSequenceDiagram] outputdir
     "test8a" (version,"aaa") <| fun ctx ->
 
     //変数の定義と代入
-    ch.I "x" <| fun x ->
-    ch.I "y" <| fun y ->
+    ctx.ch.I "x" <| fun x ->
+    ctx.ch.I "y" <| fun y ->
         x <== 0
         y <== x + 1
 

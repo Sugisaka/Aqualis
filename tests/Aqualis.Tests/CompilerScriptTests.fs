@@ -4,6 +4,38 @@ open System.IO
 open Xunit
 open Aqualis
 
+type private FunctionArgumentStructure(
+    structureName,
+    name,
+    environment:CompilationEnvironment) =
+    inherit structureValue<FunctionArgumentStructure>(
+        structureName,
+        name,
+        ?context=environment.GenerationContext)
+
+    static member StructureName = "FunctionArgumentStructure"
+
+    new(name,environment:CompilationEnvironment) =
+        environment.str.reg(
+            FunctionArgumentStructure.StructureName,
+            name)
+        FunctionArgumentStructure(
+            FunctionArgumentStructure.StructureName,
+            name,
+            environment)
+
+    override _.Rewrap(name,targetEnvironment) =
+        FunctionArgumentStructure(
+            structureName,
+            name,
+            targetEnvironment)
+
+    member _.Value =
+        environment.str.d0(
+            structureName,
+            name,
+            "value")
+
 module CompilerScriptTests =
     let private assertLfOnlyWithoutBom path =
         let bytes = File.ReadAllBytes path
@@ -152,3 +184,46 @@ module CompilerScriptTests =
         |> List.iter (fun fileName ->
             Path.Combine(output.Path, fileName)
             |> assertLfOnlyWithoutBom)
+
+    [<Fact>]
+    let ``function arguments are rebound to the function context`` () =
+        use output = new TemporaryDirectory()
+
+        Compile
+            [Fortran; C99; Python]
+            output.Path
+            "function-context"
+            ("test", "1.0")
+            (fun environment ->
+                environment.ch.dd <| fun (result,value) ->
+                environment.ch.i1 2 <| fun values ->
+                    let structureValue =
+                        FunctionArgumentStructure(
+                            "structureValue",
+                            environment)
+                    structureValue.Value <== 3.0
+
+                    environment.func "context_function" <| fun functionEnvironment ->
+                        result.farg functionEnvironment <| fun result ->
+                        value.farg functionEnvironment <| fun value ->
+                        values.farg functionEnvironment <| fun values ->
+                        structureValue.farg functionEnvironment <| fun structureValue ->
+                            result <==
+                                value +
+                                values[0] +
+                                structureValue.Value
+                            functionEnvironment.print.t result)
+
+        let fortran =
+            File.ReadAllText(
+                Path.Combine(output.Path, "function-context.f90"))
+        let c =
+            File.ReadAllText(
+                Path.Combine(output.Path, "function-context.c"))
+        let python =
+            File.ReadAllText(
+                Path.Combine(output.Path, "function-context.py"))
+
+        for generated in [fortran; c; python] do
+            Assert.Contains("context_function", generated)
+            Assert.Contains("arg01", generated)

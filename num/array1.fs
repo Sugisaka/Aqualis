@@ -20,6 +20,7 @@ namespace Aqualis
         let writein text = currentProgram().codewritein text
         let comment text = currentProgram().comment text
         let environment() = CompilationEnvironment context
+        let sizeValue value = int0(value, ?context=context)
         ///<summary>変数を作成しリストに追加</summary>
         new (context:GenerationContext,typ,size,name,para) =
             context.CurrentProgram.var.setVar(typ,size,name,para)
@@ -42,23 +43,23 @@ namespace Aqualis
             |Var1(_,name) ->
                 match currentProgram().language with
                 |Fortran ->
-                    int0(Var(It 4,name+"_size(1)",NaN))
+                    sizeValue(Var(It 4,name+"_size(1)",NaN))
                 |C99 ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |LaTeX ->
-                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |HTML ->
-                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |HTMLSequenceDiagram ->
-                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |Python ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |JavaScript ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |PHP ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |Numeric ->
-                    int0 NaN
+                    sizeValue NaN
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:int0) =

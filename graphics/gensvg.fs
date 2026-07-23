@@ -434,7 +434,7 @@ type svgfilemaker(environment:CompilationEnvironment,cvx:double,cvy:double,write
             for x in xx.data do
                 match x with
                 |RStr s -> writer.Write s
-                |RNvr s ->
+                |RNvr (s,_) ->
                     let p = s.simp
                     match p with
                     |Inv(_,Int s) -> writer.Write((-s).ToString())

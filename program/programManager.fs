@@ -35,7 +35,7 @@ namespace Aqualis
         let mutable sequenceLoopFrameColor = "rgb(255, 0, 0)"
         let mutable sequenceBranchFrameColor = "rgb(0, 180, 0)"
         let mutable sequenceSectionFrameColor = "rgb(127,0,255)"
-        let mutable terminalLifeLine = 0.0
+        let mutable terminalLifeLine = 100.0 
         let mutable sequenceVariables : (string*int*float) list = []
         let mutable sequenceFrames : (float*float*float*float) list = []
         let mutable sequenceBranches : ((string*float) list) list = []

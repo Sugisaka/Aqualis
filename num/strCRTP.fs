@@ -12,10 +12,12 @@ namespace Aqualis
         member _.StructureName = sname_
         member _.Name = name
         member _.Context = context
-        abstract member Rewrap : string -> 'Self
-        member this.farg code =
-            fn.addarg (GenerationContextMerge.requireTarget context,Structure sname_,A0,name) <| fun (_,n) ->
-                code(this.Rewrap n)
+        abstract member Rewrap : string * CompilationEnvironment -> 'Self
+        member this.farg (targetEnvironment:CompilationEnvironment) code =
+            GenerationContextMerge.requireTarget context |> ignore
+            let targetContext = targetEnvironment.RequireGenerationContext()
+            fn.addarg (targetContext,Structure sname_,A0,name) <| fun (_,n) ->
+                code(this.Rewrap(n,targetEnvironment))
 
     /// CRTP base for a one-dimensional array of structure values.
     [<AbstractClass>]
@@ -26,15 +28,17 @@ namespace Aqualis
         inherit base1(Structure sname_,Var1(size1,name),?context=context)
 
         abstract member WrapElement : string -> 'Element
-        abstract member Rewrap : string * VarType -> 'Self
+        abstract member Rewrap : string * VarType * CompilationEnvironment -> 'Self
 
         member this.Item with get(i:int0) =
             let resultContext = GenerationContextMerge.merge context i.Context
             this.WrapElement(int0(this.Idx1 i,?context=resultContext).code)
         member this.Item with get(i:int ) = this[i |> I]
-        member this.farg code =
-            fn.addarg (GenerationContextMerge.requireTarget context,sname_,size1,name) <| fun (v,n) ->
-                code(this.Rewrap(n,v))
+        member this.farg (targetEnvironment:CompilationEnvironment) code =
+            GenerationContextMerge.requireTarget context |> ignore
+            let targetContext = targetEnvironment.RequireGenerationContext()
+            fn.addarg (targetContext,sname_,size1,name) <| fun (v,n) ->
+                code(this.Rewrap(n,v,targetEnvironment))
 
     /// CRTP base for a two-dimensional array of structure values.
     [<AbstractClass>]
@@ -45,7 +49,7 @@ namespace Aqualis
         inherit base2(Structure sname_,Var2(size2,name),?context=context)
 
         abstract member WrapElement : string -> 'Element
-        abstract member Rewrap : string * VarType -> 'Self
+        abstract member Rewrap : string * VarType * CompilationEnvironment -> 'Self
 
         member this.Item with get(i:int0,j:int0) =
             let resultContext = GenerationContextMerge.mergeMany [context;i.Context;j.Context]
@@ -53,9 +57,11 @@ namespace Aqualis
         member this.Item with get(i:int0,j:int) = this[i,I j]
         member this.Item with get(i:int,j:int0) = this[I i,j]
         member this.Item with get(i:int,j:int) = this[I i,I j]
-        member this.farg code =
-            fn.addarg (GenerationContextMerge.requireTarget context,sname_,size2,name) <| fun (v,n) ->
-                code(this.Rewrap(n,v))
+        member this.farg (targetEnvironment:CompilationEnvironment) code =
+            GenerationContextMerge.requireTarget context |> ignore
+            let targetContext = targetEnvironment.RequireGenerationContext()
+            fn.addarg (targetContext,sname_,size2,name) <| fun (v,n) ->
+                code(this.Rewrap(n,v,targetEnvironment))
 
     /// CRTP base for a three-dimensional array of structure values.
     [<AbstractClass>]
@@ -66,7 +72,7 @@ namespace Aqualis
         inherit base3(Structure sname_,Var3(size3,name),?context=context)
 
         abstract member WrapElement : string -> 'Element
-        abstract member Rewrap : string * VarType -> 'Self
+        abstract member Rewrap : string * VarType * CompilationEnvironment -> 'Self
 
         member this.Item with get(i:int0,j:int0,k:int0) =
             let resultContext = GenerationContextMerge.mergeMany [context;i.Context;j.Context;k.Context]
@@ -78,6 +84,8 @@ namespace Aqualis
         member this.Item with get(i:int,j:int0,k:int) = this[I i,j,I k]
         member this.Item with get(i:int,j:int,k:int0) = this[I i,I j,k]
         member this.Item with get(i:int,j:int,k:int) = this[I i,I j,I k]
-        member this.farg code =
-            fn.addarg (GenerationContextMerge.requireTarget context,sname_,size3,name) <| fun (v,n) ->
-                code(this.Rewrap(n,v))
+        member this.farg (targetEnvironment:CompilationEnvironment) code =
+            GenerationContextMerge.requireTarget context |> ignore
+            let targetContext = targetEnvironment.RequireGenerationContext()
+            fn.addarg (targetContext,sname_,size3,name) <| fun (v,n) ->
+                code(this.Rewrap(n,v,targetEnvironment))

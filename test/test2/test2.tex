@@ -16,7 +16,6 @@
 \section{subroutines}
 \section{global variables}
 \begin{itemize}
-\item complex $\mathrm{j}$=(0d0,1d0)
 \item Cache variables (integer): \(i_m (m = 1 \cdots [i^{(1)}; i^{(2)}])\)
 \item Cache variables (double): \(d_m (m = 1 \cdots [d^{(1)}; d^{(2)}; d^{(3)}])\)
 \item Cache variables (complex): \(z_m (m = 1 \cdots [z^{(1)}; z^{(2)}])\)
@@ -48,7 +47,7 @@
   \end{align}
   %004
   \begin{align}
-  i^{(1)} \leftarrow \left(i^{(1)}+i^{(2)}\right)\left(i^{(1)}+i^{(2)}\right)
+  i^{(1)} \leftarrow \left(i^{(1)}+i^{(2)}\right) \left(i^{(1)}+i^{(2)}\right)
   \end{align}
   %005
   \begin{align}
@@ -88,7 +87,7 @@
   \end{align}
   %014
   \begin{align}
-  i^{(1)} \leftarrow -\left(i^{(1)}+i^{(2)}\right)\left(i^{(1)}+i^{(2)}\right)
+  i^{(1)} \leftarrow -\left(i^{(1)}+i^{(2)}\right) \left(i^{(1)}+i^{(2)}\right)
   \end{align}
   %015
   \begin{align}
@@ -156,10 +155,10 @@
   d^{(2)} \leftarrow \arctan\left(d^{(1)},d^{(2)}\right)
   \end{align}
   \begin{align}
-  d^{(2)} \leftarrow \lfloor d^{(1)}\rfloor
+  d^{(2)} \leftarrow int\left(\lfloor d^{(1)}\rfloor\right)
   \end{align}
   \begin{align}
-  d^{(2)} \leftarrow \lceil d^{(1)}\rceil
+  d^{(2)} \leftarrow int\left(\lceil d^{(1)}\rceil\right)
   \end{align}
 \section{testB}
   $\dot{d}^{(1)} \in \mathbb{R}^{10}$\\
@@ -180,7 +179,7 @@
   %023
   for $i^{(1)}=0\cdots \mathcal{S}_1[\dot{d}^{(3)}]-1$\\
     \begin{align}
-    \dot{d}^{(3)}_{i^{(1)}} \leftarrow \dot{d}^{(1)}_{i^{(1)}}\left(\dot{d}^{(1)}_{i^{(1)}}+\dot{d}^{(2)}_{i^{(1)}}\right)
+    \dot{d}^{(3)}_{i^{(1)}} \leftarrow \dot{d}^{(1)}_{i^{(1)}} \left(\dot{d}^{(1)}_{i^{(1)}}+\dot{d}^{(2)}_{i^{(1)}}\right)
     \end{align}
   end\\
   $\dot{d}^{(3)}$: deallocate\\
@@ -205,7 +204,7 @@
   for $i^{(1)}=0\cdots \mathcal{S}_1[\ddot{d}^{(3)}]-1$\\
     for $i^{(2)}=0\cdots \mathcal{S}_2[\ddot{d}^{(3)}]-1$\\
       \begin{align}
-      \ddot{d}^{(3)}_{i^{(1)},i^{(2)}} \leftarrow \ddot{d}^{(1)}_{i^{(1)},i^{(2)}}\left(\ddot{d}^{(1)}_{i^{(1)},i^{(2)}}+\ddot{d}^{(2)}_{i^{(1)},i^{(2)}}\right)
+      \ddot{d}^{(3)}_{i^{(1)},i^{(2)}} \leftarrow \ddot{d}^{(1)}_{i^{(1)},i^{(2)}} \left(\ddot{d}^{(1)}_{i^{(1)},i^{(2)}}+\ddot{d}^{(2)}_{i^{(1)},i^{(2)}}\right)
       \end{align}
     end\\
   end\\
@@ -222,7 +221,7 @@
   i^{(2)} \leftarrow 1
   \end{align}
   \begin{align}
-  i^{(2)} \leftarrow 4 i^{(1)}2
+  i^{(2)} \leftarrow 4 i^{(1)} 2
   \end{align}
   %aaa
   \begin{align}
@@ -382,17 +381,17 @@
   \end{align}
   print, d^{(3)}
   \begin{align}
-  d^{(3)} \leftarrow \lfloor d^{(1)}\rfloor
+  d^{(3)} \leftarrow int\left(\lfloor d^{(1)}\rfloor\right)
   \end{align}
   print, d^{(3)}
   \begin{align}
-  d^{(3)} \leftarrow \lceil d^{(1)}\rceil
+  d^{(3)} \leftarrow int\left(\lceil d^{(1)}\rceil\right)
   \end{align}
   print, d^{(3)}
   %003
   print, "003"
   \begin{align}
-  z^{(1)} \leftarrow 1-\mathrm{j}2
+  z^{(1)} \leftarrow 1-uj 2
   \end{align}
   \begin{align}
   z^{(2)} \leftarrow \sin\left(z^{(1)}\right)

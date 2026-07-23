@@ -15,9 +15,9 @@ Compile [HTMLSequenceDiagram] outputdir
     "test8c" (version,"aaa") <| fun ctx ->
     
     //条件分岐
-    ch.I "x" <| fun x ->
+    ctx.ch.I "x" <| fun x ->
         x <== 5
-        br.if2 (x .> 3) <| fun () ->
+        ctx.br.if2 (x .> 3) <| fun () ->
             x <== 0
         <| fun () ->
             x <== 1

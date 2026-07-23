@@ -11,36 +11,37 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-type testClass1(sname_,name) =
-    static member sname = "testClass1"
-    new(name) =
-        str.reg(testClass1.sname,name)
-        testClass1(testClass1.sname,name)
-    member public __.n1   = str.i0(sname_,name,"n1")
-    member public __.x1   = str.d0(sname_,name,"x1")
-    member public __.z1   = str.z0(sname_,name,"z1")
-    static member str_mem(psname, vname, name, size1) =
-        str.addmember(psname,(Structure testClass1.sname,size1,name))
-        testClass1(testClass1.sname,str.mem(vname,name))
-    member __.farg cm code = fn.addarg (Structure testClass1.sname,A0,name) <| fun (_,n) -> code(testClass1(testClass1.sname,n))
-    
+    /// <summary>
+    /// testClass1
+    /// </summary>
+    type testClass1(sname_,name,ctx:CompilationEnvironment) =
+        inherit structureValue<testClass1>(sname_,name,?context=ctx.GenerationContext)
+        static member sname = "testClass1"
+        new(name,ctx:CompilationEnvironment) =
+            ctx.str.reg(testClass1.sname,name)
+            testClass1(testClass1.sname,name,ctx)
+        override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)
+        member public __.n1 = ctx.str.i0(sname_,name,"x1")
+        member public __.x1 = ctx.str.d0(sname_,name,"y1")
+        member public __.z1 = ctx.str.z0(sname_,name,"x2")
+        
 Compile [Fortran;C99;Python] outputdir projectname ("aaa","aaa") <| fun ctx ->
     let f(y:double0,x:double0,n:int0,n1:int1,s:testClass1) =
-        func "func1" <| fun () ->
-            y.farg <| fun y ->
-            x.farg <| fun x ->
-            n.farg <| fun n ->
-            n1.farg <| fun n1 ->
-            s.farg "" <| fun s ->
+        ctx.func "func1" <| fun c ->
+            y.farg c <| fun y ->
+            x.farg c <| fun x ->
+            n.farg c <| fun n ->
+            n1.farg c <| fun n1 ->
+            s.farg c <| fun s ->
                 y <== x + n + n1[0] + s.x1
-                print.t y
-    ch.idd <| fun (n,x,z) ->
-    ch.i1 4 <| fun n1 ->
+                c.print.t y
+    ctx.ch.idd <| fun (n,x,z) ->
+    ctx.ch.i1 4 <| fun n1 ->
         n <== 1
         x <== 2
         z <== 0
         n1[0] <== 3
-        let s = testClass1 "ss"
+        let s = testClass1("ss",ctx)
         s.x1 <== 100.0
         f(z,x,n,n1,s)
-        print.t z
+        ctx.print.t z

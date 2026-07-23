@@ -19,10 +19,10 @@ namespace Aqualis
                         match q with
                         |RStr x ->
                             yield "\""+x+"\""
-                        |RNvr x when x.etype = Zt ->
+                        |RNvr (x,_) when x.etype = Zt ->
                             yield (Re x).eval (program)
                             yield (Im x).eval (program)
-                        |RNvr x ->
+                        |RNvr (x,_) ->
                             yield x.eval (program) ]
                 program.codewritein("print *, " + String.concat "," clist + "\n")
             |C99 ->
@@ -36,9 +36,9 @@ namespace Aqualis
                     |> List.map( fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x when x.etype = It 4 -> int0string_format_C
-                        |RNvr x when x.etype = Dt -> double0string_format_C
-                        |RNvr x when x.etype = Zt -> double0string_format_C + double0string_format_C
+                        |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
+                        |RNvr (x,_) when x.etype = Dt -> double0string_format_C
+                        |RNvr (x,_) when x.etype = Zt -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
@@ -47,8 +47,8 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr _ -> ""
-                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
-                        |RNvr x -> x.eval (program))
+                        |RNvr (x,_) when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr (x,_) -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 program.codewritein("printf(\""+format+"\\n\","+code+");\n")
@@ -58,7 +58,7 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x -> x.eval (program))
+                        |RNvr (x,_) -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 program.codewritein("print, " + code + "\n")
@@ -68,7 +68,7 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x -> x.eval (program))
+                        |RNvr (x,_) -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 program.codewritein("Print \\("+code+"\\)\n")
@@ -79,7 +79,7 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x -> x.eval (program))
+                        |RNvr (x,_) -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 program.codewritein("Print \\("+code+"\\)\n")
@@ -95,9 +95,9 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x when x.etype = It 4 -> int0string_format_C
-                        |RNvr x when x.etype = Dt  -> double0string_format_C
-                        |RNvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
+                        |RNvr (x,_) when x.etype = Dt  -> double0string_format_C
+                        |RNvr (x,_) when x.etype = Zt  -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
@@ -105,8 +105,8 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
-                        |RNvr x -> x.eval (program)
+                        |RNvr (x,_) when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr (x,_) -> x.eval (program)
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
@@ -122,9 +122,9 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x when x.etype = It 4 -> int0string_format_C
-                        |RNvr x when x.etype = Dt  -> double0string_format_C
-                        |RNvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
+                        |RNvr (x,_) when x.etype = Dt  -> double0string_format_C
+                        |RNvr (x,_) when x.etype = Zt  -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
@@ -132,8 +132,8 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
-                        |RNvr x -> x.eval (program)
+                        |RNvr (x,_) when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr (x,_) -> x.eval (program)
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
@@ -149,9 +149,9 @@ namespace Aqualis
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
                         |RStr x -> x
-                        |RNvr x when x.etype = It 4 -> int0string_format_C
-                        |RNvr x when x.etype = Dt  -> double0string_format_C
-                        |RNvr x when x.etype = Zt  -> double0string_format_C + double0string_format_C
+                        |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
+                        |RNvr (x,_) when x.etype = Dt  -> double0string_format_C
+                        |RNvr (x,_) when x.etype = Zt  -> double0string_format_C + double0string_format_C
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join("",s)
@@ -159,8 +159,8 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RNvr x when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
-                        |RNvr x -> x.eval (program)
+                        |RNvr (x,_) when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
+                        |RNvr (x,_) -> x.eval (program)
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
@@ -168,9 +168,9 @@ namespace Aqualis
             |Numeric ->
                 for v in lst.data do
                     match v with
-                    |RNvr (Int x) -> printf "%d " x
-                    |RNvr (Dbl x) -> printf "%e " x
-                    |RNvr (Cpx (re,im)) -> printf "%e %e " re im
+                    |RNvr (Int x,_) -> printf "%d " x
+                    |RNvr (Dbl x,_) -> printf "%e " x
+                    |RNvr (Cpx (re,im),_) -> printf "%e %e " re im
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
         static member internal sWith (program:program) (str:string) =
@@ -213,9 +213,9 @@ namespace Aqualis
             |None ->
                 for item in value.data do
                     match item with
-                    |RNvr (Int x) -> printf "%d " x
-                    |RNvr (Dbl x) -> printf "%e " x
-                    |RNvr (Cpx(re,im)) -> printf "%e %e " re im
+                    |RNvr (Int x,_) -> printf "%d " x
+                    |RNvr (Dbl x,_) -> printf "%e " x
+                    |RNvr (Cpx(re,im),_) -> printf "%e %e " re im
                     |RStr text -> printf "%s" text
                     |_ -> ()
 

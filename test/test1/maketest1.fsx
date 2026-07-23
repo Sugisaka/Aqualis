@@ -20,8 +20,8 @@ wr.WriteLine ""
 wr.WriteLine "open Aqualis"
 wr.WriteLine ""
 wr.WriteLine "Compile [Fortran;C99;Python] outputdir projectname (\"aaa\",\"aaa\") <| fun ctx ->"
-wr.WriteLine "    io.fileOutput \"result.dat\" <| fun wr ->"
-wr.WriteLine "    ch.dddd <| fun (x,y,z1,z2) ->"
+wr.WriteLine "    ctx.io.fileOutput \"result.dat\" <| fun wr ->"
+wr.WriteLine "    ctx.ch.dddd <| fun (x,y,z1,z2) ->"
 wr.WriteLine("        let p = " + r.Next(9).ToString() + "." + r.Next(9).ToString())
 wr.WriteLine("        let q = " + r.Next(9).ToString() + "." + r.Next(9).ToString())
 wr.WriteLine "        x <== p"
@@ -29,7 +29,7 @@ wr.WriteLine "        y <== q"
 for i in 1..1000 do
     printfn "%d" i
     wr.WriteLine("        //printfn \"%d\" "+i.ToString())
-    wr.WriteLine("        !\"test" + i.ToString "000" + "\"")
+    wr.WriteLine("        ctx.comment \"test" + i.ToString "000" + "\"")
     let rec maketerm(n:int) =
         match if n=0 then 0 else r.Next 2 with
         |0 ->

@@ -1,6 +1,4 @@
 #!/bin/bash
 
-FC='/usr/bin/gfortran'
-
-$FC  test3_2.f90 -ffree-line-length-none  -o test3_2.exe
+/usr/bin/gfortran -ffree-line-length-none test3_2.f90 -o test3_2.exe
 ./test3_2.exe

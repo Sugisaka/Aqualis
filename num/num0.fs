@@ -22,12 +22,12 @@ namespace Aqualis
     ///<summary>数値と文字列の結合</summary>
     type reduceExprString =
         |RStr of string
-        |RNvr of expr
+        |RNvr of expr * GenerationContext option
 
         member this.etype with get() =
             match this with
             |RStr t -> Structure "string"
-            |RNvr t -> t.etype
+            |RNvr (value,_) -> value.etype
 
     /// Common read-only representation of a scalar numeric expression.
     type INum0 =
@@ -382,7 +382,7 @@ namespace Aqualis
         static member html (e:int0) = "\\("+e.code+"\\)"
         static member html (e:exprString) =
             let program = GenerationContextMerge.requireTarget e.Context |> fun (context:GenerationContext) -> context.CurrentProgram
-            e.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+"\\("+x.evalH program+"\\)") ""
+            e.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH program+"\\)") ""
         static member html (e:list<int0>) = "\\[\\begin{align}"+String.Join("\\\\",e |> List.map (fun f -> f.code))+"\\end{align}\\]"
     ///<summary>変数（数値データ）クラス</summary>
     and double0(x:expr, ?context:GenerationContext) =
@@ -553,7 +553,7 @@ namespace Aqualis
         static member html (e:double0) = "\\("+e.code+"\\)"
         static member html (e:exprString) =
             let program = GenerationContextMerge.requireTarget e.Context |> fun (context:GenerationContext) -> context.CurrentProgram
-            e.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+"\\("+x.evalH program+"\\)") ""
+            e.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH program+"\\)") ""
         static member html (e:list<double0>) = "\\[\\begin{align}"+String.Join("\\\\",e |> List.map (fun f -> f.code))+"\\end{align}\\]"
         static member (~%%) (x:double0) =
             let context = GenerationContextMerge.requireTarget x.Context
@@ -692,7 +692,7 @@ namespace Aqualis
         static member html (e:complex0) = "\\("+e.code+"\\)"
         static member html (e:exprString) =
             let program = GenerationContextMerge.requireTarget e.Context |> fun (context:GenerationContext) -> context.CurrentProgram
-            e.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+"\\("+x.evalH program+"\\)") ""
+            e.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH program+"\\)") ""
         static member html (e:list<complex0>) = "\\[\\begin{align}"+String.Join("\\\\",e |> List.map (fun f -> f.code))+"\\end{align}\\]"
         static member (~%%) (x:complex0) =
             let context = GenerationContextMerge.requireTarget x.Context
@@ -701,10 +701,10 @@ namespace Aqualis
     ///<summary>数値と文字列の結合</summary>
     and exprString(x:list<reduceExprString>, ?context:GenerationContext) =
         new(x:string) = exprString [RStr x]
-        new(x:bool0) = exprString([RNvr x.Expr], ?context=x.Context)
-        new(x:int0) = exprString([RNvr x.Expr], ?context=x.Context)
-        new(x:double0) = exprString([RNvr x.Expr], ?context=x.Context)
-        new(x:complex0) = exprString([RNvr x.Expr], ?context=x.Context)
+        new(x:bool0) = exprString([RNvr(x.Expr,x.Context)], ?context=x.Context)
+        new(x:int0) = exprString([RNvr(x.Expr,x.Context)], ?context=x.Context)
+        new(x:double0) = exprString([RNvr(x.Expr,x.Context)], ?context=x.Context)
+        new(x:complex0) = exprString([RNvr(x.Expr,x.Context)], ?context=x.Context)
 
         member _.data with get() = x
         member _.Context = context
@@ -717,7 +717,7 @@ namespace Aqualis
                     |Direct -> x
                     |StrQuotation -> "\""+x+"\""
                     |CodeStrQuotation -> "\\\""+x+"\\\""
-                |RNvr x ->
+                |RNvr (x,_) ->
                     let program = GenerationContextMerge.requireTarget context |> fun (context:GenerationContext) -> context.CurrentProgram
                     x.eval program)
             |> fun s -> String.Join(c,s)

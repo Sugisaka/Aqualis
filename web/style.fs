@@ -98,8 +98,8 @@ type Character(environment:CompilationEnvironment,scriptDataDir:string,name:stri
         |Some x ->
             x, this.audioFile x, this.scriptColor
     member this.script(text:exprString) =
-        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+"\\("+x.evalH context.CurrentProgram+"\\)") ""
-        let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr x -> acc+x.evalT()) ""
+        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH context.CurrentProgram+"\\)") ""
+        let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+x.evalT()) ""
         this.script(subtitle,script)
     member this.script(text:string) = this.script (exprString text)
     member this.script(text:int0) = this.script (exprString text)

@@ -23,20 +23,20 @@ Compile [Fortran;C99;Python] outputdir projectname (version,"aaa") <| fun ctx ->
         sv.line((p1.re,p1.im),(p2.re,p2.im),color.stroke.black(1.0))
         
     // 市松模様
-    svgfile.make "ichimatsuA.svg" (400.0,400.0) 1.0 <| fun sv ->
+    ctx.svgfile.make "ichimatsuA.svg" (400.0,400.0) 1.0 <| fun sv ->
         // 単位図形の中心が原点にあるときの各頂点
-        ch.z1 4 <| fun a ->
+        ctx.ch.z1 4 <| fun a ->
             let r = 20.0
-            iter.num a.size1 <| fun i -> 
+            ctx.iter.num a.size1 <| fun i -> 
                 a[i] <== r*asm.exp((45+90*(i-1))*asm.uj*asm.pi/180)
             /// 単位図形を中心位置cに描画
             let drawUnit (c:complex0) =
-                iter.num (a.size1-1) <| fun i -> 
+                ctx.iter.num (a.size1-1) <| fun i -> 
                     zline (c+a[i],c+a[i+1]) sv
                 zline (c+a[a.size1-1],c+a[0]) sv
             // 単位図形を並べて描画
             let t1 = a[0]+a[3]
             let t2 = a[0]+a[1]
-            iter.range (-10, 10) <| fun ix ->
-                iter.range (-10, 10) <| fun iy ->
+            ctx.iter.range (-10, 10) <| fun ix ->
+                ctx.iter.range (-10, 10) <| fun iy ->
                     drawUnit (ix*t1+iy*t2)

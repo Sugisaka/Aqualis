@@ -21,6 +21,7 @@ namespace Aqualis
         let writein text = currentProgram().codewritein text
         let comment text = currentProgram().comment text
         let environment() = CompilationEnvironment context
+        let sizeValue value = int0(value, ?context=context)
         ///<summary>変数を作成しリストに追加</summary>
         new (context:GenerationContext,typ,size,name,para) =
             context.CurrentProgram.var.setVar(typ,size,name,para)
@@ -42,23 +43,23 @@ namespace Aqualis
             |Var3(_,name) ->
                 match currentProgram().language with
                 |Fortran ->
-                    int0(Var(It 4,name+"_size(1)",NaN))
+                    sizeValue(Var(It 4,name+"_size(1)",NaN))
                 |C99 ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |LaTeX ->
-                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |HTML ->
-                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |HTMLSequenceDiagram ->
-                    int0(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
                 |Python ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |JavaScript ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |PHP ->
-                    int0(Var(It 4,name+"_size[0]",NaN))
+                    sizeValue(Var(It 4,name+"_size[0]",NaN))
                 |Numeric ->
-                    int0 NaN
+                    sizeValue NaN
             |Arx3(s1,_,_,_) -> s1
         ///<summary>変数の要素数</summary>
         member __.size2
@@ -67,23 +68,23 @@ namespace Aqualis
             |Var3(_,name) ->
                 match currentProgram().language with
                 |Fortran ->
-                    int0(Var(It 4,name+"_size(2)",NaN))
+                    sizeValue(Var(It 4,name+"_size(2)",NaN))
                 |C99 ->
-                    int0(Var(It 4,name+"_size[1]",NaN))
+                    sizeValue(Var(It 4,name+"_size[1]",NaN))
                 |LaTeX ->
-                    int0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
                 |HTML ->
-                    int0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
                 |HTMLSequenceDiagram ->
-                    int0(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_2["+name+"]",NaN))
                 |Python ->
-                    int0(Var(It 4,name+"_size[1]",NaN))
+                    sizeValue(Var(It 4,name+"_size[1]",NaN))
                 |JavaScript ->
-                    int0(Var(It 4,name+"_size[1]",NaN))
+                    sizeValue(Var(It 4,name+"_size[1]",NaN))
                 |PHP ->
-                    int0(Var(It 4,name+"_size[1]",NaN))
+                    sizeValue(Var(It 4,name+"_size[1]",NaN))
                 |Numeric ->
-                    int0 NaN
+                    sizeValue NaN
             |Arx3(_,s2,_,_) -> s2
         ///<summary>変数の要素数</summary>
         member __.size3
@@ -92,23 +93,23 @@ namespace Aqualis
             |Var3(_,name) ->
                 match currentProgram().language with
                 |Fortran ->
-                    int0(Var(It 4,name+"_size(3)",NaN))
+                    sizeValue(Var(It 4,name+"_size(3)",NaN))
                 |C99 ->
-                    int0(Var(It 4,name+"_size[2]",NaN))
+                    sizeValue(Var(It 4,name+"_size[2]",NaN))
                 |LaTeX ->
-                    int0(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
                 |HTML ->
-                    int0(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
                 |HTMLSequenceDiagram ->
-                    int0(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
+                    sizeValue(Var(It 4,"\\mathcal{S}_3["+name+"]",NaN))
                 |Python ->
-                    int0(Var(It 4,name+"_size[2]",NaN))
+                    sizeValue(Var(It 4,name+"_size[2]",NaN))
                 |JavaScript ->
-                    int0(Var(It 4,name+"_size[2]",NaN))
+                    sizeValue(Var(It 4,name+"_size[2]",NaN))
                 |PHP ->
-                    int0(Var(It 4,name+"_size[2]",NaN))
+                    sizeValue(Var(It 4,name+"_size[2]",NaN))
                 |Numeric ->
-                    int0 NaN
+                    sizeValue NaN
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:int0,j:int0,k:int0) =

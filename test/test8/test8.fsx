@@ -32,18 +32,18 @@ Compile [HTMLSequenceDiagram] outputdir "test8" (version,"aaa") <| fun ctx ->
     //         ColorSectionFrame = "rgb(127,0,255)"
     //     }
     
-    ch.D "x" <| fun x ->
-    ch.I "x_1" <| fun x1 ->
-        group.Section "section title" <| fun () ->
+    ctx.ch.D "x" <| fun x ->
+    ctx.ch.I "x_1" <| fun x1 ->
+        group.section "section title" <| fun () ->
             x <== 0
             x <== x + 1
             x1 <== 0
-        iter.range (1,10) <| fun i ->
-            iter.range (11,20) <| fun j ->
+        ctx.iter.range (1,10) <| fun i ->
+            ctx.iter.range (11,20) <| fun j ->
                 x <== x1 + i + asm.sin i + j + asm.cos j
-        br.if2 (x1 .= 0)
+        ctx.br.if2 (x1 .= 0)
         <| fun i ->
-            br.if2 (x .= 0)
+            ctx.br.if2 (x .= 0)
             <| fun i ->
                 x <== 1
             <| fun i ->

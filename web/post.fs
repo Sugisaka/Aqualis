@@ -9,7 +9,7 @@ namespace Aqualis
 type post(environment:CompilationEnvironment,id:PHPdata) =
     let context = environment.RequireGenerationContext()
     new(environment:CompilationEnvironment,x:string) = post(environment,PHPdata [RStr x])
-    new(environment:CompilationEnvironment,x:int0) = post(environment,PHPdata([RNvr x.Expr], ?context=x.Context))
+    new(environment:CompilationEnvironment,x:int0) = post(environment,PHPdata([RNvr(x.Expr,x.Context)], ?context=x.Context))
     member _.get with get() = PHPdata.f(context,"$_POST["+id.toString(".",StrQuotation)+"]")
     member this.get_html with get() = PHPdata.f(context,"htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")
     ///テキストボックス

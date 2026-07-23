@@ -155,56 +155,71 @@ namespace Aqualis
 
     [<AutoOpen>]
     module num_farg =
+        let private argumentContexts
+            (sourceContext:GenerationContext option)
+            (targetEnvironment:CompilationEnvironment) =
+            GenerationContextMerge.requireTarget sourceContext,
+            targetEnvironment.RequireGenerationContext()
+
         type int0 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg code =
-                fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,A0,this.Expr.eval ((GenerationContextMerge.requireTarget this.Context).CurrentProgram)) <| fun (v,n) ->
-                    code(int0(Var(this.etype,n,NaN), context=GenerationContextMerge.requireTarget this.Context))
+            member this.farg (targetEnvironment:CompilationEnvironment) code =
+                let sourceContext,targetContext =
+                    argumentContexts this.Context targetEnvironment
+                fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext.CurrentProgram) <| fun (_,n) ->
+                    code(int0(Var(this.etype,n,NaN), context=targetContext))
         type double0 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg code =
-                fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,A0,this.Expr.eval ((GenerationContextMerge.requireTarget this.Context).CurrentProgram)) <| fun (v,n) ->
-                    code(double0(Var(this.etype,n,NaN), context=GenerationContextMerge.requireTarget this.Context))
+            member this.farg (targetEnvironment:CompilationEnvironment) code =
+                let sourceContext,targetContext =
+                    argumentContexts this.Context targetEnvironment
+                fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext.CurrentProgram) <| fun (_,n) ->
+                    code(double0(Var(this.etype,n,NaN), context=targetContext))
         type complex0 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg code =
-                fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,A0,this.Expr.eval ((GenerationContextMerge.requireTarget this.Context).CurrentProgram)) <| fun (v,n) ->
-                    code(complex0(Var(this.etype,n,NaN), context=GenerationContextMerge.requireTarget this.Context))
+            member this.farg (targetEnvironment:CompilationEnvironment) code =
+                let sourceContext,targetContext =
+                    argumentContexts this.Context targetEnvironment
+                fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext.CurrentProgram) <| fun (_,n) ->
+                    code(complex0(Var(this.etype,n,NaN), context=targetContext))
 
         type int1 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(int1(this.etype,Var1(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(int1(this.etype,Var1(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type double1 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(double1(this.etype,Var1(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(double1(this.etype,Var1(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type complex1 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(complex1(this.etype,Var1(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(complex1(this.etype,Var1(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
 
@@ -212,30 +227,33 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(int2(this.etype,Var2(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(int2(this.etype,Var2(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type double2 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(double2(this.etype,Var2(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(double2(this.etype,Var2(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type complex2 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(complex2(this.etype,Var2(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(complex2(this.etype,Var2(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
 
@@ -243,29 +261,32 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(int3(this.etype,Var3(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(int3(this.etype,Var3(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type double3 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(double3(this.etype,Var3(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(double3(this.etype,Var3(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"
         type complex3 with
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg = fun code ->
+            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
-                    fn.addarg (GenerationContextMerge.requireTarget this.Context,this.etype,size,name) <| fun (v,n) -> code(complex3(this.etype,Var3(v,n), context=GenerationContextMerge.requireTarget this.Context))
+                    let _,targetContext = argumentContexts this.Context targetEnvironment
+                    fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(complex3(this.etype,Var3(v,n), context=targetContext))
                 |_ ->
                     printfn "部分配列を関数の引数にできません"

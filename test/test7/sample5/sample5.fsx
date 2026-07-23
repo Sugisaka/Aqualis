@@ -4,6 +4,7 @@
 
 let outputdir = __SOURCE_DIRECTORY__
 //let outputdir = @"C:\xampp\htdocs\test_sgproc"
+let version = "186.0.4.0", "1.0.0"
 
 #I @"..\..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"
@@ -44,14 +45,14 @@ module memberinfo =
         member _.Item with get(i:int0) = _Member(var[i])
         
     /// メンバーデータ（PHP用）
-    type MemberData(varname:string) =
-        let memberData = PHPdata varname
+    type MemberData(ctx:CompilationEnvironment,varname:string) =
+        let memberData = ctx.php.var varname
         let memberList = memberData["List"]
         member _.List with get() = _Members memberList
         /// メンバーリストをjsonファイルから読み込み
         member _.ReadJSON(filename:string) =
-            memberData <== php.json_decode (php.file_get_contents filename,true)
-        member _.Length with get() = php.count memberList
+            memberData <== ctx.php.json_decode (ctx.php.file_get_contents filename,true)
+        member _.Length with get() = ctx.php.count memberList
         member _.foreach code =
             memberList.foreach <| fun i -> 
                 code i
@@ -62,63 +63,63 @@ let memberdata = "members.json"
 /// メインページ
 /// </summary>
 let mainPage() =
-    php.phpfile (outputdir, "main.php") <| fun () ->
-        html.head "Ediass" <| fun () ->
-        php.postCheck()
-        html.h1 "ログインページサンプル" <| fun () ->
+    Compile [PHP] outputdir "main" version <| fun ctx ->
+        ctx.html.head "Ediass" <| fun () ->
+        ctx.php.postCheck()
+        ctx.html.h1 "ログインページサンプル" <| fun () ->
             /// ログインユーザーID入力用テキストボックス
-            let textBoxUserID = TextBox "userid"
+            let textBoxUserID = ctx.form.textBox "userid"
             /// ログインパスワード入力用テキストボックス
-            let textBoxUserPW = TextBox "userpw"
+            let textBoxUserPW = ctx.form.textBox "userpw"
             /// ログインボタン
-            let buttonLogin = Button "login"
-            html.form "main.php" <| fun () ->
-                br.if2 buttonLogin.isset
+            let buttonLogin = ctx.form.button "login"
+            ctx.html.form "main.php" <| fun () ->
+                ctx.br.if2 buttonLogin.isset
                 <| fun () ->
                     // ログインボタンを押したとき
                     // メンバーリスト読み込み
-                    let memberData = MemberData "mdata"
+                    let memberData = MemberData(ctx,"mdata")
                     memberData.ReadJSON memberdata
                     /// ログイン検証結果：ユーザーが存在しない→0、パスワードが異なる→1、ログイン成功→2
-                    let loginState = var.i0 "loginState"
+                    let loginState = ctx.var.i0 "loginState"
                     loginState <== 0
                     // ログイン情報検証
                     memberData.foreach <| fun i ->
-                        br.if1 (memberData.List[i].ID .= textBoxUserID.text) <| fun () ->
+                        ctx.br.if1 (memberData.List[i].ID .= textBoxUserID.text) <| fun () ->
                             loginState <== 1
-                            br.if1 (memberData.List[i].PassWord .= textBoxUserPW.text) <| fun () ->
+                            ctx.br.if1 (memberData.List[i].PassWord .= textBoxUserPW.text) <| fun () ->
                             loginState <== 2
-                    br.branch <| fun b ->
+                    ctx.br.branch <| fun b ->
                         // ユーザーが存在しない
                         b.IF (loginState .= 0) <| fun () ->
-                            writein "ユーザーが存在しません<br>"
-                            writein "ID:"
+                            ctx.emit.writein "ユーザーが存在しません<br>"
+                            ctx.emit.writein "ID:"
                             textBoxUserID.show_copy()
-                            writein "パスワード:"
+                            ctx.emit.writein "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ユーザーが存在しない
                         b.IF (loginState .= 1) <| fun () ->
-                            writein "パスワードが誤りです<br>"
-                            writein "ID:"
+                            ctx.emit.writein "パスワードが誤りです<br>"
+                            ctx.emit.writein "ID:"
                             textBoxUserID.show_copy()
-                            writein "パスワード:"
+                            ctx.emit.writein "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ログイン成功
                         b.EL <| fun () ->
-                            writein "ID:"
+                            ctx.emit.writein "ID:"
                             textBoxUserID.show_copy_lock()
-                            writein "パスワード:"
+                            ctx.emit.writein "パスワード:"
                             textBoxUserPW.show_password_copy_lock()
                             buttonLogin.show_disabled "ログイン"
-                            writein "<br>"
-                            writein "ログイン後のコンテンツ"
+                            ctx.emit.writein "<br>"
+                            ctx.emit.writein "ログイン後のコンテンツ"
                 <| fun () ->
                     // ログインボタンを押していないとき
-                    writein "ID:"
+                    ctx.emit.writein "ID:"
                     textBoxUserID.show()
-                    writein "パスワード:"
+                    ctx.emit.writein "パスワード:"
                     textBoxUserPW.show_password()
                     buttonLogin.show "ログイン"
                 ()

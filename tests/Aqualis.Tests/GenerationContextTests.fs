@@ -36,6 +36,7 @@ module GenerationContextTests =
 
         Compile [C99] output.Path "explicit-environment" ("test", "1") <| fun environment ->
             Assert.True(environment.GenerationContext.IsSome)
+            environment.emit.writein "/* emitted through context */"
             environment.ch.i <| fun value ->
                 generatedVariable <- value.code
                 value <== 0
@@ -46,7 +47,31 @@ module GenerationContextTests =
 
         Assert.Equal(3, numericIterations)
         let generated = File.ReadAllText(Path.Combine(output.Path, "explicit-environment.c"))
+        Assert.Contains("/* emitted through context */", generated)
         Assert.Contains(generatedVariable + " = 0;", generated)
+
+    [<Fact>]
+    let ``emit is unavailable during Numeric execution`` () =
+        let environment = CompilationEnvironment(None)
+        Assert.Throws<InvalidOperationException>(fun () -> environment.emit.writein "invalid")
+        |> ignore
+
+    [<Fact>]
+    let ``PHP compilation writes a php file through explicit services`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [PHP] output.Path "page" ("test", "1") <| fun environment ->
+            let value = environment.php.var "value"
+            value <== environment.php.file_get_contents "data.json"
+            let input = environment.form.textBox "user"
+            environment.html.form "page.php" <| fun () -> input.show()
+
+        let phpPath = Path.Combine(output.Path, "page.php")
+        Assert.True(File.Exists phpPath)
+        Assert.False(File.Exists(Path.Combine(output.Path, "page.c")))
+        let generated = File.ReadAllText phpPath
+        Assert.Contains("$value = file_get_contents", generated)
+        Assert.Contains("<form", generated)
 
     [<Fact>]
     let ``operators functions and indexers share context validation`` () =

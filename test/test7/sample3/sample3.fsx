@@ -11,22 +11,22 @@ let outputdir = __SOURCE_DIRECTORY__
 
 open Aqualis
 
-fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
-    writein "AAA"
-    html.br()
-    writein "AAA"
-    html.br()
-    writein "AAA"
-    html.br()
-    writein "AAA"
-    html.br()
-    writein "AAA"
-    html.br()
-    writein "AAA"
-    html.br()
-    writein "AAA"
-    html.br()
-    html.canvas Style[size.width "1920px"; size.height "500px";] <| fun cv ->
+fixedWidthPage outputdir projectname projectname 1920 None <| fun ctx ->
+    ctx.emit.writein "AAA"
+    ctx.html.br()
+    ctx.emit.writein "AAA"
+    ctx.html.br()
+    ctx.emit.writein "AAA"
+    ctx.html.br()
+    ctx.emit.writein "AAA"
+    ctx.html.br()
+    ctx.emit.writein "AAA"
+    ctx.html.br()
+    ctx.emit.writein "AAA"
+    ctx.html.br()
+    ctx.emit.writein "AAA"
+    ctx.html.br()
+    ctx.html.canvas Style[size.width "1920px"; size.height "500px";] <| fun cv ->
         
         //ページ左上角
         let p0 = position.Origin
@@ -60,22 +60,22 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
         let grid_y2c = grid_y2-gap1
         
         //見出しテキスト
-        html.text
+        ctx.html.text
             <| Style[font.size 30; font.color "black"; font.weight "bold"]
             <| p0
             <| "見出し1"
         //F#コードキャプション
-        html.text
+        ctx.html.text
             <| Style[font.size 40; font.color "black"; font.weight "normal"]
             <| p0.shift(grid_x1,grid_y1c)
             <| "ソースコード"
         //Cコード(1)キャプション
-        html.text
+        ctx.html.text
             <| Style[font.size 40; font.color "black"; font.weight "normal"]
             <| p0.shift(grid_x1,grid_y2c)
             <| "ソースコード"
         //F#コード
-        let a1f = html.blockTextcode style_codeFS
+        let a1f = ctx.html.blockTextcode style_codeFS
                 <| p0.shift(grid_x1,grid_y1)
                 <| (codeBoxWidth,codeBoxHeight)
                 <| (1.0,"solid","#000000")
@@ -88,12 +88,12 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
                     "for i in c do"
                     "&nbsp;&nbsp;&nbsp;&nbsp;printfn \"%d\" i"]
         //F#コードラベル
-        let _ = html.blockText style_labelFS
+        let _ = ctx.html.blockText style_labelFS
                 <| p0.shift(grid_x1+codeBoxWidth-labelWidth,grid_y1)
                 <| (labelWidth,labelHeight)
                 <| ["F#"]
         //Cコード(1)
-        let a1c = html.blockTextcode style_codeC
+        let a1c = ctx.html.blockTextcode style_codeC
                 <| p0.shift(grid_x2,grid_y1)
                 <| (codeBoxWidth,codeBoxHeight)
                 <| (1.0,"solid","#000000")
@@ -105,12 +105,12 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
                     "&nbsp;return 0;"
                     "}"]
         //Cコード(1)ラベル
-        let _ = html.blockText style_labelC
+        let _ = ctx.html.blockText style_labelC
                 <| p0.shift(grid_x2+codeBoxWidth-labelWidth,grid_y1)
                 <| (labelWidth,labelHeight)
                 <| ["C言語"]
         //Cコード(2)
-        let a1r = html.blockTextcode style_codeC
+        let a1r = ctx.html.blockTextcode style_codeC
                 <| p0.shift(grid_x1,grid_y2)
                 <| (codeBoxWidth,codeBoxHeight)
                 <| (1.0,"solid","#000000")
@@ -122,12 +122,12 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
                     "&nbsp;return 0;"
                     "}"]
         //Cコード(2)ラベル
-        let _ = html.blockText style_labelC
+        let _ = ctx.html.blockText style_labelC
                 <| p0.shift(grid_x1+codeBoxWidth-labelWidth,grid_y2)
                 <| (labelWidth,labelHeight)
                 <| ["C言語"]
         //図形
-        html.fig p0 <| fun (f,p) ->
+        ctx.html.fig p0 <| fun (f,p) ->
             //矢印：Cコード(1)→F#コード
             f.lineArrow
                 <| (Style[stroke.color "black";],2.0,20.0)
@@ -138,17 +138,17 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun () ->
                 <| (Style[stroke.color "black";],2.0,20.0)
                 <| position(grid_x1+codeBoxWidth/2.0, a1f.Bottom)
                 <| position(grid_x1+codeBoxWidth/2.0, a1r.Top)
-    writein "BBB"
-    html.br()
-    writein "BBB"
-    html.br()
-    writein "BBB"
-    html.br()
-    writein "BBB"
-    html.br()
-    writein "BBB"
-    html.br()
-    writein "BBB"
-    html.br()
-    writein "BBB"
-    html.br()
+    ctx.emit.writein "BBB"
+    ctx.html.br()
+    ctx.emit.writein "BBB"
+    ctx.html.br()
+    ctx.emit.writein "BBB"
+    ctx.html.br()
+    ctx.emit.writein "BBB"
+    ctx.html.br()
+    ctx.emit.writein "BBB"
+    ctx.html.br()
+    ctx.emit.writein "BBB"
+    ctx.html.br()
+    ctx.emit.writein "BBB"
+    ctx.html.br()

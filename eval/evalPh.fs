@@ -162,7 +162,7 @@ namespace Aqualis
                 |Int x -> c.numFormat.ItoS x
                 |Dbl x -> c.numFormat.DtoS x
                 |Cpx (0.0,1.0) -> "uj"
-                |Cpx (re,im) -> (Add(Zt, Dbl re, Mul(Zt, Cpx(0.0,1.0), Dbl im))).evalPh c
+                |Cpx (re,im) -> c.numFormat.DtoS re + "+uj*" + c.numFormat.DtoS im
                 |Var (_,s,x) -> s
                 |Inv(_,x) ->
                     match x with

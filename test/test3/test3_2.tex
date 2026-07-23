@@ -28,17 +28,15 @@
 \section{subroutines}
 \section{global variables}
 \begin{itemize}
-\item complex $\mathrm{j}$=(0d0,1d0)
 \item testClass2 (allocatable) $q$ (:)
 \item testClass2 $p$
-\item int (allocatable) $xx$ (:)
 \item testClass1 (allocatable) $d$ (:)
 \item Cache variables (integer): \(i_m (m = 1)\)
 \item Cache array (integer,1d): \(\dot{i}_m (m = 1)\)
 \end{itemize}
 \section{main code}
 (Error:055-001 「d」は可変長1次元配列ではありません
-$xx \in \mathbb{Z}^{8}$\\
+$xx \in \mathbb{R}^{8}$\\
 \begin{align}
 p.s2.n1 \leftarrow 100
 \end{align}
@@ -46,7 +44,7 @@ p.s2.n1 \leftarrow 100
 p.s2.x1 \leftarrow 200
 \end{align}
 \begin{align}
-p.s2.z1 \leftarrow 300+\mathrm{j}400
+p.s2.z1 \leftarrow 300+uj 400
 \end{align}
 (Error:055-001 「p.t2」は可変長1次元配列ではありません
 (Error:055-001 「q」は可変長1次元配列ではありません
@@ -66,7 +64,7 @@ for $i^{(1)}=0\cdots \mathcal{S}_1[d]-1$\\
   d_{i^{(1)}}.x1 \leftarrow 2
   \end{align}
   \begin{align}
-  d_{i^{(1)}}.z1 \leftarrow 3+\mathrm{j}4
+  d_{i^{(1)}}.z1 \leftarrow 3+uj 4
   \end{align}
 end\\
 $\dot{i}^{(1)} \in \mathbb{Z}^{10}$\\

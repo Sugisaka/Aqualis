@@ -22,8 +22,8 @@ module WebGenerationStateTests =
                 [new program(output.Path, "movie-default.tmp", HTML)],
                 MovieSetting.Default)
 
-        CompilationEnvironment(Some disabled).webhtml.switchCharacter()
-        CompilationEnvironment(Some defaults).webhtml.switchCharacter()
+        CompilationEnvironment(Some disabled).html.switchCharacter()
+        CompilationEnvironment(Some defaults).html.switchCharacter()
         disabled.CurrentProgram.close()
         defaults.CurrentProgram.close()
 

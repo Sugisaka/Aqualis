@@ -14,30 +14,31 @@ open Aqualis
 let step = 2
 
 //データファイルの作成
-group.section step 1 <| fun () ->
+group.section (step, 1) <| fun () ->
     Compile [Fortran] outputdir projectname (version,"aaa") <| fun ctx ->
-        io.fileOutput "data1.dat" <| fun wr ->
+        ctx.io.fileOutput "data1.dat" <| fun wr ->
             let N = 21
-            iter.num N <| fun i ->
-                ch.ddd <| fun (x,y1,y2) ->
+            ctx.iter.num N <| fun i ->
+                ctx.ch.ddd <| fun (x,y1,y2) ->
                     x <== i
                     y1 <== 2*i+1
                     y2 <== 0.5*i*i
                     wr.tt <| x++y1++y2
-        io.fileOutput "data2.dat" <| fun wr ->
+        ctx.io.fileOutput "data2.dat" <| fun wr ->
             let N = 21
-            iter.num N <| fun i ->
-                ch.ddd <| fun (x,y1,y2) ->
+            ctx.iter.num N <| fun i ->
+                ctx.ch.ddd <| fun (x,y1,y2) ->
                     x <== i
                     y1 <== -2*(i-10)+1
                     y2 <== 0.5*(i-10)*(i-10)
                     wr.tt <| x++y1++y2
                     
-group.section step 2 <| fun () ->
+group.section (step, 2) <| fun () ->
+    let ctx = CompilationEnvironment(None)
     // outputdir：読み込むデータファイルと生成するsvgファイルのディレクトリ
     // "plot.svg"：グラフのファイル名
     // (graph1d.A4PTwoColSingle 1)：A4サイズ２段組のドキュメントに挿入する図面。グラフは横方向に1個、縦に1個配置
-    graph1d.makeGraph outputdir "plot10C.svg" (graph1d.A4PTwoColSingle 1) <| fun addGraph ->
+    ctx.graph1d.makeGraph outputdir "plot10C.svg" (ctx.graph1d.A4PTwoColSingle 1) <| fun addGraph ->
         // (1,1)：グラフを図面内の左から一つ目、下から一つ目の位置に追加
         // None：サブキャプション（グラフ下部に挿入するテキスト）なし
         addGraph (1,1) None

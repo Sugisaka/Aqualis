@@ -59,6 +59,24 @@ type MathText<'a when 'a :> INum0> = {
     /// 表示する数式
     eq:'a; }
 
+module private AnimationRendering =
+    let private target (environment:CompilationEnvironment) (value:INum0) =
+        let target = environment.RequireGenerationContext()
+        GenerationContextMerge.merge (Some target) value.Context |> ignore
+        target
+
+    let render (environment:CompilationEnvironment) (value:INum0) =
+        value.Expr.eval (target environment value).CurrentProgram
+
+    let renderDouble environment (value:double0) =
+        render environment (value :> INum0)
+
+    let inlineMath environment (value:INum0) =
+        "\\(" + render environment value + "\\)"
+
+    let time (environment:CompilationEnvironment) =
+        double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
+
 /// <summary>
 /// 線分アニメーションを生成するクラス
 /// </summary>
@@ -80,13 +98,13 @@ type AnimationLine(environment:CompilationEnvironment,s:Style,canvasX:int,canvas
     /// </summary>
     /// <param name="f">描画対象となる線分</param>
     member this.P (f:Line) =
-        let t = double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
         environment.htmlio.switchAnimationSeq <| fun environment ->
+            let t = AnimationRendering.time environment
             writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    var x1 = " + (f.Start.X t).code + ";")
-            writein (environment.RequireGenerationContext()) ("    var y1 = " + (canvasY - f.Start.Y t).code + ";")
-            writein (environment.RequireGenerationContext()) ("    var x2 = " + (f.End.X t).code + ";")
-            writein (environment.RequireGenerationContext()) ("    var y2 = " + (canvasY - f.End.Y t).code + ";")
+            writein (environment.RequireGenerationContext()) ("    var x1 = " + AnimationRendering.renderDouble environment (f.Start.X t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var y1 = " + AnimationRendering.renderDouble environment (canvasY - f.Start.Y t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var x2 = " + AnimationRendering.renderDouble environment (f.End.X t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var y2 = " + AnimationRendering.renderDouble environment (canvasY - f.End.Y t) + ";")
             writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
             writein (environment.RequireGenerationContext()) "    e.setAttribute(\"x1\", x1);"
             writein (environment.RequireGenerationContext()) "    e.setAttribute(\"y1\", y1);"
@@ -117,13 +135,13 @@ type AnimationEllipse(environment:CompilationEnvironment,s:Style,canvasX:int,can
     /// </summary>
     /// <param name="e">描画対象となる円</param>
     member this.P (e:Ellipse) =
-        let t = double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
         environment.htmlio.switchAnimationSeq <| fun environment ->
+            let t = AnimationRendering.time environment
             writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    var cx = " + (e.center.X t).code + ";")
-            writein (environment.RequireGenerationContext()) ("    var cy = " + (canvasY - e.center.Y t).code + ";")
-            writein (environment.RequireGenerationContext()) ("    var rx = " + (e.radiusX t).code + ";")
-            writein (environment.RequireGenerationContext()) ("    var ry = " + (e.radiusY t).code + ";")
+            writein (environment.RequireGenerationContext()) ("    var cx = " + AnimationRendering.renderDouble environment (e.center.X t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var cy = " + AnimationRendering.renderDouble environment (canvasY - e.center.Y t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var rx = " + AnimationRendering.renderDouble environment (e.radiusX t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var ry = " + AnimationRendering.renderDouble environment (e.radiusY t) + ";")
             writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
             writein (environment.RequireGenerationContext()) "    e.setAttribute(\"cx\", cx);"
             writein (environment.RequireGenerationContext()) "    e.setAttribute(\"cy\", cy);"
@@ -154,23 +172,23 @@ type AnimationArc(environment:CompilationEnvironment,s:Style,canvasX:int,canvasY
     /// </summary>
     /// <param name="e">描画対象となる円弧</param>
     member this.P (e:Arc) =
-        let t = double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
         environment.htmlio.switchAnimationSeq <| fun environment ->
+            let t = AnimationRendering.time environment
             writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
             let a1 = Math.PI * e.angle1 t / 180
             let x1 = e.center.X t + e.radius t * asm.cos a1
             let y1 = e.center.Y t + e.radius t * asm.sin a1
-            writein (environment.RequireGenerationContext()) ("    var x1 = " + x1.code+";")
-            writein (environment.RequireGenerationContext()) ("    var y1 = " + (canvasY - y1).code+";")
+            writein (environment.RequireGenerationContext()) ("    var x1 = " + AnimationRendering.renderDouble environment x1 + ";")
+            writein (environment.RequireGenerationContext()) ("    var y1 = " + AnimationRendering.renderDouble environment (canvasY - y1) + ";")
             let a2 = Math.PI * e.angle2 t / 180 - 1E-4
             let x2 = e.center.X t + e.radius t * asm.cos a2
             let y2 = e.center.Y t + e.radius t * asm.sin a2
-            writein (environment.RequireGenerationContext()) ("    var x2 = " + x2.code+";")
-            writein (environment.RequireGenerationContext()) ("    var y2 = " + (canvasY - y2).code+";")
-            writein (environment.RequireGenerationContext()) ("    var a1 = " + (e.angle1 t).code+";")
-            writein (environment.RequireGenerationContext()) ("    var a2 = " + (e.angle2 t).code+";")
-            writein (environment.RequireGenerationContext()) ("    var radiusX = " + (e.radius t).code + ";")
-            writein (environment.RequireGenerationContext()) ("    var radiusY = " + (e.radius t).code + ";")
+            writein (environment.RequireGenerationContext()) ("    var x2 = " + AnimationRendering.renderDouble environment x2 + ";")
+            writein (environment.RequireGenerationContext()) ("    var y2 = " + AnimationRendering.renderDouble environment (canvasY - y2) + ";")
+            writein (environment.RequireGenerationContext()) ("    var a1 = " + AnimationRendering.renderDouble environment (e.angle1 t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var a2 = " + AnimationRendering.renderDouble environment (e.angle2 t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var radiusX = " + AnimationRendering.renderDouble environment (e.radius t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var radiusY = " + AnimationRendering.renderDouble environment (e.radius t) + ";")
             writein (environment.RequireGenerationContext()) "    var da = a2 - a1;"
             writein (environment.RequireGenerationContext()) "    if(da < 0.0) {da = a2 + 360 - a1;}"
             writein (environment.RequireGenerationContext()) "    var largerOrSmaller = 0;"
@@ -204,13 +222,13 @@ type AnimationText(environment:CompilationEnvironment,s:Style,originX:int,origin
     /// </summary>
     /// <param name="e">対象となるテキスト</param>
     member this.P (e:Text) =
-        let t = double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
         environment.htmlio.switchAnimationSeq <| fun environment ->
+            let t = AnimationRendering.time environment
             writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
             writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
             writein (environment.RequireGenerationContext()) ("    e.innerHTML = \"" + e.str + "\";")
-            writein (environment.RequireGenerationContext()) ("    var x = " + (originX + e.center.X t).code+ ";")
-            writein (environment.RequireGenerationContext()) ("    var y = " + (originY + canvasY - e.center.Y t).code+ ";")
+            writein (environment.RequireGenerationContext()) ("    var x = " + AnimationRendering.renderDouble environment (originX + e.center.X t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var y = " + AnimationRendering.renderDouble environment (originY + canvasY - e.center.Y t) + ";")
             writein (environment.RequireGenerationContext()) "    x = x - e.offsetWidth/2;"
             writein (environment.RequireGenerationContext()) "    y = y - e.offsetHeight/2;"
             writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
@@ -222,14 +240,14 @@ type AnimationText(environment:CompilationEnvironment,s:Style,originX:int,origin
     /// </summary>
     /// <param name="e">対象となる数式</param>
     member this.P (e:MathText<'a>) =
-        let t = double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
         environment.htmlio.switchAnimationSeq <| fun environment ->
+            let t = AnimationRendering.time environment
             writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
             writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
-            writein (environment.RequireGenerationContext()) ("    e.innerHTML = \"\\\\(" + (e.eq :> INum0).Code + "\\\\)\";")
+            writein (environment.RequireGenerationContext()) ("    e.innerHTML = \"\\\\(" + AnimationRendering.render environment (e.eq :> INum0) + "\\\\)\";")
             writein (environment.RequireGenerationContext()) "    MathJax.typeset();"
-            writein (environment.RequireGenerationContext()) ("    var x =" + (originX + e.center.X t).code+ ";")
-            writein (environment.RequireGenerationContext()) ("    var y =" + (originY + canvasY - e.center.Y t).code+ ";")
+            writein (environment.RequireGenerationContext()) ("    var x =" + AnimationRendering.renderDouble environment (originX + e.center.X t) + ";")
+            writein (environment.RequireGenerationContext()) ("    var y =" + AnimationRendering.renderDouble environment (originY + canvasY - e.center.Y t) + ";")
             writein (environment.RequireGenerationContext()) "    x = x - e.offsetWidth/2;"
             writein (environment.RequireGenerationContext()) "    y = y - e.offsetHeight/2;"
             writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
@@ -258,13 +276,13 @@ type AnimationPolygon(environment:CompilationEnvironment,s:Style,canvasX:int,can
     /// </summary>
     /// <param name="apex">多角形を構成する頂点座標のリスト</param>
     member this.P (apex:list<tposition>) =
-        let t = double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
         environment.htmlio.switchAnimationSeq <| fun environment ->
+            let t = AnimationRendering.time environment
             writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\"" + id + "\");")
             writein (environment.RequireGenerationContext()) "    var p = \"\";"
             for p in apex do
-                writein (environment.RequireGenerationContext()) ("    var x = " + (p.X t).code + ";")
-                writein (environment.RequireGenerationContext()) ("    var y = " + (canvasY - p.Y t).code + ";")
+                writein (environment.RequireGenerationContext()) ("    var x = " + AnimationRendering.renderDouble environment (p.X t) + ";")
+                writein (environment.RequireGenerationContext()) ("    var y = " + AnimationRendering.renderDouble environment (canvasY - p.Y t) + ";")
                 writein (environment.RequireGenerationContext()) "    p = p + String(x) + \",\" + String(y) + \" \";"
             writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
             writein (environment.RequireGenerationContext()) "    e.setAttribute(\"points\", p);"
@@ -890,6 +908,21 @@ module HtmlWebExtensions =
                                     |TdRLR -> "\"tdrLR\""
                                     |TdJLR -> "\"tdjLR\"")]) <| fun () ->
                                     writein this.GenerationContext (tlist[j][i])
+        /// <summary>
+        /// num0式を評価し、インラインMathJax文字列を返す
+        /// </summary>
+        member this.inlineMath(text:int0) =
+            AnimationRendering.inlineMath this.Environment (text :> INum0)
+        /// <summary>
+        /// num0式を評価し、インラインMathJax文字列を返す
+        /// </summary>
+        member this.inlineMath(text:double0) =
+            AnimationRendering.inlineMath this.Environment (text :> INum0)
+        /// <summary>
+        /// num0式を評価し、インラインMathJax文字列を返す
+        /// </summary>
+        member this.inlineMath(text:complex0) =
+            AnimationRendering.inlineMath this.Environment (text :> INum0)
         /// <summary>
         /// num0式を評価し、MathJax形式で出力する
         /// </summary>

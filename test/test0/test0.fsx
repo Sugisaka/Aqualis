@@ -13,7 +13,7 @@ open Aqualis
 
 let step = 2
 
-group.section 1 step <| fun () ->
+group.section (step,1) <| fun () ->
     
     let res1 =
         asm.dLet 2 <| fun x ->
@@ -33,62 +33,62 @@ group.section 1 step <| fun () ->
     printfn "%s" <| (res2 id).Expr.eval().ToString()
     printfn "--------------------------------------------"
     
-group.section 2 step <| fun () ->
-    Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","bbb") <| fun ctx ->
-        let x = var.i0 "x"
-        let y = var.d0 "y"
-        let z = var.z0 "z"
+group.section (step,2) <| fun () ->
+    Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname ("aaa","bbb") <| fun c ->
+        let x = c.var.i0 "x"
+        let y = c.var.d0 "y"
+        let z = c.var.z0 "z"
         x <== 1
         y <== asm.pi
         z <== asm.uj
-        ch.i <| fun z ->
-            ch.I "i" <| fun x ->
-                ch.I "i" <| fun y ->
-                    iter.num 10 <| fun i ->
+        c.ch.i <| fun z ->
+            c.ch.I "i" <| fun x ->
+                c.ch.I "i" <| fun y -> // Variable i is already in use; using i0002 instead.
+                    c.iter.num 10 <| fun i ->
                         x <== z + x + y 
-                    iter.num 10 <| fun i ->
+                    c.iter.num 10 <| fun i ->
                         x <== z + x + y
-                    iter.num 10 <| fun i ->
+                    c.iter.num 10 <| fun i ->
                         x <== z + x + y                        
-        ch.i <| fun x ->
-            ch.i <| fun y ->
-                ch.i <| fun z ->
+        c.ch.i <| fun x ->
+            c.ch.i <| fun y ->
+                c.ch.i <| fun z ->
                     x <== 1
-                    br.if1 (Or [x .< y .< z; z .< 1]) <| fun () ->
+                    c.br.if1 (Or [x .< y .< z; z .< 1]) <| fun () ->
                         x <== 0
                     y <== 2
                     z <== 3
-                    print.t x
-                    print.s "aaa"
-                    print.tt <| x++y++z
-                    print.tt <| x++"aaa"++y++"bbb"++z
+                    c.print.t x
+                    c.print.s "aaa"
+                    c.print.tt <| x++y++z
+                    c.print.tt <| x++"aaa"++y++"bbb"++z
                     
-        io.fileOutput "test.dat" <| fun wr ->
-            ch.z <| fun z ->
+        c.io.fileOutput "test.dat" <| fun wr ->
+            c.ch.z <| fun z ->
                 z <== 1+asm.uj*2
                 wr.t z
 
-        io.fileInput "test.dat" <| fun rd ->
-            ch.z <| fun z ->
+        c.io.fileInput "test.dat" <| fun rd ->
+            c.ch.z <| fun z ->
                 rd.t z
-                print.t z
-        ch.i1 10 <| fun x ->
+                c.print.t z
+        c.ch.i1 10 <| fun x ->
             x[0] <== 0
             
-group.section 3 step <| fun () ->
+group.section (step,3) <| fun () ->
     Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname ("aaa","bbb") <| fun ctx ->
-        let x = var.d0 "x"
-        let y = var.d0 "y"
+        let x = ctx.var.d0 "x"
+        let y = ctx.var.d0 "y"
         x <== asm.pi
-        !"test"
+        ctx.comment "test"
         y <== 1
-        ch.d <| fun a ->
-        ch.d1 10 <| fun b ->
-        ch.z2 10 20 <| fun c ->
-            a <== asm.sin(x)
-            iter.num b.size1 <| fun i ->
+        ctx.ch.d <| fun a ->
+        ctx.ch.d1 10 <| fun b ->
+        ctx.ch.z2 (10, 20) <| fun c ->
+            a <== asm.sin x
+            ctx.iter.num b.size1 <| fun i ->
                 b[i] <== b[i]/b.size1
-            iter.num c.size1 <| fun i ->
-            iter.num c.size2 <| fun j ->
+            ctx.iter.num c.size1 <| fun i ->
+            ctx.iter.num c.size2 <| fun j ->
                 c[i,j] <== c[i,j]/(c.size1*c.size2)
                 c[i,j] <== (c[i,j]+x*a/y)/(c.size1*c.size2)

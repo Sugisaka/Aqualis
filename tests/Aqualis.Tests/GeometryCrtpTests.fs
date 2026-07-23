@@ -34,8 +34,11 @@ module GeometryCrtpTests =
                 try
                     let value2 = geometry.point2("value2", context)
                     let value3 = geometry.point3("value3", context)
-                    let rewrapped2: geometry.point2 = value2.Rewrap "other2"
-                    let rewrapped3: geometry.point3 = value3.Rewrap "other3"
+                    let environment = CompilationEnvironment(Some context)
+                    let rewrapped2: geometry.point2 =
+                        value2.Rewrap("other2",environment)
+                    let rewrapped3: geometry.point3 =
+                        value3.Rewrap("other3",environment)
 
                     Assert.Equal("other2", rewrapped2.Name)
                     Assert.Equal("other3", rewrapped3.Name)

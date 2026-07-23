@@ -8,6 +8,23 @@ namespace Aqualis
 
     open System
 
+    module private FileIoReadTarget =
+        let require (environment:CompilationEnvironment) target =
+            match target with
+            |RNvr(Var _ as value,Some targetContext) ->
+                let currentContext = environment.RequireGenerationContext()
+                GenerationContextMerge.merge
+                    (Some currentContext)
+                    (Some targetContext)
+                |> ignore
+                value,targetContext
+            |RNvr(_,None) ->
+                invalidOp "A file-read target is not associated with a GenerationContext."
+            |RNvr _ ->
+                invalidOp "A file-read target must be a variable."
+            |RStr _ ->
+                invalidOp "A file-read target must be a variable."
+
     type TextReader internal (environment:CompilationEnvironment,fp:string,iostat:int0) =
         let context() = environment.RequireGenerationContext()
         let program() = (context()).CurrentProgram
@@ -21,6 +38,8 @@ namespace Aqualis
                     |t   -> cpxvarlist <| list@[t,0,a] <| b <| counter
                 |[] -> counter,list
             let Nz,varlist = cpxvarlist [] lst.data 0
+            lst.data
+            |> List.iter (FileIoReadTarget.require environment >> ignore)
 
             match (program()).language with
             |Fortran ->
@@ -54,10 +73,10 @@ namespace Aqualis
                             |> (fun b ->
                                 [for t,m,b in b do
                                     match t,b with
-                                    |Zt,RNvr (Var _) ->
+                                    |Zt,RNvr(Var _,_) ->
                                         yield tmp[2*m  ].Expr.eval (program())
                                         yield tmp[2*m+1].Expr.eval (program())
-                                    |_,RNvr (Var(_,n,_)) ->
+                                    |_,RNvr(Var(_,n,_),_) ->
                                         yield n
                                     |_ ->
                                         printfn "ファイル読み込みデータの保存先が変数ではありません"
@@ -72,8 +91,11 @@ namespace Aqualis
                         writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval (program())+") "+code+"\n")
                         for t,m,b in varlist do
                             match t,b with
-                            |Zt,RNvr v ->
-                                complex0 v <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                            |Zt,target ->
+                                let value,targetContext =
+                                    FileIoReadTarget.require environment target
+                                complex0(value,context=targetContext)
+                                    <== tmp[2*m]+asm.uj*tmp[2*m+1]
                             |_ ->
                                 ()
             |C99 ->
@@ -98,10 +120,10 @@ namespace Aqualis
                       |> (fun b ->
                             [for t,m,a in b do
                                 match t,a with
-                                |Zt,RNvr (Var _) ->
+                                |Zt,RNvr(Var _,_) ->
                                     yield "&"+tmp[2*m  ].Expr.eval ((program()))
                                     yield "&"+tmp[2*m+1].Expr.eval ((program()))
-                                |_,RNvr (Var(_,n,_)) ->
+                                |_,RNvr(Var(_,n,_),_) ->
                                     yield "&"+n
                                 |_ ->
                                     printfn "ファイル読み込みデータの保存先が変数ではありません"
@@ -111,8 +133,11 @@ namespace Aqualis
                     writein("fscanf("+fp+",\""+format+"\","+code+");\n")
                     for t,m,b in varlist do
                         match t,b with
-                        |Zt,RNvr v ->
-                            complex0 v <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                        |Zt,target ->
+                            let value,targetContext =
+                                FileIoReadTarget.require environment target
+                            complex0(value,context=targetContext)
+                                <== tmp[2*m]+asm.uj*tmp[2*m+1]
                         |_ ->
                             ()
             |LaTeX ->
@@ -131,7 +156,7 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b with
-                        |RNvr (Var(_,n,_)) -> n
+                        |RNvr(Var(_,n,_),_) -> n
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ((program()))+") "+code+"\n")
@@ -151,7 +176,7 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b with
-                        |RNvr (Var(_,n,_)) -> n
+                        |RNvr(Var(_,n,_),_) -> n
                         |_ -> "")
                     |> fun s -> String.Join("<mo>,</mo>",s)
                 writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
@@ -177,10 +202,10 @@ namespace Aqualis
                       |> (fun b ->
                             [for t,m,a in b do
                                 match t,a with
-                                |Zt,RNvr (Var _) ->
+                                |Zt,RNvr(Var _,_) ->
                                     yield tmp[2*m  ].Expr.eval ((program()))
                                     yield tmp[2*m+1].Expr.eval ((program()))
-                                |_,RNvr (Var(_,n,_)) ->
+                                |_,RNvr(Var(_,n,_),_) ->
                                     yield n
                                 |_ ->
                                     printfn "ファイル読み込みデータの保存先が変数ではありません"
@@ -194,19 +219,20 @@ namespace Aqualis
                     for t,_,a in varlist do
                         //let a_string = string a
                         match t,a with
-                        |It _,RNvr v ->
+                        |It _,RNvr(v,_) ->
                             writein(v.eval (program())+" = int(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
-                        |Dt,RNvr v ->
+                        |Dt,RNvr(v,_) ->
                             writein(v.eval (program())+"= float(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
-                        |Zt,RNvr v ->
+                        |Zt,RNvr(v,_) ->
                             writein(v.eval (program())+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
                             cnt <- cnt + 2
                         |_ -> ()
             |_ -> ()
 
-        member private _.ReadByte (e:expr) =
+        member private _.ReadByte target =
+            let e,_ = FileIoReadTarget.require environment target
             writein("read("+fp+", iostat="+iostat.Expr.eval ((program()))+") byte_tmp\n")
             let ee =
                 match e.etype,e with
@@ -217,13 +243,15 @@ namespace Aqualis
         member this.t (x:int0) = this.tt (iv x)
         member this.t (x:double0) = this.tt (dv x)
         member this.t (x:complex0) = this.tt (zv x)
-        member this.b (x:int0) = this.ReadByte x.Expr
+        member this.b (x:int0) = this.ReadByte(RNvr(x.Expr,x.Context))
 
     type BinReader internal (environment:CompilationEnvironment,fp:string,iostat:int0) =
         let context() = environment.RequireGenerationContext()
         let program() = (context()).CurrentProgram
         let writein text = (program()).codewritein(text + "\n")
-        member private _.ReadBin (v:expr) =
+        member private _.ReadBin target =
+            let v,targetContext =
+                FileIoReadTarget.require environment target
             match (program()).language with
             |Fortran ->
                 match v.etype,v with
@@ -231,7 +259,7 @@ namespace Aqualis
                     environment.ch.dd <| fun (re,im) ->
                         writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+re.Expr.eval ((program()))+"\n")
                         writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+im.Expr.eval ((program()))+"\n")
-                        complex0 v <== re+asm.uj*im
+                        complex0(v,context=targetContext) <== re+asm.uj*im
                 |_,Var(_,n,_) ->
                     writein("read("+fp+",iostat="+iostat.Expr.eval (program())+") "+n+"\n")
                 |_ ->
@@ -242,7 +270,7 @@ namespace Aqualis
                     environment.ch.dd <| fun (re,im) ->
                         writein("fread(&"+re.Expr.eval ((program()))+",sizeof("+re.Expr.eval ((program()))+"),1,"+fp+");"+"\n")
                         writein("fread(&"+im.Expr.eval ((program()))+",sizeof("+im.Expr.eval ((program()))+"),1,"+fp+");"+"\n")
-                        complex0 v <== re+asm.uj*im
+                        complex0(v,context=targetContext) <== re+asm.uj*im
                 |_,Var(_,n,_) ->
                     writein("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
                 |_ ->
@@ -253,7 +281,7 @@ namespace Aqualis
                     environment.ch.dd <| fun (re,im) ->
                         writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+re.Expr.eval ((program()))+"\n")
                         writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+im.Expr.eval ((program()))+"\n")
-                        complex0 v <== re+asm.uj*im
+                        complex0(v,context=targetContext) <== re+asm.uj*im
                 |_,Var(_,n,_) ->
                     writein("read("+fp+",iostat="+iostat.Expr.eval ((program()))+") "+n+"\n")
                 |_ ->
@@ -270,7 +298,7 @@ namespace Aqualis
                     environment.ch.dd <| fun (re,im) ->
                         writein(re.Expr.eval ((program()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                         writein(im.Expr.eval ((program()))+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
-                        complex0 v <== re+asm.uj*im
+                        complex0(v,context=targetContext) <== re+asm.uj*im
                 |It _,Var(_,n,_) ->
                     writein(n+" = struct.unpack('i', "+fp+".read(4))[0]"+"\n")
                 |Dt,Var(_,n,_) ->
@@ -278,9 +306,9 @@ namespace Aqualis
                 |_ ->
                     printfn "ファイル読み込みデータの保存先が変数ではありません"
             |_ -> ()
-        member this.b (x:int0) = this.ReadBin x.Expr
-        member this.b (x:double0) = this.ReadBin x.Expr
-        member this.b (x:complex0) = this.ReadBin x.Expr
+        member this.b (x:int0) = this.ReadBin(RNvr(x.Expr,x.Context))
+        member this.b (x:double0) = this.ReadBin(RNvr(x.Expr,x.Context))
+        member this.b (x:complex0) = this.ReadBin(RNvr(x.Expr,x.Context))
 
     type TextWriter internal (environment:CompilationEnvironment,fp:string) =
         let context() = environment.RequireGenerationContext()
@@ -320,15 +348,15 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in b.data do
                             match n.etype,n with
-                            |It _,RNvr (Int v) -> yield (program()).numFormat.ItoS(v)
-                            |Dt  ,RNvr (Int v) -> yield (program()).numFormat.DtoS(double v)
-                            |_   ,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
-                            |Zt  ,RNvr v ->
+                            |It _,RNvr(Int v,_) -> yield (program()).numFormat.ItoS(v)
+                            |Dt  ,RNvr(Int v,_) -> yield (program()).numFormat.DtoS(double v)
+                            |_   ,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                            |Zt  ,RNvr(v,_) ->
                                 let z = complex0 v
                                 yield z.re.Expr.eval (program())
                                 yield z.im.Expr.eval (program())
-                            |It _,RNvr v -> yield v.eval (program())
-                            |Dt  ,RNvr v -> yield v.eval (program())
+                            |It _,RNvr(v,_) -> yield v.eval (program())
+                            |Dt  ,RNvr(v,_) -> yield v.eval (program())
                             |_ -> ()])
                     |> (fun b ->
                           [for n in 0..(b.Length-1) do
@@ -366,13 +394,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
-                        |Zt,RNvr v ->
+                        |_,RNvr(Int v,_) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                        |Zt,RNvr(v,_) ->
                             let z = complex0 v
                             yield z.re.Expr.eval (program())
                             yield z.im.Expr.eval (program())
-                        |(It _|Dt),RNvr v -> yield v.eval ((program()))
+                        |(It _|Dt),RNvr(v,_) -> yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -381,12 +409,12 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
-                          |Zt,RNvr v ->
+                          |_,RNvr(Int v,_) -> (program()).numFormat.ItoS v
+                          |_,RNvr(Dbl v,_) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr(v,_) ->
                               let z = complex0 v
                               z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
-                          |(It _|Dt),RNvr v -> v.eval (program())
+                          |(It _|Dt),RNvr(v,_) -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)\n")
@@ -395,12 +423,12 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
-                          |Zt,RNvr v ->
+                          |_,RNvr(Int v,_) -> (program()).numFormat.ItoS v
+                          |_,RNvr(Dbl v,_) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr(v,_) ->
                               let z = complex0 v
                               z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
-                          |(It _ |Dt),RNvr v -> v.eval (program())
+                          |(It _ |Dt),RNvr(v,_) -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
@@ -433,13 +461,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
-                        |Zt,RNvr v ->
+                        |_,RNvr(Int v,_) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                        |Zt,RNvr(v,_) ->
                             let z = complex0 v
                             yield z.re.Expr.eval (program())
                             yield z.im.Expr.eval (program())
-                        |(It _|Dt),RNvr v -> yield v.eval (program())
+                        |(It _|Dt),RNvr(v,_) -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
@@ -478,13 +506,13 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
                             match b[n],b[n].etype with
-                            |RNvr(Int v), It _ -> yield (program()).numFormat.ItoS(v)
-                            |RNvr(Int v), Dt   -> yield (program()).numFormat.DtoS(double v)
-                            |RNvr(Dbl v), _    -> yield (program()).numFormat.DtoS v
-                            |RNvr v, Zt   ->
+                            |RNvr(Int v,_), It _ -> yield (program()).numFormat.ItoS(v)
+                            |RNvr(Int v,_), Dt   -> yield (program()).numFormat.DtoS(double v)
+                            |RNvr(Dbl v,_), _    -> yield (program()).numFormat.DtoS v
+                            |RNvr(v,_), Zt   ->
                                 yield (Re v).eval ((program()))
                                 yield (Im v).eval ((program()))
-                            |RNvr v,(It _|Dt) -> yield v.eval ((program()))
+                            |RNvr(v,_),(It _|Dt) -> yield v.eval ((program()))
                             |RStr v,_ -> yield "\"" + v.Replace("\"","\"\"") + "\""
                             |_ -> ()])
                     |> fun s -> String.Join(",",s)
@@ -512,16 +540,16 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |It _,RNvr(Int v) ->
+                        |It _,RNvr(Int v,_) ->
                             yield (program()).numFormat.ItoS v
-                        |Dt ,RNvr(Int v) ->
+                        |Dt ,RNvr(Int v,_) ->
                             yield (program()).numFormat.DtoS (double v)
-                        |_ ,RNvr(Dbl v) ->
+                        |_ ,RNvr(Dbl v,_) ->
                             yield (program()).numFormat.DtoS v
-                        |Zt ,RNvr v ->
+                        |Zt ,RNvr(v,_) ->
                             yield (Re v).eval ((program()))
                             yield (Im v).eval ((program()))
-                        |(It _|Dt),RNvr v ->
+                        |(It _|Dt),RNvr(v,_) ->
                             yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
@@ -531,11 +559,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS (double v)
-                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
-                          |RNvr v,(It _|Dt) -> v.eval ((program()))
+                          |RNvr(Int v,_),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v,_),Dt -> (program()).numFormat.DtoS (double v)
+                          |RNvr(Dbl v,_),_ -> (program()).numFormat.DtoS v
+                          |RNvr(v,_),Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr(v,_),(It _|Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -545,11 +573,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS(double v)
-                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
-                          |RNvr v,(It _ |Dt) -> v.eval ((program()))
+                          |RNvr(Int v,_),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v,_),Dt -> (program()).numFormat.DtoS(double v)
+                          |RNvr(Dbl v,_),_ -> (program()).numFormat.DtoS v
+                          |RNvr(v,_),Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr(v,_),(It _ |Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -582,13 +610,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |It _,RNvr(Int v) -> yield (program()).numFormat.ItoS v
-                        |Dt,RNvr(Int v) -> yield (program()).numFormat.DtoS(double v)
-                        |_,RNvr(Dbl v) -> yield (program()).numFormat.DtoS v
-                        |Zt,RNvr v ->
+                        |It _,RNvr(Int v,_) -> yield (program()).numFormat.ItoS v
+                        |Dt,RNvr(Int v,_) -> yield (program()).numFormat.DtoS(double v)
+                        |_,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                        |Zt,RNvr(v,_) ->
                             yield (Re v).eval (program())
                             yield (Im v).eval (program())
-                        |(It _|Dt),RNvr v -> yield v.eval (program())
+                        |(It _|Dt),RNvr(v,_) -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
@@ -722,7 +750,7 @@ namespace Aqualis
                             match s with
                             |RStr _ ->
                                 "A"
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 "I" + match intDigit with |None -> (program()).numFormat.iFormat.ToString() |Some n -> n.ToString()
                             |_ ->
                                 "")
@@ -733,7 +761,7 @@ namespace Aqualis
                             match s with
                             |RStr t ->
                                 "\""+t+"\""
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 x.eval ((program()))
                             |_ ->
                                 "")
@@ -762,7 +790,7 @@ namespace Aqualis
                             match s with
                             |RStr t ->
                                 t
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 "%0" + (match intDigit with |None -> (program()).numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
                             |_ ->
                                 "")
@@ -774,7 +802,7 @@ namespace Aqualis
                             match s with
                             |RStr _ ->
                                 ""
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 x.eval ((program()))
                             |_ ->
                                 "")
@@ -799,7 +827,7 @@ namespace Aqualis
                             match s with
                             |RStr t ->
                                 "\""+t+"\""
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 x.eval ((program()))
                             |_ ->
                                 "")
@@ -821,7 +849,7 @@ namespace Aqualis
                             match s with
                             |RStr t ->
                                 "\""+t+"\""
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 x.eval ((program()))
                             |_ ->
                                 "")
@@ -843,7 +871,7 @@ namespace Aqualis
                             match s with
                             |RStr t ->
                                 t
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 "%0" + (match intDigit with |None -> (program()).numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
                             |_ ->
                                 "")
@@ -855,7 +883,7 @@ namespace Aqualis
                             match s with
                             |RStr _ ->
                                 ""
-                            |RNvr x when x.etype = It 4 ->
+                            |RNvr(x,_) when x.etype = It 4 ->
                                 x.eval ((program()))
                             |_ ->
                                 "")
@@ -908,15 +936,15 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in b.data do
                             match n.etype,n with
-                            |It _,RNvr (Int v) -> yield (program()).numFormat.ItoS(v)
-                            |Dt  ,RNvr (Int v) -> yield (program()).numFormat.DtoS(double v)
-                            |_   ,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
-                            |Zt  ,RNvr v ->
+                            |It _,RNvr(Int v,_) -> yield (program()).numFormat.ItoS(v)
+                            |Dt  ,RNvr(Int v,_) -> yield (program()).numFormat.DtoS(double v)
+                            |_   ,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                            |Zt  ,RNvr(v,_) ->
                                 let z = complex0 v
                                 yield z.re.Expr.eval (program())
                                 yield z.im.Expr.eval (program())
-                            |It _,RNvr v -> yield v.eval (program())
-                            |Dt  ,RNvr v -> yield v.eval (program())
+                            |It _,RNvr(v,_) -> yield v.eval (program())
+                            |Dt  ,RNvr(v,_) -> yield v.eval (program())
                             |_ -> ()])
                     |> (fun b ->
                           [for n in 0..(b.Length-1) do
@@ -954,13 +982,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
-                        |Zt,RNvr v ->
+                        |_,RNvr(Int v,_) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                        |Zt,RNvr(v,_) ->
                             let z = complex0 v
                             yield z.re.Expr.eval (program())
                             yield z.im.Expr.eval (program())
-                        |(It _|Dt),RNvr v -> yield v.eval ((program()))
+                        |(It _|Dt),RNvr(v,_) -> yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
@@ -969,12 +997,12 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
-                          |Zt,RNvr v ->
+                          |_,RNvr(Int v,_) -> (program()).numFormat.ItoS v
+                          |_,RNvr(Dbl v,_) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr(v,_) ->
                               let z = complex0 v
                               z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
-                          |(It _|Dt),RNvr v -> v.eval (program())
+                          |(It _|Dt),RNvr(v,_) -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)\n")
@@ -983,12 +1011,12 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b.etype,b with
-                          |_,RNvr (Int v) -> (program()).numFormat.ItoS v
-                          |_,RNvr (Dbl v) -> (program()).numFormat.DtoS v
-                          |Zt,RNvr v ->
+                          |_,RNvr(Int v,_) -> (program()).numFormat.ItoS v
+                          |_,RNvr(Dbl v,_) -> (program()).numFormat.DtoS v
+                          |Zt,RNvr(v,_) ->
                               let z = complex0 v
                               z.re.Expr.eval (program())+","+z.im.Expr.eval (program())
-                          |(It _ |Dt),RNvr v -> v.eval (program())
+                          |(It _ |Dt),RNvr(v,_) -> v.eval (program())
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
@@ -1021,13 +1049,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |_,RNvr (Int v) -> yield (program()).numFormat.ItoS v
-                        |_,RNvr (Dbl v) -> yield (program()).numFormat.DtoS v
-                        |Zt,RNvr v ->
+                        |_,RNvr(Int v,_) -> yield (program()).numFormat.ItoS v
+                        |_,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                        |Zt,RNvr(v,_) ->
                             let z = complex0 v
                             yield z.re.Expr.eval (program())
                             yield z.im.Expr.eval (program())
-                        |(It _|Dt),RNvr v -> yield v.eval (program())
+                        |(It _|Dt),RNvr(v,_) -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
@@ -1061,13 +1089,13 @@ namespace Aqualis
                     |> (fun b ->
                         [for n in 0..(b.Length-1) do
                             match b[n],b[n].etype with
-                            |RNvr(Int v), It _ -> yield (program()).numFormat.ItoS(v)
-                            |RNvr(Int v), Dt   -> yield (program()).numFormat.DtoS(double v)
-                            |RNvr(Dbl v), _    -> yield (program()).numFormat.DtoS v
-                            |RNvr v, Zt   ->
+                            |RNvr(Int v,_), It _ -> yield (program()).numFormat.ItoS(v)
+                            |RNvr(Int v,_), Dt   -> yield (program()).numFormat.DtoS(double v)
+                            |RNvr(Dbl v,_), _    -> yield (program()).numFormat.DtoS v
+                            |RNvr(v,_), Zt   ->
                                 yield (Re v).eval ((program()))
                                 yield (Im v).eval ((program()))
-                            |RNvr v,(It _|Dt) -> yield v.eval ((program()))
+                            |RNvr(v,_),(It _|Dt) -> yield v.eval ((program()))
                             |RStr v,_ -> yield "\"" + v.Replace("\"","\"\"") + "\""
                             |_ -> ()])
                     |> fun s -> String.Join(",",s)
@@ -1095,16 +1123,16 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |It _,RNvr(Int v) ->
+                        |It _,RNvr(Int v,_) ->
                             yield (program()).numFormat.ItoS v
-                        |Dt ,RNvr(Int v) ->
+                        |Dt ,RNvr(Int v,_) ->
                             yield (program()).numFormat.DtoS (double v)
-                        |_ ,RNvr(Dbl v) ->
+                        |_ ,RNvr(Dbl v,_) ->
                             yield (program()).numFormat.DtoS v
-                        |Zt ,RNvr v ->
+                        |Zt ,RNvr(v,_) ->
                             yield (Re v).eval ((program()))
                             yield (Im v).eval ((program()))
-                        |(It _|Dt),RNvr v ->
+                        |(It _|Dt),RNvr(v,_) ->
                             yield v.eval ((program()))
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
@@ -1114,11 +1142,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS (double v)
-                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
-                          |RNvr v,(It _|Dt) -> v.eval ((program()))
+                          |RNvr(Int v,_),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v,_),Dt -> (program()).numFormat.DtoS (double v)
+                          |RNvr(Dbl v,_),_ -> (program()).numFormat.DtoS v
+                          |RNvr(v,_),Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr(v,_),(It _|Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -1128,11 +1156,11 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b,b.etype with
-                          |RNvr(Int v),It _ -> (program()).numFormat.ItoS v
-                          |RNvr(Int v),Dt -> (program()).numFormat.DtoS(double v)
-                          |RNvr(Dbl v),_ -> (program()).numFormat.DtoS v
-                          |RNvr v,Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
-                          |RNvr v,(It _ |Dt) -> v.eval ((program()))
+                          |RNvr(Int v,_),It _ -> (program()).numFormat.ItoS v
+                          |RNvr(Int v,_),Dt -> (program()).numFormat.DtoS(double v)
+                          |RNvr(Dbl v,_),_ -> (program()).numFormat.DtoS v
+                          |RNvr(v,_),Zt -> (Re v).eval ((program()))+","+(Im v).eval ((program()))
+                          |RNvr(v,_),(It _ |Dt) -> v.eval ((program()))
                           |RStr v,_ -> "\"" + v.Replace("\"","\\\"") + "\""
                           |_ -> "")
                     |> fun s -> String.Join(",",s)
@@ -1165,13 +1193,13 @@ namespace Aqualis
                 let code =
                     [for b in lst.data do
                         match b.etype,b with
-                        |It _,RNvr(Int v) -> yield (program()).numFormat.ItoS v
-                        |Dt,RNvr(Int v) -> yield (program()).numFormat.DtoS(double v)
-                        |_,RNvr(Dbl v) -> yield (program()).numFormat.DtoS v
-                        |Zt,RNvr v ->
+                        |It _,RNvr(Int v,_) -> yield (program()).numFormat.ItoS v
+                        |Dt,RNvr(Int v,_) -> yield (program()).numFormat.DtoS(double v)
+                        |_,RNvr(Dbl v,_) -> yield (program()).numFormat.DtoS v
+                        |Zt,RNvr(v,_) ->
                             yield (Re v).eval (program())
                             yield (Im v).eval (program())
-                        |(It _|Dt),RNvr v -> yield v.eval (program())
+                        |(It _|Dt),RNvr(v,_) -> yield v.eval (program())
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
@@ -1289,6 +1317,8 @@ namespace Aqualis
                     |t   -> cpxvarlist <| list@[t,0,a] <| b <| counter
                 |[] -> counter,list
             let Nz,varlist = cpxvarlist [] lst.data 0
+            lst.data
+            |> List.iter (FileIoReadTarget.require environment >> ignore)
 
             match (program()).language with
             |Fortran ->
@@ -1322,10 +1352,10 @@ namespace Aqualis
                             |> (fun b ->
                                 [for t,m,b in b do
                                     match t,b with
-                                    |Zt,RNvr (Var _) ->
+                                    |Zt,RNvr(Var _,_) ->
                                         yield tmp[2*m  ].Expr.eval (program())
                                         yield tmp[2*m+1].Expr.eval (program())
-                                    |_,RNvr (Var(_,n,_)) ->
+                                    |_,RNvr(Var(_,n,_),_) ->
                                         yield n
                                     |_ ->
                                         printfn "ファイル読み込みデータの保存先が変数ではありません"
@@ -1340,8 +1370,11 @@ namespace Aqualis
                         writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval (program())+") "+code+"\n")
                         for t,m,b in varlist do
                             match t,b with
-                            |Zt,RNvr v ->
-                                complex0 v <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                            |Zt,target ->
+                                let value,targetContext =
+                                    FileIoReadTarget.require environment target
+                                complex0(value,context=targetContext)
+                                    <== tmp[2*m]+asm.uj*tmp[2*m+1]
                             |_ ->
                                 ()
             |C99 ->
@@ -1366,10 +1399,10 @@ namespace Aqualis
                       |> (fun b ->
                             [for t,m,a in b do
                                 match t,a with
-                                |Zt,RNvr (Var _) ->
+                                |Zt,RNvr(Var _,_) ->
                                     yield "&"+tmp[2*m  ].Expr.eval ((program()))
                                     yield "&"+tmp[2*m+1].Expr.eval ((program()))
-                                |_,RNvr (Var(_,n,_)) ->
+                                |_,RNvr(Var(_,n,_),_) ->
                                     yield "&"+n
                                 |_ ->
                                     printfn "ファイル読み込みデータの保存先が変数ではありません"
@@ -1379,8 +1412,11 @@ namespace Aqualis
                     writein("fscanf("+fp+",\""+format+"\","+code+");\n")
                     for t,m,b in varlist do
                         match t,b with
-                        |Zt,RNvr v ->
-                            complex0 v <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                        |Zt,target ->
+                            let value,targetContext =
+                                FileIoReadTarget.require environment target
+                            complex0(value,context=targetContext)
+                                <== tmp[2*m]+asm.uj*tmp[2*m+1]
                         |_ ->
                             ()
             |LaTeX ->
@@ -1399,7 +1435,7 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b with
-                        |RNvr (Var(_,n,_)) -> n
+                        |RNvr(Var(_,n,_),_) -> n
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
                 writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ((program()))+") "+code+"\n")
@@ -1419,7 +1455,7 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun b ->
                         match b with
-                        |RNvr (Var(_,n,_)) -> n
+                        |RNvr(Var(_,n,_),_) -> n
                         |_ -> "")
                     |> fun s -> String.Join("<mo>,</mo>",s)
                 writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
@@ -1445,10 +1481,10 @@ namespace Aqualis
                       |> (fun b ->
                             [for t,m,a in b do
                                 match t,a with
-                                |Zt,RNvr (Var _) ->
+                                |Zt,RNvr(Var _,_) ->
                                     yield tmp[2*m  ].Expr.eval ((program()))
                                     yield tmp[2*m+1].Expr.eval ((program()))
-                                |_,RNvr (Var(_,n,_)) ->
+                                |_,RNvr(Var(_,n,_),_) ->
                                     yield n
                                 |_ ->
                                     printfn "ファイル読み込みデータの保存先が変数ではありません"
@@ -1462,13 +1498,13 @@ namespace Aqualis
                     for t,_,a in varlist do
                         //let a_string = string a
                         match t,a with
-                        |It _,RNvr v ->
+                        |It _,RNvr(v,_) ->
                             writein(v.eval (program())+" = int(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
-                        |Dt,RNvr v ->
+                        |Dt,RNvr(v,_) ->
                             writein(v.eval (program())+"= float(word_list["+cnt.ToString()+"])")
                             cnt <- cnt + 1
-                        |Zt,RNvr v ->
+                        |Zt,RNvr(v,_) ->
                             writein(v.eval (program())+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
                             cnt <- cnt + 2
                         |_ -> ()
