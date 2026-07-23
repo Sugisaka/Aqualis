@@ -1041,26 +1041,7 @@ type svgfilemaker_aq(environment:CompilationEnvironment,cvx:double,cvy:double,wr
         generator.text(cvx,cvy,wr,D scale*cx,D scale*cy,exprString text,D size, font, textAnchor, rot, fillcolor,strokecolor)
 
 type ContextSvgFile internal (environment:CompilationEnvironment) =
-
-    /// <summary>
-    /// SVGファイルを作成
-    /// </summary>
-    /// <param name="dir">出力先ディレクトリ</param>
-    member this.make (dir:string,filename:string) = fun (cvx,cvy) (scale:double) code ->
-        let outputPath = Path.Combine(dir, filename)
-        let temporaryPath = outputPath + ".tmp"
-        try
-            do
-                use wr = new StreamWriter(temporaryPath,false,Encoding.Default)
-                let sv = svgfilemaker(environment,cvx,cvy,wr,scale)
-                sv.header <| fun sv ->
-                    code sv
-            File.Move(temporaryPath, outputPath, true)
-        with _ ->
-            if File.Exists temporaryPath then
-                File.Delete temporaryPath
-            reraise()
-
+    
     /// <summary>
     /// SVGファイルを作成
     /// </summary>
@@ -1083,6 +1064,26 @@ type ContextSvgFile internal (environment:CompilationEnvironment) =
 
 [<AutoOpen>]
 module CompilationEnvironmentGenSvgExtensions =
+    type svgfile =
+        
+        /// <summary>
+        /// SVGファイルを作成
+        /// </summary>
+        /// <param name="dir">出力先ディレクトリ</param>
+        static member make (filename:string) = fun (cvx,cvy) (scale:double) code ->
+            let temporaryPath = filename + ".tmp"
+            try
+                do
+                    use wr = new StreamWriter(temporaryPath,false,Encoding.Default)
+                    let sv = svgfilemaker(CompilationEnvironment None,cvx,cvy,wr,scale)
+                    sv.header <| fun sv ->
+                        code sv
+                File.Move(temporaryPath, filename, true)
+            with _ ->
+                if File.Exists temporaryPath then
+                    File.Delete temporaryPath
+                reraise()
+                
     type CompilationEnvironment with
         member this.gensvg = ContextGenSvg(this)
         member this.svgfile = ContextSvgFile(this)

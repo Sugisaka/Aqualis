@@ -309,7 +309,7 @@ type ContextGraph1d internal (environment:CompilationEnvironment) =
         printfn "-----------------------------------------"
         printfn "Plot %s" (outputdir+"\\"+filename)
         //SVGファイル生成
-        environment.svgfile.make (outputdir,filename) (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
+        svgfile.make (outputdir+"//"+filename) (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
             let addGraph (ix:int,iy:int) (subcaption:option<string>) (gstyle:GraphStyle) (data:list<Plot>) =
                 printfn "Subplot: (%d,%d)" ix iy
                 let gLx0,gLy0 = match subcaption with |None -> gLx,gLy |Some _ -> gLx,gLy-setting.SubCaptionShiftY
