@@ -74,24 +74,6 @@ type ContextCh internal (environment:CompilationEnvironment) =
         TemporaryVariableScope.useMany count ctx.CurrentProgram.z0.getVar
             (fun name -> complex0(Var(Zt,name,NaN), context=ctx)) code
 
-    member _.dd code =
-        let ctx = context()
-        TemporaryVariableScope.useMany 2 ctx.CurrentProgram.d0.getVar
-            (fun name -> double0(Var(Dt,name,NaN), context=ctx))
-            (function |[left;right] -> code(left,right) |_ -> failwith "unreachable")
-
-    member _.dddd code =
-        let ctx = context()
-        TemporaryVariableScope.useMany 4 ctx.CurrentProgram.d0.getVar
-            (fun name -> double0(Var(Dt,name,NaN), context=ctx))
-            (function |[a;b;c;d] -> code(a,b,c,d) |_ -> failwith "unreachable")
-
-    member _.ddd code =
-        let ctx = context()
-        TemporaryVariableScope.useMany 3 ctx.CurrentProgram.d0.getVar
-            (fun name -> double0(Var(Dt,name,NaN), context=ctx))
-            (function |[a;b;c] -> code(a,b,c) |_ -> failwith "unreachable")
-
     member _.f code =
         let ctx = context()
         let name,counter,release = ctx.CurrentProgram.f0.getVarAndCounter()
@@ -108,17 +90,37 @@ type ContextCh internal (environment:CompilationEnvironment) =
                 ctx.CurrentProgram.var.setVar(Structure "string",variableType,name,"")
                 name) code
 
-    member this.ii code = this.i (fun left -> this.i (fun right -> code(left,right)))
-    member this.iii code = this.i (fun first -> this.i (fun second -> this.i (fun third -> code(first,second,third))))
-    member this.iiz code = this.i (fun first -> this.i (fun second -> this.z (fun third -> code(first,second,third))))
+    member this.ii code = this.i (fun first -> this.i (fun second -> code(first,second)))
     member this.id code = this.i (fun first -> this.d (fun second -> code(first,second)))
-    member this.idd code = this.i (fun first -> this.d (fun second -> this.d (fun third -> code(first,second,third))))
+    member this.iz code = this.i (fun first -> this.z (fun second -> code(first,second)))
+    member this.dd code = this.d (fun first -> this.d (fun second -> code(first,second)))
+    member this.dz code = this.d (fun first -> this.z (fun second -> code(first,second)))
     member this.zz code = this.z (fun first -> this.z (fun second -> code(first,second)))
-    member _.zzzz code =
-        let ctx = context()
-        TemporaryVariableScope.useMany 4 ctx.CurrentProgram.z0.getVar
-            (fun name -> complex0(Var(Zt,name,NaN), context=ctx))
-            (function |[a;b;c;d] -> code(a,b,c,d) |_ -> failwith "unreachable")
+    member this.iii code = this.i (fun first -> this.i (fun second -> this.i (fun third -> code(first,second,third))))
+    member this.iid code = this.i (fun first -> this.i (fun second -> this.d (fun third -> code(first,second,third))))
+    member this.iiz code = this.i (fun first -> this.i (fun second -> this.z (fun third -> code(first,second,third))))
+    member this.idd code = this.i (fun first -> this.d (fun second -> this.d (fun third -> code(first,second,third))))
+    member this.idz code = this.i (fun first -> this.d (fun second -> this.z (fun third -> code(first,second,third))))
+    member this.izz code = this.i (fun first -> this.z (fun second -> this.z (fun third -> code(first,second,third))))
+    member this.ddd code = this.d (fun first -> this.d (fun second -> this.d (fun third -> code(first,second,third))))
+    member this.ddz code = this.d (fun first -> this.d (fun second -> this.z (fun third -> code(first,second,third))))
+    member this.dzz code = this.d (fun first -> this.z (fun second -> this.z (fun third -> code(first,second,third))))
+    member this.zzz code = this.z (fun first -> this.z (fun second -> this.z (fun third -> code(first,second,third))))
+    member this.iiii code = this.i (fun first -> this.i (fun second -> this.i (fun third -> this.i (fun fourth -> code(first,second,third,fourth)))))
+    member this.iiid code = this.i (fun first -> this.i (fun second -> this.i (fun third -> this.d (fun fourth -> code(first,second,third,fourth)))))
+    member this.iiiz code = this.i (fun first -> this.i (fun second -> this.i (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.iidd code = this.i (fun first -> this.i (fun second -> this.d (fun third -> this.d (fun fourth -> code(first,second,third,fourth)))))
+    member this.iidz code = this.i (fun first -> this.i (fun second -> this.d (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.iizz code = this.i (fun first -> this.i (fun second -> this.z (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.iddd code = this.i (fun first -> this.d (fun second -> this.d (fun third -> this.d (fun fourth -> code(first,second,third,fourth)))))
+    member this.iddz code = this.i (fun first -> this.d (fun second -> this.d (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.idzz code = this.i (fun first -> this.d (fun second -> this.z (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.izzz code = this.i (fun first -> this.z (fun second -> this.z (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.dddd code = this.d (fun first -> this.d (fun second -> this.d (fun third -> this.d (fun fourth -> code(first,second,third,fourth)))))
+    member this.dddz code = this.d (fun first -> this.d (fun second -> this.d (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.ddzz code = this.d (fun first -> this.d (fun second -> this.z (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.dzzz code = this.d (fun first -> this.z (fun second -> this.z (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
+    member this.zzzz code = this.z (fun first -> this.z (fun second -> this.z (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
 
 [<AutoOpen>]
 module CompilationEnvironmentChExtensions =
