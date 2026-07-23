@@ -147,6 +147,7 @@ namespace Aqualis
         member internal _.Environment =
             environment
             |> Option.defaultWith (fun () -> invalidOp "This HTML writer is not associated with a CompilationEnvironment.")
+        member internal this.GenerationContext = this.Environment.RequireGenerationContext()
         member this.head title = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"

@@ -448,602 +448,597 @@ type ContextSlideAnimation internal (environment:CompilationEnvironment) =
     /// 音声のデフォルト表示・非表示設定
     /// デフォルトの設定
 
-type ContextWebHtml internal (environment:CompilationEnvironment) =
-    let context = environment.RequireGenerationContext()
-    member internal _.Environment = environment
-    member _.taga(t:string, attributes:Atr list) = environment.html.taga(t, attributes)
-    member _.taga(t:string, attributes:string) = environment.html.taga(t, attributes)
-    member _.tagb(t:string, attributes:Atr list) = environment.html.tagb(t, attributes)
-    member _.tagb(t:string, attributes:string) = environment.html.tagb(t, attributes)
-    member _.tagb(t:string) = environment.html.tagb t
-    /// <summary>
-    /// 内部要素のないタグ
-    /// </summary>
-    member this.taga (t:string,lst:list<string*PHPdata>) =
-        writei context ("<"+t+" ")
-        context.CurrentProgram.indentInc()
-        for a,s in lst do
-            write context (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-        context.CurrentProgram.indentDec()
-        writen context " />"
-    /// <summary>
-    /// 内部要素のあるタグ
-    /// </summary>
-    member this.tagb0 (t:string,lst:list<string*PHPdata>) = fun code ->
-        if lst.Length=0 then
-            write context ("<"+t+">")
-        else
-            write context ("<"+t+" ")
-            context.CurrentProgram.indentInc()
+[<AutoOpen>]
+module HtmlWebExtensions =
+    type html with
+        /// <summary>
+        /// 内部要素のないタグ
+        /// </summary>
+        member this.taga (t:string,lst:list<string*PHPdata>) =
+            writei this.GenerationContext ("<"+t+" ")
+            this.GenerationContext.CurrentProgram.indentInc()
             for a,s in lst do
-                write context (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-            context.CurrentProgram.indentDec()
-            write context ">"
-        code()
-        writen context ("</"+t+">")
-    /// <summary>
-    /// 内部要素のあるタグ
-    /// </summary>
-    member this.tagb (t:string,lst:list<string*PHPdata>) = fun code ->
-        if lst.Length=0 then
-            writein context ("<"+t+">")
-        else
-            writei context ("<"+t+" ")
-            context.CurrentProgram.indentInc()
-            for a,s in lst do
-                writei context (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-            context.CurrentProgram.indentDec()
-            writen context ">"
-        code()
-        writein context ("</"+t+">")
-    /// <summary>
-    /// 見出し（h1）要素を生成する
-    /// </summary>
-    /// <param name="t">見出しに表示する内容</param>
-    member this.h1 (t:int0) = fun code ->
-        this.tagb "h1" <| fun () -> environment.php.echo t.code
-        code()
-    /// <summary>
-    /// 見出し（h1）要素を生成する
-    /// </summary>
-    /// <param name="t">見出しに表示する内容</param>
-    /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
-    member this.h1 (t:int0,s:Style) = fun code ->
-        this.tagb ("h1",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h2 (t:int0) = fun code ->
-        this.tagb "h2" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h2 (t:int0,s:Style) = fun code ->
-        this.tagb ("h2",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h3 (t:int0) = fun code ->
-        this.tagb "h3" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h3 (t:int0,s:Style) = fun code ->
-        this.tagb ("h3",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h4 (t:int0) = fun code ->
-        this.tagb "h4" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h4 (t:int0,s:Style) = fun code ->
-        this.tagb ("h4",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h5 (t:int0) = fun code ->
-        this.tagb "h5" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h5 (t:int0,s:Style) = fun code ->
-        this.tagb ("h5",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-    /// <summary>
-    /// 見出し（h1）要素を生成する
-    /// </summary>
-    /// <param name="t">見出しに表示する内容</param>
-    member this.h1 (t:double0) = fun code ->
-        this.tagb "h1" <| fun () -> environment.php.echo t.code
-        code()
-    /// <summary>
-    /// 見出し（h1）要素を生成する
-    /// </summary>
-    /// <param name="t">見出しに表示する内容</param>
-    /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
-    member this.h1 (t:double0,s:Style) = fun code ->
-        this.tagb ("h1",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h2 (t:double0) = fun code ->
-        this.tagb "h2" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h2 (t:double0,s:Style) = fun code ->
-        this.tagb ("h2",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h3 (t:double0) = fun code ->
-        this.tagb "h3" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h3 (t:double0,s:Style) = fun code ->
-        this.tagb ("h3",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h4 (t:double0) = fun code ->
-        this.tagb "h4" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h4 (t:double0,s:Style) = fun code ->
-        this.tagb ("h4",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-
-    member this.h5 (t:double0) = fun code ->
-        this.tagb "h5" <| fun () -> environment.php.echo t.code
-        code()
-    member this.h5 (t:double0,s:Style) = fun code ->
-        this.tagb ("h5",[s.atr]) <| fun () -> environment.php.echo t.code
-        code()
-    /// <summary>
-    /// フォーム送信用のsubmitボタンを生成する
-    /// <para>
-    /// nameとvalueの型違いに対応したオーバーロードを提供する
-    /// </para>
-    /// </summary>
-    member this.submit(name:string,value:PHPdata) = this.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value",value.code)])
-    member this.submit(name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value])
-    /// <summary>
-    /// フォーム送信用のsubmitボタンを生成する
-    /// </summary>
-    /// <param name="name">name属性に設定する文字列</param>
-    /// <param name="value">value属性に設定する文字列</param>
-    member this.submit(name:string,value:string) = this.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value","\""+value+"\"")])
-    /// <summary>
-    /// 送信先URLを指定したsubmitボタンを生成する
-    /// </summary>
-    /// <param name="url">formaction属性に設定するURL</param>
-    /// <param name="name">name属性に設定するPHPデータ</param>
-    /// <param name="value">value属性に設定する文字列</param>
-    member this.submit(url:string,name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "formaction",PHPdata url])
-    /// <summary>
-    /// 無効化されたsubmitボタンを生成する
-    /// </summary>
-    /// <param name="name">name属性に設定するPHPデータ</param>
-    /// <param name="value">value属性に設定するPHPデータ</param>
-    member this.submit_disabled(name:PHPdata,value:PHPdata) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",value; "disabled",PHPdata "disabled"])
-    member this.submit_disabled(name:string,value:PHPdata) = this.taga("input",["type",PHPdata "submit"; "name",PHPdata name; "value",value; "disabled",PHPdata "disabled"])
-    member this.submit_disabled(name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "disabled",PHPdata "disabled"])
-    /// <summary>
-    /// li要素を生成する
-    /// </summary>
-    /// <param name="a">li要素に設定する属性のリスト</param>
-    member this.item (a:list<string*PHPdata>) = fun code -> this.tagb ("li",a) code
-    /// <summary>
-    /// a要素を生成する
-    /// </summary>
-    /// <param name="url">href属性に設定するPHPデータ</param>
-    member this.link(url:PHPdata) = fun code -> this.tagb ("a",["href",url]) code
-    /// <summary>
-    /// a要素を生成する
-    /// </summary>
-    /// <param name="url">href属性に設定するPHPデータ</param>
-    /// <param name="s">文字の太さ、色を定義するスタイル情報</param>
-    member this.link(url:PHPdata, s:Style) = fun code -> this.tagb ("a",[s.atr; Atr("href","\""+url.code+"\"")]) code
-    /// <summary>
-    /// select要素を生成する
-    /// </summary>
-    /// <param name="x">name属性に設定するPHPデータ</param>
-    member this.select(x:PHPdata) = fun code -> this.tagb ("select",["name",x;]) code
-    /// <summary>
-    /// 無効化されたselsect要素を生成する
-    /// </summary>
-    member this.select_disabled(x:PHPdata) = fun code -> this.tagb ("select",["name",x; "disabled",PHPdata "disabled"]) code
-    /// <summary>
-    /// 任意のHTMLタグの開始タグと終了タグを生成する
-    /// </summary>
-    /// <param name="t">タグ名</param>
-    /// <param name="code">タグ内部の内容を生成する関数</param>
-    member this.splitTag t code =
-        let b (lst:list<string*PHPdata>) =
+                write this.GenerationContext (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+            this.GenerationContext.CurrentProgram.indentDec()
+            writen this.GenerationContext " />"
+        /// <summary>
+        /// 内部要素のあるタグ
+        /// </summary>
+        member this.tagb0 (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
-                writein context ("<"+t+">")
+                write this.GenerationContext ("<"+t+">")
             else
-                writein context ("<"+t+" ")
+                write this.GenerationContext ("<"+t+" ")
+                this.GenerationContext.CurrentProgram.indentInc()
                 for a,s in lst do
-                    writein context (a + "=" + s.code + " ")
-                writein context ">"
-        code b
-        writein context ("</"+t+">")
-    /// <summary>
-    /// select要素を生成
-    /// </summary>
-    member this.Select = this.splitTag "select"
-    /// <summary>
-    /// tr要素を生成
-    /// </summary>
-    member this.Tr = this.splitTag "tr"
-    /// <summary>
-    /// div要素を生成する
-    /// </summary>
-    /// <param name="a">属性リスト</param>
-    member this.div (a:list<string*PHPdata>) = fun code -> this.tagb ("div",a) code
-    /// <summary>
-    /// CSSdataの内容に応じてHTML要素を生成する
-    /// </summary>
-    /// <param name="a">生成する要素を指定するCSSデータ</param>
-    member this.div (a:CSSdata) = fun code ->
-        match a.label with
-        |HTMLTag s -> this.tagb s code
-        |CSSClass s -> this.tagb ("div",[Atr("class",s)]) code
-        |CSSID s -> this.tagb ("div",[Atr("id",s)]) code
-        |_ -> ()
-    /// <summary>
-    /// CSSdataの内容に応じてHTML要素を生成する
-    /// </summary>
-    /// <param name="a">生成対象を指定するCSSデータ</param>
-    /// <param name="atr">追加する属性のリスト</param>
-    member this.div (a:CSSdata,atr:list<Atr>) = fun code ->
-        match a.label with
-        |HTMLTag s -> this.tagb s code
-        |CSSClass s -> this.tagb ("div",[Atr("class",s)]@atr) code
-        |CSSID s -> this.tagb ("div",[Atr("id",s)]@atr) code
-        |_ -> ()
-    /// <summary>
-    /// CSSdataに基づいてarticle要素を生成する
-    /// </summary>
-    /// <param name="a">要素に適用するCSSデータ</param>
-    member this.article (a:CSSdata) = fun code ->
-        match a.label with
-        |CSSClass s -> this.tagb ("article",[Atr("class",s)]) code
-        |CSSID s -> this.tagb ("article",[Atr("id",s)]) code
-        |_ -> ()
-    /// <summary>
-    /// CSSdataに基づいてaside要素を生成する
-    /// </summary>
-    member this.aside (a:CSSdata) = fun code ->
-        match a.label with
-        |CSSClass s -> this.tagb ("aside",[Atr("class",s)]) code
-        |CSSID s -> this.tagb ("aside",[Atr("id",s)]) code
-        |_ -> ()
-    /// <summary>
-    /// CSSdataに基づいてpara要素を生成する
-    /// </summary>
-    member this.para (a:CSSdata) = fun code ->
-        match a.label with
-        |CSSClass s -> this.tagb ("p",[Atr("class",s)]) code
-        |CSSID s -> this.tagb ("p",[Atr("id",s)]) code
-        |_ -> ()
-    /// <summary>
-    /// CSSdataに基づいてsection要素を生成する
-    /// </summary>
-    member this.section (a:CSSdata) = fun code ->
-        match a.label with
-        |CSSClass s -> this.tagb ("section",[Atr("class",s)]) code
-        |CSSID s -> this.tagb ("section",[Atr("id",s)]) code
-        |_ -> ()
-    /// <summary>
-    /// CSSdataに基づいてspan要素を生成する
-    /// </summary>
-    member this.span (a:CSSdata) = fun code ->
-        match a.label with
-        // |CSSClass s -> this.tagb0 ("span",["class",s]) code
-        // |CSSID s -> this.tagb0 ("span",["id"
-        |CSSClass s -> this.tagb ("span",[Atr("class",s)]) code
-        |CSSID s -> this.tagb ("span",[Atr("id",s)]) code
-        |_ -> ()
-
-    /// <summary>
-    /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    /// </summary>
-    member this.checkbox(name:PHPdata) =
-        this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
-        this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1";])
-    /// <summary>
-    /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    /// </summary>
-    member this.checkbox_disabled(name:PHPdata) =
-        this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
-        this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "disabled",PHPdata "disabled"])
-    /// <summary>
-    /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    /// </summary>
-    member this.checkbox_checked(name:PHPdata) =
-        this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
-        this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "checked",PHPdata "checked";])
-    /// <summary>
-    /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    /// </summary>
-    member this.checkbox_checked_disabled(name:PHPdata) =
-        this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
-        this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "checked",PHPdata "checked"; "disabled",PHPdata "disabled"])
-    /// <summary>
-    /// 指定位置に数式テキストを描画する
-    /// </summary>
-    /// <param name="s">適用するスタイル</param>
-    /// <param name="p">表示位置</param>
-    /// <param name="text">表示する数式</param>
-    member this.Mathtext (s:Style) (p:position) (text:PHPdata) =
-        let s1 = Style [{Key = "margin-left"; Value=InvariantFormat.number p.x+"px"}
-                        {Key = "margin-top"; Value=InvariantFormat.number p.y+"px"}
-                        {Key = "position"; Value = "absolute";}]
-        this.tagb ("div", [(s1+s).atr]) <| fun () ->
-            writein context ("\\(" + text.code + "\\)")
-    /// <summary>
-    /// 指定位置に画像を表示する
-    /// </summary>
-    /// <param name="s">適用するスタイル</param>
-    /// <param name="p">表示位置</param>
-    /// <param name="filename">表示する画像のファイル名</param>
-    member this.image (s:Style,p:position) = fun (filename:string) ->
-        let f = Path.GetFileName filename
-        if File.Exists filename then
-            if Directory.Exists (context.ContentsDirectory) then
-                File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+                    write this.GenerationContext (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+                this.GenerationContext.CurrentProgram.indentDec()
+                write this.GenerationContext ">"
+            code()
+            writen this.GenerationContext ("</"+t+">")
+        /// <summary>
+        /// 内部要素のあるタグ
+        /// </summary>
+        member this.tagb (t:string,lst:list<string*PHPdata>) = fun code ->
+            if lst.Length=0 then
+                writein this.GenerationContext ("<"+t+">")
             else
-                printfn "directory not exist: %s" (context.ContentsDirectory)
-        else
-            printfn "image file not exist: %s" filename
-        let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-        this.taga ("img", [st.atr;Atr("src", Path.GetFileName (context.ContentsDirectory) + "\\" + f)])
-    member this.image (s:Style, id:string) = fun (filename:string) ->
-        let f = Path.GetFileName filename
-        if File.Exists filename then
-            if Directory.Exists (context.ContentsDirectory) then
-                File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+                writei this.GenerationContext ("<"+t+" ")
+                this.GenerationContext.CurrentProgram.indentInc()
+                for a,s in lst do
+                    writei this.GenerationContext (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+                this.GenerationContext.CurrentProgram.indentDec()
+                writen this.GenerationContext ">"
+            code()
+            writein this.GenerationContext ("</"+t+">")
+        /// <summary>
+        /// 見出し（h1）要素を生成する
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
+        member this.h1 (t:int0) = fun code ->
+            this.tagb "h1" <| fun () -> this.Environment.php.echo t.code
+            code()
+        /// <summary>
+        /// 見出し（h1）要素を生成する
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
+        /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
+        member this.h1 (t:int0,s:Style) = fun code ->
+            this.tagb ("h1",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h2 (t:int0) = fun code ->
+            this.tagb "h2" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h2 (t:int0,s:Style) = fun code ->
+            this.tagb ("h2",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h3 (t:int0) = fun code ->
+            this.tagb "h3" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h3 (t:int0,s:Style) = fun code ->
+            this.tagb ("h3",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h4 (t:int0) = fun code ->
+            this.tagb "h4" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h4 (t:int0,s:Style) = fun code ->
+            this.tagb ("h4",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h5 (t:int0) = fun code ->
+            this.tagb "h5" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h5 (t:int0,s:Style) = fun code ->
+            this.tagb ("h5",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+        /// <summary>
+        /// 見出し（h1）要素を生成する
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
+        member this.h1 (t:double0) = fun code ->
+            this.tagb "h1" <| fun () -> this.Environment.php.echo t.code
+            code()
+        /// <summary>
+        /// 見出し（h1）要素を生成する
+        /// </summary>
+        /// <param name="t">見出しに表示する内容</param>
+        /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
+        member this.h1 (t:double0,s:Style) = fun code ->
+            this.tagb ("h1",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h2 (t:double0) = fun code ->
+            this.tagb "h2" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h2 (t:double0,s:Style) = fun code ->
+            this.tagb ("h2",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h3 (t:double0) = fun code ->
+            this.tagb "h3" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h3 (t:double0,s:Style) = fun code ->
+            this.tagb ("h3",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h4 (t:double0) = fun code ->
+            this.tagb "h4" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h4 (t:double0,s:Style) = fun code ->
+            this.tagb ("h4",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+
+        member this.h5 (t:double0) = fun code ->
+            this.tagb "h5" <| fun () -> this.Environment.php.echo t.code
+            code()
+        member this.h5 (t:double0,s:Style) = fun code ->
+            this.tagb ("h5",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            code()
+        /// <summary>
+        /// フォーム送信用のsubmitボタンを生成する
+        /// <para>
+        /// nameとvalueの型違いに対応したオーバーロードを提供する
+        /// </para>
+        /// </summary>
+        member this.submit(name:string,value:PHPdata) = this.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value",value.code)])
+        member this.submit(name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value])
+        /// <summary>
+        /// フォーム送信用のsubmitボタンを生成する
+        /// </summary>
+        /// <param name="name">name属性に設定する文字列</param>
+        /// <param name="value">value属性に設定する文字列</param>
+        member this.submit(name:string,value:string) = this.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value","\""+value+"\"")])
+        /// <summary>
+        /// 送信先URLを指定したsubmitボタンを生成する
+        /// </summary>
+        /// <param name="url">formaction属性に設定するURL</param>
+        /// <param name="name">name属性に設定するPHPデータ</param>
+        /// <param name="value">value属性に設定する文字列</param>
+        member this.submit(url:string,name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "formaction",PHPdata url])
+        /// <summary>
+        /// 無効化されたsubmitボタンを生成する
+        /// </summary>
+        /// <param name="name">name属性に設定するPHPデータ</param>
+        /// <param name="value">value属性に設定するPHPデータ</param>
+        member this.submit_disabled(name:PHPdata,value:PHPdata) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",value; "disabled",PHPdata "disabled"])
+        member this.submit_disabled(name:string,value:PHPdata) = this.taga("input",["type",PHPdata "submit"; "name",PHPdata name; "value",value; "disabled",PHPdata "disabled"])
+        member this.submit_disabled(name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "disabled",PHPdata "disabled"])
+        /// <summary>
+        /// li要素を生成する
+        /// </summary>
+        /// <param name="a">li要素に設定する属性のリスト</param>
+        member this.item (a:list<string*PHPdata>) = fun code -> this.tagb ("li",a) code
+        /// <summary>
+        /// a要素を生成する
+        /// </summary>
+        /// <param name="url">href属性に設定するPHPデータ</param>
+        member this.link(url:PHPdata) = fun code -> this.tagb ("a",["href",url]) code
+        /// <summary>
+        /// a要素を生成する
+        /// </summary>
+        /// <param name="url">href属性に設定するPHPデータ</param>
+        /// <param name="s">文字の太さ、色を定義するスタイル情報</param>
+        member this.link(url:PHPdata, s:Style) = fun code -> this.tagb ("a",[s.atr; Atr("href","\""+url.code+"\"")]) code
+        /// <summary>
+        /// select要素を生成する
+        /// </summary>
+        /// <param name="x">name属性に設定するPHPデータ</param>
+        member this.select(x:PHPdata) = fun code -> this.tagb ("select",["name",x;]) code
+        /// <summary>
+        /// 無効化されたselsect要素を生成する
+        /// </summary>
+        member this.select_disabled(x:PHPdata) = fun code -> this.tagb ("select",["name",x; "disabled",PHPdata "disabled"]) code
+        /// <summary>
+        /// 任意のHTMLタグの開始タグと終了タグを生成する
+        /// </summary>
+        /// <param name="t">タグ名</param>
+        /// <param name="code">タグ内部の内容を生成する関数</param>
+        member this.splitTag t code =
+            let b (lst:list<string*PHPdata>) =
+                if lst.Length=0 then
+                    writein this.GenerationContext ("<"+t+">")
+                else
+                    writein this.GenerationContext ("<"+t+" ")
+                    for a,s in lst do
+                        writein this.GenerationContext (a + "=" + s.code + " ")
+                    writein this.GenerationContext ">"
+            code b
+            writein this.GenerationContext ("</"+t+">")
+        /// <summary>
+        /// select要素を生成
+        /// </summary>
+        member this.Select = this.splitTag "select"
+        /// <summary>
+        /// tr要素を生成
+        /// </summary>
+        member this.Tr = this.splitTag "tr"
+        /// <summary>
+        /// div要素を生成する
+        /// </summary>
+        /// <param name="a">属性リスト</param>
+        member this.div (a:list<string*PHPdata>) = fun code -> this.tagb ("div",a) code
+        /// <summary>
+        /// CSSdataの内容に応じてHTML要素を生成する
+        /// </summary>
+        /// <param name="a">生成する要素を指定するCSSデータ</param>
+        member this.div (a:CSSdata) = fun code ->
+            match a.label with
+            |HTMLTag s -> this.tagb s code
+            |CSSClass s -> this.tagb ("div",[Atr("class",s)]) code
+            |CSSID s -> this.tagb ("div",[Atr("id",s)]) code
+            |_ -> ()
+        /// <summary>
+        /// CSSdataの内容に応じてHTML要素を生成する
+        /// </summary>
+        /// <param name="a">生成対象を指定するCSSデータ</param>
+        /// <param name="atr">追加する属性のリスト</param>
+        member this.div (a:CSSdata,atr:list<Atr>) = fun code ->
+            match a.label with
+            |HTMLTag s -> this.tagb s code
+            |CSSClass s -> this.tagb ("div",[Atr("class",s)]@atr) code
+            |CSSID s -> this.tagb ("div",[Atr("id",s)]@atr) code
+            |_ -> ()
+        /// <summary>
+        /// CSSdataに基づいてarticle要素を生成する
+        /// </summary>
+        /// <param name="a">要素に適用するCSSデータ</param>
+        member this.article (a:CSSdata) = fun code ->
+            match a.label with
+            |CSSClass s -> this.tagb ("article",[Atr("class",s)]) code
+            |CSSID s -> this.tagb ("article",[Atr("id",s)]) code
+            |_ -> ()
+        /// <summary>
+        /// CSSdataに基づいてaside要素を生成する
+        /// </summary>
+        member this.aside (a:CSSdata) = fun code ->
+            match a.label with
+            |CSSClass s -> this.tagb ("aside",[Atr("class",s)]) code
+            |CSSID s -> this.tagb ("aside",[Atr("id",s)]) code
+            |_ -> ()
+        /// <summary>
+        /// CSSdataに基づいてpara要素を生成する
+        /// </summary>
+        member this.para (a:CSSdata) = fun code ->
+            match a.label with
+            |CSSClass s -> this.tagb ("p",[Atr("class",s)]) code
+            |CSSID s -> this.tagb ("p",[Atr("id",s)]) code
+            |_ -> ()
+        /// <summary>
+        /// CSSdataに基づいてsection要素を生成する
+        /// </summary>
+        member this.section (a:CSSdata) = fun code ->
+            match a.label with
+            |CSSClass s -> this.tagb ("section",[Atr("class",s)]) code
+            |CSSID s -> this.tagb ("section",[Atr("id",s)]) code
+            |_ -> ()
+        /// <summary>
+        /// CSSdataに基づいてspan要素を生成する
+        /// </summary>
+        member this.span (a:CSSdata) = fun code ->
+            match a.label with
+            // |CSSClass s -> this.tagb0 ("span",["class",s]) code
+            // |CSSID s -> this.tagb0 ("span",["id"
+            |CSSClass s -> this.tagb ("span",[Atr("class",s)]) code
+            |CSSID s -> this.tagb ("span",[Atr("id",s)]) code
+            |_ -> ()
+
+        /// <summary>
+        /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary>
+        member this.checkbox(name:PHPdata) =
+            this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
+            this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1";])
+        /// <summary>
+        /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary>
+        member this.checkbox_disabled(name:PHPdata) =
+            this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
+            this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "disabled",PHPdata "disabled"])
+        /// <summary>
+        /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary>
+        member this.checkbox_checked(name:PHPdata) =
+            this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
+            this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "checked",PHPdata "checked";])
+        /// <summary>
+        /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
+        /// </summary>
+        member this.checkbox_checked_disabled(name:PHPdata) =
+            this.taga("input",["type",PHPdata "hidden"; "name", name; "value",PHPdata "0";])
+            this.taga("input",["type",PHPdata "checkbox"; "name", name; "value",PHPdata "1"; "checked",PHPdata "checked"; "disabled",PHPdata "disabled"])
+        /// <summary>
+        /// 指定位置に数式テキストを描画する
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="text">表示する数式</param>
+        member this.Mathtext (s:Style) (p:position) (text:PHPdata) =
+            let s1 = Style [{Key = "margin-left"; Value=InvariantFormat.number p.x+"px"}
+                            {Key = "margin-top"; Value=InvariantFormat.number p.y+"px"}
+                            {Key = "position"; Value = "absolute";}]
+            this.tagb ("div", [(s1+s).atr]) <| fun () ->
+                writein this.GenerationContext ("\\(" + text.code + "\\)")
+        /// <summary>
+        /// 指定位置に画像を表示する
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="filename">表示する画像のファイル名</param>
+        member this.image (s:Style,p:position) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
+                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
             else
-                printfn "directory not exist: %s" (context.ContentsDirectory)
-        else
-            printfn "image file not exist: %s" filename
-        this.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName (context.ContentsDirectory) + "\\" + f)])
-    member this.image (s:Style) = fun (filename:string) ->
-        let f = Path.GetFileName filename
-        if File.Exists filename then
-            if Directory.Exists (context.ContentsDirectory) then
-                File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+                printfn "image file not exist: %s" filename
+            let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
+            this.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+        member this.image (s:Style, id:string) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
+                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
             else
-                printfn "directory not exist: %s" (context.ContentsDirectory)
-        else
-            printfn "image file not exist: %s" filename
-        this.taga ("img", [s.atr;Atr("src", Path.GetFileName (context.ContentsDirectory) + "\\" + f)])
-    member this.image (filename:string) =
-        let f = Path.GetFileName filename
-        if File.Exists filename then
-            if Directory.Exists (context.ContentsDirectory) then
-                File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+                printfn "image file not exist: %s" filename
+            this.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+        member this.image (s:Style) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
+                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
             else
-                printfn "directory not exist: %s" (context.ContentsDirectory)
-        else
-            printfn "image file not exist: %s" filename
-        this.taga ("img", [Atr("src", Path.GetFileName (context.ContentsDirectory) + "\\" + f)])
-    /// <summary>
-    /// 指定位置に動画を表示する
-    /// </summary>
-    /// <param name="s">適用するスタイル</param>
-    /// <param name="p">表示位置</param>
-    /// <param name="filename">表示する動画のファイル名</param>
-    member this.video (s:Style,p:position) = fun (filename:string) ->
-        let f = Path.GetFileName filename
-        if File.Exists filename then
-            if Directory.Exists (context.ContentsDirectory) then
-                File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+                printfn "image file not exist: %s" filename
+            this.taga ("img", [s.atr;Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+        member this.image (filename:string) =
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
+                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
             else
-                printfn "directory not exist: %s" (context.ContentsDirectory)
-        else
-            printfn "video file not exist: %s" filename
-        let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-        environment.html.tagv ("video", [st.atr;Atr("src", context.ContentsDirectory + "\\" + f); Atr("controls", "")])
-        environment.html.tage "video"
-    member this.video (s:Style) = fun (filename:string) ->
-        let f = Path.GetFileName filename
-        if File.Exists filename then
-            if Directory.Exists (context.ContentsDirectory) then
-                File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+                printfn "image file not exist: %s" filename
+            this.taga ("img", [Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+        /// <summary>
+        /// 指定位置に動画を表示する
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="filename">表示する動画のファイル名</param>
+        member this.video (s:Style,p:position) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
+                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
             else
-                printfn "directory not exist: %s" (context.ContentsDirectory)
-        else
-            printfn "video file not exist: %s" filename
-        environment.html.tagv ("video", [s.atr;Atr("src", context.ContentsDirectory + "\\" + f); Atr("controls", "")])
-        environment.html.tage "video"
+                printfn "video file not exist: %s" filename
+            let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
+            this.tagv ("video", [st.atr;Atr("src", this.GenerationContext.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.tage "video"
+        member this.video (s:Style) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
+                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+            else
+                printfn "video file not exist: %s" filename
+            this.tagv ("video", [s.atr;Atr("src", this.GenerationContext.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.tage "video"
 
-    /// <summary>
-    /// コードブロックを生成
-    /// </summary>
-    member this.code (style:list<string*PHPdata>) = fun cd ->
-        this.tagb0 ("pre",style) <| fun () ->
-            this.tagb0 ("code",[]) <| fun () ->
-                cd()
+        /// <summary>
+        /// コードブロックを生成
+        /// </summary>
+        member this.code (style:list<string*PHPdata>) = fun cd ->
+            this.tagb0 ("pre",style) <| fun () ->
+                this.tagb0 ("code",[]) <| fun () ->
+                    cd()
 
-    member this.code (style:list<string*PHPdata>, cd:PHPdata) =
-        this.tagb0 ("pre",style) <| fun () ->
-            this.tagb0 ("code",[]) <| fun () ->
-                write context cd.phpcode
+        member this.code (style:list<string*PHPdata>, cd:PHPdata) =
+            this.tagb0 ("pre",style) <| fun () ->
+                this.tagb0 ("code",[]) <| fun () ->
+                    write this.GenerationContext cd.phpcode
 
-    member this.code (style:list<string*string>) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b))
+        member this.code (style:list<string*string>) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b))
 
-    member this.code (style:list<string*string>, cd:PHPdata) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b),cd)
+        member this.code (style:list<string*string>, cd:PHPdata) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b),cd)
 
-    member this.code (cd:PHPdata) = this.code (([] : (string * PHPdata) list),cd)
-    /// <summary>
-    /// 罫線指定付きの表を生成
-    /// </summary>
-    /// <param name="caption">表のタイトル</param>
-    /// <param name="borderH">水平罫線の設定</param>
-    /// <param name="borderV">垂直罫線の設定</param>
-    /// <param name="tlist">表データ</param>
-    member this.listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
-        this.tagb("div",[Atr("class","\"fig\"")]) <| fun () ->
-            this.tagb ("span",[Atr("class","\"caption\"")]) <| fun () ->
-                writein context (caption)
-            this.tagb("table",[Atr("class","\"tab\"")]) <| fun () ->
-                for j in 0..tlist.Length-1 do
-                    this.tagb ("tr",[Atr("class",match borderV[j] with |TrTB -> "\"trtb\"" |TrT -> "\"trt\"" |TrB -> "\"trb\"" |TrN -> "\"trn\"")]) <| fun () ->
-                        for i in 0..tlist[j].Length-1 do
-                            this.tagb ("td",[Atr("class",
-                                match borderH[i] with
-                                |TdL -> "\"tdl\""
-                                |TdC -> "\"tdc\""
-                                |TdR -> "\"tdr\""
-                                |TdJ -> "\"tdj\""
-                                |TdLL -> "\"tdlL\""
-                                |TdCL -> "\"tdcL\""
-                                |TdRL -> "\"tdrL\""
-                                |TdJL -> "\"tdjL\""
-                                |TdLR -> "\"tdlR\""
-                                |TdCR -> "\"tdcR\""
-                                |TdRR -> "\"tdrR\""
-                                |TdJR -> "\"tdjR\""
-                                |TdLLR -> "\"tdlLR\""
-                                |TdCLR -> "\"tdcLR\""
-                                |TdRLR -> "\"tdrLR\""
-                                |TdJLR -> "\"tdjLR\"")]) <| fun () ->
-                                writein context (tlist[j][i])
-    /// <summary>
-    /// num0式を評価し、MathJax形式で出力する
-    /// </summary>
-    member this.eq(text:int0) =
-        writein context ("\\("+text.Expr.evalL context.CurrentProgram + "\\)")
-    /// <summary>
-    /// num0式を評価し、MathJax形式で出力する
-    /// </summary>
-    member this.eq(text:double0) =
-        writein context ("\\("+text.Expr.evalL context.CurrentProgram + "\\)")
-    /// <summary>
-    /// num0式を評価し、MathJax形式で出力する
-    /// </summary>
-    member this.eq(text:complex0) =
-        writein context ("\\("+text.Expr.evalL context.CurrentProgram + "\\)")
+        member this.code (cd:PHPdata) = this.code (([] : (string * PHPdata) list),cd)
+        /// <summary>
+        /// 罫線指定付きの表を生成
+        /// </summary>
+        /// <param name="caption">表のタイトル</param>
+        /// <param name="borderH">水平罫線の設定</param>
+        /// <param name="borderV">垂直罫線の設定</param>
+        /// <param name="tlist">表データ</param>
+        member this.listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
+            this.tagb("div",[Atr("class","\"fig\"")]) <| fun () ->
+                this.tagb ("span",[Atr("class","\"caption\"")]) <| fun () ->
+                    writein this.GenerationContext (caption)
+                this.tagb("table",[Atr("class","\"tab\"")]) <| fun () ->
+                    for j in 0..tlist.Length-1 do
+                        this.tagb ("tr",[Atr("class",match borderV[j] with |TrTB -> "\"trtb\"" |TrT -> "\"trt\"" |TrB -> "\"trb\"" |TrN -> "\"trn\"")]) <| fun () ->
+                            for i in 0..tlist[j].Length-1 do
+                                this.tagb ("td",[Atr("class",
+                                    match borderH[i] with
+                                    |TdL -> "\"tdl\""
+                                    |TdC -> "\"tdc\""
+                                    |TdR -> "\"tdr\""
+                                    |TdJ -> "\"tdj\""
+                                    |TdLL -> "\"tdlL\""
+                                    |TdCL -> "\"tdcL\""
+                                    |TdRL -> "\"tdrL\""
+                                    |TdJL -> "\"tdjL\""
+                                    |TdLR -> "\"tdlR\""
+                                    |TdCR -> "\"tdcR\""
+                                    |TdRR -> "\"tdrR\""
+                                    |TdJR -> "\"tdjR\""
+                                    |TdLLR -> "\"tdlLR\""
+                                    |TdCLR -> "\"tdcLR\""
+                                    |TdRLR -> "\"tdrLR\""
+                                    |TdJLR -> "\"tdjLR\"")]) <| fun () ->
+                                    writein this.GenerationContext (tlist[j][i])
+        /// <summary>
+        /// num0式を評価し、MathJax形式で出力する
+        /// </summary>
+        member this.eq(text:int0) =
+            writein this.GenerationContext ("\\("+text.Expr.evalL this.GenerationContext.CurrentProgram + "\\)")
+        /// <summary>
+        /// num0式を評価し、MathJax形式で出力する
+        /// </summary>
+        member this.eq(text:double0) =
+            writein this.GenerationContext ("\\("+text.Expr.evalL this.GenerationContext.CurrentProgram + "\\)")
+        /// <summary>
+        /// num0式を評価し、MathJax形式で出力する
+        /// </summary>
+        member this.eq(text:complex0) =
+            writein this.GenerationContext ("\\("+text.Expr.evalL this.GenerationContext.CurrentProgram + "\\)")
 
-    /// <summary>
-    /// キャラクター付き解説ページ
-    /// </summary>
-    member this.page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
-        this.slide position.Origin <| fun p ->
-            let animationCounter = context.AnimationCount
-            let contentsDirectory = context.ContentsDirectory
-            // 音声ファイル追加
-            context.AddAudioFile(
-                match audioFile with |Some t -> t |None -> "")
-            // 字幕枠
-            environment.html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if context.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
-                ()
-            // キャラクター画像
-            environment.html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if context.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
-                for ci in c do
-                    if File.Exists ci.CharacterImageFile then
-                        if Directory.Exists contentsDirectory then
-                            File.Copy(ci.CharacterImageFile, contentsDirectory+"\\"+Path.GetFileName ci.CharacterImageFile, true)
-                            environment.html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
+        /// <summary>
+        /// キャラクター付き解説ページ
+        /// </summary>
+        member this.page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
+            this.slide position.Origin <| fun p ->
+                let animationCounter = this.GenerationContext.AnimationCount
+                let contentsDirectory = this.GenerationContext.ContentsDirectory
+                // 音声ファイル追加
+                this.GenerationContext.AddAudioFile(
+                    match audioFile with |Some t -> t |None -> "")
+                // 字幕枠
+                this.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                    ()
+                // キャラクター画像
+                this.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.GenerationContext.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
+                    for ci in c do
+                        if File.Exists ci.CharacterImageFile then
+                            if Directory.Exists contentsDirectory then
+                                File.Copy(ci.CharacterImageFile, contentsDirectory+"\\"+Path.GetFileName ci.CharacterImageFile, true)
+                                this.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
+                            else
+                                printfn "directory not exist: %s" contentsDirectory
                         else
-                            printfn "directory not exist: %s" contentsDirectory
-                    else
-                        printfn "character image file not exist: %s" ci.CharacterImageFile
-            // 字幕
-            environment.html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if context.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                <| fun () -> writein context audio.Subtitle
-            environment.htmlio.switchAutoAnimation <| fun environment ->
-                writein (environment.RequireGenerationContext()) ("page"+animationCounter.ToString()+": () => {")
-            // メインコンテンツ
-            environment.html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
-                code2 p
-            environment.htmlio.switchAutoAnimation <| fun environment ->
-                writein (environment.RequireGenerationContext()) "},"
-            match context.TryLastAnimationButton() with
-            | Some(fStartName,fResetName,btnx,btny) ->
-                this.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
-                this.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
-            | None -> ()
-            context.ClearAnimationButtons()
-    /// <summary>
-    /// 指定位置にスライドを生成
-    /// </summary>
-    /// <param name="p">スライドの表示位置</param>
-    member this.slide (p:position)  code =
-            let animationCounter = context.NextAnimationNumber()
-            this.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
-                code p
-    /// <summary>
-    /// 前のページへ移動するボタンを生成
-    /// </summary>
-    member this.prevButton() =
-            this.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
-                writein context "前へ"
-    /// <summary>
-    /// 次のページへ移動するボタンを生成
-    /// </summary>
-    member this.nextButton() =
-            this.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
-                writein context "次へ"
-    /// <summary>
-    /// アニメーションを開始するボタンを生成
-    /// </summary>
-    member this.startButton2(id:string) (s:Style) (c:string) =
-            this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                writein context "Start"
-    /// <summary>
-    /// アニメーションをリセットするボタンを生成
-    /// </summary>
-    member this.resetButton2(id:string) (s:Style) (c:string) =
-            this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                writein context "Reset"
-    /// <summary>
-    /// キャラクター表示を制御するチェックボックスを生成
-    /// </summary>
-    member this.switchCharacter() =
-        this.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if context.CharacterEnabled then "checked" else "")
-        this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
-            writein context "キャラクター"
-    /// <summary>
-    /// 字幕表示を制御するチェックボックスを生成
-    /// </summary>
-    member this.switchSubtitle() =
-        this.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if context.SubtitleEnabled then "checked" else "")
-        this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
-            writein context "字幕"
-    /// <summary>
-    /// 音声再生を制御するチェックボックスを生成
-    /// </summary>
-    member this.switchAudio() =
-        this.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if context.VoiceEnabled then "checked" else "")
-        this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
-            writein context "音声"
-    member this.audioPlayer() =
-            this.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
-    /// <summary>
-    /// 指定位置に画像を表示
-    /// </summary>
-    member this.imageA (s:Style) = fun (p:position) (filename:string) ->
-        let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
-                        {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
-                        {Key = "position"; Value = "absolute";}]
-        let f = Path.GetFileName filename
-        if File.Exists filename then
-            if Directory.Exists (context.ContentsDirectory) then
-                File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+                            printfn "character image file not exist: %s" ci.CharacterImageFile
+                // 字幕
+                this.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                    <| fun () -> writein this.GenerationContext audio.Subtitle
+                this.Environment.htmlio.switchAutoAnimation <| fun environment ->
+                    writein (environment.RequireGenerationContext()) ("page"+animationCounter.ToString()+": () => {")
+                // メインコンテンツ
+                this.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
+                    code2 p
+                this.Environment.htmlio.switchAutoAnimation <| fun environment ->
+                    writein (environment.RequireGenerationContext()) "},"
+                match this.GenerationContext.TryLastAnimationButton() with
+                | Some(fStartName,fResetName,btnx,btny) ->
+                    this.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
+                    this.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
+                | None -> ()
+                this.GenerationContext.ClearAnimationButtons()
+        /// <summary>
+        /// 指定位置にスライドを生成
+        /// </summary>
+        /// <param name="p">スライドの表示位置</param>
+        member this.slide (p:position)  code =
+                let animationCounter = this.GenerationContext.NextAnimationNumber()
+                this.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
+                    code p
+        /// <summary>
+        /// 前のページへ移動するボタンを生成
+        /// </summary>
+        member this.prevButton() =
+                this.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
+                    writein this.GenerationContext "前へ"
+        /// <summary>
+        /// 次のページへ移動するボタンを生成
+        /// </summary>
+        member this.nextButton() =
+                this.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
+                    writein this.GenerationContext "次へ"
+        /// <summary>
+        /// アニメーションを開始するボタンを生成
+        /// </summary>
+        member this.startButton2(id:string) (s:Style) (c:string) =
+                this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
+                    writein this.GenerationContext "Start"
+        /// <summary>
+        /// アニメーションをリセットするボタンを生成
+        /// </summary>
+        member this.resetButton2(id:string) (s:Style) (c:string) =
+                this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
+                    writein this.GenerationContext "Reset"
+        /// <summary>
+        /// キャラクター表示を制御するチェックボックスを生成
+        /// </summary>
+        member this.switchCharacter() =
+            this.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.GenerationContext.CharacterEnabled then "checked" else "")
+            this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
+                writein this.GenerationContext "キャラクター"
+        /// <summary>
+        /// 字幕表示を制御するチェックボックスを生成
+        /// </summary>
+        member this.switchSubtitle() =
+            this.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.GenerationContext.SubtitleEnabled then "checked" else "")
+            this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
+                writein this.GenerationContext "字幕"
+        /// <summary>
+        /// 音声再生を制御するチェックボックスを生成
+        /// </summary>
+        member this.switchAudio() =
+            this.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.GenerationContext.VoiceEnabled then "checked" else "")
+            this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
+                writein this.GenerationContext "音声"
+        member this.audioPlayer() =
+                this.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
+        /// <summary>
+        /// 指定位置に画像を表示
+        /// </summary>
+        member this.imageA (s:Style) = fun (p:position) (filename:string) ->
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
+                            {Key = "position"; Value = "absolute";}]
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
+                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
             else
-                printfn "directory not exist: %s" (context.ContentsDirectory)
-        else
-            printfn "image file not exist: %s" filename
-        this.taga ("img", [(s1+s).atr])
-    /// <summary>
-    /// 指定位置・サイズでテキストブロックを生成
-    /// </summary>
-    /// <param name="s">適用するスタイル</param>
-    /// <param name="p">表示位置</param>
-    /// <param name="width, height">ブロックのサイズ</param>
-    /// <param name="text">表示する文字列のリスト</param>
-    member this.blockText (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
-        let padding = 5
-        let s1 = Style [size.width (InvariantFormat.number width+"px")
-                        size.height (InvariantFormat.number height+"px")
-                        {Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
-                        {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
-                        {Key = "position"; Value = "absolute";}
-                        {Key = "overflow-wrap"; Value = "break-word";}]
-        this.tagb ("div", [(s1+s).atr]) <| fun () ->
-            text |> List.iter (fun s -> writein context (s+"<br>"))
-            writein context ("\r\n")
-        {Left = p.x;
-        Right = p.x+double width+2.0*double padding;
-        Top = p.y;
-        Bottom = p.y+double height+2.0*double padding;}
+                printfn "image file not exist: %s" filename
+            this.taga ("img", [(s1+s).atr])
+        /// <summary>
+        /// 指定位置・サイズでテキストブロックを生成
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="width, height">ブロックのサイズ</param>
+        /// <param name="text">表示する文字列のリスト</param>
+        member this.blockText (s:Style) (p:position) (width:float,height:float) (text:list<string>) =
+            let padding = 5
+            let s1 = Style [size.width (InvariantFormat.number width+"px")
+                            size.height (InvariantFormat.number height+"px")
+                            {Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
+                            {Key = "position"; Value = "absolute";}
+                            {Key = "overflow-wrap"; Value = "break-word";}]
+            this.tagb ("div", [(s1+s).atr]) <| fun () ->
+                text |> List.iter (fun s -> writein this.GenerationContext (s+"<br>"))
+                writein this.GenerationContext ("\r\n")
+            {Left = p.x;
+            Right = p.x+double width+2.0*double padding;
+            Top = p.y;
+            Bottom = p.y+double height+2.0*double padding;}
 /// <summary>
 /// 図形アニメーションを管理するクラス
 /// </summary>
@@ -1054,7 +1049,6 @@ type ContextWebHtml internal (environment:CompilationEnvironment) =
 module CompilationEnvironmentAnimationExtensions =
     type CompilationEnvironment with
         member this.slideAnimation = ContextSlideAnimation(this)
-        member this.webhtml = ContextWebHtml(this)
 
 type FigureAnimation(environment:CompilationEnvironment,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
@@ -1544,16 +1538,16 @@ module dochtml =
     let fixedPage outputdir filename (title:string) pageWidth pageHeight setting cssfile code =
         htmlpresentationCore setting outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun environment ->
             code environment
-            environment.webhtml.prevButton()
-            environment.webhtml.nextButton()
-            environment.webhtml.switchCharacter()
-            environment.webhtml.switchSubtitle()
-            environment.webhtml.switchAudio()
-            environment.webhtml.audioPlayer()
+            environment.html.prevButton()
+            environment.html.nextButton()
+            environment.html.switchCharacter()
+            environment.html.switchSubtitle()
+            environment.html.switchAudio()
+            environment.html.audioPlayer()
 
 [<AutoOpen>]
 module htmlexpr2 =
-    type ContextWebHtml with
+    type html with
         /// <summary>
         /// 手動操作型のアニメーション領域を生成
         /// </summary>

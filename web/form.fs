@@ -22,8 +22,8 @@ type Button(environment:CompilationEnvironment,name:PHPdata) =
     /// <param name="file">ボタン押下時の移動先ファイル</param>
     /// <param name="text">ボタンに表示するテキスト</param>
     member _.show(file:string,text:string) = b.submit(file,text)
-    member _.show(text:string) = environment.webhtml.submit(name,text)
-    member _.show_disabled(text:string) = environment.webhtml.submit_disabled(name,text)
+    member _.show(text:string) = environment.html.submit(name,text)
+    member _.show_disabled(text:string) = environment.html.submit_disabled(name,text)
     
 type ButtonVar(environment:CompilationEnvironment) =
     /// ボタンが押されたか判定
@@ -41,27 +41,27 @@ type ButtonVar(environment:CompilationEnvironment) =
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:PHPdata,text:string) = environment.webhtml.submit(id,text)
+    member _.show(id:PHPdata,text:string) = environment.html.submit(id,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:int0,text:string) = environment.webhtml.submit(PHPdata id,text)
-    member _.show(id:double0,text:string) = environment.webhtml.submit(PHPdata id,text)
-    member _.show(id:complex0,text:string) = environment.webhtml.submit(PHPdata id,text)
+    member _.show(id:int0,text:string) = environment.html.submit(PHPdata id,text)
+    member _.show(id:double0,text:string) = environment.html.submit(PHPdata id,text)
+    member _.show(id:complex0,text:string) = environment.html.submit(PHPdata id,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:string,text:string) = environment.webhtml.submit(PHPdata id,text)
+    member _.show(id:string,text:string) = environment.html.submit(PHPdata id,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show_disabled(id:PHPdata,text:string) = environment.webhtml.submit_disabled(id,text)
+    member _.show_disabled(id:PHPdata,text:string) = environment.html.submit_disabled(id,text)
     
 type TextBox(environment:CompilationEnvironment,name:PHPdata) =
     let t = post(environment,name)
@@ -213,7 +213,7 @@ type ComboBox(environment:CompilationEnvironment,name:PHPdata,items:list<ComboBo
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem() =
         //c.select <| fun () ->
-        environment.webhtml.select name <| fun () ->
+        environment.html.select name <| fun () ->
             for i in items do
                 environment.br.if2(this.selectedTag .= PHPdata i.Tag)
                 <| fun () ->
@@ -223,7 +223,7 @@ type ComboBox(environment:CompilationEnvironment,name:PHPdata,items:list<ComboBo
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem(text:PHPdata) =
         //c.select <| fun () ->
-        environment.webhtml.select name <| fun () ->
+        environment.html.select name <| fun () ->
             for i in items do
                 environment.br.if2(text .= PHPdata i.Text)
                 <| fun () ->
@@ -233,7 +233,7 @@ type ComboBox(environment:CompilationEnvironment,name:PHPdata,items:list<ComboBo
     /// コンボボックスを表示
     member _.show() =
         //c.select <| fun () ->
-        environment.webhtml.select name <| fun () ->
+        environment.html.select name <| fun () ->
             for i in items do
                 environment.html.option i.Tag <| fun () -> writein (environment.RequireGenerationContext()) i.Text
     member _.foreach code =
@@ -258,7 +258,7 @@ type ComboBoxVar(environment:CompilationEnvironment) =
     member this.show_selected(id:PHPdata,items:list<ComboBoxItem>) =
         let c = post(environment,id)
         //c.select <| fun () ->
-        environment.webhtml.select id <| fun () ->
+        environment.html.select id <| fun () ->
             for i in items do
                 environment.br.if2(this.selectedTag id .= PHPdata i.Tag)
                 <| fun () ->
@@ -268,7 +268,7 @@ type ComboBoxVar(environment:CompilationEnvironment) =
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedTag(id:PHPdata,items:list<ComboBoxItem>,tag:PHPdata) =
         //c.select <| fun () ->
-        environment.webhtml.select id <| fun () ->
+        environment.html.select id <| fun () ->
             for i in items do
                 environment.br.if2(tag .= i.Tag)
                 <| fun () ->
@@ -278,7 +278,7 @@ type ComboBoxVar(environment:CompilationEnvironment) =
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedTag_disabled(id:PHPdata,items:list<ComboBoxItem>,tag:PHPdata) =
         //c.select <| fun () ->
-        environment.webhtml.select_disabled id <| fun () ->
+        environment.html.select_disabled id <| fun () ->
             for i in items do
                 environment.br.if2(tag .= i.Tag)
                 <| fun () ->
@@ -288,7 +288,7 @@ type ComboBoxVar(environment:CompilationEnvironment) =
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem(id:PHPdata,items:list<ComboBoxItem>,text:PHPdata) =
         //c.select <| fun () ->
-        environment.webhtml.select id <| fun () ->
+        environment.html.select id <| fun () ->
             for i in items do
                 environment.br.if2(text .= i.Text)
                 <| fun () ->
@@ -298,7 +298,7 @@ type ComboBoxVar(environment:CompilationEnvironment) =
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selectedItem_disabled(id:PHPdata,items:list<ComboBoxItem>,text:PHPdata) =
         //c.select <| fun () ->
-        environment.webhtml.select_disabled id <| fun () ->
+        environment.html.select_disabled id <| fun () ->
             for i in items do
                 environment.br.if2(text .= i.Text)
                 <| fun () ->
@@ -309,7 +309,7 @@ type ComboBoxVar(environment:CompilationEnvironment) =
     /// コンボボックスを表示
     member _.show(id:PHPdata,items:list<ComboBoxItem>) =
         //c.select <| fun () ->
-        environment.webhtml.select id <| fun () ->
+        environment.html.select id <| fun () ->
             for i in items do
                 environment.html.option i.Tag <| fun () -> writein (environment.RequireGenerationContext()) i.Text
     member _.foreach (items:list<ComboBoxItem>) code =
@@ -320,25 +320,25 @@ type CheckBox(environment:CompilationEnvironment,name:PHPdata) =
     new(environment:CompilationEnvironment,name:string) = CheckBox(environment,PHPdata name)
     member _.isChecked with get() = cb.get .= 1
     member _.status with get() = cb.get
-    member _.show() = environment.webhtml.checkbox name
+    member _.show() = environment.html.checkbox name
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_disabled() = environment.webhtml.checkbox_disabled name
+    member _.show_disabled() = environment.html.checkbox_disabled name
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_checked() = environment.webhtml.checkbox_checked name
+    member _.show_checked() = environment.html.checkbox_checked name
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_checked_disabled() = environment.webhtml.checkbox_checked_disabled name
+    member _.show_checked_disabled() = environment.html.checkbox_checked_disabled name
     
 /// IDによって複数のチェックボックスを表す
 type CheckBoxVar(environment:CompilationEnvironment) =
     member _.isChecked(id:PHPdata) = (post(environment,id)).get .= 1
     member _.status(id:PHPdata) = (post(environment,id)).get
-    member _.show(id:PHPdata) = environment.webhtml.checkbox id
+    member _.show(id:PHPdata) = environment.html.checkbox id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_disabled(id:PHPdata) = environment.webhtml.checkbox_disabled id
+    member _.show_disabled(id:PHPdata) = environment.html.checkbox_disabled id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_checked(id:PHPdata) = environment.webhtml.checkbox_checked id
+    member _.show_checked(id:PHPdata) = environment.html.checkbox_checked id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
-    member _.show_checked_disabled(id:PHPdata) = environment.webhtml.checkbox_checked_disabled id
+    member _.show_checked_disabled(id:PHPdata) = environment.html.checkbox_checked_disabled id
 
 [<AutoOpen>]
 module CompilationEnvironmentFormExtensions =

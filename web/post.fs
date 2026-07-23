@@ -14,7 +14,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
     member this.get_html with get() = PHPdata.f(context,"htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")
     ///テキストボックス
     member _.input() =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -23,7 +23,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input(a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -34,7 +34,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
 
     ///パスワード入力テキストボックス
     member _.password() = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -43,7 +43,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
     ///テキストボックス
     member _.input(value:PHPdata) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -53,7 +53,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
     ///テキストボックス
     member _.input_hidden(value:PHPdata) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -63,7 +63,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
     ///テキストボックス
     member _.input(value:string) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -73,7 +73,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
     ///テキストボックス
     member _.input_hidden(value:string) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -83,7 +83,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
 
     member _.input(value:PHPdata,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -92,7 +92,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
     member _.input_hidden(value:PHPdata,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -102,7 +102,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
 
     member _.input(value:string,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -112,7 +112,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
 
     member _.input_hidden(value:string,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -122,7 +122,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
 
     member _.textArea() =
-        environment.webhtml.tagb(
+        environment.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -130,7 +130,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         ) <| fun () -> ()
     member _.textArea code =
-        environment.webhtml.tagb(
+        environment.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -138,7 +138,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         ) <| fun () -> code()
     member _.textArea(a:list<Atr>) = 
-        environment.webhtml.tagb0(
+        environment.html.tagb0(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -146,7 +146,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) <| fun () -> ()
     member _.textArea_contents(a:list<Atr>) = fun code ->
-        environment.webhtml.tagb0(
+        environment.html.tagb0(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -154,7 +154,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) code
     member this.textArea_copy() =
-        environment.webhtml.tagb(
+        environment.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -162,7 +162,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         ) <| fun () -> writein context this.get_html.phpcode
     member this.textArea_copy(a:list<Atr>) =
-        environment.webhtml.tagb(
+        environment.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -170,7 +170,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) <| fun () -> writein context this.get_html.phpcode
     member _.textArea(value:string) =
-        environment.webhtml.tagb(
+        environment.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -178,7 +178,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         ) <| fun () -> writein context value
     member _.input_lock(value:PHPdata) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -188,7 +188,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input_lock(value:string) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -198,7 +198,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input_lock(value:PHPdata,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -208,7 +208,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
     member _.input_lock(value:string,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -220,7 +220,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
 
     ///テキストボックス
     member _.input(value:int0) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -229,7 +229,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input(value:int0,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -240,7 +240,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
 
     ///テキストボックス
     member _.input_hidden(value:int0) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -249,7 +249,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input_hidden(value:int0,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -259,7 +259,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
 
     member _.input_lock(value:int0) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -269,7 +269,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input_lock(value:int0,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -281,7 +281,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         
     ///パスワード入力テキストボックス
     member _.password(value:int0) = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -292,7 +292,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
 
     ///テキストボックス
     member _.input(value:double0) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -301,7 +301,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input(value:double0,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -312,7 +312,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
 
     ///テキストボックス
     member _.input_hidden(value:double0) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -321,7 +321,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input_hidden(value:double0,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -331,7 +331,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
 
     member _.input_lock(value:double0) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -341,7 +341,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.input_lock(value:double0,a:list<Atr>) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -353,7 +353,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
 
     ///パスワード入力テキストボックス
     member _.password(value:string) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -363,7 +363,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
     ///パスワード入力テキストボックス
     member _.password(value:double0) = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -374,7 +374,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
 
     ///テキストボックス（送信済みのメッセージを表示）
     member this.input_copy() = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -383,7 +383,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member this.input_copy(a:list<Atr>) = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -393,7 +393,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
     ///テキストボックス（送信済みのメッセージを表示）
     member this.input_copy_hidden() = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -402,7 +402,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member this.input_copy_hidden(a:list<Atr>) = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -411,7 +411,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
     member this.input_copy_lock() = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -421,7 +421,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member this.input_copy_lock(a:list<Atr>) = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -432,7 +432,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
         )
     ///パスワード入力テキストボックス（送信済みのメッセージを表示）
     member this.password_copy() = 
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -441,7 +441,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member this.password_copy_lock() =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -451,7 +451,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.submit(value:string) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "submit"
@@ -460,7 +460,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.submit(url:string,value:string) =
-        environment.webhtml.taga(
+        environment.html.taga(
             "input",
             [
                 "type", PHPdata "submit"
@@ -470,7 +470,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.submit(url:string,value:string,style:string) =
-        environment.webhtml.taga("input",
+        environment.html.taga("input",
             [
                 "type", PHPdata "submit"
                 "name", id
@@ -480,7 +480,7 @@ type post(environment:CompilationEnvironment,id:PHPdata) =
             ]
         )
     member _.select code = 
-        environment.webhtml.tagb (
+        environment.html.tagb (
             "select",
             [
                 "name",id
@@ -505,13 +505,13 @@ type postFile(environment:CompilationEnvironment,id:PHPdata) =
         environment.br.if1(bool0(Var(Nt, "move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ")", NaN), context=context)) <| fun () ->
             environment.php.echo "アップロード完了"
     member this.file_select() =
-        environment.webhtml.tagb ("form", [Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            environment.webhtml.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
-            environment.webhtml.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
+        environment.html.tagb ("form", [Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
+            environment.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
+            environment.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
     member this.file_select(action_phpfile:string) =
-        environment.webhtml.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            environment.webhtml.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
-            environment.webhtml.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
+        environment.html.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
+            environment.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
+            environment.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
     member this.files_upload dir =
         let file = PHPdata.var(context,"_FILES")
         environment.br.if1(environment.php.isset(file[id])) <| fun () ->
@@ -529,10 +529,10 @@ type postFile(environment:CompilationEnvironment,id:PHPdata) =
                     <| fun () ->
                         environment.php.echo ("アップロード失敗: "++file.[id].["name"].[i]++"<br>")
     member this.files_select() =
-        environment.webhtml.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
+        environment.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
         
     member this.files_select(action_phpfile:string) =
-        environment.webhtml.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
+        environment.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
         
     /// ファイルが指定されているか
     member this.isFileSpecified with get() =
