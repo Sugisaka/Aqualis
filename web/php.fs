@@ -215,6 +215,8 @@ and ContextPhp internal (environment:CompilationEnvironment) =
     let merge contexts = GenerationContextMerge.mergeMany (Some context :: contexts)
     let data code contexts = PHPdata.f(code, ?context=merge contexts)
     let boolean code contexts = bool0(Var(Nt,code,NaN), ?context=merge contexts)
+    /// Creates a PHP variable associated with this generation context.
+    member _.var(name:string) = PHPdata.var(context,name)
     /// htmlコード�Eにphpコードを埋め込み
     member this.phpcode (code:unit->unit) =
         write context "<?php "

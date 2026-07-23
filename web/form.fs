@@ -339,3 +339,12 @@ type CheckBoxVar(environment:CompilationEnvironment) =
     member _.show_checked(id:PHPdata) = environment.webhtml.checkbox_checked id
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
     member _.show_checked_disabled(id:PHPdata) = environment.webhtml.checkbox_checked_disabled id
+
+[<AutoOpen>]
+module CompilationEnvironmentFormExtensions =
+    type ContextForm internal (environment:CompilationEnvironment) =
+        member _.textBox(name:string) = TextBox(environment,name)
+        member _.button(name:string) = Button(environment,name)
+
+    type CompilationEnvironment with
+        member this.form = ContextForm(this)
