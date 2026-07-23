@@ -12,7 +12,7 @@ module GoldenFileTests =
         makeProgramWithContext
             [output.Path, filename, language]
             (fun context ->
-                let value = CompilationEnvironment(Some context).var.i0 "value"
+                let value = Aqualis(Some context).var.i0 "value"
                 value <== 42
                 context.CurrentProgram.close())
 

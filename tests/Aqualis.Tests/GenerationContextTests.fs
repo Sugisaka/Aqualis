@@ -52,7 +52,7 @@ module GenerationContextTests =
 
     [<Fact>]
     let ``emit is unavailable during Numeric execution`` () =
-        let environment = CompilationEnvironment(None)
+        let environment = Aqualis(None)
         Assert.Throws<InvalidOperationException>(fun () -> environment.emit.writein "invalid")
         |> ignore
 

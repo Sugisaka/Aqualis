@@ -7,7 +7,7 @@
 namespace Aqualis
 
     ///<summary>反復処理</summary>
-    type ContextIter internal (environment:CompilationEnvironment) =
+    type ContextIter internal (environment:Aqualis) =
         let context = environment.GenerationContext
 
         member _.loop code =
@@ -92,7 +92,7 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentIterExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.iter = ContextIter(this)
 
     ///<summary>反復処理（処理スキップ）</summary>

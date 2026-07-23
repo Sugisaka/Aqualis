@@ -12,7 +12,7 @@ namespace Aqualis
         /// <summary>
         /// 座標変換
         /// </summary>
-        type ContextCoordinate internal (environment:CompilationEnvironment) =
+        type ContextCoordinate internal (environment:Aqualis) =
 
             /// <summary>
             /// 座標系を(sx,sy)だけ平行移動
@@ -72,5 +72,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentCoordinateExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.coordinate = coordinate.ContextCoordinate(this)

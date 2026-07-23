@@ -9,7 +9,7 @@ namespace Aqualis
     open System
 
     ///<summary>変数宣言</summary>
-    type ContextVar internal (environment:CompilationEnvironment) =
+    type ContextVar internal (environment:Aqualis) =
         let context() = environment.RequireGenerationContext()
         let nameFor (ctx:GenerationContext) name =
             match ctx.CurrentProgram.language with
@@ -171,5 +171,5 @@ namespace Aqualis
             
     [<AutoOpen>]
     module CompilationEnvironmentVarExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.var = ContextVar(this)

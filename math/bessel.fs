@@ -11,7 +11,7 @@ namespace Aqualis
         type asm with
             static member besselj0 (x:double0) = fun code ->
                 let context = GenerationContextMerge.requireTarget x.Context
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 let besselj0_ (v:double0) =
                     match context.CurrentProgram.language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
@@ -28,7 +28,7 @@ namespace Aqualis
                     code bes
             static member bessely0 (x:double0) = fun code ->
                 let context = GenerationContextMerge.requireTarget x.Context
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 let bessely0_ (v:double0) =
                     match context.CurrentProgram.language with
                     |Fortran -> Var(Dt,"dbesy0("+v.code+")",NaN)
@@ -45,7 +45,7 @@ namespace Aqualis
                     code bes
             static member besselh0 (x:double0) = fun code ->
                 let context = GenerationContextMerge.requireTarget x.Context
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 let besselj0_ (v:double0) =
                     match context.CurrentProgram.language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
@@ -73,7 +73,7 @@ namespace Aqualis
                     code bes
             static member besselj1 (x:double0) = fun code ->
                 let context = GenerationContextMerge.requireTarget x.Context
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 let besselj1_ (v:double0) =
                     match context.CurrentProgram.language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)
@@ -90,7 +90,7 @@ namespace Aqualis
                     code bes
             static member bessely1 (x:double0) = fun code ->
                 let context = GenerationContextMerge.requireTarget x.Context
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 let bessely1_ (v:double0) =
                     match context.CurrentProgram.language with
                     |Fortran -> Var(Dt,"dbesy1("+v.code+")",NaN)
@@ -107,7 +107,7 @@ namespace Aqualis
                     code bes
             static member besselh1 (x:double0) = fun code ->
                 let context = GenerationContextMerge.requireTarget x.Context
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 let besselj1_ (v:double0) =
                     match context.CurrentProgram.language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)

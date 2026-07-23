@@ -45,7 +45,7 @@ type AnimationSetting = {
     FrameNumber:int}
 
 [<AbstractClass>]
-type Character(environment:CompilationEnvironment,scriptDataDir:string,name:string) =
+type Character(environment:Aqualis,scriptDataDir:string,name:string) =
     let context = environment.RequireGenerationContext()
     /// jsonファイル名（フルパス）
     let scriptDataFileName = scriptDataDir + "\\" + name + ".json"

@@ -11,11 +11,11 @@ namespace Aqualis
         type fftw_plan2(sname_,name,context:GenerationContext) =
             static member sname = "fftw_plan"
             new(name,context:GenerationContext) =
-                CompilationEnvironment(Some context).str.regWithoutAddStructure(fftw_plan2.sname,name)
+                Aqualis(Some context).str.regWithoutAddStructure(fftw_plan2.sname,name)
                 fftw_plan2 (fftw_plan2.sname,name,context)
             member __.code = name
 
-        let fftshift2 (environment:CompilationEnvironment) (x:complex2) =
+        let fftshift2 (environment:Aqualis) (x:complex2) =
             environment.br.if2 (x.size2%2 .= 0)
                 <| fun () ->
                     environment.iter.num x.size1 <| fun i ->
@@ -31,7 +31,7 @@ namespace Aqualis
                     environment.iter.num x.size2 <| fun i ->
                         fft1.fftshift_odd environment x[(),i]
 
-        let ifftshift2 (environment:CompilationEnvironment) (x:complex2) =
+        let ifftshift2 (environment:Aqualis) (x:complex2) =
             environment.br.if2 (x.size2%2 .= 0)
                 <| fun () ->
                     environment.iter.num x.size1 <| fun i ->
@@ -47,7 +47,7 @@ namespace Aqualis
                     environment.iter.num x.size2 <| fun i ->
                         fft1.ifftshift_odd environment x[(),i]
 
-        let private transform (environment:CompilationEnvironment) (planname:string,data1:complex2,data2:complex2,fftdir:int) =
+        let private transform (environment:Aqualis) (planname:string,data1:complex2,data2:complex2,fftdir:int) =
             let context = environment.RequireGenerationContext()
             let program = context.CurrentProgram
             program.olist.add "-lfftw3"
@@ -130,11 +130,11 @@ namespace Aqualis
         let ifft environment (planname:string,data1:complex2,data2:complex2) =
                 transform environment (planname,data1,data2,-1)
 
-    type ContextFft2 internal (environment:CompilationEnvironment) =
+    type ContextFft2 internal (environment:Aqualis) =
         member _.fft args = fft2.fft environment args
         member _.ifft args = fft2.ifft environment args
 
     [<AutoOpen>]
     module CompilationEnvironmentFft2Extensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.fft2 = ContextFft2(this)

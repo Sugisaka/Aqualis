@@ -6,7 +6,7 @@
 //
 namespace Aqualis
 
-    type ContextMath internal (environment:CompilationEnvironment) =
+    type ContextMath internal (environment:Aqualis) =
         ///<summary>整数次第2種球ハンケル関数を計算</summary>
         ///<param name="hn">球ハンケル関数の値</param>
         ///<param name="n">ハンケル関数の次数</param>
@@ -186,5 +186,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentMathExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.math = ContextMath(this)

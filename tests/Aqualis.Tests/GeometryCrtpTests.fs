@@ -34,7 +34,7 @@ module GeometryCrtpTests =
                 try
                     let value2 = geometry.point2("value2", context)
                     let value3 = geometry.point3("value3", context)
-                    let environment = CompilationEnvironment(Some context)
+                    let environment = Aqualis(Some context)
                     let rewrapped2: geometry.point2 =
                         value2.Rewrap("other2",environment)
                     let rewrapped3: geometry.point3 =

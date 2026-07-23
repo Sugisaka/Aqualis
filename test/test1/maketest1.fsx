@@ -29,7 +29,7 @@ wr.WriteLine "        y <== q"
 for i in 1..1000 do
     printfn "%d" i
     wr.WriteLine("        //printfn \"%d\" "+i.ToString())
-    wr.WriteLine("        ctx.comment \"test" + i.ToString "000" + "\"")
+    wr.WriteLine("        ctx.emit.comment \"test" + i.ToString "000" + "\"")
     let rec maketerm(n:int) =
         match if n=0 then 0 else r.Next 2 with
         |0 ->

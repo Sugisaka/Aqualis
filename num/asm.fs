@@ -167,7 +167,7 @@ namespace Aqualis
 
     /// Context-dependent mathematical constants. Functions with operands continue
     /// to derive their context from those operands through NumericContext.
-    type ContextAsm internal (environment:CompilationEnvironment) =
+    type ContextAsm internal (environment:Aqualis) =
         let context() = environment.RequireGenerationContext()
 
         member internal _.Environment = environment
@@ -201,5 +201,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentAsmExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.asm = ContextAsm(this)

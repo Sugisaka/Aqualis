@@ -13,7 +13,7 @@ namespace Aqualis
     module Aqualis_function =
 
         ///<summary>関数定義</summary>
-        let private generateFunction (environment:CompilationEnvironment) (projectname:string) (code:CompilationEnvironment->unit) =
+        let private generateFunction (environment:Aqualis) (projectname:string) (code:Aqualis->unit) =
             let context = environment.RequireGenerationContext()
             let mutable program = context.CurrentProgram
             let fdeclare (typ:Etype,vtp:VarType,name:string) =
@@ -41,7 +41,7 @@ namespace Aqualis
             |Fortran ->
                 program.flist.add projectname
                 let args = makeProgramWithContext [dir,projectname,Fortran] <| fun childContext ->
-                    let childEnvironment = CompilationEnvironment(Some childContext)
+                    let childEnvironment = Aqualis(Some childContext)
                     program <- childContext.CurrentProgram
                     code childEnvironment
                     program.close()
@@ -77,7 +77,7 @@ namespace Aqualis
             |C99 ->
                 program.flist.add projectname
                 let args = makeProgramWithContext [dir,projectname,C99] <| fun childContext ->
-                    let childEnvironment = CompilationEnvironment(Some childContext)
+                    let childEnvironment = Aqualis(Some childContext)
                     program <- childContext.CurrentProgram
                     code childEnvironment
                     program.close()
@@ -119,7 +119,7 @@ namespace Aqualis
             |LaTeX ->
                 program.flist.add projectname
                 let args = makeProgramWithContext [dir,projectname,LaTeX] <| fun childContext ->
-                    let childEnvironment = CompilationEnvironment(Some childContext)
+                    let childEnvironment = Aqualis(Some childContext)
                     program <- childContext.CurrentProgram
                     code childEnvironment
                     program.close()
@@ -155,7 +155,7 @@ namespace Aqualis
             |HTML ->
                 program.flist.add projectname
                 let args = makeProgramWithContext [dir,projectname,HTML] <| fun childContext ->
-                    let childEnvironment = CompilationEnvironment(Some childContext)
+                    let childEnvironment = Aqualis(Some childContext)
                     program <- childContext.CurrentProgram
                     code childEnvironment
                     program.close()
@@ -193,7 +193,7 @@ namespace Aqualis
             |Python ->
                 program.flist.add projectname
                 let re_args,args = makeProgramWithContext [dir,projectname,Python] <| fun childContext ->
-                    let childEnvironment = CompilationEnvironment(Some childContext)
+                    let childEnvironment = Aqualis(Some childContext)
                     program <- childContext.CurrentProgram
                     code childEnvironment
                     program.close()
@@ -247,5 +247,5 @@ namespace Aqualis
                 writein context (re_args + " = " + projectname + "(" + args + ")\n")
             |_ -> ()
 
-        type CompilationEnvironment with
+        type Aqualis with
             member this.func projectname code = generateFunction this projectname code

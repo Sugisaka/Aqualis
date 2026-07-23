@@ -80,7 +80,7 @@ group.section (step,3) <| fun () ->
         let x = ctx.var.d0 "x"
         let y = ctx.var.d0 "y"
         x <== asm.pi
-        ctx.comment "test"
+        ctx.emit.comment "test"
         y <== 1
         ctx.ch.d <| fun a ->
         ctx.ch.d1 10 <| fun b ->

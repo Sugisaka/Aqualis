@@ -14,10 +14,10 @@ open Aqualis
     /// <summary>
     /// testClass1
     /// </summary>
-    type testClass1(sname_,name,ctx:CompilationEnvironment) =
+    type testClass1(sname_,name,ctx:Aqualis) =
         inherit structureValue<testClass1>(sname_,name,?context=ctx.GenerationContext)
         static member sname = "testClass1"
-        new(name,ctx:CompilationEnvironment) =
+        new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)
             testClass1(testClass1.sname,name,ctx)
         override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)

@@ -1,7 +1,7 @@
 namespace Aqualis
 
 /// Explicit code-grouping and section controls for one compilation environment.
-type ContextGroup internal (environment:CompilationEnvironment) =
+type ContextGroup internal (environment:Aqualis) =
     let context() = environment.RequireGenerationContext()
     let program() = (context()).CurrentProgram
     let write line = (program()).codewritein(line + "\n")
@@ -109,5 +109,5 @@ module CompilationEnvironmentGroupExtensions =
         static member section (id1:string,id2:string) = fun code -> ()
         static member section (label:string) = fun code -> ()
         
-    type CompilationEnvironment with
+    type Aqualis with
         member this.group = ContextGroup(this)

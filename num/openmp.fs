@@ -2,13 +2,13 @@ namespace Aqualis
 
 open System
 
-type ContextOmp internal (environment:CompilationEnvironment) =
+type ContextOmp internal (environment:Aqualis) =
     let context() = environment.RequireGenerationContext()
 
     let runParallel (ctx:GenerationContext) code =
         let program = ctx.CurrentProgram
         program.close()
-        ctx.WithParallelMode(fun child -> code (CompilationEnvironment(Some child)))
+        ctx.WithParallelMode(fun child -> code (Aqualis(Some child)))
         program.appendOpen()
 
     let privateClause (program:program) =
@@ -89,11 +89,11 @@ type ContextOmp internal (environment:CompilationEnvironment) =
         match ctx.CurrentProgram.language with
         |Fortran ->
             ctx.CurrentProgram.codewritein "!$omp section"
-            ctx.WithParallelMode(fun child -> code (CompilationEnvironment(Some child)))
+            ctx.WithParallelMode(fun child -> code (Aqualis(Some child)))
         |C99 ->
             ctx.CurrentProgram.codewritein "#pragma omp section"
             ctx.CurrentProgram.codewritein "{"
-            ctx.WithParallelMode(fun child -> code (CompilationEnvironment(Some child)))
+            ctx.WithParallelMode(fun child -> code (Aqualis(Some child)))
             ctx.CurrentProgram.codewritein "}"
         |_ -> ()
 
@@ -111,5 +111,5 @@ type ContextOmp internal (environment:CompilationEnvironment) =
 
 [<AutoOpen>]
 module CompilationEnvironmentOmpExtensions =
-    type CompilationEnvironment with
+    type Aqualis with
         member this.omp = ContextOmp(this)

@@ -156,7 +156,7 @@ type PHPdata(x:list<reduceExprString>, ?context:GenerationContext) =
     static member (++) (a:PHPdata,b:complex0) = a ++ PHPdata b
 
     member this.foreach code =
-        let environment = CompilationEnvironment(Some (GenerationContextMerge.requireTarget context))
+        let environment = Aqualis(Some (GenerationContextMerge.requireTarget context))
         environment.ch.i <| fun i ->
             ContextPhp(environment).phpcode <| fun () -> writei (environment.RequireGenerationContext()) ("for("+i.code+"=0; "+i.code+"<count("+this.code+"); "+i.code+"++):")
             environment.RequireGenerationContext().CurrentProgram.indentInc()
@@ -164,7 +164,7 @@ type PHPdata(x:list<reduceExprString>, ?context:GenerationContext) =
             environment.RequireGenerationContext().CurrentProgram.indentDec()
             ContextPhp(environment).phpcode <| fun () -> writei (environment.RequireGenerationContext()) "endfor;"
     member this.foreach (key:PHPdata,value:PHPdata) = fun code ->
-        let environment = CompilationEnvironment(Some (GenerationContextMerge.mergeMany [context; key.Context; value.Context] |> GenerationContextMerge.requireTarget))
+        let environment = Aqualis(Some (GenerationContextMerge.mergeMany [context; key.Context; value.Context] |> GenerationContextMerge.requireTarget))
         environment.ch.i <| fun _ ->
             ContextPhp(environment).phpcode <| fun () -> writei (environment.RequireGenerationContext()) ("foreach("+this.code+" as "+key.code+" => "+value.code+"):")
             code()
@@ -210,7 +210,7 @@ type PHPdata(x:list<reduceExprString>, ?context:GenerationContext) =
     static member (.>=) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,GreaterEq(Var(Nt,a.code,NaN),b.Expr))
     static member (.>=) (a:PHPdata,b:int) = PHPdata.Compare(a,None,GreaterEq(Var(Nt,a.code,NaN),Int b))
 
-and ContextPhp internal (environment:CompilationEnvironment) =
+and ContextPhp internal (environment:Aqualis) =
     let context = environment.RequireGenerationContext()
     let merge contexts = GenerationContextMerge.mergeMany (Some context :: contexts)
     let data code contexts = PHPdata.f(code, ?context=merge contexts)
@@ -474,5 +474,5 @@ module num0ForPHP =
         member this.h3 (t:PHPdata) = this.h3 t.phpcode
         member this.h4 (t:PHPdata) = this.h4 t.phpcode
 
-    type CompilationEnvironment with
+    type Aqualis with
         member this.php = ContextPhp(this)

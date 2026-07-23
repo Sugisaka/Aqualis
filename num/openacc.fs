@@ -2,7 +2,7 @@ namespace Aqualis
 
 open System
 
-type ContextOpenAcc internal (environment:CompilationEnvironment) =
+type ContextOpenAcc internal (environment:Aqualis) =
     let context() = environment.RequireGenerationContext()
 
     member _.parallelize code =
@@ -20,7 +20,7 @@ type ContextOpenAcc internal (environment:CompilationEnvironment) =
         |Fortran ->
             if dataClause <> "" then program.codewritein ("!$acc data " + dataClause)
             program.codewritein "!$acc kernels"
-            ctx.WithParallelMode(fun child -> code (CompilationEnvironment(Some child)))
+            ctx.WithParallelMode(fun child -> code (Aqualis(Some child)))
             program.codewritein "!$acc end kernels"
             if dataClause <> "" then program.codewritein "!$acc end data"
         |C99 ->
@@ -29,12 +29,12 @@ type ContextOpenAcc internal (environment:CompilationEnvironment) =
                 program.codewritein "{"
             program.codewritein "#pragma acc kernels"
             program.codewritein "{"
-            ctx.WithParallelMode(fun child -> code (CompilationEnvironment(Some child)))
+            ctx.WithParallelMode(fun child -> code (Aqualis(Some child)))
             program.codewritein "}"
             if dataClause <> "" then program.codewritein "}"
         |_ -> invalidOp "OpenACC generation is available only for Fortran and C99."
 
 [<AutoOpen>]
 module CompilationEnvironmentOpenAccExtensions =
-    type CompilationEnvironment with
+    type Aqualis with
         member this.oacc = ContextOpenAcc(this)

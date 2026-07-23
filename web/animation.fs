@@ -60,12 +60,12 @@ type MathText<'a when 'a :> INum0> = {
     eq:'a; }
 
 module private AnimationRendering =
-    let private target (environment:CompilationEnvironment) (value:INum0) =
+    let private target (environment:Aqualis) (value:INum0) =
         let target = environment.RequireGenerationContext()
         GenerationContextMerge.merge (Some target) value.Context |> ignore
         target
 
-    let render (environment:CompilationEnvironment) (value:INum0) =
+    let render (environment:Aqualis) (value:INum0) =
         value.Expr.eval (target environment value).CurrentProgram
 
     let renderDouble environment (value:double0) =
@@ -74,7 +74,7 @@ module private AnimationRendering =
     let inlineMath environment (value:INum0) =
         "\\(" + render environment value + "\\)"
 
-    let time (environment:CompilationEnvironment) =
+    let time (environment:Aqualis) =
         double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
 
 /// <summary>
@@ -83,7 +83,7 @@ module private AnimationRendering =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationLine(environment:CompilationEnvironment,s:Style,canvasX:int,canvasY:int) =
+type AnimationLine(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     let id = environment.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
@@ -120,7 +120,7 @@ type AnimationLine(environment:CompilationEnvironment,s:Style,canvasX:int,canvas
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationEllipse(environment:CompilationEnvironment,s:Style,canvasX:int,canvasY:int) =
+type AnimationEllipse(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     let id = environment.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
@@ -157,7 +157,7 @@ type AnimationEllipse(environment:CompilationEnvironment,s:Style,canvasX:int,can
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationArc(environment:CompilationEnvironment,s:Style,canvasX:int,canvasY:int) =
+type AnimationArc(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     let id = environment.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
@@ -206,7 +206,7 @@ type AnimationArc(environment:CompilationEnvironment,s:Style,canvasX:int,canvasY
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationText(environment:CompilationEnvironment,s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
+type AnimationText(environment:Aqualis,s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
     let id = environment.htmlio.nextContentsID()
     let ss = Style ([{Key="position";Value="absolute"}]@s.list)
     let ss0 = Style ([{Key="display";Value="none"}]@ss.list)
@@ -261,7 +261,7 @@ type AnimationText(environment:CompilationEnvironment,s:Style,originX:int,origin
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationPolygon(environment:CompilationEnvironment,s:Style,canvasX:int,canvasY:int) =
+type AnimationPolygon(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     let id = environment.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
@@ -293,7 +293,7 @@ type AnimationPolygon(environment:CompilationEnvironment,s:Style,canvasX:int,can
 /// <summary>
 /// スライドアニメーション全体を管轄するクラス
 /// </summary>
-type ContextSlideAnimation internal (environment:CompilationEnvironment) =
+type ContextSlideAnimation internal (environment:Aqualis) =
     let context = environment.RequireGenerationContext()
     /// <summary>
     /// 登録された音声ファイルの一覧を書きだす
@@ -1080,10 +1080,10 @@ module HtmlWebExtensions =
 /// <param name="canvasX, canvasY">キャンパスのサイズ</param>
 [<AutoOpen>]
 module CompilationEnvironmentAnimationExtensions =
-    type CompilationEnvironment with
+    type Aqualis with
         member this.slideAnimation = ContextSlideAnimation(this)
 
-type FigureAnimation(environment:CompilationEnvironment,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
+type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
     /// アニメーションの実行順序リスト
     let mutable animeFlow:list<string*string*AnimationSetting*bool> = []
@@ -1383,7 +1383,7 @@ module dochtml =
                 dir  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
             ]
             <| fun context ->
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 context.ContentsDirectory <-
                     dir + "\\" + "contents_" + filename
                 environment.htmlio.switchJSAnimationStart <| fun environment ->

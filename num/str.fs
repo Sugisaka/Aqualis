@@ -9,7 +9,7 @@ namespace Aqualis
 [<AutoOpen>]
 module Aqualis_str =
 
-    type ContextStr internal (environment:CompilationEnvironment) =
+    type ContextStr internal (environment:Aqualis) =
         let context() = environment.RequireGenerationContext()
 
         ///<summary>構造体定義のコードを作成</summary>
@@ -266,5 +266,5 @@ module Aqualis_str =
 
     [<AutoOpen>]
     module CompilationEnvironmentStrExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.str = ContextStr(this)

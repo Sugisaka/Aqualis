@@ -11,11 +11,11 @@ namespace Aqualis
         type fftw_plan1(sname_,name,context:GenerationContext) =
             static member sname = "fftw_plan"
             new(name,context:GenerationContext) =
-                CompilationEnvironment(Some context).str.regWithoutAddStructure(fftw_plan1.sname,name)
+                Aqualis(Some context).str.regWithoutAddStructure(fftw_plan1.sname,name)
                 fftw_plan1(fftw_plan1.sname,name,context)
             member __.code = name
 
-        let fftshift_odd (environment:CompilationEnvironment) (a:complex1) =
+        let fftshift_odd (environment:Aqualis) (a:complex1) =
             let n2 = a.size1./2 + 1
             environment.ch.iiz <| fun (c1,c2,tmp) ->
                 c1 <== 0
@@ -28,7 +28,7 @@ namespace Aqualis
                     c1 <== c2
                 a[c1+n2-1] <== tmp
 
-        let fftshift_even (environment:CompilationEnvironment) (a:complex1) =
+        let fftshift_even (environment:Aqualis) (a:complex1) =
             let n2 = a.size1./2
             environment.ch.z <| fun tmp ->
                 environment.iter.num n2 <| fun i ->
@@ -36,7 +36,7 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
-        let ifftshift_odd (environment:CompilationEnvironment) (a:complex1) =
+        let ifftshift_odd (environment:Aqualis) (a:complex1) =
             let n2 = a.size1./2
             environment.ch.iiz <| fun (c1,c2,tmp) ->
                 c1 <== 0
@@ -49,7 +49,7 @@ namespace Aqualis
                     c1 <== c2
                 a[c1+n2+1] <== tmp
 
-        let ifftshift_even (environment:CompilationEnvironment) (a:complex1) =
+        let ifftshift_even (environment:Aqualis) (a:complex1) =
             let n2 = a.size1./2
             environment.ch.z <| fun tmp ->
                 environment.iter.num n2 <| fun i ->
@@ -57,7 +57,7 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
-        let fftshift1 (environment:CompilationEnvironment) (x:complex1) =
+        let fftshift1 (environment:Aqualis) (x:complex1) =
             environment.br.if1 (x.size1 .> 1) <| fun () ->
                 environment.br.if2 (x.size1%2 .= 0)
                 <| fun () ->
@@ -65,7 +65,7 @@ namespace Aqualis
                 <| fun () ->
                     fftshift_odd environment x
 
-        let ifftshift1 (environment:CompilationEnvironment) (x:complex1) =
+        let ifftshift1 (environment:Aqualis) (x:complex1) =
             environment.br.if1 (x.size1 .> 1) <| fun () ->
                 environment.br.if2 (x.size1%2 .= 0)
                 <| fun () ->
@@ -73,7 +73,7 @@ namespace Aqualis
                 <| fun () ->
                     ifftshift_odd environment x
 
-        let private transform (environment:CompilationEnvironment) (planname:string,data1:complex1,data2:complex1,fftdir:int) =
+        let private transform (environment:Aqualis) (planname:string,data1:complex1,data2:complex1,fftdir:int) =
             let context = environment.RequireGenerationContext()
             let program = context.CurrentProgram
             program.olist.add "-lfftw3"
@@ -153,11 +153,11 @@ namespace Aqualis
         let ifft environment (planname:string,data1:complex1,data2:complex1) =
                 transform environment (planname,data1,data2,-1)
 
-    type ContextFft1 internal (environment:CompilationEnvironment) =
+    type ContextFft1 internal (environment:Aqualis) =
         member _.fft args = fft1.fft environment args
         member _.ifft args = fft1.ifft environment args
 
     [<AutoOpen>]
     module CompilationEnvironmentFft1Extensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.fft1 = ContextFft1(this)

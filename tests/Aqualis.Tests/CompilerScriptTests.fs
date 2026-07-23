@@ -7,7 +7,7 @@ open Aqualis
 type private FunctionArgumentStructure(
     structureName,
     name,
-    environment:CompilationEnvironment) =
+    environment:Aqualis) =
     inherit structureValue<FunctionArgumentStructure>(
         structureName,
         name,
@@ -15,7 +15,7 @@ type private FunctionArgumentStructure(
 
     static member StructureName = "FunctionArgumentStructure"
 
-    new(name,environment:CompilationEnvironment) =
+    new(name,environment:Aqualis) =
         environment.str.reg(
             FunctionArgumentStructure.StructureName,
             name)

@@ -22,8 +22,8 @@ module WebGenerationStateTests =
                 [new program(output.Path, "movie-default.tmp", HTML)],
                 MovieSetting.Default)
 
-        CompilationEnvironment(Some disabled).html.switchCharacter()
-        CompilationEnvironment(Some defaults).html.switchCharacter()
+        Aqualis(Some disabled).html.switchCharacter()
+        Aqualis(Some defaults).html.switchCharacter()
         disabled.CurrentProgram.close()
         defaults.CurrentProgram.close()
 
@@ -37,8 +37,8 @@ module WebGenerationStateTests =
         use output = new TemporaryDirectory()
         let first = createContext output.Path "web-first.tmp"
         let second = createContext output.Path "web-second.tmp"
-        let firstEnvironment = CompilationEnvironment(Some first)
-        let secondEnvironment = CompilationEnvironment(Some second)
+        let firstEnvironment = Aqualis(Some first)
+        let secondEnvironment = Aqualis(Some second)
 
         try
             Assert.Equal("contentsID0", firstEnvironment.htmlio.nextContentsID())
@@ -70,7 +70,7 @@ module WebGenerationStateTests =
             Task.Run(Func<string list>(fun () ->
                 let context = createContext output.Path name
                 try
-                    let environment = CompilationEnvironment(Some context)
+                    let environment = Aqualis(Some context)
                     [ environment.htmlio.nextContentsID()
                       environment.htmlio.nextContentsID()
                       environment.htmlio.nextAnimationGroup() ]

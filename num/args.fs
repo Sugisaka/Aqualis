@@ -157,7 +157,7 @@ namespace Aqualis
     module num_farg =
         let private argumentContexts
             (sourceContext:GenerationContext option)
-            (targetEnvironment:CompilationEnvironment) =
+            (targetEnvironment:Aqualis) =
             GenerationContextMerge.requireTarget sourceContext,
             targetEnvironment.RequireGenerationContext()
 
@@ -165,7 +165,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) code =
+            member this.farg (targetEnvironment:Aqualis) code =
                 let sourceContext,targetContext =
                     argumentContexts this.Context targetEnvironment
                 fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext.CurrentProgram) <| fun (_,n) ->
@@ -174,7 +174,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) code =
+            member this.farg (targetEnvironment:Aqualis) code =
                 let sourceContext,targetContext =
                     argumentContexts this.Context targetEnvironment
                 fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext.CurrentProgram) <| fun (_,n) ->
@@ -183,7 +183,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) code =
+            member this.farg (targetEnvironment:Aqualis) code =
                 let sourceContext,targetContext =
                     argumentContexts this.Context targetEnvironment
                 fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext.CurrentProgram) <| fun (_,n) ->
@@ -193,7 +193,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -204,7 +204,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -215,7 +215,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var1(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -227,7 +227,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -238,7 +238,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -249,7 +249,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var2(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -261,7 +261,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -272,7 +272,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment
@@ -283,7 +283,7 @@ namespace Aqualis
             /// <summary>
             /// この変数を関数内変数に変換
             /// </summary>
-            member this.farg (targetEnvironment:CompilationEnvironment) = fun code ->
+            member this.farg (targetEnvironment:Aqualis) = fun code ->
                 match this.Expr with
                 |Var3(size,name) ->
                     let _,targetContext = argumentContexts this.Context targetEnvironment

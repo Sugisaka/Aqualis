@@ -6,7 +6,7 @@
 //
 namespace Aqualis
 
-type ContextOptimization internal (environment:CompilationEnvironment) =
+type ContextOptimization internal (environment:Aqualis) =
 
     /// <summary>
     /// 1次元極小値検索
@@ -316,5 +316,5 @@ type ContextOptimization internal (environment:CompilationEnvironment) =
 
 [<AutoOpen>]
 module CompilationEnvironmentOptimizationExtensions =
-    type CompilationEnvironment with
+    type Aqualis with
         member this.optimization = ContextOptimization(this)

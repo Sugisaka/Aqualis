@@ -21,7 +21,7 @@ type TextAnchor =
 
 type Setting3D = {DirX:double; DirY:double; DirZ:double; ScaleX:double; ScaleY:double; ScaleZ:double;}
 
-type ContextGenSvg internal (environment:CompilationEnvironment) =
+type ContextGenSvg internal (environment:Aqualis) =
     member this.headerOpen (cvx:double,cvy:double,wr:exprString->unit) =
         wr <| st "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
         let cvxText = InvariantFormat.numberWithFormat "0.000" cvx
@@ -427,7 +427,7 @@ type ContextGenSvg internal (environment:CompilationEnvironment) =
     member this.text(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0,fillcolor,strokecolor) =
         this.text(cvx,cvy,wr,cx,cy,text,size,TimesNewRoman,Left,None,fillcolor,strokecolor)
 
-type svgfilemaker(environment:CompilationEnvironment,cvx:double,cvy:double,writer:StreamWriter,scale:double) =
+type svgfilemaker(environment:Aqualis,cvx:double,cvy:double,writer:StreamWriter,scale:double) =
     let generator = ContextGenSvg(environment)
     let wr (x:exprString) =
         let rec write (xx:exprString) =
@@ -681,7 +681,7 @@ type svgfilemaker(environment:CompilationEnvironment,cvx:double,cvy:double,write
         let cx, cy = c
         generator.text(cvx, cvy, wr, D scale*cx, D scale*cy, st text, D size, font, textAnchor, rot, fillcolor,strokecolor)
 
-type svgfilemaker_aq(environment:CompilationEnvironment,cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
+type svgfilemaker_aq(environment:Aqualis,cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     let generator = ContextGenSvg(environment)
     member internal this.header code = generator.header (cvx,cvy) wr this code
     /// <summary>
@@ -1040,7 +1040,7 @@ type svgfilemaker_aq(environment:CompilationEnvironment,cvx:double,cvy:double,wr
         let cx, cy = c
         generator.text(cvx,cvy,wr,D scale*cx,D scale*cy,exprString text,D size, font, textAnchor, rot, fillcolor,strokecolor)
 
-type ContextSvgFile internal (environment:CompilationEnvironment) =
+type ContextSvgFile internal (environment:Aqualis) =
     
     /// <summary>
     /// SVGファイルを作成
@@ -1075,7 +1075,7 @@ module CompilationEnvironmentGenSvgExtensions =
             try
                 do
                     use wr = new StreamWriter(temporaryPath,false,Encoding.Default)
-                    let sv = svgfilemaker(CompilationEnvironment None,cvx,cvy,wr,scale)
+                    let sv = svgfilemaker(Aqualis None,cvx,cvy,wr,scale)
                     sv.header <| fun sv ->
                         code sv
                 File.Move(temporaryPath, filename, true)
@@ -1084,6 +1084,6 @@ module CompilationEnvironmentGenSvgExtensions =
                     File.Delete temporaryPath
                 reraise()
                 
-    type CompilationEnvironment with
+    type Aqualis with
         member this.gensvg = ContextGenSvg(this)
         member this.svgfile = ContextSvgFile(this)

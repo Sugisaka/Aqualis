@@ -219,9 +219,9 @@ type TextStyle =
     static member Sub t = "<tspan font-size=\"7\" baseline-shift=\"sub\">"+t+"</tspan>"
     static member Sup t = "<tspan font-size=\"7\" baseline-shift=\"super\">"+t+"</tspan>"
     
-type ContextGraph1d internal (environment:CompilationEnvironment) =
+type graph1d =
     ///<summary>A4縦2段組ドキュメント内の図：横2枚、縦ny枚配置</summary>
-    member this.A4PTwoColDouble (ny:int) = {
+    static member A4PTwoColDouble (ny:int) = {
         CanvasSize=(80.0, float ny*43.0);
         Interval=(40.0, 43.0);
         Origin=(-40.0+8.5, -0.5*float ny*43.0+7.5);
@@ -237,7 +237,7 @@ type ContextGraph1d internal (environment:CompilationEnvironment) =
         LegendLineLength = 4.0;
         }
     ///<summary>A4縦2段組ドキュメント内の図：横1枚、縦ny枚配置</summary>
-    member this.A4PTwoColSingle (ny:int) = {
+    static member A4PTwoColSingle (ny:int) = {
         CanvasSize=(80.0, float ny*43.0);
         Interval=(80.0, 43.0);
         Origin=(-40.0+8.5, -0.5*float ny*43.0+7.5);
@@ -253,9 +253,9 @@ type ContextGraph1d internal (environment:CompilationEnvironment) =
         LegendLineLength = 4.0;
         }
     ///<summary>グラフ生成(ダミー)</summary>
-    member this.dummy_makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code = ()
+    static member dummy_makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code = ()
     ///<summary>データファイルの読み込み</summary>
-    member this.readdata (filename:string) (colx:(int->double)->double,coly:(int->double)->double) =
+    static member readdata (filename:string) (colx:(int->double)->double,coly:(int->double)->double) =
         //データファイルの行数
         let nline =
             let mutable counter:int = 0
@@ -296,7 +296,7 @@ type ContextGraph1d internal (environment:CompilationEnvironment) =
     /// <param name="filename">出力ファイル名</param>
     /// <param name="setting">グラフプロット設定</param>
     /// <param name="code">グラフのプロット</param>
-    member this.makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code =
+    static member makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code =
         let cLx,cLy = setting.CanvasSize
         let dx,dy = setting.Interval
         let cx0,cy0 = setting.Origin
@@ -372,7 +372,7 @@ type ContextGraph1d internal (environment:CompilationEnvironment) =
                             |Function _ -> None,None
                             |Datafile s ->
                                 if File.Exists(outputdir+"\\"+s.FileName) then
-                                    let xdata,ydata = this.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
+                                    let xdata,ydata = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
                                     let xr = 
                                         List.fold (fun (acc:option<double*double>) (i:int) -> 
                                             match acc with
@@ -537,7 +537,7 @@ type ContextGraph1d internal (environment:CompilationEnvironment) =
                             let datxy = xylist [] None 1
                             sv.polygon(List.map (fun (x,y) -> mmtopt <| fx x,mmtopt <| fy y) datxy, color.fill.none, s.Style.lineStroke)
                         |Datafile s ->
-                            let (xdata,ydata) = this.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
+                            let (xdata,ydata) = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
                             /// (x,y)がプロット範囲内にあるか判定
                             let inside (x,y) = (xr1<=x && x<=xr2 && yr1<=y && y<=yr2)
                             // 線のプロット
@@ -636,8 +636,3 @@ type ContextGraph1d internal (environment:CompilationEnvironment) =
                             plotall lst0 <| dataplot d (xl,yl)
                     plotall data (fx xr2-setting.LegendPositionX,fy yr2-setting.LegendPositionY)
             code addGraph
-
-[<AutoOpen>]
-module CompilationEnvironmentGraph1dExtensions =
-    type CompilationEnvironment with
-        member this.graph1d = ContextGraph1d(this)

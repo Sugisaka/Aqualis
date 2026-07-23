@@ -9,7 +9,7 @@ namespace Aqualis
     open System
 
     module private FileIoReadTarget =
-        let require (environment:CompilationEnvironment) target =
+        let require (environment:Aqualis) target =
             match target with
             |RNvr(Var _ as value,Some targetContext) ->
                 let currentContext = environment.RequireGenerationContext()
@@ -25,7 +25,7 @@ namespace Aqualis
             |RStr _ ->
                 invalidOp "A file-read target must be a variable."
 
-    type TextReader internal (environment:CompilationEnvironment,fp:string,iostat:int0) =
+    type TextReader internal (environment:Aqualis,fp:string,iostat:int0) =
         let context() = environment.RequireGenerationContext()
         let program() = (context()).CurrentProgram
         let writein text = (program()).codewritein(text + "\n")
@@ -245,7 +245,7 @@ namespace Aqualis
         member this.t (x:complex0) = this.tt (zv x)
         member this.b (x:int0) = this.ReadByte(RNvr(x.Expr,x.Context))
 
-    type BinReader internal (environment:CompilationEnvironment,fp:string,iostat:int0) =
+    type BinReader internal (environment:Aqualis,fp:string,iostat:int0) =
         let context() = environment.RequireGenerationContext()
         let program() = (context()).CurrentProgram
         let writein text = (program()).codewritein(text + "\n")
@@ -310,7 +310,7 @@ namespace Aqualis
         member this.b (x:double0) = this.ReadBin(RNvr(x.Expr,x.Context))
         member this.b (x:complex0) = this.ReadBin(RNvr(x.Expr,x.Context))
 
-    type TextWriter internal (environment:CompilationEnvironment,fp:string) =
+    type TextWriter internal (environment:Aqualis,fp:string) =
         let context() = environment.RequireGenerationContext()
         let program() = (context()).CurrentProgram
         let writein text = (program()).codewritein(text + "\n")
@@ -622,7 +622,7 @@ namespace Aqualis
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
 
-    type BinWriter internal (environment:CompilationEnvironment,fp:string) =
+    type BinWriter internal (environment:Aqualis,fp:string) =
         let context() = environment.RequireGenerationContext()
         let program() = (context()).CurrentProgram
         let writein text = (program()).codewritein(text + "\n")
@@ -735,7 +735,7 @@ namespace Aqualis
         member this.b (v:complex0) = this.WriteBin v.Expr
 
     ///<summary>ファイル入出力</summary>
-    type ContextIo internal (environment:CompilationEnvironment) =
+    type ContextIo internal (environment:Aqualis) =
         let context() = environment.RequireGenerationContext()
         let program() = (context()).CurrentProgram
         let writein text = (program()).codewritein(text + "\n")
@@ -2534,5 +2534,5 @@ namespace Aqualis
     ///<summary>ファイル入出力（処理スキップ）</summary>
     [<AutoOpen>]
     module CompilationEnvironmentIoExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.io = ContextIo(this)

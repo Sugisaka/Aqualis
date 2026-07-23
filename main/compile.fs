@@ -57,7 +57,7 @@ namespace Aqualis
                 |Fortran ->
                     makeProgramWithContext [dir,projectname,Fortran] <| fun context ->
                         //メインコード生成
-                        let environment = CompilationEnvironment(Some context)
+                        let environment = Aqualis(Some context)
                         code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
@@ -130,7 +130,7 @@ namespace Aqualis
                     makeProgramWithContext [dir,projectname,C99] <| fun context ->
                         //メインコード生成
                         context.CurrentProgram.indentInc()
-                        let environment = CompilationEnvironment(Some context)
+                        let environment = Aqualis(Some context)
                         code environment
                         context.CurrentProgram.olist.add "-lm"
                         context.CurrentProgram.indentDec()
@@ -205,7 +205,7 @@ namespace Aqualis
                 |LaTeX ->
                     makeProgramWithContext [dir,projectname,LaTeX] <| fun context ->
                         //メインコード生成
-                        let environment = CompilationEnvironment(Some context)
+                        let environment = Aqualis(Some context)
                         code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
@@ -249,7 +249,7 @@ namespace Aqualis
                 |HTML ->
                     makeProgramWithContext [dir,projectname,HTML] <| fun context ->
                         //メインコード生成
-                        let environment = CompilationEnvironment(Some context)
+                        let environment = Aqualis(Some context)
                         code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
@@ -426,7 +426,7 @@ namespace Aqualis
                             dir, projectname + "_body", HTMLSequenceDiagram
                         ]
                         <| fun context ->
-                            let environment = CompilationEnvironment(Some context)
+                            let environment = Aqualis(Some context)
                             context.ContentsDirectory <-
                                 dir + "\\" + "contents_" + projectname
                             environment.htmlio.switchBody <| fun bodyEnvironment ->
@@ -472,7 +472,7 @@ namespace Aqualis
                 |Python ->
                     makeProgramWithContext [dir,projectname,Python] <| fun context ->
                         //メインコード生成
-                        let environment = CompilationEnvironment(Some context)
+                        let environment = Aqualis(Some context)
                         code environment
                         context.CurrentProgram.close()
                         //ソースファイル出力
@@ -520,7 +520,7 @@ namespace Aqualis
                     makeProgramWithContext [dir,projectname,JavaScript] <| fun context ->
                         //メインコード生成
                         context.CurrentProgram.indentInc()
-                        let environment = CompilationEnvironment(Some context)
+                        let environment = Aqualis(Some context)
                         code environment
                         context.CurrentProgram.indentDec()
                         context.CurrentProgram.close()
@@ -561,7 +561,7 @@ namespace Aqualis
                         context.CurrentProgram.delete()
                 |PHP ->
                     makeProgramWithContext [dir,projectname + ".php",PHP] <| fun context ->
-                        let environment = CompilationEnvironment(Some context)
+                        let environment = Aqualis(Some context)
                         code environment
                         context.CurrentProgram.close()
-                |Numeric -> code (CompilationEnvironment None)
+                |Numeric -> code (Aqualis None)

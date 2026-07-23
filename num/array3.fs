@@ -20,7 +20,7 @@ namespace Aqualis
         let language() = currentProgram().language
         let writein text = currentProgram().codewritein text
         let comment text = currentProgram().comment text
-        let environment() = CompilationEnvironment context
+        let environment() = Aqualis context
         let sizeValue value = int0(value, ?context=context)
         ///<summary>変数を作成しリストに追加</summary>
         new (context:GenerationContext,typ,size,name,para) =
@@ -692,7 +692,7 @@ namespace Aqualis
         static member sizeMismatchError(v1:base3,v2:base3) =
             let context = GenerationContextMerge.merge v1.GenerationContext v2.GenerationContext
             context |> Option.iter (fun ctx ->
-                let environment = CompilationEnvironment context
+                let environment = Aqualis context
                 if ctx.Debug.debugMode then
                     ctx.Errors.inc()
                     ctx.CurrentProgram.comment ("***debug array3 access check: "+ctx.Errors.ID+"*****************************")
@@ -718,7 +718,7 @@ namespace Aqualis
             |None,Arx3(size1,size2,size3,_) ->
                 GenerationContextMerge.mergeMany [size1.Context;size2.Context;size3.Context]
             |None,Var3 _ -> None
-        let environment() = CompilationEnvironment context
+        let environment() = Aqualis context
         member _.Context=context
         member _.etype=typ
         abstract member WrapScalar:expr->'Scalar

@@ -9,9 +9,9 @@ namespace Aqualis
 open System
 open System.IO
     
-type Button(environment:CompilationEnvironment,name:PHPdata) =
+type Button(environment:Aqualis,name:PHPdata) =
     let b = post(environment,name)
-    new(environment:CompilationEnvironment,name:string) = Button(environment,PHPdata name)
+    new(environment:Aqualis,name:string) = Button(environment,PHPdata name)
     /// ボタンが押されたか判定
     member _.isset with get() = environment.php.isset b.get
     /// ボタンが押されていないか判定
@@ -25,7 +25,7 @@ type Button(environment:CompilationEnvironment,name:PHPdata) =
     member _.show(text:string) = environment.html.submit(name,text)
     member _.show_disabled(text:string) = environment.html.submit_disabled(name,text)
     
-type ButtonVar(environment:CompilationEnvironment) =
+type ButtonVar(environment:Aqualis) =
     /// ボタンが押されたか判定
     member _.isset(id:PHPdata) = environment.php.isset (post(environment,id)).get
     member _.isset(id:string) = environment.php.isset (post(environment,id)).get
@@ -63,9 +63,9 @@ type ButtonVar(environment:CompilationEnvironment) =
     /// <param name="text">ボタンに表示するテキスト</param>
     member _.show_disabled(id:PHPdata,text:string) = environment.html.submit_disabled(id,text)
     
-type TextBox(environment:CompilationEnvironment,name:PHPdata) =
+type TextBox(environment:Aqualis,name:PHPdata) =
     let t = post(environment,name)
-    new(environment:CompilationEnvironment,name:string) = TextBox(environment,PHPdata name)
+    new(environment:Aqualis,name:string) = TextBox(environment,PHPdata name)
     /// テキストが送信されたか判定
     member _.isset with get() = environment.php.isset t.get
     /// 送信されたテキスト
@@ -114,7 +114,7 @@ type TextBox(environment:CompilationEnvironment,name:PHPdata) =
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示、編集不可)
     member _.show_password_copy_lock() = t.password_copy_lock()
     
-type TextBoxVar(environment:CompilationEnvironment) =
+type TextBoxVar(environment:Aqualis) =
     /// テキストが送信されたか判定
     member _.isset(id:PHPdata) = environment.php.isset (post(environment,id)).get
     /// テキストが送信されたか判定
@@ -180,10 +180,10 @@ type TextBoxVar(environment:CompilationEnvironment) =
     /// テキストボックスの表示(パスワード入力用、送信テキストを表示、編集不可)
     member _.show_password_copy_lock(id:string) = (post(environment,id)).password_copy_lock()
     
-type TextArea(environment:CompilationEnvironment,name:PHPdata) =
+type TextArea(environment:Aqualis,name:PHPdata) =
     let a = post(environment,name)
     /// 送信されたテキスト
-    new(environment:CompilationEnvironment,name:string) = TextArea(environment,PHPdata name)
+    new(environment:Aqualis,name:string) = TextArea(environment,PHPdata name)
     member _.text with get() = a.get
     member _.text_html with get() = a.get_html
     member _.isset with get() = environment.php.isset a.get
@@ -196,9 +196,9 @@ type TextArea(environment:CompilationEnvironment,name:PHPdata) =
     
 type ComboBoxItem = {Tag:string; Text:string}
 
-type ComboBox(environment:CompilationEnvironment,name:PHPdata,items:list<ComboBoxItem>) =
+type ComboBox(environment:Aqualis,name:PHPdata,items:list<ComboBoxItem>) =
     let c = post(environment,name)
-    new(environment:CompilationEnvironment,name:string,items) = ComboBox(environment,PHPdata name,items)
+    new(environment:Aqualis,name:string,items) = ComboBox(environment,PHPdata name,items)
     /// 選択されたテキスト
     member _.selectedTag with get() = c.get
     /// コンボボックスを表示（指定された選択項目を選択状態にする）
@@ -239,7 +239,7 @@ type ComboBox(environment:CompilationEnvironment,name:PHPdata,items:list<ComboBo
     member _.foreach code =
         for i in items do code i
         
-type ComboBoxVar(environment:CompilationEnvironment) =
+type ComboBoxVar(environment:Aqualis) =
     /// 選択されたテキスト
     member _.selectedTag(id:PHPdata) = (post(environment,id)).get
     member _.selectedTag(id:int0) = (post(environment,id)).get
@@ -315,9 +315,9 @@ type ComboBoxVar(environment:CompilationEnvironment) =
     member _.foreach (items:list<ComboBoxItem>) code =
         for i in items do code i
         
-type CheckBox(environment:CompilationEnvironment,name:PHPdata) =
+type CheckBox(environment:Aqualis,name:PHPdata) =
     let cb = post(environment,name)
-    new(environment:CompilationEnvironment,name:string) = CheckBox(environment,PHPdata name)
+    new(environment:Aqualis,name:string) = CheckBox(environment,PHPdata name)
     member _.isChecked with get() = cb.get .= 1
     member _.status with get() = cb.get
     member _.show() = environment.html.checkbox name
@@ -329,7 +329,7 @@ type CheckBox(environment:CompilationEnvironment,name:PHPdata) =
     member _.show_checked_disabled() = environment.html.checkbox_checked_disabled name
     
 /// IDによって複数のチェックボックスを表す
-type CheckBoxVar(environment:CompilationEnvironment) =
+type CheckBoxVar(environment:Aqualis) =
     member _.isChecked(id:PHPdata) = (post(environment,id)).get .= 1
     member _.status(id:PHPdata) = (post(environment,id)).get
     member _.show(id:PHPdata) = environment.html.checkbox id
@@ -342,9 +342,9 @@ type CheckBoxVar(environment:CompilationEnvironment) =
 
 [<AutoOpen>]
 module CompilationEnvironmentFormExtensions =
-    type ContextForm internal (environment:CompilationEnvironment) =
+    type ContextForm internal (environment:Aqualis) =
         member _.textBox(name:string) = TextBox(environment,name)
         member _.button(name:string) = Button(environment,name)
 
-    type CompilationEnvironment with
+    type Aqualis with
         member this.form = ContextForm(this)

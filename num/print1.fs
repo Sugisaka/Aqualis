@@ -197,7 +197,7 @@ namespace Aqualis
                 printfn "%s" str
 
         ///<summary>1個の項目を画面表示</summary>
-    type ContextPrint internal (environment:CompilationEnvironment) =
+    type ContextPrint internal (environment:Aqualis) =
         member internal _.Environment = environment
 
         member _.s(str:string) =
@@ -225,5 +225,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentPrintExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.print = ContextPrint(this)

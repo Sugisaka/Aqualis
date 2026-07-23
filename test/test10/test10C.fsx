@@ -34,11 +34,10 @@ group.section (step, 1) <| fun () ->
                     wr.tt <| x++y1++y2
                     
 group.section (step, 2) <| fun () ->
-    let ctx = CompilationEnvironment(None)
     // outputdir：読み込むデータファイルと生成するsvgファイルのディレクトリ
     // "plot.svg"：グラフのファイル名
     // (graph1d.A4PTwoColSingle 1)：A4サイズ２段組のドキュメントに挿入する図面。グラフは横方向に1個、縦に1個配置
-    ctx.graph1d.makeGraph outputdir "plot10C.svg" (ctx.graph1d.A4PTwoColSingle 1) <| fun addGraph ->
+    graph1d.makeGraph outputdir "plot10C.svg" (graph1d.A4PTwoColSingle 1) <| fun addGraph ->
         // (1,1)：グラフを図面内の左から一つ目、下から一つ目の位置に追加
         // None：サブキャプション（グラフ下部に挿入するテキスト）なし
         addGraph (1,1) None

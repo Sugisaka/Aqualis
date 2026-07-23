@@ -11,7 +11,7 @@ module StructureDependencyTests =
 
     let private writeStructures (context:GenerationContext) path =
         use writer = new codeWriter(path, 2, C99)
-        CompilationEnvironment(Some context).str.Def_Structure writer
+        Aqualis(Some context).str.Def_Structure writer
         writer.close()
 
     [<Fact>]

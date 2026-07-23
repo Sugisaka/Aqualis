@@ -41,7 +41,7 @@ module memberinfo =
         member _.Item with get(i:PHPdata) = _Member(var[i])
         
     /// メンバーデータ（PHP用）
-    type MemberData(ctx:CompilationEnvironment,varname:string) =
+    type MemberData(ctx:Aqualis,varname:string) =
         let memberData = ctx.php.var varname
         let memberList = memberData["List"]
         member _.List with get() = _Members memberList

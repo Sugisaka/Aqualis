@@ -13,7 +13,7 @@ module ChTests =
             [output.Path, "temporary.c", C99]
             (fun context ->
                 try
-                    let environment = CompilationEnvironment(Some context)
+                    let environment = Aqualis(Some context)
                     let mutable firstName = ""
 
                     Assert.Throws<InvalidOperationException>(
@@ -38,7 +38,7 @@ module ChTests =
             [output.Path, "temporary-list.c", C99]
             (fun context ->
                 try
-                    let environment = CompilationEnvironment(Some context)
+                    let environment = Aqualis(Some context)
                     Assert.Throws<InvalidOperationException>(
                         Action(fun () ->
                             environment.ch.ix 3 (fun _ ->
@@ -58,7 +58,7 @@ module ChTests =
             [output.Path, "temporary-array.c", C99]
             (fun context ->
                 try
-                    let environment = CompilationEnvironment(Some context)
+                    let environment = Aqualis(Some context)
                     Assert.Throws<InvalidOperationException>(
                         Action(fun () ->
                             environment.ch.i01 (fun _ ->
@@ -73,5 +73,5 @@ module ChTests =
     let ``ch in a numeric environment fails clearly`` () =
         Assert.Throws<InvalidOperationException>(
             Action(fun () ->
-                CompilationEnvironment(None).ch.i ignore))
+                Aqualis(None).ch.i ignore))
         |> ignore

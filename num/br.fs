@@ -28,7 +28,7 @@ namespace Aqualis
             con <- 0
 
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
-    type ContextBr internal (environment:CompilationEnvironment) =
+    type ContextBr internal (environment:Aqualis) =
         let context = environment.GenerationContext
 
         member _.branch code =
@@ -74,6 +74,6 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentBrExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.br = ContextBr(this)
 

@@ -8,7 +8,7 @@ namespace Aqualis
 
     open System
 
-    type eqmode(environment:CompilationEnvironment) =
+    type eqmode(environment:Aqualis) =
         let context = environment.RequireGenerationContext()
         let program = context.CurrentProgram
         ///<summary>改行</summary>
@@ -44,7 +44,7 @@ namespace Aqualis
         member _.nl with get() = complex0(Var(Zt,"",NaN))
 
     ///<summary>変数宣言</summary>
-    type ContextDoc internal (environment:CompilationEnvironment) =
+    type ContextDoc internal (environment:Aqualis) =
         let context = environment.RequireGenerationContext()
         let program = context.CurrentProgram
 
@@ -334,5 +334,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentDocExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.doc = ContextDoc(this)

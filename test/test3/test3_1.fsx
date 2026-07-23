@@ -14,10 +14,10 @@ open Aqualis
     /// <summary>
     /// testClass1
     /// </summary>
-    type testClass1(sname_,name,ctx:CompilationEnvironment) =
+    type testClass1(sname_,name,ctx:Aqualis) =
         inherit structureValue<testClass1>(sname_,name,?context=ctx.GenerationContext)
         static member sname = "testClass1"
-        new(name,ctx:CompilationEnvironment) =
+        new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)
             testClass1(testClass1.sname,name,ctx)
         override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)
@@ -28,15 +28,15 @@ open Aqualis
     /// <summary>
     /// testClass1の配列
     /// </summary>
-    type testClass1_1(sname_,name,size1,ctx:CompilationEnvironment) =
+    type testClass1_1(sname_,name,size1,ctx:Aqualis) =
         inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,?context=ctx.GenerationContext)
-        new(name,size1,ctx:CompilationEnvironment) =
+        new(name,size1,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name,size1)
             testClass1_1(testClass1.sname,name,A1 size1,ctx)
-        new(name,ctx:CompilationEnvironment) = testClass1_1(name,0,ctx)
+        new(name,ctx:Aqualis) = testClass1_1(name,0,ctx)
         override _.WrapElement n = testClass1(sname_,n,ctx)
         override _.Rewrap(n,v,targetEnvironment) = testClass1_1(sname_,n,v,targetEnvironment)
-        static member str_mem(psname, vname, name, size1,ctx:CompilationEnvironment) =
+        static member str_mem(psname, vname, name, size1,ctx:Aqualis) =
             ctx.str.addmember(psname,(Structure(testClass1.sname),size1,name))
             testClass1_1(testClass1.sname,ctx.str.mem(vname,name), size1,ctx)
             

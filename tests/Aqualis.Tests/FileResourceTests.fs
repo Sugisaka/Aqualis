@@ -18,7 +18,7 @@ module FileResourceTests =
     let private withEnvironment outputPath name code =
         let context =
             GenerationContext [new program(outputPath, name, C99)]
-        let environment = CompilationEnvironment(Some context)
+        let environment = Aqualis(Some context)
 
         try
             code context environment
@@ -86,7 +86,7 @@ module FileResourceTests =
             GenerationContext [
                 new program(output.Path, "second-read.c", C99)
             ]
-        let environment = CompilationEnvironment(Some first)
+        let environment = Aqualis(Some first)
         let target =
             complex0(
                 Var(Zt, "target", NaN),
@@ -128,7 +128,7 @@ module FileResourceTests =
         File.WriteAllText(aiPath, "old-ai")
 
         let context = GenerationContext [new program(output.Path, "resources.c", C99)]
-        let environment = CompilationEnvironment(Some context)
+        let environment = Aqualis(Some context)
 
         try
             Assert.Throws<InvalidOperationException>(
@@ -155,7 +155,7 @@ module FileResourceTests =
         use output = new TemporaryDirectory()
 
         let context = GenerationContext [new program(output.Path, "resource.c", C99)]
-        let environment = CompilationEnvironment(Some context)
+        let environment = Aqualis(Some context)
 
         try
             Assert.Throws<InvalidOperationException>(

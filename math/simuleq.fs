@@ -15,7 +15,7 @@ namespace Aqualis
         /// <param name="max_iteration">最大反復回数</param>
         /// <param name="integralequation_matmul">行列－ベクトル積実行関数</param>
         /// <param name="prec">前処理行列</param>
-        let BiCGSTAB (environment:CompilationEnvironment) (b:complex1) (x:complex1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(complex1->complex1->unit)option) =
+        let BiCGSTAB (environment:Aqualis) (b:complex1) (x:complex1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(complex1->complex1->unit)option) =
             environment.group.Section "Bi-CGSTAB法" <| fun () ->
                 //ベクトルのノルム
                 let norm(norm_:double0,b:complex1) =

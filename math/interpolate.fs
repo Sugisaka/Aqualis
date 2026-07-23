@@ -10,7 +10,7 @@ namespace Aqualis
     module interpolate =
 
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
-        type LinearInterpolate1d(environment:CompilationEnvironment,id:string,data_x,data_y) =
+        type LinearInterpolate1d(environment:Aqualis,id:string,data_x,data_y) =
             let X = environment.var.dp1(id+"_x",data_x)
             let Y = environment.var.dp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
@@ -29,7 +29,7 @@ namespace Aqualis
                     environment.br.if1(flag.=0) <| fun () -> environment.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
 
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
-        type LinearInterpolate1z(environment:CompilationEnvironment,id:string,data_x,data_y) =
+        type LinearInterpolate1z(environment:Aqualis,id:string,data_x,data_y) =
             let X = environment.var.dp1(id+"_x",data_x)
             let Y = environment.var.zp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
@@ -47,7 +47,7 @@ namespace Aqualis
                         code(Y.[X.size1])
                     environment.br.if1(flag.=0) <| fun () -> environment.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
 
-        type splineInterpolateDouble(environment:CompilationEnvironment) =
+        type splineInterpolateDouble(environment:Aqualis) =
 
             let f = environment.var.d2 "f"
             let g = environment.var.d1 "g"
@@ -188,7 +188,7 @@ namespace Aqualis
                         yy <== 3*g.[a(i+1)-1]*asm.pow(xx-x.[i+1],2) + 2*g.[b(i+1)-1]*(xx-x.[i+1]) + g.[c(i+1)-1]
                         ex()
 
-        type splineInterpolateComplex(environment:CompilationEnvironment,iscpx:bool) =
+        type splineInterpolateComplex(environment:Aqualis,iscpx:bool) =
 
             let f = environment.var.z2 "f"
             let g = environment.var.z1 "g"
@@ -352,7 +352,7 @@ namespace Aqualis
                         yy <== 3*g.[a(i+1)-1]*asm.pow(xx-x.[i+1],2) + 2*g.[b(i+1)-1]*(xx-x.[i+1]) + g.[c(i+1)-1]
                         ex()
 
-    type ContextInterpolate internal (environment:CompilationEnvironment) =
+    type ContextInterpolate internal (environment:Aqualis) =
         member _.linearDouble(id,dataX,dataY) = interpolate.LinearInterpolate1d(environment,id,dataX,dataY)
         member _.linearComplex(id,dataX,dataY) = interpolate.LinearInterpolate1z(environment,id,dataX,dataY)
         member _.splineDouble() = interpolate.splineInterpolateDouble(environment)
@@ -360,5 +360,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentInterpolateExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.interpolate = ContextInterpolate(this)

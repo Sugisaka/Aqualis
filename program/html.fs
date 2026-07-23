@@ -138,7 +138,7 @@ namespace Aqualis
         static member (+) (p1:position,p2:position) = position(p1.x+p2.x, p1.y+p2.y)
         static member (-) (p1:position,p2:position) = position(p1.x-p2.x, p1.y-p2.y)
 
-    type html internal (program:program, environment:CompilationEnvironment option) =
+    type html internal (program:program, environment:Aqualis option) =
         let write(s:string) = program.codewrite s
         let writei(s:string) = program.codewritei s
         let writen(s:string) = program.codewriten s
@@ -819,5 +819,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentHtmlExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.html = html((this.RequireGenerationContext()).CurrentProgram, Some this)

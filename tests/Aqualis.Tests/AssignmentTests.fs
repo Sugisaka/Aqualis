@@ -82,7 +82,7 @@ module AssignmentTests =
         makeProgramWithContext
             [output.Path, "assignment.c", C99]
             (fun context ->
-                let value = CompilationEnvironment(Some context).var.i0 "value"
+                let value = Aqualis(Some context).var.i0 "value"
                 value <== 42
                 context.CurrentProgram.close())
 
@@ -121,7 +121,7 @@ module AssignmentTests =
         makeProgramWithContext
             [output.Path, "arrays.c", C99]
             (fun context ->
-                let variables = CompilationEnvironment(Some context).var
+                let variables = Aqualis(Some context).var
                 let values1 = variables.i1("values1", 2)
                 let values2 = variables.i2("values2", 2, 2)
                 let values3 = variables.i3("values3", 2, 2, 2)
@@ -150,7 +150,7 @@ module AssignmentTests =
             GenerationContext [
                 new program(output.Path, "array-sizes.c", C99)
             ]
-        let variables = CompilationEnvironment(Some context).var
+        let variables = Aqualis(Some context).var
 
         try
             let values1 = variables.i1("values1", 2)

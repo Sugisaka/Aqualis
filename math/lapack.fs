@@ -6,7 +6,7 @@
 //
 namespace Aqualis
 
-    type ContextLa internal (environment:CompilationEnvironment) =
+    type ContextLa internal (environment:Aqualis) =
         let context = environment.RequireGenerationContext()
         let program = context.CurrentProgram
 
@@ -1406,5 +1406,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentLaExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.la = ContextLa(this)

@@ -24,13 +24,13 @@ namespace Aqualis
 
         type point2(sname_,name,context:GenerationContext) =
             inherit structureValue<point2>(sname_,name,context=context)
-            let environment = CompilationEnvironment(Some context)
+            let environment = Aqualis(Some context)
             static member sname = "point2"
             new(name,context:GenerationContext) =
-                CompilationEnvironment(Some context).str.reg(point2.sname,name)
+                Aqualis(Some context).str.reg(point2.sname,name)
                 point2(point2.sname,name,context)
             new(name,c,context:GenerationContext) =
-                CompilationEnvironment(Some context).str.reg(point2.sname,name,c)
+                Aqualis(Some context).str.reg(point2.sname,name,c)
                 point2(point2.sname,name,context)
             override _.Rewrap(n,targetEnvironment) =
                 point2(sname_,n,targetEnvironment.RequireGenerationContext())
@@ -63,7 +63,7 @@ namespace Aqualis
                 a.x <== b.x
                 a.y <== b.y
             static member str_mem(psname, vname, name, context:GenerationContext) =
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 environment.str.addmember(psname,(Structure point2.sname,A0,name))
                 point2(point2.sname,environment.str.mem(vname,name),context)
 
@@ -71,14 +71,14 @@ namespace Aqualis
             inherit structureArray1<point2,point2_1>(sname_,name,size1,context=context)
             //変数宣言を行う場合
             new(name,size1,context:GenerationContext) =
-                CompilationEnvironment(Some context).str.reg(point2.sname,name,size1)
+                Aqualis(Some context).str.reg(point2.sname,name,size1)
                 point2_1(point2.sname,name,A1 size1,context)
             override _.WrapElement n = point2(sname_,n,context)
             override _.Rewrap(n,v,targetEnvironment) =
                 point2_1(sname_,n,v,targetEnvironment.RequireGenerationContext())
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
             static member str_mem(psname, vname, name, size1, context:GenerationContext) =
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 environment.str.addmember(psname,(Structure point2.sname,A1 size1,name))
                 point2_1(point2.sname,environment.str.mem(vname,name),A1 size1,context)
 
@@ -101,10 +101,10 @@ namespace Aqualis
 
         type point3(sname_,name,context:GenerationContext) =
             inherit structureValue<point3>(sname_,name,context=context)
-            let environment = CompilationEnvironment(Some context)
+            let environment = Aqualis(Some context)
             static member sname = "point3"
             new(name,context:GenerationContext) =
-                CompilationEnvironment(Some context).str.reg(point3.sname,name)
+                Aqualis(Some context).str.reg(point3.sname,name)
                 point3(point3.sname,name,context)
             override _.Rewrap(n,targetEnvironment) =
                 point3(sname_,n,targetEnvironment.RequireGenerationContext())
@@ -139,14 +139,14 @@ namespace Aqualis
                 a.y <== b.y
                 a.z <== b.z
             static member str_mem(psname, vname, name, context:GenerationContext) =
-                let environment = CompilationEnvironment(Some context)
+                let environment = Aqualis(Some context)
                 environment.str.addmember(psname,(Structure(point3.sname),A0,name))
                 point3(point3.sname,environment.str.mem(vname,name),context)
 
         type point3_1(sname_,name,size1,context:GenerationContext) =
             inherit structureArray1<point3,point3_1>(sname_,name,size1,context=context)
             new(name,size1,context:GenerationContext) =
-                CompilationEnvironment(Some context).str.reg(point3.sname,name,size1)
+                Aqualis(Some context).str.reg(point3.sname,name,size1)
                 point3_1(point3.sname,name,A1 size1,context)
             override _.WrapElement n = point3(sname_,n,context)
             override _.Rewrap(n,v,targetEnvironment) =
@@ -161,7 +161,7 @@ namespace Aqualis
                 GenerationContextMerge.mergeMany
                     [x.Context; y.Context; center_x.Context; center_y.Context; radius.Context; d.Context; f.Context]
                 |> GenerationContextMerge.requireTarget
-            let environment = CompilationEnvironment(Some context)
+            let environment = Aqualis(Some context)
             let rad(y:double0,x:double0,t:double0) =
                 environment.br.branch <| fun b ->
                     b.IF (x.=0.0) <| fun () -> t <== 0.500*asm.pi

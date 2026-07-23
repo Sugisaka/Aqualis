@@ -1,10 +1,10 @@
 namespace Aqualis
 
-type ContextHtmlIo internal (environment:CompilationEnvironment) =
+type ContextHtmlIo internal (environment:Aqualis) =
     let context = environment.RequireGenerationContext()
 
     member private _.WithProgram index code =
-        context.WithProgram(index, fun child -> code (CompilationEnvironment(Some child)))
+        context.WithProgram(index, fun child -> code (Aqualis(Some child)))
 
     member this.switchMain code = this.WithProgram 0 code
     member this.switchBody code = this.WithProgram 1 code
@@ -33,5 +33,5 @@ type ContextHtmlIo internal (environment:CompilationEnvironment) =
 
 [<AutoOpen>]
 module CompilationEnvironmentHtmlIoExtensions =
-    type CompilationEnvironment with
+    type Aqualis with
         member this.htmlio = ContextHtmlIo(this)

@@ -709,30 +709,26 @@ namespace Aqualis
     /// The explicit environment passed to a Compile callback. Numeric execution has
     /// no code-generation context; every other mode exposes one through this wrapper.
     /// </summary>
-    type CompilationEnvironment (context:GenerationContext option) =
+    type Aqualis (context:GenerationContext option) =
         member _.GenerationContext = context
         member _.IsNumeric = context.IsNone
         member _.Version = "188.0.0.0"
-        member _.comment(text:string) = 
-            match context with
-            |Some c -> c.CurrentProgram.comment text
-            |None -> ()
-
         member internal _.RequireGenerationContext() =
             context
             |> Option.defaultWith (fun () ->
                 invalidOp "This operation is not available during Numeric execution.")
 
     /// Emits raw source text through the output program selected by this environment.
-    type ContextEmit internal (environment:CompilationEnvironment) =
+    type ContextEmit internal (environment:Aqualis) =
         let context = environment.RequireGenerationContext()
-
-        member _.writein(text:string) =
-            context.CurrentProgram.codewritein text
-
+        member _.writein(text:string) = context.CurrentProgram.codewritein text
+        member _.writei(text:string) = context.CurrentProgram.codewritei text
+        member _.write(text:string) = context.CurrentProgram.codewrite text
+        member _.comment(text:string) = context.CurrentProgram.comment text
+            
     [<AutoOpen>]
     module CompilationEnvironmentEmitExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.emit = ContextEmit(this)
 
     /// Shared rules for propagating and validating contexts carried by DSL values.
@@ -814,7 +810,7 @@ namespace Aqualis
         let comment(context:GenerationContext) s = context.CurrentProgram.comment s
 
     ///<summary>コード生成の設定</summary>
-    type ContextCompiler internal (environment:CompilationEnvironment) =
+    type ContextCompiler internal (environment:Aqualis) =
         let context() = environment.RequireGenerationContext()
 
         ///<summary>言語</summary>
@@ -850,7 +846,7 @@ namespace Aqualis
         ///<summary>codeをデバッグモードで実行</summary>
         member _.debug code =
             let ctx = context()
-            ctx.WithDebugMode(true, fun child -> code (CompilationEnvironment(Some child)))
+            ctx.WithDebugMode(true, fun child -> code (Aqualis(Some child)))
 
         ///<summary>プログラムの実行を強制終了</summary>
         member _.abort() =
@@ -914,5 +910,5 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentCompilerExtensions =
-        type CompilationEnvironment with
+        type Aqualis with
             member this.compiler = ContextCompiler(this)

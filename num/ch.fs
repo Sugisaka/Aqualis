@@ -21,7 +21,7 @@ module internal TemporaryVariableScope =
         try acquired |> List.map (fst >> createValue) |> code
         finally acquired |> List.rev |> List.iter (snd >> fun release -> release())
 
-type ContextCh internal (environment:CompilationEnvironment) =
+type ContextCh internal (environment:Aqualis) =
     let context() = environment.RequireGenerationContext()
 
     member internal _.Environment = environment
@@ -124,5 +124,5 @@ type ContextCh internal (environment:CompilationEnvironment) =
 
 [<AutoOpen>]
 module CompilationEnvironmentChExtensions =
-    type CompilationEnvironment with
+    type Aqualis with
         member this.ch = ContextCh(this)
