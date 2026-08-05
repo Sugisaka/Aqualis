@@ -11,6 +11,33 @@ module WebGenerationStateTests =
         GenerationContext [new program(path, name, HTML)]
 
     [<Fact>]
+    let ``block text code emits border color separately from border width`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "block-text-border.html"
+        let context = createContext output.Path fileName
+
+        try
+            let environment = Aqualis(Some context)
+            environment.html.blockTextcode
+                Style.blank
+                (position(10.0, 20.0))
+                (200.0, 100.0)
+                (2.5, "solid", "#123456")
+                ["sample"]
+            |> ignore
+        finally
+            context.CurrentProgram.close()
+            context.Deactivate()
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, fileName))
+
+        Assert.Contains("border-width: 2.5px", generated)
+        Assert.Contains("border-style: solid", generated)
+        Assert.Contains("border-color: #123456", generated)
+        Assert.DoesNotContain("border-width: #123456", generated)
+
+    [<Fact>]
     let ``movie settings are fixed for each explicit environment`` () =
         use output = new TemporaryDirectory()
         let disabled =

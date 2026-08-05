@@ -542,7 +542,7 @@ namespace Aqualis
                             {Key = "overflow-wrap"; Value = "break-word";}
                             {Key = "border-width"; Value = InvariantFormat.number borderWidth + "px";}
                             {Key = "border-style"; Value = borderStyle;}
-                            {Key = "border-width"; Value = borderColor;}]
+                            {Key = "border-color"; Value = borderColor;}]
             this.tagb ("div", [(s1+s).atr])
                 <| fun () ->
                     text |> List.iter (fun s -> writein (s+"<br>"))
