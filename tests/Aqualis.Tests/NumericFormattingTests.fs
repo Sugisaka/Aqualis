@@ -38,7 +38,6 @@ module NumericFormattingTests =
             [
                 C99, fun expression target -> expression.evalC target
                 Fortran, fun expression target -> expression.evalF target
-                JavaScript, fun expression target -> expression.evalJ target
                 PHP, fun expression target -> expression.evalPh target
                 Python, fun expression target -> expression.evalPy target
             ]
@@ -59,6 +58,91 @@ module NumericFormattingTests =
             finally
                 target.close()
                 target.delete()
+
+    [<Fact>]
+    let ``JavaScript conversions use valid JavaScript syntax`` () =
+        use output = new TemporaryDirectory()
+        use target =
+            new program(output.Path, "javascript-conversions", JavaScript)
+
+        let floatingValue = Var(Dt, "value", NaN)
+        let integerValue = Var(It 4, "count", NaN)
+
+        Assert.Equal(
+            "Math.trunc(value)",
+            ToInt floatingValue |> fun expression -> expression.evalJ target)
+        Assert.Equal(
+            "Number(count)",
+            ToDbl integerValue |> fun expression -> expression.evalJ target)
+
+    [<Fact>]
+    let ``JavaScript rejects unsupported expressions`` () =
+        use output = new TemporaryDirectory()
+        use target =
+            new program(output.Path, "javascript-unsupported", JavaScript)
+
+        let complexValue = Var(Zt, "complexValue", NaN)
+        let otherComplexValue = Var(Zt, "otherComplexValue", NaN)
+        let unsupported =
+            [
+                "complex-number literals", Cpx(1.0, 2.0)
+                "complex-number values", complexValue
+                "complex-number arithmetic",
+                    Add(Zt, complexValue, otherComplexValue)
+                "complex-number functions", Exp(Zt, complexValue)
+                "the absolute-value operation for complex numbers",
+                    Abs(Dt, complexValue)
+                "complex-number comparisons",
+                    Eq(complexValue, otherComplexValue)
+                "the real-part operation (Re)", Re complexValue
+                "the imaginary-part operation (Im)", Im complexValue
+                "the complex-conjugate operation (Conj)", Conj complexValue
+                "complex-number array values",
+                    Idx1(Zt, "complexValues", Int 0)
+                "two-dimensional array indexing",
+                    Idx2(Dt, "matrix", Int 0, Int 1)
+                "three-dimensional array indexing",
+                    Idx3(Dt, "tensor", Int 0, Int 1, Int 2)
+            ]
+
+        for operation,expression in unsupported do
+            let error =
+                Assert.Throws<NotSupportedException>(fun () ->
+                    expression.evalJ target |> ignore)
+
+            Assert.Equal(
+                $"JavaScript code generation does not support {operation}.",
+                error.Message)
+
+        let unsupportedDisplayOperations : (string * (unit -> unit)) list =
+            [ "equation display", fun () ->
+                  expr.equivJ (Int 1) (Int 2) target
+              "aligned equation display", fun () ->
+                  expr.equivAlignJ (Int 1) (Int 2) target ]
+
+        for operation,render in unsupportedDisplayOperations do
+            let error =
+                Assert.Throws<NotSupportedException>(Action render)
+            Assert.Equal(
+                $"JavaScript code generation does not support {operation}.",
+                error.Message)
+
+    [<Fact>]
+    let ``JavaScript loop exits use break instead of goto`` () =
+        use output = new TemporaryDirectory()
+        let path = Path.Combine(output.Path, "javascript-loop.js")
+
+        makeProgramWithContext
+            [output.Path, "javascript-loop.js", JavaScript]
+            (fun context ->
+                expr.loopJ context <| fun (exit,_) -> exit()
+                expr.range_exitJ context None (Int 0) (Int 2) <| fun (exit,_) ->
+                    exit()
+                context.CurrentProgram.close())
+
+        let generated = File.ReadAllText path
+        Assert.Contains("break;", generated)
+        Assert.DoesNotContain("goto", generated)
 
     [<Fact>]
     let ``non-finite numeric literals have explicit language representations`` () =

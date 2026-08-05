@@ -11,16 +11,21 @@ namespace Aqualis
 
         open System
 
+        let private notSupported operation : 'T =
+            raise (
+                NotSupportedException(
+                    $"JavaScript code generation does not support {operation}."))
+
         type expr with
 
             static member substJ (x:expr) (y:expr) (c:program) =
                 c.codewritein (x.evalJ c  + " = " + y.evalJ c + ";")
 
-            static member equivJ (x:expr) (y:expr) (c:program) =
-                printfn "JavaScriptでこの文は使用できません"
+            static member equivJ (_:expr) (_:expr) (_:program) =
+                notSupported "equation display"
 
-            static member equivAlignJ (x:expr) (y:expr) (c:program) =
-                printfn "JavaScriptでこの文は使用できません"
+            static member equivAlignJ (_:expr) (_:expr) (_:program) =
+                notSupported "aligned equation display"
 
             static member forLoopJ (context:GenerationContext) (n1:expr,n2:expr) code =
                 let c = context.CurrentProgram
@@ -42,8 +47,7 @@ namespace Aqualis
                 let c = context.CurrentProgram
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = "_" + context.GotoLabels.nextGotoLabel()
-                let exit() = c.codewritein("goto "+label+";")
+                let exit() = c.codewritein "break;"
                 expr.substJ i (Int 1) c
                 if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein "for(;;)"
@@ -53,7 +57,6 @@ namespace Aqualis
                 expr.substJ i (Add(It 4, i, Int 1)) c
                 c.indentDec()
                 c.codewritein "}"
-                c.codewritein(label+":;")
                 returnVar()
 
             ///<summary>条件を満たす間ループ</summary>
@@ -100,8 +103,7 @@ namespace Aqualis
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("goto "+label+"")
+                    let exit() = c.comment "break;"
                     if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
                     c.comment "{"
@@ -109,13 +111,11 @@ namespace Aqualis
                     code(exit,i)
                     c.indentDec()
                     c.comment "}"
-                    c.comment(label+":;")
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("goto "+label+"")
+                    let exit() = c.codewritein "break;"
                     if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
                     c.codewritein "{"
@@ -123,7 +123,6 @@ namespace Aqualis
                     code(exit,i)
                     c.indentDec()
                     c.codewritein "}"
-                    c.codewritein(label+":;")
                     returnVar()
 
             static member branchJ (context:GenerationContext) code =
@@ -157,6 +156,13 @@ namespace Aqualis
                 match this.simp with
                 |False -> "false"
                 |True -> "true"
+                |Eq(x,y)
+                |NEq(x,y)
+                |Greater(x,y)
+                |GreaterEq(x,y)
+                |Less(x,y)
+                |LessEq(x,y) when x.etype = Zt || y.etype = Zt ->
+                    notSupported "complex-number comparisons"
                 |Eq(x,y) -> x.evalJ c + " == " + y.evalJ c
                 |NEq(x,y) -> x.evalJ c + " != " + y.evalJ c
                 |Greater(x,y) -> x.evalJ c + " > " + y.evalJ c
@@ -173,9 +179,30 @@ namespace Aqualis
                     |> fun lst -> String.Join(" || ", lst)
                 |Int x -> c.numFormat.ItoS x
                 |Dbl x -> c.numFormat.DtoS x
-                |Cpx (0.0,1.0) -> "uj"
-                |Cpx (re,im) -> c.numFormat.DtoS re + "+uj*" + c.numFormat.DtoS im
+                |Cpx _ -> notSupported "complex-number literals"
+                |Var (Zt,_,_) -> notSupported "complex-number values"
                 |Var (_,s,x) -> s
+                |Inv(Zt,_)
+                |Add(Zt,_,_)
+                |Sub(Zt,_,_)
+                |Mul(Zt,_,_)
+                |Div(Zt,_,_)
+                |Mod(Zt,_,_)
+                |Pow(Zt,_,_) ->
+                    notSupported "complex-number arithmetic"
+                |Exp(Zt,_)
+                |Sin(Zt,_)
+                |Cos(Zt,_)
+                |Tan(Zt,_)
+                |Asin(Zt,_)
+                |Acos(Zt,_)
+                |Atan(Zt,_)
+                |Log(Zt,_)
+                |Log10(Zt,_)
+                |Sqrt(Zt,_) ->
+                    notSupported "complex-number functions"
+                |Abs(_,x) when x.etype = Zt ->
+                    notSupported "the absolute-value operation for complex numbers"
                 |Inv(_,x) ->
                     match x with
                     |Add _|Sub _ -> "-(" + x.evalJ c + ")"
@@ -213,30 +240,22 @@ namespace Aqualis
                 |Log(_,x) -> "Math.log(" + x.evalJ c + ")"
                 |Log10(_,x) -> "Math.log10(" + x.evalJ c + ")"
                 |Sqrt(_,x) -> "Math.sqrt(" + x.evalJ c + ")"
-                |ToInt x ->
-                    match x with
-                    |Add _|Sub _ |Mul _ |Div _ ->
-                        "(int)(" + x.evalJ c + ")"
-                    |_ ->
-                        "(int)" + x.evalJ c
-                |ToDbl x ->
-                    match x with
-                    |Add _|Sub _ |Mul _ |Div _ ->
-                        "(double)(" + x.evalJ c + ")"
-                    |_ ->
-                        "(double)" + x.evalJ c
+                |ToInt x -> "Math.trunc(" + x.evalJ c + ")"
+                |ToDbl x -> "Number(" + x.evalJ c + ")"
                 |Floor x -> "Math.floor(" + x.evalJ c + ")"
                 |Ceil x -> "Math.ceil(" + x.evalJ c + ")"
-                |Re x -> "Math.creal(" + x.evalJ c + ")"
-                |Im x -> "Math.cimag(" + x.evalJ c + ")"
-                |Conj x -> "Math.conj(" + x.evalJ c + ")"
+                |Re _ -> notSupported "the real-part operation (Re)"
+                |Im _ -> notSupported "the imaginary-part operation (Im)"
+                |Conj _ -> notSupported "the complex-conjugate operation (Conj)"
+                |Idx1 (Zt,_,_) -> notSupported "complex-number array values"
                 |Idx1 (_,name,i) -> name + "[" + i.evalJ c + "]"
-                |Idx2 (_,name,i,j) ->
-                    printfn "JavaScriptでは2次元配列の代わりに1次元配列を使用します"
-                    "NaN"
-                |Idx3 (_,name,i,j,k) ->
-                    printfn "JavaScriptでは3次元配列の代わりに1次元配列を使用します"
-                    "NaN"
+                |Idx2 _ -> notSupported "two-dimensional array indexing"
+                |Idx3 _ -> notSupported "three-dimensional array indexing"
+                |Let (Zt,_,_)
+                |Sum(Zt,_,_,_) ->
+                    notSupported "complex-number expressions"
+                |IfEl(_,n1,n2) when n1.etype = Zt || n2.etype = Zt ->
+                    notSupported "complex-number expressions"
                 |Let (t,y,f) ->
                     let x =
                         match t with
