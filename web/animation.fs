@@ -950,7 +950,7 @@ module HtmlWebExtensions =
                 this.GenerationContext.AddAudioFile(
                     match audioFile with |Some t -> t |None -> "")
                 // 字幕枠
-                this.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                this.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
                 // キャラクター画像
                 this.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.GenerationContext.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
@@ -964,7 +964,7 @@ module HtmlWebExtensions =
                         else
                             printfn "character image file not exist: %s" ci.CharacterImageFile
                 // 字幕
-                this.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 36pt; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                this.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
                     <| fun () -> writein this.GenerationContext audio.Subtitle
                 this.Environment.htmlio.switchAutoAnimation <| fun environment ->
                     writein (environment.RequireGenerationContext()) ("page"+animationCounter.ToString()+": () => {")
@@ -1597,11 +1597,11 @@ module htmlexpr2 =
             environment.htmlio.switchBody <| fun environment ->
                 let context = environment.RequireGenerationContext()
                 writein context ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
-                writein context ("width=\""+s.sX.ToString()+"px\" ")
-                writein context ("heigth=\""+s.sY.ToString()+"px\" ")
+                writein context ("width=\""+CssLength.pixelsInt s.sX+"\" ")
+                writein context ("height=\""+CssLength.pixelsInt s.sY+"\" ")
                 writein context "xmlns=\"http://www.w3.org/2000/svg\" "
-                writein context ("style=\"margin-left: "+s.mX.ToString()+"; ")
-                writein context ("margin-top: "+s.mY.ToString()+"; ")
+                writein context ("style=\"margin-left: "+CssLength.pixelsInt s.mX+"; ")
+                writein context ("margin-top: "+CssLength.pixelsInt s.mY+"; ")
                 writein context "position: absolute;"
                 writein context ("background-color: "+s.backgroundColor+";")
                 writein context "\">"
@@ -1625,11 +1625,11 @@ module htmlexpr2 =
             environment.htmlio.switchBody <| fun environment ->
                 let context = environment.RequireGenerationContext()
                 writein context ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
-                writein context ("width=\""+s.sX.ToString()+"px\" ")
-                writein context ("heigth=\""+s.sY.ToString()+"px\" ")
+                writein context ("width=\""+CssLength.pixelsInt s.sX+"\" ")
+                writein context ("height=\""+CssLength.pixelsInt s.sY+"\" ")
                 writein context "xmlns=\"http://www.w3.org/2000/svg\" "
-                writein context ("style=\"margin-left: "+s.mX.ToString()+"; ")
-                writein context ("margin-top: "+s.mY.ToString()+"; ")
+                writein context ("style=\"margin-left: "+CssLength.pixelsInt s.mX+"; ")
+                writein context ("margin-top: "+CssLength.pixelsInt s.mY+"; ")
                 writein context "position: absolute;"
                 writein context ("background-color: "+s.backgroundColor+";")
                 writein context "\">"

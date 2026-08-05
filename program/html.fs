@@ -42,6 +42,14 @@ namespace Aqualis
         static member (+) (a:Style,b:Style) = Style(a.list@b.list)
         static member blank = Style []
 
+    [<RequireQualifiedAccess>]
+    module CssLength =
+        let pixels (value:float) =
+            InvariantFormat.number value + "px"
+
+        let pixelsInt (value:int) =
+            InvariantFormat.integer value + "px"
+
     [<AutoOpen>]
     module style =
         let zindex(n:int) = {Key="z-index"; Value=n.ToString()}
@@ -51,11 +59,11 @@ namespace Aqualis
             let backGroundImage (filename:string) = {Key="background-image"; Value="url("+filename+")"}
             let opacity (s:string) = {Key="background-opacity"; Value=s}
         module font =
-            let size (s:int) = {Key="font-size"; Value=s.ToString()+"px"}
+            let size (s:int) = {Key="font-size"; Value=CssLength.pixelsInt s}
             let color (s:string) = {Key="color"; Value=s}
             let weight (s:string) = {Key="font-weight"; Value=s.ToString()}
             let family (s:string) = {Key="font-family"; Value=s}
-            let lineHeight (s:int) = {Key="line-height"; Value=s.ToString()+"px"}
+            let lineHeight (s:int) = {Key="line-height"; Value=CssLength.pixelsInt s}
             let style (s:string) = {Key="font-style"; Value=s}
         module size =
             let width (s:string) = {Key="width"; Value=s}
@@ -66,26 +74,31 @@ namespace Aqualis
             let right (s:string) = {Key="margin-right"; Value=s}
             let top (s:string) = {Key="margin-top"; Value=s}
             let bottom (s:string) = {Key="margin-bottom"; Value=s}
-            let all (s:int) = {Key="margin"; Value=s.ToString()+"px"}
+            let leftPx (s:float) = {Key="margin-left"; Value=CssLength.pixels s}
+            let rightPx (s:float) = {Key="margin-right"; Value=CssLength.pixels s}
+            let topPx (s:float) = {Key="margin-top"; Value=CssLength.pixels s}
+            let bottomPx (s:float) = {Key="margin-bottom"; Value=CssLength.pixels s}
+            let all (s:int) = {Key="margin"; Value=CssLength.pixelsInt s}
             let custom (s:string) = {Key="margin"; Value=s}
         module padding =
-            let left (s:int) = {Key="padding-left"; Value=s.ToString()+"px"}
-            let right (s:int) = {Key="padding-right"; Value=s.ToString()+"px"}
-            let top (s:int) = {Key="padding-top"; Value=s.ToString()+"px"}
-            let bottom (s:int) = {Key="padding-bottom"; Value=s.ToString()+"px"}
-            let all (s:int) = {Key="padding"; Value=s.ToString()+"px"}
-            let paddingVH (v:int,h:int) = {Key="padding"; Value=v.ToString()+"px"+h.ToString()+"px"}
+            let left (s:int) = {Key="padding-left"; Value=CssLength.pixelsInt s}
+            let right (s:int) = {Key="padding-right"; Value=CssLength.pixelsInt s}
+            let top (s:int) = {Key="padding-top"; Value=CssLength.pixelsInt s}
+            let bottom (s:int) = {Key="padding-bottom"; Value=CssLength.pixelsInt s}
+            let all (s:int) = {Key="padding"; Value=CssLength.pixelsInt s}
+            let paddingVH (v:int,h:int) =
+                {Key="padding"; Value=CssLength.pixelsInt v + " " + CssLength.pixelsInt h}
         module border =
             let style (s:string) = {Key="border"; Value=s}
             let color (s:string) = {Key="border-color"; Value=s}
             module width =
-                let top (s:int) = {Key="border-top-width"; Value=s.ToString()+"px"}
-                let bottom (s:int) = {Key="border-bottom-width"; Value=s.ToString()+"px"}
-                let left (s:int) = {Key="border-left-width"; Value=s.ToString()+"px"}
-                let right (s:int) = {Key="border-right-width"; Value=s.ToString()+"px"}
+                let top (s:int) = {Key="border-top-width"; Value=CssLength.pixelsInt s}
+                let bottom (s:int) = {Key="border-bottom-width"; Value=CssLength.pixelsInt s}
+                let left (s:int) = {Key="border-left-width"; Value=CssLength.pixelsInt s}
+                let right (s:int) = {Key="border-right-width"; Value=CssLength.pixelsInt s}
         module stroke =
             let color (s:string) = {Key="stroke"; Value=s}
-            let width (s:float) = {Key="stroke-width"; Value=InvariantFormat.number s+"px"}
+            let width (s:float) = {Key="stroke-width"; Value=CssLength.pixels s}
             let dasharray (s:list<int>) = {Key="stroke-dasharray"; Value=String.Join(" ",s |> List.map (fun i -> i.ToString()))}
             let opacity(s:float) = {Key="stroke-opacity"; Value=InvariantFormat.number s}
         module fill =
@@ -521,11 +534,11 @@ namespace Aqualis
             let sx,sy,mx,my = f.setWriteMode()
             writein (
                 "<svg viewBox=\"0 0 "+InvariantFormat.number sx+" "+InvariantFormat.number sy+"\" "+
-                "width=\""+InvariantFormat.number sx+"px\" "+
-                "heigth=\""+InvariantFormat.number sy+"px\" "+
+                "width=\""+CssLength.pixels sx+"\" "+
+                "height=\""+CssLength.pixels sy+"\" "+
                 "xmlns=\"http://www.w3.org/2000/svg\" "+
-                "style=\"margin-left: "+InvariantFormat.number mx+"; "+
-                "margin-top: "+InvariantFormat.number my+"; "+
+                "style=\"margin-left: "+CssLength.pixels mx+"; "+
+                "margin-top: "+CssLength.pixels my+"; "+
                 "position: absolute;"+
                 "\">")
             code(f,p)

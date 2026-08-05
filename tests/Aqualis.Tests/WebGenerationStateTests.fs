@@ -38,6 +38,89 @@ module WebGenerationStateTests =
         Assert.DoesNotContain("border-width: #123456", generated)
 
     [<Fact>]
+    let ``figure SVG emits valid pixel dimensions and margins`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "figure-pixels.html"
+        let context = createContext output.Path fileName
+
+        try
+            let environment = Aqualis(Some context)
+            environment.html.fig position.Origin <| fun (figure,_) ->
+                figure.rect
+                    Style.blank
+                    (position(20.0, 30.0))
+                    40
+                    50
+        finally
+            context.CurrentProgram.close()
+            context.Deactivate()
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, fileName))
+
+        Assert.Contains("viewBox=\"0 0 60 70\"", generated)
+        Assert.Contains("width=\"60px\"", generated)
+        Assert.Contains("height=\"70px\"", generated)
+        Assert.Contains("margin-left: 10px", generated)
+        Assert.Contains("margin-top: 20px", generated)
+        Assert.DoesNotContain("heigth=", generated)
+        Assert.DoesNotContain("margin-left: 10;", generated)
+        Assert.DoesNotContain("margin-top: 20;", generated)
+
+    [<Fact>]
+    let ``CSS pixel helpers use valid invariant values`` () =
+        Assert.Equal("12.5px", CssLength.pixels 12.5)
+        Assert.Equal("8px", CssLength.pixelsInt 8)
+        Assert.Equal(
+            "padding: 4px 8px",
+            (Style [padding.paddingVH(4, 8)]).code0)
+
+    [<Fact>]
+    let ``animation SVG emits valid pixel dimensions and margins`` () =
+        use output = new TemporaryDirectory()
+
+        fixedPage
+            output.Path
+            "animation-pixels"
+            "Animation pixels"
+            640
+            480
+            MovieSetting.Default
+            None
+            (fun environment ->
+                environment.html.page
+                    []
+                    ({ Subtitle = "subtitle"
+                       Script = ""
+                       AudioFileNumber = None
+                       AudioSourceNumber = None },
+                     None,
+                     "#000000")
+                    ignore
+                environment.html.animationManual
+                    { sX = 320
+                      sY = 180
+                      mX = 12
+                      mY = 34
+                      backgroundColor = "#ffffff" }
+                    position.Origin
+                    (0, 0)
+                    ignore)
+
+        let generated =
+            File.ReadAllText(
+                Path.Combine(output.Path, "animation-pixels.html"))
+
+        Assert.Contains("viewBox=\"0 0 320 180\"", generated)
+        Assert.Contains("width=\"320px\"", generated)
+        Assert.Contains("height=\"180px\"", generated)
+        Assert.Contains("margin-left: 12px", generated)
+        Assert.Contains("margin-top: 34px", generated)
+        Assert.Contains("font-size: 48px", generated)
+        Assert.DoesNotContain("heigth=", generated)
+        Assert.DoesNotContain("font-size: 36pt", generated)
+
+    [<Fact>]
     let ``movie settings are fixed for each explicit environment`` () =
         use output = new TemporaryDirectory()
         let disabled =
