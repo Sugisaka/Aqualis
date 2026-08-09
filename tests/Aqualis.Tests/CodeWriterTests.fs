@@ -53,8 +53,8 @@ module CodeWriterTests =
 
         Assert.Throws<InvalidOperationException>(
             Action(fun () ->
-                makeProgramWithContext [output.Path, "exception.c", C99] <| fun context ->
-                    writein context "before_exception"
+                Aqualis.makeProgramWithContext (output.Path, "exception.c", C99) <| fun context ->
+                    context.writein "before_exception"
                     invalidOp "expected"))
         |> ignore
 

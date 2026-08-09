@@ -34,7 +34,7 @@ module NumericFormattingTests =
     let ``complex literals render without recursively simplifying their expansion`` () =
         use output = new TemporaryDirectory()
         let value = Cpx(1.0, 2.0)
-        let cases : (Language * (expr -> program -> string)) list =
+        let cases : (Language * (expr -> Aqualis -> string)) list =
             [
                 C99, fun expression target -> expression.evalC target
                 Fortran, fun expression target -> expression.evalF target
@@ -44,9 +44,9 @@ module NumericFormattingTests =
 
         for language, render in cases do
             let target =
-                new program(
-                    output.Path,
-                    "complex-" + language.ToString(),
+                new Aqualis(
+                    Some output.Path,
+                    Some ("complex-" + language.ToString()),
                     language)
 
             try
@@ -63,7 +63,7 @@ module NumericFormattingTests =
     let ``JavaScript conversions use valid JavaScript syntax`` () =
         use output = new TemporaryDirectory()
         use target =
-            new program(output.Path, "javascript-conversions", JavaScript)
+            new Aqualis(Some output.Path, Some "javascript-conversions", JavaScript)
 
         let floatingValue = Var(Dt, "value", NaN)
         let integerValue = Var(It 4, "count", NaN)
@@ -79,7 +79,7 @@ module NumericFormattingTests =
     let ``JavaScript rejects unsupported expressions`` () =
         use output = new TemporaryDirectory()
         use target =
-            new program(output.Path, "javascript-unsupported", JavaScript)
+            new Aqualis(Some output.Path, Some "javascript-unsupported", JavaScript)
 
         let complexValue = Var(Zt, "complexValue", NaN)
         let otherComplexValue = Var(Zt, "otherComplexValue", NaN)
@@ -132,13 +132,13 @@ module NumericFormattingTests =
         use output = new TemporaryDirectory()
         let path = Path.Combine(output.Path, "javascript-loop.js")
 
-        makeProgramWithContext
-            [output.Path, "javascript-loop.js", JavaScript]
+        Aqualis.makeProgramWithContext
+            (output.Path, "javascript-loop.js", JavaScript)
             (fun context ->
                 expr.loopJ context <| fun (exit,_) -> exit()
                 expr.range_exitJ context None (Int 0) (Int 2) <| fun (exit,_) ->
                     exit()
-                context.CurrentProgram.close())
+                context.close())
 
         let generated = File.ReadAllText path
         Assert.Contains("break;", generated)

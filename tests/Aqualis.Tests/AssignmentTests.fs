@@ -1,168 +1,83 @@
 namespace Aqualis.Tests
 
 open System
+open System.IO
 open Xunit
 open Aqualis
 
 module AssignmentTests =
-    [<Fact>]
-    let ``numeric constants ignore an explicitly supplied generation context`` () =
-        use output = new TemporaryDirectory()
-        let context = GenerationContext [new program(output.Path, "constants.c", C99)]
-
-        try
-            Assert.True(int0(Int 1, context=context).Context.IsNone)
-            Assert.True(double0(Dbl 0.0, context=context).Context.IsNone)
-            Assert.True(complex0(Cpx(0.0, 1.0), context=context).Context.IsNone)
-        finally
-            context.CurrentProgram.close()
+    let private createContext path name =
+        new Aqualis(Some path, Some name, C99)
 
     [<Fact>]
     let ``operators merge constant and variable contexts`` () =
         use output = new TemporaryDirectory()
-        let context = GenerationContext [new program(output.Path, "merge.c", C99)]
-
-        try
-            let variable = int0(Var(It 4, "value", NaN), context=context)
-            let result = variable + int0(Int 1)
-            Assert.Same(context, result.Context.Value)
-        finally
-            context.CurrentProgram.close()
+        use context = createContext output.Path "merge.c"
+        let variable = int0(Var(It 4, "value", NaN), context)
+        let result = variable + int0(Int 1)
+        Assert.Same(context, result.Context)
 
     [<Fact>]
     let ``operators reject operands from different output contexts`` () =
         use output = new TemporaryDirectory()
-        let first = GenerationContext [new program(output.Path, "first-op.c", C99)]
-        let second = GenerationContext [new program(output.Path, "second-op.c", C99)]
-
-        try
-            let left = int0(Var(It 4, "left", NaN), context=first)
-            let right = int0(Var(It 4, "right", NaN), context=second)
-            Assert.Throws<InvalidOperationException>(Action(fun () -> left + right |> ignore))
-            |> ignore
-        finally
-            first.CurrentProgram.close()
-            second.CurrentProgram.close()
-
-    [<Fact>]
-    let ``assignment rejects a target without a generation context`` () =
-        let target = int0(Var(It 4, "target", NaN))
-        Assert.Throws<InvalidOperationException>(Action(fun () -> target <== 1))
+        use first = createContext output.Path "first-op.c"
+        use second = createContext output.Path "second-op.c"
+        let left = int0(Var(It 4, "left", NaN), first)
+        let right = int0(Var(It 4, "right", NaN), second)
+        Assert.Throws<InvalidOperationException>(Action(fun () -> left + right |> ignore))
         |> ignore
 
     [<Fact>]
-    let ``numeric constants do not capture the active generation context`` () =
+    let ``numeric constants inherit the assignment target context`` () =
         use output = new TemporaryDirectory()
-        let secondContext =
-            GenerationContext [new program(output.Path, "second.c", C99)]
-
-        try
-            let constant = _0d
-
-            Assert.True(constant.Context.IsNone)
-
-            let target =
-                double0(Var(Dt, "target", NaN), context=secondContext)
-            target <== constant
-
-            secondContext.CurrentProgram.close()
-            let generated =
-                System.IO.File.ReadAllText(
-                    System.IO.Path.Combine(output.Path, "second.c"))
-                |> TestHelpers.normalizeGeneratedCode
-
-            Assert.Equal("target = 0.0E0;", generated)
-        finally
-            secondContext.CurrentProgram.close()
+        let path = Path.Combine(output.Path, "constant.c")
+        use context = createContext output.Path "constant.c"
+        let constant = _0d
+        Assert.True(constant.Context.CodeFile.IsNone)
+        let target = double0(Var(Dt, "target", NaN), context)
+        target <== constant
+        context.close()
+        let generated = File.ReadAllText(path) |> TestHelpers.normalizeGeneratedCode
+        Assert.Equal("target = 0.0E0;", generated)
 
     [<Fact>]
     let ``scalar assignment writes through the left hand context`` () =
         use output = new TemporaryDirectory()
-
-        makeProgramWithContext
-            [output.Path, "assignment.c", C99]
-            (fun context ->
-                let value = Aqualis(Some context).var.i0 "value"
-                value <== 42
-                context.CurrentProgram.close())
-
+        Aqualis.makeProgramWithContext (output.Path, "assignment.c", C99) <| fun context ->
+            let value = context.var.i0 "value"
+            value <== 42
         let generated =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "assignment.c"))
+            File.ReadAllText(Path.Combine(output.Path, "assignment.c"))
             |> TestHelpers.normalizeGeneratedCode
-
         Assert.Equal("value = 42;", generated)
 
     [<Fact>]
     let ``assignment rejects values from different contexts`` () =
         use output = new TemporaryDirectory()
-        let leftContext =
-            GenerationContext [new program(output.Path, "left.c", C99)]
-        let rightContext =
-            GenerationContext [new program(output.Path, "right.c", C99)]
-
-        try
-            let left =
-                int0(Var(It 4, "left", NaN), context=leftContext)
-            let right =
-                int0(Var(It 4, "right", NaN), context=rightContext)
-
-            Assert.Throws<InvalidOperationException>(Action(fun () ->
-                left <== right))
-            |> ignore
-        finally
-            leftContext.CurrentProgram.close()
-            rightContext.CurrentProgram.close()
+        use leftContext = createContext output.Path "left.c"
+        use rightContext = createContext output.Path "right.c"
+        let left = int0(Var(It 4, "left", NaN), leftContext)
+        let right = int0(Var(It 4, "right", NaN), rightContext)
+        Assert.Throws<InvalidOperationException>(Action(fun () -> left <== right))
+        |> ignore
 
     [<Fact>]
     let ``array assignments retain their generation context`` () =
         use output = new TemporaryDirectory()
-
-        makeProgramWithContext
-            [output.Path, "arrays.c", C99]
-            (fun context ->
-                let variables = Aqualis(Some context).var
-                let values1 = variables.i1("values1", 2)
-                let values2 = variables.i2("values2", 2, 2)
-                let values3 = variables.i3("values3", 2, 2, 2)
-
-                Assert.Same(context, values1.Context.Value)
-                Assert.Same(context, values2.Context.Value)
-                Assert.Same(context, values3.Context.Value)
-
-                values1 <== 1
-                values2 <== 2
-                values3 <== 3
-                context.CurrentProgram.close())
-
-        let generated =
-            System.IO.File.ReadAllText(
-                System.IO.Path.Combine(output.Path, "arrays.c"))
-
+        Aqualis.makeProgramWithContext (output.Path, "arrays.c", C99) <| fun context ->
+            let values1 = context.var.i1("values1", 2)
+            let values2 = context.var.i2("values2", 2, 2)
+            let values3 = context.var.i3("values3", 2, 2, 2)
+            Assert.Same(context, values1.Context)
+            Assert.Same(context, values2.Context)
+            Assert.Same(context, values3.Context)
+            Assert.Same(context, values1.size1.Context)
+            Assert.Same(context, values2.size2.Context)
+            Assert.Same(context, values3.size3.Context)
+            values1 <== 1
+            values2 <== 2
+            values3 <== 3
+        let generated = File.ReadAllText(Path.Combine(output.Path, "arrays.c"))
         Assert.Contains("values1", generated)
         Assert.Contains("values2", generated)
         Assert.Contains("values3", generated)
-
-    [<Fact>]
-    let ``array size values retain their generation context`` () =
-        use output = new TemporaryDirectory()
-        let context =
-            GenerationContext [
-                new program(output.Path, "array-sizes.c", C99)
-            ]
-        let variables = Aqualis(Some context).var
-
-        try
-            let values1 = variables.i1("values1", 2)
-            let values2 = variables.i2("values2", 2, 3)
-            let values3 = variables.i3("values3", 2, 3, 4)
-
-            Assert.Same(context, values1.size1.Context.Value)
-            Assert.Same(context, values2.size1.Context.Value)
-            Assert.Same(context, values2.size2.Context.Value)
-            Assert.Same(context, values3.size1.Context.Value)
-            Assert.Same(context, values3.size2.Context.Value)
-            Assert.Same(context, values3.size3.Context.Value)
-        finally
-            context.CurrentProgram.close()
-            context.Deactivate()

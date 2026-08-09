@@ -6,7 +6,7 @@ open Aqualis
 module NumericArrayGenericTests =
     let private withinContext action =
         use output=new TemporaryDirectory()
-        makeProgramWithContext [output.Path,"numeric-arrays.c",C99] (fun _->action())
+        Aqualis.makeProgramWithContext (output.Path,"numeric-arrays.c",C99) (fun _->action())
 
     let private i1 value = int1(It 4,Arx1(I 2,fun _->Int value))
     let private d1 value = double1(Dt,Arx1(I 2,fun _->Dbl value))

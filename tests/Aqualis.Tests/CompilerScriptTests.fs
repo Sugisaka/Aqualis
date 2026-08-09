@@ -11,7 +11,7 @@ type private FunctionArgumentStructure(
     inherit structureValue<FunctionArgumentStructure>(
         structureName,
         name,
-        ?context=environment.GenerationContext)
+        environment)
 
     static member StructureName = "FunctionArgumentStructure"
 
@@ -56,9 +56,8 @@ module CompilerScriptTests =
             projectName
             "1.0"
             (fun environment ->
-                let context = environment.GenerationContext.Value
-                context.CurrentProgram.slist.add "extra source.c"
-                configure context)
+                environment.slist.add "extra source.c"
+                configure environment)
 
         File.ReadAllText(
             Path.Combine(
@@ -72,12 +71,11 @@ module CompilerScriptTests =
             projectName
             "1.0"
             (fun environment ->
-                let context = environment.GenerationContext.Value
-                context.CurrentProgram.slist.add "extra source.f90"
-                context.CurrentProgram.slist.add "quote'source.f90"
-                context.CurrentProgram.slist.add "$generated`source.f90"
-                context.CurrentProgram.olist.add "linker option"
-                configure context)
+                environment.slist.add "extra source.f90"
+                environment.slist.add "quote'source.f90"
+                environment.slist.add "$generated`source.f90"
+                environment.olist.add "linker option"
+                configure environment)
 
         File.ReadAllText(
             Path.Combine(
@@ -188,42 +186,23 @@ module CompilerScriptTests =
     [<Fact>]
     let ``function arguments are rebound to the function context`` () =
         use output = new TemporaryDirectory()
+        use source =
+            new Aqualis(Some output.Path, Some "source.c", C99)
+        use target =
+            new Aqualis(Some output.Path, Some "target.c", C99)
+        let result = double0(Var(Dt, "result", NaN), source)
+        let value = double0(Var(Dt, "value", NaN), source)
+        let values = int1(It 4, Var1(A1 2, "values"), source)
+        let structureValue =
+            FunctionArgumentStructure("structureValue", source)
 
-        Compile
-            [Fortran; C99; Python]
-            output.Path
-            "function-context"
-            "1.0"
-            (fun environment ->
-                environment.ch.dd <| fun (result,value) ->
-                environment.ch.i1 2 <| fun values ->
-                    let structureValue =
-                        FunctionArgumentStructure(
-                            "structureValue",
-                            environment)
-                    structureValue.Value <== 3.0
-
-                    environment.func "context_function" <| fun functionEnvironment ->
-                        result.farg functionEnvironment <| fun result ->
-                        value.farg functionEnvironment <| fun value ->
-                        values.farg functionEnvironment <| fun values ->
-                        structureValue.farg functionEnvironment <| fun structureValue ->
-                            result <==
-                                value +
-                                values[0] +
-                                structureValue.Value
-                            functionEnvironment.print.t result)
-
-        let fortran =
-            File.ReadAllText(
-                Path.Combine(output.Path, "function-context.f90"))
-        let c =
-            File.ReadAllText(
-                Path.Combine(output.Path, "function-context.c"))
-        let python =
-            File.ReadAllText(
-                Path.Combine(output.Path, "function-context.py"))
-
-        for generated in [fortran; c; python] do
-            Assert.Contains("context_function", generated)
-            Assert.Contains("arg01", generated)
+        result.farg target <| fun reboundResult ->
+        value.farg target <| fun reboundValue ->
+        values.farg target <| fun reboundValues ->
+        structureValue.farg target <| fun reboundStructure ->
+            Assert.Same(target, reboundResult.Context)
+            Assert.Same(target, reboundValue.Context)
+            Assert.Same(target, reboundValues.Context)
+            Assert.Same(target, reboundStructure.Context)
+            Assert.Same(target, reboundStructure.Value.Context)
+            Assert.Contains("arg", reboundResult.code)

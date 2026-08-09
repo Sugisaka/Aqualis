@@ -9,12 +9,11 @@ module GoldenFileTests =
         use output = new TemporaryDirectory()
         let filename = "assignment." + extension
 
-        makeProgramWithContext
-            [output.Path, filename, language]
+        Aqualis.makeProgramWithContext
+            (output.Path, filename, language)
             (fun context ->
-                let value = Aqualis(Some context).var.i0 "value"
-                value <== 42
-                context.CurrentProgram.close())
+                let value = context.var.i0 "value"
+                value <== 42)
 
         File.ReadAllText(Path.Combine(output.Path, filename))
         |> TestHelpers.normalizeGeneratedCode

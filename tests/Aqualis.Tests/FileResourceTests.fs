@@ -16,27 +16,20 @@ module FileResourceTests =
         Assert.True(stream.CanWrite)
 
     let private withEnvironment outputPath name code =
-        let context =
-            GenerationContext [new program(outputPath, name, C99)]
-        let environment = Aqualis(Some context)
-
-        try
-            code context environment
-        finally
-            context.CurrentProgram.close()
-            context.Deactivate()
+        use environment = new Aqualis(Some outputPath, Some name, C99)
+        code environment
 
     [<Fact>]
     let ``complex text input retains the target context`` () =
         use output = new TemporaryDirectory()
 
-        withEnvironment output.Path "complex-read.c" <| fun context environment ->
+        withEnvironment output.Path "complex-read.c" <| fun environment ->
             let target = environment.var.z0 "target"
 
             environment.io.fileInput "input.dat" <| fun reader ->
                 reader.t target
 
-            context.CurrentProgram.close()
+            environment.close()
             let generated =
                 File.ReadAllText(
                     Path.Combine(output.Path, "complex-read.c"))
@@ -48,7 +41,7 @@ module FileResourceTests =
     let ``file input rejects a target without a context`` () =
         use output = new TemporaryDirectory()
 
-        withEnvironment output.Path "constant-read.c" <| fun _ environment ->
+        withEnvironment output.Path "constant-read.c" <| fun environment ->
             let error =
                 Assert.Throws<InvalidOperationException>(fun () ->
                     environment.io.fileInput "input.dat" <| fun reader ->
@@ -62,7 +55,7 @@ module FileResourceTests =
     let ``file input rejects an expression target`` () =
         use output = new TemporaryDirectory()
 
-        withEnvironment output.Path "expression-read.c" <| fun _ environment ->
+        withEnvironment output.Path "expression-read.c" <| fun environment ->
             let variable = environment.var.z0 "target"
             let expression = variable + 1
 
@@ -78,30 +71,19 @@ module FileResourceTests =
     [<Fact>]
     let ``file input rejects a variable from another context`` () =
         use output = new TemporaryDirectory()
-        let first =
-            GenerationContext [
-                new program(output.Path, "first-read.c", C99)
-            ]
-        let second =
-            GenerationContext [
-                new program(output.Path, "second-read.c", C99)
-            ]
-        let environment = Aqualis(Some first)
+        use first =
+            new Aqualis(Some output.Path, Some "first-read.c", C99)
+        use second =
+            new Aqualis(Some output.Path, Some "second-read.c", C99)
         let target =
             complex0(
                 Var(Zt, "target", NaN),
                 context=second)
 
-        try
-            Assert.Throws<InvalidOperationException>(fun () ->
-                environment.io.fileInput "input.dat" <| fun reader ->
-                    reader.t target)
-            |> ignore
-        finally
-            first.CurrentProgram.close()
-            first.Deactivate()
-            second.CurrentProgram.close()
-            second.Deactivate()
+        Assert.Throws<InvalidOperationException>(fun () ->
+            first.io.fileInput "input.dat" <| fun reader ->
+                reader.t target)
+        |> ignore
 
     [<Fact>]
     let ``CSS generation preserves the previous file when its callback throws`` () =
@@ -127,21 +109,14 @@ module FileResourceTests =
         File.WriteAllText(svgPath, "old-svg")
         File.WriteAllText(aiPath, "old-ai")
 
-        let context = GenerationContext [new program(output.Path, "resources.c", C99)]
-        let environment = Aqualis(Some context)
-
-        try
-            Assert.Throws<InvalidOperationException>(
-                Action(fun () ->
-                    svgfile.make
-                        (output.Path+"//image.svg")
-                        (100.0, 100.0)
-                        1.0
-                        (fun _ -> invalidOp "expected")))
-            |> ignore
-        finally
-            context.CurrentProgram.close()
-            context.Deactivate()
+        Assert.Throws<InvalidOperationException>(
+            Action(fun () ->
+                svgfile.make
+                    (output.Path+"//image.svg")
+                    (100.0, 100.0)
+                    1.0
+                    (fun _ -> invalidOp "expected")))
+        |> ignore
 
         Assert.Equal("old-svg", File.ReadAllText(svgPath))
         Assert.Equal("old-ai", File.ReadAllText(aiPath))
@@ -154,22 +129,18 @@ module FileResourceTests =
     let ``shell writer arrays are released when generation throws`` () =
         use output = new TemporaryDirectory()
 
-        let context = GenerationContext [new program(output.Path, "resource.c", C99)]
-        let environment = Aqualis(Some context)
+        use environment =
+            new Aqualis(Some output.Path, Some "resource.c", C99)
 
-        try
-            Assert.Throws<InvalidOperationException>(
-                Action(fun () ->
-                    shellscript.makeShellScript
-                        environment
-                        output.Path
-                        "resource"
-                        2
-                        (fun _ -> invalidOp "expected")))
-            |> ignore
-        finally
-            context.CurrentProgram.close()
-            context.Deactivate()
+        Assert.Throws<InvalidOperationException>(
+            Action(fun () ->
+                shellscript.makeShellScript
+                    environment
+                    output.Path
+                    "resource"
+                    2
+                    (fun _ -> invalidOp "expected")))
+        |> ignore
 
         for index in 1..2 do
             let path =
@@ -193,7 +164,8 @@ module FileResourceTests =
             |> Array.map (fun path ->
                 WriteLabel(new StreamWriter(path)))
 
-        let context = GenerationContext [new program(output.Path, "document.c", C99)]
+        use context =
+            new Aqualis(Some output.Path, Some "document.c", C99)
 
         use document =
             new TeXWriter(
@@ -206,7 +178,5 @@ module FileResourceTests =
                 output.Path)
 
         (document :> IDisposable).Dispose()
-        context.CurrentProgram.close()
-        context.Deactivate()
 
         paths |> Array.iter assertUnlocked
