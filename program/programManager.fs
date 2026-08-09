@@ -22,6 +22,14 @@ namespace Aqualis
         let contextId = System.Guid.NewGuid()
         let sequenceGate = obj()
         let mutable active = 1
+        let ensureActive() =
+            if active = 0 then
+                invalidOp "This Aqualis context is no longer active. Values created in a generation callback cannot be used outside that callback."
+        let withWriter (action:codeWriter -> unit) =
+            ensureActive()
+            match cwriter with
+            |Some writer -> action writer
+            |None -> ()
         let mutable displaySection = 0
         let mutable isOpenMpUsed = 0
         let mutable isOpenAccUsed = 0
@@ -49,7 +57,7 @@ namespace Aqualis
         member internal _.CurrentIndex with get() = currentIndex and set v = currentIndex <- v
         member internal _.ParallelMode with get() = parallelMode and set v = parallelMode <- v
         member internal _.SequenceGate = sequenceGate
-        member _.Active with get() = active and set v = active <- v
+        member _.Active = active
         member _.DisplaySection with get() = displaySection and set v = displaySection <- v
         member _.IsOpenMpUsed with get() = isOpenMpUsed and set v = isOpenMpUsed <- v
         member _.IsOpenAccUsed with get() = isOpenAccUsed and set v = isOpenAccUsed <- v
@@ -86,63 +94,22 @@ namespace Aqualis
         member val GotoLabels = gotoLabelController() with get
         member val Errors = errorIDController() with get
         member val Debug = debugController() with get
-        member _.comment(s:string) =
-            match cwriter with
-            |Some wr -> wr.comment s
-            |None -> ()
-        member _.codewrite(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewrite s
-            |None -> ()
-        member _.write(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewrite s
-            |None -> ()
-        member _.writen(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewriten s
-            |None -> ()
-        member _.writein(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewritein s
-            |None -> ()
-        member _.writei(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewritei s
-            |None -> ()
-        member _.codewritei(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewritei s
-            |None -> ()
-        member _.codewriten(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewriten s
-            |None -> ()
-        member _.codewritein(s:string) =
-            match cwriter with
-            |Some wr -> wr.codewritein s
-            |None -> ()
-        member _.codewritein(h:string,s:string) =
-            match cwriter with
-            |Some wr -> wr.codewritein (h,s)
-            |None -> ()
-        member _.indentInc() = 
-            match cwriter with
-            |Some wr -> wr.indent.inc()
-            |None -> ()
-        member _.indentDec() = 
-            match cwriter with
-            |Some wr -> wr.indent.dec()
-            |None -> ()
-        member _.appendOpen() = 
-            match cwriter with
-            |Some wr -> wr.appendOpen()
-            |None -> ()
-        member _.close() = 
-            match cwriter with
-            |Some wr -> wr.close()
-            |None -> ()
+        member _.comment(s:string) = withWriter (fun writer -> writer.comment s)
+        member _.codewrite(s:string) = withWriter (fun writer -> writer.codewrite s)
+        member _.write(s:string) = withWriter (fun writer -> writer.codewrite s)
+        member _.writen(s:string) = withWriter (fun writer -> writer.codewriten s)
+        member _.writein(s:string) = withWriter (fun writer -> writer.codewritein s)
+        member _.writei(s:string) = withWriter (fun writer -> writer.codewritei s)
+        member _.codewritei(s:string) = withWriter (fun writer -> writer.codewritei s)
+        member _.codewriten(s:string) = withWriter (fun writer -> writer.codewriten s)
+        member _.codewritein(s:string) = withWriter (fun writer -> writer.codewritein s)
+        member _.codewritein(h:string,s:string) = withWriter (fun writer -> writer.codewritein (h,s))
+        member _.indentInc() = withWriter (fun writer -> writer.indent.inc())
+        member _.indentDec() = withWriter (fun writer -> writer.indent.dec())
+        member _.appendOpen() = withWriter (fun writer -> writer.appendOpen())
+        member _.close() = withWriter (fun writer -> writer.close())
         member _.allCodes with get() =
+            ensureActive()
             match cwriter with
             |Some wr -> 
                 wr.close()
@@ -157,6 +124,7 @@ namespace Aqualis
 
         interface System.IDisposable with
             member _.Dispose() =
+                active <- 0
                 match cwriter with
                 |Some wr -> (wr :> System.IDisposable).Dispose()
                 |None -> ()
@@ -185,8 +153,7 @@ namespace Aqualis
             |> Option.defaultWith (fun () ->
                 invalidOp "The assignment target is not associated with a GenerationContext.")
         member private this.EnsureActive() =
-            if this.Active = 0 then
-                invalidOp "This GenerationContext is no longer active. Values created in a Compile callback cannot be used outside that callback."
+            ensureActive()
         /// <summary>Runs an operation in a child context with parallel mode enabled.</summary>
         member this.WithParallelMode(code:Aqualis -> 'T) : 'T =
             this.EnsureActive()
