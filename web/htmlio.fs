@@ -3,63 +3,87 @@ namespace Aqualis
 open System
 open System.IO
 
+type internal WebOutputLayout = {
+    OutputDirectory:string
+    ProjectName:string
+    MainFileName:string
+    MainHtmlPath:string
+    BodyTemporaryFileName:string
+    BodyTemporaryPath:string
+    ContentsName:string
+    ContentsDirectory:string }
+
+module internal WebOutputLayout =
+    let create outputDirectory projectName =
+        let mainFileName = projectName + ".html"
+        let bodyTemporaryFileName = projectName + "_body"
+        let contentsName = "contents_" + projectName
+        {
+            OutputDirectory = outputDirectory
+            ProjectName = projectName
+            MainFileName = mainFileName
+            MainHtmlPath = Path.Combine(outputDirectory, mainFileName)
+            BodyTemporaryFileName = bodyTemporaryFileName
+            BodyTemporaryPath = Path.Combine(outputDirectory, bodyTemporaryFileName)
+            ContentsName = contentsName
+            ContentsDirectory = Path.Combine(outputDirectory, contentsName)
+        }
+
+    let assetUrl (layout:WebOutputLayout) (fileName:string) =
+        layout.ContentsName + "/" + fileName.Replace('\\', '/')
+
 type HtmlGenerationContext internal (dir:string,projectName:string) =
-
-    // member private _.WithProgram index code =
-    //     context.WithProgram(index, fun child -> code (Aqualis(Some child)))
     let gate = obj()
-
-    let contentsDirectory = Path.Combine(dir, "contents_" + projectName)
+    let layout = WebOutputLayout.create dir projectName
     let mutable contentsCounter = -1
     let mutable animationSequenceCounter = -1
     let mutable animationGroupCounter = -1
     let mutable figureCounter = 0
     let mutable animationCounter = 0
-
     let mutable characterEnabled = true
     let mutable subtitleEnabled = true
     let mutable voiceEnabled = true
     let animationButtons = ResizeArray<string * string * int * int>()
     let audioFiles = ResizeArray<string>()
-    do Directory.CreateDirectory(contentsDirectory) |> ignore
+    do Directory.CreateDirectory(layout.ContentsDirectory) |> ignore
     // メインファイル
     let main = new Aqualis(
-        Some dir,
-        Some (projectName + ".html"),
+        Some layout.OutputDirectory,
+        Some layout.MainFileName,
         HTML)
     // HTML本体のコード
     let body = new Aqualis(
-        Some dir,
-        Some (projectName + "_body"),
+        Some layout.OutputDirectory,
+        Some layout.BodyTemporaryFileName,
         HTML)
     // JavaScriptのコード
     let jsMain = new Aqualis(
-        Some dir,
+        Some layout.OutputDirectory,
         Some (projectName + "_js"),
         JavaScript)
     // スライドアニメーション用javascriptファイル名
     let animationSeq = new Aqualis(
-        Some contentsDirectory,
+        Some layout.ContentsDirectory,
         Some "animationSeq.js",
         JavaScript)
     // スライドアニメーション(アニメーション開始)用javascript
     let jsAnimationStart = new Aqualis(
-        Some contentsDirectory,
+        Some layout.ContentsDirectory,
         Some "animationStart.js",
         JavaScript)
     // スライドアニメーション(アニメーションリセット)用javascript
     let jsAnimationSeqReset = new Aqualis(
-        Some contentsDirectory,
+        Some layout.ContentsDirectory,
         Some "animationSeqReset.js",
         JavaScript)
     // スライドアニメーション(アニメーションリセット)用javascript
     let jsAnimationReset = new Aqualis(
-        Some contentsDirectory,
+        Some layout.ContentsDirectory,
         Some "animationReset.js",
         JavaScript)
     // オートアニメーション実行用javascript
     let autoAnimation = new Aqualis(
-        Some contentsDirectory,
+        Some layout.ContentsDirectory,
         Some "autoAnimation.js",
         JavaScript)
 
@@ -89,7 +113,13 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
     member _.VoiceEnabled with get() = voiceEnabled and set(v) = voiceEnabled <- v
     
     /// <summary>Gets the directory that receives generated web content.</summary>
-    member _.ContentsDirectory = contentsDirectory
+    member _.ContentsDirectory = layout.ContentsDirectory
+
+    /// <summary>Gets the relative URL prefix used by generated web assets.</summary>
+    member _.ContentsUrlPrefix = layout.ContentsName
+
+    /// <summary>Builds a relative URL for a generated web asset.</summary>
+    member _.AssetUrl(fileName:string) = WebOutputLayout.assetUrl layout fileName
 
     /// <summary>Allocates the next unique HTML content number.</summary>
     member _.NextContentsNumber() =

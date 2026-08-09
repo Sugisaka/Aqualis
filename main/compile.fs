@@ -411,26 +411,28 @@ namespace Aqualis
                         context.delete()
                 |HTMLSequenceDiagram ->
                     // ディレクトリ作成
-                    if not <| Directory.Exists (dir + "\\" + "contents_" + projectname) then
-                        ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + projectname)
-                    // コンテンツディレクトリ
-                    let main = new Aqualis (
-                        Some (dir + "\\" + "contents_" + projectname), 
-                        Some (projectname + ".html"), 
+                    let layout = WebOutputLayout.create dir projectname
+                    Directory.CreateDirectory(layout.ContentsDirectory) |> ignore
+                    // HTML本体の一時出力
+                    use body = new Aqualis(
+                        Some layout.OutputDirectory,
+                        Some layout.BodyTemporaryFileName,
                         HTMLSequenceDiagram)
-                    let body = new Aqualis (
-                        Some (dir + "\\" + "contents_" + projectname), 
-                        Some (projectname + "_body"), 
-                        HTMLSequenceDiagram)
+                    use bodyCleanup =
+                        { new IDisposable with
+                            member _.Dispose() = body.delete() }
                     code body
+                    let bodyCode = body.allCodes |> Option.defaultValue ""
+                    use main = new Aqualis(
+                        Some layout.OutputDirectory,
+                        Some layout.MainFileName,
+                        HTMLSequenceDiagram)
                     // html書き込みストリーム作成
                     main.writein "<!DOCTYPE html>"
                     // html要素
                     main.html.tagb ("html", "lang=\"ja\"") <| fun () ->
                         // head要素
                         main.html.tagb ("head", "") <| fun () ->
-                            // titleタグ
-                            main.writein ("<title>"+projectname+"</title>")
                             // metaタグ
                             main.writein "<meta charset=\"UTF-8\">"
                             //追加（5/29）viewportタブ
@@ -440,11 +442,14 @@ namespace Aqualis
                                 main.writein projectname
                             // MathJax
                             main.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
-                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeq.js\"") <| fun () -> ()
-                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeqReset.js\"") <| fun () -> ()
-                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationStart.js\"") <| fun () -> ()
-                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationReset.js\"") <| fun () -> ()
-                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/autoAnimation.js\"") <| fun () -> ()
+                            for asset in
+                                [ "animationSeq.js"
+                                  "animationSeqReset.js"
+                                  "animationStart.js"
+                                  "animationReset.js"
+                                  "autoAnimation.js" ] do
+                                let assetUrl = WebOutputLayout.assetUrl layout asset
+                                main.html.tagb ("script", "type=\"text/javascript\" src=\"" + assetUrl + "\"") <| fun () -> ()
                             // webフォント取得
                             main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
                             main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
@@ -452,11 +457,7 @@ namespace Aqualis
                         // body要素
                         let s0 = Style [area.backGroundColor "#ffffff"]
                         main.html.tagb ("body", [s0.atr]) <| fun () ->
-                            match body.allCodes with |Some s-> main.writein s |None -> ()
-                    main.close()
-                    body.close()
-                    // bodyタグ一時コード削除
-                    body.delete()
+                            main.writein bodyCode
                 |Python ->
                     Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun context ->
                         //メインコード生成

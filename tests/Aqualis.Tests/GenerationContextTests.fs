@@ -49,6 +49,52 @@ module GenerationContextTests =
         Assert.Contains("<form", generated)
 
     [<Fact>]
+    let ``HTML sequence diagrams use the shared web output layout`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "sequence-layout"
+
+        Compile [HTMLSequenceDiagram] output.Path projectName "1" <| fun context ->
+            context.writein "<div id=\"sequence-body\"></div>"
+
+        let mainPath = Path.Combine(output.Path, projectName + ".html")
+        let contentsPath = Path.Combine(output.Path, "contents_" + projectName)
+        let misplacedMainPath = Path.Combine(contentsPath, projectName + ".html")
+        let bodyTemporaryPath = Path.Combine(output.Path, projectName + "_body")
+        let generated = File.ReadAllText mainPath
+
+        Assert.True(File.Exists mainPath)
+        Assert.True(Directory.Exists contentsPath)
+        Assert.False(File.Exists misplacedMainPath)
+        Assert.False(File.Exists bodyTemporaryPath)
+        Assert.Contains("id=\"sequence-body\"", generated)
+        Assert.Equal(1, generated.Split("<title>").Length - 1)
+
+        [ "animationSeq.js"
+          "animationSeqReset.js"
+          "animationStart.js"
+          "animationReset.js"
+          "autoAnimation.js" ]
+        |> List.iter (fun asset ->
+            Assert.Contains(
+                "src=\"contents_" + projectName + "/" + asset + "\"",
+                generated))
+
+    [<Fact>]
+    let ``HTML sequence diagram failures remove the temporary body`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "sequence-failure"
+        let bodyTemporaryPath = Path.Combine(output.Path, projectName + "_body")
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            Compile [HTMLSequenceDiagram] output.Path projectName "1" <| fun context ->
+                context.writein "partial body"
+                invalidOp "expected")
+        |> ignore
+
+        Assert.False(File.Exists bodyTemporaryPath)
+        Assert.False(File.Exists(Path.Combine(output.Path, projectName + ".html")))
+
+    [<Fact>]
     let ``operators functions and indexers share context validation`` () =
         use output = new TemporaryDirectory()
         use first = createContext output.Path "merge-first.c" C99

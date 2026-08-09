@@ -1418,8 +1418,8 @@ module dochtml =
             context.slideAnimation.writeAudioList()
             context.slideAnimation.jsSetCharacter()
             context.slideAnimation.jsSetSubtitle()
-            context.slideAnimation.jsDrawNext("contents_" + filename)
-            context.slideAnimation.jsDrawPrev("contents_" + filename)
+            context.slideAnimation.jsDrawNext(context.ContentsUrlPrefix)
+            context.slideAnimation.jsDrawPrev(context.ContentsUrlPrefix)
         // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
         let codeDraw = context.switchJSMain <| fun ctx ->
             ctx.allCodes
@@ -1447,11 +1447,11 @@ module dochtml =
                         ctx.writein filename
                     // MathJax
                     ctx.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeq.js\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeqReset.js\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationStart.js\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationReset.js\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/autoAnimation.js\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationSeq.js") + "\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationSeqReset.js") + "\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationStart.js") + "\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationReset.js") + "\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("autoAnimation.js") + "\"") <| fun () -> ()
                     // scriptタグ
                     ctx.html.tagb ("script", "") <| fun () ->
                         match codeDraw with |Some s -> ctx.writein s |None -> ()
