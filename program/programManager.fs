@@ -21,7 +21,7 @@ namespace Aqualis
         let structData = structure()
         let contextId = System.Guid.NewGuid()
         let sequenceGate = obj()
-        let mutable active = 0
+        let mutable active = 1
         let mutable displaySection = 0
         let mutable isOpenMpUsed = 0
         let mutable isOpenAccUsed = 0
@@ -173,12 +173,10 @@ namespace Aqualis
                     invalidOp "Values from different language cannot be combined."
             match left.CodeFile, right.CodeFile with
             |None, None -> Aqualis.BlankWriter lang
-            |Some context, None
+            |Some context, None -> left
             |None, Some context -> right
-            |Some leftContext, Some rightContext
-                when leftContext = rightContext -> left
-            |Some _, Some _ ->
-                invalidOp "Values from different GenerationContext instances cannot be combined."
+            |Some leftContext, Some rightContext when leftContext = rightContext -> left
+            |Some _, Some _ -> invalidOp "Values from different GenerationContext instances cannot be combined."
 
         static member mergeMany contexts =
             contexts |> Seq.fold Aqualis.merge (Aqualis.BlankWriter Numeric)
@@ -190,10 +188,11 @@ namespace Aqualis
             if this.Active = 0 then
                 invalidOp "This GenerationContext is no longer active. Values created in a Compile callback cannot be used outside that callback."
         /// <summary>Runs an operation in a child context with parallel mode enabled.</summary>
-        member this.WithParallelMode(code:Aqualis -> 'T) : 'T =
+        member this.WithParallelMode(code:Aqualis -> unit) =
             this.EnsureActive()
             this.ParallelMode <- true
             code this
+            this.ParallelMode <- false
 
         member _.Language with get() = lang
 

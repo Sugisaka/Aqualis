@@ -82,12 +82,12 @@ module private AnimationRendering =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationLine(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = context.htmlio.nextContentsID()
+type AnimationLine(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:int) =
+    let id = context.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.html.taga ("line", [Atr("id",id);]@[s0.atr])
+        context.BodyContext.html.taga ("line", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -97,7 +97,7 @@ type AnimationLine(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="f">描画対象となる線分</param>
     member this.P (f:Line) =
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             let t = AnimationRendering.time ctx
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    var x1 = " + AnimationRendering.renderDouble ctx (f.Start.X t) + ";")
@@ -109,7 +109,7 @@ type AnimationLine(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
             ctx.writein "    e.setAttribute(\"y1\", y1);"
             ctx.writein "    e.setAttribute(\"x2\", x2);"
             ctx.writein "    e.setAttribute(\"y2\", y2);"
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
@@ -119,12 +119,12 @@ type AnimationLine(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationEllipse(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = context.htmlio.nextContentsID()
+type AnimationEllipse(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:int) =
+    let id = context.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.html.taga ("ellipse", [Atr("id",id);]@[s0.atr])
+        context.BodyContext.html.taga ("ellipse", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -134,7 +134,7 @@ type AnimationEllipse(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="e">描画対象となる円</param>
     member this.P (e:Ellipse) =
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             let t = AnimationRendering.time ctx
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    var cx = " + AnimationRendering.renderDouble ctx (e.center.X t) + ";")
@@ -146,7 +146,7 @@ type AnimationEllipse(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
             ctx.writein "    e.setAttribute(\"cy\", cy);"
             ctx.writein "    e.setAttribute(\"rx\", rx);"
             ctx.writein "    e.setAttribute(\"ry\", ry);"
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
@@ -156,12 +156,12 @@ type AnimationEllipse(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationArc(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = context.htmlio.nextContentsID()
+type AnimationArc(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:int) =
+    let id = context.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.html.taga ("path", [Atr("id",id);]@[s0.atr])
+        context.BodyContext.html.taga ("path", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -171,7 +171,7 @@ type AnimationArc(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="e">描画対象となる円弧</param>
     member this.P (e:Arc) =
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             let t = AnimationRendering.time ctx
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             let a1 = Math.PI * e.angle1 t / 180
@@ -195,7 +195,7 @@ type AnimationArc(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
             ctx.writein ("    d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + largerOrSmaller + \" 0 \" + x2 + \" \" + y2 " + ";")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
             ctx.writein ("    e.setAttribute(\"d\", " + "d" + ");")
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
@@ -205,13 +205,13 @@ type AnimationArc(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationText(context:Aqualis,s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
-    let id = context.htmlio.nextContentsID()
+type AnimationText(context:HtmlGenerationContext,s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
+    let id = context.nextContentsID()
     let ss = Style ([{Key="position";Value="absolute"}]@s.list)
     let ss0 = Style ([{Key="display";Value="none"}]@ss.list)
     let ss1 = Style ([{Key="display";Value="block"}]@ss.list)
     do
-        context.html.tagb ("div", [Atr("id",id); ss0.atr]) <| fun () -> ()
+        context.BodyContext.html.tagb ("div", [Atr("id",id); ss0.atr]) <| fun () -> ()
     /// <summary>
     /// 割り当てられたidを取得
     /// </summary>
@@ -221,7 +221,7 @@ type AnimationText(context:Aqualis,s:Style,originX:int,originY:int,canvasX:int,c
     /// </summary>
     /// <param name="e">対象となるテキスト</param>
     member this.P (e:Text) =
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             let t = AnimationRendering.time ctx
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
@@ -231,7 +231,7 @@ type AnimationText(context:Aqualis,s:Style,originX:int,originY:int,canvasX:int,c
             ctx.writein "    x = x - e.offsetWidth/2;"
             ctx.writein "    y = y - e.offsetHeight/2;"
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
     /// <summary>
@@ -239,7 +239,7 @@ type AnimationText(context:Aqualis,s:Style,originX:int,originY:int,canvasX:int,c
     /// </summary>
     /// <param name="e">対象となる数式</param>
     member this.P (e:MathText<'a>) =
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             let t = AnimationRendering.time ctx
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
@@ -250,7 +250,7 @@ type AnimationText(context:Aqualis,s:Style,originX:int,originY:int,canvasX:int,c
             ctx.writein "    x = x - e.offsetWidth/2;"
             ctx.writein "    y = y - e.offsetHeight/2;"
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
 
@@ -260,12 +260,12 @@ type AnimationText(context:Aqualis,s:Style,originX:int,originY:int,canvasX:int,c
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationPolygon(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = context.htmlio.nextContentsID()
+type AnimationPolygon(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:int) =
+    let id = context.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.html.taga ("polygon", [Atr("id", id);] @ [s.atr])
+        context.BodyContext.html.taga ("polygon", [Atr("id", id);] @ [s.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -275,7 +275,7 @@ type AnimationPolygon(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="apex">多角形を構成する頂点座標のリスト</param>
     member this.P (apex:list<tposition>) =
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             let t = AnimationRendering.time ctx
             ctx.writein ("    var e = document.getElementById(\"" + id + "\");")
             ctx.writein "    var p = \"\";"
@@ -285,20 +285,20 @@ type AnimationPolygon(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
                 ctx.writein "    p = p + String(x) + \",\" + String(y) + \" \";"
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
             ctx.writein "    e.setAttribute(\"points\", p);"
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
 /// <summary>
 /// スライドアニメーション全体を管轄するクラス
 /// </summary>
-type ContextSlideAnimation internal (context:Aqualis) =
+type ContextSlideAnimation internal (context:HtmlGenerationContext) =
     /// <summary>
     /// 登録された音声ファイルの一覧を書きだす
     /// </summary>
     member this.writeAudioList() =
-        context.htmlio.switchJSMain <| fun ctx ->
-            let audioFiles = context.htmlio.AudioFiles
+        context.switchJSMain <| fun ctx ->
+            let audioFiles = context.AudioFiles
             ctx.writein "const audioList = ["
             for i in 0..audioFiles.Length-1 do
                 ctx.writein ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Length-1 then "," else "")
@@ -307,7 +307,7 @@ type ContextSlideAnimation internal (context:Aqualis) =
     /// キャラクター表示を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsSetCharacter() =
-        context.htmlio.switchJSMain <| fun ctx ->
+        context.switchJSMain <| fun ctx ->
             ctx.writein "let pagecount = 1;"
             ctx.writein "function setCharacter()"
             ctx.writein "{"
@@ -326,7 +326,7 @@ type ContextSlideAnimation internal (context:Aqualis) =
     /// 字幕表示を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsSetSubtitle() =
-        context.htmlio.switchJSMain <| fun ctx ->
+        context.switchJSMain <| fun ctx ->
             ctx.writein "function setSubtitle()"
             ctx.writein "{"
             ctx.writein "        const sws = document.getElementById(\"switchSubtitle\");"
@@ -347,8 +347,8 @@ type ContextSlideAnimation internal (context:Aqualis) =
     /// 次のページへの遷移を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsDrawNext(audioDir:string) =
-        context.htmlio.switchJSMain <| fun ctx ->
-            let animationCount = context.htmlio.AnimationCount
+        context.switchJSMain <| fun ctx ->
+            let animationCount = context.AnimationCount
             ctx.writein "function drawNext()"
             ctx.writein "{"
             ctx.writein "    resetAll();"
@@ -406,7 +406,7 @@ type ContextSlideAnimation internal (context:Aqualis) =
     /// 前のページへの遷移を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsDrawPrev(audioDir:string) =
-        context.htmlio.switchJSMain <| fun ctx ->
+        context.switchJSMain <| fun ctx ->
             ctx.writein "function drawPrev()"
             ctx.writein "{"
             ctx.writein "    resetAll();"
@@ -777,82 +777,7 @@ module HtmlWebExtensions =
                             {Key = "position"; Value = "absolute";}]
             this.tagb ("div", [(s1+s).atr]) <| fun () ->
                 this.Context.writein ("\\(" + text.code + "\\)")
-        /// <summary>
-        /// 指定位置に画像を表示する
-        /// </summary>
-        /// <param name="s">適用するスタイル</param>
-        /// <param name="p">表示位置</param>
-        /// <param name="filename">表示する画像のファイル名</param>
-        member this.image (s:Style,p:position) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
-                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
-            else
-                printfn "image file not exist: %s" filename
-            let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
-        member this.image (s:Style, id:string) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
-                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
-            else
-                printfn "image file not exist: %s" filename
-            this.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
-        member this.image (s:Style) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
-                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
-            else
-                printfn "image file not exist: %s" filename
-            this.taga ("img", [s.atr;Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
-        member this.image (filename:string) =
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
-                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
-            else
-                printfn "image file not exist: %s" filename
-            this.taga ("img", [Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
-        /// <summary>
-        /// 指定位置に動画を表示する
-        /// </summary>
-        /// <param name="s">適用するスタイル</param>
-        /// <param name="p">表示位置</param>
-        /// <param name="filename">表示する動画のファイル名</param>
-        member this.video (s:Style,p:position) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
-                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
-            else
-                printfn "video file not exist: %s" filename
-            let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.tagv ("video", [st.atr;Atr("src", this.Context.htmlio.ContentsDirectory + "\\" + f); Atr("controls", "")])
-            this.tage "video"
-        member this.video (s:Style) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
-                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
-            else
-                printfn "video file not exist: %s" filename
-            this.tagv ("video", [s.atr;Atr("src", this.Context.htmlio.ContentsDirectory + "\\" + f); Atr("controls", "")])
-            this.tage "video"
+
 
         /// <summary>
         /// コードブロックを生成
@@ -937,117 +862,7 @@ module HtmlWebExtensions =
         member this.eq(text:complex0) =
             this.Context.writein ("\\("+text.Expr.evalL this.Context + "\\)")
 
-        /// <summary>
-        /// キャラクター付き解説ページ
-        /// </summary>
-        member this.page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
-            this.slide position.Origin <| fun p ->
-                let animationCounter = this.Context.htmlio.AnimationCount
-                let contentsDirectory = this.Context.htmlio.ContentsDirectory
-                // 音声ファイル追加
-                this.Context.htmlio.AddAudioFile(
-                    match audioFile with |Some t -> t |None -> "")
-                // 字幕枠
-                this.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.Context.htmlio.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
-                    ()
-                // キャラクター画像
-                this.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.Context.htmlio.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
-                    for ci in c do
-                        if File.Exists ci.CharacterImageFile then
-                            if Directory.Exists contentsDirectory then
-                                File.Copy(ci.CharacterImageFile, contentsDirectory+"\\"+Path.GetFileName ci.CharacterImageFile, true)
-                                this.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
-                            else
-                                printfn "directory not exist: %s" contentsDirectory
-                        else
-                            printfn "character image file not exist: %s" ci.CharacterImageFile
-                // 字幕
-                this.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.Context.htmlio.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                    <| fun () -> this.Context.writein audio.Subtitle
-                this.Context.htmlio.switchAutoAnimation <| fun ctx ->
-                    ctx.writein ("page"+animationCounter.ToString()+": () => {")
-                // メインコンテンツ
-                this.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
-                    code2 p
-                this.Context.htmlio.switchAutoAnimation <| fun ctx ->
-                    ctx.writein "},"
-                match this.Context.htmlio.TryLastAnimationButton() with
-                | Some(fStartName,fResetName,btnx,btny) ->
-                    this.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
-                    this.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
-                | None -> ()
-                this.Context.htmlio.ClearAnimationButtons()
-        /// <summary>
-        /// 指定位置にスライドを生成
-        /// </summary>
-        /// <param name="p">スライドの表示位置</param>
-        member this.slide (p:position)  code =
-                let animationCounter = this.Context.htmlio.NextAnimationNumber()
-                this.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
-                    code p
-        /// <summary>
-        /// 前のページへ移動するボタンを生成
-        /// </summary>
-        member this.prevButton() =
-                this.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
-                    this.Context.writein "前へ"
-        /// <summary>
-        /// 次のページへ移動するボタンを生成
-        /// </summary>
-        member this.nextButton() =
-                this.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
-                    this.Context.writein "次へ"
-        /// <summary>
-        /// アニメーションを開始するボタンを生成
-        /// </summary>
-        member this.startButton2(id:string) (s:Style) (c:string) =
-                this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                    this.Context.writein "Start"
-        /// <summary>
-        /// アニメーションをリセットするボタンを生成
-        /// </summary>
-        member this.resetButton2(id:string) (s:Style) (c:string) =
-                this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                    this.Context.writein "Reset"
-        /// <summary>
-        /// キャラクター表示を制御するチェックボックスを生成
-        /// </summary>
-        member this.switchCharacter() =
-            this.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.Context.htmlio.CharacterEnabled then "checked" else "")
-            this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
-                this.Context.writein "キャラクター"
-        /// <summary>
-        /// 字幕表示を制御するチェックボックスを生成
-        /// </summary>
-        member this.switchSubtitle() =
-            this.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.Context.htmlio.SubtitleEnabled then "checked" else "")
-            this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
-                this.Context.writein "字幕"
-        /// <summary>
-        /// 音声再生を制御するチェックボックスを生成
-        /// </summary>
-        member this.switchAudio() =
-            this.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.Context.htmlio.VoiceEnabled then "checked" else "")
-            this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
-                this.Context.writein "音声"
-        member this.audioPlayer() =
-                this.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
-        /// <summary>
-        /// 指定位置に画像を表示
-        /// </summary>
-        member this.imageA (s:Style) = fun (p:position) (filename:string) ->
-            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
-                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
-                            {Key = "position"; Value = "absolute";}]
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
-                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
-            else
-                printfn "image file not exist: %s" filename
-            this.taga ("img", [(s1+s).atr])
+
         /// <summary>
         /// 指定位置・サイズでテキストブロックを生成
         /// </summary>
@@ -1070,6 +885,239 @@ module HtmlWebExtensions =
             Right = p.x+double width+2.0*double padding;
             Top = p.y;
             Bottom = p.y+double height+2.0*double padding;}
+
+[<AutoOpen>]
+module HtmlGenerationExtensions =
+    type HtmlGenerationContext with
+        // member this.taga (t:string,atr:list<Atr>,c:Aqualis) =
+        //     c.writein("<"+t+" "+Atr.list atr+" />")
+        // /// 内部要素のないタグ
+        // member this.taga (t:string,c:Aqualis) =
+        //     c.writein("<"+t+" ")
+        //     c.writein " />"
+        // /// 内部要素のないタグ
+        // member this.taga (t:string,a:string,c:Aqualis) =
+        //     c.writein("<"+t+" "+a+" />")
+        // /// 内部要素のあるタグ
+        // member this.tagb (t:string,atr:list<Atr>,c:Aqualis) = fun code ->
+        //     let a = Atr.list atr
+        //     if a = "" then
+        //         c.writein("<"+t+">")
+        //     else
+        //         c.writein("<"+t+" "+a+" >")
+        //     code()
+        //     c.writein ("</"+t+">")
+
+        // /// 内部要素のあるタグ
+        // member this.tagb (t:string,a:string,c:Aqualis) = fun code ->
+        //     if a="" then
+        //         c.writein("<"+t+">")
+        //     else
+        //         c.writein("<"+t+" "+a+">")
+        //     code()
+        //     c.writein ("</"+t+">")
+        // /// 内部要素のあるタグ
+        // member this.tagb (t:string,c:Aqualis) = fun code ->
+        //     c.writein("<"+t+">")
+        //     code()
+        //     c.writein ("</"+t+">")
+        // member this.tagv (t:string,atr:list<Atr>,c:Aqualis) =
+        //     c.writein("<" + t + " " + Atr.list atr + ">")
+        // member this.tage (t:string,c:Aqualis) =
+        //     c.writein("</" + t + ">")
+        // member this.tag (tagname:string,c:Aqualis) (s:string) code =
+        //     this.tagb (tagname, s, c) code
+        // member this.tag_ (tagname:string,c:Aqualis) (s:string) =
+        //     this.taga (tagname, s, c)
+            
+        /// <summary>
+        /// 指定位置に画像を表示する
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="filename">表示する画像のファイル名</param>
+        member this.image (s:Style,p:position) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.ContentsDirectory) then
+                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.ContentsDirectory)
+            else
+                printfn "image file not exist: %s" filename
+            let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
+            this.BodyContext.html.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.ContentsDirectory) + "\\" + f)])
+        member this.image (s:Style, id:string) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists this.ContentsDirectory then
+                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" this.ContentsDirectory
+            else
+                printfn "image file not exist: %s" filename
+            this.BodyContext.html.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+        member this.image (s:Style) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists this.ContentsDirectory then
+                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" this.ContentsDirectory
+            else
+                printfn "image file not exist: %s" filename
+            this.BodyContext.html.taga ("img", [s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+        member this.image (filename:string) =
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists this.ContentsDirectory then
+                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" this.ContentsDirectory
+            else
+                printfn "image file not exist: %s" filename
+            this.BodyContext.html.taga ("img", [Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+        /// <summary>
+        /// 指定位置に動画を表示する
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="filename">表示する動画のファイル名</param>
+        member this.video (s:Style,p:position) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists this.ContentsDirectory then
+                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" this.ContentsDirectory
+            else
+                printfn "video file not exist: %s" filename
+            let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
+            this.BodyContext.html.tagv ("video", [st.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.BodyContext.html.tage "video"
+        member this.video (s:Style) = fun (filename:string) ->
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists this.ContentsDirectory then
+                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" this.ContentsDirectory
+            else
+                printfn "video file not exist: %s" filename
+            this.BodyContext.html.tagv ("video", [s.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.BodyContext.html.tage "video"
+        /// <summary>
+        /// キャラクター付き解説ページ
+        /// </summary>
+        member this.page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
+            this.slide position.Origin <| fun p ->
+                let animationCounter = this.AnimationCount
+                let contentsDirectory = this.ContentsDirectory
+                // 音声ファイル追加
+                this.AddAudioFile(
+                    match audioFile with |Some t -> t |None -> "")
+                // 字幕枠
+                this.BodyContext.html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                    ()
+                // キャラクター画像
+                this.BodyContext.html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
+                    for ci in c do
+                        if File.Exists ci.CharacterImageFile then
+                            if Directory.Exists contentsDirectory then
+                                File.Copy(ci.CharacterImageFile, contentsDirectory+"\\"+Path.GetFileName ci.CharacterImageFile, true)
+                                this.BodyContext.html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
+                            else
+                                printfn "directory not exist: %s" contentsDirectory
+                        else
+                            printfn "character image file not exist: %s" ci.CharacterImageFile
+                // 字幕
+                this.BodyContext.html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                    <| fun () -> this.BodyContext.writein audio.Subtitle
+                this.switchAutoAnimation <| fun ctx ->
+                    ctx.writein ("page"+animationCounter.ToString()+": () => {")
+                // メインコンテンツ
+                this.BodyContext.html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
+                    code2 p
+                this.switchAutoAnimation <| fun ctx ->
+                    ctx.writein "},"
+                match this.TryLastAnimationButton() with
+                | Some(fStartName,fResetName,btnx,btny) ->
+                    this.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
+                    this.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
+                | None -> ()
+                this.ClearAnimationButtons()
+        /// <summary>
+        /// 指定位置にスライドを生成
+        /// </summary>
+        /// <param name="p">スライドの表示位置</param>
+        member this.slide (p:position)  code =
+                let animationCounter = this.NextAnimationNumber()
+                this.BodyContext.html.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
+                    code p
+        /// <summary>
+        /// 前のページへ移動するボタンを生成
+        /// </summary>
+        member this.prevButton() =
+                this.BodyContext.html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
+                    this.BodyContext.writein "前へ"
+        /// <summary>
+        /// 次のページへ移動するボタンを生成
+        /// </summary>
+        member this.nextButton() =
+                this.BodyContext.html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
+                    this.BodyContext.writein "次へ"
+        /// <summary>
+        /// アニメーションを開始するボタンを生成
+        /// </summary>
+        member this.startButton2(id:string) (s:Style) (c:string) =
+                this.BodyContext.html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
+                    this.BodyContext.writein "Start"
+        /// <summary>
+        /// アニメーションをリセットするボタンを生成
+        /// </summary>
+        member this.resetButton2(id:string) (s:Style) (c:string) =
+                this.BodyContext.html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
+                    this.BodyContext.writein "Reset"
+        /// <summary>
+        /// キャラクター表示を制御するチェックボックスを生成
+        /// </summary>
+        member this.switchCharacter() =
+            this.BodyContext.html.taga ("input", ("type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.CharacterEnabled then "checked" else ""))
+            this.BodyContext.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
+                this.BodyContext.writein "キャラクター"
+        /// <summary>
+        /// 字幕表示を制御するチェックボックスを生成
+        /// </summary>
+        member this.switchSubtitle() =
+            this.BodyContext.html.taga ("input", ("type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.SubtitleEnabled then "checked" else ""))
+            this.BodyContext.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
+                this.BodyContext.writein "字幕"
+        /// <summary>
+        /// 音声再生を制御するチェックボックスを生成
+        /// </summary>
+        member this.switchAudio() =
+            this.BodyContext.html.taga ("input", ("type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.VoiceEnabled then "checked" else ""))
+            this.BodyContext.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
+                this.BodyContext.writein "音声"
+        member this.audioPlayer() =
+                this.BodyContext.html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
+        /// <summary>
+        /// 指定位置に画像を表示
+        /// </summary>
+        member this.imageA (s:Style) = fun (p:position) (filename:string) ->
+            let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
+                            {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
+                            {Key = "position"; Value = "absolute";}]
+            let f = Path.GetFileName filename
+            if File.Exists filename then
+                if Directory.Exists (this.ContentsDirectory) then
+                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
+                else
+                    printfn "directory not exist: %s" (this.ContentsDirectory)
+            else
+                printfn "image file not exist: %s" filename
+            this.BodyContext.html.taga ("img", [(s1+s).atr])
+
 /// <summary>
 /// 図形アニメーションを管理するクラス
 /// </summary>
@@ -1078,10 +1126,10 @@ module HtmlWebExtensions =
 /// <param name="canvasX, canvasY">キャンパスのサイズ</param>
 [<AutoOpen>]
 module CompilationEnvironmentAnimationExtensions =
-    type Aqualis with
+    type HtmlGenerationContext with
         member this.slideAnimation = ContextSlideAnimation(this)
 
-type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
+type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
     /// アニメーションの実行順序リスト
     let mutable animeFlow:list<string*string*AnimationSetting*bool> = []
@@ -1095,15 +1143,15 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
     /// <param name="setFigure">図形にアニメーション設定を適用する関数</param>
     member this.seq (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
         // アニメーションシーケンスIDを発行
-        let idstart,idreset = context.htmlio.nextAnimationSeqID()
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        let idstart,idreset = context.nextAnimationSeqID()
+        context.switchAnimationSeq <| fun ctx ->
             ctx.writein ("function "+idstart+"(t){")
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("function "+idreset+"(){")
         setFigure setting
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             ctx.writein "}"
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein "}"
         animeFlow <- animeFlow@[idstart,idreset,setting,false]
     /// <summary>
@@ -1111,15 +1159,15 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
     /// </summary>
     member this.loop (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
         // アニメーションシーケンスIDを発行
-        let idstart,idreset = context.htmlio.nextAnimationSeqID()
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        let idstart,idreset = context.nextAnimationSeqID()
+        context.switchAnimationSeq <| fun ctx ->
             ctx.writein ("function "+idstart+"(t){")
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein ("function "+idreset+"(){")
         setFigure setting
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             ctx.writein "}"
-        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+        context.switchJSAnimationSeqReset <| fun ctx ->
             ctx.writein "}"
         animeFlow <- animeFlow@[idstart,idreset,setting,true]
     /// <summary>
@@ -1142,7 +1190,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             Atr("y1",InvariantFormat.number (double canvasY-startP.y))
             Atr("x2",InvariantFormat.number endP.x)
             Atr("y2",InvariantFormat.number (double canvasY-endP.y))]
-        context.html.taga ("line", [s.atr]@c)
+        context.BodyContext.html.taga ("line", [s.atr]@c)
     /// <summary>
     /// 楕円を描画
     /// </summary>
@@ -1154,7 +1202,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             Atr("cy",InvariantFormat.number (double canvasY-center.y))
             Atr("rx",InvariantFormat.number radiusX)
             Atr("ry",InvariantFormat.number radiusY)]
-        context.html.taga ("ellipse", [s.atr]@c)
+        context.BodyContext.html.taga ("ellipse", [s.atr]@c)
     /// <summary>
     /// 円を描画
     /// </summary>
@@ -1176,7 +1224,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
                 "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 0 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
             else
                 "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 1 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
-        context.html.taga ("path", [s.atr]@[Atr("d",d)])
+        context.BodyContext.html.taga ("path", [s.atr]@[Atr("d",d)])
     /// <summary>
     /// 多角形を描画
     /// </summary>
@@ -1186,7 +1234,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             apex
             |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
-        context.html.taga ("polygon", [s.atr]@[Atr("points",pp)])
+        context.BodyContext.html.taga ("polygon", [s.atr]@[Atr("points",pp)])
     /// <summary>
     /// 折れ線を描画
     /// </summary>
@@ -1196,7 +1244,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             apex
             |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
-        context.html.taga ("polyline", [s.atr]@[Atr("points",pp)])
+        context.BodyContext.html.taga ("polyline", [s.atr]@[Atr("points",pp)])
     /// <summary>
     /// 始点から終点に向かう矢印付き直線を描画
     /// </summary>
@@ -1227,7 +1275,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             Atr("y",InvariantFormat.number (double canvasY-center.y-0.5*sy))
             Atr("width",InvariantFormat.number sx)
             Atr("height",InvariantFormat.number sy)]
-        context.html.taga ("rect", [s.atr]@c)
+        context.BodyContext.html.taga ("rect", [s.atr]@c)
     /// <summary>
     /// テキストを表示
     /// </summary>
@@ -1240,8 +1288,8 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.html.tagb ("div", [ss.atr]) <| fun () ->
-            context.writein str
+        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.BodyContext.writein str
     /// <summary>
     /// 数式を描画
     /// </summary>
@@ -1253,8 +1301,8 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.html.tagb ("div", [ss.atr]) <| fun () ->
-            context.writein ("\\(" + e.Expr.evalH (context) + "\\)")
+        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.BodyContext.writein ("\\(" + e.Expr.evalH context.BodyContext + "\\)")
     /// <summary>
     /// 数式を描画
     /// </summary>
@@ -1266,8 +1314,8 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.html.tagb ("div", [ss.atr]) <| fun () ->
-            context.writein ("\\(" + e.Expr.evalH (context) + "\\)")
+        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.BodyContext.writein ("\\(" + e.Expr.evalH context.BodyContext + "\\)")
     /// <summary>
     /// 数式を描画
     /// </summary>
@@ -1279,29 +1327,29 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.html.tagb ("div", [ss.atr]) <| fun () ->
-            context.writein ("\\(" + e.Expr.evalH (context) + "\\)")
+        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.BodyContext.writein ("\\(" + e.Expr.evalH context.BodyContext + "\\)")
     /// <summary>
     /// 画像を表示
     /// </summary>
     /// <param name="filename">画像のファイル名</param>
     member this.image (s:Style) (center:position) (filename:string) =
         let f = Path.GetFileName filename
-        File.Copy(filename, context.htmlio.ContentsDirectory + "\\" + f, true)
+        File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.html.taga ("img", [ss.atr; Atr("src",context.htmlio.ContentsDirectory + "\\" + f)])
+        context.BodyContext.html.taga ("img", [ss.atr; Atr("src",context.ContentsDirectory + "\\" + f)])
     /// <summary>
     /// 開始ボタンの制御用JavaScriptコードを生成
     /// </summary>
     /// <param name="buttonIndex">対象となるボタンの識別子</param>
     member this.jsStartControll(buttonIndex:string) =
         let fname = "start" + buttonIndex
-        context.htmlio.switchJSAnimationStart <| fun ctx ->
+        context.switchJSAnimationStart <| fun ctx ->
             ctx.writein (fname+": () => {")
             for idstart,_,setting,isLoop in animeFlow do
                 if isLoop then
@@ -1320,7 +1368,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
     /// </summary>
     member this.jsResetControll(buttonIndex:string) =
         let fname = "reset" + buttonIndex
-        context.htmlio.switchJSAnimationReset <| fun ctx ->
+        context.switchJSAnimationReset <| fun ctx ->
             ctx.writein (fname+": () => {")
             for _,idreset,_,_ in animeFlow do
                 ctx.writein ("    " + idreset + "();")
@@ -1330,7 +1378,7 @@ type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canv
     /// アニメーション用のJavaScriptコードを生成
     /// </summary>
     member _.jsAnimation codejs =
-        context.htmlio.switchBody <| fun ctx ->
+        context.switchBody <| fun ctx ->
             ctx.writein "var t = 0;"
             ctx.writein "var dt = 1;"
             ctx.writein "window.onload=function(){"
@@ -1357,19 +1405,15 @@ module dochtml =
         isPageAnimation
         code =
         // ディレクトリ作成
-        if not <| Directory.Exists (dir + "\\" + "contents_" + filename) then
-            ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + filename)
         // コンテンツディレクトリ
-        let context = new Aqualis(Some dir, Some filename,HTML)
-        context.htmlio.ContentsDirectory <-
-            dir + "\\" + "contents_" + filename
-        context.htmlio.switchJSAnimationStart <| fun ctx ->
+        use context = new HtmlGenerationContext(dir, filename)
+        context.switchJSAnimationStart <| fun ctx ->
             ctx.writein "const animationStartMap = {"
-        context.htmlio.switchJSAnimationReset <| fun ctx ->
+        context.switchJSAnimationReset <| fun ctx ->
             ctx.writein "const animationResetMap = {"
-        context.htmlio.switchAutoAnimation <| fun ctx ->
+        context.switchAutoAnimation <| fun ctx ->
             ctx.writein "const autoAnimationMap = {"
-        context.htmlio.switchAnimationSeq <| fun ctx ->
+        context.switchAnimationSeq <| fun ctx ->
             ctx.writein "function repeatSeq(fn, interval, Nt, onComplete)"
             ctx.writein "{"
             ctx.writein "    let t = 0;"
@@ -1403,8 +1447,7 @@ module dochtml =
             ctx.writein "    }"
             ctx.writein "    run();"
             ctx.writein "}"
-        context.htmlio.switchBody <| fun ctx ->
-            code ctx
+        code context
         if isPageAnimation then
             context.slideAnimation.writeAudioList()
             context.slideAnimation.jsSetCharacter()
@@ -1412,12 +1455,12 @@ module dochtml =
             context.slideAnimation.jsDrawNext("contents_" + filename)
             context.slideAnimation.jsDrawPrev("contents_" + filename)
         // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
-        let codeDraw = context.htmlio.switchJSMain <| fun ctx ->
+        let codeDraw = context.switchJSMain <| fun ctx ->
             ctx.allCodes
-        let codeBody = context.htmlio.switchBody <| fun ctx ->
+        let codeBody = context.switchBody <| fun ctx ->
             ctx.allCodes
         // html書き込みストリーム作成
-        context.htmlio.switchMain <| fun ctx ->
+        context.switchMain <| fun ctx ->
             ctx.writein "<!DOCTYPE html>"
             // html要素
             ctx.html.tagb ("html", "lang=\"ja\"") <| fun () ->
@@ -1489,10 +1532,10 @@ module dochtml =
                         ctx.html.tagb ("div", [s1.atr]) <| fun () ->
                             match codeBody with |Some s -> ctx.writein s |None -> ()
 
-                ctx.htmlio.switchJSAnimationStart <| fun ctx ->
+                context.switchJSAnimationStart <| fun ctx ->
                     ctx.writein "test: () => {}"
                     ctx.writein "};"
-                ctx.htmlio.switchJSAnimationReset <| fun ctx ->
+                context.switchJSAnimationReset <| fun ctx ->
                     ctx.writein "test: () => {}"
                     ctx.writein "};"
                     ctx.writein ""
@@ -1503,15 +1546,13 @@ module dochtml =
                     ctx.writein "        }"
                     ctx.writein "    }"
                     ctx.writein "}"
-                ctx.htmlio.switchAutoAnimation <| fun ctx ->
+                context.switchAutoAnimation <| fun ctx ->
                     ctx.writein "test: () => {}"
                     ctx.writein "};"
-                for i in 0..7 do
-                    ctx.htmlio.switchBody <| fun c -> c.close()
                 // bodyタグ一時コード削除
-                ctx.htmlio.switchBody <| fun c -> c.delete()
+                context.switchBody <| fun c -> c.delete()
                 // JavaScript関数一時コード削除
-                ctx.htmlio.switchJSMain <| fun c -> c.delete()
+                context.switchJSMain <| fun c -> c.delete()
 
     /// 全体がキャンバスの無制限レイアウト
     let htmlpresentation
@@ -1533,7 +1574,7 @@ module dochtml =
 
     let freeCanvas outputdir filename (title:string) cssfile code =
         htmlpresentation outputdir filename title cssfile (None, None) false <| fun ctx ->
-            ctx.html.canvas <| Style [size.width "0px"; size.height "0px"] <| fun () -> code ctx
+            ctx.BodyContext.html.canvas <| Style [size.width "0px"; size.height "0px"] <| fun () -> code ctx
 
     /// 全体がキャンバスの無制限レイアウト
     let freePage outputdir filename (title:string) cssfile code =
@@ -1545,17 +1586,17 @@ module dochtml =
 
     let fixedPage outputdir filename (title:string) pageWidth pageHeight cssfile code =
         htmlpresentationCore outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun ctx ->
-            code ctx
-            ctx.html.prevButton()
-            ctx.html.nextButton()
-            ctx.html.switchCharacter()
-            ctx.html.switchSubtitle()
-            ctx.html.switchAudio()
-            ctx.html.audioPlayer()
+            code ctx.BodyContext
+            ctx.prevButton()
+            ctx.nextButton()
+            ctx.switchCharacter()
+            ctx.switchSubtitle()
+            ctx.switchAudio()
+            ctx.audioPlayer()
 
 [<AutoOpen>]
 module htmlexpr2 =
-    type html with
+    type HtmlGenerationContext with
         /// <summary>
         /// 手動操作型のアニメーション領域を生成
         /// </summary>
@@ -1563,12 +1604,11 @@ module htmlexpr2 =
         /// <param name="p">表示位置</param>
         /// <param name="buttonX, buttonY">操作ボタンの配置座標</param>
         member this.animationManual (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
-            let context = this.Context
             let f =
                 FigureAnimation(
-                    context, context.htmlio.NextFigureNumber(),
+                    this, this.NextFigureNumber(),
                     s.mX,s.mY,s.sX,s.sY)
-            context.htmlio.switchBody <| fun ctx ->
+            this.switchBody <| fun ctx ->
                 ctx.writein  ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 ctx.writein  ("width=\""+CssLength.pixelsInt s.sX+"\" ")
                 ctx.writein  ("height=\""+CssLength.pixelsInt s.sY+"\" ")
@@ -1580,21 +1620,20 @@ module htmlexpr2 =
                 ctx.writein  "\">"
                 code(f,p)
                 ctx.writein  "</svg>"
-            let asc = context.htmlio.nextAnimationGroup()
+            let asc = this.nextAnimationGroup()
             let fnameStart = f.jsStartControll asc
             let fnameReset = f.jsResetControll asc
-            context.htmlio.addAnimationButton(fnameStart,fnameReset,buttonX,buttonY)
+            this.addAnimationButton(fnameStart,fnameReset,buttonX,buttonY)
 
         /// <summary>
         /// 自動再生型のアニメーション領域を生成する
         /// </summary>
         member this.animationAuto (s:ViewBoxStyle) (p:position) code =
-            let context = this.Context
             let f =
                 FigureAnimation(
-                    context, context.htmlio.NextFigureNumber(),
+                    this, this.NextFigureNumber(),
                     s.mX,s.mY,s.sX,s.sY)
-            context.htmlio.switchBody <| fun ctx ->
+            this.switchBody <| fun ctx ->
                 ctx.writein  ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
                 ctx.writein  ("width=\""+CssLength.pixelsInt s.sX+"\" ")
                 ctx.writein  ("height=\""+CssLength.pixelsInt s.sY+"\" ")
@@ -1606,7 +1645,7 @@ module htmlexpr2 =
                 ctx.writein  "\">"
                 code(f,p)
                 ctx.writein  "</svg>"
-            let asc = context.htmlio.nextAnimationGroup()
+            let asc = this.nextAnimationGroup()
             let fnameStart = f.jsStartControll asc
             let fnameReset = f.jsResetControll asc
-            context.htmlio.addAutoAnimation(fnameStart,fnameReset)
+            this.addAutoAnimation(fnameStart,fnameReset)

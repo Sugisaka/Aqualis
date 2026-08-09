@@ -1,12 +1,15 @@
 namespace Aqualis
 
-type ContextHtmlIo internal (context:Aqualis) =
+open System
+open System.IO
+
+type HtmlGenerationContext internal (dir:string,projectName:string) =
 
     // member private _.WithProgram index code =
     //     context.WithProgram(index, fun child -> code (Aqualis(Some child)))
     let gate = obj()
 
-    let mutable contentsDirectory = ""
+    let contentsDirectory = Path.Combine(dir, "contents_" + projectName)
     let mutable contentsCounter = -1
     let mutable animationSequenceCounter = -1
     let mutable animationGroupCounter = -1
@@ -18,48 +21,60 @@ type ContextHtmlIo internal (context:Aqualis) =
     let mutable voiceEnabled = true
     let animationButtons = ResizeArray<string * string * int * int>()
     let audioFiles = ResizeArray<string>()
-    let dir = match context.Dir with |Some s -> s |None -> ""
-    let filename = match context.ProjectName with |Some s -> s |None -> ""
+    do Directory.CreateDirectory(contentsDirectory) |> ignore
     // メインファイル
     let main = new Aqualis(
-        (match context.Dir with |Some s -> Some dir |None -> None), 
-        Some (filename + ".html"), 
+        Some dir,
+        Some (projectName + ".html"),
         HTML)
     // HTML本体のコード
     let body = new Aqualis(
-        (match context.Dir with |Some s -> Some dir |None -> None), 
-        Some (filename + "_body"), 
+        Some dir,
+        Some (projectName + "_body"),
         HTML)
     // JavaScriptのコード
     let jsMain = new Aqualis(
-        (match context.Dir with |Some s -> Some dir |None -> None), 
-        (match context.ProjectName with |Some filename -> Some (filename + "_js") |None -> None), 
+        Some dir,
+        Some (projectName + "_js"),
         JavaScript)
     // スライドアニメーション用javascriptファイル名
     let animationSeq = new Aqualis(
-        (match context.Dir with |Some s -> Some (dir  + "\\" + "contents_" + filename) |None -> None), 
-        (match context.ProjectName with |Some filename -> Some "animationSeq.js" |None -> None), 
+        Some contentsDirectory,
+        Some "animationSeq.js",
         JavaScript)
     // スライドアニメーション(アニメーション開始)用javascript
     let jsAnimationStart = new Aqualis(
-        (match context.Dir with |Some s -> Some (dir  + "\\" + "contents_" + filename) |None -> None), 
-        (match context.ProjectName with |Some filename -> Some "animationStart.js" |None -> None), 
+        Some contentsDirectory,
+        Some "animationStart.js",
         JavaScript)
     // スライドアニメーション(アニメーションリセット)用javascript
     let jsAnimationSeqReset = new Aqualis(
-        (match context.Dir with |Some s -> Some (dir  + "\\" + "contents_" + filename) |None -> None), 
-        (match context.ProjectName with |Some filename -> Some "animationSeqReset.js" |None -> None), 
+        Some contentsDirectory,
+        Some "animationSeqReset.js",
         JavaScript)
     // スライドアニメーション(アニメーションリセット)用javascript
     let jsAnimationReset = new Aqualis(
-        (match context.Dir with |Some s -> Some (dir  + "\\" + "contents_" + filename) |None -> None), 
-        (match context.ProjectName with |Some filename -> Some "animationReset.js" |None -> None), 
+        Some contentsDirectory,
+        Some "animationReset.js",
         JavaScript)
     // オートアニメーション実行用javascript
     let autoAnimation = new Aqualis(
-        (match context.Dir with |Some s -> Some (dir  + "\\" + "contents_" + filename) |None -> None), 
-        (match context.ProjectName with |Some filename -> Some "autoAnimation.js" |None -> None), 
+        Some contentsDirectory,
+        Some "autoAnimation.js",
         JavaScript)
+
+    let ownedContexts =
+        [| main
+           body
+           jsMain
+           animationSeq
+           jsAnimationStart
+           jsAnimationSeqReset
+           jsAnimationReset
+           autoAnimation |]
+
+    member _.BodyContext with get() = body
+
     member this.switchMain code = code main
     member this.switchBody code = code body
     member this.switchJSMain code = code jsMain
@@ -73,10 +88,8 @@ type ContextHtmlIo internal (context:Aqualis) =
     member _.SubtitleEnabled with get() = subtitleEnabled and set(v) = subtitleEnabled <- v
     member _.VoiceEnabled with get() = voiceEnabled and set(v) = voiceEnabled <- v
     
-    /// <summary>Gets or sets the directory that receives generated web content.</summary>
-    member _.ContentsDirectory
-        with get() = lock gate (fun () -> contentsDirectory)
-        and set value = lock gate (fun () -> contentsDirectory <- value)
+    /// <summary>Gets the directory that receives generated web content.</summary>
+    member _.ContentsDirectory = contentsDirectory
 
     /// <summary>Allocates the next unique HTML content number.</summary>
     member _.NextContentsNumber() =
@@ -151,7 +164,7 @@ type ContextHtmlIo internal (context:Aqualis) =
         this.switchAutoAnimation (fun child ->
             child.codewritein("animationStartMap['"+fnameStart+"']();"))
 
-[<AutoOpen>]
-module CompilationEnvironmentHtmlIoExtensions =
-    type Aqualis with
-        member this.htmlio = ContextHtmlIo(this)
+    interface IDisposable with
+        member _.Dispose() =
+            ownedContexts
+            |> Array.iter (fun context -> (context :> IDisposable).Dispose())
