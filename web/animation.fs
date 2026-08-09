@@ -60,22 +60,21 @@ type MathText<'a when 'a :> INum0> = {
     eq:'a; }
 
 module private AnimationRendering =
-    let private target (environment:Aqualis) (value:INum0) =
-        let target = environment.RequireGenerationContext()
-        GenerationContextMerge.merge (Some target) value.Context |> ignore
-        target
+    let private target (context:Aqualis) (value:INum0) =
+        Aqualis.merge context value.Context |> ignore
+        context
 
-    let render (environment:Aqualis) (value:INum0) =
-        value.Expr.eval (target environment value).CurrentProgram
+    let render (context:Aqualis) (value:INum0) =
+        value.Expr.eval (target context value)
 
-    let renderDouble environment (value:double0) =
-        render environment (value :> INum0)
+    let renderDouble context (value:double0) =
+        render context (value :> INum0)
 
-    let inlineMath environment (value:INum0) =
-        "\\(" + render environment value + "\\)"
+    let inlineMath context (value:INum0) =
+        "\\(" + render context value + "\\)"
 
-    let time (environment:Aqualis) =
-        double0(Var(Dt,"t",NaN), context=environment.RequireGenerationContext())
+    let time (context:Aqualis) =
+        double0(Var(Dt,"t",NaN), context)
 
 /// <summary>
 /// 線分アニメーションを生成するクラス
@@ -83,12 +82,12 @@ module private AnimationRendering =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationLine(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = environment.htmlio.nextContentsID()
+type AnimationLine(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
+    let id = context.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        environment.html.taga ("line", [Atr("id",id);]@[s0.atr])
+        context.html.taga ("line", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -98,21 +97,21 @@ type AnimationLine(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="f">描画対象となる線分</param>
     member this.P (f:Line) =
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            let t = AnimationRendering.time environment
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    var x1 = " + AnimationRendering.renderDouble environment (f.Start.X t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var y1 = " + AnimationRendering.renderDouble environment (canvasY - f.Start.Y t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var x2 = " + AnimationRendering.renderDouble environment (f.End.X t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var y2 = " + AnimationRendering.renderDouble environment (canvasY - f.End.Y t) + ";")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"x1\", x1);"
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"y1\", y1);"
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"x2\", x2);"
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"y2\", y2);"
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            let t = AnimationRendering.time ctx
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    var x1 = " + AnimationRendering.renderDouble ctx (f.Start.X t) + ";")
+            ctx.writein ("    var y1 = " + AnimationRendering.renderDouble ctx (canvasY - f.Start.Y t) + ";")
+            ctx.writein ("    var x2 = " + AnimationRendering.renderDouble ctx (f.End.X t) + ";")
+            ctx.writein ("    var y2 = " + AnimationRendering.renderDouble ctx (canvasY - f.End.Y t) + ";")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            ctx.writein "    e.setAttribute(\"x1\", x1);"
+            ctx.writein "    e.setAttribute(\"y1\", y1);"
+            ctx.writein "    e.setAttribute(\"x2\", x2);"
+            ctx.writein "    e.setAttribute(\"y2\", y2);"
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
 /// <summary>
 /// 円アニメーションを生成するクラス
@@ -120,12 +119,12 @@ type AnimationLine(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationEllipse(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = environment.htmlio.nextContentsID()
+type AnimationEllipse(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
+    let id = context.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        environment.html.taga ("ellipse", [Atr("id",id);]@[s0.atr])
+        context.html.taga ("ellipse", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -135,21 +134,21 @@ type AnimationEllipse(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="e">描画対象となる円</param>
     member this.P (e:Ellipse) =
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            let t = AnimationRendering.time environment
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    var cx = " + AnimationRendering.renderDouble environment (e.center.X t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var cy = " + AnimationRendering.renderDouble environment (canvasY - e.center.Y t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var rx = " + AnimationRendering.renderDouble environment (e.radiusX t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var ry = " + AnimationRendering.renderDouble environment (e.radiusY t) + ";")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"cx\", cx);"
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"cy\", cy);"
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"rx\", rx);"
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"ry\", ry);"
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            let t = AnimationRendering.time ctx
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    var cx = " + AnimationRendering.renderDouble ctx (e.center.X t) + ";")
+            ctx.writein ("    var cy = " + AnimationRendering.renderDouble ctx (canvasY - e.center.Y t) + ";")
+            ctx.writein ("    var rx = " + AnimationRendering.renderDouble ctx (e.radiusX t) + ";")
+            ctx.writein ("    var ry = " + AnimationRendering.renderDouble ctx (e.radiusY t) + ";")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            ctx.writein "    e.setAttribute(\"cx\", cx);"
+            ctx.writein "    e.setAttribute(\"cy\", cy);"
+            ctx.writein "    e.setAttribute(\"rx\", rx);"
+            ctx.writein "    e.setAttribute(\"ry\", ry);"
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
 /// <summary>
 /// 円弧アニメーションを生成するクラス
@@ -157,12 +156,12 @@ type AnimationEllipse(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationArc(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = environment.htmlio.nextContentsID()
+type AnimationArc(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
+    let id = context.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        environment.html.taga ("path", [Atr("id",id);]@[s0.atr])
+        context.html.taga ("path", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -172,33 +171,33 @@ type AnimationArc(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="e">描画対象となる円弧</param>
     member this.P (e:Arc) =
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            let t = AnimationRendering.time environment
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            let t = AnimationRendering.time ctx
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
             let a1 = Math.PI * e.angle1 t / 180
             let x1 = e.center.X t + e.radius t * asm.cos a1
             let y1 = e.center.Y t + e.radius t * asm.sin a1
-            writein (environment.RequireGenerationContext()) ("    var x1 = " + AnimationRendering.renderDouble environment x1 + ";")
-            writein (environment.RequireGenerationContext()) ("    var y1 = " + AnimationRendering.renderDouble environment (canvasY - y1) + ";")
+            ctx.writein ("    var x1 = " + AnimationRendering.renderDouble ctx x1 + ";")
+            ctx.writein ("    var y1 = " + AnimationRendering.renderDouble ctx (canvasY - y1) + ";")
             let a2 = Math.PI * e.angle2 t / 180 - 1E-4
             let x2 = e.center.X t + e.radius t * asm.cos a2
             let y2 = e.center.Y t + e.radius t * asm.sin a2
-            writein (environment.RequireGenerationContext()) ("    var x2 = " + AnimationRendering.renderDouble environment x2 + ";")
-            writein (environment.RequireGenerationContext()) ("    var y2 = " + AnimationRendering.renderDouble environment (canvasY - y2) + ";")
-            writein (environment.RequireGenerationContext()) ("    var a1 = " + AnimationRendering.renderDouble environment (e.angle1 t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var a2 = " + AnimationRendering.renderDouble environment (e.angle2 t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var radiusX = " + AnimationRendering.renderDouble environment (e.radius t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var radiusY = " + AnimationRendering.renderDouble environment (e.radius t) + ";")
-            writein (environment.RequireGenerationContext()) "    var da = a2 - a1;"
-            writein (environment.RequireGenerationContext()) "    if(da < 0.0) {da = a2 + 360 - a1;}"
-            writein (environment.RequireGenerationContext()) "    var largerOrSmaller = 0;"
-            writein (environment.RequireGenerationContext()) "    if(da > 180.0) {largerOrSmaller = 1;}"
-            writein (environment.RequireGenerationContext()) ("    d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + largerOrSmaller + \" 0 \" + x2 + \" \" + y2 " + ";")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"d\", " + "d" + ");")
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+            ctx.writein ("    var x2 = " + AnimationRendering.renderDouble ctx x2 + ";")
+            ctx.writein ("    var y2 = " + AnimationRendering.renderDouble ctx (canvasY - y2) + ";")
+            ctx.writein ("    var a1 = " + AnimationRendering.renderDouble ctx (e.angle1 t) + ";")
+            ctx.writein ("    var a2 = " + AnimationRendering.renderDouble ctx (e.angle2 t) + ";")
+            ctx.writein ("    var radiusX = " + AnimationRendering.renderDouble ctx (e.radius t) + ";")
+            ctx.writein ("    var radiusY = " + AnimationRendering.renderDouble ctx (e.radius t) + ";")
+            ctx.writein "    var da = a2 - a1;"
+            ctx.writein "    if(da < 0.0) {da = a2 + 360 - a1;}"
+            ctx.writein "    var largerOrSmaller = 0;"
+            ctx.writein "    if(da > 180.0) {largerOrSmaller = 1;}"
+            ctx.writein ("    d = \"M \" + x1 + \" \" + y1 + \" A \" + radiusX + \" \" + radiusY + \" 0 \" + largerOrSmaller + \" 0 \" + x2 + \" \" + y2 " + ";")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            ctx.writein ("    e.setAttribute(\"d\", " + "d" + ");")
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
 /// <summary>
 /// テキスト・数式アニメーションを生成するクラス
@@ -206,13 +205,13 @@ type AnimationArc(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationText(environment:Aqualis,s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
-    let id = environment.htmlio.nextContentsID()
+type AnimationText(context:Aqualis,s:Style,originX:int,originY:int,canvasX:int,canvasY:int) =
+    let id = context.htmlio.nextContentsID()
     let ss = Style ([{Key="position";Value="absolute"}]@s.list)
     let ss0 = Style ([{Key="display";Value="none"}]@ss.list)
     let ss1 = Style ([{Key="display";Value="block"}]@ss.list)
     do
-        environment.html.tagb ("div", [Atr("id",id); ss0.atr]) <| fun () -> ()
+        context.html.tagb ("div", [Atr("id",id); ss0.atr]) <| fun () -> ()
     /// <summary>
     /// 割り当てられたidを取得
     /// </summary>
@@ -222,38 +221,38 @@ type AnimationText(environment:Aqualis,s:Style,originX:int,originY:int,canvasX:i
     /// </summary>
     /// <param name="e">対象となるテキスト</param>
     member this.P (e:Text) =
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            let t = AnimationRendering.time environment
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
-            writein (environment.RequireGenerationContext()) ("    e.innerHTML = \"" + e.str + "\";")
-            writein (environment.RequireGenerationContext()) ("    var x = " + AnimationRendering.renderDouble environment (originX + e.center.X t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var y = " + AnimationRendering.renderDouble environment (originY + canvasY - e.center.Y t) + ";")
-            writein (environment.RequireGenerationContext()) "    x = x - e.offsetWidth/2;"
-            writein (environment.RequireGenerationContext()) "    y = y - e.offsetHeight/2;"
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            let t = AnimationRendering.time ctx
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
+            ctx.writein ("    e.innerHTML = \"" + e.str + "\";")
+            ctx.writein ("    var x = " + AnimationRendering.renderDouble ctx (originX + e.center.X t) + ";")
+            ctx.writein ("    var y = " + AnimationRendering.renderDouble ctx (originY + canvasY - e.center.Y t) + ";")
+            ctx.writein "    x = x - e.offsetWidth/2;"
+            ctx.writein "    y = y - e.offsetHeight/2;"
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
     /// <summary>
     /// 指定したMathTextオブジェクトをキャンパスに追加する
     /// </summary>
     /// <param name="e">対象となる数式</param>
     member this.P (e:MathText<'a>) =
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            let t = AnimationRendering.time environment
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
-            writein (environment.RequireGenerationContext()) ("    e.innerHTML = \"\\\\(" + AnimationRendering.render environment (e.eq :> INum0) + "\\\\)\";")
-            writein (environment.RequireGenerationContext()) "    MathJax.typeset();"
-            writein (environment.RequireGenerationContext()) ("    var x =" + AnimationRendering.renderDouble environment (originX + e.center.X t) + ";")
-            writein (environment.RequireGenerationContext()) ("    var y =" + AnimationRendering.renderDouble environment (originY + canvasY - e.center.Y t) + ";")
-            writein (environment.RequireGenerationContext()) "    x = x - e.offsetWidth/2;"
-            writein (environment.RequireGenerationContext()) "    y = y - e.offsetHeight/2;"
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            let t = AnimationRendering.time ctx
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + "\");")
+            ctx.writein ("    e.innerHTML = \"\\\\(" + AnimationRendering.render ctx (e.eq :> INum0) + "\\\\)\";")
+            ctx.writein "    MathJax.typeset();"
+            ctx.writein ("    var x =" + AnimationRendering.renderDouble ctx (originX + e.center.X t) + ";")
+            ctx.writein ("    var y =" + AnimationRendering.renderDouble ctx (originY + canvasY - e.center.Y t) + ";")
+            ctx.writein "    x = x - e.offsetWidth/2;"
+            ctx.writein "    y = y - e.offsetHeight/2;"
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss1.code0 + " margin-left: \"+String(x)+\"px; margin-top: \"+String(y)+\"px; \");")
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + ss0.code0 + "\");")
 
 /// <summary>
 /// 多角形アニメーションを生成するクラス
@@ -261,12 +260,12 @@ type AnimationText(environment:Aqualis,s:Style,originX:int,originY:int,canvasX:i
 /// <param name="s">線の太さ、色を定義するスタイル情報</param>
 /// <param name="canvasX">描画領域の横幅</param>
 /// <param name="canvasY">描画領域の縦幅</param>
-type AnimationPolygon(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
-    let id = environment.htmlio.nextContentsID()
+type AnimationPolygon(context:Aqualis,s:Style,canvasX:int,canvasY:int) =
+    let id = context.htmlio.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        environment.html.taga ("polygon", [Atr("id", id);] @ [s.atr])
+        context.html.taga ("polygon", [Atr("id", id);] @ [s.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -276,190 +275,189 @@ type AnimationPolygon(environment:Aqualis,s:Style,canvasX:int,canvasY:int) =
     /// </summary>
     /// <param name="apex">多角形を構成する頂点座標のリスト</param>
     member this.P (apex:list<tposition>) =
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            let t = AnimationRendering.time environment
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\"" + id + "\");")
-            writein (environment.RequireGenerationContext()) "    var p = \"\";"
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            let t = AnimationRendering.time ctx
+            ctx.writein ("    var e = document.getElementById(\"" + id + "\");")
+            ctx.writein "    var p = \"\";"
             for p in apex do
-                writein (environment.RequireGenerationContext()) ("    var x = " + AnimationRendering.renderDouble environment (p.X t) + ";")
-                writein (environment.RequireGenerationContext()) ("    var y = " + AnimationRendering.renderDouble environment (canvasY - p.Y t) + ";")
-                writein (environment.RequireGenerationContext()) "    p = p + String(x) + \",\" + String(y) + \" \";"
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
-            writein (environment.RequireGenerationContext()) "    e.setAttribute(\"points\", p);"
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("    var e = document.getElementById(\""+id+"\");")
-            writein (environment.RequireGenerationContext()) ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
+                ctx.writein ("    var x = " + AnimationRendering.renderDouble ctx (p.X t) + ";")
+                ctx.writein ("    var y = " + AnimationRendering.renderDouble ctx (canvasY - p.Y t) + ";")
+                ctx.writein "    p = p + String(x) + \",\" + String(y) + \" \";"
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s1.code0 + "\");")
+            ctx.writein "    e.setAttribute(\"points\", p);"
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("    var e = document.getElementById(\""+id+"\");")
+            ctx.writein ("    e.setAttribute(\"style\"," + "\"" + s0.code0 + "\");")
 
 /// <summary>
 /// スライドアニメーション全体を管轄するクラス
 /// </summary>
-type ContextSlideAnimation internal (environment:Aqualis) =
-    let context = environment.RequireGenerationContext()
+type ContextSlideAnimation internal (context:Aqualis) =
     /// <summary>
     /// 登録された音声ファイルの一覧を書きだす
     /// </summary>
     member this.writeAudioList() =
-        environment.htmlio.switchJSMain <| fun environment ->
-            let audioFiles = context.AudioFiles
-            writein (environment.RequireGenerationContext()) "const audioList = ["
+        context.htmlio.switchJSMain <| fun ctx ->
+            let audioFiles = context.htmlio.AudioFiles
+            ctx.writein "const audioList = ["
             for i in 0..audioFiles.Length-1 do
-                writein (environment.RequireGenerationContext()) ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Length-1 then "," else "")
-            writein (environment.RequireGenerationContext()) "];"
+                ctx.writein ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Length-1 then "," else "")
+            ctx.writein "];"
     /// <summary>
     /// キャラクター表示を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsSetCharacter() =
-        environment.htmlio.switchJSMain <| fun environment ->
-            writein (environment.RequireGenerationContext()) "let pagecount = 1;"
-            writein (environment.RequireGenerationContext()) "function setCharacter()"
-            writein (environment.RequireGenerationContext()) "{"
-            writein (environment.RequireGenerationContext()) "        const swc = document.getElementById(\"switchCharacter\");"
-            writein (environment.RequireGenerationContext()) "        const c = document.getElementById(\"c\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        if(swc.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            c.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        else"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            c.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "}"
+        context.htmlio.switchJSMain <| fun ctx ->
+            ctx.writein "let pagecount = 1;"
+            ctx.writein "function setCharacter()"
+            ctx.writein "{"
+            ctx.writein "        const swc = document.getElementById(\"switchCharacter\");"
+            ctx.writein "        const c = document.getElementById(\"c\"+pagecount);"
+            ctx.writein "        if(swc.checked)"
+            ctx.writein "        {"
+            ctx.writein "            c.style.display = \"block\";"
+            ctx.writein "        }"
+            ctx.writein "        else"
+            ctx.writein "        {"
+            ctx.writein "            c.style.display = \"none\";"
+            ctx.writein "        }"
+            ctx.writein "}"
     /// <summary>
     /// 字幕表示を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsSetSubtitle() =
-        environment.htmlio.switchJSMain <| fun environment ->
-            writein (environment.RequireGenerationContext()) "function setSubtitle()"
-            writein (environment.RequireGenerationContext()) "{"
-            writein (environment.RequireGenerationContext()) "        const sws = document.getElementById(\"switchSubtitle\");"
-            writein (environment.RequireGenerationContext()) "        const b2 = document.getElementById(\"sb\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        const s2 = document.getElementById(\"s\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        if(sws.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            b2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "            s2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        else"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            b2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "            s2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "}"
+        context.htmlio.switchJSMain <| fun ctx ->
+            ctx.writein "function setSubtitle()"
+            ctx.writein "{"
+            ctx.writein "        const sws = document.getElementById(\"switchSubtitle\");"
+            ctx.writein "        const b2 = document.getElementById(\"sb\"+pagecount);"
+            ctx.writein "        const s2 = document.getElementById(\"s\"+pagecount);"
+            ctx.writein "        if(sws.checked)"
+            ctx.writein "        {"
+            ctx.writein "            b2.style.display = \"block\";"
+            ctx.writein "            s2.style.display = \"block\";"
+            ctx.writein "        }"
+            ctx.writein "        else"
+            ctx.writein "        {"
+            ctx.writein "            b2.style.display = \"none\";"
+            ctx.writein "            s2.style.display = \"none\";"
+            ctx.writein "        }"
+            ctx.writein "}"
     /// <summary>
     /// 次のページへの遷移を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsDrawNext(audioDir:string) =
-        environment.htmlio.switchJSMain <| fun environment ->
-            let animationCount = context.AnimationCount
-            writein (environment.RequireGenerationContext()) "function drawNext()"
-            writein (environment.RequireGenerationContext()) "{"
-            writein (environment.RequireGenerationContext()) "    resetAll();"
-            writein (environment.RequireGenerationContext()) ("    if(pagecount<"+animationCount.ToString()+")")
-            writein (environment.RequireGenerationContext()) "    {"
-            writein (environment.RequireGenerationContext()) "        const swc = document.getElementById(\"switchCharacter\");"
-            writein (environment.RequireGenerationContext()) "        const sws = document.getElementById(\"switchSubtitle\");"
-            writein (environment.RequireGenerationContext()) "        const swa = document.getElementById(\"switchAudio\");"
-            writein (environment.RequireGenerationContext()) "        "
-            writein (environment.RequireGenerationContext()) "        const p1 = document.getElementById(\"p\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        p1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        const b1 = document.getElementById(\"sb\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        b1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        const s1 = document.getElementById(\"s\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        s1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        const c1 = document.getElementById(\"c\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        c1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        pagecount++;"
-            writein (environment.RequireGenerationContext()) "        const p2 = document.getElementById(\"p\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        p2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        if(sws.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            b2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "            const s2 = document.getElementById(\"s\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            s2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        else"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            b2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "            const s2 = document.getElementById(\"s\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            s2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        if(swc.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const c2 = document.getElementById(\"c\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            c2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        else"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const c2 = document.getElementById(\"c\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            c2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        const audioPlayer = document.getElementById(\"audioPlayer\");"
-            writein (environment.RequireGenerationContext()) "        if(audioList[pagecount-1] != \"\" && swa.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) ("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
-            writein (environment.RequireGenerationContext()) "            audioPlayer.play();"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        autoAnimationMap['page'+pagecount]();"
-            writein (environment.RequireGenerationContext()) "    }"
-            writein (environment.RequireGenerationContext()) "}"
+        context.htmlio.switchJSMain <| fun ctx ->
+            let animationCount = context.htmlio.AnimationCount
+            ctx.writein "function drawNext()"
+            ctx.writein "{"
+            ctx.writein "    resetAll();"
+            ctx.writein ("    if(pagecount<"+animationCount.ToString()+")")
+            ctx.writein "    {"
+            ctx.writein "        const swc = document.getElementById(\"switchCharacter\");"
+            ctx.writein "        const sws = document.getElementById(\"switchSubtitle\");"
+            ctx.writein "        const swa = document.getElementById(\"switchAudio\");"
+            ctx.writein "        "
+            ctx.writein "        const p1 = document.getElementById(\"p\"+pagecount);"
+            ctx.writein "        p1.style.display = \"none\";"
+            ctx.writein "        const b1 = document.getElementById(\"sb\"+pagecount);"
+            ctx.writein "        b1.style.display = \"none\";"
+            ctx.writein "        const s1 = document.getElementById(\"s\"+pagecount);"
+            ctx.writein "        s1.style.display = \"none\";"
+            ctx.writein "        const c1 = document.getElementById(\"c\"+pagecount);"
+            ctx.writein "        c1.style.display = \"none\";"
+            ctx.writein "        pagecount++;"
+            ctx.writein "        const p2 = document.getElementById(\"p\"+pagecount);"
+            ctx.writein "        p2.style.display = \"block\";"
+            ctx.writein "        if(sws.checked)"
+            ctx.writein "        {"
+            ctx.writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            ctx.writein "            b2.style.display = \"block\";"
+            ctx.writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            ctx.writein "            s2.style.display = \"block\";"
+            ctx.writein "        }"
+            ctx.writein "        else"
+            ctx.writein "        {"
+            ctx.writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            ctx.writein "            b2.style.display = \"none\";"
+            ctx.writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            ctx.writein "            s2.style.display = \"none\";"
+            ctx.writein "        }"
+            ctx.writein "        if(swc.checked)"
+            ctx.writein "        {"
+            ctx.writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            ctx.writein "            c2.style.display = \"block\";"
+            ctx.writein "        }"
+            ctx.writein "        else"
+            ctx.writein "        {"
+            ctx.writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            ctx.writein "            c2.style.display = \"none\";"
+            ctx.writein "        }"
+            ctx.writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
+            ctx.writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
+            ctx.writein "        {"
+            ctx.writein ("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
+            ctx.writein "            audioPlayer.play();"
+            ctx.writein "        }"
+            ctx.writein "        autoAnimationMap['page'+pagecount]();"
+            ctx.writein "    }"
+            ctx.writein "}"
     /// <summary>
     /// 前のページへの遷移を制御するJavaScriptコードの生成
     /// </summary>
     member this.jsDrawPrev(audioDir:string) =
-        environment.htmlio.switchJSMain <| fun environment ->
-            writein (environment.RequireGenerationContext()) "function drawPrev()"
-            writein (environment.RequireGenerationContext()) "{"
-            writein (environment.RequireGenerationContext()) "    resetAll();"
-            writein (environment.RequireGenerationContext()) "    if(pagecount>1)"
-            writein (environment.RequireGenerationContext()) "    {"
-            writein (environment.RequireGenerationContext()) "        const swc = document.getElementById(\"switchCharacter\");"
-            writein (environment.RequireGenerationContext()) "        const sws = document.getElementById(\"switchSubtitle\");"
-            writein (environment.RequireGenerationContext()) "        const swa = document.getElementById(\"switchAudio\");"
-            writein (environment.RequireGenerationContext()) "        const p1 = document.getElementById(\"p\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        p1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        const b1 = document.getElementById(\"sb\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        b1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        const s1 = document.getElementById(\"s\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        s1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        const c1 = document.getElementById(\"c\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        c1.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        pagecount--;"
-            writein (environment.RequireGenerationContext()) "        const p2 = document.getElementById(\"p\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "        p2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        if(sws.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            b2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "            const s2 = document.getElementById(\"s\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            s2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        else"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const b2 = document.getElementById(\"sb\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            b2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "            const s2 = document.getElementById(\"s\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            s2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        if(swc.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const c2 = document.getElementById(\"c\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            c2.style.display = \"block\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        else"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) "            const c2 = document.getElementById(\"c\"+pagecount);"
-            writein (environment.RequireGenerationContext()) "            c2.style.display = \"none\";"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "        const audioPlayer = document.getElementById(\"audioPlayer\");"
-            writein (environment.RequireGenerationContext()) "        if(audioList[pagecount-1] != \"\" && swa.checked)"
-            writein (environment.RequireGenerationContext()) "        {"
-            writein (environment.RequireGenerationContext()) ("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
-            writein (environment.RequireGenerationContext()) "            audioPlayer.play();"
-            writein (environment.RequireGenerationContext()) "        }"
-            writein (environment.RequireGenerationContext()) "    }"
-            writein (environment.RequireGenerationContext()) "}"
+        context.htmlio.switchJSMain <| fun ctx ->
+            ctx.writein "function drawPrev()"
+            ctx.writein "{"
+            ctx.writein "    resetAll();"
+            ctx.writein "    if(pagecount>1)"
+            ctx.writein "    {"
+            ctx.writein "        const swc = document.getElementById(\"switchCharacter\");"
+            ctx.writein "        const sws = document.getElementById(\"switchSubtitle\");"
+            ctx.writein "        const swa = document.getElementById(\"switchAudio\");"
+            ctx.writein "        const p1 = document.getElementById(\"p\"+pagecount);"
+            ctx.writein "        p1.style.display = \"none\";"
+            ctx.writein "        const b1 = document.getElementById(\"sb\"+pagecount);"
+            ctx.writein "        b1.style.display = \"none\";"
+            ctx.writein "        const s1 = document.getElementById(\"s\"+pagecount);"
+            ctx.writein "        s1.style.display = \"none\";"
+            ctx.writein "        const c1 = document.getElementById(\"c\"+pagecount);"
+            ctx.writein "        c1.style.display = \"none\";"
+            ctx.writein "        pagecount--;"
+            ctx.writein "        const p2 = document.getElementById(\"p\"+pagecount);"
+            ctx.writein "        p2.style.display = \"block\";"
+            ctx.writein "        if(sws.checked)"
+            ctx.writein "        {"
+            ctx.writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            ctx.writein "            b2.style.display = \"block\";"
+            ctx.writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            ctx.writein "            s2.style.display = \"block\";"
+            ctx.writein "        }"
+            ctx.writein "        else"
+            ctx.writein "        {"
+            ctx.writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
+            ctx.writein "            b2.style.display = \"none\";"
+            ctx.writein "            const s2 = document.getElementById(\"s\"+pagecount);"
+            ctx.writein "            s2.style.display = \"none\";"
+            ctx.writein "        }"
+            ctx.writein "        if(swc.checked)"
+            ctx.writein "        {"
+            ctx.writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            ctx.writein "            c2.style.display = \"block\";"
+            ctx.writein "        }"
+            ctx.writein "        else"
+            ctx.writein "        {"
+            ctx.writein "            const c2 = document.getElementById(\"c\"+pagecount);"
+            ctx.writein "            c2.style.display = \"none\";"
+            ctx.writein "        }"
+            ctx.writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
+            ctx.writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
+            ctx.writein "        {"
+            ctx.writein ("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
+            ctx.writein "            audioPlayer.play();"
+            ctx.writein "        }"
+            ctx.writein "    }"
+            ctx.writein "}"
 
     /// キャラクターのデフォルト表示・非表示設定
     /// 字幕のデフォルト表示・非表示設定
@@ -473,48 +471,48 @@ module HtmlWebExtensions =
         /// 内部要素のないタグ
         /// </summary>
         member this.taga (t:string,lst:list<string*PHPdata>) =
-            writei this.GenerationContext ("<"+t+" ")
-            this.GenerationContext.CurrentProgram.indentInc()
+            this.Context.writei("<"+t+" ")
+            this.Context.indentInc()
             for a,s in lst do
-                write this.GenerationContext (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-            this.GenerationContext.CurrentProgram.indentDec()
-            writen this.GenerationContext " />"
+                this.Context.write (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+            this.Context.indentDec()
+            this.Context.writen  " />"
         /// <summary>
         /// 内部要素のあるタグ
         /// </summary>
         member this.tagb0 (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
-                write this.GenerationContext ("<"+t+">")
+                this.Context.write ("<"+t+">")
             else
-                write this.GenerationContext ("<"+t+" ")
-                this.GenerationContext.CurrentProgram.indentInc()
+                this.Context.write ("<"+t+" ")
+                this.Context.indentInc()
                 for a,s in lst do
-                    write this.GenerationContext (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-                this.GenerationContext.CurrentProgram.indentDec()
-                write this.GenerationContext ">"
+                    this.Context.write (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+                this.Context.indentDec()
+                this.Context.write ">"
             code()
-            writen this.GenerationContext ("</"+t+">")
+            this.Context.writen ("</"+t+">")
         /// <summary>
         /// 内部要素のあるタグ
         /// </summary>
         member this.tagb (t:string,lst:list<string*PHPdata>) = fun code ->
             if lst.Length=0 then
-                writein this.GenerationContext ("<"+t+">")
+                this.Context.writein ("<"+t+">")
             else
-                writei this.GenerationContext ("<"+t+" ")
-                this.GenerationContext.CurrentProgram.indentInc()
+                this.Context.writei ("<"+t+" ")
+                this.Context.indentInc()
                 for a,s in lst do
-                    writei this.GenerationContext (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
-                this.GenerationContext.CurrentProgram.indentDec()
-                writen this.GenerationContext ">"
+                    this.Context.writei (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+                this.Context.indentDec()
+                this.Context.writen ">"
             code()
-            writein this.GenerationContext ("</"+t+">")
+            this.Context.writein ("</"+t+">")
         /// <summary>
         /// 見出し（h1）要素を生成する
         /// </summary>
         /// <param name="t">見出しに表示する内容</param>
         member this.h1 (t:int0) = fun code ->
-            this.tagb "h1" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h1" <| fun () -> this.Context.php.echo t.code
             code()
         /// <summary>
         /// 見出し（h1）要素を生成する
@@ -522,42 +520,42 @@ module HtmlWebExtensions =
         /// <param name="t">見出しに表示する内容</param>
         /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
         member this.h1 (t:int0,s:Style) = fun code ->
-            this.tagb ("h1",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h2 (t:int0) = fun code ->
-            this.tagb "h2" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h2" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h2 (t:int0,s:Style) = fun code ->
-            this.tagb ("h2",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h3 (t:int0) = fun code ->
-            this.tagb "h3" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h3" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h3 (t:int0,s:Style) = fun code ->
-            this.tagb ("h3",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h4 (t:int0) = fun code ->
-            this.tagb "h4" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h4" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h4 (t:int0,s:Style) = fun code ->
-            this.tagb ("h4",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h5 (t:int0) = fun code ->
-            this.tagb "h5" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h5" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h5 (t:int0,s:Style) = fun code ->
-            this.tagb ("h5",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
         /// <summary>
         /// 見出し（h1）要素を生成する
         /// </summary>
         /// <param name="t">見出しに表示する内容</param>
         member this.h1 (t:double0) = fun code ->
-            this.tagb "h1" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h1" <| fun () -> this.Context.php.echo t.code
             code()
         /// <summary>
         /// 見出し（h1）要素を生成する
@@ -565,35 +563,35 @@ module HtmlWebExtensions =
         /// <param name="t">見出しに表示する内容</param>
         /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
         member this.h1 (t:double0,s:Style) = fun code ->
-            this.tagb ("h1",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h2 (t:double0) = fun code ->
-            this.tagb "h2" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h2" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h2 (t:double0,s:Style) = fun code ->
-            this.tagb ("h2",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h3 (t:double0) = fun code ->
-            this.tagb "h3" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h3" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h3 (t:double0,s:Style) = fun code ->
-            this.tagb ("h3",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h4 (t:double0) = fun code ->
-            this.tagb "h4" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h4" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h4 (t:double0,s:Style) = fun code ->
-            this.tagb ("h4",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
 
         member this.h5 (t:double0) = fun code ->
-            this.tagb "h5" <| fun () -> this.Environment.php.echo t.code
+            this.tagb "h5" <| fun () -> this.Context.php.echo t.code
             code()
         member this.h5 (t:double0,s:Style) = fun code ->
-            this.tagb ("h5",[s.atr]) <| fun () -> this.Environment.php.echo t.code
+            this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echo t.code
             code()
         /// <summary>
         /// フォーム送信用のsubmitボタンを生成する
@@ -657,14 +655,14 @@ module HtmlWebExtensions =
         member this.splitTag t code =
             let b (lst:list<string*PHPdata>) =
                 if lst.Length=0 then
-                    writein this.GenerationContext ("<"+t+">")
+                    this.Context.writein ("<"+t+">")
                 else
-                    writein this.GenerationContext ("<"+t+" ")
+                    this.Context.writein ("<"+t+" ")
                     for a,s in lst do
-                        writein this.GenerationContext (a + "=" + s.code + " ")
-                    writein this.GenerationContext ">"
+                        this.Context.writein (a + "=" + s.code + " ")
+                    this.Context.writein ">"
             code b
-            writein this.GenerationContext ("</"+t+">")
+            this.Context.writein ("</"+t+">")
         /// <summary>
         /// select要素を生成
         /// </summary>
@@ -778,7 +776,7 @@ module HtmlWebExtensions =
                             {Key = "margin-top"; Value=InvariantFormat.number p.y+"px"}
                             {Key = "position"; Value = "absolute";}]
             this.tagb ("div", [(s1+s).atr]) <| fun () ->
-                writein this.GenerationContext ("\\(" + text.code + "\\)")
+                this.Context.writein ("\\(" + text.code + "\\)")
         /// <summary>
         /// 指定位置に画像を表示する
         /// </summary>
@@ -788,44 +786,44 @@ module HtmlWebExtensions =
         member this.image (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
-                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
+                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
             else
                 printfn "image file not exist: %s" filename
             let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+            this.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
         member this.image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
-                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
+                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
             else
                 printfn "image file not exist: %s" filename
-            this.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+            this.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
         member this.image (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
-                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
+                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
             else
                 printfn "image file not exist: %s" filename
-            this.taga ("img", [s.atr;Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+            this.taga ("img", [s.atr;Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
         member this.image (filename:string) =
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
-                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
+                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
             else
                 printfn "image file not exist: %s" filename
-            this.taga ("img", [Atr("src", Path.GetFileName (this.GenerationContext.ContentsDirectory) + "\\" + f)])
+            this.taga ("img", [Atr("src", Path.GetFileName (this.Context.htmlio.ContentsDirectory) + "\\" + f)])
         /// <summary>
         /// 指定位置に動画を表示する
         /// </summary>
@@ -835,25 +833,25 @@ module HtmlWebExtensions =
         member this.video (s:Style,p:position) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
-                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
+                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
             else
                 printfn "video file not exist: %s" filename
             let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.tagv ("video", [st.atr;Atr("src", this.GenerationContext.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.tagv ("video", [st.atr;Atr("src", this.Context.htmlio.ContentsDirectory + "\\" + f); Atr("controls", "")])
             this.tage "video"
         member this.video (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
-                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
+                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
             else
                 printfn "video file not exist: %s" filename
-            this.tagv ("video", [s.atr;Atr("src", this.GenerationContext.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.tagv ("video", [s.atr;Atr("src", this.Context.htmlio.ContentsDirectory + "\\" + f); Atr("controls", "")])
             this.tage "video"
 
         /// <summary>
@@ -867,7 +865,7 @@ module HtmlWebExtensions =
         member this.code (style:list<string*PHPdata>, cd:PHPdata) =
             this.tagb0 ("pre",style) <| fun () ->
                 this.tagb0 ("code",[]) <| fun () ->
-                    write this.GenerationContext cd.phpcode
+                    this.Context.write cd.phpcode
 
         member this.code (style:list<string*string>) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b))
 
@@ -884,7 +882,7 @@ module HtmlWebExtensions =
         member this.listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
             this.tagb("div",[Atr("class","\"fig\"")]) <| fun () ->
                 this.tagb ("span",[Atr("class","\"caption\"")]) <| fun () ->
-                    writein this.GenerationContext (caption)
+                    this.Context.writein (caption)
                 this.tagb("table",[Atr("class","\"tab\"")]) <| fun () ->
                     for j in 0..tlist.Length-1 do
                         this.tagb ("tr",[Atr("class",match borderV[j] with |TrTB -> "\"trtb\"" |TrT -> "\"trt\"" |TrB -> "\"trb\"" |TrN -> "\"trn\"")]) <| fun () ->
@@ -907,53 +905,53 @@ module HtmlWebExtensions =
                                     |TdCLR -> "\"tdcLR\""
                                     |TdRLR -> "\"tdrLR\""
                                     |TdJLR -> "\"tdjLR\"")]) <| fun () ->
-                                    writein this.GenerationContext (tlist[j][i])
+                                    this.Context.writein (tlist[j][i])
         /// <summary>
         /// num0式を評価し、インラインMathJax文字列を返す
         /// </summary>
         member this.inlineMath(text:int0) =
-            AnimationRendering.inlineMath this.Environment (text :> INum0)
+            AnimationRendering.inlineMath this.Context (text :> INum0)
         /// <summary>
         /// num0式を評価し、インラインMathJax文字列を返す
         /// </summary>
         member this.inlineMath(text:double0) =
-            AnimationRendering.inlineMath this.Environment (text :> INum0)
+            AnimationRendering.inlineMath this.Context (text :> INum0)
         /// <summary>
         /// num0式を評価し、インラインMathJax文字列を返す
         /// </summary>
         member this.inlineMath(text:complex0) =
-            AnimationRendering.inlineMath this.Environment (text :> INum0)
+            AnimationRendering.inlineMath this.Context (text :> INum0)
         /// <summary>
         /// num0式を評価し、MathJax形式で出力する
         /// </summary>
         member this.eq(text:int0) =
-            writein this.GenerationContext ("\\("+text.Expr.evalL this.GenerationContext.CurrentProgram + "\\)")
+            this.Context.writein ("\\("+text.Expr.evalL this.Context + "\\)")
         /// <summary>
         /// num0式を評価し、MathJax形式で出力する
         /// </summary>
         member this.eq(text:double0) =
-            writein this.GenerationContext ("\\("+text.Expr.evalL this.GenerationContext.CurrentProgram + "\\)")
+            this.Context.writein ("\\("+text.Expr.evalL this.Context + "\\)")
         /// <summary>
         /// num0式を評価し、MathJax形式で出力する
         /// </summary>
         member this.eq(text:complex0) =
-            writein this.GenerationContext ("\\("+text.Expr.evalL this.GenerationContext.CurrentProgram + "\\)")
+            this.Context.writein ("\\("+text.Expr.evalL this.Context + "\\)")
 
         /// <summary>
         /// キャラクター付き解説ページ
         /// </summary>
         member this.page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
             this.slide position.Origin <| fun p ->
-                let animationCounter = this.GenerationContext.AnimationCount
-                let contentsDirectory = this.GenerationContext.ContentsDirectory
+                let animationCounter = this.Context.htmlio.AnimationCount
+                let contentsDirectory = this.Context.htmlio.ContentsDirectory
                 // 音声ファイル追加
-                this.GenerationContext.AddAudioFile(
+                this.Context.htmlio.AddAudioFile(
                     match audioFile with |Some t -> t |None -> "")
                 // 字幕枠
-                this.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                this.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.Context.htmlio.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
                 // キャラクター画像
-                this.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.GenerationContext.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
+                this.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.Context.htmlio.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
                     for ci in c do
                         if File.Exists ci.CharacterImageFile then
                             if Directory.Exists contentsDirectory then
@@ -964,27 +962,27 @@ module HtmlWebExtensions =
                         else
                             printfn "character image file not exist: %s" ci.CharacterImageFile
                 // 字幕
-                this.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.GenerationContext.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
-                    <| fun () -> writein this.GenerationContext audio.Subtitle
-                this.Environment.htmlio.switchAutoAnimation <| fun environment ->
-                    writein (environment.RequireGenerationContext()) ("page"+animationCounter.ToString()+": () => {")
+                this.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.Context.htmlio.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                    <| fun () -> this.Context.writein audio.Subtitle
+                this.Context.htmlio.switchAutoAnimation <| fun ctx ->
+                    ctx.writein ("page"+animationCounter.ToString()+": () => {")
                 // メインコンテンツ
                 this.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
                     code2 p
-                this.Environment.htmlio.switchAutoAnimation <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "},"
-                match this.GenerationContext.TryLastAnimationButton() with
+                this.Context.htmlio.switchAutoAnimation <| fun ctx ->
+                    ctx.writein "},"
+                match this.Context.htmlio.TryLastAnimationButton() with
                 | Some(fStartName,fResetName,btnx,btny) ->
                     this.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
                     this.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
                 | None -> ()
-                this.GenerationContext.ClearAnimationButtons()
+                this.Context.htmlio.ClearAnimationButtons()
         /// <summary>
         /// 指定位置にスライドを生成
         /// </summary>
         /// <param name="p">スライドの表示位置</param>
         member this.slide (p:position)  code =
-                let animationCounter = this.GenerationContext.NextAnimationNumber()
+                let animationCounter = this.Context.htmlio.NextAnimationNumber()
                 this.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
                     code p
         /// <summary>
@@ -992,46 +990,46 @@ module HtmlWebExtensions =
         /// </summary>
         member this.prevButton() =
                 this.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
-                    writein this.GenerationContext "前へ"
+                    this.Context.writein "前へ"
         /// <summary>
         /// 次のページへ移動するボタンを生成
         /// </summary>
         member this.nextButton() =
                 this.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
-                    writein this.GenerationContext "次へ"
+                    this.Context.writein "次へ"
         /// <summary>
         /// アニメーションを開始するボタンを生成
         /// </summary>
         member this.startButton2(id:string) (s:Style) (c:string) =
                 this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                    writein this.GenerationContext "Start"
+                    this.Context.writein "Start"
         /// <summary>
         /// アニメーションをリセットするボタンを生成
         /// </summary>
         member this.resetButton2(id:string) (s:Style) (c:string) =
                 this.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
-                    writein this.GenerationContext "Reset"
+                    this.Context.writein "Reset"
         /// <summary>
         /// キャラクター表示を制御するチェックボックスを生成
         /// </summary>
         member this.switchCharacter() =
-            this.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.GenerationContext.CharacterEnabled then "checked" else "")
+            this.taga ("input", "type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.Context.htmlio.CharacterEnabled then "checked" else "")
             this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
-                writein this.GenerationContext "キャラクター"
+                this.Context.writein "キャラクター"
         /// <summary>
         /// 字幕表示を制御するチェックボックスを生成
         /// </summary>
         member this.switchSubtitle() =
-            this.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.GenerationContext.SubtitleEnabled then "checked" else "")
+            this.taga ("input", "type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.Context.htmlio.SubtitleEnabled then "checked" else "")
             this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
-                writein this.GenerationContext "字幕"
+                this.Context.writein "字幕"
         /// <summary>
         /// 音声再生を制御するチェックボックスを生成
         /// </summary>
         member this.switchAudio() =
-            this.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.GenerationContext.VoiceEnabled then "checked" else "")
+            this.taga ("input", "type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.Context.htmlio.VoiceEnabled then "checked" else "")
             this.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
-                writein this.GenerationContext "音声"
+                this.Context.writein "音声"
         member this.audioPlayer() =
                 this.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
         /// <summary>
@@ -1043,10 +1041,10 @@ module HtmlWebExtensions =
                             {Key = "position"; Value = "absolute";}]
             let f = Path.GetFileName filename
             if File.Exists filename then
-                if Directory.Exists (this.GenerationContext.ContentsDirectory) then
-                    File.Copy(filename, this.GenerationContext.ContentsDirectory + "\\" + f, true)
+                if Directory.Exists (this.Context.htmlio.ContentsDirectory) then
+                    File.Copy(filename, this.Context.htmlio.ContentsDirectory + "\\" + f, true)
                 else
-                    printfn "directory not exist: %s" (this.GenerationContext.ContentsDirectory)
+                    printfn "directory not exist: %s" (this.Context.htmlio.ContentsDirectory)
             else
                 printfn "image file not exist: %s" filename
             this.taga ("img", [(s1+s).atr])
@@ -1066,8 +1064,8 @@ module HtmlWebExtensions =
                             {Key = "position"; Value = "absolute";}
                             {Key = "overflow-wrap"; Value = "break-word";}]
             this.tagb ("div", [(s1+s).atr]) <| fun () ->
-                text |> List.iter (fun s -> writein this.GenerationContext (s+"<br>"))
-                writein this.GenerationContext ("\r\n")
+                text |> List.iter (fun s -> this.Context.writein (s+"<br>"))
+                this.Context.writein ("\r\n")
             {Left = p.x;
             Right = p.x+double width+2.0*double padding;
             Top = p.y;
@@ -1083,7 +1081,7 @@ module CompilationEnvironmentAnimationExtensions =
     type Aqualis with
         member this.slideAnimation = ContextSlideAnimation(this)
 
-type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
+type FigureAnimation(context:Aqualis,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
     /// アニメーションの実行順序リスト
     let mutable animeFlow:list<string*string*AnimationSetting*bool> = []
@@ -1097,42 +1095,42 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
     /// <param name="setFigure">図形にアニメーション設定を適用する関数</param>
     member this.seq (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
         // アニメーションシーケンスIDを発行
-        let idstart,idreset = environment.htmlio.nextAnimationSeqID()
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("function "+idstart+"(t){")
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("function "+idreset+"(){")
+        let idstart,idreset = context.htmlio.nextAnimationSeqID()
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            ctx.writein ("function "+idstart+"(t){")
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("function "+idreset+"(){")
         setFigure setting
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            writein (environment.RequireGenerationContext()) "}"
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) "}"
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            ctx.writein "}"
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein "}"
         animeFlow <- animeFlow@[idstart,idreset,setting,false]
     /// <summary>
     /// アニメーションをループする
     /// </summary>
     member this.loop (setting:AnimationSetting) (setFigure:AnimationSetting->unit) =
         // アニメーションシーケンスIDを発行
-        let idstart,idreset = environment.htmlio.nextAnimationSeqID()
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("function "+idstart+"(t){")
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) ("function "+idreset+"(){")
+        let idstart,idreset = context.htmlio.nextAnimationSeqID()
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            ctx.writein ("function "+idstart+"(t){")
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein ("function "+idreset+"(){")
         setFigure setting
-        environment.htmlio.switchAnimationSeq <| fun environment ->
-            writein (environment.RequireGenerationContext()) "}"
-        environment.htmlio.switchJSAnimationSeqReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) "}"
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            ctx.writein "}"
+        context.htmlio.switchJSAnimationSeqReset <| fun ctx ->
+            ctx.writein "}"
         animeFlow <- animeFlow@[idstart,idreset,setting,true]
     /// <summary>
     /// キャンバスアニメーションを指定して図形アニメーションを生成
     /// </summary>
     /// <param name="s">アニメーション設定</param>
-    member this.animationEllipse s = AnimationEllipse(environment,s,canvasX,canvasY)
-    member this.animationLine s = AnimationLine(environment,s,canvasX,canvasY)
-    member this.animationArc s = AnimationArc(environment,s,canvasX,canvasY)
-    member this.animationText s = AnimationText(environment,s,originX,originY,canvasX,canvasY)
-    member this.animationPolygon s = AnimationPolygon(environment,s,canvasX,canvasY)
+    member this.animationEllipse s = AnimationEllipse(context,s,canvasX,canvasY)
+    member this.animationLine s = AnimationLine(context,s,canvasX,canvasY)
+    member this.animationArc s = AnimationArc(context,s,canvasX,canvasY)
+    member this.animationText s = AnimationText(context,s,originX,originY,canvasX,canvasY)
+    member this.animationPolygon s = AnimationPolygon(context,s,canvasX,canvasY)
     /// <summary>
     /// 直線を描画
     /// </summary>
@@ -1144,7 +1142,7 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             Atr("y1",InvariantFormat.number (double canvasY-startP.y))
             Atr("x2",InvariantFormat.number endP.x)
             Atr("y2",InvariantFormat.number (double canvasY-endP.y))]
-        environment.html.taga ("line", [s.atr]@c)
+        context.html.taga ("line", [s.atr]@c)
     /// <summary>
     /// 楕円を描画
     /// </summary>
@@ -1156,7 +1154,7 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             Atr("cy",InvariantFormat.number (double canvasY-center.y))
             Atr("rx",InvariantFormat.number radiusX)
             Atr("ry",InvariantFormat.number radiusY)]
-        environment.html.taga ("ellipse", [s.atr]@c)
+        context.html.taga ("ellipse", [s.atr]@c)
     /// <summary>
     /// 円を描画
     /// </summary>
@@ -1178,7 +1176,7 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
                 "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 0 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
             else
                 "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 1 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
-        environment.html.taga ("path", [s.atr]@[Atr("d",d)])
+        context.html.taga ("path", [s.atr]@[Atr("d",d)])
     /// <summary>
     /// 多角形を描画
     /// </summary>
@@ -1188,7 +1186,7 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             apex
             |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
-        environment.html.taga ("polygon", [s.atr]@[Atr("points",pp)])
+        context.html.taga ("polygon", [s.atr]@[Atr("points",pp)])
     /// <summary>
     /// 折れ線を描画
     /// </summary>
@@ -1198,7 +1196,7 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             apex
             |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
-        environment.html.taga ("polyline", [s.atr]@[Atr("points",pp)])
+        context.html.taga ("polyline", [s.atr]@[Atr("points",pp)])
     /// <summary>
     /// 始点から終点に向かう矢印付き直線を描画
     /// </summary>
@@ -1229,7 +1227,7 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             Atr("y",InvariantFormat.number (double canvasY-center.y-0.5*sy))
             Atr("width",InvariantFormat.number sx)
             Atr("height",InvariantFormat.number sy)]
-        environment.html.taga ("rect", [s.atr]@c)
+        context.html.taga ("rect", [s.atr]@c)
     /// <summary>
     /// テキストを表示
     /// </summary>
@@ -1242,8 +1240,8 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        environment.html.tagb ("div", [ss.atr]) <| fun () ->
-            writein (environment.RequireGenerationContext()) str
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.writein str
     /// <summary>
     /// 数式を描画
     /// </summary>
@@ -1255,8 +1253,8 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        environment.html.tagb ("div", [ss.atr]) <| fun () ->
-            writein (environment.RequireGenerationContext()) ("\\(" + e.Expr.evalH (environment.RequireGenerationContext().CurrentProgram) + "\\)")
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.writein ("\\(" + e.Expr.evalH (context) + "\\)")
     /// <summary>
     /// 数式を描画
     /// </summary>
@@ -1268,8 +1266,8 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        environment.html.tagb ("div", [ss.atr]) <| fun () ->
-            writein (environment.RequireGenerationContext()) ("\\(" + e.Expr.evalH (environment.RequireGenerationContext().CurrentProgram) + "\\)")
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.writein ("\\(" + e.Expr.evalH (context) + "\\)")
     /// <summary>
     /// 数式を描画
     /// </summary>
@@ -1281,77 +1279,76 @@ type FigureAnimation(environment:Aqualis,figcounter:int,originX:int,originY:int,
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        environment.html.tagb ("div", [ss.atr]) <| fun () ->
-            writein (environment.RequireGenerationContext()) ("\\(" + e.Expr.evalH (environment.RequireGenerationContext().CurrentProgram) + "\\)")
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
+            context.writein ("\\(" + e.Expr.evalH (context) + "\\)")
     /// <summary>
     /// 画像を表示
     /// </summary>
     /// <param name="filename">画像のファイル名</param>
     member this.image (s:Style) (center:position) (filename:string) =
         let f = Path.GetFileName filename
-        File.Copy(filename, environment.RequireGenerationContext().ContentsDirectory + "\\" + f, true)
+        File.Copy(filename, context.htmlio.ContentsDirectory + "\\" + f, true)
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        environment.html.taga ("img", [ss.atr; Atr("src",environment.RequireGenerationContext().ContentsDirectory + "\\" + f)])
+        context.html.taga ("img", [ss.atr; Atr("src",context.htmlio.ContentsDirectory + "\\" + f)])
     /// <summary>
     /// 開始ボタンの制御用JavaScriptコードを生成
     /// </summary>
     /// <param name="buttonIndex">対象となるボタンの識別子</param>
     member this.jsStartControll(buttonIndex:string) =
         let fname = "start" + buttonIndex
-        environment.htmlio.switchJSAnimationStart <| fun environment ->
-            writein (environment.RequireGenerationContext()) (fname+": () => {")
+        context.htmlio.switchJSAnimationStart <| fun ctx ->
+            ctx.writein (fname+": () => {")
             for idstart,_,setting,isLoop in animeFlow do
                 if isLoop then
-                    writein (environment.RequireGenerationContext()) ("    repeat(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ");")
+                    ctx.writein ("    repeat(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ");")
                 else
-                    writein (environment.RequireGenerationContext()) ("    repeatSeq(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ", () => {")
+                    ctx.writein ("    repeatSeq(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ", () => {")
             for _,_,_,isLoop in animeFlow do
                 if isLoop then
                     ()
                 else
-                    writein (environment.RequireGenerationContext()) "    });"
-            writein (environment.RequireGenerationContext()) "},"
+                    ctx.writein "    });"
+            ctx.writein "},"
         fname
     /// <summary>
     /// リセットボタンの制御用JavaScriptコードを生成
     /// </summary>
     member this.jsResetControll(buttonIndex:string) =
         let fname = "reset" + buttonIndex
-        environment.htmlio.switchJSAnimationReset <| fun environment ->
-            writein (environment.RequireGenerationContext()) (fname+": () => {")
+        context.htmlio.switchJSAnimationReset <| fun ctx ->
+            ctx.writein (fname+": () => {")
             for _,idreset,_,_ in animeFlow do
-                writein (environment.RequireGenerationContext()) ("    " + idreset + "();")
-            writein (environment.RequireGenerationContext()) "},"
+                ctx.writein ("    " + idreset + "();")
+            ctx.writein "},"
         fname
     /// <summary>
     /// アニメーション用のJavaScriptコードを生成
     /// </summary>
     member _.jsAnimation codejs =
-        environment.htmlio.switchBody <| fun environment ->
-            writein (environment.RequireGenerationContext()) "var t = 0;"
-            writein (environment.RequireGenerationContext()) "var dt = 1;"
-            writein (environment.RequireGenerationContext()) "window.onload=function(){"
-            writein (environment.RequireGenerationContext()) "    var timer;"
-            writein (environment.RequireGenerationContext()) "    var delay = 33;"
-            writein (environment.RequireGenerationContext()) "    var loop = function(){"
-            writein (environment.RequireGenerationContext()) "        t = t + dt;"
-            writein (environment.RequireGenerationContext()) "        if(t >= 100){t = 0;}"
-            writein (environment.RequireGenerationContext()) "        clearTimeout(timer);"
-            writein (environment.RequireGenerationContext()) "        timer=setTimeout(loop,delay);"
-            writein (environment.RequireGenerationContext()) "    }"
-            writein (environment.RequireGenerationContext()) "    loop();"
-            writein (environment.RequireGenerationContext()) "}"
-            writein (environment.RequireGenerationContext()) codejs
+        context.htmlio.switchBody <| fun ctx ->
+            ctx.writein "var t = 0;"
+            ctx.writein "var dt = 1;"
+            ctx.writein "window.onload=function(){"
+            ctx.writein "    var timer;"
+            ctx.writein "    var delay = 33;"
+            ctx.writein "    var loop = function(){"
+            ctx.writein "        t = t + dt;"
+            ctx.writein "        if(t >= 100){t = 0;}"
+            ctx.writein "        clearTimeout(timer);"
+            ctx.writein "        timer=setTimeout(loop,delay);"
+            ctx.writein "    }"
+            ctx.writein "    loop();"
+            ctx.writein "}"
+            ctx.writein codejs
 
 [<AutoOpen>]
 module dochtml =
     let private htmlpresentationCore
-        (movieSetting:MovieSetting)
         (dir:string)
         (filename:string)
         (title:string)
@@ -1363,179 +1360,158 @@ module dochtml =
         if not <| Directory.Exists (dir + "\\" + "contents_" + filename) then
             ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + filename)
         // コンテンツディレクトリ
-        makeProgramWithMovieSetting movieSetting
-            [
-                // メインファイル
-                dir, filename + ".html", HTML
-                // HTML本体のコード
-                dir, filename+"_body", HTML
-                // JavaScriptのコード
-                dir, filename+"_js", JavaScript
-                // スライドアニメーション用javascriptファイル名
-                dir  + "\\" + "contents_" + filename, "animationSeq.js", JavaScript
-                // スライドアニメーション(アニメーション開始)用javascript
-                dir  + "\\" + "contents_" + filename, "animationStart.js", JavaScript
-                // スライドアニメーション(アニメーションリセット)用javascript
-                dir  + "\\" + "contents_" + filename, "animationSeqReset.js", JavaScript
-                // スライドアニメーション(アニメーションリセット)用javascript
-                dir  + "\\" + "contents_" + filename, "animationReset.js", JavaScript
-                // オートアニメーション実行用javascript
-                dir  + "\\" + "contents_" + filename, "autoAnimation.js", JavaScript
-            ]
-            <| fun context ->
-                let environment = Aqualis(Some context)
-                context.ContentsDirectory <-
-                    dir + "\\" + "contents_" + filename
-                environment.htmlio.switchJSAnimationStart <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "const animationStartMap = {"
-                environment.htmlio.switchJSAnimationReset <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "const animationResetMap = {"
-                environment.htmlio.switchAutoAnimation <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "const autoAnimationMap = {"
-                environment.htmlio.switchAnimationSeq <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "function repeatSeq(fn, interval, Nt, onComplete)"
-                    writein (environment.RequireGenerationContext()) "{"
-                    writein (environment.RequireGenerationContext()) "    let t = 0;"
-                    writein (environment.RequireGenerationContext()) "    function run()"
-                    writein (environment.RequireGenerationContext()) "    {"
-                    writein (environment.RequireGenerationContext()) "        if (t < Nt)"
-                    writein (environment.RequireGenerationContext()) "        {"
-                    writein (environment.RequireGenerationContext()) "            fn(t);"
-                    writein (environment.RequireGenerationContext()) "            t++;"
-                    writein (environment.RequireGenerationContext()) "            setTimeout(run, interval);"
-                    writein (environment.RequireGenerationContext()) "        }"
-                    writein (environment.RequireGenerationContext()) "        else"
-                    writein (environment.RequireGenerationContext()) "        {"
-                    writein (environment.RequireGenerationContext()) "            onComplete();"
-                    writein (environment.RequireGenerationContext()) "        }"
-                    writein (environment.RequireGenerationContext()) "    }"
-                    writein (environment.RequireGenerationContext()) "    run();"
-                    writein (environment.RequireGenerationContext()) "}"
-                    writein (environment.RequireGenerationContext()) "function repeat(fn, interval, Nt)"
-                    writein (environment.RequireGenerationContext()) "{"
-                    writein (environment.RequireGenerationContext()) "    let t = 0;"
-                    writein (environment.RequireGenerationContext()) "    function run()"
-                    writein (environment.RequireGenerationContext()) "    {"
-                    writein (environment.RequireGenerationContext()) "        if(t == Nt)"
-                    writein (environment.RequireGenerationContext()) "        {"
-                    writein (environment.RequireGenerationContext()) "            t = 0;"
-                    writein (environment.RequireGenerationContext()) "        }"
-                    writein (environment.RequireGenerationContext()) "        fn(t);"
-                    writein (environment.RequireGenerationContext()) "        t++;"
-                    writein (environment.RequireGenerationContext()) "        setTimeout(run, interval);"
-                    writein (environment.RequireGenerationContext()) "    }"
-                    writein (environment.RequireGenerationContext()) "    run();"
-                    writein (environment.RequireGenerationContext()) "}"
-                environment.htmlio.switchBody <| fun environment ->
-                    code environment
-                if isPageAnimation then
-                    environment.slideAnimation.writeAudioList()
-                    environment.slideAnimation.jsSetCharacter()
-                    environment.slideAnimation.jsSetSubtitle()
-                    environment.slideAnimation.jsDrawNext("contents_" + filename)
-                    environment.slideAnimation.jsDrawPrev("contents_" + filename)
-                // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
-                let codeDraw = environment.htmlio.switchJSMain <| fun environment ->
-                    environment.RequireGenerationContext().CurrentProgram.allCodes
-                let codeBody = environment.htmlio.switchBody <| fun environment ->
-                    environment.RequireGenerationContext().CurrentProgram.allCodes
-                // html書き込みストリーム作成
-                environment.htmlio.switchMain <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "<!DOCTYPE html>"
-                    // html要素
-                    environment.html.tagb ("html", "lang=\"ja\"") <| fun () ->
-                        // head要素
-                        environment.html.tagb ("head", "") <| fun () ->
-                            // titleタグ
-                            writein (environment.RequireGenerationContext()) ("<title>"+title+"</title>")
-                            // metaタグ
-                            writein (environment.RequireGenerationContext()) "<meta charset=\"UTF-8\">"
-                            //追加（5/29）viewportタブ
-                            match pagesizeX with
-                            |None ->
-                                writein (environment.RequireGenerationContext()) "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
-                            |Some width ->
-                                writein (environment.RequireGenerationContext()) ("<meta name=\"viewport\" content=\"width=" + width.ToString() + "\">")
-                            // titleタグ
-                            environment.html.tagb ("title", "") <| fun () ->
-                                writein (environment.RequireGenerationContext()) filename
-                            // MathJax
-                            environment.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
-                            environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeq.js\"") <| fun () -> ()
-                            environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeqReset.js\"") <| fun () -> ()
-                            environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationStart.js\"") <| fun () -> ()
-                            environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationReset.js\"") <| fun () -> ()
-                            environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/autoAnimation.js\"") <| fun () -> ()
-                            // scriptタグ
-                            environment.html.tagb ("script", "") <| fun () ->
-                                writein (environment.RequireGenerationContext()) codeDraw
-                            // webフォント取得
-                            writein (environment.RequireGenerationContext()) "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                            writein (environment.RequireGenerationContext()) "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                            writein (environment.RequireGenerationContext()) "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
-                            match cssfile with |Some x -> writein (environment.RequireGenerationContext()) ("<link rel=\"stylesheet\" href=\""+x+"\" />") |None -> ()
-                        // body要素
-                        match pagesizeX,pagesizeY with
-                        |None,None ->
-                            let s0 = Style [area.backGroundColor "#ffffff"]
-                            environment.html.tagb ("body", [s0.atr]) <| fun () ->
-                                writein (environment.RequireGenerationContext()) codeBody
-                        |Some x,None ->
-                            let s0 = Style [area.backGroundColor "#aaaaaa"]
-                            environment.html.tagb ("body", [s0.atr]) <| fun () ->
-                                let s1 = Style [
-                                    area.backGroundColor "#ffffff"
-                                    margin.left "auto"
-                                    margin.right "auto"
-                                    size.width (x.ToString()+"px")]
-                                environment.html.tagb ("div", [s1.atr]) <| fun () ->
-                                    writein (environment.RequireGenerationContext()) codeBody
-                        |None,Some y->
-                            let s0 = Style [area.backGroundColor "#aaaaaa"]
-                            environment.html.tagb ("body", [s0.atr]) <| fun () ->
-                                let s1 = Style [
-                                    area.backGroundColor "#ffffff"
-                                    margin.left "auto"
-                                    margin.right "auto"
-                                    size.height (y.ToString()+"px")]
-                                environment.html.tagb ("div", [s1.atr]) <| fun () ->
-                                    writein (environment.RequireGenerationContext()) codeBody
-                        |Some x,Some y ->
-                            let s0 = Style [area.backGroundColor "#aaaaaa"]
-                            environment.html.tagb ("body", [s0.atr]) <| fun () ->
-                                let s1 = Style [
-                                    area.backGroundColor "#ffffff"
-                                    margin.left "auto"
-                                    margin.right "auto"
-                                    size.width (x.ToString()+"px")
-                                    size.height (y.ToString()+"px")]
-                                environment.html.tagb ("div", [s1.atr]) <| fun () ->
-                                    writein (environment.RequireGenerationContext()) codeBody
+        let context = new Aqualis(Some dir, Some filename,HTML)
+        context.htmlio.ContentsDirectory <-
+            dir + "\\" + "contents_" + filename
+        context.htmlio.switchJSAnimationStart <| fun ctx ->
+            ctx.writein "const animationStartMap = {"
+        context.htmlio.switchJSAnimationReset <| fun ctx ->
+            ctx.writein "const animationResetMap = {"
+        context.htmlio.switchAutoAnimation <| fun ctx ->
+            ctx.writein "const autoAnimationMap = {"
+        context.htmlio.switchAnimationSeq <| fun ctx ->
+            ctx.writein "function repeatSeq(fn, interval, Nt, onComplete)"
+            ctx.writein "{"
+            ctx.writein "    let t = 0;"
+            ctx.writein "    function run()"
+            ctx.writein "    {"
+            ctx.writein "        if (t < Nt)"
+            ctx.writein "        {"
+            ctx.writein "            fn(t);"
+            ctx.writein "            t++;"
+            ctx.writein "            setTimeout(run, interval);"
+            ctx.writein "        }"
+            ctx.writein "        else"
+            ctx.writein "        {"
+            ctx.writein "            onComplete();"
+            ctx.writein "        }"
+            ctx.writein "    }"
+            ctx.writein "    run();"
+            ctx.writein "}"
+            ctx.writein "function repeat(fn, interval, Nt)"
+            ctx.writein "{"
+            ctx.writein "    let t = 0;"
+            ctx.writein "    function run()"
+            ctx.writein "    {"
+            ctx.writein "        if(t == Nt)"
+            ctx.writein "        {"
+            ctx.writein "            t = 0;"
+            ctx.writein "        }"
+            ctx.writein "        fn(t);"
+            ctx.writein "        t++;"
+            ctx.writein "        setTimeout(run, interval);"
+            ctx.writein "    }"
+            ctx.writein "    run();"
+            ctx.writein "}"
+        context.htmlio.switchBody <| fun ctx ->
+            code ctx
+        if isPageAnimation then
+            context.slideAnimation.writeAudioList()
+            context.slideAnimation.jsSetCharacter()
+            context.slideAnimation.jsSetSubtitle()
+            context.slideAnimation.jsDrawNext("contents_" + filename)
+            context.slideAnimation.jsDrawPrev("contents_" + filename)
+        // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
+        let codeDraw = context.htmlio.switchJSMain <| fun ctx ->
+            ctx.allCodes
+        let codeBody = context.htmlio.switchBody <| fun ctx ->
+            ctx.allCodes
+        // html書き込みストリーム作成
+        context.htmlio.switchMain <| fun ctx ->
+            ctx.writein "<!DOCTYPE html>"
+            // html要素
+            ctx.html.tagb ("html", "lang=\"ja\"") <| fun () ->
+                // head要素
+                ctx.html.tagb ("head", "") <| fun () ->
+                    // titleタグ
+                    ctx.writein ("<title>"+title+"</title>")
+                    // metaタグ
+                    ctx.writein "<meta charset=\"UTF-8\">"
+                    //追加（5/29）viewportタブ
+                    match pagesizeX with
+                    |None ->
+                        ctx.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                    |Some width ->
+                        ctx.writein ("<meta name=\"viewport\" content=\"width=" + width.ToString() + "\">")
+                    // titleタグ
+                    ctx.html.tagb ("title", "") <| fun () ->
+                        ctx.writein filename
+                    // MathJax
+                    ctx.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeq.js\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationSeqReset.js\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationStart.js\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/animationReset.js\"") <| fun () -> ()
+                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + filename + "/autoAnimation.js\"") <| fun () -> ()
+                    // scriptタグ
+                    ctx.html.tagb ("script", "") <| fun () ->
+                        match codeDraw with |Some s -> ctx.writein s |None -> ()
+                    // webフォント取得
+                    ctx.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                    ctx.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                    ctx.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                    match cssfile with |Some x -> ctx.writein ("<link rel=\"stylesheet\" href=\""+x+"\" />") |None -> ()
+                // body要素
+                match pagesizeX,pagesizeY with
+                |None,None ->
+                    let s0 = Style [area.backGroundColor "#ffffff"]
+                    ctx.html.tagb ("body", [s0.atr]) <| fun () ->
+                        match codeBody with |Some s -> ctx.writein s |None -> ()
+                |Some x,None ->
+                    let s0 = Style [area.backGroundColor "#aaaaaa"]
+                    ctx.html.tagb ("body", [s0.atr]) <| fun () ->
+                        let s1 = Style [
+                            area.backGroundColor "#ffffff"
+                            margin.left "auto"
+                            margin.right "auto"
+                            size.width (x.ToString()+"px")]
+                        ctx.html.tagb ("div", [s1.atr]) <| fun () ->
+                            match codeBody with |Some s -> ctx.writein s |None -> ()
+                |None,Some y->
+                    let s0 = Style [area.backGroundColor "#aaaaaa"]
+                    ctx.html.tagb ("body", [s0.atr]) <| fun () ->
+                        let s1 = Style [
+                            area.backGroundColor "#ffffff"
+                            margin.left "auto"
+                            margin.right "auto"
+                            size.height (y.ToString()+"px")]
+                        ctx.html.tagb ("div", [s1.atr]) <| fun () ->
+                            match codeBody with |Some s -> ctx.writein s |None -> ()
+                |Some x,Some y ->
+                    let s0 = Style [area.backGroundColor "#aaaaaa"]
+                    ctx.html.tagb ("body", [s0.atr]) <| fun () ->
+                        let s1 = Style [
+                            area.backGroundColor "#ffffff"
+                            margin.left "auto"
+                            margin.right "auto"
+                            size.width (x.ToString()+"px")
+                            size.height (y.ToString()+"px")]
+                        ctx.html.tagb ("div", [s1.atr]) <| fun () ->
+                            match codeBody with |Some s -> ctx.writein s |None -> ()
 
-                environment.htmlio.switchJSAnimationStart <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "test: () => {}"
-                    writein (environment.RequireGenerationContext()) "};"
-                environment.htmlio.switchJSAnimationReset <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "test: () => {}"
-                    writein (environment.RequireGenerationContext()) "};"
-                    writein (environment.RequireGenerationContext()) ""
-                    writein (environment.RequireGenerationContext()) "function resetAll(){"
-                    writein (environment.RequireGenerationContext()) "    for (const key in animationResetMap) {"
-                    writein (environment.RequireGenerationContext()) "        if (typeof animationResetMap[key] === \"function\") {"
-                    writein (environment.RequireGenerationContext()) "            animationResetMap[key]();"
-                    writein (environment.RequireGenerationContext()) "        }"
-                    writein (environment.RequireGenerationContext()) "    }"
-                    writein (environment.RequireGenerationContext()) "}"
-                environment.htmlio.switchAutoAnimation <| fun environment ->
-                    writein (environment.RequireGenerationContext()) "test: () => {}"
-                    writein (environment.RequireGenerationContext()) "};"
-                let context = environment.RequireGenerationContext()
+                ctx.htmlio.switchJSAnimationStart <| fun ctx ->
+                    ctx.writein "test: () => {}"
+                    ctx.writein "};"
+                ctx.htmlio.switchJSAnimationReset <| fun ctx ->
+                    ctx.writein "test: () => {}"
+                    ctx.writein "};"
+                    ctx.writein ""
+                    ctx.writein "function resetAll(){"
+                    ctx.writein "    for (const key in animationResetMap) {"
+                    ctx.writein "        if (typeof animationResetMap[key] === \"function\") {"
+                    ctx.writein "            animationResetMap[key]();"
+                    ctx.writein "        }"
+                    ctx.writein "    }"
+                    ctx.writein "}"
+                ctx.htmlio.switchAutoAnimation <| fun ctx ->
+                    ctx.writein "test: () => {}"
+                    ctx.writein "};"
                 for i in 0..7 do
-                    context.Programs[i].close()
+                    ctx.htmlio.switchBody <| fun c -> c.close()
                 // bodyタグ一時コード削除
-                context.Programs[1].delete()
+                ctx.htmlio.switchBody <| fun c -> c.delete()
                 // JavaScript関数一時コード削除
-                context.Programs[2].delete()
+                ctx.htmlio.switchJSMain <| fun c -> c.delete()
 
     /// 全体がキャンバスの無制限レイアウト
     let htmlpresentation
@@ -1547,7 +1523,6 @@ module dochtml =
         isPageAnimation
         code =
         htmlpresentationCore
-            MovieSetting.Default
             dir
             filename
             title
@@ -1557,8 +1532,8 @@ module dochtml =
             code
 
     let freeCanvas outputdir filename (title:string) cssfile code =
-        htmlpresentation outputdir filename title cssfile (None, None) false <| fun environment ->
-            environment.html.canvas <| Style [size.width "0px"; size.height "0px"] <| fun () -> code environment
+        htmlpresentation outputdir filename title cssfile (None, None) false <| fun ctx ->
+            ctx.html.canvas <| Style [size.width "0px"; size.height "0px"] <| fun () -> code ctx
 
     /// 全体がキャンバスの無制限レイアウト
     let freePage outputdir filename (title:string) cssfile code =
@@ -1568,15 +1543,15 @@ module dochtml =
     let fixedWidthPage outputdir filename (title:string) pageWidth cssfile code =
         htmlpresentation outputdir filename title cssfile (Some pageWidth, None) false code
 
-    let fixedPage outputdir filename (title:string) pageWidth pageHeight setting cssfile code =
-        htmlpresentationCore setting outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun environment ->
-            code environment
-            environment.html.prevButton()
-            environment.html.nextButton()
-            environment.html.switchCharacter()
-            environment.html.switchSubtitle()
-            environment.html.switchAudio()
-            environment.html.audioPlayer()
+    let fixedPage outputdir filename (title:string) pageWidth pageHeight cssfile code =
+        htmlpresentationCore outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun ctx ->
+            code ctx
+            ctx.html.prevButton()
+            ctx.html.nextButton()
+            ctx.html.switchCharacter()
+            ctx.html.switchSubtitle()
+            ctx.html.switchAudio()
+            ctx.html.audioPlayer()
 
 [<AutoOpen>]
 module htmlexpr2 =
@@ -1588,54 +1563,50 @@ module htmlexpr2 =
         /// <param name="p">表示位置</param>
         /// <param name="buttonX, buttonY">操作ボタンの配置座標</param>
         member this.animationManual (s:ViewBoxStyle) (p:position) (buttonX:int,buttonY:int) code =
-            let environment = this.Environment
-            let context = environment.RequireGenerationContext()
+            let context = this.Context
             let f =
                 FigureAnimation(
-                    environment, context.NextFigureNumber(),
+                    context, context.htmlio.NextFigureNumber(),
                     s.mX,s.mY,s.sX,s.sY)
-            environment.htmlio.switchBody <| fun environment ->
-                let context = environment.RequireGenerationContext()
-                writein context ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
-                writein context ("width=\""+CssLength.pixelsInt s.sX+"\" ")
-                writein context ("height=\""+CssLength.pixelsInt s.sY+"\" ")
-                writein context "xmlns=\"http://www.w3.org/2000/svg\" "
-                writein context ("style=\"margin-left: "+CssLength.pixelsInt s.mX+"; ")
-                writein context ("margin-top: "+CssLength.pixelsInt s.mY+"; ")
-                writein context "position: absolute;"
-                writein context ("background-color: "+s.backgroundColor+";")
-                writein context "\">"
+            context.htmlio.switchBody <| fun ctx ->
+                ctx.writein  ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
+                ctx.writein  ("width=\""+CssLength.pixelsInt s.sX+"\" ")
+                ctx.writein  ("height=\""+CssLength.pixelsInt s.sY+"\" ")
+                ctx.writein  "xmlns=\"http://www.w3.org/2000/svg\" "
+                ctx.writein  ("style=\"margin-left: "+CssLength.pixelsInt s.mX+"; ")
+                ctx.writein  ("margin-top: "+CssLength.pixelsInt s.mY+"; ")
+                ctx.writein  "position: absolute;"
+                ctx.writein  ("background-color: "+s.backgroundColor+";")
+                ctx.writein  "\">"
                 code(f,p)
-                writein context "</svg>"
-            let asc = environment.htmlio.nextAnimationGroup()
+                ctx.writein  "</svg>"
+            let asc = context.htmlio.nextAnimationGroup()
             let fnameStart = f.jsStartControll asc
             let fnameReset = f.jsResetControll asc
-            environment.htmlio.addAnimationButton(fnameStart,fnameReset,buttonX,buttonY)
+            context.htmlio.addAnimationButton(fnameStart,fnameReset,buttonX,buttonY)
 
         /// <summary>
         /// 自動再生型のアニメーション領域を生成する
         /// </summary>
         member this.animationAuto (s:ViewBoxStyle) (p:position) code =
-            let environment = this.Environment
-            let context = environment.RequireGenerationContext()
+            let context = this.Context
             let f =
                 FigureAnimation(
-                    environment, context.NextFigureNumber(),
+                    context, context.htmlio.NextFigureNumber(),
                     s.mX,s.mY,s.sX,s.sY)
-            environment.htmlio.switchBody <| fun environment ->
-                let context = environment.RequireGenerationContext()
-                writein context ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
-                writein context ("width=\""+CssLength.pixelsInt s.sX+"\" ")
-                writein context ("height=\""+CssLength.pixelsInt s.sY+"\" ")
-                writein context "xmlns=\"http://www.w3.org/2000/svg\" "
-                writein context ("style=\"margin-left: "+CssLength.pixelsInt s.mX+"; ")
-                writein context ("margin-top: "+CssLength.pixelsInt s.mY+"; ")
-                writein context "position: absolute;"
-                writein context ("background-color: "+s.backgroundColor+";")
-                writein context "\">"
+            context.htmlio.switchBody <| fun ctx ->
+                ctx.writein  ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
+                ctx.writein  ("width=\""+CssLength.pixelsInt s.sX+"\" ")
+                ctx.writein  ("height=\""+CssLength.pixelsInt s.sY+"\" ")
+                ctx.writein  "xmlns=\"http://www.w3.org/2000/svg\" "
+                ctx.writein  ("style=\"margin-left: "+CssLength.pixelsInt s.mX+"; ")
+                ctx.writein  ("margin-top: "+CssLength.pixelsInt s.mY+"; ")
+                ctx.writein  "position: absolute;"
+                ctx.writein  ("background-color: "+s.backgroundColor+";")
+                ctx.writein  "\">"
                 code(f,p)
-                writein context "</svg>"
-            let asc = environment.htmlio.nextAnimationGroup()
+                ctx.writein  "</svg>"
+            let asc = context.htmlio.nextAnimationGroup()
             let fnameStart = f.jsStartControll asc
             let fnameReset = f.jsResetControll asc
-            environment.htmlio.addAutoAnimation(fnameStart,fnameReset)
+            context.htmlio.addAutoAnimation(fnameStart,fnameReset)

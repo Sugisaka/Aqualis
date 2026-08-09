@@ -3,7 +3,7 @@ namespace Aqualis
 [<AutoOpen>]
 module varControl2 =
     type varGenerator with
-        static member isVarExist(program:program, name:string, typ:Etype, shape:VarType) =
+        static member isVarExist(program:Aqualis, name:string, typ:Etype, shape:VarType) =
             [
                 program.i0, It 4, A0
                 program.d0, Dt, A0
@@ -26,7 +26,7 @@ module varControl2 =
                 |None,None,None,None -> false
                 |None,Some _,None,None when itemType = typ && itemShape = shape -> false
                 |_ -> true)
-            |> fun exists -> exists || program.var.exists name
+            |> fun exists -> exists || program.cvar.exists name
 
         member private this.getNamedVar(name:string, collision:bool) =
             if collision then
@@ -55,7 +55,7 @@ module varControl2 =
                     this.addOfflineStrList name
                 name,release
 
-        member this.getVar(program:program, name:string, typ:Etype, shape:VarType) =
+        member this.getVar(program:Aqualis, name:string, typ:Etype, shape:VarType) =
             this.getNamedVar(name, varGenerator.isVarExist(program,name,typ,shape))
 
         member this.getVar(name:string, _typ:Etype, _shape:VarType) =

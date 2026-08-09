@@ -1,9 +1,10 @@
 namespace Aqualis
 
-    type double3(typ:Etype,x:Expr3,?context:GenerationContext) as this=
-        inherit NumericArray3<double0,double1,double2,double3>(typ,x,?context=context)
-        new(context:GenerationContext,typ,size,name,para)=
-            context.CurrentProgram.var.setVar(typ,size,name,para)
+    type double3(typ:Etype,x:Expr3,context:Aqualis) as this=
+        inherit NumericArray3<double0,double1,double2,double3>(typ,x,context)
+        new(typ,x) = double3(typ,x,Aqualis.BlankWriter Numeric)
+        new(context:Aqualis,typ,size,name,para)=
+            context.cvar.setVar(typ,size,name,para)
             double3(typ,Var3(size,name),context=context)
         new(a:int0,b:int0,c:int0,f:int0*int0*int0->double0) = double3(Dt,Arx3(a,b,c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int0,c:int0,f:int0*int0*int0->double0) = double3(Dt,Arx3(I a,b,c,fun ijk->(f ijk).Expr))
@@ -13,11 +14,11 @@ namespace Aqualis
         new(a:int ,b:int0,c:int ,f:int0*int0*int0->double0) = double3(Dt,Arx3(I a,b,I c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int0,f:int0*int0*int0->double0) = double3(Dt,Arx3(I a,I b,c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int ,f:int0*int0*int0->double0) = double3(Dt,Arx3(I a,I b,I c,fun ijk->(f ijk).Expr))
-        override _.WrapScalar value=double0(value,?context=this.Context)
-        override _.WrapRow value=double1(typ,value,?context=this.Context)
-        override _.WrapMatrix value=double2(typ,value,?context=this.Context)
-        override _.CreateWithContext(elementType,value,resultContext)=double3(elementType,value,?context=resultContext)
-        override _.AssignAt(i,j,k,value)=this[i,j,k] <== double0(value,?context=this.Context)
+        override _.WrapScalar value=double0(value,this.Context)
+        override _.WrapRow value=double1(typ,value,this.Context)
+        override _.WrapMatrix value=double2(typ,value,this.Context)
+        override _.CreateWithContext(elementType,value,resultContext)=double3(elementType,value,resultContext)
+        override _.AssignAt(i,j,k,value)=this[i,j,k] <== double0(value,this.Context)
         override _.clear()=this.AssignScalar(D 0.0)
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
         static member (<==)(x:double3,y:double3)=x.AssignArray y

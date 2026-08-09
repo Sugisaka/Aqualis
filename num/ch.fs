@@ -21,73 +21,61 @@ module internal TemporaryVariableScope =
         try acquired |> List.map (fst >> createValue) |> code
         finally acquired |> List.rev |> List.iter (snd >> fun release -> release())
 
-type ContextCh internal (environment:Aqualis) =
-    let context() = environment.RequireGenerationContext()
+type ContextCh internal (c:Aqualis) =
 
-    member internal _.Environment = environment
+    member internal _.Environment = c
 
     member _.i code =
-        let ctx = context()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.i0.getVar
-            (fun name -> int0(Var(It 4,name,NaN), context=ctx)) code
+        TemporaryVariableScope.useOne c.i0.getVar
+            (fun name -> int0(Var(It 4,name,NaN), context=c)) code
 
     member _.d code =
-        let ctx = context()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.d0.getVar
-            (fun name -> double0(Var(Dt,name,NaN), context=ctx)) code
+        TemporaryVariableScope.useOne c.d0.getVar
+            (fun name -> double0(Var(Dt,name,NaN), context=c)) code
 
     member _.z code =
-        let ctx = context()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.z0.getVar
-            (fun name -> complex0(Var(Zt,name,NaN), context=ctx)) code
+        TemporaryVariableScope.useOne c.z0.getVar
+            (fun name -> complex0(Var(Zt,name,NaN), context=c)) code
 
     member _.I name code =
-        let ctx = context()
         TemporaryVariableScope.useOne
-            (fun () -> ctx.CurrentProgram.i0.getVar(ctx.CurrentProgram,name,It 4,A0))
-            (fun variableName -> int0(Var(It 4,variableName,NaN), context=ctx)) code
+            (fun () -> c.i0.getVar(c,name,It 4,A0))
+            (fun variableName -> int0(Var(It 4,variableName,NaN), context=c)) code
 
     member _.D name code =
-        let ctx = context()
         TemporaryVariableScope.useOne
-            (fun () -> ctx.CurrentProgram.d0.getVar(ctx.CurrentProgram,name,Dt,A0))
-            (fun variableName -> double0(Var(Dt,variableName,NaN), context=ctx)) code
+            (fun () -> c.d0.getVar(c,name,Dt,A0))
+            (fun variableName -> double0(Var(Dt,variableName,NaN), context=c)) code
 
     member _.Z name code =
-        let ctx = context()
         TemporaryVariableScope.useOne
-            (fun () -> ctx.CurrentProgram.z0.getVar(ctx.CurrentProgram,name,Zt,A0))
-            (fun variableName -> complex0(Var(Zt,variableName,NaN), context=ctx)) code
+            (fun () -> c.z0.getVar(c,name,Zt,A0))
+            (fun variableName -> complex0(Var(Zt,variableName,NaN), context=c)) code
 
     member _.ix count code =
-        let ctx = context()
-        TemporaryVariableScope.useMany count ctx.CurrentProgram.i0.getVar
-            (fun name -> int0(Var(It 4,name,NaN), context=ctx)) code
+        TemporaryVariableScope.useMany count c.i0.getVar
+            (fun name -> int0(Var(It 4,name,NaN), context=c)) code
 
     member _.dx count code =
-        let ctx = context()
-        TemporaryVariableScope.useMany count ctx.CurrentProgram.d0.getVar
-            (fun name -> double0(Var(Dt,name,NaN), context=ctx)) code
+        TemporaryVariableScope.useMany count c.d0.getVar
+            (fun name -> double0(Var(Dt,name,NaN), context=c)) code
 
     member _.zx count code =
-        let ctx = context()
-        TemporaryVariableScope.useMany count ctx.CurrentProgram.z0.getVar
-            (fun name -> complex0(Var(Zt,name,NaN), context=ctx)) code
+        TemporaryVariableScope.useMany count c.z0.getVar
+            (fun name -> complex0(Var(Zt,name,NaN), context=c)) code
 
     member _.f code =
-        let ctx = context()
-        let name,counter,release = ctx.CurrentProgram.f0.getVarAndCounter()
+        let name,counter,release = c.f0.getVarAndCounter()
         try
-            let initial = if ctx.CurrentProgram.language = Fortran then ctx.CurrentProgram.numFormat.ItoS(counter + 10) else ""
-            ctx.CurrentProgram.var.setVar(Structure "file",A0,name,initial)
+            let initial = if c.language = Fortran then c.numFormat.ItoS(counter + 10) else ""
+            c.cvar.setVar(Structure "file",A0,name,initial)
             code name
         finally release()
 
     member _.t variableType code =
-        let ctx = context()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.t0.getVar
+        TemporaryVariableScope.useOne c.t0.getVar
             (fun name ->
-                ctx.CurrentProgram.var.setVar(Structure "string",variableType,name,"")
+                c.cvar.setVar(Structure "string",variableType,name,"")
                 name) code
 
     member this.ii code = this.i (fun first -> this.i (fun second -> code(first,second)))

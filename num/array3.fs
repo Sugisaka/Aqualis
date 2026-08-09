@@ -14,23 +14,19 @@ namespace Aqualis
         |Arx3 of (int0*int0*int0*((int0*int0*int0)->expr))
 
     ///<summary>3次元配列</summary>
-    type base3 (typ:Etype,x:Expr3, ?context:GenerationContext) =
-        let requireContext() = GenerationContextMerge.requireTarget context
-        let currentProgram() = (requireContext()).CurrentProgram
-        let language() = currentProgram().language
-        let writein text = currentProgram().codewritein text
-        let comment text = currentProgram().comment text
-        let environment() = Aqualis context
-        let sizeValue value = int0(value, ?context=context)
+    type base3 (typ:Etype,x:Expr3, c:Aqualis) =
+        let writein text = c.codewritein text
+        let comment text = c.comment text
+        let sizeValue value = int0(value, c)
         ///<summary>変数を作成しリストに追加</summary>
-        new (context:GenerationContext,typ,size,name,para) =
-            context.CurrentProgram.var.setVar(typ,size,name,para)
-            base3(typ,Var3(size,name), context=context)
+        new (context:Aqualis,typ,size,name,para) =
+            context.cvar.setVar(typ,size,name,para)
+            base3(typ,Var3(size,name),context)
         ///<summary>変数を作成しリストに追加</summary>
-        new(context:GenerationContext,sname,size,name) =
-            context.CurrentProgram.var.setVar(Structure sname,size,name,"")
-            base3(Structure sname,Var3(size,name), context=context)
-        member internal _.GenerationContext = context
+        new(context:Aqualis,sname,size,name) =
+            context.cvar.setVar(Structure sname,size,name,"")
+            base3(Structure sname,Var3(size,name),context)
+        member internal _.Aqualis = c
         member _.Expr with get() = x
         member _.code with get() =
             match x with
@@ -41,7 +37,7 @@ namespace Aqualis
           with get() =
             match x with
             |Var3(_,name) ->
-                match currentProgram().language with
+                match c.language with
                 |Fortran ->
                     sizeValue(Var(It 4,name+"_size(1)",NaN))
                 |C99 ->
@@ -66,7 +62,7 @@ namespace Aqualis
           with get() =
             match x with
             |Var3(_,name) ->
-                match currentProgram().language with
+                match c.language with
                 |Fortran ->
                     sizeValue(Var(It 4,name+"_size(2)",NaN))
                 |C99 ->
@@ -91,7 +87,7 @@ namespace Aqualis
           with get() =
             match x with
             |Var3(_,name) ->
-                match currentProgram().language with
+                match c.language with
                 |Fortran ->
                     sizeValue(Var(It 4,name+"_size(3)",NaN))
                 |C99 ->
@@ -113,23 +109,23 @@ namespace Aqualis
             |Arx3(_,_,s3,_) -> s3
         ///<summary>インデクサ</summary>
         member this.Idx3(i:int0,j:int0,k:int0) =
-            GenerationContextMerge.mergeMany [context;i.Context;j.Context;k.Context] |> ignore
-            if context |> Option.exists (fun value -> value.Debug.debugMode) then
+            Aqualis.mergeMany [c;i.Context;j.Context;k.Context] |> ignore
+            if c.Debug.debugMode then
                 match x with
                 |Var3(_,name) ->
-                    (requireContext()).Errors.inc()
-                    comment ("***debug array3 access check: "+(requireContext()).Errors.ID+"*****************************")
-                    (environment()).br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () ->
-                        (environment()).print.s <| "ERROR"+(requireContext()).Errors.ID+" array "+name+" is not allocated"
-                    (environment()).br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                        (environment()).print.tt <| "ERROR" + (requireContext()).Errors.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
-                    (environment()).br.if1 (Or [j .< _0; this.size2 .<= j]) <| fun () ->
-                        (environment()).print.tt <| "ERROR" + (requireContext()).Errors.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
-                    (environment()).br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
-                        (environment()).print.tt <| "ERROR" + (requireContext()).Errors.ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
+                    c.Errors.inc()
+                    comment ("***debug array3 access check: "+c.Errors.ID+"*****************************")
+                    c.br.if1 (Or [this.size1 .= -1; this.size2 .= -1; this.size3 .= -1]) <| fun () ->
+                        c.print.s <| "ERROR"+c.Errors.ID+" array "+name+" is not allocated"
+                    c.br.if1 (Or [i .< _0; this.size1 .<= i]) <| fun () ->
+                        c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                    c.br.if1 (Or [j .< _0; this.size2 .<= j]) <| fun () ->
+                        c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
+                    c.br.if1 (Or [k .< _0; this.size3 .<= k]) <| fun () ->
+                        c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ k ++ " is out of range (1:" ++ this.size3 ++ ")"
                     comment "****************************************************"
                 |_ -> ()
-            let targetLanguage = context |> Option.map (fun value -> value.CurrentProgram.language) |> Option.defaultValue Numeric
+            let targetLanguage = c.language
             match x,targetLanguage with
             |Var3(_,name),Fortran -> Idx3(typ,name,(i+1).Expr,(j+1).Expr,(k+1).Expr)
             |Var3(_,name),C99 -> Idx1(typ,name,(i + j * this.size1 + k * this.size1 * this.size2).Expr)
@@ -482,21 +478,21 @@ namespace Aqualis
         member this.allocate(n1:int0,n2:int0,n3:int0) =
                 match x with
                 |Var3(size,name) ->
-                    if (requireContext()).Debug.debugMode then
-                        (requireContext()).Errors.inc()
-                        comment ("***debug array1 allocate check: "+(requireContext()).Errors.ID+"*****************************")
-                        (environment()).br.branch <| fun b ->
+                    if c.Debug.debugMode then
+                        c.Errors.inc()
+                        comment ("***debug array1 allocate check: "+c.Errors.ID+"*****************************")
+                        c.br.branch <| fun b ->
                             b.IF (this.size1 .=/ -1) <| fun () ->
-                                (environment()).print.s <| "ERROR"+(requireContext()).Errors.ID+" array "+name+" is already allocated"
+                                c.print.s <| "ERROR"+c.Errors.ID+" array "+name+" is already allocated"
                         comment "****************************************************"
-                    match currentProgram().language with
+                    match c.language with
                     |Fortran ->
                         match size with
                         |A3(0,0,0) ->
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            writein("allocate("+name+"(1:"+this.size1.Expr.eval (currentProgram())+",1:"+this.size2.Expr.eval (currentProgram())+",1:"+this.size3.Expr.eval (currentProgram())+")"+")"+"\n")
+                            writein("allocate("+name+"(1:"+this.size1.Expr.eval (c)+",1:"+this.size2.Expr.eval (c)+",1:"+this.size3.Expr.eval (c)+")"+")"+"\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |C99 ->
@@ -505,37 +501,37 @@ namespace Aqualis
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            writein(name+" = "+"("+typ.tostring(language())+" *)"+"malloc("+"sizeof("+typ.tostring(language())+")*"+this.size1.Expr.eval (currentProgram())+"*"+this.size2.Expr.eval (currentProgram())+"*"+this.size3.Expr.eval (currentProgram())+");\n")
+                            writein(name+" = "+"("+typ.tostring(c.language)+" *)"+"malloc("+"sizeof("+typ.tostring(c.language)+")*"+this.size1.Expr.eval (c)+"*"+this.size2.Expr.eval (c)+"*"+this.size3.Expr.eval (c)+");\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |LaTeX ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}$\\\\\n")
                         |A3(0,0,0),Dt   ->
-                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}$\\\\\n")
                         |A3(0,0,0),Zt   ->
-                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}$\\\\\n")
+                            writein("$"+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}$\\\\\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |HTML ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}\\)<br>\n")
                         |A3(0,0,0),Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}\\)<br>\n")
                         |A3(0,0,0),Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}\\)<br>\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |HTMLSequenceDiagram ->
                         match size,typ with
                         |A3(0,0,0),It _ ->
-                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{Z}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}\\)<br>\n")
                         |A3(0,0,0),Dt   ->
-                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{R}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}\\)<br>\n")
                         |A3(0,0,0),Zt   ->
-                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (currentProgram())+"\\times"+n2.Expr.eval (currentProgram())+"\\times"+n3.Expr.eval (currentProgram())+"}\\)<br>\n")
+                            writein("\\("+name+" \\in \\mathbb{C}^{"+n1.Expr.eval (c)+"\\times"+n2.Expr.eval (c)+"\\times"+n3.Expr.eval (c)+"}\\)<br>\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |Python ->
@@ -545,10 +541,10 @@ namespace Aqualis
                             this.size2 <== n2
                             this.size3 <== n3
                             match typ with
-                            |Structure sname -> writein(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval (currentProgram())+"))] for _ in range(int("+this.size2.Expr.eval (currentProgram())+"))] for _ in range(int("+this.size1.Expr.eval (currentProgram())+"))], dtype=object).reshape(int("+this.size1.Expr.eval (currentProgram())+"),int("+this.size2.Expr.eval (currentProgram())+"),int("+this.size3.Expr.eval (currentProgram())+"))\n")
-                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (currentProgram())+"*"+this.size2.Expr.eval (currentProgram())+"*"+this.size3.Expr.eval (currentProgram())+", dtype=int).reshape("+this.size1.Expr.eval (currentProgram())+","+this.size2.Expr.eval (currentProgram())+","+this.size3.Expr.eval (currentProgram())+")"+"\n")
-                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (currentProgram())+"*"+this.size2.Expr.eval (currentProgram())+"*"+this.size3.Expr.eval (currentProgram())+", dtype=numpy.complex128).reshape("+this.size1.Expr.eval (currentProgram())+","+this.size2.Expr.eval (currentProgram())+","+this.size3.Expr.eval (currentProgram())+")"+"\n")
-                            |_               -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (currentProgram())+"*"+this.size2.Expr.eval (currentProgram())+"*"+this.size3.Expr.eval (currentProgram())+").reshape("+this.size1.Expr.eval (currentProgram())+","+this.size2.Expr.eval (currentProgram())+","+this.size3.Expr.eval (currentProgram())+")"+"\n")
+                            |Structure sname -> writein(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval (c)+"))] for _ in range(int("+this.size2.Expr.eval (c)+"))] for _ in range(int("+this.size1.Expr.eval (c)+"))], dtype=object).reshape(int("+this.size1.Expr.eval (c)+"),int("+this.size2.Expr.eval (c)+"),int("+this.size3.Expr.eval (c)+"))\n")
+                            |It _ |It 1      -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (c)+"*"+this.size2.Expr.eval (c)+"*"+this.size3.Expr.eval (c)+", dtype=int).reshape("+this.size1.Expr.eval (c)+","+this.size2.Expr.eval (c)+","+this.size3.Expr.eval (c)+")"+"\n")
+                            |Zt              -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (c)+"*"+this.size2.Expr.eval (c)+"*"+this.size3.Expr.eval (c)+", dtype=numpy.complex128).reshape("+this.size1.Expr.eval (c)+","+this.size2.Expr.eval (c)+","+this.size3.Expr.eval (c)+")"+"\n")
+                            |_               -> writein(name+" = numpy.zeros("+this.size1.Expr.eval (c)+"*"+this.size2.Expr.eval (c)+"*"+this.size3.Expr.eval (c)+").reshape("+this.size1.Expr.eval (c)+","+this.size2.Expr.eval (c)+","+this.size3.Expr.eval (c)+")"+"\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |JavaScript ->
@@ -557,7 +553,7 @@ namespace Aqualis
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            writein(name+" = "+"Array("+this.size1.Expr.eval (currentProgram())+"*"+this.size2.Expr.eval (currentProgram())+"*"+this.size3.Expr.eval (currentProgram())+");\n")
+                            writein(name+" = "+"Array("+this.size1.Expr.eval (c)+"*"+this.size2.Expr.eval (c)+"*"+this.size3.Expr.eval (c)+");\n")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |PHP ->
@@ -583,19 +579,19 @@ namespace Aqualis
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
-            if (requireContext()).Debug.debugMode then
+            if c.Debug.debugMode then
                 match x with
                 |Var3(_,name) ->
-                    (requireContext()).Errors.inc()
-                    comment ("***debug array1 deallocate check: "+(requireContext()).Errors.ID+"*****************************")
-                    (environment()).br.branch <| fun b ->
+                    c.Errors.inc()
+                    comment ("***debug array1 deallocate check: "+c.Errors.ID+"*****************************")
+                    c.br.branch <| fun b ->
                         b.IF (this.size1 .= -1) <| fun () ->
-                            (environment()).print.s <| "ERROR"+(requireContext()).Errors.ID+" cannot deallocate array "+name
+                            c.print.s <| "ERROR"+c.Errors.ID+" cannot deallocate array "+name
                     comment "****************************************************"
                 |_ -> ()
             match x with
             |Var3(size,name) ->
-                match currentProgram().language with
+                match c.language with
                 |Fortran ->
                     match size with
                     |A3(0,0,0) ->
@@ -663,68 +659,65 @@ namespace Aqualis
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach code =
-            (environment()).iter.num this.size1 <| fun i ->
-                (environment()).iter.num this.size2 <| fun j ->
-                    (environment()).iter.num this.size3 <| fun k ->
+            c.iter.num this.size1 <| fun i ->
+                c.iter.num this.size2 <| fun j ->
+                    c.iter.num this.size3 <| fun k ->
                         code(i,j,k)
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.Foreach (counterName1:string,counterName2:string,counterName3:string) code =
-            (environment()).iter.num (this.size1,counterName1) <| fun i ->
-                (environment()).iter.num (this.size2,counterName2) <| fun j ->
-                    (environment()).iter.num (this.size3,counterName3) <| fun k ->
+            c.iter.num (this.size1,counterName1) <| fun i ->
+                c.iter.num (this.size2,counterName2) <| fun j ->
+                    c.iter.num (this.size3,counterName3) <| fun k ->
                         code(i,j,k)
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach_exit code =
-            (environment()).iter.num_exit this.size1 <| fun (ext1,i) ->
-                (environment()).iter.num_exit this.size2 <| fun (ext2,j) ->
-                    (environment()).iter.num_exit this.size3 <| fun (ext3,k) ->
+            c.iter.num_exit this.size1 <| fun (ext1,i) ->
+                c.iter.num_exit this.size2 <| fun (ext2,j) ->
+                    c.iter.num_exit this.size3 <| fun (ext3,k) ->
                         code(ext1,ext2,ext3,i,j,k)
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.Foreach_exit (counterName1:string,counterName2:string,counterName3:string) code =
-            (environment()).iter.num_exit (this.size1,counterName1) <| fun (ext1,i) ->
-                (environment()).iter.num_exit (this.size2,counterName2) <| fun (ext2,j) ->
-                    (environment()).iter.num_exit (this.size3,counterName3) <| fun (ext3,k) ->
+            c.iter.num_exit (this.size1,counterName1) <| fun (ext1,i) ->
+                c.iter.num_exit (this.size2,counterName2) <| fun (ext2,j) ->
+                    c.iter.num_exit (this.size3,counterName3) <| fun (ext3,k) ->
                         code(ext1,ext2,ext3,i,j,k)
 
         static member sizeMismatchError(v1:base3,v2:base3) =
-            let context = GenerationContextMerge.merge v1.GenerationContext v2.GenerationContext
-            context |> Option.iter (fun ctx ->
-                let environment = Aqualis context
-                if ctx.Debug.debugMode then
-                    ctx.Errors.inc()
-                    ctx.CurrentProgram.comment ("***debug array3 access check: "+ctx.Errors.ID+"*****************************")
-                    environment.br.if1 (v1.size1 .=/ v2.size1) <| fun () ->
-                        environment.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size1 mismatch"
-                    environment.br.if1 (v1.size2 .=/ v2.size2) <| fun () ->
-                        environment.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size2 mismatch"
-                    environment.br.if1 (v1.size3 .=/ v2.size3) <| fun () ->
-                        environment.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size3 mismatch"
-                    ctx.CurrentProgram.comment "****************************************************")
-
+            let ctx = Aqualis.merge v1.Aqualis v2.Aqualis
+            if ctx.Debug.debugMode then
+                ctx.Errors.inc()
+                ctx.comment ("***debug array3 access check: "+ctx.Errors.ID+"*****************************")
+                ctx.br.if1 (v1.size1 .=/ v2.size1) <| fun () ->
+                    ctx.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size1 mismatch"
+                ctx.br.if1 (v1.size2 .=/ v2.size2) <| fun () ->
+                    ctx.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size2 mismatch"
+                ctx.br.if1 (v1.size3 .=/ v2.size3) <| fun () ->
+                    ctx.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size3 mismatch"
+                ctx.comment "****************************************************"
+                
     /// Shared implementation for three-dimensional numeric arrays.
     [<AbstractClass>]
     type NumericArray3<'Scalar,'Row,'Matrix,'Self
         when 'Scalar :> INum0
         and 'Self :> NumericArray3<'Scalar,'Row,'Matrix,'Self>>
-        (typ:Etype,x:Expr3,?context:GenerationContext) =
-        inherit base3(typ,x,?context=context)
+        (typ:Etype,x:Expr3,context:Aqualis) =
+        inherit base3(typ,x,context)
 
-        let context =
-            match context,x with
-            |Some value,_ -> Some value
-            |None,Arx3(size1,size2,size3,_) ->
-                GenerationContextMerge.mergeMany [size1.Context;size2.Context;size3.Context]
-            |None,Var3 _ -> None
-        let environment() = Aqualis context
+        // let context =
+        //     match context,x with
+        //     |Some value,_ -> Some value
+        //     |None,Arx3(size1,size2,size3,_) ->
+        //         Aqualis.mergeMany [size1.Context;size2.Context;size3.Context]
+        //     |None,Var3 _ -> None
         member _.Context=context
         member _.etype=typ
         abstract member WrapScalar:expr->'Scalar
         abstract member WrapRow:Expr1->'Row
         abstract member WrapMatrix:Expr2->'Matrix
-        abstract member CreateWithContext:Etype*Expr3*GenerationContext option->'Self
+        abstract member CreateWithContext:Etype*Expr3*Aqualis->'Self
         abstract member AssignAt:int0*int0*int0*expr->unit
         member this.Create(elementType,value)=this.CreateWithContext(elementType,value,context)
 
@@ -1075,13 +1068,13 @@ namespace Aqualis
             this.CreateWithContext(elementType,Arx3(this.size1,this.size2,this.size3,body),resultContext)
         static member private Binary(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
             base3.sizeMismatchError(x,y)
-            let resultContext=GenerationContextMerge.merge x.Context y.Context
+            let resultContext=Aqualis.merge x.Context y.Context
             x.New(x.etype%%y.etype,(fun (i:int0,j:int0,k:int0)->make(x.etype%%y.etype,(x[i,j,k]:>INum0).Expr,(y[i,j,k]:>INum0).Expr)),resultContext)
         static member private ScalarLeft(value:INum0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
-            let resultContext=GenerationContextMerge.merge value.Context y.Context
+            let resultContext=Aqualis.merge value.Context y.Context
             y.New(value.Etype%%y.etype,(fun (i:int0,j:int0,k:int0)->make(value.Etype%%y.etype,value.Expr,(y[i,j,k]:>INum0).Expr)),resultContext)
         static member private ScalarRight(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,value:INum0,make:Etype*expr*expr->expr)=
-            let resultContext=GenerationContextMerge.merge x.Context value.Context
+            let resultContext=Aqualis.merge x.Context value.Context
             x.New(x.etype%%value.Etype,(fun (i:int0,j:int0,k:int0)->make(x.etype%%value.Etype,(x[i,j,k]:>INum0).Expr,value.Expr)),resultContext)
         static member private PrimitiveLeft(elementType,value,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
             y.New(elementType%%y.etype,(fun (i:int0,j:int0,k:int0)->make(elementType%%y.etype,value,(y[i,j,k]:>INum0).Expr)),y.Context)
@@ -1118,14 +1111,13 @@ namespace Aqualis
         static member (/)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:double)=NumericArray3.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Div(t,a,b))
 
         member this.AssignArray(other:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=
-            let ctx = GenerationContextMerge.requireTarget context
-            GenerationContextMerge.merge context other.Context |> ignore
-            let writein text=ctx.CurrentProgram.codewritein text
+            Aqualis.merge context other.Context |> ignore
+            let writein text=context.codewritein text
             base3.sizeMismatchError(this,other)
-            let elementwise()=(environment()).iter.num this.size1 <| fun i->(environment()).iter.num this.size2 <| fun j->(environment()).iter.num this.size3 <| fun k->this.AssignAt(i,j,k,(other[i,j,k]:>INum0).Expr)
+            let elementwise()=context.iter.num this.size1 <| fun i->context.iter.num this.size2 <| fun j->context.iter.num this.size3 <| fun k->this.AssignAt(i,j,k,(other[i,j,k]:>INum0).Expr)
             match this.Expr,other.Expr with
             |Var3(_,left),Var3(_,right)->
-                match ctx.CurrentProgram.language with
+                match context.language with
                 |Fortran|LaTeX->writein(left+"="+right)
                 |HTML|HTMLSequenceDiagram->writein(left+" \\leftarrow "+right)
                 |Python->writein(left+" = copy.deepcopy("+right+")")
@@ -1134,19 +1126,18 @@ namespace Aqualis
             |_->elementwise()
 
         member this.AssignScalar(value:INum0)=
-            let ctx = GenerationContextMerge.requireTarget context
-            GenerationContextMerge.merge context value.Context |> ignore
-            let writein text=ctx.CurrentProgram.codewritein text
-            let elementwise()=(environment()).iter.num this.size1 <| fun i->(environment()).iter.num this.size2 <| fun j->(environment()).iter.num this.size3 <| fun k->this.AssignAt(i,j,k,value.Expr)
+            Aqualis.merge context value.Context |> ignore
+            let writein text=context.codewritein text
+            let elementwise()=context.iter.num this.size1 <| fun i->context.iter.num this.size2 <| fun j->context.iter.num this.size3 <| fun k->this.AssignAt(i,j,k,value.Expr)
             match this.Expr with
             |Var3(_,name)->
-                match ctx.CurrentProgram.language with
-                |Fortran|LaTeX->writein(name+"="+value.Expr.eval ctx.CurrentProgram)
-                |HTML|HTMLSequenceDiagram->writein(name+" \\leftarrow "+value.Expr.eval ctx.CurrentProgram)
+                match context.language with
+                |Fortran|LaTeX->writein(name+"="+value.Expr.eval context)
+                |HTML|HTMLSequenceDiagram->writein(name+" \\leftarrow "+value.Expr.eval context)
                 |Python->
                     match typ with
-                    |Structure sname->writein(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval ctx.CurrentProgram+"))] for _ in range(int("+this.size2.Expr.eval ctx.CurrentProgram+"))] for _ in range(int("+this.size1.Expr.eval ctx.CurrentProgram+"))], dtype=object)\n")
-                    |_->writein(name+"[:,:,:]="+value.Expr.eval ctx.CurrentProgram+"\n")
+                    |Structure sname->writein(name+" = numpy.array([[["+sname+"() for _ in range(int("+this.size3.Expr.eval context+"))] for _ in range(int("+this.size2.Expr.eval context+"))] for _ in range(int("+this.size1.Expr.eval context+"))], dtype=object)\n")
+                    |_->writein(name+"[:,:,:]="+value.Expr.eval context+"\n")
                 |C99|JavaScript|PHP->elementwise()
                 |Numeric->()
             |Arx3 _->elementwise()

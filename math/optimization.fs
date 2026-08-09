@@ -6,7 +6,7 @@
 //
 namespace Aqualis
 
-type ContextOptimization internal (environment:Aqualis) =
+type ContextOptimization internal (context:Aqualis) =
 
     /// <summary>
     /// 1次元極小値検索
@@ -19,16 +19,16 @@ type ContextOptimization internal (environment:Aqualis) =
     /// <param name="xx">fが極小となるベクトル</param>
     member this.findmin (m:int) (x0_:double1,df:double1) (dd:double0) (f:double0->double1->unit) (xx:double1) =
         let r = 0.5*(1.0+sqrt(5.0))
-        environment.ch.d1 x0_.size1 <| fun xa ->
-        environment.ch.d1 x0_.size1 <| fun x1 ->
-        environment.ch.d1 x0_.size1 <| fun x2 ->
-        environment.ch.d1 x0_.size1 <| fun xb ->
-        environment.ch.dddd <| fun (fa,f1,f2,fb) ->
-        environment.ch.d <| fun fa_ ->
-        environment.ch.d <| fun norm_df ->
-        environment.ch.i <| fun counter ->
+        context.ch.d1 x0_.size1 <| fun xa ->
+        context.ch.d1 x0_.size1 <| fun x1 ->
+        context.ch.d1 x0_.size1 <| fun x2 ->
+        context.ch.d1 x0_.size1 <| fun xb ->
+        context.ch.dddd <| fun (fa,f1,f2,fb) ->
+        context.ch.d <| fun fa_ ->
+        context.ch.d <| fun norm_df ->
+        context.ch.i <| fun counter ->
             norm_df.clear()
-            environment.iter.num df.size1 <| fun i ->
+            context.iter.num df.size1 <| fun i ->
                 norm_df <== norm_df + df.[i]*df.[i]
             norm_df <== asm.sqrt(norm_df)
             xa.foreach <| fun i -> xa.[i] <== x0_.[i]
@@ -41,8 +41,8 @@ type ContextOptimization internal (environment:Aqualis) =
             f f2 x2
             counter.clear()
             fa_ <== fa
-            environment.iter.whiledo (counter.<m) <| fun _ ->
-                environment.br.branch <| fun b ->
+            context.iter.whiledo (counter.<m) <| fun _ ->
+                context.br.branch <| fun b ->
                     b.IF (fa .> f1 .> f2 .> fb) <| fun () ->
                         counter.dec()
                         //xa: そのまま
@@ -74,7 +74,7 @@ type ContextOptimization internal (environment:Aqualis) =
                         x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
                         f f1 x1
                     b.EL <| fun () ->
-                        environment.print.s "error: findmin"
+                        context.print.s "error: findmin"
             xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])
 
     /// <summary>
@@ -93,17 +93,17 @@ type ContextOptimization internal (environment:Aqualis) =
                 pu (_0,x0)
           |None ->
             ()
-        environment.ch.d <| fun dd0_ ->
-            environment.ch.d1 x0.size1 <| fun y ->
-                environment.iter.num_exit (I n) <| fun (ext,i) ->
+        context.ch.d <| fun dd0_ ->
+            context.ch.d1 x0.size1 <| fun y ->
+                context.iter.num_exit (I n) <| fun (ext,i) ->
                     dd0_ <== dd0
-                    environment.ch.d1 x0.size1 <| fun (df0:double1) ->
+                    context.ch.d1 x0.size1 <| fun (df0:double1) ->
                         df df0 x0
                         //勾配を計算
                         y.foreach <| fun i ->
                             y.[i] <== -df0.[i]
-                        environment.la.norm y <| fun nr ->
-                            environment.br.if1 (nr.=0.0) <| fun () ->
+                        context.la.norm y <| fun nr ->
+                            context.br.if1 (nr.=0.0) <| fun () ->
                                 ext()
                         //勾配方向に最小値を探す
                         this.findmin m (x0,y) dd0_ f x0
@@ -129,32 +129,32 @@ type ContextOptimization internal (environment:Aqualis) =
                 pu (_0,x0)
           |None ->
             ()
-        environment.ch.d <| fun a ->
-        environment.ch.d <| fun dd0_ ->
-            environment.ch.d1 x0.size1 <| fun b ->
-            environment.ch.d1 x0.size1 <| fun y ->
+        context.ch.d <| fun a ->
+        context.ch.d <| fun dd0_ ->
+            context.ch.d1 x0.size1 <| fun b ->
+            context.ch.d1 x0.size1 <| fun y ->
                 b.clear()
-                environment.iter.num_exit (I n) <| fun (ext,i) ->
+                context.iter.num_exit (I n) <| fun (ext,i) ->
                     dd0_ <== dd0
-                    environment.ch.d1 x0.size1 <| fun df0 ->
+                    context.ch.d1 x0.size1 <| fun df0 ->
                         df df0 x0
-                        environment.br.branch <| fun r ->
+                        context.br.branch <| fun r ->
                             r.IF (i.=0) <| fun () ->
                                 a <== 0
                             r.EL <| fun () ->
-                                environment.ch.d2 (x0.size1, x0.size1) <| fun h ->
+                                context.ch.d2 (x0.size1, x0.size1) <| fun h ->
                                     fH h x0
-                                    environment.la.matmul (h,df0) <| fun p1 ->
-                                        environment.la.matmul (h,b) <| fun p2 ->
-                                            environment.la.dot (b,p1) <| fun c1 ->
-                                                environment.la.dot (b,p2) <| fun c2 ->
-                                                    environment.br.if1 (c2.=0.0) <| fun () -> ext()
+                                    context.la.matmul (h,df0) <| fun p1 ->
+                                        context.la.matmul (h,b) <| fun p2 ->
+                                            context.la.dot (b,p1) <| fun c1 ->
+                                                context.la.dot (b,p2) <| fun c2 ->
+                                                    context.br.if1 (c2.=0.0) <| fun () -> ext()
                                                     a <== c1/c2
                         //勾配を計算
                         y.foreach <| fun i ->
                             y.[i] <== -df0.[i] + a * b.[i]
-                        environment.la.norm y <| fun nr ->
-                            environment.br.if1 (nr.=0.0) <| fun () -> ext()
+                        context.la.norm y <| fun nr ->
+                            context.br.if1 (nr.=0.0) <| fun () -> ext()
                         //勾配方向に最小値を探す
                         this.findmin m (x0,y) dd0_ f x0
                         match stepProc with
@@ -180,36 +180,36 @@ type ContextOptimization internal (environment:Aqualis) =
                 pu (_0,x0)
           |None ->
             ()
-        environment.ch.d <| fun a ->
-        environment.ch.d <| fun dd0_ ->
-            environment.ch.d1 x0.size1 <| fun b ->
-            environment.ch.d1 x0.size1 <| fun y ->
-            environment.ch.d1 x0.size1 <| fun df1 ->
-            environment.ch.d1 x0.size1 <| fun p1 ->
+        context.ch.d <| fun a ->
+        context.ch.d <| fun dd0_ ->
+            context.ch.d1 x0.size1 <| fun b ->
+            context.ch.d1 x0.size1 <| fun y ->
+            context.ch.d1 x0.size1 <| fun df1 ->
+            context.ch.d1 x0.size1 <| fun p1 ->
                 b.clear()
-                environment.iter.num_exit (I n) <| fun (ext,i) ->
+                context.iter.num_exit (I n) <| fun (ext,i) ->
                     dd0_ <== dd0
-                    environment.ch.d1 x0.size1 <| fun (df0:double1) ->
+                    context.ch.d1 x0.size1 <| fun (df0:double1) ->
                         df df0 x0
-                        environment.br.branch <| fun r ->
+                        context.br.branch <| fun r ->
                             r.IF (i.=0) <| fun () ->
                                 a <== 0
                             r.EL <| fun () ->
                                 p1.foreach <| fun j ->
                                     p1.[j] <== df0.[j] - df1.[j]
-                                environment.la.dot (df0,p1) <| fun c1 ->
-                                    environment.la.dot (b,p1) <| fun c2 ->
-                                        environment.br.if1 (c2.=0.0) <| fun () ->
+                                context.la.dot (df0,p1) <| fun c1 ->
+                                    context.la.dot (b,p1) <| fun c2 ->
+                                        context.br.if1 (c2.=0.0) <| fun () ->
                                             ext()
                                         a <== c1/c2
                         //勾配を計算
                         y.foreach <| fun i ->
                             y.[i] <== -df0.[i] + a * b.[i]
-                        environment.la.norm y <| fun nr ->
-                            environment.br.if1 (nr.=0.0) <| fun () ->
+                        context.la.norm y <| fun nr ->
+                            context.br.if1 (nr.=0.0) <| fun () ->
                                 ext()
                         //勾配方向に最小値を探す
-                        environment.ch.d1 x0.size1 <| fun x ->
+                        context.ch.d1 x0.size1 <| fun x ->
                             this.findmin m (x0,y) dd0_ f x
                             x0 <== x
                             match stepProc with
@@ -238,18 +238,18 @@ type ContextOptimization internal (environment:Aqualis) =
                 pu (_0,x0)
           |None ->
             ()
-        environment.ch.d <| fun dd0_ ->
-            environment.iter.num_exit (I n) <| fun (ext,i) ->
+        context.ch.d <| fun dd0_ ->
+            context.iter.num_exit (I n) <| fun (ext,i) ->
                 dd0_ <== dd0
-                environment.ch.d2 (x0.size1, x0.size1) <| fun ih ->
-                    environment.ch.d2 (x0.size1, x0.size1) <| fun h ->
+                context.ch.d2 (x0.size1, x0.size1) <| fun ih ->
+                    context.ch.d2 (x0.size1, x0.size1) <| fun h ->
                         fH h x0
-                        environment.la.inverse_matrix (ih, h)
-                    environment.ch.d1 x0.size1 <| fun df0 ->
+                        context.la.inverse_matrix (ih, h)
+                    context.ch.d1 x0.size1 <| fun df0 ->
                         df df0 x0
-                        environment.la.matmul (ih,df0) <| fun a ->
-                            environment.la.norm a <| fun nr ->
-                                environment.br.if1 (nr.=0.0) <| fun () -> ext()
+                        context.la.matmul (ih,df0) <| fun a ->
+                            context.la.norm a <| fun nr ->
+                                context.br.if1 (nr.=0.0) <| fun () -> ext()
                             a.foreach <| fun j ->
                                 a.[j] <== -a.[j]
                             this.findmin m (x0,a) dd0_ f x0
@@ -274,36 +274,36 @@ type ContextOptimization internal (environment:Aqualis) =
                 pu (_0,x0)
           |None ->
             ()
-        environment.ch.d <| fun dd0_ ->
-        environment.ch.d1 x0.size1 <| fun df1 ->
-        environment.ch.d1 x0.size1 <| fun y ->
-        environment.ch.d1 x0.size1 <| fun s ->
-        environment.ch.d2 (x0.size1, x0.size1) <| fun B ->
+        context.ch.d <| fun dd0_ ->
+        context.ch.d1 x0.size1 <| fun df1 ->
+        context.ch.d1 x0.size1 <| fun y ->
+        context.ch.d1 x0.size1 <| fun s ->
+        context.ch.d2 (x0.size1, x0.size1) <| fun B ->
             B.clear()
-            environment.iter.num x0.size1 <| fun i ->
+            context.iter.num x0.size1 <| fun i ->
                 B.[i,i] <== 1.0
-            environment.iter.num_exit (I n) <| fun (ext,i) ->
+            context.iter.num_exit (I n) <| fun (ext,i) ->
                 dd0_ <== dd0
-                environment.ch.d1 x0.size1 <| fun df0 ->
+                context.ch.d1 x0.size1 <| fun df0 ->
                     df df0 x0
-                    environment.br.if1 (i.>0) <| fun () ->
+                    context.br.if1 (i.>0) <| fun () ->
                         y.foreach <| fun j -> y.[j] <== df0.[j] - df1.[j]
-                        environment.ch.d <| fun p ->
+                        context.ch.d <| fun p ->
                             p.clear()
                             y.foreach <| fun j -> p <== p + y.[j] * s.[j]
-                            environment.ch.d2 (x0.size1, x0.size1) <| fun t ->
+                            context.ch.d2 (x0.size1, x0.size1) <| fun t ->
                                 t.clear()
-                                environment.iter.num x0.size1 <| fun j -> t.[j,j] <== 1.0
+                                context.iter.num x0.size1 <| fun j -> t.[j,j] <== 1.0
                                 t.foreach <| fun (j1,j2) -> t.[j1,j2] <== t.[j1,j2] - y.[j1] * s.[j2] / p
-                                environment.ch.d2 (x0.size1, x0.size1) <| fun u ->
-                                    environment.la.matmul (u,t,B)
-                                    environment.la.matmul (B,u,t)
+                                context.ch.d2 (x0.size1, x0.size1) <| fun u ->
+                                    context.la.matmul (u,t,B)
+                                    context.la.matmul (B,u,t)
                                     t.foreach <| fun (j1,j2) ->
                                         B.[j1,j2] <== B.[j1,j2] + s.[j1] * s.[j2] / p
-                    environment.la.matmul (B,df0) <| fun a ->
-                        environment.la.norm a <| fun nr -> environment.br.if1 (nr.=0.0) <| fun () -> ext()
+                    context.la.matmul (B,df0) <| fun a ->
+                        context.la.norm a <| fun nr -> context.br.if1 (nr.=0.0) <| fun () -> ext()
                         a.foreach <| fun i -> a.[i] <== -a.[i]
-                        environment.ch.d1 x0.size1 <| fun xx ->
+                        context.ch.d1 x0.size1 <| fun xx ->
                             this.findmin m (x0,a) dd0_ f xx
                             s.foreach <| fun j -> s.[j] <== xx.[j] - x0.[j]
                             df1 <== df0

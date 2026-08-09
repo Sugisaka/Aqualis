@@ -13,22 +13,21 @@ namespace Aqualis
 
         type expr with
 
-            static member substPh (x:expr) (y:expr) (c:program) =
+            static member substPh (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein ("<?php ", x.evalPh c + " = " + y.evalPh c + "; ?>")
 
-            static member equivPh (x:expr) (y:expr) (c:program) =
+            static member equivPh (x:expr) (y:expr) (c:Aqualis) =
                 printfn "PHPでこの文は使用できません"
 
-            static member equivAlignPh (x:expr) (y:expr) (c:program) =
+            static member equivAlignPh (x:expr) (y:expr) (c:Aqualis) =
                 printfn "PHPでこの文は使用できません"
 
-            static member forLoopPh (context:GenerationContext) (n1:expr,n2:expr) code =
-                let c = context.CurrentProgram
+            static member forLoopPh (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalPh c
                 let n2_ = n2.evalPh c
-                if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein("<?php ", "for(" + i.evalPh c + " = " + n1_ + "; " + i.evalPh c + " <= " + n2_ + "; " + i.evalPh c + "++): ?>")
                 c.indentInc()
                 code i
@@ -37,14 +36,13 @@ namespace Aqualis
                 returnVar()
 
             ///<summary>無限ループ</summary>
-            static member loopPh (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member loopPh (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = "_" + context.GotoLabels.nextGotoLabel()
+                let label = "_" + c.GotoLabels.nextGotoLabel()
                 let exit() = c.codewritein("<?php ", "goto "+label+"; ?>")
                 expr.substPh i (Int 1) c
-                if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein("<?php ", "for(;;): ?>")
                 c.indentInc()
                 code(exit,i)
@@ -55,8 +53,7 @@ namespace Aqualis
                 returnVar()
 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledoPh (context:GenerationContext) (cond:expr) = fun code ->
-                let c = context.CurrentProgram
+            static member whiledoPh (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("<?php ", "while(" + cond.evalPh c + "): ?>")
                 c.indentInc()
                 code()
@@ -64,13 +61,12 @@ namespace Aqualis
                 c.codewritein("<?php ", "endwhile; ?>")
 
             ///<summary>指定した範囲でループ</summary>
-            static member rangePh (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member rangePh (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("<?php for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code i
@@ -80,7 +76,7 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code i
@@ -89,15 +85,14 @@ namespace Aqualis
                     returnVar()
 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitPh (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member range_exitPh (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("<?php ", "goto "+label+" ?>")
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("<?php for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code(exit,i)
@@ -108,9 +103,9 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("<?php ", "goto "+label+" ?>")
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code(exit,i)
@@ -119,8 +114,7 @@ namespace Aqualis
                     c.codewritein(label+":")
                     returnVar()
 
-            static member branchPh (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member branchPh (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPh c
                     c.codewritein ("<?php ", "if(" + cond + "): ?>")
@@ -141,7 +135,7 @@ namespace Aqualis
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein("<?php ", "endif; ?>")
 
-            member this.evalPh(c:program) =
+            member this.evalPh(c:Aqualis) =
                 match this.simp with
                 |False -> "false"
                 |True -> "true"
@@ -239,13 +233,13 @@ namespace Aqualis
                 |Sum(t, n1, n2, f) ->
                     // 合計値格納用変数
                     (Let(t, Int 0, fun u ->
-                        expr.forLoopPh (GenerationContext.ForInternalProgram c) (n1,n2) <| fun i ->
+                        expr.forLoopPh c (n1,n2) <| fun i ->
                             // 加算・代入処理
                             expr.substPh u (Add(t,u, f i)) c
                         u)).evalPh c
                 |IfEl(cond,n1,n2) ->
                     (Let(n1.etype, NaN, fun x ->
-                        expr.branchPh (GenerationContext.ForInternalProgram c) <| fun (ifcode,_,elsecode) ->
+                        expr.branchPh c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substPh x n1 c
                             elsecode <| fun () ->

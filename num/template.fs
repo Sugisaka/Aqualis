@@ -11,8 +11,8 @@ namespace Aqualis
 
     type Label = |WriteLabel of StreamWriter |ReadLabel of list<string*string>
 
-    type TeXWriter(context:GenerationContext,figlabel:Label,equlabel:Label,tablabel:Label,codelabel:Label,lang:Language,figdir:string) =
-        let writein text = context.CurrentProgram.codewritein(text + "\n")
+    type TeXWriter(context:Aqualis,figlabel:Label,equlabel:Label,tablabel:Label,codelabel:Label,lang:Language,figdir:string) =
+        let writein text = context.codewritein(text + "\n")
         let mutable equnum = 0
         let mutable fignum = 0
         let mutable tabnum = 0
@@ -601,8 +601,8 @@ namespace Aqualis
                         read []
                 match lang with
                 |HTML ->
-                    makeProgramWithContext [outputdir,filename+".html",HTML] <| fun context ->
-                        let writein text = context.CurrentProgram.codewritein(text + "\n")
+                    Aqualis.makeProgramWithContext (outputdir,filename+".html",HTML) <| fun context ->
+                        let writein text = context.codewritein(text + "\n")
                         writein "<!DOCTYPE html>"
                         writein "<html lang='ja'>"
                         writein "    <head>"
@@ -660,21 +660,21 @@ namespace Aqualis
                         code document
                         writein "    </body>"
                         writein "</html>"
-                        context.CurrentProgram.close()
+                        context.close()
                 |LaTeX ->
-                    makeProgramWithContext [outputdir,filename+".tex",LaTeX; outputdir,filename+"_temp.tex",LaTeX] <| fun context ->
-                        let writein text = context.CurrentProgram.codewritein(text + "\n")
-                        context.WithProgram(1, fun child ->
-                            use document =
-                                new TeXWriter(
-                                    child,
-                                    figlabel,
-                                    equlabel,
-                                    tablabel,
-                                    codelabel,
-                                    lang,
-                                    figdir)
-                            code document)
+                    Aqualis.makeProgramWithContext (outputdir,filename+".tex",LaTeX) <| fun context ->
+                    Aqualis.makeProgramWithContext (outputdir,filename+"_temp.tex",LaTeX) <| fun child ->
+                        let writein text = context.codewritein(text + "\n")
+                        use document =
+                            new TeXWriter(
+                                child,
+                                figlabel,
+                                equlabel,
+                                tablabel,
+                                codelabel,
+                                lang,
+                                figdir)
+                        code document
                         writein "\\documentclass[a4paper]{ltjsarticle}"
                         writein ""
                         writein "\\usepackage{luatexja}"
@@ -687,7 +687,7 @@ namespace Aqualis
                         writein "\\usepackage{upgreek}"
                         writein "\\usepackage[no-math]{luatexja-fontspec}"
                         writein "\\usepackage[haranoaji,deluxe,match,nfssonly]{luatexja-preset}"
-                        for p in context.Programs[1].hlist.list do
+                        for p in child.hlist.list do
                             writein p
                         writein ""
                         writein "\\newcommand{\\inputfigure}[2]{"
@@ -744,10 +744,10 @@ namespace Aqualis
                         writein "\\renewcommand{\\lstlistingname}{ソースコード}"
                         writein ""
                         writein "\\begin{document}"
-                        writein(context.Programs[1].allCodes)
+                        match child.allCodes with |Some s -> writein s |None -> ()
                         writein "\\end{document}"
-                        context.CurrentProgram.close()
-                        context.Programs[1].delete()
+                        context.close()
+                        child.delete()
                 |_ -> ()
                 match figlabel with
                 |WriteLabel wr -> wr.Close()

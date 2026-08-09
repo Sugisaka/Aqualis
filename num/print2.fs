@@ -10,7 +10,7 @@ namespace Aqualis
     module ContextPrintArrayExtensions =
         type ContextPrint with
             member private this.ValidateContext context =
-                GenerationContextMerge.merge this.Environment.GenerationContext context |> ignore
+                Aqualis.merge this.Environment context |> ignore
 
             member this.t(s:int1) =
                 this.ValidateContext s.Context

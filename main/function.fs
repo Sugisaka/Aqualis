@@ -13,88 +13,84 @@ namespace Aqualis
     module Aqualis_function =
 
         ///<summary>関数定義</summary>
-        let private generateFunction (environment:Aqualis) (projectname:string) (code:Aqualis->unit) =
-            let context = environment.RequireGenerationContext()
-            let mutable program = context.CurrentProgram
+        let private generateFunction (context:Aqualis) (projectname:string) (code:Aqualis->unit) =
             let fdeclare (typ:Etype,vtp:VarType,name:string) =
-                match program.language with
+                match context.language with
                 |HTML ->
                     match vtp with
-                    |A0 -> typ.tostring program.language + " :: " + name
-                    |A1 0 -> typ.tostring program.language + ",allocatable" + " :: " + name + "(:)"
-                    |A2(0,0) -> typ.tostring program.language + ",allocatable" + " :: " + name + "(:,:)"
-                    |A3(0,0,0) -> typ.tostring program.language + ",allocatable" + " :: " + name + "(:,:,:)"
-                    |A1 _ -> typ.tostring program.language + " :: " + name + "(:)"
-                    |A2(_,_) -> typ.tostring program.language + " :: " + name + "(:,:)"
-                    |A3(_,_,_) -> typ.tostring program.language + " :: " + name + "(:,:,:)"
+                    |A0 -> typ.tostring context.language + " :: " + name
+                    |A1 0 -> typ.tostring context.language + ",allocatable" + " :: " + name + "(:)"
+                    |A2(0,0) -> typ.tostring context.language + ",allocatable" + " :: " + name + "(:,:)"
+                    |A3(0,0,0) -> typ.tostring context.language + ",allocatable" + " :: " + name + "(:,:,:)"
+                    |A1 _ -> typ.tostring context.language + " :: " + name + "(:)"
+                    |A2(_,_) -> typ.tostring context.language + " :: " + name + "(:,:)"
+                    |A3(_,_,_) -> typ.tostring context.language + " :: " + name + "(:,:,:)"
                 |_ ->
                     match vtp with
-                    |A0 -> typ.tostring program.language + " :: " + name
-                    |A1 0 -> typ.tostring program.language + ",allocatable" + " :: " + name + "(:)"
-                    |A2(0,0) -> typ.tostring program.language + ",allocatable" + " :: " + name + "(:,:)"
-                    |A3(0,0,0) -> typ.tostring program.language + ",allocatable" + " :: " + name + "(:,:,:)"
-                    |A1 _ -> typ.tostring program.language + " :: " + name + "(:)"
-                    |A2(_,_) -> typ.tostring program.language + " :: " + name + "(:,:)"
-                    |A3(_,_,_) -> typ.tostring program.language + " :: " + name + "(:,:,:)"
-            let dir = program.dir
-            match program.language with
+                    |A0 -> typ.tostring context.language + " :: " + name
+                    |A1 0 -> typ.tostring context.language + ",allocatable" + " :: " + name + "(:)"
+                    |A2(0,0) -> typ.tostring context.language + ",allocatable" + " :: " + name + "(:,:)"
+                    |A3(0,0,0) -> typ.tostring context.language + ",allocatable" + " :: " + name + "(:,:,:)"
+                    |A1 _ -> typ.tostring context.language + " :: " + name + "(:)"
+                    |A2(_,_) -> typ.tostring context.language + " :: " + name + "(:,:)"
+                    |A3(_,_,_) -> typ.tostring context.language + " :: " + name + "(:,:,:)"
+            let dir = match context.dir with |Some d -> d |None -> ""
+            match context.language with
             |Fortran ->
-                program.flist.add projectname
-                let args = makeProgramWithContext [dir,projectname,Fortran] <| fun childContext ->
-                    let childEnvironment = Aqualis(Some childContext)
-                    program <- childContext.CurrentProgram
-                    code childEnvironment
-                    program.close()
+                context.flist.add projectname
+                let args = Aqualis.makeProgramWithContext (dir,projectname,Fortran) <| fun childContext ->
+                    //program <- childContext.CurrentProgram
+                    code childContext
+                    context.close()
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, program.language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, context.language)
                     writer.codewritein "!=============================================================================================\n"
                     writer.codewritein("! Subroutine name: " + projectname + "\n")
-                    for _,(_,_,nm) in program.arg.list do
+                    for _,(_,_,nm) in context.arg.list do
                         writer.codewritein("!  " + nm + "\n")
                     writer.codewritein "!============================================================================================="
-                    let argvar = String.Join(", ", program.arg.list |> List.map(fun (_,(_,_,n)) -> n))
+                    let argvar = String.Join(", ", context.arg.list |> List.map(fun (_,(_,_,n)) -> n))
                     writer.codewritein("subroutine " + projectname + "(" + argvar + ")\n")
                     writer.indent.inc()
                     //モジュールファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| program.mlist.list
+                    List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| context.mlist.list
                     writer.codewritein "implicit none"
                     //ヘッダファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| program.hlist.list
+                    List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| context.hlist.list
                     //サブルーチン引数の定義
-                    for _,s in program.arg.list do
+                    for _,s in context.arg.list do
                         writer.codewritein(fdeclare s)
                     //グローバル変数の定義
                     declareall childContext writer
                     //メインコード
-                    writer.codewritein(program.allCodes)
+                    match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                     writer.indent.dec()
                     writer.codewritein("end subroutine " + projectname + "\n")
                     writer.close()
                     File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
-                    String.Join(", ", program.arg.list |> List.map(fun (n,(_,_,_)) -> n))
-                writein context ("call" + " " + projectname + "(" + args + ")\n")
+                    String.Join(", ", context.arg.list |> List.map(fun (n,(_,_,_)) -> n))
+                context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
-                program.flist.add projectname
-                let args = makeProgramWithContext [dir,projectname,C99] <| fun childContext ->
-                    let childEnvironment = Aqualis(Some childContext)
-                    program <- childContext.CurrentProgram
-                    code childEnvironment
-                    program.close()
+                context.flist.add projectname
+                let args = Aqualis.makeProgramWithContext (dir,projectname,C99) <| fun childContext ->
+                    // program <- childContext.CurrentProgram
+                    code childContext
+                    context.close()
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, program.language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, context.language)
                     writer.codewritein "/*==========================================================================================*/\n"
                     writer.codewritein("/* Subroutine name: " + projectname + " */\n")
-                    for _,(_,_,nm) in program.arg.list do
+                    for _,(_,_,nm) in context.arg.list do
                         writer.codewritein("/* " + nm + " */\n")
                     writer.codewritein "/*==========================================================================================*/\n"
                     //速度を上げるために参照渡しにしている
                     let argvar =
-                        program.arg.list
+                        context.arg.list
                         |> List.map (fun (_,(typ,vtp,n)) ->
                             match vtp with
-                            |A1 _|A2 _|A3 _ -> typ.tostring program.language + " *" + n
-                            |_ -> typ.tostring program.language + " *" + n)
+                            |A1 _|A2 _|A3 _ -> typ.tostring context.language + " *" + n
+                            |_ -> typ.tostring context.language + " *" + n)
                         |> fun s -> String.Join(", ", s)
                     writer.codewritein("void " + projectname + "(" + argvar + ")\n")
                     writer.codewritein "{\n"
@@ -102,71 +98,69 @@ namespace Aqualis
                     //グローバル変数の定義
                     declareall childContext writer
                     //メインコード
-                    writer.codewritein(program.allCodes)
+                    match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                     writer.indent.dec()
                     writer.codewritein "}\n"
                     writer.close()
                     File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
-                    program.arg.list
+                    context.arg.list
                     |> List.map (fun (n,(typ,vtp,_)) ->
                         match typ,vtp,n.StartsWith "(*" with
                         |(It _|Dt|Zt|Structure _),A0,false -> "&" + n
                         |(It _|Dt|Zt|Structure _),A0,true  -> n.Substring(2,n.Length-3)
                         |_ -> n)
                     |> fun s -> String.Join(", ", s)
-                writein context (projectname + "(" + args + ");\n")
+                context.writein (projectname + "(" + args + ");\n")
             |LaTeX ->
-                program.flist.add projectname
-                let args = makeProgramWithContext [dir,projectname,LaTeX] <| fun childContext ->
-                    let childEnvironment = Aqualis(Some childContext)
-                    program <- childContext.CurrentProgram
-                    code childEnvironment
-                    program.close()
+                context.flist.add projectname
+                let args = Aqualis.makeProgramWithContext (dir,projectname,LaTeX) <| fun childContext ->
+                    // program <- childContext.CurrentProgram
+                    code childContext
+                    context.close()
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, program.language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, context.language)
                     writer.codewritein "%=============================================================================================\n"
                     writer.codewritein("% Subroutine name: " + projectname + "\n")
-                    for _,(_,_,nm) in program.arg.list do
+                    for _,(_,_,nm) in context.arg.list do
                         writer.codewritein("% " +  nm + "\n")
                     writer.codewritein "%=============================================================================================\n"
-                    let argvar = String.Join(", ", program.arg.list |> List.map (fun (_,(_,_,n)) -> n))
+                    let argvar = String.Join(", ", context.arg.list |> List.map (fun (_,(_,_,n)) -> n))
                     writer.codewritein("subroutine " + projectname + "(" + argvar + ")\n")
                     writer.indent.inc()
                     //モジュールファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| program.mlist.list
+                    List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| context.mlist.list
                     writer.codewritein "implicit none\n"
                     //ヘッダファイルのインクルード
-                    List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| program.hlist.list
+                    List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| context.hlist.list
                     //サブルーチン引数の定義
-                    for _,s in program.arg.list do
+                    for _,s in context.arg.list do
                         writer.codewritein(fdeclare s)
                     //グローバル変数の定義
                     declareall childContext writer
                     //メインコード
-                    writer.codewritein(program.allCodes)
+                    match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                     writer.indent.dec()
                     writer.codewritein("end subroutine " + projectname + "\n")
                     writer.close()
                     File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
-                    String.Join(", ", program.arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                writein context ("call" + " " + projectname + "(" + args + ")\n")
+                    String.Join(", ", context.arg.list |> List.map (fun (n,(_,_,_)) -> n))
+                context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |HTML ->
-                program.flist.add projectname
-                let args = makeProgramWithContext [dir,projectname,HTML] <| fun childContext ->
-                    let childEnvironment = Aqualis(Some childContext)
-                    program <- childContext.CurrentProgram
-                    code childEnvironment
-                    program.close()
+                context.flist.add projectname
+                let args = Aqualis.makeProgramWithContext (dir,projectname,HTML) <| fun childContext ->
+                    // program <- childContext.CurrentProgram
+                    code childContext
+                    context.close()
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, program.language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, context.language)
                     writer.codewritein("<h3>" + projectname + "</h3>\n")
                     writer.codewritein "<ul>\n"
-                    for _,(_,_,nm) in program.arg.list do
+                    for _,(_,_,nm) in context.arg.list do
                         writer.codewritein("<li>\\(" + nm + "\\)</li>\n")
                     writer.codewritein "</ul>\n"
-                    let argvar = String.Join(", ", program.arg.list |> List.map (fun (_,(_,_,n)) -> n))
+                    let argvar = String.Join(", ", context.arg.list |> List.map (fun (_,(_,_,n)) -> n))
                     writer.codewritein "<div class=\"codeblock\">\n"
                     writer.codewritein "<details>\n"
                     writer.codewritein("<summary><span class=\"op-func\">function</span> \\(" + projectname + "(" + argvar + ")\\)</summary>\n")
@@ -174,13 +168,13 @@ namespace Aqualis
                     writer.indent.inc()
                     writer.codewritein "<ul>\n"
                     //サブルーチン引数の定義
-                    for _,s in program.arg.list do
+                    for _,s in context.arg.list do
                         writer.codewritein("<li>" + fdeclare s + "</li>\n")
                     //グローバル変数の定義
                     declareall childContext writer
                     writer.codewritein "</ul>"
                     //メインコード
-                    writer.codewritein(program.allCodes)
+                    match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                     writer.indent.dec()
                     writer.codewritein "</div>\n"
                     writer.codewritein "</details>\n"
@@ -188,28 +182,27 @@ namespace Aqualis
                     writer.close()
                     File.Delete(dir + "\\" + projectname)
                     //呼び出しコードを記述
-                    String.Join(", ", program.arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                writein context ("\\(" + projectname + "(" + args + ")\\)<br/>\n")
+                    String.Join(", ", context.arg.list |> List.map (fun (n,(_,_,_)) -> n))
+                context.writein  ("\\(" + projectname + "(" + args + ")\\)<br/>\n")
             |Python ->
-                program.flist.add projectname
-                let re_args,args = makeProgramWithContext [dir,projectname,Python] <| fun childContext ->
-                    let childEnvironment = Aqualis(Some childContext)
-                    program <- childContext.CurrentProgram
-                    code childEnvironment
-                    program.close()
+                context.flist.add projectname
+                let re_args,args = Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun childContext ->
+                    // program <- childContext.CurrentProgram
+                    code childContext
+                    context.close()
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, program.language)
+                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, context.language)
                     writer.codewritein "#==========================================================================================\n"
                     writer.codewritein("# Subroutine name: " + projectname + "\n")
-                    for _,(_,_,nm) in program.arg.list do
+                    for _,(_,_,nm) in context.arg.list do
                         writer.codewritein("# " + nm + "\n")
                     writer.codewritein "#==========================================================================================\n"
                     let argvar =
-                        program.arg.list
+                        context.arg.list
                         |> List.map (fun (_,(_,_,n)) -> n)
                         |> fun s -> String.Join(", ", s)
                     let re_argvar =
-                        program.arg.list
+                        context.arg.list
                         |> List.map (fun (_,(_,vtp,n)) ->
                             match vtp with
                             |A1 _|A2 _|A3 _ -> ""
@@ -218,7 +211,7 @@ namespace Aqualis
                         |> fun s -> String.Join(", ", s)
                     //呼び出しコードを記述
                     let args =
-                        program.arg.list
+                        context.arg.list
                         |> List.map (fun (n,(typ,vtp,_)) ->
                             match typ,vtp,n.StartsWith "(*" with
                             |(It _|Dt|Zt|Structure _),A0,false -> n
@@ -226,7 +219,7 @@ namespace Aqualis
                             |_ -> n)
                         |> fun s -> String.Join(", ", s)
                     let re_args =
-                        program.arg.list
+                        context.arg.list
                         |> List.map (fun (n,(_,vtp,_)) ->
                             match vtp with
                             |A1 _|A2 _|A3 _ -> ""
@@ -238,13 +231,13 @@ namespace Aqualis
                     //グローバル変数の定義
                     declareall childContext writer
                     //メインコード
-                    writer.codewritein(program.allCodes)
+                    match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                     writer.codewritein("return " + re_argvar + "\n")
                     writer.indent.dec()
                     writer.close()
                     File.Delete(dir + "\\" + projectname)
                     re_args,args
-                writein context (re_args + " = " + projectname + "(" + args + ")\n")
+                context.writein (re_args + " = " + projectname + "(" + args + ")\n")
             |_ -> ()
 
         type Aqualis with

@@ -55,11 +55,10 @@ namespace Aqualis
             for lang in langgList do
                 match lang with
                 |Fortran ->
-                    makeProgramWithContext [dir,projectname,Fortran] <| fun context ->
+                    Aqualis.makeProgramWithContext (dir,projectname,Fortran) <| fun context ->
                         //メインコード生成
-                        let environment = Aqualis(Some context)
-                        code environment
-                        context.CurrentProgram.close()
+                        code context
+                        context.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".f90", 2, Fortran)
                         writer.codewritein "!=============================================================================================\n"
@@ -73,34 +72,34 @@ namespace Aqualis
                         writer.codewritein("program " + projectname + "\n")
                         writer.codewritein "use, intrinsic :: ieee_arithmetic\n"
                         //モジュールファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| context.CurrentProgram.mlist.list
+                        List.iter (fun (s:string) -> writer.codewritein("use " + s + "\n")) <| context.mlist.list
                         writer.codewritein "implicit none\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| context.CurrentProgram.hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein("include " + s + "\n")) <| context.hlist.list
                         //構造体の定義
-                        environment.str.Def_Structure writer
+                        context.str.Def_Structure writer
                         //グローバル変数の定義
                         declareall context writer
                         //メインコード
-                        writer.codewritein(context.CurrentProgram.allCodes)
+                        match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                         //サブルーチン
                         writer.codewritein "\n"
                         writer.codewritein "contains\n"
                         writer.codewritein "\n"
-                        for funname in context.CurrentProgram.flist.list do
+                        for funname in context.flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
                         writer.codewritein("end program " + projectname + "\n")
                         writer.close()
                         //beeファイル削除
-                        context.CurrentProgram.delete()
+                        context.delete()
                         //コンパイル・実行用スクリプト生成
                         use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_F.sh")
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
-                        let sources = context.CurrentProgram.slist.list
-                        let options = context.CurrentProgram.olist.list
+                        let sources = context.slist.list
+                        let options = context.olist.list
                         let writeCompileCommand compiler fixedArguments =
                             ShellCommand.buildCompileCommand
                                 compiler
@@ -110,11 +109,11 @@ namespace Aqualis
                                 options
                                 (projectname + ".exe")
                             |> wr.WriteLine
-                        if context.IsOpenAccUsed then
+                        if context.IsOpenAccUsed<>0 then
                             writeCompileCommand
                                 "/usr/bin/pgfortran"
                                 ["-acc"; "-Minfo=accel"]
-                        else if context.IsOpenMpUsed then
+                        else if context.IsOpenMpUsed<>0 then
                             writeCompileCommand
                                 "/usr/bin/gfortran"
                                 ["-fopenmp"]
@@ -127,14 +126,13 @@ namespace Aqualis
                             []
                         |> wr.WriteLine
                 |C99 ->
-                    makeProgramWithContext [dir,projectname,C99] <| fun context ->
+                    Aqualis.makeProgramWithContext (dir,projectname,C99) <| fun context ->
                         //メインコード生成
-                        context.CurrentProgram.indentInc()
-                        let environment = Aqualis(Some context)
-                        code environment
-                        context.CurrentProgram.olist.add "-lm"
-                        context.CurrentProgram.indentDec()
-                        context.CurrentProgram.close()
+                        context.indentInc()
+                        code context
+                        context.olist.add "-lm"
+                        context.indentDec()
+                        context.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
@@ -150,34 +148,34 @@ namespace Aqualis
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.CurrentProgram.hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
-                        environment.str.Def_Structure writer
+                        context.str.Def_Structure writer
                         //グローバル変数の宣言
                         declareall context writer
                         //extern指定子
-                        for s in context.CurrentProgram.elist.list do
+                        for s in context.elist.list do
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
-                        for funname in context.CurrentProgram.flist.list do
+                        for funname in context.flist.list do
                             writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein ("\n")
                         //Main関数
                         writer.codewritein "int main()\n"
                         writer.codewritein "{\n"
-                        writer.codewritein (context.CurrentProgram.allCodes)
+                        match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                         writer.codewritein "  return 0;\n"
                         writer.codewritein "}\n"
                         writer.close()
                         //beeファイル削除
-                        context.CurrentProgram.delete()
+                        context.delete()
                         //コンパイル・実行用スクリプト生成
                         use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_C.sh")
-                        let sources = context.CurrentProgram.slist.list
-                        let options = context.CurrentProgram.olist.list
+                        let sources = context.slist.list
+                        let options = context.olist.list
                         let writeCompileCommand compiler fixedArguments =
                             ShellCommand.buildCompileCommand
                                 compiler
@@ -187,12 +185,12 @@ namespace Aqualis
                                 options
                                 (projectname + ".exe")
                             |> wr.WriteLine
-                        if context.IsOpenMpUsed then
+                        if context.IsOpenMpUsed<>0 then
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
                             writeCompileCommand "gcc" ["-fopenmp"]
                             ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
-                        else if context.IsOpenAccUsed then
+                        else if context.IsOpenAccUsed<>0 then
                             wr.Write "#!/bin/bash"
                             wr.Write "\n"
                             writeCompileCommand "pgcc" ["-acc"; "-Minfo=accel"]
@@ -203,16 +201,15 @@ namespace Aqualis
                             writeCompileCommand "gcc" []
                             ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
                 |LaTeX ->
-                    makeProgramWithContext [dir,projectname,LaTeX] <| fun context ->
+                    Aqualis.makeProgramWithContext (dir,projectname,LaTeX) <| fun context ->
                         //メインコード生成
-                        let environment = Aqualis(Some context)
-                        code environment
-                        context.CurrentProgram.close()
+                        code context
+                        context.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".tex", 2, LaTeX)
                         writer.codewritein "\\documentclass[a4paper,fleqn]{ltjsarticle}\n"
                         writer.codewritein "\\usepackage{amsmath}\n"
-                        List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| context.CurrentProgram.hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| context.hlist.list
                         writer.codewritein "\\oddsidemargin=-0.4mm\n"
                         writer.codewritein "\\topmargin=4.6mm\n"
                         writer.codewritein "\\headheight=0mm\n"
@@ -227,10 +224,10 @@ namespace Aqualis
                         writer.codewritein("{\\Large " + projectname.Replace("_","\\_") + "}\n")
                         //構造体の定義
                         writer.codewritein "\\section{structures}\n"
-                        environment.str.Def_Structure writer
+                        context.str.Def_Structure writer
                         //関数定義
                         writer.codewritein "\\section{subroutines}\n"
-                        for funname in context.CurrentProgram.flist.list do
+                        for funname in context.flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein("\n")
@@ -241,17 +238,16 @@ namespace Aqualis
                         writer.codewritein "\\end{itemize}\n"
                         //メインコード
                         writer.codewritein "\\section{main code}\n"
-                        writer.codewritein(context.CurrentProgram.allCodes)
+                        match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                         writer.codewritein "\\end{document}\n"
                         writer.close()
                         //beeファイル削除
-                        context.CurrentProgram.delete()
+                        context.delete()
                 |HTML ->
-                    makeProgramWithContext [dir,projectname,HTML] <| fun context ->
+                    Aqualis.makeProgramWithContext (dir,projectname,HTML) <| fun context ->
                         //メインコード生成
-                        let environment = Aqualis(Some context)
-                        code environment
-                        context.CurrentProgram.close()
+                        code context
+                        context.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".html", 2, HTML)
                         writer.codewritein "<!DOCTYPE html>\n"
@@ -383,12 +379,12 @@ namespace Aqualis
                         //構造体の定義
                         writer.codewritein "\t\t<div id=\"defstr\">\n"
                         writer.codewritein "\t\t<h2>構造体定義</h2>\n"
-                        environment.str.Def_Structure writer
+                        context.str.Def_Structure writer
                         writer.codewritein "\t\t</div>\n"
                         //関数定義
                         writer.codewritein "\t\t<div id=\"deffunc\">\n"
                         writer.codewritein "\t\t<h2>関数定義</h2>\n"
-                        for funname in context.CurrentProgram.flist.list do
+                        for funname in context.flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein "\n"
@@ -406,75 +402,66 @@ namespace Aqualis
                         writer.codewritein "<input type=\"text\" id=\"textvar\" value=\"\">\n"
                         writer.codewritein "<input type=\"button\" onclick=\"fsearch()\" value=\"Search\">\n"
                         writer.codewritein "<br/>\n"
-                        writer.codewritein(context.CurrentProgram.allCodes)
+                        match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                         writer.codewritein "\t\t</div>\n"
                         writer.codewritein "\t</body>\n"
                         writer.codewritein "</html>\n"
                         writer.close()
                         //beeファイル削除
-                        context.CurrentProgram.delete()
+                        context.delete()
                 |HTMLSequenceDiagram ->
                     // ディレクトリ作成
                     if not <| Directory.Exists (dir + "\\" + "contents_" + projectname) then
                         ignore <| Directory.CreateDirectory(dir + "\\" + "contents_" + projectname)
                     // コンテンツディレクトリ
-                    makeProgramWithContext
-                        [
-                            // メインファイル
-                            dir, projectname + ".html", HTMLSequenceDiagram
-                            // HTML本体のコード
-                            dir, projectname + "_body", HTMLSequenceDiagram
-                        ]
-                        <| fun context ->
-                            let environment = Aqualis(Some context)
-                            context.ContentsDirectory <-
-                                dir + "\\" + "contents_" + projectname
-                            environment.htmlio.switchBody <| fun bodyEnvironment ->
-                                code bodyEnvironment
-                            let codeBody = environment.htmlio.switchBody <| fun bodyEnvironment ->
-                                bodyEnvironment.RequireGenerationContext().CurrentProgram.allCodes
-                            // html書き込みストリーム作成
-                            environment.htmlio.switchMain <| fun environment ->
-                                let context = environment.RequireGenerationContext()
-                                writein context "<!DOCTYPE html>"
-                                // html要素
-                                environment.html.tagb ("html", "lang=\"ja\"") <| fun () ->
-                                    // head要素
-                                    environment.html.tagb ("head", "") <| fun () ->
-                                        // titleタグ
-                                        writein context ("<title>"+projectname+"</title>")
-                                        // metaタグ
-                                        writein context "<meta charset=\"UTF-8\">"
-                                        //追加（5/29）viewportタブ
-                                        writein context "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
-                                        // titleタグ
-                                        environment.html.tagb ("title", "") <| fun () ->
-                                            writein context projectname
-                                        // MathJax
-                                        environment.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
-                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeq.js\"") <| fun () -> ()
-                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeqReset.js\"") <| fun () -> ()
-                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationStart.js\"") <| fun () -> ()
-                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationReset.js\"") <| fun () -> ()
-                                        environment.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/autoAnimation.js\"") <| fun () -> ()
-                                        // webフォント取得
-                                        writein context "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                                        writein context "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                                        writein context "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
-                                    // body要素
-                                    let s0 = Style [area.backGroundColor "#ffffff"]
-                                    environment.html.tagb ("body", [s0.atr]) <| fun () ->
-                                        writein context codeBody
-                            for i in 0..1 do
-                                context.Programs[i].close()
-                            // bodyタグ一時コード削除
-                            context.Programs[1].delete()
+                    let main = new Aqualis (
+                        Some (dir + "\\" + "contents_" + projectname), 
+                        Some (projectname + ".html"), 
+                        HTMLSequenceDiagram)
+                    let body = new Aqualis (
+                        Some (dir + "\\" + "contents_" + projectname), 
+                        Some (projectname + "_body"), 
+                        HTMLSequenceDiagram)
+                    code body
+                    // html書き込みストリーム作成
+                    main.writein "<!DOCTYPE html>"
+                    // html要素
+                    main.html.tagb ("html", "lang=\"ja\"") <| fun () ->
+                        // head要素
+                        main.html.tagb ("head", "") <| fun () ->
+                            // titleタグ
+                            main.writein ("<title>"+projectname+"</title>")
+                            // metaタグ
+                            main.writein "<meta charset=\"UTF-8\">"
+                            //追加（5/29）viewportタブ
+                            main.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                            // titleタグ
+                            main.html.tagb ("title", "") <| fun () ->
+                                main.writein projectname
+                            // MathJax
+                            main.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
+                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeq.js\"") <| fun () -> ()
+                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationSeqReset.js\"") <| fun () -> ()
+                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationStart.js\"") <| fun () -> ()
+                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/animationReset.js\"") <| fun () -> ()
+                            main.html.tagb ("script", "type=\"text/javascript\" src=\"" + "contents_" + projectname + "/autoAnimation.js\"") <| fun () -> ()
+                            // webフォント取得
+                            main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                            main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                            main.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                        // body要素
+                        let s0 = Style [area.backGroundColor "#ffffff"]
+                        main.html.tagb ("body", [s0.atr]) <| fun () ->
+                            match body.allCodes with |Some s-> main.writein s |None -> ()
+                    main.close()
+                    body.close()
+                    // bodyタグ一時コード削除
+                    body.delete()
                 |Python ->
-                    makeProgramWithContext [dir,projectname,Python] <| fun context ->
+                    Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun context ->
                         //メインコード生成
-                        let environment = Aqualis(Some context)
-                        code environment
-                        context.CurrentProgram.close()
+                        code context
+                        context.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".py", 2, Python)
                         writer.codewritein "#=============================================================================================\n"
@@ -497,33 +484,32 @@ namespace Aqualis
                         writer.codewritein "from scipy.special import jv, yn\n"
                         writer.codewritein "import sys\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein("import " + s + "\n")) <| context.CurrentProgram.hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein("import " + s + "\n")) <| context.hlist.list
                         //構造体の定義
-                        environment.str.Def_Structure writer
+                        context.str.Def_Structure writer
                         //グローバル変数の定義
                         declareall context writer
                         //関数定義
-                        for funname in context.CurrentProgram.flist.list do
+                        for funname in context.flist.list do
                             writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein("\n")
                         //メインコード
-                        writer.codewritein(context.CurrentProgram.allCodes)
+                        match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                         writer.close()
                         //beeファイル削除
-                        context.CurrentProgram.delete()
+                        context.delete()
                         use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_P.sh")
                         wr.Write "#!/bin/bash\n"
                         wr.Write "\n"
                         wr.Write("python3 " + projectname + ".py\n")
                 |JavaScript ->
-                    makeProgramWithContext [dir,projectname,JavaScript] <| fun context ->
+                    Aqualis.makeProgramWithContext (dir,projectname,JavaScript) <| fun context ->
                         //メインコード生成
-                        context.CurrentProgram.indentInc()
-                        let environment = Aqualis(Some context)
-                        code environment
-                        context.CurrentProgram.indentDec()
-                        context.CurrentProgram.close()
+                        context.indentInc()
+                        code context
+                        context.indentDec()
+                        context.close()
                         //ソースファイル出力
                         use writer = new codeWriter(dir + "\\" + projectname + ".c", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
@@ -539,29 +525,28 @@ namespace Aqualis
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
                         //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.CurrentProgram.hlist.list
+                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
                         //構造体の定義
-                        environment.str.Def_Structure writer
+                        context.str.Def_Structure writer
                         //グローバル変数の宣言
                         declareall context writer
                         //extern指定子
-                        for s in context.CurrentProgram.elist.list do
+                        for s in context.elist.list do
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
-                        for funname in context.CurrentProgram.flist.list do
+                        for funname in context.flist.list do
                             writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
                             File.Delete(dir + "\\" + funname + "_main")
                             writer.codewritein ("\n")
                         //Main
-                        writer.codewritein (context.CurrentProgram.allCodes)
+                        match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                         writer.close()
                         //beeファイル削除
-                        context.CurrentProgram.delete()
+                        context.delete()
                 |PHP ->
-                    makeProgramWithContext [dir,projectname + ".php",PHP] <| fun context ->
-                        let environment = Aqualis(Some context)
-                        code environment
-                        context.CurrentProgram.close()
-                |Numeric -> code (Aqualis None)
+                    Aqualis.makeProgramWithContext (dir,projectname + ".php",PHP) <| fun context ->
+                        code context
+                        context.close()
+                |Numeric -> code (new Aqualis(None,None,Numeric))

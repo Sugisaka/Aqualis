@@ -1,9 +1,10 @@
 namespace Aqualis
 
-    type complex3(typ:Etype,x:Expr3,?context:GenerationContext) as this=
-        inherit NumericArray3<complex0,complex1,complex2,complex3>(typ,x,?context=context)
-        new(context:GenerationContext,typ,size,name,para)=
-            context.CurrentProgram.var.setVar(typ,size,name,para)
+    type complex3(typ:Etype,x:Expr3,context:Aqualis) as this=
+        inherit NumericArray3<complex0,complex1,complex2,complex3>(typ,x,context)
+        new(typ,x) = complex3(typ,x,Aqualis.BlankWriter Numeric)
+        new(context:Aqualis,typ,size,name,para)=
+            context.cvar.setVar(typ,size,name,para)
             complex3(typ,Var3(size,name),context=context)
         new(a:int0,b:int0,c:int0,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(a,b,c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int0,c:int0,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(I a,b,c,fun ijk->(f ijk).Expr))
@@ -13,11 +14,11 @@ namespace Aqualis
         new(a:int ,b:int0,c:int ,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(I a,b,I c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int0,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(I a,I b,c,fun ijk->(f ijk).Expr))
         new(a:int ,b:int ,c:int ,f:int0*int0*int0->complex0) = complex3(Zt,Arx3(I a,I b,I c,fun ijk->(f ijk).Expr))
-        override _.WrapScalar value=complex0(value,?context=this.Context)
-        override _.WrapRow value=complex1(typ,value,?context=this.Context)
-        override _.WrapMatrix value=complex2(typ,value,?context=this.Context)
-        override _.CreateWithContext(elementType,value,resultContext)=complex3(elementType,value,?context=resultContext)
-        override _.AssignAt(i,j,k,value)=this[i,j,k] <== complex0(value,?context=this.Context)
+        override _.WrapScalar value=complex0(value,this.Context)
+        override _.WrapRow value=complex1(typ,value,this.Context)
+        override _.WrapMatrix value=complex2(typ,value,this.Context)
+        override _.CreateWithContext(elementType,value,resultContext)=complex3(elementType,value,resultContext)
+        override _.AssignAt(i,j,k,value)=this[i,j,k] <== complex0(value,this.Context)
         override _.clear()=this.AssignScalar(complex0(Int 0))
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
         static member (<==)(x:complex3,y:complex3)=x.AssignArray y

@@ -194,6 +194,7 @@ namespace Aqualis
             if not (String.IsNullOrEmpty filename) then
                 cwriter <- Some(new StreamWriter(filename, append))
         
+        member _.FilePath with get() = filename
         member val indent = IndentController indentsize with get
         
         member _.cwrite(s:string) =

@@ -1,11 +1,8 @@
 namespace Aqualis
 
-/// Explicit code-grouping and section controls for one compilation environment.
-type ContextGroup internal (environment:Aqualis) =
-    let context() = environment.RequireGenerationContext()
-    let program() = (context()).CurrentProgram
-    let write line = (program()).codewritein(line + "\n")
-    let emitComment line = (program()).comment line
+type ContextGroup internal (ctx:Aqualis) =
+    let write line = ctx.codewritein(line + "\n")
+    let emitComment line = ctx.comment line
 
     member _.section (label:string) code = code()
     member _.comment (text:string) = emitComment text
@@ -14,13 +11,11 @@ type ContextGroup internal (environment:Aqualis) =
     member this.whenStep step id code = this.whenEnabled (step = id) code
 
     member _.Section (label:string) (code:unit -> unit) =
-        let ctx = context()
-        let current = ctx.CurrentProgram
-        match current.language with
+        match ctx.language with
         |Fortran|C99|JavaScript ->
             emitComment ("===" + label.PadRight(76,'='))
-            current.indentInc()
-            try code() finally current.indentDec()
+            ctx.indentInc()
+            try code() finally ctx.indentDec()
             emitComment ("=== end " + label.PadRight(76,'='))
             write ""
         |Python ->
@@ -35,17 +30,16 @@ type ContextGroup internal (environment:Aqualis) =
             write "<details open>"
             write ("<summary><span class=\"op-section\">section</span>" + label + "</summary>")
             write "<div class=\"insidecode-section\">"
-            current.indentInc()
-            try code() finally current.indentDec()
+            ctx.indentInc()
+            try code() finally ctx.indentDec()
             write "</div>"
             write "</details>"
-        |HTMLSequenceDiagram -> expr.sectionHS(current,label) code
+        |HTMLSequenceDiagram -> expr.sectionHS(ctx,label) code
         |Numeric|PHP -> code()
 
     member _.subSection (label:string) (code:unit -> unit) =
-        let current = program()
         let header text =
-            match current.language with
+            match ctx.language with
             |LaTeX -> write ("\\subsection{" + text + "}")
             |HTML ->
                 write "<details open>"
@@ -53,17 +47,16 @@ type ContextGroup internal (environment:Aqualis) =
                 write "<div class=\"insidecode-section\">"
             |_ -> emitComment ("---" + text.PadRight(76,'-'))
         header label
-        if current.language <> Python then current.indentInc()
-        try code() finally if current.language <> Python then current.indentDec()
-        match current.language with
+        if ctx.language <> Python then ctx.indentInc()
+        try code() finally if ctx.language <> Python then ctx.indentDec()
+        match ctx.language with
         |Fortran|C99 -> header ("end " + label); write ""
         |Python -> header ("end " + label)
         |HTML -> write "</div>"; write "</details>"
         |_ -> ()
 
     member private _.Header (marker:char) (label:string) =
-        let current = program()
-        match current.language with
+        match ctx.language with
         |Fortran|C99|Python|JavaScript|PHP ->
             emitComment (System.String(marker,3) + label.PadRight(76,marker))
         |LaTeX -> write ("\\section{" + label + "}")
@@ -74,21 +67,19 @@ type ContextGroup internal (environment:Aqualis) =
         |Numeric -> ()
 
     member private _.Footer marker label =
-        match (program()).language with
+        match ctx.language with
         |Fortran|C99|Python -> emitComment (System.String(marker,3) + ("end " + label).PadRight(76,marker))
         |HTML|HTMLSequenceDiagram -> write "</div>"; write "</details>"
         |_ -> ()
 
     member private this.Heading marker displayPrefix displaySuffix label code =
-        let ctx = context()
-        let current = ctx.CurrentProgram
         this.Header marker label
-        if ctx.DisplaySection then environment.print.s (displayPrefix + label)
-        if current.language = Python then code()
+        if ctx.DisplaySection <> 0 then ctx.print.s (displayPrefix + label)
+        if ctx.language = Python then code()
         else
-            current.indentInc()
-            try code() finally current.indentDec()
-        if ctx.DisplaySection then environment.print.s (displaySuffix + label)
+            ctx.indentInc()
+            try code() finally ctx.indentDec()
+        if ctx.DisplaySection <> 0 then ctx.print.s (displaySuffix + label)
         this.Footer marker label
         write ""
 

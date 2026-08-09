@@ -1,18 +1,19 @@
 namespace Aqualis
 
-    type int2 (typ:Etype,x:Expr2,?context:GenerationContext) as this =
-        inherit NumericArray2<int0,int1,int2>(typ,x,?context=context)
-        new(context:GenerationContext,typ,size,name,para)=
-            context.CurrentProgram.var.setVar(typ,size,name,para)
+    type int2 (typ:Etype,x:Expr2,context:Aqualis) as this =
+        inherit NumericArray2<int0,int1,int2>(typ,x,context)
+        new(typ,x) = int2(typ,x,Aqualis.BlankWriter Numeric)
+        new(context:Aqualis,typ,size,name,para)=
+            context.cvar.setVar(typ,size,name,para)
             int2(typ,Var2(size,name),context=context)
         new(a:int0,b:int0,f:int0*int0->int0) = int2(It 4,Arx2(a, b, fun ij -> (f ij).Expr))
         new(a:int ,b:int0,f:int0*int0->int0) = int2(It 4,Arx2(I a, b, fun ij -> (f ij).Expr))
         new(a:int0,b:int ,f:int0*int0->int0) = int2(It 4,Arx2(a, I b, fun ij -> (f ij).Expr))
         new(a:int ,b:int ,f:int0*int0->int0) = int2(It 4,Arx2(I a, I b, fun ij -> (f ij).Expr))
-        override _.WrapScalar value=int0(value,?context=this.Context)
-        override _.WrapRow value=int1(typ,value,?context=this.Context)
-        override _.CreateWithContext(elementType,value,resultContext)=int2(elementType,value,?context=resultContext)
-        override _.AssignAt(i,j,value)=this[i,j] <== int0(value,?context=this.Context)
+        override _.WrapScalar value=int0(value,this.Context)
+        override _.WrapRow value=int1(typ,value,this.Context)
+        override _.CreateWithContext(elementType,value,resultContext)=int2(elementType,value,resultContext)
+        override _.AssignAt(i,j,value)=this[i,j] <== int0(value,this.Context)
         override _.clear()=this.AssignScalar(I 0)
         override _.sizeinit()=this.size1<== -1; this.size2<== -1
         static member (./)(x:int2,y:int2)=base2.sizeMismatchError(x,y);int2(x.etype%%y.etype,Arx2(x.size1,x.size2,fun(i,j)->Div(It 4,x[i,j].Expr,y[i,j].Expr)))

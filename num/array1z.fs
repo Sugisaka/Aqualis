@@ -7,18 +7,19 @@
 namespace Aqualis
 
     /// One-dimensional complex expression array.
-    type complex1 (typ:Etype,x:Expr1, ?context:GenerationContext) as this =
-        inherit NumericArray1<complex0,complex1>(typ,x,?context=context)
+    type complex1 (typ:Etype,x:Expr1, context:Aqualis) as this =
+        inherit NumericArray1<complex0,complex1>(typ,x,context)
 
-        new (context:GenerationContext,typ,size,name,para) =
-            context.CurrentProgram.var.setVar(typ,size,name,para)
+        new (typ,x) = complex1(typ,x,Aqualis.BlankWriter Numeric)
+        new (context:Aqualis,typ,size,name,para) =
+            context.cvar.setVar(typ,size,name,para)
             complex1(typ,Var1(size,name),context=context)
         new(a:int0,f:int0->complex0) = complex1(Zt,Arx1(a,fun i -> (f i).Expr))
         new(a:int ,f:int0->complex0) = complex1(Zt,Arx1(I a,fun i -> (f i).Expr))
 
-        override _.WrapScalar(value,resultContext) = complex0(value,?context=resultContext)
-        override _.Create(elementType,value,resultContext) = complex1(elementType,value,?context=resultContext)
-        override _.AssignAt(index,value) = this[index] <== complex0(value,?context=this.Context)
+        override _.WrapScalar(value,resultContext) = complex0(value,resultContext)
+        override _.Create(elementType,value,resultContext) = complex1(elementType,value,resultContext)
+        override _.AssignAt(index,value) = this[index] <== complex0(value,this.Context)
         override _.clear() = this.AssignScalar(complex0(Int 0))
         override _.sizeinit() = this.size1 <== -1
 

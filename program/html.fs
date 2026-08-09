@@ -151,16 +151,12 @@ namespace Aqualis
         static member (+) (p1:position,p2:position) = position(p1.x+p2.x, p1.y+p2.y)
         static member (-) (p1:position,p2:position) = position(p1.x-p2.x, p1.y-p2.y)
 
-    type html internal (program:program, environment:Aqualis option) =
-        let write(s:string) = program.codewrite s
-        let writei(s:string) = program.codewritei s
-        let writen(s:string) = program.codewriten s
-        let writein(s:string) = program.codewritein s
-        new(program:program) = html(program, None)
-        member internal _.Environment =
-            environment
-            |> Option.defaultWith (fun () -> invalidOp "This HTML writer is not associated with a CompilationEnvironment.")
-        member internal this.GenerationContext = this.Environment.RequireGenerationContext()
+    type html internal (c:Aqualis) =
+        let write(s:string) = c.codewrite s
+        let writei(s:string) = c.codewritei s
+        let writen(s:string) = c.codewriten s
+        let writein(s:string) = c.codewritein s
+        member _.Context with get() = c
         member this.head title = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
@@ -833,4 +829,4 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentHtmlExtensions =
         type Aqualis with
-            member this.html = html((this.RequireGenerationContext()).CurrentProgram, Some this)
+            member this.html = html(this)

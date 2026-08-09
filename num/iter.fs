@@ -7,21 +7,19 @@
 namespace Aqualis
 
     ///<summary>反復処理</summary>
-    type ContextIter internal (environment:Aqualis) =
-        let context = environment.GenerationContext
-
+    type ContextIter internal (c:Aqualis) =
         member _.loop code =
-            match context with
-            |Some ctx ->
-                expr.loop ctx (fun (exitLoop, index) ->
-                    code(exitLoop, int0(index, context=ctx)))
+            match c.CodeFile with
+            |Some _ ->
+                expr.loop c (fun (exitLoop, index) ->
+                    code(exitLoop, int0(index, c)))
             |None -> invalidOp "An unbounded loop is not supported during Numeric execution."
 
         member _.whiledo (condition:bool0) code =
-            match context with
-            |Some ctx ->
-                GenerationContextMerge.merge (Some ctx) condition.Context |> ignore
-                expr.whiledo ctx condition.Expr code
+            match c.CodeFile with
+            |Some _ ->
+                Aqualis.merge c condition.Context |> ignore
+                expr.whiledo c condition.Expr code
             |None ->
                 let mutable keepRunning = true
                 while keepRunning do
@@ -31,13 +29,13 @@ namespace Aqualis
                     |_ -> invalidOp "The Numeric loop condition could not be evaluated."
 
         member _.range (first:int0, last:int0) = fun code ->
-            match context with
-            |Some ctx ->
-                GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
-                expr.range ctx None first.Expr last.Expr (fun index ->
-                    code (int0(index, context=ctx)))
+            match c.CodeFile with
+            |Some _ ->
+                Aqualis.mergeMany [c; first.Context; last.Context] |> ignore
+                expr.range c None first.Expr last.Expr (fun index ->
+                    code (int0(index, c)))
             |None ->
-                GenerationContextMerge.merge first.Context last.Context |> ignore
+                Aqualis.merge first.Context last.Context |> ignore
                 expr.rangeN first.Expr last.Expr (fun index -> code (int0 index))
 
         member this.range (first:int, last:int) = fun code ->
@@ -50,29 +48,29 @@ namespace Aqualis
             this.range (int0(Int first), last) code
 
         member _.range (counterName:string, first:int0, last:int0) = fun code ->
-            match context with
-            |Some ctx ->
-                GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
-                expr.range ctx (Some counterName) first.Expr last.Expr (fun index ->
-                    code (int0(index, context=ctx)))
+            match c.CodeFile with
+            |Some _ ->
+                Aqualis.mergeMany [c; first.Context; last.Context] |> ignore
+                expr.range c (Some counterName) first.Expr last.Expr (fun index ->
+                    code (int0(index, c)))
             |None ->
-                GenerationContextMerge.merge first.Context last.Context |> ignore
+                Aqualis.merge first.Context last.Context |> ignore
                 expr.rangeN first.Expr last.Expr (fun index -> code (int0 index))
 
         member _.range_exit (first:int0, last:int0) = fun code ->
-            match context with
-            |Some ctx ->
-                GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
-                expr.range_exit ctx None first.Expr last.Expr (fun (exitLoop,index) ->
-                    code(exitLoop,int0(index,context=ctx)))
+            match c.CodeFile with
+            |Some _ ->
+                Aqualis.mergeMany [c; first.Context; last.Context] |> ignore
+                expr.range_exit c None first.Expr last.Expr (fun (exitLoop,index) ->
+                    code(exitLoop,int0(index,c)))
             |None -> invalidOp "An early-exit loop is not supported during Numeric execution."
 
         member _.range_exit (counterName:string, first:int0, last:int0) = fun code ->
-            match context with
-            |Some ctx ->
-                GenerationContextMerge.mergeMany [Some ctx; first.Context; last.Context] |> ignore
-                expr.range_exit ctx (Some counterName) first.Expr last.Expr (fun (exitLoop,index) ->
-                    code(exitLoop,int0(index,context=ctx)))
+            match c.CodeFile with
+            |Some _ ->
+                Aqualis.mergeMany [c; first.Context; last.Context] |> ignore
+                expr.range_exit c (Some counterName) first.Expr last.Expr (fun (exitLoop,index) ->
+                    code(exitLoop,int0(index,c)))
             |None -> invalidOp "An early-exit loop is not supported during Numeric execution."
 
         member this.num (count:int0) = fun code ->
@@ -93,6 +91,4 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentIterExtensions =
         type Aqualis with
-            member this.iter = ContextIter(this)
-
-    ///<summary>反復処理（処理スキップ）</summary>
+            member this.iter = ContextIter this

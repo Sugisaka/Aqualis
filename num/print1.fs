@@ -11,7 +11,7 @@ namespace Aqualis
     ///<summary>画面表示</summary>
     type internal PrintEmitter () =
         ///<summary>変数リストを画面表示</summary>
-        static member internal ttWith (program:program) (lst:exprString) =
+        static member internal ttWith (program:Aqualis) (lst:exprString) =
             match program.language with
             |Fortran ->
                 let clist =
@@ -173,7 +173,7 @@ namespace Aqualis
                     |RNvr (Cpx (re,im),_) -> printf "%e %e " re im
                     |_ -> ()
         ///<summary>文字列を画面表示</summary>
-        static member internal sWith (program:program) (str:string) =
+        static member internal sWith (program:Aqualis) (str:string) =
             match program.language with
             |Fortran ->
                 program.codewritein("print *, "+"\""+str+"\""+"\n")
@@ -197,19 +197,20 @@ namespace Aqualis
                 printfn "%s" str
 
         ///<summary>1個の項目を画面表示</summary>
-    type ContextPrint internal (environment:Aqualis) =
-        member internal _.Environment = environment
-
+    type ContextPrint internal (c:Aqualis) =
+        
+        member _.Environment with get() = c
+        
         member _.s(str:string) =
-            match environment.GenerationContext with
-            |Some context -> PrintEmitter.sWith context.CurrentProgram str
+            match c.CodeFile with
+            |Some _ -> PrintEmitter.sWith c str
             |None -> printfn "%s" str
 
         member _.tt(value:exprString) =
-            match environment.GenerationContext with
-            |Some context ->
-                GenerationContextMerge.merge (Some context) value.Context |> ignore
-                PrintEmitter.ttWith context.CurrentProgram value
+            match c.CodeFile with
+            |Some _ ->
+                Aqualis.merge c value.Context |> ignore
+                PrintEmitter.ttWith c value
             |None ->
                 for item in value.data do
                     match item with
@@ -226,4 +227,4 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentPrintExtensions =
         type Aqualis with
-            member this.print = ContextPrint(this)
+            member this.print = ContextPrint this

@@ -44,9 +44,9 @@ module num0Const =
     let And (s:list<bool0>) =
         bool0(
             AND(s |> List.map (fun value -> value.Expr)),
-            ?context=(s |> Seq.map _.Context |> GenerationContextMerge.mergeMany))
+            (s |> Seq.map _.Context |> Aqualis.mergeMany))
     let Or (s:list<bool0>) =
         bool0(
             OR(s |> List.map (fun value -> value.Expr)),
-            ?context=(s |> Seq.map _.Context |> GenerationContextMerge.mergeMany))
+            (s |> Seq.map _.Context |> Aqualis.mergeMany))
     let inf = double0(Var(Dt,"\\infty",NaN))

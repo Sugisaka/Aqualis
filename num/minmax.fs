@@ -12,15 +12,15 @@ namespace Aqualis
             static member private cp1(zA:int1,v:int0,iv:int0 option,compare:int0*int0->bool0) =
                 match iv with |Some(iv) -> iv <== 0 |_ -> ()
                 v <== zA[_0]
-                (Aqualis(zA.Context)).iter.num zA.size1 <| fun i ->
-                    (Aqualis(zA.Context)).br.if1 (compare(v, i)) <| fun () ->
+                zA.Context.iter.num zA.size1 <| fun i ->
+                    zA.Context.br.if1 (compare(v, i)) <| fun () ->
                         match iv with |Some(iv) -> iv <== i |_ -> ()
                         v <== zA[i]
             static member private cp1(zA:double1,v:double0,iv:int0 option,compare:double0*int0->bool0) =
                 match iv with |Some(iv) -> iv <== 0 |_ -> ()
                 v <== zA[_0]
-                (Aqualis(zA.Context)).iter.num zA.size1 <| fun i ->
-                    (Aqualis(zA.Context)).br.if1 (compare(v, i)) <| fun () ->
+                zA.Context.iter.num zA.size1 <| fun i ->
+                    zA.Context.br.if1 (compare(v, i)) <| fun () ->
                         match iv with |Some(iv) -> iv <== i |_ -> ()
                         v <== zA[i]
 
@@ -28,9 +28,9 @@ namespace Aqualis
                 match iv1 with |Some(iv1) -> iv1 <== 0 |_ -> ()
                 match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
                 v <== zA[_0,_0]
-                (Aqualis(zA.Context)).iter.num zA.size1 <| fun i ->
-                (Aqualis(zA.Context)).iter.num zA.size2 <| fun j ->
-                    (Aqualis(zA.Context)).br.if1 (compare(v, i, j)) <| fun () ->
+                zA.Context.iter.num zA.size1 <| fun i ->
+                zA.Context.iter.num zA.size2 <| fun j ->
+                    zA.Context.br.if1 (compare(v, i, j)) <| fun () ->
                         match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
                         match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
                         v <== zA[i,j]
@@ -38,9 +38,9 @@ namespace Aqualis
                 match iv1 with |Some(iv1) -> iv1 <== 0 |_ -> ()
                 match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
                 v <== zA[_0,_0]
-                (Aqualis(zA.Context)).iter.num zA.size1 <| fun i ->
-                (Aqualis(zA.Context)).iter.num zA.size2 <| fun j ->
-                    (Aqualis(zA.Context)).br.if1 (compare(v, i, j)) <| fun () ->
+                zA.Context.iter.num zA.size1 <| fun i ->
+                zA.Context.iter.num zA.size2 <| fun j ->
+                    zA.Context.br.if1 (compare(v, i, j)) <| fun () ->
                         match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
                         match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
                         v <== zA[i,j]
@@ -50,10 +50,10 @@ namespace Aqualis
                 match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
                 match iv3 with |Some(iv3) -> iv3 <== 0 |_ -> ()
                 v <== zA[_0,_0,_0]
-                (Aqualis(zA.Context)).iter.num zA.size1 <| fun i ->
-                (Aqualis(zA.Context)).iter.num zA.size2 <| fun j ->
-                (Aqualis(zA.Context)).iter.num zA.size3 <| fun k ->
-                    (Aqualis(zA.Context)).br.if1 (compare(v, i, j, k)) <| fun () ->
+                zA.Context.iter.num zA.size1 <| fun i ->
+                zA.Context.iter.num zA.size2 <| fun j ->
+                zA.Context.iter.num zA.size3 <| fun k ->
+                    zA.Context.br.if1 (compare(v, i, j, k)) <| fun () ->
                         match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
                         match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
                         match iv3 with |Some(iv3) -> iv3 <== k |_ -> ()
@@ -63,10 +63,10 @@ namespace Aqualis
                 match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
                 match iv3 with |Some(iv3) -> iv3 <== 0 |_ -> ()
                 v <== zA[_0,_0,_0]
-                (Aqualis(zA.Context)).iter.num zA.size1 <| fun i ->
-                (Aqualis(zA.Context)).iter.num zA.size2 <| fun j ->
-                (Aqualis(zA.Context)).iter.num zA.size3 <| fun k ->
-                    (Aqualis(zA.Context)).br.if1 (compare(v, i, j, k)) <| fun () ->
+                zA.Context.iter.num zA.size1 <| fun i ->
+                zA.Context.iter.num zA.size2 <| fun j ->
+                zA.Context.iter.num zA.size3 <| fun k ->
+                    zA.Context.br.if1 (compare(v, i, j, k)) <| fun () ->
                         match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
                         match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
                         match iv3 with |Some(iv3) -> iv3 <== k |_ -> ()

@@ -12,7 +12,7 @@ namespace Aqualis
         /// <summary>
         /// 座標変換
         /// </summary>
-        type ContextCoordinate internal (environment:Aqualis) =
+        type ContextCoordinate internal (context:Aqualis) =
 
             /// <summary>
             /// 座標系を(sx,sy)だけ平行移動
@@ -20,7 +20,7 @@ namespace Aqualis
             member this.shift (sx:double0,sy:double0) =
                 fun (x:double0,y:double0) ->
                     fun code ->
-                        environment.ch.dd <| fun (x_,y_) ->
+                        context.ch.dd <| fun (x_,y_) ->
                             x_ <== x - sx
                             y_ <== y - sy
                             code(x_,y_)
@@ -39,7 +39,7 @@ namespace Aqualis
             member this.rotate_rad (radian:double0) =
                 fun (x:double0,y:double0) ->
                     fun code ->
-                        environment.ch.dd <| fun (x_,y_) ->
+                        context.ch.dd <| fun (x_,y_) ->
                             x_ <==  x * asm.cos radian + y * asm.sin radian
                             y_ <== -x * asm.sin radian + y * asm.cos radian
                             code(x_,y_)
@@ -50,7 +50,7 @@ namespace Aqualis
             member this.rotate_deg (degree:double0) =
                 fun (x:double0,y:double0) ->
                     fun code ->
-                        environment.ch.ddd <| fun (x_,y_,radian) ->
+                        context.ch.ddd <| fun (x_,y_,radian) ->
                             radian <== asm.pi*degree/180.0
                             this.rotate_rad radian (x,y) code
 

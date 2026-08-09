@@ -8,30 +8,28 @@ namespace Aqualis
 
     open System
 
-    type eqmode(environment:Aqualis) =
-        let context = environment.RequireGenerationContext()
-        let program = context.CurrentProgram
+    type eqmode(context:Aqualis) =
         ///<summary>改行</summary>
         member _.eqReturn() =
-            match program.language with
+            match context.language with
             |LaTeX ->
-                program.codewritein "\\\\"
+                context.codewritein "\\\\"
             |_ ->
                 ()
 
         ///<summary>数式番号なし</summary>
         member _.eqNonumber() =
-            match program.language with
+            match context.language with
             |LaTeX ->
-                program.codewritein "\\nonumber"
+                context.codewritein "\\nonumber"
             |_ ->
                 ()
 
         ///<summary>改行</summary>
         member _.eqLabel(lb:string) =
-            match program.language with
+            match context.language with
             |LaTeX ->
-                program.codewritein("\\label{"+lb+"}")
+                context.codewritein("\\label{"+lb+"}")
             |_ ->
                 ()
 
@@ -44,82 +42,80 @@ namespace Aqualis
         member _.nl with get() = complex0(Var(Zt,"",NaN))
 
     ///<summary>変数宣言</summary>
-    type ContextDoc internal (environment:Aqualis) =
-        let context = environment.RequireGenerationContext()
-        let program = context.CurrentProgram
+    type ContextDoc internal (context:Aqualis) =
 
         ///<summary>段落</summary>
         member this.para code =
-            match program.language with
+            match context.language with
             |LaTeX ->
-                program.codewritein "\\par"
+                context.codewritein "\\par"
                 code()
             |_ ->
                 code()
 
         ///<summary>テキスト</summary>
         member this.text (s:string) =
-            match program.language with
+            match context.language with
             |LaTeX ->
-                program.codewritein s
+                context.codewritein s
             |_ ->
-                environment.group.comment s
+                context.group.comment s
 
         ///<summary>図の挿入</summary>
         member this.inputfigure (filename:string) (caption:string) =
-            program.hlist.add "\\usepackage{graphicx}"
-            match program.language with
+            context.hlist.add "\\usepackage{graphicx}"
+            match context.language with
             |LaTeX ->
-                program.codewritein "\\begin{figure}[htbp]"
-                program.codewritein "\\begin{center}"
-                program.codewritein("\\includegraphics{"+filename+"}")
-                program.codewritein "\\end{center}"
-                program.codewritein("\\caption{"+caption+"}")
-                program.codewritein("\\label{"+filename+"}")
-                program.codewritein "\\end{figure}"
+                context.codewritein "\\begin{figure}[htbp]"
+                context.codewritein "\\begin{center}"
+                context.codewritein("\\includegraphics{"+filename+"}")
+                context.codewritein "\\end{center}"
+                context.codewritein("\\caption{"+caption+"}")
+                context.codewritein("\\label{"+filename+"}")
+                context.codewritein "\\end{figure}"
             |_ ->
-                environment.group.comment (filename+": "+caption)
+                context.group.comment (filename+": "+caption)
 
         ///<summary>番号付き箇条書き</summary>
         member this.enumerate (slst:(unit->unit)list) =
-            match program.language with
+            match context.language with
             |LaTeX ->
-                program.codewritein "\\begin{enumerate}"
+                context.codewritein "\\begin{enumerate}"
                 for s in slst do
-                    program.codewritein "\\item"
+                    context.codewritein "\\item"
                     s()
-                program.codewritein "\\end{enumerate}"
+                context.codewritein "\\end{enumerate}"
             |_ ->
                 for s in slst do
                     s()
 
         ///<summary>番号なし箇条書き</summary>
         member this.itemize (slst:(unit->unit)list) =
-            match program.language with
+            match context.language with
             |LaTeX ->
-                program.codewritein "\\begin{itemize}"
+                context.codewritein "\\begin{itemize}"
                 for s in slst do
-                    program.codewritein "\\item"
+                    context.codewritein "\\item"
                     s()
-                program.codewritein "\\end{itemize}"
+                context.codewritein "\\end{itemize}"
             |_ ->
                 for s in slst do
                     s()
 
         ///<summary>数式</summary>
         member this.eq code =
-            let e = eqmode(environment)
-            match program.language with
+            let e = eqmode(context)
+            match context.language with
             |LaTeX ->
-                program.codewritein "\\begin{align}"
+                context.codewritein "\\begin{align}"
                 code e
-                program.codewritein "\\end{align}"
+                context.codewritein "\\end{align}"
             |HTML ->
-                program.codewritein "\\["
-                program.codewritein "\\begin{align}"
+                context.codewritein "\\["
+                context.codewritein "\\begin{align}"
                 code e
-                program.codewritein "\\end{align}"
-                program.codewritein "\\]"
+                context.codewritein "\\end{align}"
+                context.codewritein "\\]"
             |_ ->
                 code e
 
@@ -145,7 +141,7 @@ namespace Aqualis
 
         ///<summary>総和</summary>
         member this.sum (a:int0,i:int0,b:int0,c:double0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let ti = i.code
@@ -161,7 +157,7 @@ namespace Aqualis
                 double0 NaN
         ///<summary>総和</summary>
         member this.sum (a:int0,i:int0,b:int0,c:complex0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let ti = i.code
@@ -178,7 +174,7 @@ namespace Aqualis
 
         ///<summary>総和</summary>
         member this.sum (a:int0,b:int0,c:double0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let tb = b.code
@@ -193,7 +189,7 @@ namespace Aqualis
                 double0 NaN
         ///<summary>総和</summary>
         member this.sum (a:int0,b:int0,c:complex0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let tb = b.code
@@ -209,7 +205,7 @@ namespace Aqualis
 
         ///<summary>積分</summary>
         member this.integral (a:double0,b:double0,eq:double0,x:double0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let tb = b.code
@@ -225,7 +221,7 @@ namespace Aqualis
                 double0 NaN
         ///<summary>積分</summary>
         member this.integral (a:double0,b:double0,eq:complex0,x:double0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let ta = a.code
                 let tb = b.code
@@ -254,7 +250,7 @@ namespace Aqualis
 
         ///<summary>微分</summary>
         member this.diff (f:double0,x:double0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let tf = f.code
                 let tx = x.code
@@ -264,7 +260,7 @@ namespace Aqualis
 
         ///<summary>偏微分</summary>
         member this.pdiff (f:double0,x:double0) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let tf = f.code
                 let tx = x.code
@@ -274,7 +270,7 @@ namespace Aqualis
 
         ///<summary>場合分け</summary>
         member this.cases (lst:(double0*string)list) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c =
                     lst
@@ -286,7 +282,7 @@ namespace Aqualis
 
         ///<summary>場合分け</summary>
         member this.cases (lst:(double0*double0)list) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c =
                     lst
@@ -298,7 +294,7 @@ namespace Aqualis
 
         ///<summary>場合分け</summary>
         member this.cases (lst:(double0*bool0)list) =
-            match program.language with
+            match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 let c =
                     lst

@@ -7,106 +7,27 @@
 namespace Aqualis
 
     open System
-
-    type SequenceDiagramStyle =
-        {
-            /// ダイアグラム上マージン
-            TopMargin:float;
-            /// ダイアグラム左マージン
-            LeftMargin:float;
-            /// 変数間の間隔
-            VarInterval:float;
-            /// 単一代入文の矢印、基準線から代入先までの矢印の長さ
-            SingleArrowLength:float;
-            /// 変数ヘッダーの横幅
-            VarHeaderWidth:float;
-            /// 変数ヘッダーの高さ
-            VarHeaderHeight:float;
-            /// 線の太さ
-            LineWidth:float;
-            /// 実効線の太さ
-            ActiveLineWidth:float;
-            // 枠のマージン
-            FrameMargin:float;
-            /// 図形描画の時間方向間隔
-            TimeStep:float;
-            // 枠線の太さ
-            FrameBorder:float;
-            /// ライフライン（実効状態）の色
-            ColorActiveLine:string;
-            /// ループフレームの色
-            ColorLoopFrame:string;
-            /// ブランチフレームの色
-            ColorBranchFrame:string;
-            /// セクションフレームの色
-            ColorSectionFrame:string;
-        }
-
-    [<AutoOpen>]
-    module sequenceDiagramParam =
-        let private style(c:program) = {
-            TopMargin = c.SequenceTopMargin
-            LeftMargin = c.SequenceLeftMargin
-            VariableInterval = c.SequenceVariableInterval
-            SingleArrowLength = c.SequenceSingleArrowLength
-            VariableHeaderWidth = c.SequenceVariableHeaderWidth
-            VariableHeaderHeight = c.SequenceVariableHeaderHeight
-            LineWidth = c.SequenceLineWidth
-            ActiveLineWidth = c.SequenceActiveLineWidth
-            FrameMargin = c.SequenceFrameMargin
-            TimeStep = c.SequenceTimeStep
-            FrameBorder = c.SequenceFrameBorder
-            ActiveLineColor = c.SequenceActiveLineColor
-            LoopFrameColor = c.SequenceLoopFrameColor
-            BranchFrameColor = c.SequenceBranchFrameColor
-            SectionFrameColor = c.SequenceSectionFrameColor
-        }
-        /// 上側マージン
-        let topMargin c = (style c).TopMargin
-        /// 左側マージン
-        let leftMargin c = (style c).LeftMargin
-        /// 変数間の間隔
-        let varInterval c = (style c).VariableInterval
-        /// 単一代入文の矢印、基準線から代入先までの矢印の長さ
-        let singleArrowLength c = (style c).SingleArrowLength
-        /// 変数ヘッダーの横幅
-        let varHeaderWidth c = (style c).VariableHeaderWidth
-        /// 変数ヘッダーの高さ
-        let varHeaderHeight c = (style c).VariableHeaderHeight
-        /// 線の太さ
-        let lineWidth c = (style c).LineWidth
-        /// 実効線の太さ
-        let activeLineWidth c = (style c).ActiveLineWidth
-        // 枠のマージン
-        let frameMargin c = (style c).FrameMargin
-        /// 図形描画の時間方向間隔
-        let timeStep c = (style c).TimeStep
-        /// 枠線の太さ
-        let frameBorder c = (style c).FrameBorder
-        /// 現在のライフライン終端座標
-        let colorActiveLine c = (style c).ActiveLineColor
-        let colorLoopFrame c = (style c).LoopFrameColor
-        let colorBranchFrame c = (style c).BranchFrameColor
-        let colorSectionFrame c = (style c).SectionFrameColor
-        let setSequenceDiagramStyle(context:GenerationContext) (s:SequenceDiagramStyle) =
-            let c = context.CurrentProgram
-            lock c.SequenceGate (fun () ->
-                c.SequenceTopMargin <- s.TopMargin
-                c.SequenceLeftMargin <- s.LeftMargin
-                c.SequenceVariableInterval <- s.VarInterval
-                c.SequenceSingleArrowLength <- s.SingleArrowLength
-                c.SequenceVariableHeaderWidth <- s.VarHeaderWidth
-                c.SequenceVariableHeaderHeight <- s.VarHeaderHeight
-                c.SequenceLineWidth <- s.LineWidth
-                c.SequenceActiveLineWidth <- s.ActiveLineWidth
-                c.SequenceFrameMargin <- s.FrameMargin
-                c.SequenceTimeStep <- s.TimeStep
-                c.SequenceFrameBorder <- s.FrameBorder
-                c.SequenceActiveLineColor <- s.ColorActiveLine
-                c.SequenceLoopFrameColor <- s.ColorLoopFrame
-                c.SequenceBranchFrameColor <- s.ColorBranchFrame
-                c.SequenceSectionFrameColor <- s.ColorSectionFrame)
-
+    
+    [<RequireQualifiedAccess>]
+    module SequenceDiagramContext =
+        let topMargin = 40.0
+        let leftMargin = 40.0
+        let variableInterval = 150.0
+        let singleArrowLength = 37.5
+        let varHeaderWidth = 50.0
+        let varHeaderHeight = 20.0
+        let lineWidth = 2.0
+        let activeLineWidth = 10.0
+        let frameMargin = 10.0
+        let timeStep = 10.0
+        let frameBorder = 2.0
+        let activeLineColor = "rgba(0, 191, 255, 0.5)"
+        let loopFrameColor = "rgb(255, 0, 0)"
+        let branchFrameColor = "rgb(0, 180, 0)"
+        let sectionFrameColor = "rgb(127,0,255)"
+        let lifeLine = 100.0 
+        let lifeLineX (n:int) = leftMargin + varHeaderWidth / 2.0 + float n * variableInterval
+        let p0 = position.Origin
         let styleVarHead =
             Style[
                 font.size 12;
@@ -117,31 +38,14 @@ namespace Aqualis
                 padding.top 5;
                 padding.bottom 5;
                 {Key="text-align"; Value="center"}]
-
-    [<AutoOpen>]
-    module sequenceDiagramData =
-        let p0 = position.Origin
-        let terminalLifeLine(c:program) = c.TerminalLifeLine
-        let setTerminalLifeLine(c:program) value = c.TerminalLifeLine <- value
-        /// シーケンス図に描画済み変数リスト
-        let varList(c:program) = c.SequenceVariables
-        let setVarList(c:program) value = c.SequenceVariables <- value
-        /// フレーム枠座標スタックリスト
-        let frameStack(c:program) = c.SequenceFrames
-        let setFrameStack(c:program) value = c.SequenceFrames <- value
-        /// 条件分岐枠スタックリスト
-        let branchStack(c:program) = c.SequenceBranches
-        let setBranchStack(c:program) value = c.SequenceBranches <- value
-        /// 第n変数ライフラインのx座標
-        let lifeLineX(c:program) (n:int) = leftMargin c + varHeaderWidth c / 2.0 + float n * varInterval c
-
+                
     [<AutoOpen>]
     module exprEvalHS =
 
         type expr with
 
             /// 変数用
-            static member addVarList (e:expr,c:program) =
+            static member addVarList (e:expr,c:Aqualis) =
                 let rec makeList (e:expr) (lst:list<string*int*float>) =
                     match e with
                     |Int _ -> lst
@@ -152,26 +56,26 @@ namespace Aqualis
                             // すでにlstに同じ変数が含まれていればこの変数は追加不要
                             lst
                         |None ->
-                            match List.tryFind (fun (label,_,_) -> label=vname) (varList c) with
+                            match List.tryFind (fun (label,_,_) -> label=vname) c.SequenceVariables with
                             |Some d ->
                                 // lstに追加
                                 lst@[d]
                             |None ->
-                                let varCount = (varList c).Length
+                                let varCount = c.SequenceVariables.Length
                                 // dicにも未登録のためここで追加する
-                                setVarList c <| varList c@[vname,varCount,terminalLifeLine c]
+                                c.SequenceVariables <- c.SequenceVariables@[vname,varCount,c.TerminalLifeLine]
                                 // シーケンス図に追加
                                 let x =
                                     html(c).blockTextcode
-                                        <| styleVarHead
-                                        <| p0.shift(leftMargin c+varInterval c*float varCount,topMargin c)
-                                        <| (varHeaderWidth c,varHeaderHeight c)
-                                        <| (frameBorder c,"solid","#000000")
+                                        <| SequenceDiagramContext.styleVarHead
+                                        <| SequenceDiagramContext.p0.shift(SequenceDiagramContext.leftMargin+SequenceDiagramContext.variableInterval*float varCount, SequenceDiagramContext.topMargin)
+                                        <| (SequenceDiagramContext.varHeaderWidth, SequenceDiagramContext.varHeaderHeight)
+                                        <| (SequenceDiagramContext.frameBorder, "solid", "#000000")
                                         <| ["\\(" + e.evalHS c + "\\)"]
                                 //現在位置までライフライン描画
-                                expr.drawLifeLine(c,lifeLineX c varCount,x.Bottom,terminalLifeLine c)
+                                expr.drawLifeLine(c,SequenceDiagramContext.lifeLineX varCount,x.Bottom,c.TerminalLifeLine)
                                 // lstに追加
-                                lst@[vname,varCount,terminalLifeLine c]
+                                lst@[vname,varCount,c.TerminalLifeLine]
                     |Add (_,a,b) -> makeList b (makeList a lst)
                     |Sub (_,a,b) -> makeList b (makeList a lst)
                     |Mul (_,a,b) -> makeList b (makeList a lst)
@@ -198,7 +102,7 @@ namespace Aqualis
                     |_ -> lst
                 makeList e []
 
-            static member fig (c:program) (p:position) code =
+            static member fig (c:Aqualis) (p:position) code =
                 let writein = c.codewritein
                 let f = figure(html(c).taga)
                 code(f,p)
@@ -216,44 +120,44 @@ namespace Aqualis
                 writein "</svg>"
 
             /// ライフラインを描画
-            static member drawLifeLine(c:program,x:float,y1:float,y2:float) =
-                expr.fig c p0 <| fun (f,_) ->
+            static member drawLifeLine(c:Aqualis,x:float,y1:float,y2:float) =
+                expr.fig c SequenceDiagramContext.p0 <| fun (f,_) ->
                     //破線：classの縦線
                     f.line Style[stroke.color "black"; stroke.width 1.0; stroke.dasharray [5; 3]]
                         <| position(x,y1)
                         <| position(x,y2)
 
             /// 水平線を描画
-            static member drawHorizontalLine(c:program,x1:float, x2:float, y:float) =
-                html(c).fig p0 <| fun (f,_) ->
-                    f.line Style[stroke.color "black"; stroke.width (lineWidth c)]
+            static member drawHorizontalLine(c:Aqualis,x1:float, x2:float, y:float) =
+                html(c).fig SequenceDiagramContext.p0 <| fun (f,_) ->
+                    f.line Style[stroke.color "black"; stroke.width SequenceDiagramContext.lineWidth]
                         <| position(x1, y)
                         <| position(x2, y)
 
             /// 水平矢印線を描画
-            static member drawHorizontalArrowLine(c:program,x1:float, x2:float, y:float) =
-                html(c).fig p0 <| fun (f,_) ->
+            static member drawHorizontalArrowLine(c:Aqualis,x1:float, x2:float, y:float) =
+                html(c).fig SequenceDiagramContext.p0 <| fun (f,_) ->
                     f.lineArrow (Style[stroke.color "black";],2,12)
                         <| position(x1, y)
                         <| position(x2, y)
 
             //基準線
-            static member drawVerticalLine(c:program,x:float,y1:float,y2:float) =
-                html(c).fig p0 <| fun (f,p) ->
+            static member drawVerticalLine(c:Aqualis,x:float,y1:float,y2:float) =
+                html(c).fig SequenceDiagramContext.p0 <| fun (f,p) ->
                     //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                    f.line Style[stroke.color "black"; stroke.width (lineWidth c)]
+                    f.line Style[stroke.color "black"; stroke.width SequenceDiagramContext.lineWidth]
                         <| position(x, y1)
                         <| position(x, y2)
 
             /// ライフライン(アクティブ)を描画
-            static member drawActiveLine(c:program,x:float, y1:float, y2:float, color:string) =
-                html(c).fig p0 <| fun (f,p) ->
+            static member drawActiveLine(c:Aqualis,x:float, y1:float, y2:float, color:string) =
+                html(c).fig SequenceDiagramContext.p0 <| fun (f,p) ->
                     //実行線
-                    f.line Style[stroke.color color; stroke.width (activeLineWidth c)]
+                    f.line Style[stroke.color color; stroke.width SequenceDiagramContext.activeLineWidth]
                         <| position(x, y1)
                         <| position(x, y2)
                 // フレーム枠(左、右、下)更新
-                frameStack c |> List.map (fun (xMin,xMax,yMin,yMax) ->
+                c.FrameStack |> List.map (fun (xMin,xMax,yMin,yMax) ->
                     let xMin' =
                         if xMin = 0.0 then x
                         elif x < xMin then x
@@ -268,11 +172,11 @@ namespace Aqualis
                         elif y2 > yMax && y2 > y1 then y2
                         else yMax
                     xMin',xMax',yMin,yMax')
-                |> setFrameStack c
+                |> fun u -> c.FrameStack <- u
 
             /// テキストを描画
-            static member drawText(c:program,size:int,color:string,weight:string,x:float,y:float,text:string) =
-                let p = p0.shift(x,y)
+            static member drawText(c:Aqualis,size:int,color:string,weight:string,x:float,y:float,text:string) =
+                let p = SequenceDiagramContext.p0.shift(x,y)
                 let s1 = Style [{Key = "margin-left"; Value = p.x.ToString()+"px";}
                                 {Key = "margin-top"; Value = p.y.ToString()+"px";}
                                 {Key = "position"; Value = "absolute";}
@@ -282,7 +186,7 @@ namespace Aqualis
                 html(c).tagb ("div", [s1.atr]) <| fun () -> c.codewritein text
 
             /// 代入式を描画
-            static member substHS (x:expr) (eq:expr) (c:program) =
+            static member substHS (x:expr) (eq:expr) (c:Aqualis) =
                 let start = expr.addVarList(eq,c)
                 // 代入元に変数があるか
                 let goal = expr.addVarList(x,c)
@@ -293,83 +197,83 @@ namespace Aqualis
                     // 自身への代入（他の変数無し）の場合
                     let equText = "\\(" + eq.evalHS c + "\\)"
                     //存在する変数すべてにライフライン継ぎ足し
-                    for _,number,_ in varList c do
-                        expr.drawLifeLine(c,lifeLineX c number, terminalLifeLine c, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+2))
+                    for _,number,_ in c.SequenceVariables do
+                        expr.drawLifeLine(c,SequenceDiagramContext.lifeLineX number, c.TerminalLifeLine, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+2))
                     let goalName, goalX, goalY = goal[0]
                     //代入先の実行線
-                    expr.drawActiveLine(c,lifeLineX c goalX, goalY, terminalLifeLine c+timeStep c,colorActiveLine c)
-                    expr.drawActiveLine(c,lifeLineX c goalX, terminalLifeLine c+2.0*timeStep c, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1),colorActiveLine c)
+                    expr.drawActiveLine(c,SequenceDiagramContext.lifeLineX goalX, goalY, c.TerminalLifeLine+SequenceDiagramContext.timeStep,SequenceDiagramContext.activeLineColor)
+                    expr.drawActiveLine(c,SequenceDiagramContext.lifeLineX goalX, c.TerminalLifeLine+2.0*SequenceDiagramContext.timeStep, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1),SequenceDiagramContext.activeLineColor)
                     // 変数リストのライフラインを更新
-                    varList c |> List.map
+                    c.SequenceVariables |> List.map
                         (fun (name, number, yData) ->
                             if name=goalName then
-                                name, number, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1)
+                                name, number, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1)
                             else
                                 name, number, yData)
-                    |> setVarList c
-                    let baseline = lifeLineX c goalX + singleArrowLength c
-                    let arrow_goal = lifeLineX c goalX + activeLineWidth c/2.0
+                    |> (fun u -> c.SequenceVariables <- u)
+                    let baseline = SequenceDiagramContext.lifeLineX goalX + SequenceDiagramContext.singleArrowLength
+                    let arrow_goal = SequenceDiagramContext.lifeLineX goalX + SequenceDiagramContext.activeLineWidth/2.0
                     //代入元の変数の数だけ矢印を引く
                     let _,s,_ = start[0]
                     // 代入元から基準線までの矢印
                     if goalX > s then
                         //右矢印：実行中→縦線
-                        expr.drawHorizontalLine(c,lifeLineX c s + activeLineWidth c/2.0, baseline, terminalLifeLine c+timeStep c*float(stepCount+1))
+                        expr.drawHorizontalLine(c,SequenceDiagramContext.lifeLineX s + SequenceDiagramContext.activeLineWidth/2.0, baseline, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(stepCount+1))
                     elif goalX = s then
                         //右矢印：実行中→縦線
-                        expr.drawHorizontalLine(c,lifeLineX c s + activeLineWidth c/2.0, baseline, terminalLifeLine c+timeStep c*float(stepCount+1))
+                        expr.drawHorizontalLine(c,SequenceDiagramContext.lifeLineX s + SequenceDiagramContext.activeLineWidth/2.0, baseline, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(stepCount+1))
                     else
                         //左矢印：実行中→縦線
-                        expr.drawHorizontalLine(c,lifeLineX c s - activeLineWidth c/2.0, baseline, terminalLifeLine c+timeStep c*float(stepCount+1))
+                        expr.drawHorizontalLine(c,SequenceDiagramContext.lifeLineX s - SequenceDiagramContext.activeLineWidth/2.0, baseline, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(stepCount+1))
                     //次の変数の矢印のために1つ下にずらす
                     stepCount <- stepCount + 1
                     //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                    expr.drawVerticalLine(c,baseline, terminalLifeLine c+timeStep c, terminalLifeLine c+timeStep c*float(start.Length+1))
+                    expr.drawVerticalLine(c,baseline, c.TerminalLifeLine+SequenceDiagramContext.timeStep, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+1))
                     //左矢印：基準線から代入先まで(x軸)
-                    expr.drawHorizontalArrowLine(c,baseline, arrow_goal, terminalLifeLine c+timeStep c*float(start.Length+1))
+                    expr.drawHorizontalArrowLine(c,baseline, arrow_goal, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+1))
                     // テキスト（実行内容）
-                    expr.drawText(c,12, "black", "normal", baseline, terminalLifeLine c-timeStep c, equText)
+                    expr.drawText(c,12, "black", "normal", baseline, c.TerminalLifeLine-SequenceDiagramContext.timeStep, equText)
                     //実行線の下辺からさらに10.0下を描き始めとする
-                    setTerminalLifeLine c <| terminalLifeLine c+timeStep c*float(start.Length+goal.Length+2)
+                    c.TerminalLifeLine <- c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+2)
                 |0 ->
                     // 定数の代入の場合
                     let equText = "\\(" + eq.evalHS c + "\\)"
                     //存在する変数すべてに破線を引く
-                    for _,number,_ in varList c do
+                    for _,number,_ in c.SequenceVariables do
                         //破線：classの縦線
-                        expr.drawLifeLine(c,lifeLineX c number,terminalLifeLine c,terminalLifeLine c+timeStep c*float(start.Length+goal.Length+2))
+                        expr.drawLifeLine(c,SequenceDiagramContext.lifeLineX number,c.TerminalLifeLine,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+2))
                     let goalName,goalX,_ = goal[0]
                     //代入先の実行線
-                    expr.drawActiveLine(c,lifeLineX c goalX, terminalLifeLine c, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1),colorActiveLine c)
-                    varList c |> List.map
+                    expr.drawActiveLine(c,SequenceDiagramContext.lifeLineX goalX, c.TerminalLifeLine, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1),SequenceDiagramContext.activeLineColor)
+                    c.SequenceVariables |> List.map
                         (fun (name, number, yData) ->
                             if name=goalName then
-                                name, number, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1)
+                                name, number, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1)
                             else
                                 name, number, yData)
-                    |> setVarList c
+                    |> (fun u -> c.SequenceVariables <- u)
                     //左矢印：基準線から代入先まで(x軸)
-                    expr.drawHorizontalArrowLine(c,lifeLineX c goalX + singleArrowLength c, lifeLineX c goalX + activeLineWidth c/2.0, terminalLifeLine c+timeStep c*float(start.Length+1))
+                    expr.drawHorizontalArrowLine(c,SequenceDiagramContext.lifeLineX goalX + SequenceDiagramContext.singleArrowLength, SequenceDiagramContext.lifeLineX goalX + SequenceDiagramContext.activeLineWidth/2.0, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+1))
                     // テキスト（実行内容）
-                    expr.drawText(c,12,"black","normal", lifeLineX c goalX + singleArrowLength c, terminalLifeLine c-timeStep c,equText)
+                    expr.drawText(c,12,"black","normal", SequenceDiagramContext.lifeLineX goalX + SequenceDiagramContext.singleArrowLength, c.TerminalLifeLine-SequenceDiagramContext.timeStep,equText)
                     //実行線の下辺からさらに10.0下を描き始めとする
-                    setTerminalLifeLine c <| terminalLifeLine c+timeStep c*float(start.Length+goal.Length+2)
+                    c.TerminalLifeLine <- c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+2)
                 |_ ->
                     let equText = "\\(" + eq.evalHS c + "\\)"
                     //存在する変数すべてに破線を引く
-                    for _,number,_ in varList c do
+                    for _,number,_ in c.SequenceVariables do
                         //破線：classの縦線
-                        expr.drawLifeLine(c,lifeLineX c number, terminalLifeLine c, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+2))
+                        expr.drawLifeLine(c,SequenceDiagramContext.lifeLineX number, c.TerminalLifeLine, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+2))
                     for goalName,goalX,_ in goal do
                         //代入先の実行線
-                        expr.drawActiveLine(c,lifeLineX c goalX, terminalLifeLine c, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1), colorActiveLine c)
-                        varList c |> List.map
+                        expr.drawActiveLine(c,SequenceDiagramContext.lifeLineX goalX, c.TerminalLifeLine, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1), SequenceDiagramContext.activeLineColor)
+                        c.SequenceVariables |> List.map
                             (fun (name, number, yData) ->
                                 if name=goalName then
-                                    name, number, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1)
+                                    name, number, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1)
                                 else
                                     name, number, yData)
-                        |> setVarList c
+                        |> (fun u -> c.SequenceVariables <- u)
                         let left,right =
                             start
                             |> List.fold (fun (l,r) (_,x,_) ->
@@ -378,94 +282,94 @@ namespace Aqualis
                                 else l,r) (0,0)
                         //基準線が左側の場合(右矢印)
                         if left > right then
-                            let baseline = lifeLineX c goalX - singleArrowLength c
-                            let arrow_goal = lifeLineX c goalX - activeLineWidth c/2.0
+                            let baseline = SequenceDiagramContext.lifeLineX goalX - SequenceDiagramContext.singleArrowLength
+                            let arrow_goal = SequenceDiagramContext.lifeLineX goalX - SequenceDiagramContext.activeLineWidth/2.0
                             //代入元の変数の数だけ実行線を引く
                             for label,s,y in start do
                                 //代入元の実行線
-                                expr.drawActiveLine(c,lifeLineX c s,y,terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1),colorActiveLine c)
-                                varList c |> List.map
+                                expr.drawActiveLine(c,SequenceDiagramContext.lifeLineX s,y,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1),SequenceDiagramContext.activeLineColor)
+                                c.SequenceVariables |> List.map
                                     (fun (name, number, yData) ->
                                         if name=label then
-                                            name, number, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1)
+                                            name, number, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1)
                                         else
                                             name, number, yData)
-                                |> setVarList c
+                                |> (fun u -> c.SequenceVariables <- u)
                             //代入元の変数の数だけ矢印を引く
                             for _,s,_ in start do
                                 // 代入元から基準線までの矢印
                                 if goalX > s then
                                     //右矢印：実行中→縦線
-                                    expr.drawHorizontalLine(c,lifeLineX c s + activeLineWidth c/2.0, baseline, terminalLifeLine c+timeStep c*float(stepCount+1))
+                                    expr.drawHorizontalLine(c,SequenceDiagramContext.lifeLineX s + SequenceDiagramContext.activeLineWidth/2.0, baseline, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(stepCount+1))
                                 else
                                     //左矢印：実行中→縦線
-                                    expr.drawHorizontalLine(c,lifeLineX c s - activeLineWidth c/2.0, baseline, terminalLifeLine c+timeStep c*float(stepCount+1))
+                                    expr.drawHorizontalLine(c,SequenceDiagramContext.lifeLineX s - SequenceDiagramContext.activeLineWidth/2.0, baseline, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(stepCount+1))
                                 //次の変数の矢印のために1つ下にずらす
                                 stepCount <- stepCount + 1
                             //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                            expr.drawVerticalLine(c,baseline, terminalLifeLine c+timeStep c,terminalLifeLine c+timeStep c*float(start.Length+1))
+                            expr.drawVerticalLine(c,baseline, c.TerminalLifeLine+SequenceDiagramContext.timeStep,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+1))
                             //右矢印：基準線から代入先まで(x軸)
-                            expr.drawHorizontalArrowLine(c,baseline,arrow_goal,terminalLifeLine c+timeStep c*float(start.Length+1))
+                            expr.drawHorizontalArrowLine(c,baseline,arrow_goal,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+1))
                             // テキスト（実行内容）
-                            expr.drawText(c,12,"black","normal",baseline,terminalLifeLine c-timeStep c,equText)
+                            expr.drawText(c,12,"black","normal",baseline,c.TerminalLifeLine-SequenceDiagramContext.timeStep,equText)
                         //基準線が右側の場合(左矢印)
                         else
-                            let baseline = lifeLineX c goalX + singleArrowLength c
-                            let arrow_goal = lifeLineX c goalX + activeLineWidth c/2.0
+                            let baseline = SequenceDiagramContext.lifeLineX goalX + SequenceDiagramContext.singleArrowLength
+                            let arrow_goal = SequenceDiagramContext.lifeLineX goalX + SequenceDiagramContext.activeLineWidth/2.0
                             //代入元の変数の数だけ実行線を引く
                             for label,s,y in start do
                                 //代入元の実行線
-                                expr.drawActiveLine(c,lifeLineX c s, y, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1),colorActiveLine c)
-                                varList c |> List.map
+                                expr.drawActiveLine(c,SequenceDiagramContext.lifeLineX s, y, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1),SequenceDiagramContext.activeLineColor)
+                                c.SequenceVariables |> List.map
                                     (fun (name, number, yData) ->
                                         if name=label then
-                                            name, number, terminalLifeLine c+timeStep c*float(start.Length+goal.Length+1)
+                                            name, number, c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+1)
                                         else
                                             name, number, yData)
-                                |> setVarList c
+                                |> (fun u -> c.SequenceVariables <- u)
                             //代入元の変数の数だけ矢印を引く
                             for label,s,y in start do
                                 // 代入元から基準線までの矢印
                                 if goalX >= s then
                                     //右矢印：実行中→縦線
-                                    expr.drawHorizontalLine(c,lifeLineX c s + activeLineWidth c/2.0,baseline,terminalLifeLine c+timeStep c*float(stepCount+1))
+                                    expr.drawHorizontalLine(c,SequenceDiagramContext.lifeLineX s + SequenceDiagramContext.activeLineWidth/2.0,baseline,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(stepCount+1))
                                 else //goalX < s then
                                     //左矢印：実行中→縦線
-                                    expr.drawHorizontalLine(c,lifeLineX c s - activeLineWidth c/2.0,baseline,terminalLifeLine c+timeStep c*float(stepCount+1))
+                                    expr.drawHorizontalLine(c,SequenceDiagramContext.lifeLineX s - SequenceDiagramContext.activeLineWidth/2.0,baseline,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(stepCount+1))
                                 //次の変数の矢印のために1つ下にずらす
                                 stepCount <- stepCount + 1
                             //基準線(縦線)：代入元の1番目から代入先まで(y軸)
-                            expr.drawVerticalLine(c,baseline,terminalLifeLine c+timeStep c,terminalLifeLine c+timeStep c*float(start.Length+1))
+                            expr.drawVerticalLine(c,baseline,c.TerminalLifeLine+SequenceDiagramContext.timeStep,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+1))
                             //左矢印：基準線から代入先まで(x軸)
-                            expr.drawHorizontalArrowLine(c,baseline,arrow_goal,terminalLifeLine c+timeStep c*float(start.Length+1))
+                            expr.drawHorizontalArrowLine(c,baseline,arrow_goal,c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+1))
                             // テキスト（実行内容）
-                            expr.drawText(c,12,"black","normal",baseline,terminalLifeLine c-timeStep c,equText)
+                            expr.drawText(c,12,"black","normal",baseline,c.TerminalLifeLine-SequenceDiagramContext.timeStep,equText)
                     //実行線の下辺からさらにtimeStep分延ばす
-                    setTerminalLifeLine c <| terminalLifeLine c+timeStep c*float(start.Length+goal.Length+2)
+                    c.TerminalLifeLine <- c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+2)
 
-            static member equivHS (x:expr) (y:expr) (c:program) =
+            static member equivHS (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalHS c  + " = " + y.evalHS c)
 
-            static member equivAlignHS (x:expr) (y:expr) (c:program) =
+            static member equivAlignHS (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalHS c  + " =& " + y.evalHS c)
 
             //破線(実行線や枠との(y座標の)隙間をつくるため)
-            static member extendLifeLine(c:program) (gap:float) =
+            static member extendLifeLine(c:Aqualis) (gap:float) =
                 //存在する変数すべてに破線を引く
-                for _,number,_ in varList c do
+                for _,number,_ in c.SequenceVariables do
                     //破線：classの縦線
-                    expr.drawLifeLine(c,lifeLineX c number,terminalLifeLine c,terminalLifeLine c+gap)
-                setTerminalLifeLine c <| terminalLifeLine c + gap
+                    expr.drawLifeLine(c,SequenceDiagramContext.lifeLineX number,c.TerminalLifeLine,c.TerminalLifeLine+gap)
+                c.TerminalLifeLine <- c.TerminalLifeLine + gap
 
             //色線(枠用)
-            static member colorLine(c:program,x1:float,y1:float,x2:float,y2:float,color:string) =
-                html(c).fig p0 <| fun (f,_) ->
-                    f.line Style[stroke.color color; stroke.width (frameBorder c)]
+            static member colorLine(c:Aqualis,x1:float,y1:float,x2:float,y2:float,color:string) =
+                html(c).fig SequenceDiagramContext.p0 <| fun (f,_) ->
+                    f.line Style[stroke.color color; stroke.width (SequenceDiagramContext.frameBorder)]
                         <| position(x1,y1)
                         <| position(x2,y2)
 
             //ループの枠
-            static member rectangle(c:program,startPoint_x:float,startPoint_y:float,endPoint_x:float,endPoint_y:float,color:string) =
+            static member rectangle(c:Aqualis,startPoint_x:float,startPoint_y:float,endPoint_x:float,endPoint_y:float,color:string) =
                 //上辺:左上から右上
                 expr.colorLine(c,startPoint_x,startPoint_y,endPoint_x,startPoint_y,color)
                 //右辺:右上から右下
@@ -475,30 +379,29 @@ namespace Aqualis
                 //左辺:左下から左上
                 expr.colorLine(c,startPoint_x,endPoint_y,startPoint_x,startPoint_y,color)
 
-            static member sectionHS (c:program,label:string) = fun code ->
+            static member sectionHS (c:Aqualis,label:string) = fun code ->
                 //上に20.0破線のスペースを作る
                 expr.extendLifeLine c 20.0
-                setFrameStack c <| (0.0, 0.0, terminalLifeLine c - 5.0, terminalLifeLine c)::frameStack c
+                c.FrameStack <- (0.0, 0.0, c.TerminalLifeLine - 5.0, c.TerminalLifeLine)::c.FrameStack
                 //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
-                let sectionCount = (frameStack c).Length-1
+                let sectionCount = c.FrameStack.Length-1
                 code()
                 //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                let xMin,xMax,yMin,yMax = (frameStack c).Head
+                let xMin,xMax,yMin,yMax = c.FrameStack.Head
                 // ループの枠
-                expr.rectangle(c,xMin-50.0+frameMargin c*float sectionCount,yMin,xMax+50.0-frameMargin c*float sectionCount,yMax+5.0,colorSectionFrame c)
+                expr.rectangle(c,xMin-50.0+SequenceDiagramContext.frameMargin*float sectionCount,yMin,xMax+50.0-SequenceDiagramContext.frameMargin*float sectionCount,yMax+5.0,SequenceDiagramContext.sectionFrameColor)
                 // テキスト（グループ名）
-                expr.drawText(c,12,colorSectionFrame c,"normal",xMin-50.0+frameMargin c*float sectionCount,yMin-15.0,label)
+                expr.drawText(c,12,SequenceDiagramContext.sectionFrameColor,"normal",xMin-50.0+SequenceDiagramContext.frameMargin*float sectionCount,yMin-15.0,label)
                 //下にframeMargin分のスペースを作る
-                expr.extendLifeLine c (frameMargin c)
+                expr.extendLifeLine c (SequenceDiagramContext.frameMargin)
                 //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
-                setFrameStack c <| (frameStack c).Tail
+                c.FrameStack <- c.FrameStack.Tail
                 // 外側のループ枠をframeMargin分広げる
-                frameStack c
-                |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+frameMargin c)
-                |> setFrameStack c
+                c.FrameStack
+                |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+SequenceDiagramContext.frameMargin)
+                |> (fun u -> c.FrameStack <- u)
 
-            static member forLoopHS (context:GenerationContext) (n1:expr,n2:expr) code =
-                let c = context.CurrentProgram
+            static member forLoopHS (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalHS c
@@ -512,11 +415,10 @@ namespace Aqualis
                 returnVar()
 
             ///<summary>無限ループ</summary>
-            static member loopHS (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member loopHS (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = context.GotoLabels.nextGotoLabel()
+                let label = c.GotoLabels.nextGotoLabel()
                 let exit() = c.codewritein("goto " + label)
                 expr.substH i (Int 1) c
                 c.codewritein "<summary><span class=\"op-loop\">repeat</span></summary>"
@@ -530,8 +432,7 @@ namespace Aqualis
                 returnVar()
 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledoHS (context:GenerationContext) (cond:expr) = fun code ->
-                let c = context.CurrentProgram
+            static member whiledoHS (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalHS c + "\\)</summary>")
                 c.codewritein "<div class=\"insidecode-loop\">"
                 c.indentInc()
@@ -540,48 +441,46 @@ namespace Aqualis
                 c.codewritein "</div>"
 
             ///<summary>指定した範囲でループ</summary>
-            static member rangeHS (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member rangeHS (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 //カウンター変数の取得
                 let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                 let i = Var(It 4, iname, NaN)
                 //上に20.0破線のスペースを作る
                 expr.extendLifeLine c 20.0
-                setFrameStack c <| (0.0, 0.0, terminalLifeLine c - 5.0, terminalLifeLine c)::frameStack c
+                c.FrameStack <- (0.0, 0.0, c.TerminalLifeLine - 5.0, c.TerminalLifeLine)::c.FrameStack
                 //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
-                let sectionCount = (frameStack c).Length-1
+                let sectionCount = c.FrameStack.Length-1
                 let counter_Var = expr.addVarList(i,c)
                 for countName, count_number, y in counter_Var do
                     //実行線
-                    expr.drawActiveLine(c,lifeLineX c count_number, terminalLifeLine c-timeStep c, terminalLifeLine c, colorLoopFrame c)
+                    expr.drawActiveLine(c,SequenceDiagramContext.lifeLineX count_number, c.TerminalLifeLine-SequenceDiagramContext.timeStep, c.TerminalLifeLine, SequenceDiagramContext.loopFrameColor)
                     // テキスト（ループ範囲）
-                    expr.drawText(c,12,colorLoopFrame c,"normal",lifeLineX c count_number + timeStep c, terminalLifeLine c - 25.0,"\\(" + i1.evalHS c + " \\rightarrow " + i2.evalHS c + "\\)")
+                    expr.drawText(c,12,SequenceDiagramContext.loopFrameColor,"normal",SequenceDiagramContext.lifeLineX count_number + SequenceDiagramContext.timeStep, c.TerminalLifeLine - 25.0,"\\(" + i1.evalHS c + " \\rightarrow " + i2.evalHS c + "\\)")
                 code i
                 //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                let xMin,xMax,yMin,yMax = (frameStack c).Head
+                let xMin,xMax,yMin,yMax = (c.FrameStack).Head
                 // ループの枠
-                expr.rectangle(c,xMin-50.0+frameMargin c*float sectionCount,yMin,xMax+50.0-frameMargin c*float sectionCount,yMax+5.0,colorLoopFrame c)
+                expr.rectangle(c,xMin-50.0+SequenceDiagramContext.frameMargin*float sectionCount,yMin,xMax+50.0-SequenceDiagramContext.frameMargin*float sectionCount,yMax+5.0,SequenceDiagramContext.loopFrameColor)
                 // テキスト（グループ名）
-                expr.drawText(c,12,colorLoopFrame c,"normal",xMin-50.0+frameMargin c*float sectionCount,yMin-15.0,"\\(\\mathrm{For}\\)")
+                expr.drawText(c,12,SequenceDiagramContext.loopFrameColor,"normal",xMin-50.0+SequenceDiagramContext.frameMargin*float sectionCount,yMin-15.0,"\\(\\mathrm{For}\\)")
                 //下にframeMargin分のスペースを作る
-                expr.extendLifeLine c (frameMargin c)
+                expr.extendLifeLine c (SequenceDiagramContext.frameMargin)
                 //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
-                setFrameStack c <| (frameStack c).Tail
+                c.FrameStack <- (c.FrameStack).Tail
                 // 外側のループ枠をframeMargin分広げる
-                frameStack c
-                |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+frameMargin c)
-                |> setFrameStack c
+                c.FrameStack
+                |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+SequenceDiagramContext.frameMargin)
+                |> (fun u -> c.FrameStack <- u)
                 // 使用済みカウンタ変数を返却し再利用可能にする
                 returnVar()
 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitHS (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member range_exitHS (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.comment("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
                     c.comment "<div class=\"insidecode-loop\">"
@@ -595,7 +494,7 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.codewritein("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
                     c.codewritein "<div class=\"insidecode-loop\">"
@@ -607,16 +506,15 @@ namespace Aqualis
                     c.codewritein(label+" continue")
                     returnVar()
 
-            static member branchHS (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member branchHS (c:Aqualis) code =
                 //新しい分岐処理枠を追加
-                setBranchStack c <| []::branchStack c
+                c.SequenceBranches <- []::c.SequenceBranches
                 let ifcode (cond:expr) code =
                     //上に30.0破線のスペースを作る
                     expr.extendLifeLine c 30.0
                     // 現在の分岐処理枠に条件式とy座標追加
-                    setBranchStack c <| ((branchStack c).Head@["\\(" + cond.evalHS c + "\\)",terminalLifeLine c])::(branchStack c).Tail
-                    setFrameStack c <| (0.0, 0.0, terminalLifeLine c - 5.0, terminalLifeLine c)::frameStack c
+                    c.SequenceBranches <- ((c.SequenceBranches).Head@["\\(" + cond.evalHS c + "\\)",c.TerminalLifeLine])::c.SequenceBranches.Tail
+                    c.FrameStack <- (0.0, 0.0, c.TerminalLifeLine - 5.0, c.TerminalLifeLine)::c.FrameStack
                     code()
                     //中に20.0破線のスペースを作る
                     expr.extendLifeLine c 20.0
@@ -625,45 +523,45 @@ namespace Aqualis
                     //中に20.0破線のスペースを作る
                     expr.extendLifeLine c 20.0
                     // 現在の分岐処理枠に条件式とy座標追加
-                    setBranchStack c <| ((branchStack c).Head@["\\(" + cond.evalHS c + "\\)",terminalLifeLine c])::(branchStack c).Tail
+                    c.SequenceBranches <- ((c.SequenceBranches).Head@["\\(" + cond.evalHS c + "\\)",c.TerminalLifeLine])::(c.BranchStack).Tail
                     code()
                 let elsecode code =
                     // 現在の分岐処理枠に条件式とy座標追加
-                    setBranchStack c <| ((branchStack c).Head@["\\(\\mathrm{Else}\\)",terminalLifeLine c])::(branchStack c).Tail
+                    c.SequenceBranches <- ((c.SequenceBranches).Head@["\\(\\mathrm{Else}\\)",c.TerminalLifeLine])::(c.BranchStack).Tail
                     code()
 
                 code(ifcode,elseifcode,elsecode)
 
                 //最後に入れた枠の座標と枠の深さの数値を各変数に代入する(この段階ではstackに変化はない)
-                let xMin,xMax,yMin,yMax = (frameStack c).Head
+                let xMin,xMax,yMin,yMax = (c.FrameStack).Head
                 //stack内の要素の個数(デフォルト1個)-1個を枠の深さ(sectionCount)とする
-                let sectionCount = (frameStack c).Length-1
-                expr.rectangle(c,xMin-50.0+frameMargin c*float sectionCount,yMin-20.0,xMax+50.0-frameMargin c*float sectionCount,yMax+5.0,colorBranchFrame c)
-                for cond,y in (branchStack c).Head do
+                let sectionCount = (c.FrameStack).Length-1
+                expr.rectangle(c,xMin-50.0+SequenceDiagramContext.frameMargin*float sectionCount,yMin-20.0,xMax+50.0-SequenceDiagramContext.frameMargin*float sectionCount,yMax+5.0,SequenceDiagramContext.branchFrameColor)
+                for cond,y in (c.SequenceBranches).Head do
                     // テキスト（条件式）
-                    expr.drawText(c,12,colorBranchFrame c,"normal",5.0+xMin-50.0+frameMargin c*float sectionCount,y-25.0,cond)
-                for _,y in (branchStack c).Head.Tail do
+                    expr.drawText(c,12,SequenceDiagramContext.branchFrameColor,"normal",5.0+xMin-50.0+SequenceDiagramContext.frameMargin*float sectionCount,y-25.0,cond)
+                for _,y in (c.SequenceBranches).Head.Tail do
                     //破線：境界線(間の仕切り)
-                    let x1 = xMin-50.0+frameMargin c*float sectionCount
-                    let x2 = xMax+50.0-frameMargin c*float sectionCount
+                    let x1 = xMin-50.0+SequenceDiagramContext.frameMargin*float sectionCount
+                    let x2 = xMax+50.0-SequenceDiagramContext.frameMargin*float sectionCount
                     let y1 = y-25.0
-                    html(c).fig p0 <| fun (f,_) ->
+                    html(c).fig SequenceDiagramContext.p0 <| fun (f,_) ->
                         //破線：条件分岐の横線
-                        f.line Style[stroke.color (colorBranchFrame c); stroke.width (frameBorder c); stroke.dasharray [2]]
+                        f.line Style[stroke.color (SequenceDiagramContext.branchFrameColor); stroke.width (SequenceDiagramContext.frameBorder); stroke.dasharray [2]]
                             <| position(x1,y1)
                             <| position(x2,y1)
                 //下にframeMargin分のスペースを作る
-                expr.extendLifeLine c (frameMargin c)
+                expr.extendLifeLine c (SequenceDiagramContext.frameMargin)
                 //枠の座標と枠の深さのリストから使った要素以外を残す(使った分を取り除く)
-                setFrameStack c <| (frameStack c).Tail
+                c.FrameStack <- (c.FrameStack).Tail
                 // 外側のループ枠をマージン分広げる
-                frameStack c
-                |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+frameMargin c)
-                |> setFrameStack c
+                c.FrameStack
+                |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+SequenceDiagramContext.frameMargin)
+                |> (fun u -> c.SequenceFrames <- u)
                 //先頭の分岐処理枠を削除
-                setBranchStack c <| (branchStack c).Tail
+                c.SequenceBranches <- c.SequenceBranches.Tail
 
-            member this.evalHS(c:program) =
+            member this.evalHS(c:Aqualis) =
                 let par (s:string) (pl:int) =
                     match pl%3 with
                     |2 -> "\\left\\{" + s + "\\right\\}"
@@ -901,13 +799,13 @@ namespace Aqualis
                     |Sum(t, n1, n2, f) ->
                         // 合計値格納用変数
                         eval (Let(t, Int 0, fun u ->
-                            expr.forLoopHS (GenerationContext.ForInternalProgram c) (n1,n2) <| fun i ->
+                            expr.forLoopHS c (n1,n2) <| fun i ->
                                 // 加算・代入処理
                                 expr.substHS u (Add(t,u, f i)) c
                             u)) pl
                     |IfEl(cond,n1,n2) ->
                         eval (Let(n1.etype, NaN, fun x ->
-                            expr.branchHS (GenerationContext.ForInternalProgram c) <| fun (ifcode,_,elsecode) ->
+                            expr.branchHS c <| fun (ifcode,_,elsecode) ->
                                 ifcode cond <| fun () ->
                                     expr.substHS x n1 c
                                 elsecode <| fun () ->

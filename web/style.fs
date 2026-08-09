@@ -13,10 +13,10 @@ open System.Text.Encodings.Web
 
 type Serif(subtitle:string,hatsuon:string) =
     new(subtitle:string) = Serif(subtitle,subtitle)
-    new(subtitle:int0) = Serif("\\("+subtitle.Expr.eval ((GenerationContextMerge.requireTarget subtitle.Context).CurrentProgram)+"\\)",subtitle.Expr.evalT())
-    new(subtitle:double0) = Serif("\\("+subtitle.Expr.eval ((GenerationContextMerge.requireTarget subtitle.Context).CurrentProgram)+"\\)",subtitle.Expr.evalT())
-    new(subtitle:complex0) = Serif("\\("+subtitle.Expr.eval ((GenerationContextMerge.requireTarget subtitle.Context).CurrentProgram)+"\\)",subtitle.Expr.evalT())
-    new(subtitle:bool0) = Serif("\\("+subtitle.Expr.eval ((GenerationContextMerge.requireTarget subtitle.Context).CurrentProgram)+"\\)",subtitle.Expr.evalT())
+    new(subtitle:int0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
+    new(subtitle:double0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
+    new(subtitle:complex0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
+    new(subtitle:bool0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
     member _.Subtitle with get() = subtitle
     member _.Hatsuon with get() = hatsuon
     static member (+) (a:Serif,b:Serif) = Serif(a.Subtitle+b.Subtitle,a.Hatsuon+b.Hatsuon)
@@ -45,8 +45,7 @@ type AnimationSetting = {
     FrameNumber:int}
 
 [<AbstractClass>]
-type Character(environment:Aqualis,scriptDataDir:string,name:string) =
-    let context = environment.RequireGenerationContext()
+type Character(context:Aqualis,scriptDataDir:string,name:string) =
     /// jsonファイル名（フルパス）
     let scriptDataFileName = scriptDataDir + "\\" + name + ".json"
     let jsonOptions =
@@ -98,7 +97,7 @@ type Character(environment:Aqualis,scriptDataDir:string,name:string) =
         |Some x ->
             x, this.audioFile x, this.scriptColor
     member this.script(text:exprString) =
-        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH context.CurrentProgram+"\\)") ""
+        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH context+"\\)") ""
         let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+x.evalT()) ""
         this.script(subtitle,script)
     member this.script(text:string) = this.script (exprString text)

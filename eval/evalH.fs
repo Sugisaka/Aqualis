@@ -13,21 +13,20 @@ namespace Aqualis
         
         type expr with
             
-            static member substH (x:expr) (y:expr) (c:program) =
+            static member substH (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein "\\["
                 c.codewritein "\\begin{align}"
                 c.codewritein (x.evalH c  + " \\leftarrow " + y.evalH c + "")
                 c.codewritein "\\end{align}"
                 c.codewritein "\\]"
                 
-            static member equivH (x:expr) (y:expr) (c:program) =
+            static member equivH (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " = " + y.evalL c)
                 
-            static member equivAlignH (x:expr) (y:expr) (c:program) =
+            static member equivAlignH (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " =& " + y.evalL c)
                 
-            static member forLoopH (context:GenerationContext) (n1:expr,n2:expr) code =
-                let c = context.CurrentProgram
+            static member forLoopH (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalH c
@@ -45,11 +44,10 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>無限ループ</summary>
-            static member loopH (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member loopH (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = context.GotoLabels.nextGotoLabel()
+                let label = c.GotoLabels.nextGotoLabel()
                 let exit() = c.codewritein("goto " + label)
                 expr.substH i (Int 1) c
                 c.codewritein "<div class=\"codeblock\">"
@@ -67,8 +65,7 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledoH (context:GenerationContext) (cond:expr) = fun code ->
-                let c = context.CurrentProgram
+            static member whiledoH (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein "<div class=\"codeblock\">"
                 c.codewritein "<details open>"
                 c.codewritein("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalH c + "\\)</summary>")
@@ -81,8 +78,7 @@ namespace Aqualis
                 c.codewritein "</div>"
                 
             ///<summary>指定した範囲でループ</summary>
-            static member rangeH (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member rangeH (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -114,13 +110,12 @@ namespace Aqualis
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitH (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member range_exitH (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.comment "<div class=\"codeblock\">"
                     c.comment "<details open>"
@@ -138,7 +133,7 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     c.codewritein "<div class=\"codeblock\">"
                     c.codewritein "<details open>"
@@ -154,8 +149,7 @@ namespace Aqualis
                     c.codewritein(label+" continue")
                     returnVar()
                     
-            static member branchH (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member branchH (c:Aqualis) code =
                 c.codewritein "<div class=\"codeblock\">"
                 c.codewritein "<details open>"
                 let ifcode (cond:expr) code =
@@ -185,7 +179,7 @@ namespace Aqualis
                 c.codewritein "</details>"
                 c.codewritein "</div>"
                 
-            member this.evalH(c:program) =
+            member this.evalH(c:Aqualis) =
                 let par (s:string) (pl:int) =
                     match pl%3 with
                     |2 -> "\\left\\{" + s + "\\right\\}"
@@ -423,13 +417,13 @@ namespace Aqualis
                     |Sum(t, n1, n2, f) ->
                         // 合計値格納用変数
                         eval (Let(t, Int 0, fun u ->
-                            expr.forLoopH (GenerationContext.ForInternalProgram c) (n1,n2) <| fun i ->
+                            expr.forLoopH c (n1,n2) <| fun i ->
                                 // 加算・代入処理
                                 expr.substH u (Add(t,u, f i)) c
                             u)) pl
                     |IfEl(cond,n1,n2) -> 
                         eval (Let(n1.etype, NaN, fun x -> 
-                            expr.branchH (GenerationContext.ForInternalProgram c) <| fun (ifcode,_,elsecode) ->
+                            expr.branchH c <| fun (ifcode,_,elsecode) ->
                                 ifcode cond <| fun () ->
                                     expr.substH x n1 c
                                 elsecode <| fun () ->

@@ -10,49 +10,49 @@ namespace Aqualis
     module interpolate =
 
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
-        type LinearInterpolate1d(environment:Aqualis,id:string,data_x,data_y) =
-            let X = environment.var.dp1(id+"_x",data_x)
-            let Y = environment.var.dp1(id+"_y",data_y)
+        type LinearInterpolate1d(context:Aqualis,id:string,data_x,data_y) =
+            let X = context.var.dp1(id+"_x",data_x)
+            let Y = context.var.dp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
             member _.y (x:double0) code =
-                environment.ch.i <| fun flag ->
+                context.ch.i <| fun flag ->
                     flag<==0
-                    environment.iter.range (_0, X.size1-2) <| fun i ->
-                        environment.br.if1 (X.[i] .<= x .< X.[i+1]) <| fun () ->
+                    context.iter.range (_0, X.size1-2) <| fun i ->
+                        context.br.if1 (X.[i] .<= x .< X.[i+1]) <| fun () ->
                             flag<==1
-                            environment.ch.d <| fun z ->
+                            context.ch.d <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
                                 code(z)
-                    environment.br.if1 (x.=X.[X.size1]) <| fun () ->
+                    context.br.if1 (x.=X.[X.size1]) <| fun () ->
                         flag<==1
                         code(Y.[X.size1])
-                    environment.br.if1(flag.=0) <| fun () -> environment.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
+                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
 
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
-        type LinearInterpolate1z(environment:Aqualis,id:string,data_x,data_y) =
-            let X = environment.var.dp1(id+"_x",data_x)
-            let Y = environment.var.zp1(id+"_y",data_y)
+        type LinearInterpolate1z(context:Aqualis,id:string,data_x,data_y) =
+            let X = context.var.dp1(id+"_x",data_x)
+            let Y = context.var.zp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
             member this.y (x:double0) code =
-                environment.ch.i <| fun flag ->
+                context.ch.i <| fun flag ->
                     flag<==0
-                    environment.iter.range (_0, X.size1-2) <| fun i ->
-                        environment.br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
+                    context.iter.range (_0, X.size1-2) <| fun i ->
+                        context.br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
-                            environment.ch.z <| fun z ->
+                            context.ch.z <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
                                 code(z)
-                    environment.br.if1 (x.=X.[X.size1]) <| fun () ->
+                    context.br.if1 (x.=X.[X.size1]) <| fun () ->
                         flag<==1
                         code(Y.[X.size1])
-                    environment.br.if1(flag.=0) <| fun () -> environment.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
+                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
 
-        type splineInterpolateDouble(environment:Aqualis) =
+        type splineInterpolateDouble(context:Aqualis) =
 
-            let f = environment.var.d2 "f"
-            let g = environment.var.d1 "g"
-            let x = environment.var.d1 "x"
-            let y = environment.var.d1 "y"
+            let f = context.var.d2 "f"
+            let g = context.var.d1 "g"
+            let x = context.var.d1 "x"
+            let y = context.var.d1 "y"
 
             let a(n:int0) = 3*n-2
 
@@ -74,25 +74,25 @@ namespace Aqualis
             /// 補間を実行
             /// </summary>
             member __.set() =
-                environment.ch.i <| fun N ->
+                context.ch.i <| fun N ->
                     N <== x.size1
                     f.allocate(3*N-3,3*N-3)
                     g.allocate(3*N-3)
                     f.clear()
                     g.clear()
-                    environment.group.comment "interpolation constraint"
+                    context.group.comment "interpolation constraint"
                     f.[1-1,a _1-1] <== 0.0
                     f.[1-1,b _1-1] <== 2
                     g.[1-1] <== 0
-                    environment.iter.range (_1, N-2) <| fun n ->
-                        environment.ch.d <| fun dx ->
+                    context.iter.range (_1, N-2) <| fun n ->
+                        context.ch.d <| fun dx ->
                             dx <== x.[n+1-1]-x.[n+1-1-1]
-                            environment.group.comment "interpolation constraint"
+                            context.group.comment "interpolation constraint"
                             f.[3*(n+1)-4-1,a(n+1-1)-1] <== asm.pow(dx,3)
                             f.[3*(n+1)-4-1,b(n+1-1)-1] <== asm.pow(dx,2)
                             f.[3*(n+1)-4-1,c(n+1-1)-1] <== dx
                             g.[3*(n+1)-4-1] <== y.[(n+1)-1] - y.[(n+1)-1-1]
-                            environment.group.comment "interpolation constraint"
+                            context.group.comment "interpolation constraint"
                             f.[3*(n+1)-3-1,a(n+1-1)-1] <== 3*asm.pow(dx,2)
                             f.[3*(n+1)-3-1,b(n+1-1)-1] <== 2*dx
                             f.[3*(n+1)-3-1,c(n+1-1)-1] <== 1
@@ -100,41 +100,41 @@ namespace Aqualis
                             f.[3*(n+1)-3-1,b(n+1)-1] <== 0.0
                             f.[3*(n+1)-3-1,c(n+1)-1] <== -1
                             g.[3*(n+1)-3-1] <== 0.0
-                            environment.group.comment "interpolation constraint"
+                            context.group.comment "interpolation constraint"
                             f.[3*(n+1)-2-1,a(n+1-1)-1] <== 6*dx
                             f.[3*(n+1)-2-1,b(n+1-1)-1] <== 2
                             f.[3*(n+1)-2-1,a(n+1)-1] <== 0.0
                             f.[3*(n+1)-2-1,b(n+1)-1] <== -2
                             g.[3*(n+1)-2-1] <== 0.0
-                    environment.ch.d <| fun dx ->
+                    context.ch.d <| fun dx ->
                         dx <== x.[N-1]-x.[N-1-1]
-                        environment.group.comment "interpolation constraint"
+                        context.group.comment "interpolation constraint"
                         f.[3*N-4-1,a(N-1)-1] <== asm.pow(dx,3)
                         f.[3*N-4-1,b(N-1)-1] <== asm.pow(dx,2)
                         f.[3*N-4-1,c(N-1)-1] <== dx
                         g.[3*N-4-1] <== y.[N-1] - y.[N-1-1]
-                        environment.group.comment "interpolation constraint"
+                        context.group.comment "interpolation constraint"
                         f.[3*N-3-1,a(N-1)-1] <== 6*dx
                         f.[3*N-3-1,b(N-1)-1] <== 2
                         g.[3*N-3-1] <== 0
-                    environment.la.solve_simuleq(f,g)
+                    context.la.solve_simuleq(f,g)
 
             /// <summary>
             /// 補間データをファイルに保存
             /// </summary>
             /// <param name="filename"></param>
             member __.save(filename:string) =
-                environment.io.fileOutput (filename+"_x.dat") <| fun wr ->
+                context.io.fileOutput (filename+"_x.dat") <| fun wr ->
                     wr.t x.size1
-                    environment.iter.num x.size1 <| fun i ->
+                    context.iter.num x.size1 <| fun i ->
                         wr.t x.[i]
-                environment.io.fileOutput (filename+"_y.dat") <| fun wr ->
+                context.io.fileOutput (filename+"_y.dat") <| fun wr ->
                     wr.t y.size1
-                    environment.iter.num y.size1 <| fun i ->
+                    context.iter.num y.size1 <| fun i ->
                         wr.t y.[i]
-                environment.io.fileOutput (filename+"_g.dat") <| fun wr ->
+                context.io.fileOutput (filename+"_g.dat") <| fun wr ->
                     wr.t g.size1
-                    environment.iter.num g.size1 <| fun i ->
+                    context.iter.num g.size1 <| fun i ->
                         wr.t g.[i]
 
             /// <summary>
@@ -142,25 +142,25 @@ namespace Aqualis
             /// </summary>
             /// <param name="filename"></param>
             member __.load(filename:string) =
-                environment.io.fileInput (filename+"_x.dat") <| fun wr ->
-                    environment.ch.id <| fun (n,t) ->
+                context.io.fileInput (filename+"_x.dat") <| fun wr ->
+                    context.ch.id <| fun (n,t) ->
                         wr.t n
                         x.allocate n
-                        environment.iter.num x.size1 <| fun i ->
+                        context.iter.num x.size1 <| fun i ->
                             wr.t t
                             x.[i] <== t
-                environment.io.fileInput (filename+"_y.dat") <| fun wr ->
-                    environment.ch.id <| fun (n,t) ->
+                context.io.fileInput (filename+"_y.dat") <| fun wr ->
+                    context.ch.id <| fun (n,t) ->
                         wr.t n
                         y.allocate n
-                        environment.iter.num y.size1 <| fun i ->
+                        context.iter.num y.size1 <| fun i ->
                             wr.t t
                             y.[i] <== t
-                environment.io.fileInput (filename+"_g.dat") <| fun wr ->
-                    environment.ch.id <| fun (n,t) ->
+                context.io.fileInput (filename+"_g.dat") <| fun wr ->
+                    context.ch.id <| fun (n,t) ->
                         wr.t n
                         g.allocate n
-                        environment.iter.num g.size1 <| fun i ->
+                        context.iter.num g.size1 <| fun i ->
                             wr.t t
                             g.[i] <== t
 
@@ -171,8 +171,8 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.p (yy:double0) (xx:double0) =
                 yy.clear()
-                environment.iter.num_exit (x.size1-1) <| fun (ex,i) ->
-                    environment.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
+                context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
+                    context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
                         yy <== g.[a(i+1)-1]*asm.pow(xx-x.[i],3) + g.[b(i+1)-1]*asm.pow(xx-x.[i],2) + g.[c(i+1)-1]*(xx-x.[i+1]) + y.[i]
                         ex()
 
@@ -183,17 +183,17 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.dp (yy:double0) (xx:double0) =
                 yy.clear()
-                environment.iter.num_exit (x.size1-1) <| fun (ex,i) ->
-                    environment.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
+                context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
+                    context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
                         yy <== 3*g.[a(i+1)-1]*asm.pow(xx-x.[i+1],2) + 2*g.[b(i+1)-1]*(xx-x.[i+1]) + g.[c(i+1)-1]
                         ex()
 
-        type splineInterpolateComplex(environment:Aqualis,iscpx:bool) =
+        type splineInterpolateComplex(context:Aqualis,iscpx:bool) =
 
-            let f = environment.var.z2 "f"
-            let g = environment.var.z1 "g"
-            let x = environment.var.d1 "x"
-            let y = environment.var.z1 "y"
+            let f = context.var.z2 "f"
+            let g = context.var.z1 "g"
+            let x = context.var.d1 "x"
+            let y = context.var.z1 "y"
 
             let a(n:int0) = 3*n-2
 
@@ -215,25 +215,25 @@ namespace Aqualis
             /// 補間を実行
             /// </summary>
             member __.set() =
-                environment.ch.i <| fun N ->
+                context.ch.i <| fun N ->
                     N <== x.size1
                     f.allocate(3*N-3,3*N-3)
                     g.allocate(3*N-3)
                     f.clear()
                     g.clear()
-                    environment.group.comment "interpolation constraint"
+                    context.group.comment "interpolation constraint"
                     f.[1-1,a _1-1] <== 0.0
                     f.[1-1,b _1-1] <== 2
                     g.[1-1] <== 0
-                    environment.iter.range (_1, N-2) <| fun n ->
-                        environment.ch.d <| fun dx ->
+                    context.iter.range (_1, N-2) <| fun n ->
+                        context.ch.d <| fun dx ->
                             dx <== x.[n+1-1]-x.[n+1-1-1]
-                            environment.group.comment "interpolation constraint"
+                            context.group.comment "interpolation constraint"
                             f.[3*(n+1)-4-1,a(n+1-1)-1] <== asm.pow(dx,3)
                             f.[3*(n+1)-4-1,b(n+1-1)-1] <== asm.pow(dx,2)
                             f.[3*(n+1)-4-1,c(n+1-1)-1] <== dx
                             g.[3*(n+1)-4-1] <== y.[(n+1)-1] - y.[(n+1)-1-1]
-                            environment.group.comment "interpolation constraint"
+                            context.group.comment "interpolation constraint"
                             f.[3*(n+1)-3-1,a(n+1-1)-1] <== 3*asm.pow(dx,2)
                             f.[3*(n+1)-3-1,b(n+1-1)-1] <== 2*dx
                             f.[3*(n+1)-3-1,c(n+1-1)-1] <== 1
@@ -241,41 +241,41 @@ namespace Aqualis
                             f.[3*(n+1)-3-1,b(n+1)-1] <== 0.0
                             f.[3*(n+1)-3-1,c(n+1)-1] <== -1
                             g.[3*(n+1)-3-1] <== 0.0
-                            environment.group.comment "interpolation constraint"
+                            context.group.comment "interpolation constraint"
                             f.[3*(n+1)-2-1,a(n+1-1)-1] <== 6*dx
                             f.[3*(n+1)-2-1,b(n+1-1)-1] <== 2
                             f.[3*(n+1)-2-1,a(n+1)-1] <== 0.0
                             f.[3*(n+1)-2-1,b(n+1)-1] <== -2
                             g.[3*(n+1)-2-1] <== 0.0
-                    environment.ch.d <| fun dx ->
+                    context.ch.d <| fun dx ->
                         dx <== x.[N-1]-x.[N-1-1]
-                        environment.group.comment "interpolation constraint"
+                        context.group.comment "interpolation constraint"
                         f.[3*N-4-1,a(N-1)-1] <== asm.pow(dx,3)
                         f.[3*N-4-1,b(N-1)-1] <== asm.pow(dx,2)
                         f.[3*N-4-1,c(N-1)-1] <== dx
                         g.[3*N-4-1] <== y.[N-1] - y.[N-1-1]
-                        environment.group.comment "interpolation constraint"
+                        context.group.comment "interpolation constraint"
                         f.[3*N-3-1,a(N-1)-1] <== 6*dx
                         f.[3*N-3-1,b(N-1)-1] <== 2
                         g.[3*N-3-1] <== 0
-                    environment.la.solve_simuleq(f,g)
+                    context.la.solve_simuleq(f,g)
 
             /// <summary>
             /// 補間データをファイルに保存
             /// </summary>
             /// <param name="filename"></param>
             member __.save(filename:string) =
-                environment.io.fileOutput (filename+"_x.dat") <| fun wr ->
+                context.io.fileOutput (filename+"_x.dat") <| fun wr ->
                     wr.t x.size1
-                    environment.iter.num x.size1 <| fun i ->
+                    context.iter.num x.size1 <| fun i ->
                         wr.t x.[i]
-                environment.io.fileOutput (filename+"_y.dat") <| fun wr ->
+                context.io.fileOutput (filename+"_y.dat") <| fun wr ->
                     wr.t y.size1
-                    environment.iter.num y.size1 <| fun i ->
+                    context.iter.num y.size1 <| fun i ->
                         wr.t y.[i]
-                environment.io.fileOutput (filename+"_g.dat") <| fun wr ->
+                context.io.fileOutput (filename+"_g.dat") <| fun wr ->
                     wr.t g.size1
-                    environment.iter.num g.size1 <| fun i ->
+                    context.iter.num g.size1 <| fun i ->
                         wr.t g.[i]
 
             /// <summary>
@@ -284,47 +284,47 @@ namespace Aqualis
             /// <param name="filename"></param>
             member __.load(filename:string) =
                 if iscpx then
-                    environment.io.fileInput (filename+"_x.dat") <| fun rd ->
-                        environment.ch.id <| fun (n,t) ->
+                    context.io.fileInput (filename+"_x.dat") <| fun rd ->
+                        context.ch.id <| fun (n,t) ->
                             rd.t n
                             x.allocate n
-                            environment.iter.num x.size1 <| fun i ->
+                            context.iter.num x.size1 <| fun i ->
                                 rd.t t
                                 x.[i] <== t
-                    environment.io.fileInput (filename+"_y.dat") <| fun rd ->
-                        environment.ch.idd <| fun (n,s,t) ->
+                    context.io.fileInput (filename+"_y.dat") <| fun rd ->
+                        context.ch.idd <| fun (n,s,t) ->
                             rd.t n
                             y.allocate n
-                            environment.iter.num y.size1 <| fun i ->
+                            context.iter.num y.size1 <| fun i ->
                                 rd.tt <| s++t
                                 y.[i] <== s+asm.uj*t
-                    environment.io.fileInput (filename+"_g.dat") <| fun rd ->
-                        environment.ch.idd <| fun (n,s,t) ->
+                    context.io.fileInput (filename+"_g.dat") <| fun rd ->
+                        context.ch.idd <| fun (n,s,t) ->
                             rd.t n
                             g.allocate n
-                            environment.iter.num g.size1 <| fun i ->
+                            context.iter.num g.size1 <| fun i ->
                                 rd.tt <| s++t
                                 g.[i] <== s+asm.uj*t
                 else
-                    environment.io.fileInput (filename+"_x.dat") <| fun rd ->
-                        environment.ch.id <| fun (n,t) ->
+                    context.io.fileInput (filename+"_x.dat") <| fun rd ->
+                        context.ch.id <| fun (n,t) ->
                             rd.t n
                             x.allocate n
-                            environment.iter.num x.size1 <| fun i ->
+                            context.iter.num x.size1 <| fun i ->
                                 rd.t t
                                 x.[i] <== t
-                    environment.io.fileInput (filename+"_y.dat") <| fun rd ->
-                        environment.ch.id <| fun (n,t) ->
+                    context.io.fileInput (filename+"_y.dat") <| fun rd ->
+                        context.ch.id <| fun (n,t) ->
                             rd.t n
                             y.allocate n
-                            environment.iter.num y.size1 <| fun i ->
+                            context.iter.num y.size1 <| fun i ->
                                 rd.t t
                                 y.[i] <== t
-                    environment.io.fileInput (filename+"_g.dat") <| fun rd ->
-                        environment.ch.id <| fun (n,t) ->
+                    context.io.fileInput (filename+"_g.dat") <| fun rd ->
+                        context.ch.id <| fun (n,t) ->
                             rd.t n
                             g.allocate n
-                            environment.iter.num g.size1 <| fun i ->
+                            context.iter.num g.size1 <| fun i ->
                                 rd.t t
                                 g.[i] <== t
 
@@ -335,8 +335,8 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.p (yy:complex0) (xx:double0) =
                 yy.clear()
-                environment.iter.num_exit (x.size1-1) <| fun (ex,i) ->
-                    environment.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
+                context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
+                    context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
                         yy <== g.[a(i+1)-1]*asm.pow(xx-x.[i],3) + g.[b(i+1)-1]*asm.pow(xx-x.[i],2) + g.[c(i+1)-1]*(xx-x.[i+1]) + y.[i]
                         ex()
 
@@ -347,16 +347,16 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.dp (yy:complex0) (xx:double0) =
                 yy.clear()
-                environment.iter.num_exit (x.size1-1) <| fun (ex,i) ->
-                    environment.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
+                context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
+                    context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
                         yy <== 3*g.[a(i+1)-1]*asm.pow(xx-x.[i+1],2) + 2*g.[b(i+1)-1]*(xx-x.[i+1]) + g.[c(i+1)-1]
                         ex()
 
-    type ContextInterpolate internal (environment:Aqualis) =
-        member _.linearDouble(id,dataX,dataY) = interpolate.LinearInterpolate1d(environment,id,dataX,dataY)
-        member _.linearComplex(id,dataX,dataY) = interpolate.LinearInterpolate1z(environment,id,dataX,dataY)
-        member _.splineDouble() = interpolate.splineInterpolateDouble(environment)
-        member _.splineComplex(isComplex) = interpolate.splineInterpolateComplex(environment,isComplex)
+    type ContextInterpolate internal (context:Aqualis) =
+        member _.linearDouble(id,dataX,dataY) = interpolate.LinearInterpolate1d(context,id,dataX,dataY)
+        member _.linearComplex(id,dataX,dataY) = interpolate.LinearInterpolate1z(context,id,dataX,dataY)
+        member _.splineDouble() = interpolate.splineInterpolateDouble(context)
+        member _.splineComplex(isComplex) = interpolate.splineInterpolateComplex(context,isComplex)
 
     [<AutoOpen>]
     module CompilationEnvironmentInterpolateExtensions =

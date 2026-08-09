@@ -13,20 +13,19 @@ namespace Aqualis
         
         type expr with
             
-            static member substL (x:expr) (y:expr) (c:program) =
+            static member substL (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein "\\begin{align}"
                 c.codewritein (x.evalL c  + " \\leftarrow " + y.evalL c)
                 c.codewritein "\\end{align}"
 
                 
-            static member equivL (x:expr) (y:expr) (c:program) =
+            static member equivL (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " = " + y.evalL c)
                 
-            static member equivAlignL (x:expr) (y:expr) (c:program) =
+            static member equivAlignL (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " =& " + y.evalL c)
                 
-            static member forLoopL (context:GenerationContext) (n1:expr,n2:expr) code =
-                let c = context.CurrentProgram
+            static member forLoopL (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalL c
@@ -39,11 +38,10 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>無限ループ</summary>
-            static member loopL (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member loopL (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = context.GotoLabels.nextGotoLabel()
+                let label = c.GotoLabels.nextGotoLabel()
                 let exit() = c.codewritein("goto " + label)
                 expr.substL i (Int 1) c
                 c.codewritein "do"
@@ -56,8 +54,7 @@ namespace Aqualis
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledoL (context:GenerationContext) (cond:expr) = fun code ->
-                let c = context.CurrentProgram
+            static member whiledoL (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("while " + cond.evalL c + "\\\\")
                 c.indentInc()
                 code()
@@ -65,8 +62,7 @@ namespace Aqualis
                 c.codewritein "end\\\\"
                 
             ///<summary>指定した範囲でループ</summary>
-            static member rangeL (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member rangeL (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -88,13 +84,12 @@ namespace Aqualis
                     returnVar()
                     
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitL (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member range_exitL (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto " + label)
                     c.comment("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
                     c.indentInc()
@@ -106,7 +101,7 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto " + label)
                     c.codewritein("for $" + i.evalL c + "=" + i1.evalL c + "\\cdots " + i2.evalL c + "$\\\\")
                     c.indentInc()
@@ -116,8 +111,7 @@ namespace Aqualis
                     c.codewritein(label + " continue")
                     returnVar()
                     
-            static member branchL (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member branchL (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalL c
                     c.codewritein("if " + cond)
@@ -138,7 +132,7 @@ namespace Aqualis
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein "endif"
                 
-            member this.evalL(c:program) =
+            member this.evalL(c:Aqualis) =
                 let par (s:string) (pl:int) =
                     match pl%3 with
                     |2 -> "\\left\\{" + s + "\\right\\}"
@@ -377,13 +371,13 @@ namespace Aqualis
                     |Sum(t, n1, n2, f) ->
                         // 合計値格納用変数
                         eval (Let(t, Int 0, fun u ->
-                            expr.forLoopF (GenerationContext.ForInternalProgram c) (n1,n2) <| fun i ->
+                            expr.forLoopF c (n1,n2) <| fun i ->
                                 // 加算・代入処理
                                 expr.substL u (Add(t,u, f i)) c
                             u)) pl
                     |IfEl(cond,n1,n2) -> 
                         eval (Let(n1.etype, NaN, fun x -> 
-                            expr.branchL (GenerationContext.ForInternalProgram c) <| fun (ifcode,_,elsecode) ->
+                            expr.branchL c <| fun (ifcode,_,elsecode) ->
                                 ifcode cond <| fun () ->
                                     expr.substL x n1 c
                                 elsecode <| fun () ->

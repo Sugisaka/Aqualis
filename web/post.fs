@@ -6,15 +6,14 @@
 // 
 namespace Aqualis
 
-type post(environment:Aqualis,id:PHPdata) =
-    let context = environment.RequireGenerationContext()
-    new(environment:Aqualis,x:string) = post(environment,PHPdata [RStr x])
-    new(environment:Aqualis,x:int0) = post(environment,PHPdata([RNvr(x.Expr,x.Context)], ?context=x.Context))
+type post(context:Aqualis,id:PHPdata) =
+    new(ctx:Aqualis,x:string) = post(ctx,PHPdata ([RStr x],Aqualis.BlankWriter PHP))
+    new(ctx:Aqualis,x:int0) = post(ctx,PHPdata([RNvr(x.Expr,x.Context)], x.Context))
     member _.get with get() = PHPdata.f(context,"$_POST["+id.toString(".",StrQuotation)+"]")
     member this.get_html with get() = PHPdata.f(context,"htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")
     ///テキストボックス
     member _.input() =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -23,7 +22,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input(a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -34,7 +33,7 @@ type post(environment:Aqualis,id:PHPdata) =
 
     ///パスワード入力テキストボックス
     member _.password() = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -43,7 +42,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
     ///テキストボックス
     member _.input(value:PHPdata) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -53,7 +52,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
     ///テキストボックス
     member _.input_hidden(value:PHPdata) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -63,7 +62,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
     ///テキストボックス
     member _.input(value:string) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -73,7 +72,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
     ///テキストボックス
     member _.input_hidden(value:string) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -83,7 +82,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
 
     member _.input(value:PHPdata,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -92,7 +91,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
     member _.input_hidden(value:PHPdata,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -102,7 +101,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
 
     member _.input(value:string,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -112,7 +111,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
 
     member _.input_hidden(value:string,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -122,7 +121,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
 
     member _.textArea() =
-        environment.html.tagb(
+        context.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -130,7 +129,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         ) <| fun () -> ()
     member _.textArea code =
-        environment.html.tagb(
+        context.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -138,7 +137,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         ) <| fun () -> code()
     member _.textArea(a:list<Atr>) = 
-        environment.html.tagb0(
+        context.html.tagb0(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -146,7 +145,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) <| fun () -> ()
     member _.textArea_contents(a:list<Atr>) = fun code ->
-        environment.html.tagb0(
+        context.html.tagb0(
             "textarea",
             [
                 "type", PHPdata "text"
@@ -154,31 +153,31 @@ type post(environment:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) code
     member this.textArea_copy() =
-        environment.html.tagb(
+        context.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
                 "name", id
             ]
-        ) <| fun () -> writein context this.get_html.phpcode
+        ) <| fun () -> context.writein this.get_html.phpcode
     member this.textArea_copy(a:list<Atr>) =
-        environment.html.tagb(
+        context.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
                 "name", id
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        ) <| fun () -> writein context this.get_html.phpcode
+        ) <| fun () -> context.writein this.get_html.phpcode
     member _.textArea(value:string) =
-        environment.html.tagb(
+        context.html.tagb(
             "textarea",
             [
                 "type", PHPdata "text"
                 "name", id
             ]
-        ) <| fun () -> writein context value
+        ) <| fun () -> context.writein value
     member _.input_lock(value:PHPdata) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -188,7 +187,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input_lock(value:string) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -198,7 +197,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input_lock(value:PHPdata,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -208,7 +207,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
     member _.input_lock(value:string,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -220,7 +219,7 @@ type post(environment:Aqualis,id:PHPdata) =
 
     ///テキストボックス
     member _.input(value:int0) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -229,7 +228,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input(value:int0,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -240,7 +239,7 @@ type post(environment:Aqualis,id:PHPdata) =
 
     ///テキストボックス
     member _.input_hidden(value:int0) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -249,7 +248,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input_hidden(value:int0,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -259,7 +258,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
 
     member _.input_lock(value:int0) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -269,7 +268,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input_lock(value:int0,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -281,7 +280,7 @@ type post(environment:Aqualis,id:PHPdata) =
         
     ///パスワード入力テキストボックス
     member _.password(value:int0) = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -292,7 +291,7 @@ type post(environment:Aqualis,id:PHPdata) =
 
     ///テキストボックス
     member _.input(value:double0) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -301,7 +300,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input(value:double0,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -312,7 +311,7 @@ type post(environment:Aqualis,id:PHPdata) =
 
     ///テキストボックス
     member _.input_hidden(value:double0) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -321,7 +320,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input_hidden(value:double0,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -331,7 +330,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
 
     member _.input_lock(value:double0) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -341,7 +340,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.input_lock(value:double0,a:list<Atr>) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -353,7 +352,7 @@ type post(environment:Aqualis,id:PHPdata) =
 
     ///パスワード入力テキストボックス
     member _.password(value:string) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -363,7 +362,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
     ///パスワード入力テキストボックス
     member _.password(value:double0) = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -374,7 +373,7 @@ type post(environment:Aqualis,id:PHPdata) =
 
     ///テキストボックス（送信済みのメッセージを表示）
     member this.input_copy() = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -383,7 +382,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member this.input_copy(a:list<Atr>) = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -393,7 +392,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
     ///テキストボックス（送信済みのメッセージを表示）
     member this.input_copy_hidden() = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -402,7 +401,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member this.input_copy_hidden(a:list<Atr>) = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "hidden"
@@ -411,7 +410,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
     member this.input_copy_lock() = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -421,7 +420,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member this.input_copy_lock(a:list<Atr>) = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "text"
@@ -432,7 +431,7 @@ type post(environment:Aqualis,id:PHPdata) =
         )
     ///パスワード入力テキストボックス（送信済みのメッセージを表示）
     member this.password_copy() = 
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -441,7 +440,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member this.password_copy_lock() =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "password"
@@ -451,7 +450,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.submit(value:string) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "submit"
@@ -460,7 +459,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.submit(url:string,value:string) =
-        environment.html.taga(
+        context.html.taga(
             "input",
             [
                 "type", PHPdata "submit"
@@ -470,7 +469,7 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.submit(url:string,value:string,style:string) =
-        environment.html.taga("input",
+        context.html.taga("input",
             [
                 "type", PHPdata "submit"
                 "name", id
@@ -480,16 +479,15 @@ type post(environment:Aqualis,id:PHPdata) =
             ]
         )
     member _.select code = 
-        environment.html.tagb (
+        context.html.tagb (
             "select",
             [
                 "name",id
             ]
         ) code
     
-type postFile(environment:Aqualis,id:PHPdata) =
-    let context = environment.RequireGenerationContext()
-    new(environment:Aqualis,x:string) = postFile(environment,PHPdata x)
+type postFile(context:Aqualis,id:PHPdata) =
+    new(ctx:Aqualis,x:string) = postFile(ctx,PHPdata x)
     member _.files with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"name\"]")
     member _.err with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"error\"]")
     member this.file_upload dir =
@@ -497,42 +495,42 @@ type postFile(environment:Aqualis,id:PHPdata) =
         let file = PHPdata.var(context,"_FILES")
         let aaa = file.[id].["name"]
         upload <== "./"++file.[id].["name"]
-        environment.php.phpcode <| fun () -> write context ("move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ");")
+        context.php.phpcode <| fun () -> context.write ("move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ");")
     member this.file_upload_check dir =
         let upload = PHPdata(id.toString(".",StrQuotation)+"_file_upload")
         let file = PHPdata.var(context,"_FILES")
         upload <== "./"++file.[id].["name"]
-        environment.br.if1(bool0(Var(Nt, "move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ")", NaN), context=context)) <| fun () ->
-            environment.php.echo "アップロード完了"
+        context.br.if1(bool0(Var(Nt, "move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ")", NaN), context)) <| fun () ->
+            context.php.echo "アップロード完了"
     member this.file_select() =
-        environment.html.tagb ("form", [Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            environment.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
-            environment.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
+        context.html.tagb ("form", [Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
+            context.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
+            context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
     member this.file_select(action_phpfile:string) =
-        environment.html.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            environment.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
-            environment.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
+        context.html.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
+            context.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
+            context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
     member this.files_upload dir =
         let file = PHPdata.var(context,"_FILES")
-        environment.br.if1(environment.php.isset(file[id])) <| fun () ->
+        context.br.if1(context.php.isset(file[id])) <| fun () ->
             file.[id].["name"].foreach <| fun i ->
-                environment.br.if1(bool0(Var(Nt, "is_uploaded_file(" + file.[id].["tmp_name"].[i].code + ")",NaN), context=context)) <| fun () ->
-                    environment.php.phpcode <| fun () -> write context ("move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./"+dir+"\"."+file.[id].["name"].[i].code + ");")
+                context.br.if1(bool0(Var(Nt, "is_uploaded_file(" + file.[id].["tmp_name"].[i].code + ")",NaN), context)) <| fun () ->
+                    context.php.phpcode <| fun () -> context.write ("move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./"+dir+"\"."+file.[id].["name"].[i].code + ");")
     member this.files_upload_check(dir) =
         let file = PHPdata.var(context,"_FILES")
-        environment.br.if1(environment.php.isset(file[id])) <| fun () ->
+        context.br.if1(context.php.isset(file[id])) <| fun () ->
             file.[id].["name"].foreach <| fun i ->
-                environment.br.if1(bool0(Var(Nt,"is_uploaded_file(" + file.[id].["tmp_name"].[i].code + ")",NaN), context=context)) <| fun () ->
-                    environment.br.if2(bool0(Var(Nt,"move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./" + dir + "\"." + file.[id].["name"].[i].code + ")",NaN), context=context))
+                context.br.if1(bool0(Var(Nt,"is_uploaded_file(" + file.[id].["tmp_name"].[i].code + ")",NaN), context)) <| fun () ->
+                    context.br.if2(bool0(Var(Nt,"move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./" + dir + "\"." + file.[id].["name"].[i].code + ")",NaN), context))
                     <| fun () ->
-                        environment.php.echo ("アップロード完了: "++file.[id].["name"].[i]++"<br>")
+                        context.php.echo ("アップロード完了: "++file.[id].["name"].[i]++"<br>")
                     <| fun () ->
-                        environment.php.echo ("アップロード失敗: "++file.[id].["name"].[i]++"<br>")
+                        context.php.echo ("アップロード失敗: "++file.[id].["name"].[i]++"<br>")
     member this.files_select() =
-        environment.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
+        context.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
         
     member this.files_select(action_phpfile:string) =
-        environment.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
+        context.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
         
     /// ファイルが指定されているか
     member this.isFileSpecified with get() =

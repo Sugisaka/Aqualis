@@ -28,39 +28,34 @@ namespace Aqualis
             con <- 0
 
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
-    type ContextBr internal (environment:Aqualis) =
-        let context = environment.GenerationContext
-
-        member _.branch code =
-            match context with
-            |Some ctx -> expr.branch ctx (fun callbacks -> code (br callbacks))
-            |None -> invalidOp "A symbolic branch builder is not available during Numeric execution."
+    type ContextBr internal (c:Aqualis) =
+        member _.branch code = expr.branch c (fun callbacks -> code (br callbacks))
 
         member this.if1 (condition:bool0) code =
-            match context with
+            match c.CodeFile with
             |None ->
                 match condition.Expr.simp with
                 |True -> code()
                 |False -> ()
                 |_ -> invalidOp "The Numeric branch condition could not be evaluated."
-            |Some ctx ->
-                GenerationContextMerge.merge (Some ctx) condition.Context |> ignore
-                match ctx.CurrentProgram.language, condition.Expr.simp with
+            |Some _ ->
+                Aqualis.merge c condition.Context |> ignore
+                match c.language, condition.Expr.simp with
                 |(LaTeX|HTML), _ -> this.branch (fun branch -> branch.IF condition code)
                 |_, True -> code()
                 |_, False -> ()
                 |_, _ -> this.branch (fun branch -> branch.IF condition code)
 
         member this.if2 (condition:bool0) codeWhenTrue codeWhenFalse =
-            match context with
+            match c.CodeFile with
             |None ->
                 match condition.Expr.simp with
                 |True -> codeWhenTrue()
                 |False -> codeWhenFalse()
                 |_ -> invalidOp "The Numeric branch condition could not be evaluated."
-            |Some ctx ->
-                GenerationContextMerge.merge (Some ctx) condition.Context |> ignore
-                match ctx.CurrentProgram.language, condition.Expr.simp with
+            |Some _ ->
+                Aqualis.merge c condition.Context |> ignore
+                match c.language, condition.Expr.simp with
                 |(LaTeX|HTML), _ ->
                     this.branch (fun branch ->
                         branch.IF condition codeWhenTrue
@@ -75,5 +70,4 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentBrExtensions =
         type Aqualis with
-            member this.br = ContextBr(this)
-
+            member this.br = ContextBr this

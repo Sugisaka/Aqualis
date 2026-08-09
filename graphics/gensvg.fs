@@ -21,7 +21,7 @@ type TextAnchor =
 
 type Setting3D = {DirX:double; DirY:double; DirZ:double; ScaleX:double; ScaleY:double; ScaleZ:double;}
 
-type ContextGenSvg internal (environment:Aqualis) =
+type ContextGenSvg internal (context:Aqualis) =
     member this.headerOpen (cvx:double,cvy:double,wr:exprString->unit) =
         wr <| st "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
         let cvxText = InvariantFormat.numberWithFormat "0.000" cvx
@@ -110,10 +110,10 @@ type ContextGenSvg internal (environment:Aqualis) =
 
     member this.polygon(cvx,cvy,wr:exprString -> unit,px:double1,py:double1,fillcolor,strokecolor) =
         wr <| st "<path d=\""
-        environment.iter.range (_1, px.size1) <| fun i ->
+        context.iter.range (_1, px.size1) <| fun i ->
             let pxi = 0.5*cvx+px.[i-1]
             let pyi = 0.5*cvy-py.[i-1]
-            environment.br.if2 (i.=1)
+            context.br.if2 (i.=1)
                 <| fun () ->
                     wr <| "M "++pxi++","++pyi
                 <| fun () ->
@@ -185,11 +185,11 @@ type ContextGenSvg internal (environment:Aqualis) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
-        environment.iter.range (_1, px.size1) <| fun i ->
+        context.iter.range (_1, px.size1) <| fun i ->
             let xs,ys = xy3D px[i-1] py[i-1] pz[i-1]
             let pxi = 0.5*cvx+xs
             let pyi = 0.5*cvy-ys
-            environment.br.if2 (i.=1)
+            context.br.if2 (i.=1)
             <| fun () ->
                 wr <| "M "++pxi++","++pyi
             <| fun () ->
@@ -215,7 +215,7 @@ type ContextGenSvg internal (environment:Aqualis) =
         let x2 = match t2.Expr with |Dbl t2 -> cx + r*cos(-t2*pi/180.0) |_ -> cx + r*asm.cos(-t2*asm.pi/180.0)
         let y2 = match t2.Expr with |Dbl t2 -> cy + r*sin(-t2*pi/180.0) |_ -> cy + r*asm.sin(-t2*asm.pi/180.0)
         wr <| st "<path "
-        environment.br.if2 (t2-t1.>180.0)
+        context.br.if2 (t2-t1.>180.0)
             <| fun () ->
                 wr <| "d=\"M "++x1++","++y1++" "++"A"++" "++r++" "++r++" "++"0"++" "++"1"++" "++"0"++" "++x2++" "++y2++"\""
             <| fun () ->
@@ -249,7 +249,7 @@ type ContextGenSvg internal (environment:Aqualis) =
         let x2 = cx + r*asm.cos(-t2*asm.pi/180.0)
         let y2 = cy + r*asm.sin(-t2*asm.pi/180.0)
         wr <| st "<path "
-        environment.br.if2 (t2-t1.>180.0)
+        context.br.if2 (t2-t1.>180.0)
             <| fun () ->
                 wr <| "d=\"M "++x1++","++y1++" A "++r++" "++r++" 0 "++"1, 0 "++x2++", "++y2++"\""
             <| fun () ->
@@ -262,14 +262,14 @@ type ContextGenSvg internal (environment:Aqualis) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
-        environment.iter.range (1,n+1) <| fun i ->
+        context.iter.range (1,n+1) <| fun i ->
             let px = cx + r*asm.cos(2*asm.pi*i/n)
             let py = cy + r*asm.sin(2*asm.pi*i/n)
             let pz = cz
             let xs,ys = xy3D px py pz
             let pxi = 0.5*cvx+xs
             let pyi = 0.5*cvy-ys
-            environment.br.if2 (i.=1)
+            context.br.if2 (i.=1)
                 <| fun () ->
                     wr <| "M "++pxi++","++pyi
                 <| fun () ->
@@ -281,14 +281,14 @@ type ContextGenSvg internal (environment:Aqualis) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
-        environment.iter.range (_1, n+1) <| fun i ->
+        context.iter.range (_1, n+1) <| fun i ->
             let px = cx
             let py = cy + r*asm.cos(2*asm.pi*i/n)
             let pz = cz + r*asm.sin(2*asm.pi*i/n)
             let xs,ys = xy3D px py pz
             let pxi = 0.5*cvx+xs
             let pyi = 0.5*cvy-ys
-            environment.br.if2 (i.=1)
+            context.br.if2 (i.=1)
                 <| fun () ->
                     wr <| st "M "++pxi++","++pyi
                 <| fun () ->
@@ -300,14 +300,14 @@ type ContextGenSvg internal (environment:Aqualis) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
         wr <| st "<path d=\""
-        environment.iter.range (_1, n+1) <| fun i ->
+        context.iter.range (_1, n+1) <| fun i ->
             let px = cx + r*asm.cos(2*asm.pi*i/n)
             let py = cy
             let pz = cz + r*asm.sin(2*asm.pi*i/n)
             let xs,ys = xy3D px py pz
             let pxi = 0.5*cvx+xs
             let pyi = 0.5*cvy-ys
-            environment.br.if2 (i.=1)
+            context.br.if2 (i.=1)
                 <| fun () ->
                     wr <| "M "++pxi++","++pyi
                 <| fun () ->
@@ -427,8 +427,8 @@ type ContextGenSvg internal (environment:Aqualis) =
     member this.text(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0,fillcolor,strokecolor) =
         this.text(cvx,cvy,wr,cx,cy,text,size,TimesNewRoman,Left,None,fillcolor,strokecolor)
 
-type svgfilemaker(environment:Aqualis,cvx:double,cvy:double,writer:StreamWriter,scale:double) =
-    let generator = ContextGenSvg(environment)
+type svgfilemaker(context:Aqualis,cvx:double,cvy:double,writer:StreamWriter,scale:double) =
+    let generator = ContextGenSvg(context)
     let wr (x:exprString) =
         let rec write (xx:exprString) =
             for x in xx.data do
@@ -681,8 +681,8 @@ type svgfilemaker(environment:Aqualis,cvx:double,cvy:double,writer:StreamWriter,
         let cx, cy = c
         generator.text(cvx, cvy, wr, D scale*cx, D scale*cy, st text, D size, font, textAnchor, rot, fillcolor,strokecolor)
 
-type svgfilemaker_aq(environment:Aqualis,cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
-    let generator = ContextGenSvg(environment)
+type svgfilemaker_aq(context:Aqualis,cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
+    let generator = ContextGenSvg(context)
     member internal this.header code = generator.header (cvx,cvy) wr this code
     /// <summary>
     /// レイヤーを追加
@@ -761,10 +761,10 @@ type svgfilemaker_aq(environment:Aqualis,cvx:double,cvy:double,wr:exprString -> 
         if scale=1.0 then
             generator.polygon(cvx,cvy,wr,px,py,fillcolor,strokecolor)
         else
-            environment.ch.d1 px.size1 <| fun spx ->
-            environment.ch.d1 py.size1 <| fun spy ->
-                environment.iter.range (_1, px.size1) <| fun i -> spx[i-1] <== scale*px[i-1]
-                environment.iter.range (_1, py.size1) <| fun i -> spy[i-1] <== scale*py[i-1]
+            context.ch.d1 px.size1 <| fun spx ->
+            context.ch.d1 py.size1 <| fun spy ->
+                context.iter.range (_1, px.size1) <| fun i -> spx[i-1] <== scale*px[i-1]
+                context.iter.range (_1, py.size1) <| fun i -> spy[i-1] <== scale*py[i-1]
                 generator.polygon(cvx,cvy,wr,spx,spy,fillcolor,strokecolor)
     /// <summary>
     /// 折れ線を追加
@@ -791,12 +791,12 @@ type svgfilemaker_aq(environment:Aqualis,cvx:double,cvy:double,wr:exprString -> 
         if scale=1.0 then
             generator.polygon3D(cvx,cvy,wr,px,py,pz,p3D,fillcolor,strokecolor)
         else
-            environment.ch.d1 px.size1 <| fun spx ->
-            environment.ch.d1 py.size1 <| fun spy ->
-            environment.ch.d1 pz.size1 <| fun spz ->
-                environment.iter.range (_1, px.size1) <| fun i -> spx[i-1] <== scale*px[i-1]
-                environment.iter.range (_1, py.size1) <| fun i -> spy[i-1] <== scale*py[i-1]
-                environment.iter.range (_1, pz.size1) <| fun i -> spz[i-1] <== scale*pz[i-1]
+            context.ch.d1 px.size1 <| fun spx ->
+            context.ch.d1 py.size1 <| fun spy ->
+            context.ch.d1 pz.size1 <| fun spz ->
+                context.iter.range (_1, px.size1) <| fun i -> spx[i-1] <== scale*px[i-1]
+                context.iter.range (_1, py.size1) <| fun i -> spy[i-1] <== scale*py[i-1]
+                context.iter.range (_1, pz.size1) <| fun i -> spz[i-1] <== scale*pz[i-1]
                 generator.polygon3D(cvx,cvy,wr,spx,spy,spz,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 直線を追加
@@ -1040,15 +1040,15 @@ type svgfilemaker_aq(environment:Aqualis,cvx:double,cvy:double,wr:exprString -> 
         let cx, cy = c
         generator.text(cvx,cvy,wr,D scale*cx,D scale*cy,exprString text,D size, font, textAnchor, rot, fillcolor,strokecolor)
 
-type ContextSvgFile internal (environment:Aqualis) =
+type ContextSvgFile internal (context:Aqualis) =
     
     /// <summary>
     /// SVGファイルを作成
     /// </summary>
     /// <param name="filename">ファイル名</param>
     member this.make (filename:exprString) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
-        environment.io.fileOutput filename <| fun wr ->
-            let sv = svgfilemaker_aq(environment,cvx,cvy,wr.cc,scale)
+        context.io.fileOutput filename <| fun wr ->
+            let sv = svgfilemaker_aq(context,cvx,cvy,wr.cc,scale)
             sv.header <| fun sv ->
                 code sv
 
@@ -1057,8 +1057,8 @@ type ContextSvgFile internal (environment:Aqualis) =
     /// </summary>
     /// <param name="filename">ファイル名</param>
     member this.make (filename:string) = fun (cvx,cvy) (scale:double) (code:svgfilemaker_aq->unit) ->
-        environment.io.fileOutput filename <| fun wr ->
-            let sv = svgfilemaker_aq(environment,cvx,cvy,wr.cc,scale)
+        context.io.fileOutput filename <| fun wr ->
+            let sv = svgfilemaker_aq(context,cvx,cvy,wr.cc,scale)
             sv.header <| fun sv ->
                 code sv
 
@@ -1075,7 +1075,7 @@ module CompilationEnvironmentGenSvgExtensions =
             try
                 do
                     use wr = new StreamWriter(temporaryPath,false,Encoding.Default)
-                    let sv = svgfilemaker(Aqualis None,cvx,cvy,wr,scale)
+                    let sv = svgfilemaker(Aqualis.BlankWriter Numeric,cvx,cvy,wr,scale)
                     sv.header <| fun sv ->
                         code sv
                 File.Move(temporaryPath, filename, true)

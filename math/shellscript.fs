@@ -11,8 +11,8 @@ namespace Aqualis
         open System
         open System.IO
 
-        type Shell(environment:Aqualis,dir:string,project:string,nproc:int) =
-            let language = environment.RequireGenerationContext().CurrentProgram.language
+        type Shell(context:Aqualis,dir:string,project:string,nproc:int) =
+            let language = context.language
             let mutable id = 0
             let w =
                 if nproc <= 0 then
@@ -107,6 +107,6 @@ namespace Aqualis
                 member _.Dispose() =
                     disposeWriters()
 
-        let makeShellScript (environment:Aqualis) (dir:string) (project:string) (n:int) code =
-            use proc = new Shell(environment,dir,project,n)
+        let makeShellScript (context:Aqualis) (dir:string) (project:string) (n:int) code =
+            use proc = new Shell(context,dir,project,n)
             code proc

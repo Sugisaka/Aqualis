@@ -11,7 +11,7 @@ namespace Aqualis
         type expr with
             
             /// fをxで微分(gは変数生成用カウンタ)
-            static member diff (f:expr) = fun (x:expr) (g:program) ->
+            static member diff (f:expr) = fun (x:expr) (g:Aqualis) ->
                     match f,x with
                     |Int _,_ ->
                         Int 0

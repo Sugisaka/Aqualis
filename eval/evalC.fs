@@ -13,22 +13,21 @@ namespace Aqualis
 
         type expr with
 
-            static member substC (x:expr) (y:expr) (c:program) =
-                c.codewritein (x.evalC c  + " = " + y.evalC c + ";")
+            static member substC (x:expr) (y:expr) (c:Aqualis) =
+               c.codewritein (x.evalC c  + " = " + y.evalC c + ";")
 
-            static member equivC (x:expr) (y:expr) (c:program) =
+            static member equivC (x:expr) (y:expr) (c:Aqualis) =
                 printfn "C99でこの文は使用できません"
 
-            static member equivAlignC (x:expr) (y:expr) (c:program) =
+            static member equivAlignC (x:expr) (y:expr) (c:Aqualis) =
                 printfn "C99でこの文は使用できません"
 
-            static member forLoopC (context:GenerationContext) (n1:expr,n2:expr) code =
-                let c = context.CurrentProgram
+            static member forLoopC (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalC c
                 let n2_ = n2.evalC c
-                if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein("for(" + i.evalC c + " = " + n1_ + "; " + i.evalC c + " <= " + n2_ + "; " + i.evalC c + "++)")
                 c.codewritein "{"
                 c.indentInc()
@@ -38,14 +37,13 @@ namespace Aqualis
                 returnVar()
 
             ///<summary>無限ループ</summary>
-            static member loopC (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member loopC (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = "_" + context.GotoLabels.nextGotoLabel()
+                let label = "_" + c.GotoLabels.nextGotoLabel()
                 let exit() = c.codewritein("goto "+label+";")
                 expr.substC i (Int 1) c
-                if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein "for(;;)"
                 c.codewritein "{"
                 c.indentInc()
@@ -57,8 +55,7 @@ namespace Aqualis
                 returnVar()
 
             ///<summary>条件を満たす間ループ</summary>
-            static member whiledoC (context:GenerationContext) (cond:expr) = fun code ->
-                let c = context.CurrentProgram
+            static member whiledoC (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("while(" + cond.evalC c + ")")
                 c.codewritein "{"
                 c.indentInc()
@@ -67,13 +64,12 @@ namespace Aqualis
                 c.codewritein "}"
 
             ///<summary>指定した範囲でループ</summary>
-            static member rangeC (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member rangeC (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("for(" + i.evalC c + "=" + i1.evalC c + "; " + i.evalC c + "<=" + i2.evalC c + "; " + i.evalC c + "++)")
                     c.comment "{"
                     c.indentInc()
@@ -84,7 +80,7 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("for(" + i.evalC c + "=" + i1.evalC c + "; " + i.evalC c + "<=" + i2.evalC c + "; " + i.evalC c + "++)")
                     c.codewritein "{"
                     c.indentInc()
@@ -94,15 +90,14 @@ namespace Aqualis
                     returnVar()
 
             ///<summary>指定した範囲でループ(途中脱出可)</summary>
-            static member range_exitC (context:GenerationContext) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
-                let c = context.CurrentProgram
+            static member range_exitC (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label+"")
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.comment("for(" + i.evalC c + "=" + i1.evalC c + "; " + i.evalC c + "<=" + i2.evalC c + "; " + i.evalC c + "++)")
                     c.comment "{"
                     c.indentInc()
@@ -114,9 +109,9 @@ namespace Aqualis
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = context.GotoLabels.nextGotoLabel()
+                    let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label+"")
-                    if context.IsParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("for(" + i.evalC c + "=" + i1.evalC c + "; " + i.evalC c + "<=" + i2.evalC c + "; " + i.evalC c + "++)")
                     c.codewritein "{"
                     c.indentInc()
@@ -126,8 +121,7 @@ namespace Aqualis
                     c.codewritein(label+":;")
                     returnVar()
 
-            static member branchC (context:GenerationContext) code =
-                let c = context.CurrentProgram
+            static member branchC (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalC c
                     c.codewritein("if(" + cond + ")")
@@ -153,7 +147,7 @@ namespace Aqualis
                     c.codewritein "}"
                 code(ifcode,elseifcode,elsecode)
 
-            member this.evalC(c:program) =
+            member this.evalC(c:Aqualis) =
                 match this.simp with
                 |False -> "false"
                 |True -> "true"
@@ -263,13 +257,13 @@ namespace Aqualis
                 |Sum(t, n1, n2, f) ->
                     // 合計値格納用変数
                     (Let(t, Int 0, fun u ->
-                        expr.forLoopC (GenerationContext.ForInternalProgram c) (n1,n2) <| fun i ->
+                        expr.forLoopC c (n1,n2) <| fun i ->
                             // 加算・代入処理
                             expr.substC u (Add(t,u, f i)) c
                         u)).evalC c
                 |IfEl(cond,n1,n2) ->
                     (Let(n1.etype, NaN, fun x ->
-                        expr.branchC (GenerationContext.ForInternalProgram c) <| fun (ifcode,_,elsecode) ->
+                        expr.branchC c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substC x n1 c
                             elsecode <| fun () ->

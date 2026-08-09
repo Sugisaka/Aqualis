@@ -8,23 +8,23 @@ namespace Aqualis
 module ContextChArrayExtensions =
   type ContextCh with
     member this.c code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.c0.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.c0.getVar
             (fun name -> Var(Structure "char",name,NaN)) code
 
     member this.i01 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.i1.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.i1.getVar
             (fun name -> int1(It 4, Var1(A1 0,name), context=ctx)) code
 
     member this.d01 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.d1.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.d1.getVar
             (fun name -> double1(Dt, Var1(A1 0,name), context=ctx)) code
 
     member this.z01 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.z1.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.z1.getVar
             (fun name -> complex1(Zt, Var1(A1 0,name), context=ctx)) code
 
     member this.i1 (size:int0) = fun code ->
@@ -47,18 +47,18 @@ module ContextChArrayExtensions =
     member this.z1 (size:int) = fun code -> this.z1 (I size) code
 
     member this.i02 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.i2.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.i2.getVar
             (fun name -> int2(It 4, Var2(A2(0,0),name), context=ctx)) code
 
     member this.d02 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.d2.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.d2.getVar
             (fun name -> double2(Dt, Var2(A2(0,0),name), context=ctx)) code
 
     member this.z02 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.z2.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.z2.getVar
             (fun name -> complex2(Zt, Var2(A2(0,0),name), context=ctx)) code
 
     member this.i2 (size1:int0,size2:int0) = fun code ->
@@ -89,18 +89,18 @@ module ContextChArrayExtensions =
     member this.z2 (size1:int,size2:int) = fun code -> this.z2 (I size1,I size2) code
 
     member this.i03 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.i2.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.i2.getVar
             (fun name -> int3(It 4, Var3(A3(0,0,0),name), context=ctx)) code
 
     member this.d03 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.d2.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.d2.getVar
             (fun name -> double3(Dt, Var3(A3(0,0,0),name), context=ctx)) code
 
     member this.z03 code =
-        let ctx = this.Environment.RequireGenerationContext()
-        TemporaryVariableScope.useOne ctx.CurrentProgram.z2.getVar
+        let ctx = this.Environment
+        TemporaryVariableScope.useOne ctx.z2.getVar
             (fun name -> complex3(Zt, Var3(A3(0,0,0),name), context=ctx)) code
             
     member this.i3 (size1:int0,size2:int0,size3:int0) = fun code ->
