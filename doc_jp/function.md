@@ -22,9 +22,9 @@ let x = y + z
 y <== 1
 z <== 1
 let x = y - z
-print.t x
+ctx.print.t x
 y <== 2
-print.t x
+ctx.print.t x
 ```
 
 ## 関数の定義
@@ -42,28 +42,27 @@ let f x = x - 1
 ただし、以下のように使用するとエラーが出る
 ```fsharp
 let x = x - 1
-ch.ii <| fun (a,b) ->
+ctx.ch.ii <| fun (a,b) ->
     a <== 1
     b <== f a
-    print.t b
+    ctx.print.t b
 ```
-関数内では`x`に1(int型)を足しているので、`x`もint型であると自動解釈される。
-chで定義した変数は**num0**型と呼ばれる型で、想定された型に一致しないためエラーとなる。そのようなときは以下のように型を指定すればよい。
+引数に変数を指定する場合は、自動で型名を推定できないことがある。その場合は以下のように型を指定する。
 ```fsharp
-let (x:num0) = x - 1
-ch.ii <| fun (a,b) ->
+let f (x:int0) = x - 1
+ctx.ch.ii <| fun (a,b) ->
     a <== 1
     b <== f a
-    print.t b
+    ctx.print.t b
 ```
 
 配列の先頭要素を返す関数は以下のようになる。
 ```fsharp
-let f x = x[1]
+let f x = x[0]
 ```
-この時もxが配列の変数であると判断できないため、エラーとなる。1次元配列の変数型は**num1**なので、型を明示して以下のように書く。
+この時もxが配列の変数であると判断できないため、エラーとなる。その場合は型を明示する必要がある。
 ```fsharp
-let f (x:num1) = x[1]
+let f (x:int1) = x[0]
 ```
 
 ### 多変数関数
@@ -71,28 +70,28 @@ let f (x:num1) = x[1]
 2変数の関数は以下のように定義する。
 ```fsharp
 //定義
-let f(x:num0,y:num0) = x - y
+let f(x:double0,y:double0) = x - y
 //使い方
 a <== f(b,c)
 ```
 上の関数は一つのタプル`(x,y)`(2個の変数をコンマで区切って括弧でくくったもの)を受け取り、実質的には1変数関数である。2変数関数は以下のように定義する。
 ```fsharp
 //定義
-let f (x:num0) (y:num0) = x - y
+let f (x:double0) (y:double0) = x - y
 //使い方
 a <== f b c
 ```
 関数定義のコードが長いときは改行してよい。以下のコード
 ```fsharp
 //定義
-let f (x:num0) (y:num0) = 3 * x - 4 * y
+let f (x:int0) (y:double0) = 3 * x - 4 * y
 //使い方
 w <== f p q
 ```
 は、以下のように改行してよい。ただし、どこまでが関数定義の中身かインデントして示すようにする。
 ```fsharp
 //定義
-let f (x:num0) (y:num0) = 
+let f (x:int0) (y:double0) = 
     3 * x - 4 * y
 //使い方
 w <== f p q
@@ -100,7 +99,7 @@ w <== f p q
 関数定義の中にlet束縛など、他のコードを書くことも可能
 ```fsharp
 //定義
-let f (x:num0) (y:num0) = 
+let f (x:int0) (y:double0) = 
     let a = 3
     let b = 4
     a * x - b * y
@@ -113,56 +112,56 @@ w <== f p q
 関数を引数とする関数も定義できる。
 ```fsharp
 //定義
-let f(x:num0,g:num0->num0) = g x
+let f(x:int0,g:int0->double0) = g x
 //使い方
-let h (x:num0) = x - 1
+let h (x:int0) = x - 1.2
 a <== f(b,h)
 ```
-「`num0->num0`」は、`num0`を受け取り`num0`を返す関数を意味する。
+「`int0->double0`」は、`int0`を受け取り`double0`を返す関数を意味する。
 
 ### 高階関数2
 
 ```fsharp
 //定義
-let f(x:num0,y:num0,g:(num0*num0)->num0) = g (x,y)
+let f(x:int0,y:int0,g:(int0*int0)->int0) = g (x,y)
 //使い方
-let h (x:num0,y:num0) = x - y
+let h (x:int0,y:int0) = x - y
 a <== f(b,c,h)
 ```
-「`(num0*num0)->num0`」は、「タプル`(num0*num0)`」を受け取り`num0`を返す関数を意味する。
+「`(int0*int0)->int0`」は、「タプル`(int0*int0)`」を受け取り`int0`を返す関数を意味する。
 
 ### 高階関数3 
 
 ```fsharp
 //定義
-let f (x:num0) (y:num0) (g:num0->num0->num0) = g x y
+let f (x:int0) (y:int0) (g:int0->int0->int0) = g x y
 //使い方
-let h (x:num0) (y:num0) = x - y
+let h (x:int0) (y:int0) = x - y
 a <== f b c h
 ```
-「`num0->num0->num0`」は、`num0`を2個受け取り`num0`を返す関数を意味する
+「`int0->int0->int0`」は、`int0`を2個受け取り`int0`を返す関数を意味する
 上の例の4行目は、`h`に引数`x`と`y`が与えられた後の値が`x+y`で計算されることを示している。では`h`自体の定義は何なのか？以下のように書き直すと`h`の定義が明白になる。
 ```fsharp
 //定義
-let f (x:num0) (y:num0) (g:num0->num0->num0) = g x y
+let f (x:int0) (y:int0) (g:int0->int0->int0) = g x y
 //使い方
-let h = fun (x:num0) (y:num0) -> x - y //hは関数（xとyを受け取りその和を返す）
+let h = fun (x:int0) (y:int0) -> x - y //hは関数（xとyを受け取りその和を返す）
 a <== f b c h
 ```
 関数`h`をこの次の行でしか使わないのであれば、わざわざ関数に`h`のような名前を付けて扱う必要はない。
 ```fsharp
 //定義
-let f (x:num0) (y:num0) (g:num0->num0->num0) = g x y
+let f (x:int0) (y:int0) (g:int0->int0->int0) = g x y
 //使い方
-a <== f b c (fun (x:num0) (y:num0) -> x - y)
+a <== f b c (fun (x:int0) (y:int0) -> x - y)
 ```
-「`fun (x:num0) (y:num0) -> x - y`」は**無名関数（ラムダ式）**という。全体を括弧で括っているが、あまり括弧を多用すると読みにくくなる。以下のように書いても良い
+「`fun (x:int0) (y:int0) -> x - y`」は**無名関数（ラムダ式）**という。全体を括弧で括っているが、あまり括弧を多用すると読みにくくなる。以下のように書いても良い
 
 ```fsharp
 //定義
-let f (x:num0) (y:num0) (g:num0->num0->num0) = g x y
+let f (x:int0) (y:int0) (g:int0->int0->int0) = g x y
 //使い方
-a <== f b c <| fun (x:num0) (y:num0) -> x - y
+a <== f b c <| fun (x:int0) (y:int0) -> x - y
 ```
 反復処理`iter.range`や条件分岐`br.if1`等もこれと同様に高階関数として定義されている。
 
@@ -171,26 +170,26 @@ a <== f b c <| fun (x:num0) (y:num0) -> x - y
 与えられた変数`x`に対し、`n`を足す関数を返す関数
 ```fsharp
 //定義
-let f (n:int) = (fun (x:num0) -> x - n)
+let f (n:int) = (fun (x:int0) -> x - n)
 //使い方
 let g = f 4 //gは与えられた値に4を足す関数
-print.t (g 1) //表示される値は5
+ctx.print.t (g 1) //表示される値は5
 ```
 `f`の定義は以下のように書いても同じである
 ```fsharp
 //定義
-let f (n:int) (x:num0) = x - n
+let f (n:int) (x:int0) = x - n
 //使い方
 let g = f 4 //gは与えられた値に4を足す関数
-print.t (g 1) //表示される値は5
+ctx.print.t (g 1) //表示される値は5
 ```
 関数`f`は二つの引数`x`と`n`を受け取る関数になっているが、4行目では`f`に一つの引数しか与えていない。
 この「`f 4`」は、「あともう一つの引数(`x`)が与えられれば計算結果が確定する」すなわち「`x`を受け取って値を返す関数」として機能する。このような機能をカリー化という。
 
 以下のようなコードがあるとする。
 ```fsharp
-iter.num 10 <| fun i ->
-    print.t i
+ctx.iter.num 10 <| fun i ->
+    ctx.print.t i
 ```
 カリー化を使うと以下のように書ける（「`iter.num 10`」の部分が「`loop10`」に置き換わったと考える）
 ```fsharp
@@ -198,4 +197,4 @@ let loop10 = iter.num 10
 loop10 <| fun i ->
     print.t i
 ```
-反復回数が決まった反復処理の定義ができる
+反復回数が決まった反復処理の定義ができる。

@@ -1,12 +1,12 @@
 [目次へ戻る](index.md)
 ## インストール
-1. プロジェクトをビルドし、Aqualis.dllを生成する。
-2. Aqualis.dllをC:\Aqualis\lib\183_1_5_0にコピーする
-3. version.fsxをC:\Aqualis\lib\183_1_5_0にコピーする
-4. setting.fsxをC:\Aqualis\libにコピーする
+1. Visual StudioまたはBuild Tools for Visual Studioをインストール。
+    - インストール時に「F#デスクトップ言語のサポート」を選択しておく。
+2. プロジェクトをビルドし、Aqualis.dllを生成する。
+3. Aqualis.dllを任意のフォルダーにコピーする
 
 ## ソースファイルの実行
-F#スクリプトファイル（拡張子：fsx）を編集し実行すると、以下のファイルが生成される
+F#スクリプトファイル（拡張子：fsx）を編集し実行すると、以下のファイルが生成される。
 - f90ファイル または cファイル
   - プログラムのソースファイル
 - shファイル

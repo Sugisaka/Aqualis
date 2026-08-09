@@ -473,6 +473,8 @@ namespace Aqualis
         member this.t (x:int0) = this.tt (iv x)
         member this.t (x:double0) = this.tt (dv x)
         member this.t (x:complex0) = this.tt (zv x)
+        member this.t (x:int) = this.tt (iv (I x))
+        member this.t (x:double) = this.tt (dv (D x))
 
         member _.cc (lst:exprString) =
             match ctx.language with

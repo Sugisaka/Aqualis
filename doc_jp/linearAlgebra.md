@@ -60,25 +60,22 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\184_0_1_0"
+#I "C:\\Aqualis\\lib\\188_0_1_0"
 #r "Aqualis.dll"
-#load "version.fsx"
-
-let fullversion = preprocess.backup outputdir __SOURCE_DIRECTORY__ __SOURCE_FILE__ projectname version
  
 open Aqualis
  
-Compile [Fortran] outputdir projectname fullversion <| fun ctx ->
-    ch.d2 2 2 <| fun A ->
-        ch.d1 2 <| fun b ->
+Compile [Fortran] outputdir projectname version <| fun ctx ->
+    ctx.ch.d2 2 2 <| fun A ->
+        ctx.ch.d1 2 <| fun b ->
             A[1,1] <== 1.0
             A[1,2] <== 2.0
             A[2,1] <== 3.0
             A[2,2] <== 4.0
             b[1] <== 5.0
             b[2] <== 6.0
-            La.solve_simuleq(A,b)
-            b.foreach <| fun i -> print.tt i b[i]
+            ctx.la.solve_simuleq(A,b)
+            b.foreach <| fun i -> ctx.print.tt <| i++b[i]
 ```
 
 ### 複数の連立方程式の解
@@ -97,7 +94,7 @@ $$
 を解く。 $\boldsymbol{b}_1, \boldsymbol{b}_2, \cdots, \boldsymbol{b}_N$ を並べた2次元配列`b`を用意し
 
 ```fsharp
-La.solve_simuleqs(A,b)
+la.solve_simuleqs(A,b)
 ```
 
 とすると、`b`に連立方程式の解 $A^{-1}\boldsymbol{x}_1, A^{-1}\boldsymbol{x}_2, \cdots, A^{-1}\boldsymbol{x}_N$ が代入された状態になる。

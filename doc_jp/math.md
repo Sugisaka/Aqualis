@@ -13,11 +13,11 @@ z <== x - y
 ```fsharp
 z <== x * y
 ```
-徐算(`x`と`y`がint、dobubleに関わらず`z`は浮動小数点型になる
+徐算(`x`と`y`がint、dobubleに関わらず`z`は浮動小数点型になる)
 ```fsharp
 z <== x / y
 ```
-徐算（`x`と`y`は整数。`z`は小数点以下を切り捨てて整数型となる）
+徐算(`x`と`y`は整数。`z`は小数点以下を切り捨てて整数型となる)
 ```fsharp
 z <== x ./ y
 ```
@@ -59,18 +59,12 @@ z <== -x
 
 ### ハンケル関数
 
-モジュールの読み込みが必要
-
-```fsharp
-open Aqualis.bessel
-```
-
 #### 第2種0次ハンケル関数
 
 $H^{(2)}_0(x)$を計算。関数の値は`h`に保存されている
 
 ```fsharp
-besselh0 x <| fun h ->
+asm.besselh0 x <| fun h ->
     print.t h
 ```
 
@@ -79,6 +73,6 @@ besselh0 x <| fun h ->
 $H^{(2)}_1(x)$を計算。関数の値は`h`に保存されている
 
 ```fsharp
-besselh1 x <| fun h ->
+asm.besselh1 x <| fun h ->
     print.t h
 ```

@@ -7,25 +7,20 @@
 
 変数`x`、`y`、`z`の値をファイル「`test.dat`」に書き込む
 ```fsharp
-ch.id <| fun (x,y) ->
+ctx.ch.id <| fun (x,y) ->
     x <== 1
     y <== 2.0
-    io.fileOutput "test.dat" <| fun wr ->
-        wr [x; y] //セミコロンで区切っていくつでも指定可能
+    ctx.io.fileOutput "test.dat" <| fun wr ->
+        wr.t "aaa" //文字列を書き込み
+        wr.t x //変数を書き込み
+        wr.tt <| x++y //2個以上の変数をタブ区切りで書き込み
 ```
 以下はエラーになる
 ```fsharp
 let x = 1
 let y = 2.0
-io.fileOutput "test.dat" <| fun wr ->
-    wr [x; y]
-```
-括弧の中は`num0`型である必要があるが、`x`はint型、`y`はdouble型なのでエラーになる。以下のように書くとintやdoubleを強制的に`num0`に変換できる。
-```fsharp
-let x = 1
-let y = 2.0
-io.fileOutput "test.dat" <| fun wr ->
-    wr [I x; D y]
+ctx.io.fileOutput "test.dat" <| fun wr ->
+    wr.tt <| x++y
 ```
 複数のファイルを同時に開くことも可能。その際は書き込み指定子「`wr`」の名前を変える
 ```fsharp
@@ -34,8 +29,8 @@ ch.id <| fun (x,y) ->
     y <== 2.0
     io.fileOutput "test1.dat" <| fun wr1 ->
         io.fileOutput "test2.dat" <| fun wr2 ->
-            wr1 [x] //test1.datに書き込み
-            wr2 [x] //test2.datに書き込み
+            wr1.t x //test1.datに書き込み
+            wr2.t x //test2.datに書き込み
 ```
 ファイル名は整数の変数を指定することも可能
 ```fsharp
@@ -48,11 +43,11 @@ ch.i <| fun n ->
 
 以下のような内容のテキストファイル"test.dat"があるとき、
 ```
-       3    -1.230000000000000E+001
+           3    -1.230000000000000E+001
 ```
 ファイルの読み込みは以下のようにする。
 ```fsharp
 ch.id <| fun (x,y) ->
     io.fileInput "test.dat" <| fun rd ->
-        rd [x; y]
+        rd <| x++y
 ```
