@@ -188,11 +188,14 @@ namespace Aqualis
             if this.Active = 0 then
                 invalidOp "This GenerationContext is no longer active. Values created in a Compile callback cannot be used outside that callback."
         /// <summary>Runs an operation in a child context with parallel mode enabled.</summary>
-        member this.WithParallelMode(code:Aqualis -> unit) =
+        member this.WithParallelMode(code:Aqualis -> 'T) : 'T =
             this.EnsureActive()
+            let previousMode = this.ParallelMode
             this.ParallelMode <- true
-            code this
-            this.ParallelMode <- false
+            try
+                code this
+            finally
+                this.ParallelMode <- previousMode
 
         member _.Language with get() = lang
 
