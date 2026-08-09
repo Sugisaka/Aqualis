@@ -206,3 +206,41 @@ module CompilerScriptTests =
             Assert.Same(target, reboundStructure.Context)
             Assert.Same(target, reboundStructure.Value.Context)
             Assert.Contains("arg", reboundResult.code)
+
+    [<Fact>]
+    let ``function generation keeps the parent context open and inherits dependencies`` () =
+        use output = new TemporaryDirectory()
+
+        Compile
+            [C99]
+            output.Path
+            "function-context"
+            "1.0"
+            (fun context ->
+                context.ch.D "result" <| fun result ->
+                context.ch.D "value" <| fun value ->
+                    context.func "copy_value" <| fun childContext ->
+                        childContext.hlist.add "<time.h>"
+                        childContext.olist.add "-lchild"
+                        childContext.IsOpenMpUsed <- true
+                        result.farg childContext <| fun target ->
+                        value.farg childContext <| fun source ->
+                            target <== source
+
+                    Assert.Equal(1, context.Active)
+                    context.writein "/* parent remains open */")
+
+        let generated =
+            File.ReadAllText(
+                Path.Combine(output.Path, "function-context.c"))
+        let compileScript =
+            File.ReadAllText(
+                Path.Combine(output.Path, "proc_function-context_C.sh"))
+
+        Assert.Contains("#include <time.h>", generated)
+        Assert.Contains("void copy_value(", generated)
+        Assert.Contains("(*arg01) = (*arg02);", generated)
+        Assert.Contains("copy_value(&result, &value);", generated)
+        Assert.Contains("/* parent remains open */", generated)
+        Assert.Contains("gcc -fopenmp", compileScript)
+        Assert.Contains("-lchild", compileScript)

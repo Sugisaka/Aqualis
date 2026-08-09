@@ -9,7 +9,7 @@ namespace Aqualis
     open System.IO
     open System.Threading
    
-    type Aqualis(outputdir:string option,pjname:string option,lang:Language) =
+    type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool) =
         let cwriter = 
             match outputdir,pjname with
             |Some dir,Some filename ->
@@ -47,12 +47,15 @@ namespace Aqualis
         member _.FrameStack with get() = sequenceFrames and set(v) = sequenceFrames <- v
         /// 条件分岐枠スタックリスト
         member _.BranchStack with get() = sequenceBranches and set(v) = sequenceBranches <- v 
+        new(outputdir:string option,pjname:string option,lang:Language) =
+            new Aqualis(outputdir,pjname,lang,false)
         static member Version = "188.0.0.0"
-        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang)
+        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true)
         member _.Dir with get() = outputdir
         member _.ProjectName with get() = pjname
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(dir+"\\"+src) |_ -> None
         member _.ContextId with get() = contextId
+        member internal _.IsNeutral = isNeutral
         member internal _.ParallelMode with get() = parallelMode and set v = parallelMode <- v
         member internal _.SequenceGate = sequenceGate
         member _.Active = active
@@ -131,21 +134,25 @@ namespace Aqualis
             left.ContextId = right.ContextId
 
         static member merge (left:Aqualis) (right:Aqualis) =
-            let lang = 
-                match left.language,right.language with 
-                |a,Numeric |Numeric,a -> a
-                |a,b when a=b -> a
-                |_ ->
-                    invalidOp "Values from different language cannot be combined."
-            match left.CodeFile, right.CodeFile with
-            |None, None -> Aqualis.BlankWriter lang
-            |Some context, None -> left
-            |None, Some context -> right
-            |Some leftContext, Some rightContext when leftContext = rightContext -> left
-            |Some _, Some _ -> invalidOp "Values from different GenerationContext instances cannot be combined."
+            match left.language,right.language with
+            |_,Numeric |Numeric,_ -> ()
+            |a,b when a=b -> ()
+            |_ ->
+                invalidOp "Values from different language cannot be combined."
+            match left.IsNeutral, right.IsNeutral with
+            |true, true -> left
+            |true, false -> right
+            |false, true -> left
+            |false, false when Aqualis.sameTarget left right -> left
+            |false, false ->
+                invalidOp (
+                    "Values from different GenerationContext instances cannot be combined. " +
+                    $"Left context: {left.ContextId}; right context: {right.ContextId}.")
 
         static member mergeMany contexts =
-            contexts |> Seq.fold Aqualis.merge (Aqualis.BlankWriter Numeric)
+            match contexts |> Seq.toList with
+            |[] -> Aqualis.BlankWriter Numeric
+            |first::rest -> rest |> List.fold Aqualis.merge first
         static member requireTarget context =
             context
             |> Option.defaultWith (fun () ->

@@ -68,6 +68,43 @@ module GenerationContextTests =
         Assert.Same(first, inherited.Context)
 
     [<Fact>]
+    let ``contexts with the same output path remain distinct`` () =
+        use output = new TemporaryDirectory()
+        use first = createContext output.Path "same-output.c" C99
+        let left = double0(Var(Dt, "left", NaN), first)
+        first.close()
+        use second = createContext output.Path "same-output.c" C99
+        let right = double0(Var(Dt, "right", NaN), second)
+
+        Assert.NotEqual(first.ContextId, second.ContextId)
+        Assert.Throws<InvalidOperationException>(fun () -> left + right |> ignore)
+        |> ignore
+
+    [<Fact>]
+    let ``writerless non-Numeric contexts are not neutral`` () =
+        use first = new Aqualis(None, None, C99)
+        use second = new Aqualis(None, None, C99)
+        let left = int0(Var(It 4, "left", NaN), first)
+        let sameContext = int0(Var(It 4, "same", NaN), first)
+        let foreign = int0(Var(It 4, "foreign", NaN), second)
+
+        Assert.Same(first, (left + sameContext).Context)
+        Assert.Throws<InvalidOperationException>(fun () -> left + foreign |> ignore)
+        |> ignore
+
+    [<Fact>]
+    let ``Numeric contexts remain neutral during merges`` () =
+        let left = int0(Int 1)
+        let right = int0(Int 2)
+        let combined = left + right
+        use empty = Aqualis.mergeMany Seq.empty
+
+        Assert.True(left.Context.IsNeutral)
+        Assert.True(right.Context.IsNeutral)
+        Assert.Same(left.Context, combined.Context)
+        Assert.True(empty.IsNeutral)
+
+    [<Fact>]
     let ``values and contexts cannot write after a Compile callback`` () =
         use output = new TemporaryDirectory()
         let mutable escapedValue:int0 option = None
