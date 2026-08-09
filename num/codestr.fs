@@ -74,12 +74,12 @@ type ContextGroup internal (ctx:Aqualis) =
 
     member private this.Heading marker displayPrefix displaySuffix label code =
         this.Header marker label
-        if ctx.DisplaySection <> 0 then ctx.print.s (displayPrefix + label)
+        if ctx.DisplaySection then ctx.print.s (displayPrefix + label)
         if ctx.language = Python then code()
         else
             ctx.indentInc()
             try code() finally ctx.indentDec()
-        if ctx.DisplaySection <> 0 then ctx.print.s (displaySuffix + label)
+        if ctx.DisplaySection then ctx.print.s (displaySuffix + label)
         this.Footer marker label
         write ""
 

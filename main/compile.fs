@@ -109,11 +109,11 @@ namespace Aqualis
                                 options
                                 (projectname + ".exe")
                             |> wr.WriteLine
-                        if context.IsOpenAccUsed<>0 then
+                        if context.IsOpenAccUsed then
                             writeCompileCommand
                                 "/usr/bin/pgfortran"
                                 ["-acc"; "-Minfo=accel"]
-                        else if context.IsOpenMpUsed<>0 then
+                        else if context.IsOpenMpUsed then
                             writeCompileCommand
                                 "/usr/bin/gfortran"
                                 ["-fopenmp"]
@@ -185,12 +185,12 @@ namespace Aqualis
                                 options
                                 (projectname + ".exe")
                             |> wr.WriteLine
-                        if context.IsOpenMpUsed<>0 then
+                        if context.IsOpenMpUsed then
                             wr.Write "#!/bin/bash\n"
                             wr.Write "\n"
                             writeCompileCommand "gcc" ["-fopenmp"]
                             ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
-                        else if context.IsOpenAccUsed<>0 then
+                        else if context.IsOpenAccUsed then
                             wr.Write "#!/bin/bash"
                             wr.Write "\n"
                             writeCompileCommand "pgcc" ["-acc"; "-Minfo=accel"]

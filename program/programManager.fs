@@ -30,10 +30,9 @@ namespace Aqualis
             match cwriter with
             |Some writer -> action writer
             |None -> ()
-        let mutable displaySection = 0
-        let mutable isOpenMpUsed = 0
-        let mutable isOpenAccUsed = 0
-        let mutable currentIndex = 0
+        let mutable displaySection = false
+        let mutable isOpenMpUsed = false
+        let mutable isOpenAccUsed = false
         let mutable parallelMode = false
         let mutable terminalLifeLine = 100.0
         let mutable sequenceVariables : (string*int*float) list = []
@@ -54,7 +53,6 @@ namespace Aqualis
         member _.ProjectName with get() = pjname
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(dir+"\\"+src) |_ -> None
         member _.ContextId with get() = contextId
-        member internal _.CurrentIndex with get() = currentIndex and set v = currentIndex <- v
         member internal _.ParallelMode with get() = parallelMode and set v = parallelMode <- v
         member internal _.SequenceGate = sequenceGate
         member _.Active = active

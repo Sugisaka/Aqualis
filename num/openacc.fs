@@ -5,7 +5,7 @@ open System
 type ContextOpenAcc internal (c:Aqualis) =
 
     member _.parallelize code =
-        c.IsOpenAccUsed <- 1
+        c.IsOpenAccUsed <- true
         let copyIn = c.varCopyIn.list |> List.map (fun (_,_,name,_) -> name)
         let copyOut = c.varCopyOut.list |> List.map (fun (_,_,name,_) -> name)
         let dataClause =

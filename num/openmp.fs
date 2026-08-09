@@ -19,7 +19,7 @@ type ContextOmp internal (c:Aqualis) =
             |> sprintf " private(%s)"
 
     let emitParallelFor (threadCount:int option) (reduction:string option) code =
-        c.IsOpenMpUsed <- 1
+        c.IsOpenMpUsed <- true
         match c.language with
         |Fortran -> c.mlist.add "omp_lib"
         |C99 -> c.hlist.add "<omp.h>"
@@ -53,7 +53,7 @@ type ContextOmp internal (c:Aqualis) =
         |_ -> invalidArg (nameof operation) "OpenMP reduction supports +, -, and *."
 
     member _.sections threadCount code =
-        c.IsOpenMpUsed <- 1
+        c.IsOpenMpUsed <- true
         match c.language with
         |Fortran -> c.mlist.add "omp_lib"
         |C99 -> c.hlist.add "<omp.h>"
