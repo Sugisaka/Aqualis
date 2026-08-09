@@ -512,7 +512,7 @@ namespace Aqualis
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(dir + "\\" + projectname + ".c", 2, C99)
+                        use writer = new codeWriter(dir + "\\" + projectname + ".js", 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")
@@ -521,21 +521,8 @@ namespace Aqualis
                         writer.codewritein("/* Aqualis version: " + Aqualis.Version + " */\n")
                         writer.codewritein("/* Generated date: " + System.DateTime.Now.ToString() + " */\n")
                         writer.codewritein "/*=============================================================================================*/\n"
-                        writer.codewritein "#include <stdio.h>\n"
-                        writer.codewritein "#include <stdlib.h>\n"
-                        writer.codewritein "#include <complex.h>\n"
-                        writer.codewritein "#include <math.h>\n"
-                        //ヘッダファイルのインクルード
-                        List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.hlist.list
-                        writer.codewritein "#undef I\n"
-                        writer.codewritein "#define uj _Complex_I\n"
-                        //構造体の定義
-                        context.str.Def_Structure writer
                         //グローバル変数の宣言
                         declareall context writer
-                        //extern指定子
-                        for s in context.elist.list do
-                            writer.codewritein ("extern " + s + ";\n")
                         //関数定義
                         for funname in context.flist.list do
                             writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
