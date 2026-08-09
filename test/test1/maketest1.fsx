@@ -21,15 +21,18 @@ wr.WriteLine "open Aqualis"
 wr.WriteLine ""
 wr.WriteLine "Compile [Fortran;C99;Python] outputdir projectname \"aaa\" <| fun ctx ->"
 wr.WriteLine "    ctx.io.fileOutput \"result.dat\" <| fun wr ->"
-wr.WriteLine "    ctx.ch.dddd <| fun (x,y,z1,z2) ->"
-wr.WriteLine("        let p = " + r.Next(9).ToString() + "." + r.Next(9).ToString())
-wr.WriteLine("        let q = " + r.Next(9).ToString() + "." + r.Next(9).ToString())
-wr.WriteLine "        x <== p"
-wr.WriteLine "        y <== q"
+wr.WriteLine "    ctx.ch.D \"x\" <| fun p ->"
+wr.WriteLine "    ctx.ch.D \"y\" <| fun q ->"
+wr.WriteLine "    ctx.ch.d <| fun z1 ->"
+wr.WriteLine "    ctx.ch.d <| fun z2 ->"
+wr.WriteLine("        let x = D " + r.Next(9).ToString() + "." + r.Next(9).ToString())
+wr.WriteLine("        let y = D " + r.Next(9).ToString() + "." + r.Next(9).ToString())
+wr.WriteLine "        p <== x"
+wr.WriteLine "        q <== y"
 for i in 1..1000 do
     printfn "%d" i
     wr.WriteLine("        //printfn \"%d\" "+i.ToString())
-    wr.WriteLine("        ctx.comment \"test" + i.ToString "000" + "\"")
+    wr.WriteLine("        ctx.print.s \"test" + i.ToString "000" + "\"")
     let rec maketerm(n:int) =
         match if n=0 then 0 else r.Next 2 with
         |0 ->
@@ -57,15 +60,14 @@ for i in 1..1000 do
                 eq <- (if eq="" then eq else eq + op) + maketerm(n-1)
             if m=0 then eq else "("+eq+")"
     let eq = maketerm 3
-    wr.WriteLine("        //let z0 = " + eq)
-    wr.WriteLine("        //printfn \"%d\" <| " + i.ToString())
-    wr.WriteLine "        //printfn \"original:\""
-    wr.WriteLine "        //printfn \"%s\" <| z0.Expr.ToString()"
-    wr.WriteLine "        //printfn \"simp:\""
-    wr.WriteLine "        //printfn \"%s\" <| z0.Expr.simp.ToString()"
-    if eq.Contains("x") || eq.Contains("y") then
-        wr.WriteLine("        let s = (" + eq + ").Expr.eval()")
-        wr.WriteLine "        if (not <| s.ToString().Contains(\"NaN\")) && (not <| s.ToString().Contains(\"∞\")) then"
+    wr.WriteLine("        //equation: " + eq)
+    if eq.Contains "x" || eq.Contains "y" then
+        wr.WriteLine("        let s = (" + eq + ").Expr.simp.eval()")
+        wr.WriteLine "        if s.ToString().Contains(\"NaN\") then"
+        wr.WriteLine "            ctx.print.s \"NaN\""
+        wr.WriteLine "        elif s.ToString().Contains(\"∞\") then"
+        wr.WriteLine "            ctx.print.s \"Infinity\""
+        wr.WriteLine "        else"
         wr.WriteLine("            z1 <== " + eq.Replace("x","p").Replace("y","q"))
         wr.WriteLine("            z2 <== " + eq)
         wr.WriteLine("            wr.tt <| (I " + i.ToString() + ")++z1++z2++asm.abs(z1-z2)")

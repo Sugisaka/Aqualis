@@ -27,6 +27,10 @@ namespace Aqualis
                     True
                 |False -> 
                     False
+                |Inv (_,Int v) -> 
+                    Int -v
+                |Inv (_,Dbl v) -> 
+                    Dbl -v
                 |Int x -> 
                     Int x
                 |Dbl x -> 

@@ -15,9 +15,9 @@ namespace Aqualis
             
             static member simpInv(x:expr) =
                 match x with
-                |Int v when v <= 0   -> Int -v
-                |Dbl v when v <= 0.0 -> Dbl -v
-                |Cpx(0.0,0.0) -> Cpx(0.0,0.0)
+                |Int v -> Int -v
+                |Dbl v -> Dbl -v
+                |Cpx(re,im) -> Cpx(-re,-im)
                 |Inv(_,v) -> v
                 |Sub(_,a,b) -> expr.simpSub(b,a)
                 |_ -> Inv(x.etype,x)
@@ -35,8 +35,16 @@ namespace Aqualis
                 |Cpx(v1re,v1im),Int v2 -> Cpx(v1re+double v2,v1im)
                 |Cpx(v1re,v1im),Dbl v2 -> Cpx(v1re+v2,v1im)
                 |Cpx(v1re,v1im),Cpx(v2re,v2im) -> Cpx(v1re+v2re,v1im+v2im)
+                |Int xx,Inv(_,y) when xx<0 -> (-(Int -xx + y)).simp
+                |Dbl xx,Inv(_,y) when xx<0.0 -> (-(Dbl -xx + y)).simp
+                |Inv(_,x),Int yy when yy<0 -> (-(x + Int -yy)).simp
+                |Inv(_,x),Dbl yy when yy<0.0 -> (-(x + Dbl -yy)).simp
                 |Inv(_,x),Inv(_,y) -> (-(x+y)).simp
+                |_,Int yy when yy<0 -> (x-Int -yy).simp
+                |_,Dbl yy when yy<0.0 -> (x-Dbl -yy).simp
                 |_,Inv(_,y) -> (x-y).simp
+                |Int xx,_ when xx<0 -> (y - Int -xx).simp
+                |Dbl xx,_ when xx<0.0 -> (y - Dbl -xx).simp
                 |Inv(_,x),_ -> (y-x).simp
                 |_ when expr.equal(x,y) -> 
                     (Int 2*x).simp
@@ -102,8 +110,16 @@ namespace Aqualis
                 |Cpx(v1re,v1im),Int v2 -> Cpx(v1re-double v2,v1im)
                 |Cpx(v1re,v1im),Dbl v2 -> Cpx(v1re-v2,v1im)
                 |Cpx(v1re,v1im),Cpx(v2re,v2im) -> Cpx(v1re-v2re,v1im-v2im)
+                |Int xx,Inv(_,y) when xx<0 -> (y - Int -xx).simp
+                |Dbl xx,Inv(_,y) when xx<0.0 -> (y - Dbl -xx).simp
+                |Inv(_,x),Int yy when yy<0 -> (Int -yy - x).simp
+                |Inv(_,x),Dbl yy when yy<0.0 -> (Dbl -yy - x).simp
                 |Inv(_,x),Inv(_,y) -> (y-x).simp
+                |Int xx,_ when xx<0 -> (-(Int -xx + y).simp).simp
+                |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx + y).simp).simp
                 |Inv(_,x),_ -> (-(x+y).simp).simp
+                |_,Int yy when yy<0 -> (x + Int -yy).simp
+                |_,Dbl yy when yy<0.0 -> (x + Dbl -yy).simp
                 |_,Inv(_,y) -> (x+y).simp
                 |v1,v2 when expr.equal(v1,v2) -> Int 0
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,c) -> ((b-d).simp*a).simp
@@ -163,8 +179,16 @@ namespace Aqualis
                 |Cpx(v1re,v1im),Int v2 -> Cpx(v1re*double v2,v1im*double v2)
                 |Cpx(v1re,v1im),Dbl v2 -> Cpx(v1re*v2,v1im*v2)
                 |Cpx(v1re,v1im),Cpx(v2re,v2im) -> Cpx(v1re*v2re-v1im*v2im,v1re*v2im+v1im*v2re)
+                |Int xx,Inv(_,y) when xx<0 -> (Int -xx * y).simp
+                |Dbl xx,Inv(_,y) when xx<0.0 -> (Dbl -xx * y).simp
+                |Inv(_,x),Int yy when yy<0 -> (x * Int -yy).simp
+                |Inv(_,x),Dbl yy when yy<0.0 -> (x * Dbl -yy).simp
                 |Inv(_,x),Inv(_,y) -> (x*y).simp
+                |_,Int yy when yy<0 -> (-(x * Int -yy).simp).simp
+                |_,Dbl yy when yy<0.0 -> (-(x * Dbl -yy).simp).simp
                 |_,Inv(_,y) -> (-(x*y).simp).simp
+                |Int xx,_ when xx<0 -> (-(Int -xx * y).simp).simp
+                |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx * y).simp).simp
                 |Inv(_,x),_ -> (-(x*y).simp).simp
                 |Mul(_,a,b),c ->
                     let a = a.simp
@@ -226,8 +250,16 @@ namespace Aqualis
                 |Cpx (xre,xim), Dbl y -> Cpx (xre/y,xim/y)
                 |Cpx (xre,xim), Cpx (yre,yim) -> let d = yre*yre+yim*yim in Cpx((xre*yre+xim*yim)/d, (-xre*yim+xim*yre)/d)
                 |_ when expr.equal(x,y) -> Int 1
+                |Int xx,Inv(_,y) when xx<0 -> (Int -xx / y).simp
+                |Dbl xx,Inv(_,y) when xx<0.0 -> (Dbl -xx / y).simp
+                |Inv(_,x),Int yy when yy<0 -> (x / Int -yy).simp
+                |Inv(_,x),Dbl yy when yy<0.0 -> (x / Dbl -yy).simp
                 |Inv(_,x),Inv(_,y) -> (x/y).simp
+                |_,Int yy when yy<0 -> (-(x/Int -yy).simp).simp
+                |_,Dbl yy when yy<0.0 -> (-(x/Dbl -yy).simp).simp
                 |_,Inv(_,y) -> (-(x/y).simp).simp
+                |Int xx,_ when xx<0 -> (-(Int -xx / y).simp).simp
+                |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx / y).simp).simp
                 |Inv(_,x),_ -> (-(x/y).simp).simp
                 |Mul(_,a,b),c ->
                     let a = a.simp
