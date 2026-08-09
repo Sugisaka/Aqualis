@@ -15,7 +15,7 @@ open Aqualis
     /// testClass1
     /// </summary>
     type testClass1(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass1>(sname_,name,?context=ctx.GenerationContext)
+        inherit structureValue<testClass1>(sname_,name,ctx)
         static member sname = "testClass1"
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)

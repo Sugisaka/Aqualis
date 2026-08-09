@@ -12,7 +12,7 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
     type testClass1(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass1>(sname_,name,?context=ctx.GenerationContext)
+        inherit structureValue<testClass1>(sname_,name,ctx)
         static member sname = "testClass1"
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)
@@ -26,7 +26,7 @@ open Aqualis
             testClass1(testClass1.sname,ctx.str.mem(vname,name),ctx)
         
     type testClass1_1(sname_,name,size1,ctx:Aqualis) =
-        inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,?context=ctx.GenerationContext)
+        inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,ctx)
         new(name,size1,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name,size1)
             testClass1_1(testClass1.sname,name,A1 size1,ctx)
@@ -38,7 +38,7 @@ open Aqualis
             testClass1_1(testClass1.sname,ctx.str.mem(vname,name), size1,ctx)
         
     type testClass2(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass2>(sname_,name,?context=ctx.GenerationContext)
+        inherit structureValue<testClass2>(sname_,name,ctx)
         static member sname = "testClass2"
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass2.sname,name)
@@ -51,7 +51,7 @@ open Aqualis
         member public __.t1 = testClass1_1.str_mem(testClass2.sname,name,"t2",A1 0,ctx)
         
     type testClass2_1(sname_,name,size1,ctx:Aqualis) =
-        inherit structureArray1<testClass2,testClass2_1>(sname_,name,size1,?context=ctx.GenerationContext)
+        inherit structureArray1<testClass2,testClass2_1>(sname_,name,size1,ctx)
         new(name,size1,ctx:Aqualis) =
             ctx.str.reg(testClass2.sname,name,size1)
             testClass2_1(testClass2.sname,name,A1(size1),ctx)

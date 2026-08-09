@@ -45,7 +45,7 @@ type AnimationSetting = {
     FrameNumber:int}
 
 [<AbstractClass>]
-type Character(context:Aqualis,scriptDataDir:string,name:string) =
+type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
     /// jsonファイル名（フルパス）
     let scriptDataFileName = scriptDataDir + "\\" + name + ".json"
     let jsonOptions =
@@ -97,7 +97,7 @@ type Character(context:Aqualis,scriptDataDir:string,name:string) =
         |Some x ->
             x, this.audioFile x, this.scriptColor
     member this.script(text:exprString) =
-        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH context+"\\)") ""
+        let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH context.BodyContext+"\\)") ""
         let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+x.evalT()) ""
         this.script(subtitle,script)
     member this.script(text:string) = this.script (exprString text)

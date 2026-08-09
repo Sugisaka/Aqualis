@@ -15,7 +15,7 @@ open Aqualis
     /// testClass1
     /// </summary>
     type testClass1(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass1>(sname_,name,?context=ctx.GenerationContext)
+        inherit structureValue<testClass1>(sname_,name,ctx)
         static member sname = "testClass1"
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)
@@ -29,7 +29,7 @@ open Aqualis
     /// testClass1の配列
     /// </summary>
     type testClass1_1(sname_,name,size1,ctx:Aqualis) =
-        inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,?context=ctx.GenerationContext)
+        inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,ctx)
         new(name,size1,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name,size1)
             testClass1_1(testClass1.sname,name,A1 size1,ctx)

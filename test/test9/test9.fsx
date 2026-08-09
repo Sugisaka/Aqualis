@@ -88,34 +88,34 @@ let mainPage() =
                     ctx.br.branch <| fun b ->
                         // ユーザーが存在しない
                         b.IF (loginState .= 0) <| fun () ->
-                            ctx.emit.writein "ユーザーが存在しません<br>"
-                            ctx.emit.writein "ID:"
+                            ctx.writein "ユーザーが存在しません<br>"
+                            ctx.writein "ID:"
                             textBoxUserID.show_copy()
-                            ctx.emit.writein "パスワード:"
+                            ctx.writein "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ユーザーが存在しない
                         b.IF (loginState .= 1) <| fun () ->
-                            ctx.emit.writein "パスワードが誤りです<br>"
-                            ctx.emit.writein "ID:"
+                            ctx.writein "パスワードが誤りです<br>"
+                            ctx.writein "ID:"
                             textBoxUserID.show_copy()
-                            ctx.emit.writein "パスワード:"
+                            ctx.writein "パスワード:"
                             textBoxUserPW.show_password_copy()
                             buttonLogin.show "ログイン"
                         // ログイン成功
                         b.EL <| fun () ->
-                            ctx.emit.writein "ID:"
+                            ctx.writein "ID:"
                             textBoxUserID.show_copy_lock()
-                            ctx.emit.writein "パスワード:"
+                            ctx.writein "パスワード:"
                             textBoxUserPW.show_password_copy_lock()
                             buttonLogin.show_disabled "ログイン"
-                            ctx.emit.writein "<br>"
-                            ctx.emit.writein "ログイン後のコンテンツ"
+                            ctx.writein "<br>"
+                            ctx.writein "ログイン後のコンテンツ"
                 <| fun () ->
                     // ログインボタンを押していないとき
-                    ctx.emit.writein "ID:"
+                    ctx.writein "ID:"
                     textBoxUserID.show()
-                    ctx.emit.writein "パスワード:"
+                    ctx.writein "パスワード:"
                     textBoxUserPW.show_password()
                     buttonLogin.show "ログイン"
 

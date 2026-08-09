@@ -59,6 +59,12 @@ type MathText<'a when 'a :> INum0> = {
     /// 表示する数式
     eq:'a; }
 
+[<AutoOpen>]
+module HtmlGenerationExtensions1 =
+    type HtmlGenerationContext with
+        
+        member this.html = html this.BodyContext
+
 module private AnimationRendering =
     let private target (context:Aqualis) (value:INum0) =
         Aqualis.merge context value.Context |> ignore
@@ -87,7 +93,7 @@ type AnimationLine(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:int
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.BodyContext.html.taga ("line", [Atr("id",id);]@[s0.atr])
+        context.html.taga ("line", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -124,7 +130,7 @@ type AnimationEllipse(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.BodyContext.html.taga ("ellipse", [Atr("id",id);]@[s0.atr])
+        context.html.taga ("ellipse", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -161,7 +167,7 @@ type AnimationArc(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:int)
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.BodyContext.html.taga ("path", [Atr("id",id);]@[s0.atr])
+        context.html.taga ("path", [Atr("id",id);]@[s0.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -211,7 +217,7 @@ type AnimationText(context:HtmlGenerationContext,s:Style,originX:int,originY:int
     let ss0 = Style ([{Key="display";Value="none"}]@ss.list)
     let ss1 = Style ([{Key="display";Value="block"}]@ss.list)
     do
-        context.BodyContext.html.tagb ("div", [Atr("id",id); ss0.atr]) <| fun () -> ()
+        context.html.tagb ("div", [Atr("id",id); ss0.atr]) <| fun () -> ()
     /// <summary>
     /// 割り当てられたidを取得
     /// </summary>
@@ -265,7 +271,7 @@ type AnimationPolygon(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)
     let s1 = Style ([{Key="visibility";Value="visible"}]@s.list)
     do
-        context.BodyContext.html.taga ("polygon", [Atr("id", id);] @ [s.atr])
+        context.html.taga ("polygon", [Atr("id", id);] @ [s.atr])
     /// <summary>
     /// 割り当てられたidを取得する
     /// </summary>
@@ -887,49 +893,9 @@ module HtmlWebExtensions =
             Bottom = p.y+double height+2.0*double padding;}
 
 [<AutoOpen>]
-module HtmlGenerationExtensions =
+module HtmlGenerationExtensions2 =
     type HtmlGenerationContext with
-        // member this.taga (t:string,atr:list<Atr>,c:Aqualis) =
-        //     c.writein("<"+t+" "+Atr.list atr+" />")
-        // /// 内部要素のないタグ
-        // member this.taga (t:string,c:Aqualis) =
-        //     c.writein("<"+t+" ")
-        //     c.writein " />"
-        // /// 内部要素のないタグ
-        // member this.taga (t:string,a:string,c:Aqualis) =
-        //     c.writein("<"+t+" "+a+" />")
-        // /// 内部要素のあるタグ
-        // member this.tagb (t:string,atr:list<Atr>,c:Aqualis) = fun code ->
-        //     let a = Atr.list atr
-        //     if a = "" then
-        //         c.writein("<"+t+">")
-        //     else
-        //         c.writein("<"+t+" "+a+" >")
-        //     code()
-        //     c.writein ("</"+t+">")
-
-        // /// 内部要素のあるタグ
-        // member this.tagb (t:string,a:string,c:Aqualis) = fun code ->
-        //     if a="" then
-        //         c.writein("<"+t+">")
-        //     else
-        //         c.writein("<"+t+" "+a+">")
-        //     code()
-        //     c.writein ("</"+t+">")
-        // /// 内部要素のあるタグ
-        // member this.tagb (t:string,c:Aqualis) = fun code ->
-        //     c.writein("<"+t+">")
-        //     code()
-        //     c.writein ("</"+t+">")
-        // member this.tagv (t:string,atr:list<Atr>,c:Aqualis) =
-        //     c.writein("<" + t + " " + Atr.list atr + ">")
-        // member this.tage (t:string,c:Aqualis) =
-        //     c.writein("</" + t + ">")
-        // member this.tag (tagname:string,c:Aqualis) (s:string) code =
-        //     this.tagb (tagname, s, c) code
-        // member this.tag_ (tagname:string,c:Aqualis) (s:string) =
-        //     this.taga (tagname, s, c)
-            
+        
         /// <summary>
         /// 指定位置に画像を表示する
         /// </summary>
@@ -946,7 +912,7 @@ module HtmlGenerationExtensions =
             else
                 printfn "image file not exist: %s" filename
             let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.BodyContext.html.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.ContentsDirectory) + "\\" + f)])
+            this.html.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.ContentsDirectory) + "\\" + f)])
         member this.image (s:Style, id:string) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -956,7 +922,7 @@ module HtmlGenerationExtensions =
                     printfn "directory not exist: %s" this.ContentsDirectory
             else
                 printfn "image file not exist: %s" filename
-            this.BodyContext.html.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+            this.html.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
         member this.image (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -966,7 +932,7 @@ module HtmlGenerationExtensions =
                     printfn "directory not exist: %s" this.ContentsDirectory
             else
                 printfn "image file not exist: %s" filename
-            this.BodyContext.html.taga ("img", [s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+            this.html.taga ("img", [s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
         member this.image (filename:string) =
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -976,7 +942,7 @@ module HtmlGenerationExtensions =
                     printfn "directory not exist: %s" this.ContentsDirectory
             else
                 printfn "image file not exist: %s" filename
-            this.BodyContext.html.taga ("img", [Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+            this.html.taga ("img", [Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
         /// <summary>
         /// 指定位置に動画を表示する
         /// </summary>
@@ -993,8 +959,8 @@ module HtmlGenerationExtensions =
             else
                 printfn "video file not exist: %s" filename
             let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.BodyContext.html.tagv ("video", [st.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
-            this.BodyContext.html.tage "video"
+            this.html.tagv ("video", [st.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.html.tage "video"
         member this.video (s:Style) = fun (filename:string) ->
             let f = Path.GetFileName filename
             if File.Exists filename then
@@ -1004,8 +970,8 @@ module HtmlGenerationExtensions =
                     printfn "directory not exist: %s" this.ContentsDirectory
             else
                 printfn "video file not exist: %s" filename
-            this.BodyContext.html.tagv ("video", [s.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
-            this.BodyContext.html.tage "video"
+            this.html.tagv ("video", [s.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.html.tage "video"
         /// <summary>
         /// キャラクター付き解説ページ
         /// </summary>
@@ -1017,26 +983,26 @@ module HtmlGenerationExtensions =
                 this.AddAudioFile(
                     match audioFile with |Some t -> t |None -> "")
                 // 字幕枠
-                this.BodyContext.html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                this.html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
                     ()
                 // キャラクター画像
-                this.BodyContext.html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
+                this.html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
                     for ci in c do
                         if File.Exists ci.CharacterImageFile then
                             if Directory.Exists contentsDirectory then
                                 File.Copy(ci.CharacterImageFile, contentsDirectory+"\\"+Path.GetFileName ci.CharacterImageFile, true)
-                                this.BodyContext.html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
+                                this.html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
                             else
                                 printfn "directory not exist: %s" contentsDirectory
                         else
                             printfn "character image file not exist: %s" ci.CharacterImageFile
                 // 字幕
-                this.BodyContext.html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                this.html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
                     <| fun () -> this.BodyContext.writein audio.Subtitle
                 this.switchAutoAnimation <| fun ctx ->
                     ctx.writein ("page"+animationCounter.ToString()+": () => {")
                 // メインコンテンツ
-                this.BodyContext.html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
+                this.html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
                     code2 p
                 this.switchAutoAnimation <| fun ctx ->
                     ctx.writein "},"
@@ -1052,55 +1018,55 @@ module HtmlGenerationExtensions =
         /// <param name="p">スライドの表示位置</param>
         member this.slide (p:position)  code =
                 let animationCounter = this.NextAnimationNumber()
-                this.BodyContext.html.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
+                this.html.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
                     code p
         /// <summary>
         /// 前のページへ移動するボタンを生成
         /// </summary>
         member this.prevButton() =
-                this.BodyContext.html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
+                this.html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
                     this.BodyContext.writein "前へ"
         /// <summary>
         /// 次のページへ移動するボタンを生成
         /// </summary>
         member this.nextButton() =
-                this.BodyContext.html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
+                this.html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
                     this.BodyContext.writein "次へ"
         /// <summary>
         /// アニメーションを開始するボタンを生成
         /// </summary>
         member this.startButton2(id:string) (s:Style) (c:string) =
-                this.BodyContext.html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
+                this.html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
                     this.BodyContext.writein "Start"
         /// <summary>
         /// アニメーションをリセットするボタンを生成
         /// </summary>
         member this.resetButton2(id:string) (s:Style) (c:string) =
-                this.BodyContext.html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
+                this.html.tagb ("button", [Atr("id",id); Atr("onclick",c)]@[s.atr]) <| fun () ->
                     this.BodyContext.writein "Reset"
         /// <summary>
         /// キャラクター表示を制御するチェックボックスを生成
         /// </summary>
         member this.switchCharacter() =
-            this.BodyContext.html.taga ("input", ("type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.CharacterEnabled then "checked" else ""))
-            this.BodyContext.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
+            this.html.taga ("input", ("type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.CharacterEnabled then "checked" else ""))
+            this.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
                 this.BodyContext.writein "キャラクター"
         /// <summary>
         /// 字幕表示を制御するチェックボックスを生成
         /// </summary>
         member this.switchSubtitle() =
-            this.BodyContext.html.taga ("input", ("type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.SubtitleEnabled then "checked" else ""))
-            this.BodyContext.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
+            this.html.taga ("input", ("type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.SubtitleEnabled then "checked" else ""))
+            this.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
                 this.BodyContext.writein "字幕"
         /// <summary>
         /// 音声再生を制御するチェックボックスを生成
         /// </summary>
         member this.switchAudio() =
-            this.BodyContext.html.taga ("input", ("type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.VoiceEnabled then "checked" else ""))
-            this.BodyContext.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
+            this.html.taga ("input", ("type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.VoiceEnabled then "checked" else ""))
+            this.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
                 this.BodyContext.writein "音声"
         member this.audioPlayer() =
-                this.BodyContext.html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
+                this.html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
         /// <summary>
         /// 指定位置に画像を表示
         /// </summary>
@@ -1116,7 +1082,7 @@ module HtmlGenerationExtensions =
                     printfn "directory not exist: %s" (this.ContentsDirectory)
             else
                 printfn "image file not exist: %s" filename
-            this.BodyContext.html.taga ("img", [(s1+s).atr])
+            this.html.taga ("img", [(s1+s).atr])
 
 /// <summary>
 /// 図形アニメーションを管理するクラス
@@ -1190,7 +1156,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             Atr("y1",InvariantFormat.number (double canvasY-startP.y))
             Atr("x2",InvariantFormat.number endP.x)
             Atr("y2",InvariantFormat.number (double canvasY-endP.y))]
-        context.BodyContext.html.taga ("line", [s.atr]@c)
+        context.html.taga ("line", [s.atr]@c)
     /// <summary>
     /// 楕円を描画
     /// </summary>
@@ -1202,7 +1168,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             Atr("cy",InvariantFormat.number (double canvasY-center.y))
             Atr("rx",InvariantFormat.number radiusX)
             Atr("ry",InvariantFormat.number radiusY)]
-        context.BodyContext.html.taga ("ellipse", [s.atr]@c)
+        context.html.taga ("ellipse", [s.atr]@c)
     /// <summary>
     /// 円を描画
     /// </summary>
@@ -1224,7 +1190,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
                 "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 0 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
             else
                 "M " + InvariantFormat.number x1 + " " + InvariantFormat.number (float canvasY-y1) + " A " + InvariantFormat.number radiusX + " " + InvariantFormat.number radiusY + " 0 1 0 " + InvariantFormat.number x2 + " " + InvariantFormat.number (float canvasY-y2)
-        context.BodyContext.html.taga ("path", [s.atr]@[Atr("d",d)])
+        context.html.taga ("path", [s.atr]@[Atr("d",d)])
     /// <summary>
     /// 多角形を描画
     /// </summary>
@@ -1234,7 +1200,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             apex
             |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
-        context.BodyContext.html.taga ("polygon", [s.atr]@[Atr("points",pp)])
+        context.html.taga ("polygon", [s.atr]@[Atr("points",pp)])
     /// <summary>
     /// 折れ線を描画
     /// </summary>
@@ -1244,7 +1210,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             apex
             |> List.map (fun p -> InvariantFormat.number p.x + "," + InvariantFormat.number (double canvasY-p.y))
             |> fun s -> String.Join(",",s)
-        context.BodyContext.html.taga ("polyline", [s.atr]@[Atr("points",pp)])
+        context.html.taga ("polyline", [s.atr]@[Atr("points",pp)])
     /// <summary>
     /// 始点から終点に向かう矢印付き直線を描画
     /// </summary>
@@ -1275,7 +1241,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             Atr("y",InvariantFormat.number (double canvasY-center.y-0.5*sy))
             Atr("width",InvariantFormat.number sx)
             Atr("height",InvariantFormat.number sy)]
-        context.BodyContext.html.taga ("rect", [s.atr]@c)
+        context.html.taga ("rect", [s.atr]@c)
     /// <summary>
     /// テキストを表示
     /// </summary>
@@ -1288,7 +1254,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
             context.BodyContext.writein str
     /// <summary>
     /// 数式を描画
@@ -1301,7 +1267,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
             context.BodyContext.writein ("\\(" + e.Expr.evalH context.BodyContext + "\\)")
     /// <summary>
     /// 数式を描画
@@ -1314,7 +1280,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
             context.BodyContext.writein ("\\(" + e.Expr.evalH context.BodyContext + "\\)")
     /// <summary>
     /// 数式を描画
@@ -1327,7 +1293,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.BodyContext.html.tagb ("div", [ss.atr]) <| fun () ->
+        context.html.tagb ("div", [ss.atr]) <| fun () ->
             context.BodyContext.writein ("\\(" + e.Expr.evalH context.BodyContext + "\\)")
     /// <summary>
     /// 画像を表示
@@ -1342,7 +1308,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.BodyContext.html.taga ("img", [ss.atr; Atr("src",context.ContentsDirectory + "\\" + f)])
+        context.html.taga ("img", [ss.atr; Atr("src",context.ContentsDirectory + "\\" + f)])
     /// <summary>
     /// 開始ボタンの制御用JavaScriptコードを生成
     /// </summary>
@@ -1574,7 +1540,7 @@ module dochtml =
 
     let freeCanvas outputdir filename (title:string) cssfile code =
         htmlpresentation outputdir filename title cssfile (None, None) false <| fun ctx ->
-            ctx.BodyContext.html.canvas <| Style [size.width "0px"; size.height "0px"] <| fun () -> code ctx
+            ctx.html.canvas <| Style [size.width "0px"; size.height "0px"] <| fun () -> code ctx
 
     /// 全体がキャンバスの無制限レイアウト
     let freePage outputdir filename (title:string) cssfile code =
@@ -1586,7 +1552,7 @@ module dochtml =
 
     let fixedPage outputdir filename (title:string) pageWidth pageHeight cssfile code =
         htmlpresentationCore outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun ctx ->
-            code ctx.BodyContext
+            code ctx
             ctx.prevButton()
             ctx.nextButton()
             ctx.switchCharacter()
@@ -1597,6 +1563,9 @@ module dochtml =
 [<AutoOpen>]
 module htmlexpr2 =
     type HtmlGenerationContext with
+        
+        member this.html = html this.BodyContext
+        
         /// <summary>
         /// 手動操作型のアニメーション領域を生成
         /// </summary>

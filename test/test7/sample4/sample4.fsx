@@ -60,18 +60,18 @@ let NL = double0(Var(Dt,"",NaN))
 let ff t = 0.2+0.2*t+0.01*cos(2.0*System.Math.PI*t/0.6)+0.1*cos(2.0*System.Math.PI*t/3.4)+0.05*sin(2.0*System.Math.PI*t/2.9)
 let gg t = if abs(t) < 0.4 then 1.0 else 0.0
 
-fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=OFF; Voice=OFF} None <| fun ctx ->
+fixedPage outputdir projectname projectname 1920 1080 None <| fun ctx ->
     let tale = Tale(ctx,scriptDir, "tale")
     let dang = Dango(ctx,scriptDir, "dango")
     let armi = Armillaris(ctx,scriptDir, "armi")
     let f(x:double0) = double0(Var(Dt,"f("+x.code+")",NaN))
     let t = double0(Var(Dt,"t",NaN))
-    ctx.html.page
+    ctx.page
         [tale.AAA;
          dang.D00;]
         <| dang.script "だんごのセリフ"
-        <| fun p -> ctx.html.image (Style [size.width "100%";],p) @"C:\home\contents/title.PNG"
-    ctx.html.page
+        <| fun p -> ctx.image (Style [size.width "100%";],p) @"C:\home\contents/title.PNG"
+    ctx.page
         [tale.AAA;
          dang.D00;]
         <| tale.script "テールのセリフ"
@@ -81,8 +81,8 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             ctx.html.subtitle1 Style[] (p+position(80,150)) "サンプルページ1"
             ctx.html.subtitle2 Style[] (p+position(100,250)) "テキストと数式の表示"
             ctx.html.text textB (p+position(100,320)) "AAA"
-            ctx.ch.D "x" <| fun x ->
-                ctx.ch.D "y" <| fun y ->
+            ctx.BodyContext.ch.D "x" <| fun x ->
+                ctx.BodyContext.ch.D "y" <| fun y ->
                     ctx.html.text textB  (p+position(180,320)) "x+y"
                     ctx.html.text textBR (p+position(280,320)) <| double0.html (2*x*(-y)*asm.pow(-y,x+1))
                     ctx.html.text textB  (p+position(180,390)) <| double0.html 
@@ -95,7 +95,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                 Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";], fun x -> sin(x)
                 Style[stroke.width 3.0; stroke.color "#0000ff"; fill.color "none";], fun x -> cos(x)
             ]
-            ctx.html.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
+            ctx.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
                 let line1 = f.animationLine Style[stroke.width 3.0; stroke.dasharray [4;4]; stroke.color "#000000"]
                 let elps1 = f.animationArc Style[stroke.width 3.0; stroke.color "#000000"; fill.color "none";]
                 f.ellipse Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";] (position(200.0,400.0)) (200, 100)
@@ -106,7 +106,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                 f.polyline Style[stroke.width 3.0; stroke.color "#aa00ff"; fill.color "none";] [position(200.0,600.0);position(300.0,700.0);position(300.0,600.0)]
 
                 //f.image Style[] (position(0.0,0.0)) @"C:\home\contents\アルミAAA.png"
-                ctx.ch.D "t" <| fun t ->
+                ctx.BodyContext.ch.D "t" <| fun t ->
                     f.eqd Style[] (position(0.0,40.0)) (asm.sin t)
                 f.text Style[] (position(0.0,80.0)) "ABC"
                 /// 中心座標
@@ -128,7 +128,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                         angle1 = fun _ -> D 0
                         angle2 = fun t -> 360*t/(s.FrameNumber-1)
                         radius = fun _ -> R }
-    ctx.html.page
+    ctx.page
         [tale.AAA;
          dang.D00;]
         <| tale.script "テールのセリフ"
@@ -146,7 +146,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                     arrow arrowBlack [position(-0.4,-0.04);position(0.4,-0.04)]
                     text textB (position(-0.1,-0.04)) <| "幅：" + ctx.html.inlineMath _1d
 
-            ctx.html.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
+            ctx.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
                 /// 中心座標
                 let cx,cy = 350.0, 390.0
                 /// 円弧の半径
@@ -161,7 +161,7 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
                             Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber)}
                         radiusX = fun _ -> D 10
                         radiusY = fun _ -> D 10}
-    ctx.html.page
+    ctx.page
         [tale.AAA;
          dang.D00;]
         <| tale.script ("テールのセリフ："++asm.sin(t))
@@ -169,15 +169,15 @@ fixedPage outputdir projectname projectname 1920 1080 {Character=OFF; Subtitle=O
             ctx.html.text textA (p+position(1860,10)) "10"
             ctx.html.contents Style[] (p+position(50,50)) "アニメーション制御の実装3"
             ctx.html.subtitle1 Style[] (p+position(80,150)) "アニメーション3"
-            ctx.ch.D "x" <| fun x ->
-                ctx.ch.D "y" <| fun y ->
+            ctx.BodyContext.ch.D "x" <| fun x ->
+                ctx.BodyContext.ch.D "y" <| fun y ->
                     ctx.html.text textAM (position(80,400)) <| double0.html [y === x + 1]
                     ctx.html.text textAG (position(80,500)) <| double0.html 
                         [y  =|= x + 1
                          NL =|= (x + 2)
                          NL =|= (x + 3)]
             ctx.html.text textB (p+position(100,320)) "ページの表示直後にアニメーションが始まる"
-            ctx.html.animationAuto {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p <| fun (f,p) ->
+            ctx.animationAuto {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p <| fun (f,p) ->
                 /// 中心座標
                 let cx,cy = 350.0, 390.0
                 /// 円弧の半径

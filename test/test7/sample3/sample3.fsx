@@ -12,19 +12,19 @@ let outputdir = __SOURCE_DIRECTORY__
 open Aqualis
 
 fixedWidthPage outputdir projectname projectname 1920 None <| fun ctx ->
-    ctx.emit.writein "AAA"
+    ctx.BodyContext.writein "AAA"
     ctx.html.br()
-    ctx.emit.writein "AAA"
+    ctx.BodyContext.writein "AAA"
     ctx.html.br()
-    ctx.emit.writein "AAA"
+    ctx.BodyContext.writein "AAA"
     ctx.html.br()
-    ctx.emit.writein "AAA"
+    ctx.BodyContext.writein "AAA"
     ctx.html.br()
-    ctx.emit.writein "AAA"
+    ctx.BodyContext.writein "AAA"
     ctx.html.br()
-    ctx.emit.writein "AAA"
+    ctx.BodyContext.writein "AAA"
     ctx.html.br()
-    ctx.emit.writein "AAA"
+    ctx.BodyContext.writein "AAA"
     ctx.html.br()
     ctx.html.canvas Style[size.width "1920px"; size.height "500px";] <| fun cv ->
         
@@ -138,17 +138,17 @@ fixedWidthPage outputdir projectname projectname 1920 None <| fun ctx ->
                 <| (Style[stroke.color "black";],2.0,20.0)
                 <| position(grid_x1+codeBoxWidth/2.0, a1f.Bottom)
                 <| position(grid_x1+codeBoxWidth/2.0, a1r.Top)
-    ctx.emit.writein "BBB"
+    ctx.BodyContext.writein "BBB"
     ctx.html.br()
-    ctx.emit.writein "BBB"
+    ctx.BodyContext.writein "BBB"
     ctx.html.br()
-    ctx.emit.writein "BBB"
+    ctx.BodyContext.writein "BBB"
     ctx.html.br()
-    ctx.emit.writein "BBB"
+    ctx.BodyContext.writein "BBB"
     ctx.html.br()
-    ctx.emit.writein "BBB"
+    ctx.BodyContext.writein "BBB"
     ctx.html.br()
-    ctx.emit.writein "BBB"
+    ctx.BodyContext.writein "BBB"
     ctx.html.br()
-    ctx.emit.writein "BBB"
+    ctx.BodyContext.writein "BBB"
     ctx.html.br()
