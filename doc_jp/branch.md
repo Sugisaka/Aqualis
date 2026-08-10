@@ -49,7 +49,7 @@ ctx.br.branch <| fun b1 ->
     b1.IF (条件1A) <| fun () ->
         (コード1A)
     b1.IF (条件2) <| fun () ->
-        br.branch <| fun b2 ->
+        ctx.br.branch <| fun b2 ->
             b2.IF (条件2A) <| fun () ->
                 (コード2A)
             b2.IF (条件2B) <| fun () ->
