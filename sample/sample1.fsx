@@ -2,7 +2,7 @@
 // project title
 let projectname = "sample"
 // Aqualis version, this sample program version
-let version = "186.0.4.0", "1.0.0"
+let version = "186.0.4.0"
 // Directory for source file output
 let outputdir = @"C:\home\work"
 //#############################################################################
