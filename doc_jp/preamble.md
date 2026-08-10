@@ -35,7 +35,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
   - HTML
 - 14行目：`ctx`はコード生成に使用するコンテキスト。他の名称に変更してもよい。
 
-以下のコードでは、「`print.t "aaa"`」と「`print.t "bbb"`」がFortranのコードに変換される。「`print.s "ccc"`」はインデントが戻っているので出力の対象外となる。
+以下のコードでは、「`print.s "aaa"`」と「`print.s "bbb"`」がFortranのコードに変換される。「`print.s "ccc"`」はインデントが戻っているので出力の対象外となる。
 ```fsharp
 Compile [Fortran] outputdir projectname version <| fun ctx ->
     print.s "aaa"
