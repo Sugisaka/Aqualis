@@ -6,7 +6,7 @@
 - [コメント文](#コメント文)
 - [変数の定義と代入](#変数の定義と代入)
 - [画面出力](#画面出力)
-- [四則演算 ](#四則演算 )
+- [四則演算](#四則演算)
 - [Aqualis数学関数](#Aqualis数学関数)
 - [配列](#配列)
 - [条件分岐](#条件分岐)
@@ -20,14 +20,20 @@
 - [シンボリック微分](#シンボリック微分)
 
 ## インストール
-[トップへ戻る](#Aqualis)
-1. Visual StudioまたはBuild Tools for Visual Studioをインストール。
-    - インストール時に「F#デスクトップ言語のサポート」を選択しておく。
-2. プロジェクトをビルドし、Aqualis.dllを生成する。
-3. Aqualis.dllを任意のフォルダーにコピーする
+[トップへ戻る](#aqualis)
+1. .NET 10 SDKをインストールする。Visual StudioまたはBuild Tools for Visual Studioを使用する場合は、「F#デスクトップ言語のサポート」も選択する。
+2. リポジトリのルートで次を実行し、Release版の`Aqualis.dll`を生成する。
+    ```powershell
+    dotnet build Aqualis.fsproj -c Release
+    ```
+3. 次を実行すると、ライブラリのバージョンに対応する`C:\Aqualis\lib\(バージョン番号)`へDLLがコピーされる。
+    ```powershell
+    dotnet fsi install.fsx
+    ```
+   DLLを別の場所へ手動でコピーした場合は、F#スクリプトの`#I`もその場所に合わせて変更する。
 
 ## ソースファイルの実行
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 F#スクリプトファイル（拡張子：fsx）を編集し実行すると、以下のファイルが生成される。
 - f90ファイル または cファイル
   - プログラムのソースファイル
@@ -35,7 +41,7 @@ F#スクリプトファイル（拡張子：fsx）を編集し実行すると、
   - ソースファイルのコンパイル・実行を自動処理するスクリプトファイル
 
 ## プリアンブル部 
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 fsxファイルの冒頭部分は毎回以下のように書く
 ```fsharp
@@ -69,27 +75,34 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
   - Python
   - LaTeX
   - HTML
+  - HTMLSequenceDiagram
+  - JavaScript
+  - PHP
+  - Numeric（ソースファイルを生成せず直接計算）
 - 14行目：`ctx`はコード生成に使用するコンテキスト。他の名称に変更してもよい。
 
-以下のコードでは、「`print.s "aaa"`」と「`print.s "bbb"`」がFortranのコードに変換される。「`print.s "ccc"`」はインデントが戻っているので出力の対象外となる。
+以下のコードでは、「`ctx.print.s "aaa"`」と「`ctx.print.s "bbb"`」がFortranのコードに変換される。「`ctx.print.s "ccc"`」はインデントが戻っているので出力の対象外となる。
 ```fsharp
 Compile [Fortran] outputdir projectname version <| fun ctx ->
-    print.s "aaa"
-    print.s "bbb"
-print.s "ccc"
+    ctx.print.s "aaa"
+    ctx.print.s "bbb"
+ctx.print.s "ccc"
 ```
 
 ## コメント文
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 - コメント
-  - テキストを「`(*`」、「`\*)`」で囲む。複数行に渡っても良い。
+  - テキストを「`(*`」、「`*)`」で囲む。複数行に渡っても良い。
 - 行コメント
   - 「`//`」より右側の文字から改行するまでコメント文となる
 
 ### 出力ソースファイル上のコメント
 
-`comment`を使用して記述したコメント文は生成されるソースファイルにも反映される
+`ctx.group.comment`を使用して記述したコメント文は生成されるソースファイルにも反映される。
+```fsharp
+ctx.group.comment "このコメントは生成コードにも出力される"
+```
 
 ### ドキュメントコメント
 
@@ -97,13 +110,17 @@ F#と同じドキュメントコメントを使用可能（生成されるソー
 
 ### コマンドのコメント化
 
-`ch`、`iter`、`br`、`io`の前に`dummy_`をつけて`dummy_ch`、`dummy_iter`、`dummy_br`、`dummy_io`とすると、その内部（以降のインデントしている範囲）の処理はスキップされる。
+コード生成の一部を条件に応じて無効化する場合は、`ctx.group.whenEnabled`を使用する。次の例では内部の処理は生成されない。
+```fsharp
+ctx.group.whenEnabled false <| fun () ->
+    ctx.print.s "この行は生成されない"
+```
 
 
 以降では、Aqualisのコンテキスト名（`Compile`関数で指定）を`ctx`として説明する。
 
 ## 変数の定義と代入
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 変数の宣言と値の代入の仕方は以下のように書く。
 
 ```fsharp
@@ -122,7 +139,7 @@ ctx.ch.I "aaa" <| fun x ->
 |-----|-----|-----|
 |i|int0|整数|
 |d|double0|倍精度浮動小数点型|
-|z|complex0|複素数型（倍精度）||
+|z|complex0|複素数型（倍精度）|
 |I|int0|整数|
 |D|double0|倍精度浮動小数点型|
 |Z|complex0|複素数型（倍精度）|
@@ -182,7 +199,7 @@ ctx.ch.i <| fun x ->
     x <== 1
     ctx.ch.i <| fun x ->
         x <== 2
-    print.t x
+    ctx.print.t x
 ```
 複数の変数を宣言していくと、インデントが急速に深くなって読みにくくなる。そのため、複数の変数を同時に定義できる関数が用意されている。
 ```fsharp
@@ -231,7 +248,7 @@ a <== x.pow
 ```
 
 ## 画面出力
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 `print`を用いて画面に文字や変数の値を出力できる。単純な文字列を表示する場合は以下のように書く。
 ```fsharp
@@ -239,19 +256,19 @@ ctx.print.s "Hello World!"
 ```
 変数の値を表示する場合は以下のように書く。
 ```fsharp
-print.t x
+ctx.print.t x
 ```
 2個以上の変数、または文字列と変数の組み合わせを出力する場合は`++`演算子を用いて以下のように書く。
 ```
-print.tt <| "aaa"++a++"bbb"++b
+ctx.print.tt <| "aaa"++a++"bbb"++b
 ```
 
 ## 四則演算 
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 加算
 ```fsharp
-z <== x - y
+z <== x + y
 ```
 減算
 ```fsharp
@@ -261,7 +278,7 @@ z <== x - y
 ```fsharp
 z <== x * y
 ```
-除算(`x`と`y`がint、dobubleに関わらず`z`は浮動小数点型になる)
+除算（`x`と`y`が`int`、`double`のいずれであっても、`z`は浮動小数点型になる）
 ```fsharp
 z <== x / y
 ```
@@ -313,7 +330,7 @@ $H^{(2)}_0(x)$を計算。関数の値は`h`に保存されている
 
 ```fsharp
 asm.besselh0 x <| fun h ->
-    print.t h
+    ctx.print.t h
 ```
 
 #### 第2種1次ハンケル関数
@@ -322,11 +339,11 @@ $H^{(2)}_1(x)$を計算。関数の値は`h`に保存されている
 
 ```fsharp
 asm.besselh1 x <| fun h ->
-    print.t h
+    ctx.print.t h
 ```
 
 ## 配列
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 1～3次元配列を指定可能。Aqualis上での型名は、例えば整数型1次元配列の場合`int1`、複素数型3次元配列の場合`complex3`となる。
 
@@ -334,11 +351,11 @@ asm.besselh1 x <| fun h ->
 
 1次元配列は次のコードで配列を生成することができる。`i`は変数の型(他に`d`、`z`が指定可)、1は配列の次元、5が要素数、aが変数名になっている。上のコードでは「1次元で要素数が5の配列」を生成することができる。
 ```fsharp
-ch.i1 5 <| fun a ->
+ctx.ch.i1 5 <| fun a ->
 ```
 以下のように、要素数が未定の配列を宣言し、後から要素数を指定しても良い。
 ```fsharp
-ch.i01 <| fun a ->
+ctx.ch.i01 <| fun a ->
     a.allocate(5)
     a.deallocate()
 ```
@@ -349,11 +366,11 @@ ch.i01 <| fun a ->
 - 以下は配列の変数名を「a」とした場合の例
   - 要素数は整数値、int型、int0型のいずれかで指定する
   - a.clear()で要素の値をすべて0に初期化する（配列以外の変数にも使用可能）
-  - 配列の要素は角括弧で指定する。要素インデックスは1から始まる正の整数（int型またはint0型の変数でも良い）配列の範囲を超えたインデックスを指定するとエラーが出る（エラーが出ずに完全におかしな計算結果のまま処理が進行することもあるので注意）
+  - 配列の要素は角括弧で指定する。Aqualis上の要素インデックスは0から始まり、要素数が`a.size1`なら有効範囲は`0`～`a.size1-1`となる。Fortranの生成コードでは、Aqualisが添字を1始まりに変換する。範囲外アクセスを避けるため、必要に応じてデバッグモードの境界チェックも利用する
   - `a.size1`で配列の要素数を参照できる
 
 ```fsharp
-ch.i 5 <| fun ->
+ctx.ch.i1 5 <| fun a ->
     //配列aの先頭要素に5を代入
     a[0] <== 5
     //配列aの第2要素に10を代入
@@ -370,7 +387,7 @@ ch.i 5 <| fun ->
 2次元配列は、同じ型の変数が縦横に2次元的に並んでいるイメージ。画像や平面上の電界分布等を表わすのによく使われる
 次のコードで2次元配列を生成できる。
 ```fsharp
-ch.i2 (3,5) <| fun a ->
+ctx.ch.i2 (3,5) <| fun a ->
 ```
 - 全要素を0で初期化するときは`a.clear()`と記述する
 - 配列の要素にアクセスするときは「`a[1,2]`」のように入力する。
@@ -380,14 +397,14 @@ ch.i2 (3,5) <| fun a ->
 
 次のコードで3次元配列を生成できる。
 ```fsharp
-ch.i3 (3,4,5) <| fun a ->
+ctx.ch.i3 (3,4,5) <| fun a ->
 ```
 
 ### 部分配列
 
 3個の配列`x`,`y`,`z`に対して、以下の要素同士の四則演算、代入式
 ```fsharp
-iter.num z.size1 <| fun i ->
+ctx.iter.num z.size1 <| fun i ->
     z[i] <== x[i] - y[i]
 ```
 は次のように書ける（2、3次元配列も同様）
@@ -405,7 +422,7 @@ z[(),4] <== x[(),4] - y[(),4]
 とする。
 
 ## 条件分岐
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 基本的に3種類の書き方がある
 
@@ -494,7 +511,7 @@ Or [x.<y; y.<z]
 ```
 
 ## 反復処理 
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 以下のコードで反復処理を指定する
 
@@ -503,7 +520,7 @@ Or [x.<y; y.<z]
 ctx.iter.range (1, 10) <| fun i ->
 ```
 
-以下の例では`aaa`が画面に10回表示される。「`print.t "bbb"`」の行はインデントが戻っているため10回の反復処理の後に1度だけ実行される
+以下の例では`aaa`が画面に10回表示される。「`ctx.print.s "bbb"`」の行はインデントが戻っているため10回の反復処理の後に1度だけ実行される
 ```fsharp
 ctx.iter.range (0, 9) <| fun i ->
     ctx.print.s "aaa"
@@ -512,11 +529,11 @@ ctx.print.s "bbb"
 以下の二つのコードは同じ動作になる。
 ```fsharp
 ctx.iter.range (0, n-1) <| fun i ->
-    print.t i
+    ctx.print.t i
 ```
 ```fsharp
 ctx.iter.num n <| fun i ->
-    print.t i
+    ctx.print.t i
 ```
 
 以下のコードでは配列`a`の全要素に1を代入する
@@ -537,14 +554,14 @@ a.foreach <| fun n ->
 ```fsharp
 ctx.iter.num 5 <| fun i ->
     ctx.iter.num 10 <| fun j ->
-        ctx.print.tt i++j
+        ctx.print.tt <| i++j
 ```
 2次元配列の全要素にアクセスする場合は以下のように記述できる。
 ```fsharp
 a.foreach <| fun (i,j) ->
     a[i,j] <== i*j
 ```
-`iter.loop`は無限ループ。`ex`はループを脱出する関数で、if式と組み合わせて使用される。`i`はループカウンタ
+`ctx.iter.loop`は無限ループ。`ex`はループを脱出する関数で、if式と組み合わせて使用される。`i`はループカウンタ
 ```fsharp
 ctx.iter.loop <| fun (ex,i) ->
     ctx.print.s "aaa"
@@ -558,7 +575,7 @@ ctx.iter.whiledo (条件) <| fun ex ->
     (コード)
 ```
 
-リストの各要素に対し処理を行う場合は`iter.list`を使用する。
+リストの各要素に対し処理を行う場合は`ctx.iter.list`を使用する。
 ```fsharp
 ctx.iter.list [x;y;z] <| fun v ->
     ctx.print.t v
@@ -571,7 +588,7 @@ ctx.print.t z
 ```
 
 ## 式と関数
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 ### let束縛
 
@@ -595,7 +612,7 @@ let x = y + z
 ```fsharp
 y <== 1
 z <== 1
-let x = y - z
+let x = y + z
 ctx.print.t x
 y <== 2
 ctx.print.t x
@@ -605,15 +622,15 @@ ctx.print.t x
 
 xに1を足す関数`f`は以下のように定義する。
 ```fsharp
-let f(x) = x - 1
+let f(x) = x + 1
 ```
 引数の括弧は省略可
 ```fsharp
-let f x = x - 1
+let f x = x + 1
 ```
 ただし、以下のように使用するとエラーが出る
 ```fsharp
-let x = x - 1
+let f x = x + 1
 ctx.ch.ii <| fun (a,b) ->
     a <== 1
     b <== f a
@@ -621,7 +638,7 @@ ctx.ch.ii <| fun (a,b) ->
 ```
 引数に変数を指定する場合は、自動で型名を推定できないことがある。その場合は以下のように型を指定する。
 ```fsharp
-let f (x:int0) = x - 1
+let f (x:int0) = x + 1
 ctx.ch.ii <| fun (a,b) ->
     a <== 1
     b <== f a
@@ -712,12 +729,12 @@ let h (x:int0) (y:int0) = x - y
 a <== f b c h
 ```
 「`int0->int0->int0`」は、`int0`を2個受け取り`int0`を返す関数を意味する
-上の例の4行目は、`h`に引数`x`と`y`が与えられた後の値が`x+y`で計算されることを示している。では`h`自体の定義は何なのか？以下のように書き直すと`h`の定義が明白になる。
+上の例では、`h`に引数`x`と`y`が与えられた後の値が`x-y`で計算される。では`h`自体の定義は何なのか？以下のように書き直すと`h`の定義が明白になる。
 ```fsharp
 //定義
 let f (x:int0) (y:int0) (g:int0->int0->int0) = g x y
 //使い方
-let h = fun (x:int0) (y:int0) -> x - y //hは関数（xとyを受け取りその和を返す）
+let h = fun (x:int0) (y:int0) -> x - y //hは関数（xとyを受け取り、その差を返す）
 a <== f b c h
 ```
 関数`h`をこの次の行でしか使わないのであれば、わざわざ関数に`h`のような名前を付けて扱う必要はない。
@@ -735,14 +752,14 @@ let f (x:int0) (y:int0) (g:int0->int0->int0) = g x y
 //使い方
 a <== f b c <| fun (x:int0) (y:int0) -> x - y
 ```
-反復処理`iter.range`や条件分岐`br.if1`等もこれと同様に高階関数として定義されている。
+反復処理`ctx.iter.range`や条件分岐`ctx.br.if1`等もこれと同様に高階関数として定義されている。
 
 ### 関数を返す関数 
 
 与えられた変数`x`に対し、`n`を足す関数を返す関数
 ```fsharp
 //定義
-let f (n:int) = (fun (x:int0) -> x - n)
+let f (n:int) = (fun (x:int0) -> x + n)
 //使い方
 let g = f 4 //gは与えられた値に4を足す関数
 ctx.print.t (g 1) //表示される値は5
@@ -750,7 +767,7 @@ ctx.print.t (g 1) //表示される値は5
 `f`の定義は以下のように書いても同じである
 ```fsharp
 //定義
-let f (n:int) (x:int0) = x - n
+let f (n:int) (x:int0) = x + n
 //使い方
 let g = f 4 //gは与えられた値に4を足す関数
 ctx.print.t (g 1) //表示される値は5
@@ -763,16 +780,16 @@ ctx.print.t (g 1) //表示される値は5
 ctx.iter.num 10 <| fun i ->
     ctx.print.t i
 ```
-カリー化を使うと以下のように書ける（「`iter.num 10`」の部分が「`loop10`」に置き換わったと考える）
+カリー化を使うと以下のように書ける（「`ctx.iter.num 10`」の部分が「`loop10`」に置き換わったと考える）
 ```fsharp
 let loop10 = ctx.iter.num 10
 loop10 <| fun i ->
-    print.t i
+    ctx.print.t i
 ```
 反復回数が決まった反復処理の定義ができる。
 
 ## ファイル入出力
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 コード上で出力した値を別のファイルに保存したり、また逆にファイルに保存されたデータを使いたい場合がある。以下にその方法を記す。
 
@@ -797,19 +814,19 @@ ctx.io.fileOutput "test.dat" <| fun wr ->
 ```
 複数のファイルを同時に開くことも可能。その際は書き込み指定子「`wr`」の名前を変える
 ```fsharp
-ch.id <| fun (x,y) ->
+ctx.ch.id <| fun (x,y) ->
     x <== 1
     y <== 2.0
-    io.fileOutput "test1.dat" <| fun wr1 ->
-        io.fileOutput "test2.dat" <| fun wr2 ->
+    ctx.io.fileOutput "test1.dat" <| fun wr1 ->
+        ctx.io.fileOutput "test2.dat" <| fun wr2 ->
             wr1.t x //test1.datに書き込み
             wr2.t x //test2.datに書き込み
 ```
 ファイル名は整数の変数を指定することも可能
 ```fsharp
-ch.i <| fun n ->
+ctx.ch.i <| fun n ->
     n <== 4
-    io.fileOutput ("test"++n++".dat") <| fun wr -> //ファイル名は「test00004.dat」
+    ctx.io.fileOutput ("test"++n++".dat") <| fun wr -> //ファイル名は「test00004.dat」
 ```
 
 ### ファイルからの読み込み 
@@ -820,13 +837,13 @@ ch.i <| fun n ->
 ```
 ファイルの読み込みは以下のようにする。
 ```fsharp
-ch.id <| fun (x,y) ->
-    io.fileInput "test.dat" <| fun rd ->
+ctx.ch.id <| fun (x,y) ->
+    ctx.io.fileInput "test.dat" <| fun rd ->
         rd <| x++y
 ```
 
 ## 線形代数演算
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 ### 単独の連立方程式
 
@@ -860,23 +877,23 @@ $$
 のとき、`A`と`b`を
 
 ```fsharp
-A[1,1] <== 1.0
-A[1,2] <== 2.0
-A[2,1] <== 3.0
-A[2,2] <== 4.0
-b[1] <== 5.0
-b[2] <== 6.0
+A[0,0] <== 1.0
+A[0,1] <== 2.0
+A[1,0] <== 3.0
+A[1,1] <== 4.0
+b[0] <== 5.0
+b[1] <== 6.0
 ```
 
 とする。
 
 ```fsharp
-La.solve_simuleq(A,b)
+ctx.la.solve_simuleq(A,b)
 ```
 
 とすると、`b`に連立方程式の解 $A^{-1}\boldsymbol{b}$ が代入された状態になる。
 
-サンプル：式(1)、(2)の求解（ $x_1=-4$ 、 $x_2=-4.5$ ）
+サンプル：上記の連立方程式の求解（ $x_1=-4$ 、 $x_2=4.5$ ）
 
 ```fsharp
 //#############################################################################
@@ -887,20 +904,20 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\188_0_1_0"
+#I "C:\\Aqualis\\lib\\188_0_0_0"
 #r "Aqualis.dll"
  
 open Aqualis
  
 Compile [Fortran] outputdir projectname version <| fun ctx ->
-    ctx.ch.d2 2 2 <| fun A ->
+    ctx.ch.d2 (2,2) <| fun A ->
         ctx.ch.d1 2 <| fun b ->
-            A[1,1] <== 1.0
-            A[1,2] <== 2.0
-            A[2,1] <== 3.0
-            A[2,2] <== 4.0
-            b[1] <== 5.0
-            b[2] <== 6.0
+            A[0,0] <== 1.0
+            A[0,1] <== 2.0
+            A[1,0] <== 3.0
+            A[1,1] <== 4.0
+            b[0] <== 5.0
+            b[1] <== 6.0
             ctx.la.solve_simuleq(A,b)
             b.foreach <| fun i -> ctx.print.tt <| i++b[i]
 ```
@@ -921,21 +938,21 @@ $$
 を解く。 $\boldsymbol{b}_1, \boldsymbol{b}_2, \cdots, \boldsymbol{b}_N$ を並べた2次元配列`b`を用意し
 
 ```fsharp
-la.solve_simuleqs(A,b)
+ctx.la.solve_simuleqs(A,b)
 ```
 
-とすると、`b`に連立方程式の解 $A^{-1}\boldsymbol{x}_1, A^{-1}\boldsymbol{x}_2, \cdots, A^{-1}\boldsymbol{x}_N$ が代入された状態になる。
+とすると、`b`に連立方程式の解 $A^{-1}\boldsymbol{b}_1, A^{-1}\boldsymbol{b}_2, \cdots, A^{-1}\boldsymbol{b}_N$ が代入された状態になる。
 
 ## OpenMP
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 ### 基本
 
-下は"iter.num"を並列化させたい場合の例
+以下は`ctx.iter.num`を並列化する例
 
 ```fsharp
-ctx.iter.parallelize <| fun () ->
-    ctx.iter.num 12 <| fun i ->
+ctx.omp.parallelize <| fun pctx ->
+    pctx.iter.num 12 <| fun i ->
         //ここが並列化される
 ```
 CPUのスレッドごとに変数iの値がそれぞれ割り当てられ、
@@ -943,8 +960,8 @@ CPUのスレッドごとに変数iの値がそれぞれ割り当てられ、
 同時に処理する数を指定したい場合は次のようにする。
 
 ```fsharp
-ctx.omp.parallelize_th 6 <| fun () ->    //<--6並列
-    ctx.iter.num 12 <| fun i ->
+ctx.omp.parallelize_th 6 <| fun pctx ->    //<--6並列
+    pctx.iter.num 12 <| fun i ->
         //ここが並列化される
 ```
 thの横の数字が指定したいスレッド数でこの場合同時に
@@ -953,71 +970,38 @@ thの横の数字が指定したいスレッド数でこの場合同時に
 
 - プライベート変数
 
-次のコードは、実行すると間違った計算結果がでてしまう。
+並列化した反復処理のループカウンタは、スレッドごとのプライベート変数として自動的に生成される。共有変数を作業用変数として更新するとデータ競合が起きるため、可能な限りループカウンタをそのまま使用する。
 
 ```fsharp
-ctx.ch.ii <| fun (w,sum) ->
+ctx.ch.i <| fun sum ->
     sum <== 0
     ctx.ch.i1 10000 <| fun a ->
-        ctx.omp.parallelize_th <| fun () ->
-            ctx.iter.num 10000 <| fun i ->
-                w <== i
-                a[w] <== i
+        ctx.omp.parallelize <| fun pctx ->
+            pctx.iter.num 10000 <| fun i ->
+                a[i] <== i+1
         ctx.iter.num 10000 <| fun i ->
-            sum <== sum - a[i]
+            sum <== sum + a[i]
         ctx.print.t sum
 ```
-ほしい結果は50005000だが何度か実行すると間違った結果どころか毎回違う数字が出力されてしまう。
-これは同時に同じ処理を行っている影響で変数wが正しい値とならないことが原因である。
-これを回避するためにはwをスレッドごとにそれぞれ違う数字として認識させなければならない。
-これをプライベート変数という。
-次のようにwを宣言すれば解決できる。
-
-```fsharp
-ctx.ch.private_i <| fun w ->
-    ctx.ch.i <| fun sum ->
-        sum <== 0
-        ctx.ch.i1 10000 <| fun a ->
-            ctx.omp.parallelize_th <| fun () ->
-                ctx.iter.num 10000 <| fun i ->
-                    w <== i
-                    a[w] <== i
-            ctx.iter.num 10000 <| fun i ->
-                sum <== sum + a[i]
-            ctx.print.t sum
-```
+この例では、配列への書き込みだけを並列化し、共有変数`sum`の加算は並列領域の外で行う。加算自体を並列化する場合は、`ctx.omp.reduction`または`ctx.omp.reduction_th`を使用する。
 
 ## OpenACC
 
 ### 基本
 
-基本はOpenACCと同じ、ただしスレッド数の指定はできないので注意!
+基本的な書き方はOpenMPと同じ。ただしスレッド数は指定できず、生成対象言語はFortranまたはC99に限られる。
 ```fsharp
-ctx.oacc.parallelize <| fun () ->
-    ctx.iter.num 12 <| fun i ->
+ctx.oacc.parallelize <| fun pctx ->
+    pctx.iter.num 12 <| fun i ->
         //ここが並列化される
 ```
-### Copyout, Copyin
-OpenACCは並列化部分の計算をGPUや他のデバイスで計算させるものである。
-ホスト側のCPUのメモリにある変数は、GPUからは参照することができないため、
-計算に必要な変数の値を転送する必要がある。
-```fsharp
-//copyin:ホストからデバイス
-ctx.ch.copyin_i1 1024 <| fun a ->
-    //copyout:デバイスからホスト
-    ctx.ch.copyout_z2 1024 1024 <| fun b ->
-        ctx.oacc.parallelize <| fun () ->
-            //ここが並列化される
-```
-以上のように、転送に必要な変数を宣言できる。
-ホストからGPUに転送するときは"copyin",GPUからホストに転送するときは"copyout"だ。
-何も設定しなくても、自動的にコンパイラが必要なものを選んで転送してくれるのだが、
-余計な変数が転送されて、プログラムの実行速度が遅くなることもあるため、自分で設定することが好ましい。
+
+OpenACCは並列化部分をGPUなどのアクセラレータで実行する。現バージョンの公開APIには、旧版の`ctx.ch.copyin_*`、`ctx.ch.copyout_*`ヘルパーはないため使用しない。
 
 ## クラス定義例
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
-以下のコードでクラス「classAAA」を定義可能。Fortran、C言語ではフィールドを構造体、メソッドをインライン展開して実装される
+以下のコードでクラス`testClass1`を定義できる。Fortran、C言語ではフィールドを構造体、メソッドをインライン展開して実装される。
 
 ```fsharp
 /// <summary>
@@ -1059,17 +1043,17 @@ type testClass1_1(sname_,name,size1,ctx:Aqualis) =
 ### 使用例
 
 ```fsharp
-Compile [Fortran] outputdir projectname fullversion <| fun ctx ->
+Compile [Fortran] outputdir projectname version <| fun ctx ->
     
-    //testClass1型変数（変数名：abc）を生成
+    //testClass1型変数（変数名：u）を生成
     let u = testClass1("u",ctx)
     //フィールドへのアクセスは「変数名.フィールド名」
     u.n1 <== 1
     u.x1 <== 2.0
     u.z1 <== 3.0+asm.uj*4.0
-    print.tt <| u.n1 ++ u.x1 ++ u.z1
+    ctx.print.tt <| u.n1 ++ u.x1 ++ u.z1
     
-    //testClass1型1次元配列（配列名：xyz）を生成
+    //testClass1型1次元配列（配列名：v）を生成
     let v = testClass1_1("v",ctx)
     //配列要素数を指定してメモリ確保
     v.allocate(10)
@@ -1078,11 +1062,11 @@ Compile [Fortran] outputdir projectname fullversion <| fun ctx ->
         v[i].n1 <== 1
         v[i].x1 <== 2.0
         v[i].z1 <== 3.0+asm.uj*4.0
-        print.tt <| v[i].a ++ v[i].x ++ v[i].w
+        ctx.print.tt <| v[i].n1 ++ v[i].x1 ++ v[i].z1
 ```
 
 ## シンボリック微分
-[トップへ戻る](#Aqualis)
+[トップへ戻る](#aqualis)
 
 関数 $f(x)$ とその微分 $g(x)=\mathrm{d}f(x)/\mathrm{d}x$ を代数的に計算する
 
@@ -1097,9 +1081,9 @@ $$
 ```fsharp
 ctx.ch.d <| fun x ->
     //関数f
-    let f(x:num0) = 2*x*x+3*x
+    let f(x:double0) = 2*x*x+3*x
     //関数fのx微分
-    let g(x:num0) = asm.diff (f x) x
+    let g(x:double0) = asm.diff(f x,x)
     
     //微分値の確認
     ctx.iter.num 100 <| fun i ->
@@ -1118,11 +1102,11 @@ g(x) &= \frac{\mathrm{d}f(x)}{\mathrm{d}x}
 $$
 
 ```fsharp
-ch.d <| fun x ->
+ctx.ch.d <| fun x ->
     //関数f
-    let f(x:num0) = 2*x*asm.sin(3*x)
+    let f(x:double0) = 2*x*asm.sin(3*x)
     //関数fのx微分
-    let g(x:num0) = asm.diff (f x) x
+    let g(x:double0) = asm.diff(f x,x)
     
     //微分値の確認
     ctx.iter.num 100 <| fun i ->
@@ -1139,11 +1123,11 @@ g(x) &= \frac{\mathrm{d}f(x)}{\mathrm{d}x}
 $$
 
 ```fsharp
-ch.d <| fun x ->
+ctx.ch.d <| fun x ->
     //関数f
-    let f(x:num0) = 2*asm.sin(3*x)/asm.sqrt(x*x+1)
+    let f(x:double0) = 2*asm.sin(3*x)/asm.sqrt(x*x+1)
     //関数fのx微分
-    let g(x:num0) = asm.diff (f x) x
+    let g(x:double0) = asm.diff(f x,x)
     
     //微分値の確認
     ctx.iter.num 100 <| fun i ->
@@ -1162,16 +1146,16 @@ g(x) &= \frac{\mathrm{d}f(x)}{\mathrm{d}x}
 $$
 
 ```fsharp
-ch.d <| fun x ->
+ctx.ch.d <| fun x ->
     //関数f
-    let f(x:num0) = 2*asm.sum 1 5 (fun i -> i*x*x+1)
+    let f(x:double0) = 2*(asm.dSum (1,5) <| fun i -> i*x*x+1)
     //関数fのx微分
-    let g(x:num0) = asm.diff (f x) x
+    let g(x:double0) = asm.diff(f x,x)
     
     //微分値の確認
     ctx.iter.num 100 <| fun i ->
         x <== 0.1*i
-        ctx.print.tt <| x ++ (g x) ++ (2*asm.sum 1 5 (fun i -> 2*i*x))
+        ctx.print.tt <| x ++ (g x) ++ (2*(asm.dSum (1,5) <| fun i -> 2*i*x))
 ```
 
 級数を含む式の微分では、同じ級数の計算を何度も行うことがある（以下の例では2回）
@@ -1192,31 +1176,32 @@ $$
 ```fsharp
   ctx.ch.d <| fun x ->
       //関数f
-      let f(x:num0) = asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/(x+1)
+      let f(x:double0) = asm.pow(2*x+(asm.dSum (1,5) <| fun i -> i*x*x+1),2)/(x+1)
       //関数fのx微分
-      let g(x:num0) = asm.diff (f x) x
+      let g(x:double0) = asm.diff(f x,x)
       
       //微分値の確認
       ctx.iter.num 100 <| fun i ->
           x <== 0.1*i
-          ctx.print.tt <| x ++ (g x) ++ (2*(2*x+asm.sum 1 5 (fun i -> i*x*x+1))*(2+asm.sum 1 5 (fun i -> 2*i*x))/(x+1)-asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/asm.pow(x+1,2))
+          ctx.print.tt <| x ++ (g x) ++ (2*(2*x+(asm.dSum (1,5) <| fun i -> i*x*x+1))*(2+(asm.dSum (1,5) <| fun i -> 2*i*x))/(x+1)-asm.pow(2*x+(asm.dSum (1,5) <| fun i -> i*x*x+1),2)/asm.pow(x+1,2))
 ```
 
-`xlet`を使うと、一度計算した級数の値を変数に保存できる
+`asm.iLet`、`asm.dLet`、`asm.zLet`を使うと、一度計算した式の値を一時変数として再利用できる。整数式には`iLet`、実数式には`dLet`、複素数式には`zLet`を使用する。
 
 ```fsharp
-  // tmp:一時変数
-  ctx.ch.dd <| fun (x,tmp) ->
+  ctx.ch.d <| fun x ->
       //関数f
-      let f(x:num0) = asm.pow(2*x+asm.xlet(tmp,asm.sum 1 5 (fun i -> i*x*x+1)),2)/(x+1)
+      let f(x:double0) =
+          asm.dLet (asm.dSum (1,5) <| fun i -> i*x*x+1) <| fun tmp ->
+              asm.pow(2*x+tmp,2)/(x+1)
       //関数fのx微分
-      let g(x:num0) = asm.diff (f x) x
+      let g(x:double0) = asm.diff(f x,x)
       //微分値の確認
       ctx.iter.num 100 <| fun i ->
           x <== 0.1*i
-          //数式内の級数を評価 → 一時変数に保存
+          //数式内の級数を評価し、一時変数に保存
           (f x).eval()
-          ctx.print.tt <| x ++ (g x) ++ (2*(2*x+asm.sum 1 5 (fun i -> i*x*x+1))*(2+asm.sum 1 5 (fun i -> 2*i*x))/(x+1)-asm.pow(2*x+asm.sum 1 5 (fun i -> i*x*x+1),2)/asm.pow(x+1,2))
+          ctx.print.tt <| x ++ (g x)
 ```
 
 配列要素による微分
@@ -1226,9 +1211,9 @@ $$
     ctx.ch.d1 N <| fun x ->
     ctx.ch.d1 N <| fun y ->
         //関数f
-        let f(x:num1) = 2*asm.sum 1 N (fun i -> i*asm.pow(x[i],2)+1)
+        let f(x:double1) = 2*(asm.dSum (1,N) <| fun i -> i*asm.pow(x[i],2)+1)
         //関数fのx[j]微分
-        let g(x:num1,j:num0) = asm.diff (f x) x[j]
+        let g(x:double1,j:int0) = asm.diff(f x,x[j])
         //xの初期化
         ctx.iter.num N <| fun i ->
             x[i] <== 0.1*i
