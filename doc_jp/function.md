@@ -193,7 +193,7 @@ ctx.iter.num 10 <| fun i ->
 ```
 カリー化を使うと以下のように書ける（「`iter.num 10`」の部分が「`loop10`」に置き換わったと考える）
 ```fsharp
-let loop10 = iter.num 10
+let loop10 = ctx.iter.num 10
 loop10 <| fun i ->
     print.t i
 ```
