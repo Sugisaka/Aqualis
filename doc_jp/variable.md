@@ -62,7 +62,7 @@ ctx.ch.i <| fun x ->
 変数を複数定義する場合は以下のようにする。
 ```fsharp
 ctx.ch.i <| fun x ->
-    ch.i <| fun y ->
+    ctx.ch.i <| fun y ->
         x <== 1
         y <== 2
 ```
