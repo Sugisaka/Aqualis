@@ -721,7 +721,7 @@ let f(a:complex0,b:complex0) =
 ```
 以下のように一つの関数だけ定義しておくと、引数`b`に`int0`、`double0`、`double0`のいずれも指定できる。
 ```fsharp
-let inline f(a:double0, b:#INum0) =
+let inline f(a:complex0, b:#INum0) =
     a <== b.ToComplex0 + 1
 ```
 `INum0`は数値を表すインターフェースである。

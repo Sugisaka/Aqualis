@@ -11,7 +11,7 @@ This library generates C/FORTRAN/Python/LaTeX/HTML source codes for numerical si
 
 Run the script file `sample1.fsx` to generate C, Fortran, and Python source files in `C:\home\work`.
 
-See also the [Japanese manual](doc/doc-jp.md) or [English manual](doc/doc-en.md).
+See also the [Japanese manual](docs/doc-jp.md) or [English manual](docs/doc-en.md).
 
 ## License
 [MIT License](license)

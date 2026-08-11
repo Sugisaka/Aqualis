@@ -720,7 +720,6 @@ let f (x:int0) (y:double0) =
 w <== f p q
 ```
 
-```
 The following two functions perform the same operation; the only difference is the type of their arguments.
 ```fsharp
 let f(a:double0, b:int0) =
@@ -734,7 +733,7 @@ let inline f(a:double0, b:#IReal0) =
     a <== b.ToDouble0 + 1
 ```
 `IReal0` is an interface that represents real numbers. Therefore, specifying a variable of type `complex0` for the argument `b` will result in an error.
-```
+
 The following three functions perform the same operation; they differ only in the types of their arguments.
 ```fsharp
 let f(a:complex0, b:int0) =
@@ -746,7 +745,7 @@ let f(a:complex0, b:complex0) =
 ```
 If you define a single function as shown below, you can pass `int0`, `double0`, or `double0` as the argument `b`.
 ```fsharp
-let inline f(a:double0, b:#INum0) =
+let inline f(a:complex0, b:#INum0) =
     a <== b.ToComplex0 + 1
 ```
 `INum0` is an interface that represents numeric values.
