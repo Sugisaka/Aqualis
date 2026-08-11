@@ -696,7 +696,6 @@ let f (x:int0) (y:double0) =
 w <== f p q
 ```
 
-```
 以下の二つの関数は、引数の型が異なるだけで同じ処理を行っている。
 ```fsharp
 let f(a:double0,b:int0) =
@@ -710,7 +709,7 @@ let inline f(a:double0, b:#IReal0) =
     a <== b.ToDouble0 + 1
 ```
 `IReal0`は実数を表すインターフェースである。したがって、引数`b`に`complex0`型の変数を指定するとエラーになる。
-```
+
 以下の三つの関数は、引数の型が異なるだけで同じ処理を行っている。
 ```fsharp
 let f(a:complex0,b:int0) =
