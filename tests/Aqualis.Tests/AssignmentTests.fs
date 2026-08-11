@@ -9,6 +9,51 @@ module AssignmentTests =
     let private createContext path name =
         new Aqualis(Some path, Some name, C99)
 
+    let private assignRealPlusOne (target:double0, value:#IReal0) =
+        target <== value.ToDouble0 + 1
+
+    let private assignNumericPlusOne (target:complex0, value:#INum0) =
+        target <== value.ToComplex0 + 1
+
+    [<Fact>]
+    let ``real scalar marker includes integers and doubles but excludes complex values`` () =
+        Assert.True(typeof<IReal0>.IsAssignableFrom(typeof<int0>))
+        Assert.True(typeof<IReal0>.IsAssignableFrom(typeof<double0>))
+        Assert.False(typeof<IReal0>.IsAssignableFrom(typeof<complex0>))
+
+    [<Fact>]
+    let ``real scalar constraint accepts integer and double expressions`` () =
+        use output = new TemporaryDirectory()
+        use context = createContext output.Path "real-scalar-assignment.c"
+        let target = double0(Var(Dt, "target", NaN), context)
+        let integerValue = int0(Var(It 4, "integerValue", NaN), context)
+        let doubleValue = double0(Var(Dt, "doubleValue", NaN), context)
+
+        Assert.Same(integerValue.Expr, (integerValue :> IReal0).ToDouble0.Expr)
+        Assert.Same(context, (integerValue :> IReal0).ToDouble0.Context)
+        Assert.Same(doubleValue.Expr, (doubleValue :> IReal0).ToDouble0.Expr)
+        Assert.Same(context, (doubleValue :> IReal0).ToDouble0.Context)
+        assignRealPlusOne(target, integerValue)
+        assignRealPlusOne(target, doubleValue)
+
+    [<Fact>]
+    let ``numeric scalar conversion to complex preserves expressions and contexts`` () =
+        use output = new TemporaryDirectory()
+        use context = createContext output.Path "numeric-scalar-assignment.c"
+        let target = complex0(Var(Zt, "target", NaN), context)
+        let integerValue = int0(Var(It 4, "integerValue", NaN), context)
+        let doubleValue = double0(Var(Dt, "doubleValue", NaN), context)
+        let complexValue = complex0(Var(Zt, "complexValue", NaN), context)
+
+        let values : INum0 list = [integerValue; doubleValue; complexValue]
+        for value in values do
+            Assert.Same(value.Expr, value.ToComplex0.Expr)
+            Assert.Same(context, value.ToComplex0.Context)
+
+        assignNumericPlusOne(target, integerValue)
+        assignNumericPlusOne(target, doubleValue)
+        assignNumericPlusOne(target, complexValue)
+
     [<Fact>]
     let ``operators merge constant and variable contexts`` () =
         use output = new TemporaryDirectory()

@@ -36,6 +36,10 @@ namespace Aqualis
         abstract member Etype : Etype
         abstract member Context : Aqualis
 
+    /// Marker for scalar numeric expressions whose values are always real.
+    type IReal0 =
+        inherit INum0
+
     module internal NumericContext =
         let unary (value:INum0) = value.Context
         let binary (left:INum0) (right:INum0) =
@@ -229,6 +233,8 @@ namespace Aqualis
     and int0(x:expr, context:Aqualis) =
         inherit NumericScalar<int0>(x,context)
 
+        interface IReal0
+
         new (x:expr) = int0(x,Aqualis.BlankWriter Numeric)
         member _.Context with get() = context
         ///<summary>優先度の高い型を選択</summary>
@@ -379,6 +385,8 @@ namespace Aqualis
     ///<summary>変数（数値データ）クラス</summary>
     and double0(x:expr, context:Aqualis) =
         inherit NumericScalar<double0>(x,context)
+
+        interface IReal0
 
         new (x:expr) = double0(x,Aqualis.BlankWriter Numeric)
 
@@ -724,6 +732,18 @@ namespace Aqualis
         static member (++) (a:exprString,b:int) = a ++ int0(Int b)
         static member (++) (a:double,b:exprString) = double0(Dbl a) ++ b
         static member (++) (a:exprString,b:double) = a ++ double0(Dbl b)
+
+    [<AutoOpen>]
+    module Real0Extensions =
+        type IReal0 with
+            /// Views this real scalar expression as a double-precision expression.
+            member this.ToDouble0 = double0(this.Expr, this.Context)
+
+    [<AutoOpen>]
+    module Num0Extensions =
+        type INum0 with
+            /// Views this scalar numeric expression as a complex expression.
+            member this.ToComplex0 = complex0(this.Expr, this.Context)
 
     [<AutoOpen>]
     module strExpr =

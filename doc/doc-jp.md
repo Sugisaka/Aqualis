@@ -696,6 +696,37 @@ let f (x:int0) (y:double0) =
 w <== f p q
 ```
 
+```
+以下の二つの関数は、引数の型が異なるだけで同じ処理を行っている。
+```fsharp
+let f(a:double0,b:int0) =
+    a <== b + 1
+let f(a:double0,b:double0) =
+    a <== b + 1
+```
+以下のように一つの関数だけ定義しておくと、引数`b`に`int0`と`double0`の両方を指定できる。
+```fsharp
+let inline f(a:double0, b:#IReal0) =
+    a <== b.ToDouble0 + 1
+```
+`IReal0`は実数を表すインターフェースである。したがって、引数`b`に`complex0`型の変数を指定するとエラーになる。
+```
+以下の三つの関数は、引数の型が異なるだけで同じ処理を行っている。
+```fsharp
+let f(a:complex0,b:int0) =
+    a <== b + 1
+let f(a:complex0,b:double0) =
+    a <== b + 1
+let f(a:complex0,b:complex0) =
+    a <== b + 1
+```
+以下のように一つの関数だけ定義しておくと、引数`b`に`int0`、`double0`、`double0`のいずれも指定できる。
+```fsharp
+let inline f(a:double0, b:#INum0) =
+    a <== b.ToComplex0 + 1
+```
+`INum0`は数値を表すインターフェースである。
+
 ### 高階関数1
 
 関数を引数とする関数も定義できる。

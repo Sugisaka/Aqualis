@@ -92,3 +92,17 @@ group.section (step,3) <| fun () ->
             ctx.iter.num c.size2 <| fun j ->
                 c[i,j] <== c[i,j]/(c.size1*c.size2)
                 c[i,j] <== (c[i,j]+x*a/y)/(c.size1*c.size2)
+        let f1(a:double0, b:#IReal0) =
+            a <== b.ToDouble0 + 1
+        let f2(a:complex0, b:#INum0) =
+            a <== b.ToComplex0 + 1
+        ctx.ch.idz <| fun (a,b,c) ->
+            f1(b,I 1)
+            f1(b,D 1.22)
+            f1(b,a)
+            f1(b,b)
+            //f1(b,c) //error
+            f2(c,I 1)
+            f2(c,D 1.22)
+            f2(c,a)
+            f2(c,b)
