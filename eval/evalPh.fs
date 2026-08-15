@@ -219,26 +219,39 @@ namespace Aqualis
                 |Idx3 (_,name,i,j,k) ->
                     printfn "Ph言語では3次元配列の代わりに1次元配列を使用します"
                     "NaN"
-                |Let (t,y,f) ->
-                    let x =
-                        match t with
-                        |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), y)
-                        |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), y)
-                        |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), y)
-                        |_    -> NaN
-                    match y with
-                    |NaN -> ()
-                    |_ -> expr.substPh x y c
+                |Let (t,y,x,f) ->
+                    // let x =
+                    //     match t with
+                    //     |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), y)
+                    //     |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), y)
+                    //     |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), y)
+                    //     |_    -> NaN
+                    // match y with
+                    // |NaN -> ()
+                    // |_ -> expr.substPh x y c
                     (f x).evalPh c
                 |Sum(t, n1, n2, f) ->
+                    let v =
+                        match t with
+                        |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), NaN)
+                        |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), NaN)
+                        |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), NaN)
+                        |_    -> NaN
+                    expr.substPh v (Int 0) c
                     // 合計値格納用変数
-                    (Let(t, Int 0, fun u ->
+                    (Let(t, Int 0, v, fun u ->
                         expr.forLoopPh c (n1,n2) <| fun i ->
                             // 加算・代入処理
                             expr.substPh u (Add(t,u, f i)) c
                         u)).evalPh c
                 |IfEl(cond,n1,n2) ->
-                    (Let(n1.etype, NaN, fun x ->
+                    let v =
+                        match n1.etype with
+                        |It 4 -> Var (It 4, (fun (a,_) -> a) (c.i0.getVar()), NaN)
+                        |Dt   -> Var (Dt, (fun (a,_) -> a) (c.d0.getVar()), NaN)
+                        |Zt   -> Var (Zt, (fun (a,_) -> a) (c.z0.getVar()), NaN)
+                        |_    -> NaN
+                    (Let(n1.etype, NaN, v, fun x ->
                         expr.branchPh c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substPh x n1 c

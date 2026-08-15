@@ -357,26 +357,39 @@ namespace Aqualis
                         let j,nj = eval j 0
                         let k,nk = eval k 0
                         name + "_{" + i + "," + j + "," + k + "}", pl
-                    |Let (t,y,f) -> 
-                        let x =
-                            match t with
-                            |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), y)
-                            |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), y)
-                            |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), y)
-                            |_    -> NaN
-                        match y with
-                        |NaN -> ()
-                        |_ -> expr.substL x y c
+                    |Let (t,y,x,f) -> 
+                        // let x =
+                        //     match t with
+                        //     |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), y)
+                        //     |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), y)
+                        //     |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), y)
+                        //     |_    -> NaN
+                        // match y with
+                        // |NaN -> ()
+                        // |_ -> expr.substL x y c
                         eval (f x) pl
                     |Sum(t, n1, n2, f) ->
+                        let v =
+                            match t with
+                            |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), NaN)
+                            |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), NaN)
+                            |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), NaN)
+                            |_    -> NaN
+                        expr.substC v (Int 0) c
                         // 合計値格納用変数
-                        eval (Let(t, Int 0, fun u ->
+                        eval (Let(t, Int 0, v, fun u ->
                             expr.forLoopF c (n1,n2) <| fun i ->
                                 // 加算・代入処理
                                 expr.substL u (Add(t,u, f i)) c
                             u)) pl
                     |IfEl(cond,n1,n2) -> 
-                        eval (Let(n1.etype, NaN, fun x -> 
+                        let v =
+                            match n1.etype with
+                            |It 4 -> Var (It 4, (fun (a,_) -> a) (c.i0.getVar()), NaN)
+                            |Dt   -> Var (Dt, (fun (a,_) -> a) (c.d0.getVar()), NaN)
+                            |Zt   -> Var (Zt, (fun (a,_) -> a) (c.z0.getVar()), NaN)
+                            |_    -> NaN
+                        eval (Let(n1.etype, NaN, v, fun x -> 
                             expr.branchL c <| fun (ifcode,_,elsecode) ->
                                 ifcode cond <| fun () ->
                                     expr.substL x n1 c

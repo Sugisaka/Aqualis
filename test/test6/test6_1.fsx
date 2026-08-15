@@ -4,14 +4,14 @@ let projectname = "test6_1"
 let version = "1.0.0"
 //#############################################################################
  
-let outputdir = __SOURCE_DIRECTORY__
+let outputdir = @"C:\home\work" //__SOURCE_DIRECTORY__
 
 #I @"..\..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open Aqualis
 
-Compile [Fortran;C99;Python] outputdir projectname "aaa" <| fun ctx ->
+Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
     let dd = 1E-5
     ctx.ch.dddd <| fun (x,y1,y2,dy) ->
     ctx.ch.d <| fun c1 ->
@@ -106,9 +106,8 @@ Compile [Fortran;C99;Python] outputdir projectname "aaa" <| fun ctx ->
                 y1 <== f z
                 y2r <== f (z+dd)
                 y2i <== f (z+dd*asm.uj)
-                ctx.print.tt <| y1++y2r++y2i
                 ctx.print.tt <| dy ++ ((y2r-y1)/dd+asm.uj*(y2i-y1)/dd)
-        group.section "012" <| fun () ->
+        dummy_group.section "012" <| fun () ->
             ctx.ch.d1 10 <| fun ar ->
                 ar.foreach <| fun i -> ar[i] <== i
                 let f(a:double1) = (asm.dSum (0,9) <| fun n -> n*n*a[n])/asm.sqrt(asm.dSum (0,9) <| fun n -> n*a[n])
@@ -121,11 +120,50 @@ Compile [Fortran;C99;Python] outputdir projectname "aaa" <| fun ctx ->
                     y2 <== f ar
                     ar[i] <== ar[i] - dd
                     ctx.print.tt <| i ++ dy ++ (y2-y1)/dd
-        dummy_group.section "013" <| fun () ->
+        dummy_group.section "013A" <| fun () ->
             ctx.ch.d1 10 <| fun ar ->
                 ar.foreach <| fun i -> ar[i] <== i
                 let f(a:double1) = 
-                    asm.dLet (asm.dSum (0,9) <| fun n -> asm.todouble(n*n)) (fun x -> (asm.dSum (0,9) <| fun n -> n*n*a[n])/x)
+                    ctx.ch.dLet (asm.dSum (0,9) <| fun n -> asm.pow(a[n],2)+asm.todouble(n*n)*a[n]+1) (fun x -> 
+                        (asm.dSum (0,9) <| fun n -> n*n*a[n]+3)/x)
+                ar.foreach <| fun i ->
+                    ctx.comment "代数微分"
+                    dy <== asm.diff (f ar, ar[i])
+                    ctx.comment "数値微分"
+                    y1 <== f ar
+                    ar[i] <== ar[i] + dd
+                    y2 <== f ar
+                    ar[i] <== ar[i] - dd
+                    ctx.print.tt <| i ++ dy ++ (y2-y1)/dd
+        dummy_group.section "013B" <| fun () ->
+            ctx.ch.d1 10 <| fun ar ->
+                ar.foreach <| fun i -> ar[i] <== i
+                let cps  = new AqualisBuilder<double0>()
+                let f(a:double1) = 
+                    cps{
+                        let! x = ctx.ch.dLet (asm.dSum (0,9) <| fun n -> asm.pow(a[n],2)+asm.todouble(n*n)*a[n]+1)
+                        return (asm.dSum (0,9) <| fun n -> n*n*a[n]+3)/x
+                    } <| id
+                ar.foreach <| fun i ->
+                    ctx.comment "代数微分"
+                    dy <== asm.diff (f ar, ar[i])
+                    ctx.comment "数値微分"
+                    y1 <== f ar
+                    ar[i] <== ar[i] + dd
+                    y2 <== f ar
+                    ar[i] <== ar[i] - dd
+                    ctx.print.tt <| i ++ dy ++ (y2-y1)/dd
+        group.section "014" <| fun () ->
+            ctx.ch.d1 10 <| fun ar ->
+            ctx.ch.d1 10 <| fun br ->
+                ar.foreach <| fun i -> ar[i] <== i
+                br.foreach <| fun i -> br[i] <== i*i/10
+                let cps  = new AqualisBuilder<double0>()
+                let f(a:double1) = 
+                    cps{
+                        let! A = ctx.ch.dLet (asm.sqrt(asm.dSum (0,9) <| fun n -> asm.pow(ar[n],2)))
+                        return asm.sqrt(asm.dSum (0,9) <| fun n -> asm.pow(a[n]/A-br[n],2))
+                    } <| id
                 ar.foreach <| fun i ->
                     ctx.comment "代数微分"
                     dy <== asm.diff (f ar, ar[i])

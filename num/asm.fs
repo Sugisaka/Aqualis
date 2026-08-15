@@ -112,24 +112,24 @@ namespace Aqualis
         static member zSum (n1:int, n2:int0) = asm.zSum(int0(Int n1), n2)
         static member zSum (n1:int0, n2:int) = asm.zSum(n1, int0(Int n2))
         static member zSum (n1:int, n2:int) = asm.zSum(int0(Int n1), int0(Int n2))
-        static member iLet (x:int0) = fun (f:int0->int0) ->
-            int0(Let(It 4, x.Expr, fun value -> (f(int0(value, x.Context))).Expr), x.Context)
-        static member iLet (x:int) = fun (f:int0->int0) -> asm.iLet (I x) f
-        static member dLet (x:double0) = fun (f:double0->double0) ->
-            double0(Let(Dt, x.Expr, fun value -> (f(double0(value, x.Context))).Expr), x.Context)
-        static member dLet (x:double) = fun (f:double0->double0) -> asm.dLet (D x) f
-        static member dLet (x:int0) = fun (f:double0->double0) ->
-            double0(Let(Dt, x.Expr, fun value -> (f(double0(value, x.Context))).Expr), x.Context)
-        static member dLet (x:int) = fun (f:double0->double0) -> asm.dLet (I x) f
-        static member zLet (x:complex0) = fun (f:complex0->complex0) ->
-            complex0(Let(Zt, x.Expr, fun value -> (f(complex0(value, x.Context))).Expr), x.Context)
-        static member zLet (x:double0) = fun (f:complex0->complex0) ->
-            complex0(Let(Zt, x.Expr, fun value -> (f(complex0(value, x.Context))).Expr), x.Context)
-        static member zLet (x:double*double) = fun (f:complex0->complex0) -> asm.zLet (Z x) f
-        static member zLet (x:double) = fun (f:complex0->complex0) -> asm.zLet (D x) f
-        static member zLet (x:int0) = fun (f:complex0->complex0) ->
-            complex0(Let(Zt, x.Expr, fun value -> (f(complex0(value, x.Context))).Expr), x.Context)
-        static member zLet (x:int) = fun (f:complex0->complex0) -> asm.zLet (I x) f
+        // static member iLet (x:int0) = fun (f:int0->int0) ->
+        //     int0(Let(It 4, x.Expr, fun value -> (f(int0(value, x.Context))).Expr), x.Context)
+        // static member iLet (x:int) = fun (f:int0->int0) -> asm.iLet (I x) f
+        // static member dLet (x:double0) = fun (f:double0->double0) ->
+        //     double0(Let(Dt, x.Expr, fun value -> (f(double0(value, x.Context))).Expr), x.Context)
+        // static member dLet (x:double) = fun (f:double0->double0) -> asm.dLet (D x) f
+        // static member dLet (x:int0) = fun (f:double0->double0) ->
+        //     double0(Let(Dt, x.Expr, fun value -> (f(double0(value, x.Context))).Expr), x.Context)
+        // static member dLet (x:int) = fun (f:double0->double0) -> asm.dLet (I x) f
+        // static member zLet (x:complex0) = fun (f:complex0->complex0) ->
+        //     complex0(Let(Zt, x.Expr, fun value -> (f(complex0(value, x.Context))).Expr), x.Context)
+        // static member zLet (x:double0) = fun (f:complex0->complex0) ->
+        //     complex0(Let(Zt, x.Expr, fun value -> (f(complex0(value, x.Context))).Expr), x.Context)
+        // static member zLet (x:double*double) = fun (f:complex0->complex0) -> asm.zLet (Z x) f
+        // static member zLet (x:double) = fun (f:complex0->complex0) -> asm.zLet (D x) f
+        // static member zLet (x:int0) = fun (f:complex0->complex0) ->
+        //     complex0(Let(Zt, x.Expr, fun value -> (f(complex0(value, x.Context))).Expr), x.Context)
+        // static member zLet (x:int) = fun (f:complex0->complex0) -> asm.zLet (I x) f
         static member diff (f:double0,x:double0) =
             let context = NumericContext.binary f x
             double0(expr.diff f.Expr x.Expr context, context)

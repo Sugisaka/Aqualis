@@ -39,8 +39,8 @@ namespace Aqualis
                     Cpx (xre,xim)
                 |Div(Dt,x,y) when x.etype = It 4 && y.etype = It 4 -> 
                     (ToDbl x/ToDbl y).simp.eval()
-                |Let (_,y,f) -> 
-                    let x = y.simp.eval()
+                |Let (_,y,x,f) -> 
+                    // let x = y.simp.eval()
                     match x with
                     |Int _ ->
                         (f x).simp.eval()

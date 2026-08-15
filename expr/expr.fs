@@ -52,7 +52,7 @@ namespace Aqualis
         |Idx1 of Etype*string*expr
         |Idx2 of Etype*string*expr*expr
         |Idx3 of Etype*string*expr*expr*expr
-        |Let of Etype*expr*(expr->expr)
+        |Let of Etype*expr*expr*(expr->expr)
         |IfEl of expr*expr*expr
         |Sum of Etype*expr*expr*(expr->expr)
         |NaN
@@ -102,7 +102,7 @@ namespace Aqualis
             |Idx1 (t,_,_) -> t
             |Idx2 (t,_,_,_) -> t
             |Idx3 (t,_,_,_,_) -> t
-            |Let (t,_,_) -> t
+            |Let (t,_,_,_) -> t
             |Sum (t,_,_,_) -> t
             |IfEl (_,a,b) -> a.etype%%b.etype
             |NaN -> Nt
@@ -201,7 +201,7 @@ namespace Aqualis
                 |Idx1 (t,x,i) -> ss0 + "Idx1(" + x + ", " + str(i, indent+indentStep) + ") "
                 |Idx2 (t,x,i,j) -> ss0 + "Idx2(" + x + ", " + str(i, indent+indentStep) + ", " + str(j, indent+indentStep) + ") "
                 |Idx3 (t,x,i,j,k) -> ss0 + "Idx3(" + x + ", " + str(i, indent+indentStep) + ", " + str(j, indent+indentStep) + ", " + str(k, indent+indentStep) + ") "
-                |Let (t,_,_) -> ss0 + "Let"
+                |Let (t,_,_,_) -> ss0 + "Let"
                 |Sum (_,_,_,_) -> ss0 + "Sum"
                 |IfEl (_,a,b) -> ss0 + "IfEl"
                 |NaN -> ss0 + "NaN"

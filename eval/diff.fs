@@ -67,6 +67,8 @@ namespace Aqualis
                         Div(t, Mul(t, Dbl (log10(2.718281828459045)), expr.diff v x g), v)
                     |Sqrt(t,v),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Div(t, Mul(t, Dbl 0.5, expr.diff v x g), Sqrt(t,v))
+                    |ToDbl v,_ ->
+                        expr.diff v x g
                     |Idx1(t1,u1,nA1),Idx1(t2,u2,nB1) ->
                         if t1 = t2 && u1 = u2 then
                             IfEl(Eq(nA1,nB1), Int 1, Int 0)
@@ -87,12 +89,12 @@ namespace Aqualis
                     |Idx3 _ ,(Var _|Idx1 _|Idx2 _) -> Int 0
                     |Sum(t, n1, n2, f),_ ->
                         Sum(t, n1, n2, fun n -> expr.diff (f n) x g)
-                    |Let(t,u,f),_ ->
+                    |Let(t,eq,v,f),_ ->
                         // 直接計算の場合でも変数を生成し、その変数に対し微分を行う
-                        let vname,_ = g.d0.getVar()
-                        let v = Var(Dt,vname,NaN)
-                        expr.subst v u g
-                        expr.diff (f v) x g + expr.diff (f v) v g * expr.diff u x g
+                        // let vname,_ = g.d0.getVar()
+                        // let v = Var(Dt,vname,NaN)
+                        // expr.subst v eq g
+                        expr.diff (f v) x g + expr.diff (f v) v g * expr.diff eq x g
                     |NaN,_ ->
                         printfn "NaNを微分できません"
                         NaN

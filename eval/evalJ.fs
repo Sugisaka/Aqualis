@@ -245,31 +245,44 @@ namespace Aqualis
                 |Idx1 (_,name,i) -> name + "[" + i.evalJ c + "]"
                 |Idx2 _ -> notSupported "two-dimensional array indexing"
                 |Idx3 _ -> notSupported "three-dimensional array indexing"
-                |Let (Zt,_,_)
+                |Let (Zt,_,_,_)
                 |Sum(Zt,_,_,_) ->
                     notSupported "complex-number expressions"
                 |IfEl(_,n1,n2) when n1.etype = Zt || n2.etype = Zt ->
                     notSupported "complex-number expressions"
-                |Let (t,y,f) ->
-                    let x =
-                        match t with
-                        |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), y)
-                        |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), y)
-                        |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), y)
-                        |_    -> NaN
-                    match y with
-                    |NaN -> ()
-                    |_ -> expr.substJ x y c
+                |Let (t,y,x,f) ->
+                    // let x =
+                    //     match t with
+                    //     |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), y)
+                    //     |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), y)
+                    //     |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), y)
+                    //     |_    -> NaN
+                    // match y with
+                    // |NaN -> ()
+                    // |_ -> expr.substJ x y c
                     (f x).evalJ c
                 |Sum(t, n1, n2, f) ->
+                    let v =
+                        match t with
+                        |It 4 -> Var (t, (fun (a,_) -> a) (c.i0.getVar()), NaN)
+                        |Dt   -> Var (t, (fun (a,_) -> a) (c.d0.getVar()), NaN)
+                        |Zt   -> Var (t, (fun (a,_) -> a) (c.z0.getVar()), NaN)
+                        |_    -> NaN
+                    expr.substC v (Int 0) c
                     // 合計値格納用変数
-                    (Let(t, Int 0, fun u ->
+                    (Let(t, Int 0, v, fun u ->
                         expr.forLoopJ c (n1,n2) <| fun i ->
                             // 加算・代入処理
                             expr.substJ u (Add(t,u, f i)) c
                         u)).evalJ c
                 |IfEl(cond,n1,n2) ->
-                    (Let(n1.etype, NaN, fun x ->
+                    let v =
+                        match n1.etype with
+                        |It 4 -> Var (It 4, (fun (a,_) -> a) (c.i0.getVar()), NaN)
+                        |Dt   -> Var (Dt, (fun (a,_) -> a) (c.d0.getVar()), NaN)
+                        |Zt   -> Var (Zt, (fun (a,_) -> a) (c.z0.getVar()), NaN)
+                        |_    -> NaN
+                    (Let(n1.etype, NaN, v, fun x ->
                         expr.branchJ c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substJ x n1 c
