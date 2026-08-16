@@ -70,4 +70,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentBrExtensions =
         type Aqualis with
+            ///<summary>条件分岐</summary>
             member this.br = ContextBr this

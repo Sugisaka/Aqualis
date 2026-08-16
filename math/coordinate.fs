@@ -73,4 +73,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentCoordinateExtensions =
         type Aqualis with
+            ///<summary>座標変換</summary>
             member this.coordinate = coordinate.ContextCoordinate(this)

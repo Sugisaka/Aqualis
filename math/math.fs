@@ -187,4 +187,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentMathExtensions =
         type Aqualis with
+            ///<summary>特殊関数</summary>
             member this.math = ContextMath(this)

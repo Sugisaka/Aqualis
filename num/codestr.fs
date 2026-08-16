@@ -101,4 +101,5 @@ module CompilationEnvironmentGroupExtensions =
         static member section (label:string) = fun code -> ()
         
     type Aqualis with
+        ///<summary>コードグループ</summary>
         member this.group = ContextGroup(this)

@@ -829,4 +829,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentHtmlExtensions =
         type Aqualis with
+            ///<summary>HTML生成</summary>
             member this.html = html(this)

@@ -1405,4 +1405,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentLaExtensions =
         type Aqualis with
+            ///<summary>線形代数ライブラリ</summary>
             member this.la = ContextLa(this)

@@ -361,4 +361,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentInterpolateExtensions =
         type Aqualis with
+            ///<summary>データ補間</summary>
             member this.interpolate = ContextInterpolate(this)

@@ -364,4 +364,5 @@ module num0ForPHP =
         member this.h4 (t:PHPdata) = this.h4 t.phpcode
 
     type Aqualis with
+        ///<summary>PHPコード生成</summary>
         member this.php = ContextPhp(this)

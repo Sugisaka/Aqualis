@@ -227,4 +227,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentPrintExtensions =
         type Aqualis with
+            ///<summary>画面表示</summary>
             member this.print = ContextPrint this

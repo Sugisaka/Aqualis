@@ -135,4 +135,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentFft2Extensions =
         type Aqualis with
+            ///<summary>2次元フーリエ変換</summary>
             member this.fft2 = ContextFft2(this)

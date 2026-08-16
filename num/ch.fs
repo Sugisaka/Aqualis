@@ -148,4 +148,5 @@ type ContextCh internal (c:Aqualis) =
 [<AutoOpen>]
 module CompilationEnvironmentChExtensions =
     type Aqualis with
+        ///<summary>一時変数生成</summary>
         member this.ch = ContextCh(this)

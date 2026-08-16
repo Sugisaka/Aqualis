@@ -101,4 +101,5 @@ type ContextOmp internal (c:Aqualis) =
 [<AutoOpen>]
 module CompilationEnvironmentOmpExtensions =
     type Aqualis with
+        ///<summary>OpenMP</summary>
         member this.omp = ContextOmp(this)

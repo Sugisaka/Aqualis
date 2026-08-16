@@ -317,4 +317,5 @@ type ContextOptimization internal (context:Aqualis) =
 [<AutoOpen>]
 module CompilationEnvironmentOptimizationExtensions =
     type Aqualis with
+        ///<summary>非線形最適化</summary>
         member this.optimization = ContextOptimization(this)

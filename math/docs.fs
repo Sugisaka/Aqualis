@@ -331,4 +331,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentDocExtensions =
         type Aqualis with
+            ///<summary>ドキュメント生成</summary>
             member this.doc = ContextDoc(this)

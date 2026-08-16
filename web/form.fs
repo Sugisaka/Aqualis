@@ -347,4 +347,5 @@ module CompilationEnvironmentFormExtensions =
         member _.button(name:string) = Button(context,name)
 
     type Aqualis with
+        ///<summary>HTMLフォーム生成</summary>
         member this.form = ContextForm(this)

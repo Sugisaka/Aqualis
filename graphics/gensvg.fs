@@ -1085,5 +1085,5 @@ module CompilationEnvironmentGenSvgExtensions =
                 reraise()
                 
     type Aqualis with
-        member this.gensvg = ContextGenSvg(this)
+        ///<summary>SVGファイル生成</summary>
         member this.svgfile = ContextSvgFile(this)

@@ -6,13 +6,6 @@
 // 
 namespace Aqualis
     
-    type CPSBuilder() =
-        member _.Bind(source: (int -> int) -> int, k: int -> int) =
-            source k
-        member _.Bind(source: (unit -> int) -> int, k: unit -> int) =
-            source k
-        member _.Return x = x
-        
     // 「継続渡し」(CPS) 用の式ビルダー
     // M<'T> = ('T -> 'R) -> 'R という型を想定
     type AqualisBuilder<'R>() =

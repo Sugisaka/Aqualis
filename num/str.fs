@@ -266,4 +266,5 @@ module Aqualis_str =
     [<AutoOpen>]
     module CompilationEnvironmentStrExtensions =
         type Aqualis with
+            ///<summary>構造体定義</summary>
             member this.str = ContextStr(this)

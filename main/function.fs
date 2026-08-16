@@ -244,4 +244,5 @@ namespace Aqualis
             |_ -> ()
 
         type Aqualis with
+            ///<summary>非インライン関数定義</summary>
             member this.func projectname code = generateFunction this projectname code

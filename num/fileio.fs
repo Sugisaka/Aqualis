@@ -2528,9 +2528,9 @@ namespace Aqualis
         member this.load (f:complex2,filename:string) = this.load(f,st filename)
         member this.load (f:complex1,filename:string) = this.load(f,st filename)
         member this.load (f:complex0,filename:string) = this.load(f,st filename)
-
-    ///<summary>ファイル入出力（処理スキップ）</summary>
+        
     [<AutoOpen>]
     module CompilationEnvironmentIoExtensions =
         type Aqualis with
+            ///<summary>ファイル入出力</summary>
             member this.io = ContextIo(this)

@@ -145,4 +145,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentVarExtensions =
         type Aqualis with
+            ///<summary>変数生成</summary>
             member this.var = ContextVar(this)

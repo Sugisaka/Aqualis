@@ -91,4 +91,5 @@ namespace Aqualis
     [<AutoOpen>]
     module CompilationEnvironmentIterExtensions =
         type Aqualis with
+            ///<summary>反復処理</summary>
             member this.iter = ContextIter this

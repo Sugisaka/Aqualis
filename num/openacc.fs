@@ -34,4 +34,5 @@ type ContextOpenAcc internal (c:Aqualis) =
 [<AutoOpen>]
 module CompilationEnvironmentOpenAccExtensions =
     type Aqualis with
+        ///<summary>OpenACC</summary>
         member this.oacc = ContextOpenAcc(this)
