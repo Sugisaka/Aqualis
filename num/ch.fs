@@ -78,7 +78,19 @@ type ContextCh internal (c:Aqualis) =
                 c.cvar.setVar(Structure "string",variableType,name,"")
                 name) code
 
-    member _.dLet (x:double0) = fun (f:double0->double0) ->
+    member _.xLet (x:int0) = fun (f:int0->int0) ->
+        let y = 
+            match c.language with
+            |Numeric ->
+                x.Expr.simp.eval()
+            |_ ->
+                let vname,_ = c.i0.getVar()
+                let v = int0(Var(It 4,vname,NaN),c)
+                v <== x
+                v.Expr
+        int0(Let(It 4, x.Expr, y, fun value -> (f(int0(value, x.Context))).Expr), x.Context)
+        
+    member _.xLet (x:double0) = fun (f:double0->double0) ->
         let y = 
             match c.language with
             |Numeric ->
@@ -90,6 +102,17 @@ type ContextCh internal (c:Aqualis) =
                 v.Expr
         double0(Let(Dt, x.Expr, y, fun value -> (f(double0(value, x.Context))).Expr), x.Context)
         
+    member _.xLet (x:complex0) = fun (f:complex0->complex0) ->
+        let y = 
+            match c.language with
+            |Numeric ->
+                x.Expr.simp.eval()
+            |_ ->
+                let vname,_ = c.z0.getVar()
+                let v = complex0(Var(Zt,vname,NaN),c)
+                v <== x
+                v.Expr
+        complex0(Let(Zt, x.Expr, y, fun value -> (f(complex0(value, x.Context))).Expr), x.Context)
     member this.ii code = this.i (fun first -> this.i (fun second -> code(first,second)))
     member this.id code = this.i (fun first -> this.d (fun second -> code(first,second)))
     member this.iz code = this.i (fun first -> this.z (fun second -> code(first,second)))

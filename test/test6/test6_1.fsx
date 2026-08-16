@@ -124,7 +124,7 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
             ctx.ch.d1 10 <| fun ar ->
                 ar.foreach <| fun i -> ar[i] <== i
                 let f(a:double1) = 
-                    ctx.ch.dLet (asm.dSum (0,9) <| fun n -> asm.pow(a[n],2)+asm.todouble(n*n)*a[n]+1) (fun x -> 
+                    ctx.ch.xLet (asm.dSum (0,9) <| fun n -> asm.pow(a[n],2)+asm.todouble(n*n)*a[n]+1) (fun x -> 
                         (asm.dSum (0,9) <| fun n -> n*n*a[n]+3)/x)
                 ar.foreach <| fun i ->
                     ctx.comment "代数微分"
@@ -141,7 +141,7 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
                 let cps  = new AqualisBuilder<double0>()
                 let f(a:double1) = 
                     cps{
-                        let! x = ctx.ch.dLet (asm.dSum (0,9) <| fun n -> asm.pow(a[n],2)+asm.todouble(n*n)*a[n]+1)
+                        let! x = ctx.ch.xLet (asm.dSum (0,9) <| fun n -> asm.pow(a[n],2)+asm.todouble(n*n)*a[n]+1)
                         return (asm.dSum (0,9) <| fun n -> n*n*a[n]+3)/x
                     } <| id
                 ar.foreach <| fun i ->
@@ -153,7 +153,7 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
                     y2 <== f ar
                     ar[i] <== ar[i] - dd
                     ctx.print.tt <| i ++ dy ++ (y2-y1)/dd
-        group.section "014" <| fun () ->
+        dummy_group.section "014" <| fun () ->
             ctx.ch.d1 10 <| fun ar ->
             ctx.ch.d1 10 <| fun br ->
                 ar.foreach <| fun i -> ar[i] <== i
@@ -161,7 +161,7 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
                 let cps  = new AqualisBuilder<double0>()
                 let f(a:double1) = 
                     cps{
-                        let! A = ctx.ch.dLet (asm.sqrt(asm.dSum (0,9) <| fun n -> asm.pow(ar[n],2)))
+                        let! A = ctx.ch.xLet (asm.sqrt(asm.dSum (0,9) <| fun n -> asm.pow(ar[n],2)))
                         return asm.sqrt(asm.dSum (0,9) <| fun n -> asm.pow(a[n]/A-br[n],2))
                     } <| id
                 ar.foreach <| fun i ->
@@ -173,3 +173,20 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
                     y2 <== f ar
                     ar[i] <== ar[i] - dd
                     ctx.print.tt <| i ++ dy ++ (y2-y1)/dd
+        group.section "015" <| fun () ->
+                let cps  = new AqualisBuilder<double0>()
+                let f(x:double0) = 
+                    cps{
+                        let! A = ctx.ch.xLet (asm.pow(x,2)+1)
+                        let! B = ctx.ch.xLet (asm.sqrt(2*A))
+                        let! C = ctx.ch.xLet (asm.sin(B-1))
+                        return asm.sqrt(asm.dSum (1,10) <| fun n -> asm.pow(x/(n*C)-1,2))
+                    } <| id
+                ctx.comment "代数微分"
+                dy <== asm.diff (f x, x)
+                ctx.comment "数値微分"
+                y1 <== f x
+                x <== x + dd
+                y2 <== f x
+                x <== x - dd
+                ctx.print.tt <| dy ++ (y2-y1)/dd
