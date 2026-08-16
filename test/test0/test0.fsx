@@ -15,24 +15,26 @@ let step = 2
 
 group.section (step,1) <| fun () ->
     
-    let res1 =
-        asm.dLet 2 <| fun x ->
-            asm.dLet 3 <| fun y ->
-                asm.dSum (1, 4) <| fun z -> (x+y)*z
-                
-    let aqualis  = new AqualisBuilder<double0>()
-    let res2 = aqualis{
-        let! x = asm.dLet 2
-        let! y = asm.dLet 3
-        let  s = asm.dSum (1, 4) <| fun z -> (x+y)*z
-        return s}
+    Compile [Numeric] outputdir projectname "bbb" <| fun ctx ->
         
-    printfn "--- Direct expression ----------------------"
-    printfn "%s" <| res1.Expr.eval().ToString()
-    printfn "--- Monad ----------------------------------"
-    printfn "%s" <| (res2 id).Expr.eval().ToString()
-    printfn "--------------------------------------------"
-    
+        let res1 =
+            ctx.ch.xLet _2 <| fun x ->
+                ctx.ch.xLet _3 <| fun y ->
+                    asm.iSum (1, 4) <| fun z -> (x+y)*z
+                    
+        let aqualis  = new AqualisBuilder<int0>()
+        let res2 = aqualis{
+            let! x = ctx.ch.xLet _2
+            let! y = ctx.ch.xLet _3
+            let  s = asm.iSum (1, 4) <| fun z -> (x+y)*z
+            return s}
+            
+        printfn "--- Direct expression ----------------------"
+        printfn "%s" <| res1.Expr.eval().ToString()
+        printfn "--- Monad ----------------------------------"
+        printfn "%s" <| (res2 id).Expr.eval().ToString()
+        printfn "--------------------------------------------"
+        
 group.section (step,2) <| fun () ->
     Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname "bbb" <| fun c ->
         let x = c.var.i0 "x"

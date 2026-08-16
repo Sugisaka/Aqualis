@@ -172,7 +172,7 @@ namespace Aqualis
         member _.Language with get() = lang
 
         ///<summary>整数型変数リスト</summary>
-        member val i0 = varGenerator (
+        member val internal i0 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "i^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i0"+n.ToString "000"
@@ -180,7 +180,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>倍精度浮動小数点型変数リスト</summary>
-        member val d0 = varGenerator (
+        member val internal d0 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "d^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d0"+n.ToString "000"
@@ -188,7 +188,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>複素数型変数リスト</summary>
-        member val z0 = varGenerator (
+        member val internal z0 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "z^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z0"+n.ToString "000"
@@ -196,7 +196,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>文字変数リスト</summary>
-        member val c0 = varGenerator (
+        member val internal c0 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "c^{("+n.ToString()+")}"
             |PHP -> fun n -> "$c0"+n.ToString "000"
@@ -204,7 +204,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>文字列変数リスト</summary>
-        member val t0 = varGenerator (
+        member val internal t0 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "t^{("+n.ToString()+")}"
             |PHP -> fun n -> "$t0"+n.ToString "000"
@@ -212,7 +212,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>ファイルポインタリスト</summary>
-        member val f0 = varGenerator (
+        member val internal f0 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "f^{("+n.ToString()+")}"
             |PHP -> fun n -> "$f0"+n.ToString "000"
@@ -220,7 +220,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>整数型1次元配列リスト</summary>
-        member val i1 = varGenerator (
+        member val internal i1 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i1"+n.ToString "000"
@@ -228,7 +228,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>倍精度浮動小数点型1次元配列リスト</summary>
-        member val d1 = varGenerator (
+        member val internal d1 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d1"+n.ToString "000"
@@ -236,7 +236,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>複素数型1次元配列リスト</summary>
-        member val z1 = varGenerator (
+        member val internal z1 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z1"+n.ToString "000"
@@ -244,7 +244,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>整数型2次元配列リスト</summary>
-        member val i2 = varGenerator (
+        member val internal i2 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i2"+n.ToString "000"
@@ -252,7 +252,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>倍精度浮動小数点型2次元配列リスト</summary>
-        member val d2 = varGenerator (
+        member val internal d2 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d2"+n.ToString "000"
@@ -260,7 +260,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>複素数型2次元配列リスト</summary>
-        member val z2 = varGenerator (
+        member val internal z2 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\ddot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z2"+n.ToString "000"
@@ -268,7 +268,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>整数型3次元配列リスト</summary>
-        member val i3 = varGenerator (
+        member val internal i3 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{i}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$i3"+n.ToString "000"
@@ -276,7 +276,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>倍精度浮動小数点型3次元配列リスト</summary>
-        member val d3 = varGenerator (
+        member val internal d3 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{d}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$d3"+n.ToString "000"
@@ -284,7 +284,7 @@ namespace Aqualis
             ) with get
 
         ///<summary>複素数型3次元配列リスト</summary>
-        member val z3 = varGenerator (
+        member val internal z3 = varGenerator (
             match lang with
             |LaTeX|HTML|HTMLSequenceDiagram -> fun n -> "\\dddot{z}^{("+n.ToString()+")}"
             |PHP -> fun n -> "$z3"+n.ToString "000"
