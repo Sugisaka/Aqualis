@@ -164,7 +164,7 @@ type ContextDiff(c:Aqualis) =
                             let na,fa = dataset (complex0 a,m)
                             // aの値を保存
                             w[n] <== fa
-                            na,w[n]
+                            na, asm.conj w[n]
                         |p -> 
                             n,complex0 p
                     ignore <| dataset(f,0)
@@ -186,12 +186,15 @@ type ContextDiff(c:Aqualis) =
                             nb
                         |Mul(_,a,b) ->
                             let m = n + 2
+                            let fa = w[n] //double0 a
+                            /// bの値を一時変数リストから取得
+                            let fb = w[n+1] //double0 b
                             /// aの微分値保存用
                             let da = w'[n]
                             /// bの微分値保存用
                             let db = w'[n+1]
-                            da <== df*asm.conj (complex0 b)
-                            db <== df*asm.conj (complex0 a)
+                            da <== df*asm.conj fb
+                            db <== df*asm.conj fa
                             let na = dd (complex0 a,da,m)
                             let nb = dd (complex0 b,db,na)
                             nb
@@ -238,14 +241,14 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
                 c1 <== 4+asm.uj*3
                 c2 <== -2+asm.uj*5
                 2*(c1*x+c2).pow
-            ctx.comment "代数微分"
+            ctx.comment "自動微分(forward)"
             result <== f x
             ctx.print.t (2*result.dx')
             ctx.comment "数値微分"
             y1 <== f x
             y2re <== f (x+dd)
             y2im <== f (x+asm.uj*dd)
-            ctx.print.tt <| (y2re-y1)/dd ++ (y2im-y1)/dd
+            ctx.print.tt <| (y2re.re-y1.re)/dd ++ (y2im.re-y1.re)/dd
     ctx.ch.z <| fun x ->
     ctx.ch.z <| fun y1 ->
     ctx.ch.z <| fun y2re ->
@@ -258,11 +261,11 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
                 c1 <== 4+asm.uj*3
                 c2 <== -2+asm.uj*5
                 2*(c1*x+c2)*asm.conj(c1*x+c2)
-            ctx.comment "代数微分"
+            ctx.comment "自動微分(reverse)"
             ctx.TopDown.diff(f x,x) <| fun df ->
                 ctx.print.t df
             ctx.comment "数値微分"
             y1 <== f x
             y2re <== f (x+dd)
             y2im <== f (x+asm.uj*dd)
-            ctx.print.tt <| (y2re-y1)/dd ++ (y2im-y1)/dd
+            ctx.print.tt <| (y2re.re-y1.re)/dd ++ (y2im.re-y1.re)/dd

@@ -190,7 +190,7 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
             let f (x:AutoDiff) = 
                 c1 <== 4
                 x*x+2*x+c1
-            ctx.comment "代数微分"
+            ctx.comment "自動微分(forward)"
             result <== f x
             ctx.print.t result.dx
             ctx.comment "数値微分"
@@ -207,7 +207,7 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
             let f (x:double0) = 
                 c1 <== 4
                 x*x+2*x+c1
-            ctx.comment "代数微分"
+            ctx.comment "自動微分(reverse)"
             ctx.TopDown.diff(f x,x) <| fun df ->
                 ctx.print.t df
             ctx.comment "数値微分"
