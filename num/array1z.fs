@@ -50,3 +50,15 @@ namespace Aqualis
             static member log10(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.log10(x[i]).Expr))
             static member sqrt(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.sqrt(x[i]).Expr))
             static member conj(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.conj(x[i]).Expr))
+
+    [<AutoOpen>]
+    module Real1Extensions =
+        type IReal1 with
+            /// Views this real one-dimensional expression array as a double-precision array.
+            member this.ToDouble1 = double1(this.Etype, this.Expr, this.Context)
+
+    [<AutoOpen>]
+    module Num1Extensions =
+        type INum1 with
+            /// Views this one-dimensional numeric expression array as a complex array.
+            member this.ToComplex1 = complex1(this.Etype, this.Expr, this.Context)

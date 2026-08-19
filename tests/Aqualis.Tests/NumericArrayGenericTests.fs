@@ -19,6 +19,43 @@ module NumericArrayGenericTests =
     let private z3 value = complex3(Zt,Arx3(I 2,I 2,I 2,fun _->Cpx(value,0.0)))
 
     [<Fact>]
+    let ``numeric array interfaces classify real and complex arrays`` () =
+        Assert.True(typeof<INum1>.IsAssignableFrom(typeof<int1>))
+        Assert.True(typeof<INum1>.IsAssignableFrom(typeof<double1>))
+        Assert.True(typeof<INum1>.IsAssignableFrom(typeof<complex1>))
+        Assert.True(typeof<IReal1>.IsAssignableFrom(typeof<int1>))
+        Assert.True(typeof<IReal1>.IsAssignableFrom(typeof<double1>))
+        Assert.False(typeof<IReal1>.IsAssignableFrom(typeof<complex1>))
+        Assert.True(typeof<INum2>.IsAssignableFrom(typeof<int2>))
+        Assert.True(typeof<INum2>.IsAssignableFrom(typeof<double2>))
+        Assert.True(typeof<INum2>.IsAssignableFrom(typeof<complex2>))
+        Assert.True(typeof<IReal2>.IsAssignableFrom(typeof<int2>))
+        Assert.True(typeof<IReal2>.IsAssignableFrom(typeof<double2>))
+        Assert.False(typeof<IReal2>.IsAssignableFrom(typeof<complex2>))
+        Assert.True(typeof<INum3>.IsAssignableFrom(typeof<int3>))
+        Assert.True(typeof<INum3>.IsAssignableFrom(typeof<double3>))
+        Assert.True(typeof<INum3>.IsAssignableFrom(typeof<complex3>))
+        Assert.True(typeof<IReal3>.IsAssignableFrom(typeof<int3>))
+        Assert.True(typeof<IReal3>.IsAssignableFrom(typeof<double3>))
+        Assert.False(typeof<IReal3>.IsAssignableFrom(typeof<complex3>))
+
+    [<Fact>]
+    let ``numeric array interface views preserve expressions and contexts`` () =
+        withinContext <| fun () ->
+            let real1 = i1 1
+            let real2 = d2 2.0
+            let numeric3 = z3 3.0
+            let doubleView1 = (real1 :> IReal1).ToDouble1
+            let doubleView2 = (real2 :> IReal2).ToDouble2
+            let complexView3 = (numeric3 :> INum3).ToComplex3
+            Assert.Same(real1.Expr, doubleView1.Expr)
+            Assert.Same(real1.Context, doubleView1.Context)
+            Assert.Same(real2.Expr, doubleView2.Expr)
+            Assert.Same(real2.Context, doubleView2.Context)
+            Assert.Same(numeric3.Expr, complexView3.Expr)
+            Assert.Same(numeric3.Context, complexView3.Context)
+
+    [<Fact>]
     let ``generic bases preserve concrete result types`` () =
         withinContext <| fun ()->
             let ai:int1=i1 1+i1 2

@@ -2,6 +2,7 @@ namespace Aqualis
 
     type int2 (typ:Etype,x:Expr2,context:Aqualis) as this =
         inherit NumericArray2<int0,int1,int2>(typ,x,context)
+        interface IReal2
         new(typ,x) = int2(typ,x,Aqualis.BlankWriter Numeric)
         new(context:Aqualis,typ,size,name,para)=
             context.cvar.setVar(typ,size,name,para)

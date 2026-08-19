@@ -13,6 +13,17 @@ namespace Aqualis
         ///<summary>部分配列</summary>
         |Arx3 of (int0*int0*int0*((int0*int0*int0)->expr))
 
+    /// Common read-only representation of a three-dimensional numeric expression array.
+    type INum3 =
+        abstract member Code : string
+        abstract member Expr : Expr3
+        abstract member Etype : Etype
+        abstract member Context : Aqualis
+
+    /// Marker for three-dimensional numeric expression arrays whose values are always real.
+    type IReal3 =
+        inherit INum3
+
     ///<summary>3次元配列</summary>
     type base3 (typ:Etype,x:Expr3, c:Aqualis) =
         let writein text = c.codewritein text
@@ -714,6 +725,12 @@ namespace Aqualis
         //     |None,Var3 _ -> None
         member _.Context=context
         member _.etype=typ
+
+        interface INum3 with
+            member this.Code = this.code
+            member this.Expr = this.Expr
+            member this.Etype = this.etype
+            member this.Context = this.Context
         abstract member WrapScalar:expr->'Scalar
         abstract member WrapRow:Expr1->'Row
         abstract member WrapMatrix:Expr2->'Matrix

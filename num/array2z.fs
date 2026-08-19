@@ -39,3 +39,15 @@ namespace Aqualis
             static member log10(x:complex2)=complex2(x.etype,Arx2(x.size1,x.size2,fun(i,j)->asm.log10(x[i,j]).Expr))
             static member sqrt(x:complex2)=complex2(x.etype,Arx2(x.size1,x.size2,fun(i,j)->asm.sqrt(x[i,j]).Expr))
             static member conj(x:complex2)=complex2(x.etype,Arx2(x.size1,x.size2,fun(i,j)->asm.conj(x[i,j]).Expr))
+
+    [<AutoOpen>]
+    module Real2Extensions =
+        type IReal2 with
+            /// Views this real two-dimensional expression array as a double-precision array.
+            member this.ToDouble2 = double2(this.Etype, this.Expr, this.Context)
+
+    [<AutoOpen>]
+    module Num2Extensions =
+        type INum2 with
+            /// Views this two-dimensional numeric expression array as a complex array.
+            member this.ToComplex2 = complex2(this.Etype, this.Expr, this.Context)

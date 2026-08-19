@@ -13,6 +13,17 @@ namespace Aqualis
         ///<summary>部分配列</summary>
         |Arx2 of (int0*int0*((int0*int0)->expr))
 
+    /// Common read-only representation of a two-dimensional numeric expression array.
+    type INum2 =
+        abstract member Code : string
+        abstract member Expr : Expr2
+        abstract member Etype : Etype
+        abstract member Context : Aqualis
+
+    /// Marker for two-dimensional numeric expression arrays whose values are always real.
+    type IReal2 =
+        inherit INum2
+
     ///<summary>2次元配列</summary>
     type base2 (typ:Etype,x:Expr2, c:Aqualis) =
         let writein text = c.codewritein text
@@ -379,6 +390,12 @@ namespace Aqualis
 
         member _.Context = context
         member _.etype = typ
+
+        interface INum2 with
+            member this.Code = this.code
+            member this.Expr = this.Expr
+            member this.Etype = this.etype
+            member this.Context = this.Context
         abstract member WrapScalar: expr -> 'Scalar
         abstract member WrapRow: Expr1 -> 'Row
         abstract member CreateWithContext: Etype * Expr2 * Aqualis -> 'Self

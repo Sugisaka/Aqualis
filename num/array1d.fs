@@ -10,6 +10,8 @@ namespace Aqualis
     type double1 (typ:Etype,x:Expr1, context:Aqualis) as this =
         inherit NumericArray1<double0,double1>(typ,x,context)
 
+        interface IReal1
+
         new (typ,x) = double1(typ,x,Aqualis.BlankWriter Numeric)
         new (context:Aqualis,typ,size,name,para) =
             context.cvar.setVar(typ,size,name,para)

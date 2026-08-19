@@ -44,3 +44,15 @@ namespace Aqualis
             static member log10(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log10(x[i,j,k]).Expr))
             static member sqrt(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sqrt(x[i,j,k]).Expr))
             static member conj(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.conj(x[i,j,k]).Expr))
+
+    [<AutoOpen>]
+    module Real3Extensions =
+        type IReal3 with
+            /// Views this real three-dimensional expression array as a double-precision array.
+            member this.ToDouble3 = double3(this.Etype, this.Expr, this.Context)
+
+    [<AutoOpen>]
+    module Num3Extensions =
+        type INum3 with
+            /// Views this three-dimensional numeric expression array as a complex array.
+            member this.ToComplex3 = complex3(this.Etype, this.Expr, this.Context)

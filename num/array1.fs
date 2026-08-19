@@ -13,6 +13,17 @@ namespace Aqualis
         ///<summary>部分配列</summary>
         |Arx1 of (int0*(int0->expr))
 
+    /// Common read-only representation of a one-dimensional numeric expression array.
+    type INum1 =
+        abstract member Code : string
+        abstract member Expr : Expr1
+        abstract member Etype : Etype
+        abstract member Context : Aqualis
+
+    /// Marker for one-dimensional numeric expression arrays whose values are always real.
+    type IReal1 =
+        inherit INum1
+
     ///<summary>1次元配列</summary>
     type base1 (typ:Etype,x:Expr1, c:Aqualis) =
         let writein text = c.codewritein text
@@ -298,6 +309,12 @@ namespace Aqualis
 
         member _.Context = context
         member _.etype = typ
+
+        interface INum1 with
+            member this.Code = this.code
+            member this.Expr = this.Expr
+            member this.Etype = this.etype
+            member this.Context = this.Context
 
         abstract member WrapScalar : expr * Aqualis -> 'Scalar
         abstract member Create : Etype * Expr1 * Aqualis -> 'Self
