@@ -11,89 +11,94 @@ let outputdir = @"C:\home\work" //__SOURCE_DIRECTORY__
 
 open Aqualis
 
-type DDistribution1(u:(int0*double0)->double0,n1:int0,n2:int0,x0:double0,dx:double0,c:Aqualis) =
+type Distribution1Operations<'T> = {
+    Add: 'T -> 'T -> 'T
+    Subtract: 'T -> 'T -> 'T
+    Multiply: 'T -> 'T -> 'T
+    Divide: 'T -> 'T -> 'T
+    Assign: 'T -> 'T -> unit
+    Sum: Aqualis -> int0 -> int0 -> (int0 -> 'T) -> 'T
+}
 
-    member _.f with get() = u
-    member _.N1 with get() = n1
-    member _.N2 with get() = n2
-    member _.Dx with get() = dx
-    member _.X0 with get() = x0
-    member _.ctx with get() = c
+module Distribution1Operations =
+    let real = {
+        Add = fun a b -> a + b
+        Subtract = fun a b -> a - b
+        Multiply = fun a b -> a * b
+        Divide = fun a b -> a / b
+        Assign = fun a b -> a <== b
+        Sum = fun _ n1 n2 term -> asm.dSum (n1,n2) term
+    }
+
+    let complex = {
+        Add = fun a b -> a + b
+        Subtract = fun a b -> a - b
+        Multiply = fun a b -> a * b
+        Divide = fun a b -> a / b
+        Assign = fun a b -> a <== b
+        Sum = fun _ n1 n2 term -> asm.zSum (n1,n2) term
+    }
+
+type Distribution1<'T>
+    (u:(int0*double0)->'T,n1:int0,n2:int0,x0:double0,dx:double0,c:Aqualis,operations:Distribution1Operations<'T>) =
+
+    member _.f = u
+    member _.N1 = n1
+    member _.N2 = n2
+    member _.Dx = dx
+    member _.X0 = x0
+    member _.ctx = c
     member _.x(n:int0) = x0+dx*n
-    static member ( + ) (a:DDistribution1,b:DDistribution1) = DDistribution1((fun (n,x) -> a.f (n,x) + b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( - ) (a:DDistribution1,b:DDistribution1) = DDistribution1((fun (n,x) -> a.f (n,x) - b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( * ) (a:DDistribution1,b:DDistribution1) = DDistribution1((fun (n,x) -> a.f (n,x) * b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( / ) (a:DDistribution1,b:DDistribution1) = DDistribution1((fun (n,x) -> a.f (n,x) / b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( + ) (a:DDistribution1,b:double0->double0) = DDistribution1((fun (n,x) -> a.f (n,x) + b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( - ) (a:DDistribution1,b:double0->double0) = DDistribution1((fun (n,x) -> a.f (n,x) - b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( * ) (a:DDistribution1,b:double0->double0) = DDistribution1((fun (n,x) -> a.f (n,x) * b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( / ) (a:DDistribution1,b:double0->double0) = DDistribution1((fun (n,x) -> a.f (n,x) / b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( + ) (a:double0->double0,b:DDistribution1) = DDistribution1((fun (n,x) -> a x + b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( - ) (a:double0->double0,b:DDistribution1) = DDistribution1((fun (n,x) -> a x - b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( * ) (a:double0->double0,b:DDistribution1) = DDistribution1((fun (n,x) -> a x * b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( / ) (a:double0->double0,b:DDistribution1) = DDistribution1((fun (n,x) -> a x / b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( <== ) (a:DDistribution1,b:DDistribution1) = 
-        a.ctx.iter.range (a.N1,a.N2) <| fun i ->
-            a.ctx.ch.d <| fun x ->
-                x <== a.x i
-                a.f (i,x) <== b.f (i,x)
-    static member ( <== ) (a:DDistribution1,b:double0->double0) = 
-        a.ctx.iter.range (a.N1,a.N2) <| fun i ->
-            a.ctx.ch.d <| fun x ->
-                x <== a.x i
-                a.f (i,x) <== b x
-                
-type ZDistribution1(u:(int0*double0)->complex0,n1:int0,n2:int0,x0:double0,dx:double0,c:Aqualis) =
+    member private _.Operations = operations
+    member private _.New(value) = Distribution1(value,n1,n2,x0,dx,c,operations)
+    member private this.Assign(value:(int0*double0)->'T) =
+        c.iter.range (n1,n2) <| fun i ->
+            c.ch.d <| fun x ->
+                x <== this.x i
+                operations.Assign (u(i,x)) (value(i,x))
+    member this.Sum() =
+        operations.Sum c n1 n2 <| fun n ->
+            c.ch.d <| fun x ->
+                x <== this.x n
+                u(n,x)
 
-    member _.f with get() = u
-    member _.N1 with get() = n1
-    member _.N2 with get() = n2
-    member _.Dx with get() = dx
-    member _.X0 with get() = x0
-    member _.ctx with get() = c
-    member _.x(n:int0) = x0+dx*n
-    static member ( + ) (a:ZDistribution1,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a.f (n,x) + b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( - ) (a:ZDistribution1,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a.f (n,x) - b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( * ) (a:ZDistribution1,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a.f (n,x) * b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( / ) (a:ZDistribution1,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a.f (n,x) / b.f (n,x)),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( + ) (a:ZDistribution1,b:double0->complex0) = ZDistribution1((fun (n,x) -> a.f (n,x) + b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( - ) (a:ZDistribution1,b:double0->complex0) = ZDistribution1((fun (n,x) -> a.f (n,x) - b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( * ) (a:ZDistribution1,b:double0->complex0) = ZDistribution1((fun (n,x) -> a.f (n,x) * b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( / ) (a:ZDistribution1,b:double0->complex0) = ZDistribution1((fun (n,x) -> a.f (n,x) / b x),a.N1,a.N2,a.X0,a.Dx,a.ctx)
-    static member ( + ) (a:double0->complex0,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a x + b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( - ) (a:double0->complex0,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a x - b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( * ) (a:double0->complex0,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a x * b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( / ) (a:double0->complex0,b:ZDistribution1) = ZDistribution1((fun (n,x) -> a x / b.f (n,x) ),b.N1,b.N2,b.X0,b.Dx,b.ctx)
-    static member ( <== ) (a:ZDistribution1,b:ZDistribution1) = 
-        a.ctx.iter.range (a.N1,a.N2) <| fun i ->
-            a.ctx.ch.d <| fun x ->
-                x <== a.x i
-                a.f (i,x) <== b.f (i,x)
-    static member ( <== ) (a:ZDistribution1,b:double0->complex0) = 
-        a.ctx.iter.range (a.N1,a.N2) <| fun i ->
-            a.ctx.ch.d <| fun x ->
-                x <== a.x i
-                a.f (i,x) <== b x
-
+    static member (+) (a:Distribution1<'T>,b:Distribution1<'T>) =
+        a.New(fun (n,x) -> a.Operations.Add (a.f(n,x)) (b.f(n,x)))
+    static member (-) (a:Distribution1<'T>,b:Distribution1<'T>) =
+        a.New(fun (n,x) -> a.Operations.Subtract (a.f(n,x)) (b.f(n,x)))
+    static member (*) (a:Distribution1<'T>,b:Distribution1<'T>) =
+        a.New(fun (n,x) -> a.Operations.Multiply (a.f(n,x)) (b.f(n,x)))
+    static member (/) (a:Distribution1<'T>,b:Distribution1<'T>) =
+        a.New(fun (n,x) -> a.Operations.Divide (a.f(n,x)) (b.f(n,x)))
+    static member (+) (a:Distribution1<'T>,b:double0->'T) =
+        a.New(fun (n,x) -> a.Operations.Add (a.f(n,x)) (b x))
+    static member (-) (a:Distribution1<'T>,b:double0->'T) =
+        a.New(fun (n,x) -> a.Operations.Subtract (a.f(n,x)) (b x))
+    static member (*) (a:Distribution1<'T>,b:double0->'T) =
+        a.New(fun (n,x) -> a.Operations.Multiply (a.f(n,x)) (b x))
+    static member (/) (a:Distribution1<'T>,b:double0->'T) =
+        a.New(fun (n,x) -> a.Operations.Divide (a.f(n,x)) (b x))
+    static member (+) (a:double0->'T,b:Distribution1<'T>) =
+        b.New(fun (n,x) -> b.Operations.Add (a x) (b.f(n,x)))
+    static member (-) (a:double0->'T,b:Distribution1<'T>) =
+        b.New(fun (n,x) -> b.Operations.Subtract (a x) (b.f(n,x)))
+    static member (*) (a:double0->'T,b:Distribution1<'T>) =
+        b.New(fun (n,x) -> b.Operations.Multiply (a x) (b.f(n,x)))
+    static member (/) (a:double0->'T,b:Distribution1<'T>) =
+        b.New(fun (n,x) -> b.Operations.Divide (a x) (b.f(n,x)))
+    static member (<==) (a:Distribution1<'T>,b:Distribution1<'T>) = a.Assign b.f
+    static member (<==) (a:Distribution1<'T>,b:double0->'T) = a.Assign(fun (_,x) -> b x)
+    
 type DistributionContext(c:Aqualis) =
     member _.d(m1:int0,m2:int0,x0:double0,dx:double0) = fun code ->
         c.ch.d1 (m2-m1+1) <| fun v ->
-            let p = DDistribution1((fun (n:int0,_) -> v[n-m1]),m1,m2,x0,dx,c)
+            let p = Distribution1<double0>((fun (n:int0,_) -> v[n-m1]),m1,m2,x0,dx,c,Distribution1Operations.real)
             code p
     member _.z(m1:int0,m2:int0,x0:double0,dx:double0) = fun code ->
         c.ch.z1 (m2-m1+1) <| fun v ->
-            let p = ZDistribution1((fun (n:int0,_) -> v[n-m1]),m1,m2,x0,dx,c)
+            let p = Distribution1<complex0>((fun (n:int0,_) -> v[n-m1]),m1,m2,x0,dx,c,Distribution1Operations.complex)
             code p
-    member _.sum (g:DDistribution1) =
-        asm.dSum (g.N1,g.N2) <| fun n -> 
-            g.ctx.ch.d <| fun x ->
-                x <== g.x n
-                g.f (n,x)
-    member _.sum (g:ZDistribution1) =
-        asm.zSum (g.N1,g.N2) <| fun n -> 
-            g.ctx.ch.d <| fun x ->
-                x <== g.x n
-                g.f (n,x)
+    member _.sum (g:Distribution1<'T>) = g.Sum()
                 
 [<AutoOpen>]
 module DistributionContextExtension =
