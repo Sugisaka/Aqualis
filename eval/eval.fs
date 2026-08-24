@@ -12,6 +12,14 @@ namespace Aqualis
         type expr with
             
             static member subst (x:expr) (y:expr) (c:Aqualis) =
+                match x.etype,y.etype,x with
+                |It _,Dt,_ ->
+                    invalidOp "実数を整数型変数に代入できません"
+                |It _,Zt,_ ->
+                    invalidOp "複素数を整数型変数に代入できません"
+                |Dt,Zt,_ ->
+                    invalidOp "複素数を実数型変数に代入できません"
+                |_,_,(Var _ |Idx1 _ |Idx2 _ |Idx3 _) ->
                     match c.language with
                     |Fortran -> expr.substF x y c
                     |C99 -> expr.substC x y c
@@ -20,10 +28,10 @@ namespace Aqualis
                     |PHP -> expr.substPh x y c
                     |LaTeX -> expr.substL x y c
                     |HTML -> expr.substH x y c
-                    |HTMLSequenceDiagram -> 
-                            expr.substHS x y c
+                    |HTMLSequenceDiagram -> expr.substHS x y c
                     |Numeric -> ()
-                
+                |_ ->
+                    invalidArg (x.eval c) "代入不可能な式または値が指定されています"
             static member equiv (x:expr) (y:expr) (c:Aqualis) =
                     match c.language with
                     |Fortran -> expr.equivF x y c
