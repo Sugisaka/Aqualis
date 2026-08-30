@@ -75,7 +75,7 @@ namespace Aqualis
 
         let private transform (context:Aqualis) (planname:string,data1:complex1,data2:complex1,fftdir:int) =
             context.olist.add "-lfftw3"
-            context.olist.add "-I/usr/local/include"
+            context.olist.add "-I/usr/include"
             context.ch.ii <| fun (N,N2) ->
                 N <== data1.size1
                 N2 <== asm.floor(N/2.0)

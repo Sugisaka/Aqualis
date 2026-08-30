@@ -49,7 +49,7 @@ namespace Aqualis
 
         let private transform (context:Aqualis) (planname:string,data1:complex2,data2:complex2,fftdir:int) =
             context.olist.add "-lfftw3"
-            context.olist.add "-I/usr/local/include"
+            context.olist.add "-I/usr/include"
             context.ch.iiii <| fun (nx,ny,nx2,ny2) ->
                 nx <== data1.size1
                 ny <== data1.size2
