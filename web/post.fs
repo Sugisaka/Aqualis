@@ -6,6 +6,10 @@
 // 
 namespace Aqualis
 
+open System
+open System.Security.Cryptography
+open System.Text
+
 type post(context:Aqualis,id:PHPdata) =
     new(ctx:Aqualis,x:string) = post(ctx,PHPdata ([RStr x],Aqualis.BlankWriter PHP))
     new(ctx:Aqualis,x:int0) = post(ctx,PHPdata([RNvr(x.Expr,x.Context)], x.Context))
@@ -486,51 +490,264 @@ type post(context:Aqualis,id:PHPdata) =
             ]
         ) code
     
+/// Controls validation and storage of an uploaded file.
+type UploadPolicy = {
+    /// Directory relative to the generated PHP script's directory.
+    DestinationDirectory:string
+    /// Maximum accepted file size in bytes.
+    MaxBytes:int64
+    /// Maximum number of files accepted by a multiple-file upload.
+    MaxFiles:int
+    /// Allowed MIME type and server-controlled extension pairs.
+    AllowedMimeTypes:(string*string) list
+    /// Number of cryptographically random bytes used in stored file names.
+    RandomNameBytes:int }
+
+[<RequireQualifiedAccess>]
+module UploadPolicy =
+    /// Creates a policy for private, non-executable uploads.
+    let create destinationDirectory maxBytes allowedMimeTypes = {
+        DestinationDirectory = destinationDirectory
+        MaxBytes = maxBytes
+        MaxFiles = 10
+        AllowedMimeTypes = allowedMimeTypes
+        RandomNameBytes = 16 }
+
+    let internal legacy destinationDirectory = {
+        DestinationDirectory = destinationDirectory
+        MaxBytes = 10L * 1024L * 1024L
+        MaxFiles = 10
+        AllowedMimeTypes = [
+            "image/jpeg", "jpg"
+            "image/png", "png"
+            "image/gif", "gif"
+            "image/webp", "webp"
+            "application/pdf", "pdf"
+            "text/plain", "txt"
+            "text/csv", "csv"
+            "application/json", "json"
+            "application/zip", "zip" ]
+        RandomNameBytes = 16 }
+
+/// Values produced by a secure single-file upload.
+type UploadedFile = {
+    Success:bool0
+    StoredName:PHPdata
+    OriginalName:PHPdata
+    OriginalNameHtml:PHPdata
+    MimeType:PHPdata
+    Size:PHPdata
+    Error:PHPdata }
+
+module private UploadGeneration =
+    let phpString (value:string) =
+        if isNull value then nullArg (nameof value)
+        if value.IndexOf '\u0000' >= 0 then
+            invalidArg (nameof value) "A PHP string literal cannot contain NUL."
+        "'" +
+        value
+            .Replace("\\", "\\\\")
+            .Replace("'", "\\'")
+            .Replace("\r", "\\r")
+            .Replace("\n", "\\n") +
+        "'"
+
+    let validatePolicy policy =
+        if String.IsNullOrWhiteSpace policy.DestinationDirectory then
+            invalidArg "policy" "The upload destination directory cannot be empty."
+        if policy.MaxBytes <= 0L then
+            invalidArg "policy" "The maximum upload size must be positive."
+        if policy.MaxFiles <= 0 then
+            invalidArg "policy" "The maximum upload file count must be positive."
+        if policy.RandomNameBytes < 16 then
+            invalidArg "policy" "At least 16 random bytes are required for stored file names."
+        if List.isEmpty policy.AllowedMimeTypes then
+            invalidArg "policy" "At least one allowed MIME type is required."
+        for mimeType,extension in policy.AllowedMimeTypes do
+            if String.IsNullOrWhiteSpace mimeType then
+                invalidArg "policy" "An allowed MIME type cannot be empty."
+            if
+                String.IsNullOrWhiteSpace extension ||
+                extension.Length > 16 ||
+                extension |> Seq.exists (Char.IsLetterOrDigit >> not)
+            then
+                invalidArg "policy" "Stored file extensions must contain only letters and digits."
+        let mimeTypes = policy.AllowedMimeTypes |> List.map fst
+        if mimeTypes.Length <> (mimeTypes |> List.distinct).Length then
+            invalidArg "policy" "Allowed MIME types must be unique."
+
+    let prefix suffix (id:PHPdata) =
+        let digest =
+            id.code
+            |> Encoding.UTF8.GetBytes
+            |> SHA256.HashData
+            |> Convert.ToHexString
+        "$aqualis_upload_" + digest.Substring(0,12).ToLowerInvariant() + "_" + suffix
+
+    let allowedTypes policy =
+        policy.AllowedMimeTypes
+        |> List.map (fun (mimeType,extension) ->
+            phpString mimeType + " => " + phpString (extension.ToLowerInvariant()))
+        |> String.concat ", "
+        |> fun values -> "[" + values + "]"
+
+    let emitSaveFunction (context:Aqualis) functionName policy =
+        validatePolicy policy
+        let lines = [
+            functionName + " = static function (array $upload): array {"
+            "if (!array_key_exists('error', $upload) || is_array($upload['error'])) {"
+            "throw new \\RuntimeException('Invalid upload data.');"
+            "}"
+            "if ((int)$upload['error'] !== UPLOAD_ERR_OK) {"
+            "throw new \\RuntimeException('Upload failed with error code '.(int)$upload['error'].'.');"
+            "}"
+            "if (!isset($upload['size']) || (int)$upload['size'] < 0 || (int)$upload['size'] > " + string policy.MaxBytes + ") {"
+            "throw new \\RuntimeException('The uploaded file size is not allowed.');"
+            "}"
+            "if (!isset($upload['tmp_name']) || !is_string($upload['tmp_name']) || !is_uploaded_file($upload['tmp_name'])) {"
+            "throw new \\RuntimeException('The file is not a valid HTTP upload.');"
+            "}"
+            "$finfo = new \\finfo(FILEINFO_MIME_TYPE);"
+            "$mimeType = $finfo->file($upload['tmp_name']);"
+            "$allowedTypes = " + allowedTypes policy + ";"
+            "if (!is_string($mimeType) || !isset($allowedTypes[$mimeType])) {"
+            "throw new \\RuntimeException('The uploaded file type is not allowed.');"
+            "}"
+            "$uploadRoot = realpath(__DIR__.DIRECTORY_SEPARATOR." + phpString policy.DestinationDirectory + ");"
+            "if ($uploadRoot === false || !is_dir($uploadRoot) || !is_writable($uploadRoot)) {"
+            "throw new \\RuntimeException('The upload directory is unavailable.');"
+            "}"
+            "do {"
+            "$storedName = bin2hex(random_bytes(" + string policy.RandomNameBytes + ")).'.'.$allowedTypes[$mimeType];"
+            "$destination = $uploadRoot.DIRECTORY_SEPARATOR.$storedName;"
+            "} while (file_exists($destination));"
+            "if (!move_uploaded_file($upload['tmp_name'], $destination)) {"
+            "throw new \\RuntimeException('Failed to store the uploaded file.');"
+            "}"
+            "return ["
+            "'stored_name' => $storedName,"
+            "'original_name' => basename((string)($upload['name'] ?? '')) ,"
+            "'mime_type' => $mimeType,"
+            "'size' => (int)$upload['size'],"
+            "];"
+            "};" ]
+        context.php.phpcode <| fun () ->
+            lines |> List.iter context.writein
+
+    let uploadedFile (context:Aqualis) (prefix:string) =
+        let result = prefix + "_result"
+        let data (expression:string) = PHPdata.f(expression,context)
+        {
+            Success = bool0(Var(Nt,prefix + "_success",NaN),context)
+            StoredName = data (result + "['stored_name'] ?? null")
+            OriginalName = data (result + "['original_name'] ?? null")
+            OriginalNameHtml = data ("htmlspecialchars(" + result + "['original_name'] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')")
+            MimeType = data (result + "['mime_type'] ?? null")
+            Size = data (result + "['size'] ?? null")
+            Error = data (prefix + "_error")
+        }
+
 type postFile(context:Aqualis,id:PHPdata) =
     new(ctx:Aqualis,x:string) = postFile(ctx,PHPdata x)
     member _.files with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"name\"]")
     member _.err with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"error\"]")
+
+    /// Generates a validated single-file upload and returns its result variables.
+    member _.save(policy:UploadPolicy) =
+        let prefix = UploadGeneration.prefix "single" id
+        let saveFunction = prefix + "_save_one"
+        let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
+        UploadGeneration.emitSaveFunction context saveFunction policy
+        context.php.phpcode <| fun () ->
+            context.writein(prefix + "_success = false;")
+            context.writein(prefix + "_result = null;")
+            context.writein(prefix + "_error = null;")
+            context.writein "try {"
+            context.writein("if (!isset(" + fileExpression + ") || !is_array(" + fileExpression + ")) {")
+            context.writein "throw new \\RuntimeException('Invalid upload data.');"
+            context.writein "}"
+            context.writein(prefix + "_result = " + saveFunction + "(" + fileExpression + ");")
+            context.writein(prefix + "_success = true;")
+            context.writein "} catch (\\Throwable $exception) {"
+            context.writein(prefix + "_error = $exception->getMessage();")
+            context.writein "}"
+        UploadGeneration.uploadedFile context prefix
+
+    /// Generates validated multiple-file uploads and returns an array of result records.
+    member _.saveMany(policy:UploadPolicy) =
+        let prefix = UploadGeneration.prefix "many" id
+        let saveFunction = prefix + "_save_one"
+        let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
+        UploadGeneration.emitSaveFunction context saveFunction policy
+        context.php.phpcode <| fun () ->
+            context.writein(prefix + "_results = [];")
+            context.writein("if (!isset(" + fileExpression + "['error']) || !is_array(" + fileExpression + "['error'])) {")
+            context.writein(prefix + "_results[] = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Invalid upload data.'];")
+            context.writein("} elseif (count(" + fileExpression + "['error']) > " + string policy.MaxFiles + ") {")
+            context.writein(prefix + "_results[] = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Too many uploaded files.'];")
+            context.writein "} else {"
+            context.writein("foreach (" + fileExpression + "['error'] as $index => $uploadError) {")
+            context.writein "$upload = ["
+            context.writein("'name' => " + fileExpression + "['name'][$index] ?? '',")
+            context.writein("'tmp_name' => " + fileExpression + "['tmp_name'][$index] ?? '',")
+            context.writein "'error' => $uploadError,"
+            context.writein("'size' => " + fileExpression + "['size'][$index] ?? -1,")
+            context.writein "];"
+            context.writein "try {"
+            context.writein("$result = " + saveFunction + "($upload);")
+            context.writein "$result['success'] = true;"
+            context.writein "$result['error'] = null;"
+            context.writein "} catch (\\Throwable $exception) {"
+            context.writein "$result = ["
+            context.writein "'success' => false,"
+            context.writein "'stored_name' => null,"
+            context.writein "'original_name' => basename((string)$upload['name']),"
+            context.writein "'mime_type' => null,"
+            context.writein "'size' => isset($upload['size']) ? (int)$upload['size'] : null,"
+            context.writein "'error' => $exception->getMessage(),"
+            context.writein "];"
+            context.writein "}"
+            context.writein(prefix + "_results[] = $result;")
+            context.writein "}"
+            context.writein "}"
+        PHPdata.f(context,prefix + "_results")
+
+    [<Obsolete("Use save with an explicit UploadPolicy.")>]
     member this.file_upload dir =
-        let upload = PHPdata(id.toString(".",StrQuotation)+"_file_upload")
-        let file = PHPdata.var(context,"_FILES")
-        let aaa = file.[id].["name"]
-        upload <== "./"++file.[id].["name"]
-        context.php.phpcode <| fun () -> context.write ("move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ");")
+        this.save(UploadPolicy.legacy dir) |> ignore
+
+    [<Obsolete("Use save with an explicit UploadPolicy.")>]
     member this.file_upload_check dir =
-        let upload = PHPdata(id.toString(".",StrQuotation)+"_file_upload")
-        let file = PHPdata.var(context,"_FILES")
-        upload <== "./"++file.[id].["name"]
-        context.br.if1(bool0(Var(Nt, "move_uploaded_file($_FILES['file_upload']['tmp_name'], " + upload.code + ")", NaN), context)) <| fun () ->
+        let result = this.save(UploadPolicy.legacy dir)
+        context.br.if2 result.Success <| fun () ->
             context.php.echo "アップロード完了"
+        <| fun () ->
+            context.php.echo result.Error
+
     member this.file_select() =
         context.html.tagb ("form", [Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            context.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
+            context.html.taga ("input", ["name",id; "type",PHPdata "file"])
             context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
     member this.file_select(action_phpfile:string) =
         context.html.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            context.html.taga ("input", [Atr("input name",id.toString(".",StrQuotation)); Atr("type","file");])
+            context.html.taga ("input", ["name",id; "type",PHPdata "file"])
             context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
+
+    [<Obsolete("Use saveMany with an explicit UploadPolicy.")>]
     member this.files_upload dir =
-        let file = PHPdata.var(context,"_FILES")
-        context.br.if1(context.php.isset(file[id])) <| fun () ->
-            file.[id].["name"].foreach <| fun i ->
-                context.br.if1(bool0(Var(Nt, "is_uploaded_file(" + file.[id].["tmp_name"].[i].code + ")",NaN), context)) <| fun () ->
-                    context.php.phpcode <| fun () -> context.write ("move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./"+dir+"\"."+file.[id].["name"].[i].code + ");")
+        this.saveMany(UploadPolicy.legacy dir) |> ignore
+
+    [<Obsolete("Use saveMany with an explicit UploadPolicy.")>]
     member this.files_upload_check(dir) =
-        let file = PHPdata.var(context,"_FILES")
-        context.br.if1(context.php.isset(file[id])) <| fun () ->
-            file.[id].["name"].foreach <| fun i ->
-                context.br.if1(bool0(Var(Nt,"is_uploaded_file(" + file.[id].["tmp_name"].[i].code + ")",NaN), context)) <| fun () ->
-                    context.br.if2(bool0(Var(Nt,"move_uploaded_file(" + file.[id].["tmp_name"].[i].code + ", \"./" + dir + "\"." + file.[id].["name"].[i].code + ")",NaN), context))
-                    <| fun () ->
-                        context.php.echo ("アップロード完了: "++file.[id].["name"].[i]++"<br>")
-                    <| fun () ->
-                        context.php.echo ("アップロード失敗: "++file.[id].["name"].[i]++"<br>")
+        this.saveMany(UploadPolicy.legacy dir) |> ignore
+
     member this.files_select() =
-        context.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
+        context.html.taga ("input", ["multiple",PHPdata "multiple"; "name", id++"[]"; "type",PHPdata "file"])
         
     member this.files_select(action_phpfile:string) =
-        context.html.taga ("input", ["multiple name", id++"[]"; "type",PHPdata "file";])
+        context.html.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post")]) <| fun () ->
+            context.html.taga ("input", ["multiple",PHPdata "multiple"; "name", id++"[]"; "type",PHPdata "file"])
+            context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード")])
         
     /// ファイルが指定されているか
     member this.isFileSpecified with get() =

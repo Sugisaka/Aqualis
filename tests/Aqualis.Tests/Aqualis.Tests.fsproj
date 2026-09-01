@@ -30,6 +30,7 @@
     <Compile Include="InterpolationTests.fs" />
     <Compile Include="LapackRankGenerationTests.fs" />
     <Compile Include="LapackDeterminantGenerationTests.fs" />
+    <Compile Include="PhpUploadGenerationTests.fs" />
     <Compile Include="ChTests.fs" />
     <Compile Include="GoldenFileTests.fs" />
     <Compile Include="MarkdownTests.fs" />
