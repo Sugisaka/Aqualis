@@ -6,6 +6,9 @@ open Xunit
 open Aqualis
 
 module FileResourceTests =
+    let private occurrenceCount (value:string) (text:string) =
+        text.Split(value, StringSplitOptions.None).Length - 1
+
     let private assertUnlocked path =
         use stream =
             new FileStream(
@@ -36,6 +39,41 @@ module FileResourceTests =
                 |> TestHelpers.normalizeGeneratedCode
 
             Assert.Contains("target =", generated)
+
+    [<Fact>]
+    let ``sequential Fortran file outputs declare reused temporaries once`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [Fortran] output.Path "sequential-file-output" "1" <| fun context ->
+            context.io.fileOutput "first.dat" (fun _ -> ())
+            context.io.fileOutput "second.dat" (fun _ -> ())
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "sequential-file-output.f90"))
+            |> TestHelpers.normalizeGeneratedCode
+
+        Assert.Equal(1, occurrenceCount "character(100) :: t0001" generated)
+        Assert.Equal(1, occurrenceCount "integer :: f0000=" generated)
+        Assert.Equal(1, occurrenceCount "integer :: f0000=10" generated)
+
+    [<Fact>]
+    let ``nested Fortran file outputs declare simultaneous temporaries once each`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [Fortran] output.Path "nested-file-output" "1" <| fun context ->
+            context.io.fileOutput "outer.dat" <| fun _ ->
+                context.io.fileOutput "inner.dat" (fun _ -> ())
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "nested-file-output.f90"))
+            |> TestHelpers.normalizeGeneratedCode
+
+        Assert.Equal(1, occurrenceCount "character(100) :: t0001" generated)
+        Assert.Equal(1, occurrenceCount "character(100) :: t0002" generated)
+        Assert.Equal(1, occurrenceCount "integer :: f0000=" generated)
+        Assert.Equal(1, occurrenceCount "integer :: f0001=" generated)
+        Assert.Equal(1, occurrenceCount "integer :: f0000=10" generated)
+        Assert.Equal(1, occurrenceCount "integer :: f0001=11" generated)
 
     [<Fact>]
     let ``file input rejects a target without a context`` () =

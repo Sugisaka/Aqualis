@@ -3,6 +3,7 @@
 - [Installation](#installation)
 - [Running a Source File](#running-a-source-file)
 - [Preamble](#preamble)
+- [Settings](#settings)
 - [Comments](#comments)
 - [Defining and Assigning Variables](#defining-and-assigning-variables)
 - [Console Output](#console-output)
@@ -94,6 +95,46 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
     ctx.print.s "aaa"
     ctx.print.s "bbb"
 ctx.print.s "ccc"
+```
+
+## Settings
+
+[Back to top](#aqualis)
+
+### Debug mode
+
+The following enables debug mode for subsequent operations. In debug mode, Aqualis generates runtime checks for array-index bounds, array sizes, and related array operations.
+
+```fsharp
+ctx.Setting.DebugMode ON
+```
+
+Use the following to return to normal mode.
+
+```fsharp
+ctx.Setting.DebugMode OFF
+```
+
+### Numeric-to-string formatting
+
+The following sets the field width used when converting integer values to strings to eight characters. The default is 12 characters. This setting is used for console output, text-file output, and file names that contain integer values.
+
+```fsharp
+ctx.Setting.IntToStringFormat 8
+```
+
+The following sets the field width used when converting double-precision floating-point values to strings to 27 characters, with 17 digits after the decimal point. The default is also `(27,17)`. This setting is used for console output and text-file input and output, among other operations.
+
+```fsharp
+ctx.Setting.DoubleToStringFormat (27,17)
+```
+
+### Compiler options
+
+You can add options to the command that compiles the generated source file. The following adds the optimization option `-O2`. Do not include the leading hyphen in the argument.
+
+```fsharp
+ctx.Setting.Option "O2"
 ```
 
 ## Comments

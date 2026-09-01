@@ -325,7 +325,7 @@ namespace Aqualis
             ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
             member _.DoubleToStringFormat x = c.numFormat.setDFormat x
             ///<summary>コンパイル時のオプションを追加</summary>
-            member _.Option x = c.olist.add x
+            member _.Option x = c.olist.add ("-"+x)
             
         type Aqualis with
             ///<summary>Aqualis設定</summary>

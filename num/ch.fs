@@ -68,14 +68,14 @@ type ContextCh internal (c:Aqualis) =
         let name,counter,release = c.f0.getVarAndCounter()
         try
             let initial = if c.language = Fortran then c.numFormat.ItoS(counter + 10) else ""
-            c.cvar.setVar(Structure "file",A0,name,initial)
+            c.cvar.setUniqVar(Structure "file",A0,name,initial)
             code name
         finally release()
 
     member _.t variableType code =
         TemporaryVariableScope.useOne c.t0.getVar
             (fun name ->
-                c.cvar.setVar(Structure "string",variableType,name,"")
+                c.cvar.setUniqVar(Structure "string",variableType,name,"")
                 name) code
 
     member _.xLet (x:int0) = fun (f:int0->int0) ->

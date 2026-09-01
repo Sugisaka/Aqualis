@@ -48,7 +48,7 @@ namespace Aqualis
                         let num = autoVarCounter
                         onlineNumList <- num::onlineNumList
                         autoVarCounter <- autoVarCounter + 1
-                        v,num,autoVarCounter)
+                        v,num,num)
             let returnVar() =
                 lock gate (fun () ->
                     if List.contains num onlineNumList then
