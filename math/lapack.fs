@@ -473,72 +473,85 @@ namespace Aqualis
             context.olist.add "-llapack"
             context.olist.add "-lblas"
             context.group.section "行列の階数" <| fun () ->
-                context.ch.d1 mat.size1 <| fun s -> context.ch.z2 (mat.size1, mat.size1) <| fun u -> context.ch.z2 (mat.size1, mat.size1) <| fun vt ->
-                    //特異値分解を利用
+                context.ch.iii <| fun (m,n,ns) ->
+                    m <== mat.size1
+                    n <== mat.size2
+                    context.br.if2 (m.<n) (fun () -> ns <== m) (fun () -> ns <== n)
+                    context.ch.d1 ns <| fun s ->
+                    rank.clear()
+                    let countRank () =
+                        s.foreach <| fun i ->
+                            context.br.if1 (s[i] .> cond) <| fun () -> rank <== rank + 1
                     match context.language with
                     |Fortran ->
-                        context.ch.iii <| fun (npre,info,lwork) ->
-                            npre<==mat.size1
-                            context.ch.i1 mat.size1 <| fun ipiv -> context.ch.d1 (5*mat.size1) <| fun rwork -> context.ch.i1 (8*mat.size1) <| fun iwork ->
-                            context.ch.z1 lwork <| fun work ->
-                                ipiv.clear()
-                                lwork <== 2*npre+npre
+                        context.ch.iii <| fun (lda,info,lwork) ->
+                        context.ch.ii <| fun (ldu,ldvt) ->
+                        context.ch.z1 1 <| fun u ->
+                        context.ch.z1 1 <| fun vt ->
+                        context.ch.z01 <| fun work ->
+                        context.ch.d1 (5*ns) <| fun rwork ->
+                        context.ch.i1 (8*ns) <| fun iwork ->
+                            context.br.if2 (m .< 1) (fun () -> lda <== 1) (fun () -> lda <== m)
+                            ldu <== 1
+                            ldvt <== 1
+                            lwork <== -1
+                            work.allocate 1
+                            let callZgesdd () =
                                 context.codewritein("call zgesdd('N', " +
-                                    npre.code + "," + " " +
-                                    npre.code + ","  +
-                                    mat.code+", "  +
-                                    npre.code + ", "  +
-                                    s.code + ","   +
-                                    u.code + ", "  +
-                                    npre.code + ","   +
-                                    vt.code + ", "  +
-                                    npre.code + ", "  +
-                                    work.code + ", "  +
-                                    lwork.code + ","   +
-                                    rwork.code + ","   +
-                                    iwork.code + ", "  +
-                                    info.code + ")")
-                                context.br.if1 (info .=/ 0) <| fun () -> context.print.tt <| "rank Info: "++info
+                                    m.code + ", " + n.code + ", " + mat.code + ", " +
+                                    lda.code + ", " + s.code + ", " + u.code + ", " +
+                                    ldu.code + ", " + vt.code + ", " + ldvt.code + ", " +
+                                    work.code + ", " + lwork.code + ", " + rwork.code + ", " +
+                                    iwork.code + ", " + info.code + ")")
+                            callZgesdd()
+                            lwork <== asm.toint work[0].re
+                            work.deallocate()
+                            work.allocate lwork
+                            callZgesdd()
+                            work.deallocate()
+                            context.br.if2 (info .= 0) countRank <| fun () ->
+                                context.print.tt <| "rank Info: "++info
                     |C99 ->
-                        context.ch.iii <| fun (npre,info,lwork) ->
-                            npre<==mat.size1
-                            context.ch.i1 mat.size1 <| fun ipiv -> context.ch.d1 (5*mat.size1) <| fun rwork -> context.ch.i1 (8*mat.size1) <| fun iwork ->
-                            context.ch.z1 lwork <| fun work ->
-                            context.ch.c <| fun jobz ->
-                                match jobz with
-                                |Var(_,name,_) ->
-                                    ipiv.clear()
-                                    lwork <== 2*npre+npre
-                                    context.elist.add "void zgesdd_(char jobz, int m, int n, double complex *a, int lda, double *s, double complex *u, int ldu, double complex *vt, int ldvt, double complex *work, int lwork, double *rwork, int *iwork, int info)"
-                                    context.codewritein(name + " = 'N';")
+                        context.ch.iii <| fun (lda,info,lwork) ->
+                        context.ch.ii <| fun (ldu,ldvt) ->
+                        context.ch.z1 1 <| fun u ->
+                        context.ch.z1 1 <| fun vt ->
+                        context.ch.z01 <| fun work ->
+                        context.ch.d1 (5*ns) <| fun rwork ->
+                        context.ch.i1 (8*ns) <| fun iwork ->
+                        context.ch.c <| fun jobz ->
+                            match jobz with
+                            |Var(_,name,_) ->
+                                context.br.if2 (m .< 1) (fun () -> lda <== 1) (fun () -> lda <== m)
+                                ldu <== 1
+                                ldvt <== 1
+                                lwork <== -1
+                                context.elist.add "void zgesdd_(char *, int *, int *, double complex *, int *, double *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *, int *)"
+                                context.codewritein(name + " = 'N';")
+                                work.allocate 1
+                                let callZgesdd () =
                                     context.codewritein("zgesdd_(" +
-                                        "&" + name + ", " +
-                                        "&" + npre.code + "," +
-                                        "&" + npre.code + ", " +
-                                        mat.code+", " +
-                                        "&" + npre.code + ", " +
-                                        "*" + s.code + ", " +
-                                        "*" + u.code + ", " +
-                                        "&" + npre.code + ", " +
-                                        "*" + vt.code + ", " +
-                                        "&" + npre.code + ", " +
-                                        "&" + work.code + ", " +
-                                        "&" + lwork.code + ", " +
-                                        "*" + rwork.code + ", " +
-                                        "*" + iwork.code + ", " +
-                                        "&" + info.code + ");")
-                                    context.br.if1 (info .=/ 0) <| fun () -> context.print.tt <| "rank Info: "++info
-                                |_ -> ()
+                                        "&" + name + ", &" + m.code + ", &" + n.code + ", " +
+                                        mat.code + ", &" + lda.code + ", " + s.code + ", " +
+                                        u.code + ", &" + ldu.code + ", " + vt.code + ", &" +
+                                        ldvt.code + ", " + work.code + ", &" + lwork.code + ", " +
+                                        rwork.code + ", " + iwork.code + ", &" + info.code + ");")
+                                callZgesdd()
+                                lwork <== asm.toint work[0].re
+                                work.deallocate()
+                                work.allocate lwork
+                                callZgesdd()
+                                work.deallocate()
+                                context.br.if2 (info .= 0) countRank <| fun () ->
+                                    context.print.tt <| "rank Info: "++info
+                            |_ -> ()
                     |LaTeX ->
                         context.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                     |HTML ->
                         context.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                     |Python ->
-                        //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                        context.codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
-                        context.codewritein "threshold = 1e-10  # ゼロの閾値\n"
-                        //行列の階級rank.codeを求める
-                        context.codewritein(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
+                        context.codewritein("_,"+s.code+",_ = svd("+mat.code+")"+"\n")
+                        context.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.code+")"+"\n")
                     |_ -> ()
 
         ///<summary>行列の階数</summary>
@@ -549,76 +562,84 @@ namespace Aqualis
             context.olist.add "-llapack"
             context.olist.add "-lblas"
             context.group.section "行列の階数" <| fun () ->
-                context.ch.d1 mat.size1 <| fun s -> context.ch.z2 (mat.size1, mat.size1) <| fun u -> context.ch.z2 (mat.size1, mat.size1) <| fun vt ->
-                    //特異値分解を利用
+                context.ch.iii <| fun (m,n,ns) ->
+                    m <== mat.size1
+                    n <== mat.size2
+                    context.br.if2 (m.<n) (fun () -> ns <== m) (fun () -> ns <== n)
+                    context.ch.d1 ns <| fun s ->
+                    rank.clear()
+                    let countRank () =
+                        s.foreach <| fun i ->
+                            context.br.if1 (s[i] .> cond) <| fun () -> rank.inc()
                     match context.language with
                     |Fortran ->
-                        context.ch.iii <| fun (npre,info,lwork) ->
-                            npre<==mat.size1
-                            context.ch.i1 mat.size1 <| fun ipiv -> context.ch.d1 (5*mat.size1) <| fun rwork -> context.ch.i1 (8*mat.size1) <| fun iwork ->
-                            context.ch.d1 lwork <| fun work ->
-                                ipiv.clear()
-                                lwork <== 2*npre+npre
+                        context.ch.iii <| fun (lda,info,lwork) ->
+                        context.ch.ii <| fun (ldu,ldvt) ->
+                        context.ch.d1 1 <| fun u ->
+                        context.ch.d1 1 <| fun vt ->
+                        context.ch.d01 <| fun work ->
+                        context.ch.i1 (8*ns) <| fun iwork ->
+                            context.br.if2 (m .< 1) (fun () -> lda <== 1) (fun () -> lda <== m)
+                            ldu <== 1
+                            ldvt <== 1
+                            lwork <== -1
+                            work.allocate 1
+                            let callDgesdd () =
                                 context.codewritein("call dgesdd('N', " +
-                                    npre.code + "," + " " +
-                                    npre.code + ","  +
-                                    mat.code+", "  +
-                                    npre.code + ", "  +
-                                    s.code + ","   +
-                                    u.code + ", "  +
-                                    npre.code + ","   +
-                                    vt.code + ", "  +
-                                    npre.code + ", "  +
-                                    work.code + ", "  +
-                                    lwork.code + ","   +
-                                    rwork.code + ","   +
-                                    iwork.code + ", "  +
+                                    m.code + ", " + n.code + ", " + mat.code + ", " +
+                                    lda.code + ", " + s.code + ", " + u.code + ", " +
+                                    ldu.code + ", " + vt.code + ", " + ldvt.code + ", " +
+                                    work.code + ", " + lwork.code + ", " + iwork.code + ", " +
                                     info.code + ")")
-                                context.br.if1 (info .=/ 0) <| fun () -> context.print.tt <| "rank Info: "++info
+                            callDgesdd()
+                            lwork <== asm.toint work[0]
+                            work.deallocate()
+                            work.allocate lwork
+                            callDgesdd()
+                            work.deallocate()
+                            context.br.if2 (info .= 0) countRank <| fun () ->
+                                context.print.tt <| "rank Info: "++info
                     |C99 ->
-                        context.ch.iii <| fun (npre,info,lwork) ->
-                            npre<==mat.size1
-                            context.ch.i1 mat.size1 <| fun ipiv -> context.ch.d1 (5*mat.size1) <| fun rwork -> context.ch.i1 (8*mat.size1) <| fun iwork ->
-                            context.ch.d1 lwork <| fun work ->
-                            context.ch.c <| fun jobz ->
-                                match jobz with
-                                |Var(_,name,_) ->
-                                    ipiv.clear()
-                                    lwork <== 2*npre+npre
-                                    context.elist.add "void dgesdd_(char jobz, int m, int n, double *a, int lda, double *s, double *u, int ldu, double *vt, int ldvt, double *work, int lwork, int *iwork, int info)"
-                                    context.codewritein(name + " = 'N';")
+                        context.ch.iii <| fun (lda,info,lwork) ->
+                        context.ch.ii <| fun (ldu,ldvt) ->
+                        context.ch.d1 1 <| fun u ->
+                        context.ch.d1 1 <| fun vt ->
+                        context.ch.d01 <| fun work ->
+                        context.ch.i1 (8*ns) <| fun iwork ->
+                        context.ch.c <| fun jobz ->
+                            match jobz with
+                            |Var(_,name,_) ->
+                                context.br.if2 (m .< 1) (fun () -> lda <== 1) (fun () -> lda <== m)
+                                ldu <== 1
+                                ldvt <== 1
+                                lwork <== -1
+                                context.elist.add "void dgesdd_(char *, int *, int *, double *, int *, double *, double *, int *, double *, int *, double *, int *, int *, int *)"
+                                context.codewritein(name + " = 'N';")
+                                work.allocate 1
+                                let callDgesdd () =
                                     context.codewritein("dgesdd_(" +
-                                        "&" + name + ", " +
-                                        "&" + npre.code + "," +
-                                        "&" + npre.code + ", " +
-                                        mat.code+", " +
-                                        "&" + npre.code + ", " +
-                                        "*" + s.code + ", " +
-                                        "*" + u.code + ", "+
-                                        "&" + npre.code + ", " +
-                                        "*" + vt.code + ", " +
-                                        "&" + npre.code + ", " +
-                                        "&" + work.code + ", " +
-                                        "&" + lwork.code + ", " +
-                                        "*" + rwork.code + ", " +
-                                        "*" + iwork.code + ", " +
-                                        "&" + info.code + ");")
-                                    context.br.if1 (info .=/ 0) <| fun () -> context.print.tt <| "rank Info: "++info
-                                |_ -> ()
+                                        "&" + name + ", &" + m.code + ", &" + n.code + ", " +
+                                        mat.code + ", &" + lda.code + ", " + s.code + ", " +
+                                        u.code + ", &" + ldu.code + ", " + vt.code + ", &" +
+                                        ldvt.code + ", " + work.code + ", &" + lwork.code + ", " +
+                                        iwork.code + ", &" + info.code + ");")
+                                callDgesdd()
+                                lwork <== asm.toint work[0]
+                                work.deallocate()
+                                work.allocate lwork
+                                callDgesdd()
+                                work.deallocate()
+                                context.br.if2 (info .= 0) countRank <| fun () ->
+                                    context.print.tt <| "rank Info: "++info
+                            |_ -> ()
                     |LaTeX ->
                         context.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                     |HTML ->
                         context.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                     |Python ->
-                        //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                        context.codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat.code+")"+"\n")
-                        context.codewritein "threshold = 1e-10  # ゼロの閾値\n"
-                        //行列の階級rank.codeを求める
-                        context.codewritein(rank.code+" = numpy.sum("+s.code+" > threshold)"+"\n")
+                        context.codewritein("_,"+s.code+",_ = svd("+mat.code+")"+"\n")
+                        context.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.code+")"+"\n")
                     |_ -> ()
-                    rank.clear()
-                    s.foreach <| fun i ->
-                        context.br.if1 (s[i] .> cond) <| fun () -> rank.inc()
 
         ///<summary>疑似逆行列の計算</summary>
         ///<param name="mat2">matの疑似逆行列</param>
@@ -1027,38 +1048,39 @@ namespace Aqualis
             context.olist.add "-lblas"
             context.group.section "行列式の常用対数を計算" <| fun () ->
                 context.ch.d <| fun d ->
+                    let calculateFromFactorizedDiagonal () =
+                        d.clear()
+                        context.iter.num matrix.size1 <| fun i ->
+                            d <== d + asm.log10(asm.abs(matrix[i,i]))
+                        code d
                     match context.language with
                     |Fortran ->
-                        context.ch.iid <| fun (N,info,d) ->
+                        context.ch.ii <| fun (N,info) ->
                             N <== matrix.size1
                             context.ch.i1 N <| fun ipiv ->
                                 context.codewritein("call zgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
+                                context.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
+                                    context.print.tt <| "determinant Info: "++info
                     |C99 ->
-                        context.ch.iid <| fun (N,info,d) ->
+                        context.ch.ii <| fun (N,info) ->
                             N <== matrix.size1
                             context.ch.i1 N <| fun ipiv ->
                                 context.elist.add "void zgetrf_(int *, int *, double complex *, int *, int *, int *)"
                                 context.codewritein("zgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
+                                context.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
+                                    context.print.tt <| "determinant Info: "++info
                     |LaTeX ->
                         context.codewritein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
+                        calculateFromFactorizedDiagonal()
                     |HTML ->
                         context.codewritein("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
+                        calculateFromFactorizedDiagonal()
                     |Python ->
-                        //LU分解
-                        context.codewritein("P ,L ,U = lu("+matrix.code+")"+"\n")
-                        //上三角行列 U の対角成分の積を計算
-                        context.codewritein("det_U = numpy.prod(numpy.diag(U))"+"\n")
-                        //行列式を計算
-                        //pの行列式は、ピボット行列の行交換の回数で符号が決まる
-                        context.codewritein("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
-                        context.codewritein("det_"+matrix.code+" = sign * det_U"+"\n")
-                        //行列式の常用対数を計算
-                        context.codewritein(d.code+" = numpy.log10(det_"+matrix.code+")"+"\n")
-                    |_ -> ()
-                    d.clear()
-                    context.iter.num matrix.size1 <| fun i ->
-                        d <== d + asm.log10(asm.abs(matrix[i,i]))
-                    code d
+                        context.codewritein(
+                            d.code + " = numpy.linalg.slogdet(" + matrix.code +
+                            ")[1] / numpy.log(10.0)\n")
+                        code d
+                    |_ -> calculateFromFactorizedDiagonal()
 
         /// <summary>
         /// 行列式の常用対数を計算
@@ -1070,38 +1092,39 @@ namespace Aqualis
             context.olist.add "-lblas"
             context.group.section "行列式の常用対数を計算" <| fun () ->
                 context.ch.d <| fun d ->
+                    let calculateFromFactorizedDiagonal () =
+                        d.clear()
+                        context.iter.num matrix.size1 <| fun i ->
+                            d <== d + asm.log10(asm.abs(matrix[i,i]))
+                        code d
                     match context.language with
                     |Fortran ->
-                        context.ch.iid <| fun (N,info,d) ->
+                        context.ch.ii <| fun (N,info) ->
                             N <== matrix.size1
                             context.ch.i1 N <| fun ipiv ->
                                 context.codewritein("call dgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
+                                context.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
+                                    context.print.tt <| "determinant Info: "++info
                     |C99 ->
-                        context.ch.iid <| fun (N,info,d) ->
+                        context.ch.ii <| fun (N,info) ->
                             N <== matrix.size1
                             context.ch.i1 N <| fun ipiv ->
-                                context.elist.add "void dgetrf_(int *, int *, double complex *, int *, int *, int *)"
+                                context.elist.add "void dgetrf_(int *, int *, double *, int *, int *, int *)"
                                 context.codewritein("dgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
+                                context.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
+                                    context.print.tt <| "determinant Info: "++info
                     |LaTeX ->
                         context.codewritein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
+                        calculateFromFactorizedDiagonal()
                     |HTML ->
                         context.codewritein("\\("+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"\\)"+"<br/>\n")
+                        calculateFromFactorizedDiagonal()
                     |Python ->
-                        //LU分解
-                        context.codewritein("P ,L ,U = lu("+matrix.code+")"+"\n")
-                        //上三角行列 U の対角成分の積を計算
-                        context.codewritein("det_U = numpy.prod(numpy.diag(U))"+"\n")
-                        //行列式を計算
-                        //pの行列式は、ピボット行列の行交換の回数で符号が決まる
-                        context.codewritein("sign = (-1) ** numpy.sum(numpy.arange("+matrix.code+".shape[0]) != numpy.argsort(numpy.argsort(P[:, 0])))"+"\n")
-                        context.codewritein("det_"+matrix.code+" = sign * det_U"+"\n")
-                        //行列式の常用対数を計算
-                        context.codewritein(d.code+" = np.log10(np.abs(det_"+matrix.code+"))"+"\n")
-                    |_ -> ()
-                    d.clear()
-                    context.iter.num matrix.size1 <| fun i ->
-                        d <== d + asm.log10(asm.abs(matrix[i,i]))
-                    code d
+                        context.codewritein(
+                            d.code + " = numpy.linalg.slogdet(" + matrix.code +
+                            ")[1] / numpy.log(10.0)\n")
+                        code d
+                    |_ -> calculateFromFactorizedDiagonal()
 
         /// <summary>
         /// mat = u * s * v に特異値分解
