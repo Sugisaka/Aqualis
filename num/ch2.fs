@@ -90,17 +90,17 @@ module ContextChArrayExtensions =
 
     member this.i03 code =
         let ctx = this.Environment
-        TemporaryVariableScope.useOne ctx.i2.getVar
+        TemporaryVariableScope.useOne ctx.i3.getVar
             (fun name -> int3(It 4, Var3(A3(0,0,0),name), context=ctx)) code
 
     member this.d03 code =
         let ctx = this.Environment
-        TemporaryVariableScope.useOne ctx.d2.getVar
+        TemporaryVariableScope.useOne ctx.d3.getVar
             (fun name -> double3(Dt, Var3(A3(0,0,0),name), context=ctx)) code
 
     member this.z03 code =
         let ctx = this.Environment
-        TemporaryVariableScope.useOne ctx.z2.getVar
+        TemporaryVariableScope.useOne ctx.z3.getVar
             (fun name -> complex3(Zt, Var3(A3(0,0,0),name), context=ctx)) code
             
     member this.i3 (size1:int0,size2:int0,size3:int0) = fun code ->
