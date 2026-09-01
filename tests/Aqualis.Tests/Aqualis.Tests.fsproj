@@ -27,6 +27,7 @@
     <Compile Include="NumericFormattingTests.fs" />
     <Compile Include="NumericArrayGenericTests.fs" />
     <Compile Include="GeometryCrtpTests.fs" />
+    <Compile Include="InterpolationTests.fs" />
     <Compile Include="ChTests.fs" />
     <Compile Include="GoldenFileTests.fs" />
     <Compile Include="MarkdownTests.fs" />

@@ -9,43 +9,57 @@ namespace Aqualis
     ///<summary>データ補間</summary>
     module interpolate =
 
+        let private validateLinearData (dataX:double list) dataYCount =
+            if dataX.Length < 2 then
+                invalidArg "data_x" "Linear interpolation requires at least two data points."
+            if dataX.Length <> dataYCount then
+                invalidArg "data_y" "The x and y data must contain the same number of points."
+            if dataX |> List.exists (System.Double.IsFinite >> not) then
+                invalidArg "data_x" "The x data must contain only finite values."
+            if dataX |> List.pairwise |> List.exists (fun (left, right) -> right <= left) then
+                invalidArg "data_x" "The x data must be strictly increasing."
+
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
-        type LinearInterpolate1d(context:Aqualis,id:string,data_x,data_y) =
+        type LinearInterpolate1d(context:Aqualis,id:string,data_x:double list,data_y:double list) =
+            do validateLinearData data_x data_y.Length
             let X = context.var.dp1(id+"_x",data_x)
             let Y = context.var.dp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
             member _.y (x:double0) code =
+                let lastIndex = X.size1 - 1
                 context.ch.i <| fun flag ->
                     flag<==0
-                    context.iter.range (_0, X.size1-2) <| fun i ->
+                    context.iter.range (_0, lastIndex-1) <| fun i ->
                         context.br.if1 (X.[i] .<= x .< X.[i+1]) <| fun () ->
                             flag<==1
                             context.ch.d <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
                                 code(z)
-                    context.br.if1 (x.=X.[X.size1]) <| fun () ->
+                    context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                         flag<==1
-                        code(Y.[X.size1])
-                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
+                        code(Y.[lastIndex])
+                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[0]++X.[lastIndex]
 
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
-        type LinearInterpolate1z(context:Aqualis,id:string,data_x,data_y) =
+        type LinearInterpolate1z(context:Aqualis,id:string,data_x:double list,data_y:(double*double) list) =
+            do validateLinearData data_x data_y.Length
             let X = context.var.dp1(id+"_x",data_x)
             let Y = context.var.zp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
             member this.y (x:double0) code =
+                let lastIndex = X.size1 - 1
                 context.ch.i <| fun flag ->
                     flag<==0
-                    context.iter.range (_0, X.size1-2) <| fun i ->
+                    context.iter.range (_0, lastIndex-1) <| fun i ->
                         context.br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             context.ch.z <| fun z ->
                                 z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
                                 code(z)
-                    context.br.if1 (x.=X.[X.size1]) <| fun () ->
+                    context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                         flag<==1
-                        code(Y.[X.size1])
-                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[1]++X.[X.size1]
+                        code(Y.[lastIndex])
+                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[0]++X.[lastIndex]
 
         type splineInterpolateDouble(context:Aqualis) =
 
