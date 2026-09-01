@@ -10,6 +10,45 @@ open System.IO
 open System.Text
 
 [<RequireQualifiedAccess>]
+module internal ShellCommand =
+    let quoteArgument (value:string) =
+        if isNull value then
+            nullArg (nameof value)
+        if value.IndexOf '\u0000' >= 0 then
+            invalidArg (nameof value) "A shell argument cannot contain NUL."
+
+        let isSafe character =
+            System.Char.IsLetterOrDigit character ||
+            "_-./:=+@%,".Contains character
+
+        if value <> "" && value |> Seq.forall isSafe then
+            value
+        else
+            "'" + value.Replace("'", "'\"'\"'") + "'"
+
+    let buildCommand executable arguments =
+        executable::arguments
+        |> List.filter (System.String.IsNullOrWhiteSpace >> not)
+        |> List.map quoteArgument
+        |> String.concat " "
+
+    let buildCompileCommand
+        compiler
+        fixedArguments
+        sources
+        mainSource
+        options
+        output =
+        buildCommand compiler [
+            yield! fixedArguments
+            yield! sources
+            yield mainSource
+            yield! options
+            yield "-o"
+            yield output
+        ]
+
+[<RequireQualifiedAccess>]
 module internal ShellScriptWriter =
     let create path =
         let writer = new StreamWriter(path, false, UTF8Encoding(false))

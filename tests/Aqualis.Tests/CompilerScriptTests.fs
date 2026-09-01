@@ -184,6 +184,70 @@ module CompilerScriptTests =
             |> assertLfOnlyWithoutBom)
 
     [<Fact>]
+    let ``mail notified processes are distributed round robin`` () =
+        use output = new TemporaryDirectory()
+
+        Compile
+            [C99]
+            output.Path
+            "mail-distributed"
+            "1.0"
+            (fun environment ->
+                use scripts =
+                    new shellscript.Shell(
+                        environment,
+                        output.Path,
+                        "mail-distributed",
+                        2)
+                for _ in 1..5 do
+                    scripts.AddProcess("notify@example.com"))
+
+        let first =
+            File.ReadAllText(
+                Path.Combine(output.Path, "shell_mail-distributed_01.sh"))
+        let second =
+            File.ReadAllText(
+                Path.Combine(output.Path, "shell_mail-distributed_02.sh"))
+        let countRuns (script:string) =
+            script.Split("{ time sh proc_mail-distributed_C.sh; }").Length - 1
+
+        Assert.Equal(3, countRuns first)
+        Assert.Equal(2, countRuns second)
+        for script in [first; second] do
+            Assert.StartsWith("#!/bin/bash", script)
+            Assert.Contains("aqualis_exit_status=0", script)
+            Assert.Contains("aqualis_process_status=$?", script)
+            Assert.Contains("aqualis_exit_status=$aqualis_process_status", script)
+            Assert.EndsWith("exit \"$aqualis_exit_status\"\n", script)
+            Assert.Contains("project mail-distributed finished", script)
+            Assert.Contains("project mail-distributed failed", script)
+            Assert.Contains("> mail-distributed.log 2> mail-distributed_time.log", script)
+            Assert.DoesNotContain("&>", script)
+
+    [<Fact>]
+    let ``mail notified processes use the language specific script`` () =
+        use output = new TemporaryDirectory()
+
+        for language, project, suffix in
+            [C99, "mail-c", "_C.sh"
+             Fortran, "mail-fortran", "_F.sh"
+             Python, "mail-python", "_P.sh"] do
+            Compile
+                [language]
+                output.Path
+                project
+                "1.0"
+                (fun environment ->
+                    use scripts =
+                        new shellscript.Shell(environment, output.Path, project, 1)
+                    scripts.AddProcess("notify@example.com"))
+
+            let script =
+                File.ReadAllText(
+                    Path.Combine(output.Path, "shell_" + project + "_01.sh"))
+            Assert.Contains("sh proc_" + project + suffix, script)
+
+    [<Fact>]
     let ``function arguments are rebound to the function context`` () =
         use output = new TemporaryDirectory()
         use source =
