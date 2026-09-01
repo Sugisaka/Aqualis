@@ -64,37 +64,37 @@ namespace Aqualis
         member _.IsOpenAccUsed with get() = isOpenAccUsed and set v = isOpenAccUsed <- v
 
         ///<summary>言語設定</summary>
-        member val language = lang with get
+        member val internal language = lang with get
 
         ///<summary>出力先ディレクトリ</summary>
-        member val dir = outputdir with get
+        member val internal dir = outputdir with get
 
         ///<summary>プロジェクト名</summary>
-        member val projectName = pjname with get
+        member val internal projectName = pjname with get
       
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
-        member val hlist = new UniqueList()
+        member val internal hlist = new UniqueList()
 
         ///<summary>ライブラリの使用時に必要なモジュールファイル</summary>
-        member val mlist = new UniqueList()
+        member val internal mlist = new UniqueList()
 
         ///<summary>ライブラリの使用時に必要なextern指定子</summary>
-        member val elist = new UniqueList()
+        member val internal elist = new UniqueList()
 
         ///<summary>定義された関数のリスト</summary>
-        member val flist = new UniqueList()
+        member val internal flist = new UniqueList()
 
         ///<summary>コンパイル時に必要な他のソースファイル</summary>
-        member val slist = new UniqueList()
+        member val internal slist = new UniqueList()
 
         ///<summary>コンパイル時に必要なライブラリ・オプション</summary>
-        member val olist = new UniqueList()
-        member val numFormat = numericFormatController lang with get
-        member val arg = argumentController lang with get
-        member val Functions: ResizeArray<string> = new ResizeArray<string>() with get
-        member val GotoLabels = gotoLabelController() with get
-        member val Errors = errorIDController() with get
-        member val Debug = debugController() with get
+        member val internal olist = new UniqueList()
+        member val internal numFormat = numericFormatController lang with get
+        member val internal arg = argumentController lang with get
+        member val internal Functions: ResizeArray<string> = new ResizeArray<string>() with get
+        member val internal GotoLabels = gotoLabelController() with get
+        member val internal Errors = errorIDController() with get
+        member val internal Debug = debugController() with get
         member _.comment(s:string) = withWriter (fun writer -> writer.comment s)
         member _.codewrite(s:string) = withWriter (fun writer -> writer.codewrite s)
         member _.write(s:string) = withWriter (fun writer -> writer.codewrite s)
@@ -311,3 +311,22 @@ namespace Aqualis
                 code context
             finally
                 context.disposePrograms()
+
+    [<AutoOpen>]
+    module SettingExtensions =
+        type AqualisSetting(c:Aqualis) =
+            ///<summary>デバッグモード設定</summary>
+            member _.DebugMode (x:Switch) =
+                match x with
+                |ON -> c.Debug.setDebugMode true
+                |OFF -> c.Debug.setDebugMode false
+            ///<summary>整数型を文字列に変換するときの桁数</summary>
+            member _.IntToStringFormat x = c.numFormat.setIFormat x
+            ///<summary>倍精度浮動小数点型を文字列に変換するときの桁数(全体,小数点以下)</summary>
+            member _.DoubleToStringFormat x = c.numFormat.setDFormat x
+            ///<summary>コンパイル時のオプションを追加</summary>
+            member _.Option x = c.olist.add x
+            
+        type Aqualis with
+            ///<summary>Aqualis設定</summary>
+            member this.Setting = AqualisSetting this
