@@ -54,3 +54,16 @@ module internal ShellScriptWriter =
         let writer = new StreamWriter(path, false, UTF8Encoding(false))
         writer.NewLine <- "\n"
         writer
+
+    let writeCompileAndRun
+        (writer:StreamWriter)
+        (compileCommand:string)
+        (runCommand:string) =
+        writer.WriteLine compileCommand
+        writer.WriteLine "aqualis_compile_status=$?"
+        writer.WriteLine "if [ \"$aqualis_compile_status\" -ne 0 ]; then"
+        writer.WriteLine "  printf '%s\\n' 'Aqualis: compilation failed.' >&2"
+        writer.WriteLine "  exit \"$aqualis_compile_status\""
+        writer.WriteLine "fi"
+        writer.WriteLine()
+        writer.WriteLine("exec " + runCommand)

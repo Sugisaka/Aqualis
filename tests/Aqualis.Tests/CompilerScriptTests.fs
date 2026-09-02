@@ -37,6 +37,35 @@ type private FunctionArgumentStructure(
             "value")
 
 module CompilerScriptTests =
+    let private assertCompileFailureStopsExecution executable (script:string) =
+        let lines =
+            script.Split('\n', System.StringSplitOptions.RemoveEmptyEntries)
+            |> Array.map _.TrimEnd()
+        let statusIndex =
+            lines |> Array.findIndex ((=) "aqualis_compile_status=$?")
+        let guardIndex =
+            lines
+            |> Array.findIndex ((=) "if [ \"$aqualis_compile_status\" -ne 0 ]; then")
+        let exitIndex =
+            lines
+            |> Array.findIndex ((=) "  exit \"$aqualis_compile_status\"")
+        let endGuardIndex =
+            lines |> Array.findIndex ((=) "fi")
+        let executionLine = "exec " + executable
+        let executionIndexes =
+            lines
+            |> Array.indexed
+            |> Array.choose (fun (index,line) ->
+                if line = executionLine then Some index else None)
+
+        Assert.True(statusIndex > 0)
+        Assert.Contains(" -o ", lines[statusIndex - 1])
+        Assert.Equal(statusIndex + 1, guardIndex)
+        Assert.True(exitIndex > guardIndex)
+        Assert.True(endGuardIndex > exitIndex)
+        Assert.Single(executionIndexes) |> ignore
+        Assert.True(executionIndexes[0] > endGuardIndex)
+
     let private assertLfOnlyWithoutBom path =
         let bytes = File.ReadAllBytes path
         let hasUtf8Bom =
@@ -108,6 +137,9 @@ module CompilerScriptTests =
         Assert.DoesNotContain("gccextra", normal)
         Assert.DoesNotContain("-Minfo=accelextra", openAcc)
 
+        for project,script in ["normal",normal; "openmp",openMp; "openacc",openAcc] do
+            assertCompileFailureStopsExecution ("./" + project + ".exe") script
+
     [<Fact>]
     let ``Fortran compile scripts quote each argument and use direct compiler paths`` () =
         use output = new TemporaryDirectory()
@@ -148,6 +180,9 @@ module CompilerScriptTests =
         Assert.Contains("./normal.exe", normal)
         Assert.Contains("./openmp.exe", openMp)
         Assert.Contains("./openacc.exe", openAcc)
+
+        for project,script in ["normal",normal; "openmp",openMp; "openacc",openAcc] do
+            assertCompileFailureStopsExecution ("./" + project + ".exe") script
 
     [<Fact>]
     let ``generated shell scripts use LF and UTF-8 without BOM`` () =

@@ -63,7 +63,7 @@ namespace Aqualis
                         wr.WriteLine()
                         let sources = context.slist.list
                         let options = context.olist.list
-                        let writeCompileCommand compiler fixedArguments =
+                        let buildCompileCommand compiler fixedArguments =
                             ShellCommand.buildCompileCommand
                                 compiler
                                 fixedArguments
@@ -71,23 +71,27 @@ namespace Aqualis
                                 (projectname + ".f90")
                                 options
                                 (projectname + ".exe")
-                            |> wr.WriteLine
-                        if context.IsOpenAccUsed then
-                            writeCompileCommand
-                                "/usr/bin/pgfortran"
-                                ["-acc"; "-Minfo=accel"]
-                        else if context.IsOpenMpUsed then
-                            writeCompileCommand
-                                "/usr/bin/gfortran"
-                                ["-fopenmp"]
-                        else
-                            writeCompileCommand
-                                "/usr/bin/gfortran"
-                                ["-ffree-line-length-none"]
-                        ShellCommand.buildCommand
-                            ("./" + projectname + ".exe")
-                            []
-                        |> wr.WriteLine
+                        let compileCommand =
+                            if context.IsOpenAccUsed then
+                                buildCompileCommand
+                                    "/usr/bin/pgfortran"
+                                    ["-acc"; "-Minfo=accel"]
+                            else if context.IsOpenMpUsed then
+                                buildCompileCommand
+                                    "/usr/bin/gfortran"
+                                    ["-fopenmp"]
+                            else
+                                buildCompileCommand
+                                    "/usr/bin/gfortran"
+                                    ["-ffree-line-length-none"]
+                        let runCommand =
+                            ShellCommand.buildCommand
+                                ("./" + projectname + ".exe")
+                                []
+                        ShellScriptWriter.writeCompileAndRun
+                            wr
+                            compileCommand
+                            runCommand
                 |C99 ->
                     Aqualis.makeProgramWithContext (dir,projectname,C99) <| fun context ->
                         //メインコード生成
@@ -137,9 +141,11 @@ namespace Aqualis
                         context.delete()
                         //コンパイル・実行用スクリプト生成
                         use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_C.sh")
+                        wr.WriteLine "#!/bin/bash"
+                        wr.WriteLine()
                         let sources = context.slist.list
                         let options = context.olist.list
-                        let writeCompileCommand compiler fixedArguments =
+                        let buildCompileCommand compiler fixedArguments =
                             ShellCommand.buildCompileCommand
                                 compiler
                                 fixedArguments
@@ -147,22 +153,21 @@ namespace Aqualis
                                 (projectname + ".c")
                                 options
                                 (projectname + ".exe")
-                            |> wr.WriteLine
-                        if context.IsOpenMpUsed then
-                            wr.Write "#!/bin/bash\n"
-                            wr.Write "\n"
-                            writeCompileCommand "gcc" ["-fopenmp"]
-                            ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
-                        else if context.IsOpenAccUsed then
-                            wr.Write "#!/bin/bash"
-                            wr.Write "\n"
-                            writeCompileCommand "pgcc" ["-acc"; "-Minfo=accel"]
-                            ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
-                        else
-                            wr.Write "#!/bin/bash\n"
-                            wr.Write "\n"
-                            writeCompileCommand "gcc" []
-                            ShellCommand.buildCommand ("./" + projectname + ".exe") [] |> wr.WriteLine
+                        let compileCommand =
+                            if context.IsOpenMpUsed then
+                                buildCompileCommand "gcc" ["-fopenmp"]
+                            else if context.IsOpenAccUsed then
+                                buildCompileCommand "pgcc" ["-acc"; "-Minfo=accel"]
+                            else
+                                buildCompileCommand "gcc" []
+                        let runCommand =
+                            ShellCommand.buildCommand
+                                ("./" + projectname + ".exe")
+                                []
+                        ShellScriptWriter.writeCompileAndRun
+                            wr
+                            compileCommand
+                            runCommand
                 |LaTeX ->
                     Aqualis.makeProgramWithContext (dir,projectname,LaTeX) <| fun context ->
                         //メインコード生成
