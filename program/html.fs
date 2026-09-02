@@ -10,17 +10,45 @@ namespace Aqualis
 
     type CSS = {Key:string; Value:string}
 
-    type Atr(s:string,t:string) =
-        new(s:string) = Atr(s,"")
+    [<RequireQualifiedAccess>]
+    module internal HtmlEncoding =
+        let attributeValue (value:string) =
+            if isNull value then nullArg (nameof value)
+
+            value
+                .Replace("&", "&amp;")
+                .Replace("\"", "&quot;")
+                .Replace("'", "&#39;")
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;")
+
+        let attributeName (name:string) =
+            if String.IsNullOrWhiteSpace name then
+                invalidArg (nameof name) "An HTML attribute name is required."
+
+            let validFirst character =
+                Char.IsLetter character || character = '_' || character = ':'
+            let validRest character =
+                validFirst character || Char.IsDigit character || character = '-' || character = '.'
+
+            if not (validFirst name[0]) || name |> Seq.skip 1 |> Seq.exists (validRest >> not) then
+                invalidArg (nameof name) "The HTML attribute name contains invalid characters."
+
+            name
+
+    type Atr private (s:string,t:string option) =
+        new(s:string,t:string) = Atr(s,Some t)
+        new(s:string) = Atr(s,None)
         // new(s:Style) =
         //     let h:string = s.code
         //     Atr h
         member _.name with get() = s
-        member _.value with get() = t
+        member _.value with get() = defaultArg t ""
         member _.code with get() =
+            let name = HtmlEncoding.attributeName s
             match t with
-            |"" -> s
-            |_ -> s+" = \""+t+"\""
+            | None -> name
+            | Some value -> name + "=\"" + HtmlEncoding.attributeValue value + "\""
         static member list(s:list<Atr>) =
             String.concat " " (
                 s
@@ -206,8 +234,8 @@ namespace Aqualis
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            writein("    <link rel='stylesheet' href='"+cssfile+"'>")
-            writein("    <script type='text/javascript' src='"+jsfile+"'></script>")
+            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", cssfile)])
+            this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", jsfile)]) ignore
             writein("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
             writein "</head>"
             writein "<body>"
@@ -226,8 +254,8 @@ namespace Aqualis
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            writein("    <link rel='stylesheet' href='"+cssfile+"' />")
-            writein("    <script type='text/javascript' src='"+jsfile+"'></script>")
+            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", cssfile)])
+            this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", jsfile)]) ignore
             writein "</head>"
             writein "<body>"
             code()
@@ -245,7 +273,7 @@ namespace Aqualis
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            writein("    <link rel='stylesheet' href='"+cssfile+"' />")
+            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", cssfile)])
             writein "</head>"
             writein "<body>"
             code()
@@ -268,6 +296,7 @@ namespace Aqualis
             writein("<"+t+" ")
             writein " />"
         /// 内部要素のないタグ
+        [<Obsolete("Use the list<Atr> overload so attribute values are HTML-encoded.")>]
         member this.taga (t:string,a:string) =
             writein("<"+t+" "+a+" />")
         // /// 内部要素のあるタグ
@@ -301,6 +330,7 @@ namespace Aqualis
         //     code()
         //     writein ("</"+t+">")
         /// 内部要素のあるタグ
+        [<Obsolete("Use the list<Atr> overload so attribute values are HTML-encoded.")>]
         member this.tagb (t:string,a:string) = fun code ->
             if a="" then
                 writein("<"+t+">")
@@ -518,11 +548,18 @@ namespace Aqualis
         member this.div (s:list<Atr>) = fun code ->
             this.tagb ("div", s) code
 
+        [<Obsolete("Use tagb with list<Atr> so attribute values are HTML-encoded.")>]
         member this.tag (tagname:string) (s:string) code =
-            this.tagb (tagname, s) code
+            if s = "" then
+                writein("<" + tagname + ">")
+            else
+                writein("<" + tagname + " " + s + ">")
+            code()
+            writein("</" + tagname + ">")
 
+        [<Obsolete("Use taga with list<Atr> so attribute values are HTML-encoded.")>]
         member this.tag_ (tagname:string) (s:string) =
-            this.taga (tagname, s)
+            writein("<" + tagname + " " + s + " />")
 
         member this.fig (p:position) code =
             let f = figure(this.taga)

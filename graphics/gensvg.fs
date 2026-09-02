@@ -35,7 +35,7 @@ type ContextGenSvg internal (context:Aqualis) =
         this.headerClose wr
 
     member this.layer(wr:exprString -> unit,layername:string) = fun code ->
-        wr <| st("<g id=\""+layername+"\">")
+        wr <| st("<g id=\"" + HtmlEncoding.attributeValue layername + "\">")
         code()
         wr <| st "</g>"
 

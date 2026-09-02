@@ -59,7 +59,7 @@ namespace Aqualis
                 expr.substH i (Add(It 4, i, Int 1)) c
                 c.indentDec()
                 c.codewritein "</div>"
-                c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                c.codewritein("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                 c.codewritein "</details>"
                 c.codewritein "</div>"
                 returnVar()
@@ -125,7 +125,7 @@ namespace Aqualis
                     code(exit,i)
                     c.indentDec()
                     c.comment "</div>"
-                    c.comment("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                    c.comment("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                     c.comment "</details>"
                     c.comment "</div>"
                     c.comment(label+" continue")
@@ -143,7 +143,7 @@ namespace Aqualis
                     code(exit,i)
                     c.indentDec()
                     c.codewritein "</div>"
-                    c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                    c.codewritein("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                     c.codewritein "</details>"
                     c.codewritein "</div>"
                     c.codewritein(label+" continue")

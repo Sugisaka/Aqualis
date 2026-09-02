@@ -53,7 +53,8 @@ namespace Aqualis
             |HTML ->
                 writein "<div "
                 for a,name in lst do
-                    writein(a+"=\""+name+"\" ")
+                    let attributeName = HtmlEncoding.attributeName a
+                    writein(attributeName + "=\"" + HtmlEncoding.attributeValue name + "\" ")
                 writein ">"
                 code()
                 writein "</div>"
@@ -61,16 +62,32 @@ namespace Aqualis
         member this.form (name:string) code =
             match lang with
             |HTML ->
-                writein("<form name=\""+name+"\">")
+                writein("<form name=\"" + HtmlEncoding.attributeValue name + "\">")
                 code()
                 writein "</form>"
             |_ -> ()
+        member this.radioButtonAttributes (name:string) (lst:list<string*string*bool*list<Atr>>) =
+            match lang with
+            | HTML ->
+                this.form ("f_" + name) <| fun () ->
+                    for value,text,isChecked,attributes in lst do
+                        let checkedAttribute = if isChecked then [Atr("checked")] else []
+                        let allAttributes =
+                            [Atr("type", "radio"); Atr("name", name); Atr("value", value)] @
+                            checkedAttribute @ attributes
+                        writein("<input " + Atr.list allAttributes + ">" + text)
+            | _ -> ()
+
+        [<Obsolete("Use radioButtonAttributes so additional attribute values are HTML-encoded.")>]
         member this.radioButton (name:string) lst =
             match lang with
             |HTML ->
                 this.form ("f_"+name) <| fun () ->
                     for (a,b,c,d) in lst do
-                        writein("<input type=\"radio\" name=\""+name+"\" value=\""+a+"\""+(if c then " checked" else "")+" "+d+">"+b)
+                        writein(
+                            "<input type=\"radio\" name=\"" + HtmlEncoding.attributeValue name +
+                            "\" value=\"" + HtmlEncoding.attributeValue a + "\"" +
+                            (if c then " checked" else "") + " " + d + ">" + b)
             |_ -> ()
         member this.title txt =
             match lang with
@@ -203,7 +220,7 @@ namespace Aqualis
                 |None ->
                     "図??"
                 |Some(_,n) ->
-                    "<a href=\"#"+label+"\">図"+n.ToString()+"</a>"
+                    "<a href=\"#" + HtmlEncoding.attributeValue label + "\">図" + n.ToString() + "</a>"
             |_ -> ""
         member this.figref_nolink(label) =
             match lang,figlabel with
@@ -265,8 +282,10 @@ namespace Aqualis
             match lang with
             |HTML ->
                 writein "<div class=\"fig\">"
-                writein("  <a name=\""+filename+"\">")
-                writein("    <img src =\""+figdir+"/"+filename+".svg\" alt=\""+caption+"\">")
+                writein("  <a name=\"" + HtmlEncoding.attributeValue filename + "\">")
+                writein(
+                    "    <img src=\"" + HtmlEncoding.attributeValue (figdir + "/" + filename + ".svg") +
+                    "\" alt=\"" + HtmlEncoding.attributeValue caption + "\">")
                 writein("  </a>")
                 writein("  <div class=\"caption\">"+this.figref_nolink filename+"&emsp;"+caption+"</div>")
                 writein "</div>"
@@ -283,7 +302,7 @@ namespace Aqualis
             match lang with
             |HTML ->
                 writein "<div class=\"fig\">"
-                writein("<img src =\""+figdir+"/"+filename+".svg\">")
+                writein("<img src=\"" + HtmlEncoding.attributeValue (figdir + "/" + filename + ".svg") + "\">")
                 writein "</div>"
             |LaTeX ->
                 writein "\\begin{center}"
@@ -476,13 +495,13 @@ namespace Aqualis
             |LaTeX ->
                 txt
             |HTML ->
-                "<a href=\""+url+"\">"+txt+"</a>"
+                "<a href=\"" + HtmlEncoding.attributeValue url + "\">" + txt + "</a>"
             |_ ->
                 ""
         member this.pdflink(text,filename) =
             match lang with
             |HTML ->
-                writein("    <div class='pdflink'><a href='"+filename+".pdf' target='_blank'>"+text+"</a></div>")
+                writein("    <div class='pdflink'><a href=\"" + HtmlEncoding.attributeValue (filename + ".pdf") + "\" target='_blank'>" + text + "</a></div>")
             |_ ->
                 ()
         member this.bold(txt:string) = match lang with |LaTeX -> "\\boldsymbol{"+txt+"}" |HTML -> "\\boldsymbol{"+txt+"}" |_ -> ""

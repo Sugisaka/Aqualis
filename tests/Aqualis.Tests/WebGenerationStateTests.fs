@@ -1,11 +1,63 @@
 namespace Aqualis.Tests
 
+open System
 open System.IO
 open System.Text.RegularExpressions
 open Xunit
 open Aqualis
 
 module WebGenerationStateTests =
+    [<Fact>]
+    let ``HTML attributes encode markup characters exactly once`` () =
+        let attribute = Atr("data-value", "a&b\"c'd<e>f")
+
+        Assert.Equal(
+            "data-value=\"a&amp;b&quot;c&#39;d&lt;e&gt;f\"",
+            attribute.code)
+        Assert.Equal("controls", Atr("controls").code)
+
+    [<Fact>]
+    let ``HTML attributes reject invalid names`` () =
+        Assert.Throws<ArgumentException>(fun () ->
+            Atr("value onfocus", "alert(1)").code |> ignore)
+        |> ignore
+
+    [<Fact>]
+    let ``HTML attribute payload cannot create another attribute`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "attribute-escaping.html"
+
+        use context = new Aqualis(Some output.Path, Some fileName, HTML)
+        context.html.taga (
+            "input",
+            [Atr("value", "x\" autofocus onfocus=\"alert(1)")])
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.Contains(
+            "value=\"x&quot; autofocus onfocus=&quot;alert(1)\"",
+            generated)
+        Assert.DoesNotContain("value=\"x\" autofocus", generated)
+
+    [<Fact>]
+    let ``HTML head resource attributes are encoded`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "head-attribute-escaping.html"
+
+        use context = new Aqualis(Some output.Path, Some fileName, HTML)
+        context.html.head (
+            "Title",
+            "theme\" onload=\"alert(1).css",
+            "application&bundle.js") ignore
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.Contains(
+            "href=\"theme&quot; onload=&quot;alert(1).css\"",
+            generated)
+        Assert.Contains("src=\"application&amp;bundle.js\"", generated)
+        Assert.DoesNotContain("href=\"theme\" onload", generated)
+
     [<Fact>]
     let ``block text code emits border color separately from border width`` () =
         use output = new TemporaryDirectory()

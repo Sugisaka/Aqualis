@@ -472,6 +472,10 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
 
 [<AutoOpen>]
 module HtmlWebExtensions =
+    let private phpAttributeCode (name:string) (value:PHPdata) =
+        let validName = HtmlEncoding.attributeName name
+        validName + "=\"<?php echo htmlspecialchars((string)(" + value.code + "), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>\""
+
     type html with
         /// <summary>
         /// 内部要素のないタグ
@@ -480,7 +484,7 @@ module HtmlWebExtensions =
             this.Context.writei("<"+t+" ")
             this.Context.indentInc()
             for a,s in lst do
-                this.Context.write (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+                this.Context.write (phpAttributeCode a s + " ")
             this.Context.indentDec()
             this.Context.writen  " />"
         /// <summary>
@@ -493,7 +497,7 @@ module HtmlWebExtensions =
                 this.Context.write ("<"+t+" ")
                 this.Context.indentInc()
                 for a,s in lst do
-                    this.Context.write (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+                    this.Context.write (phpAttributeCode a s + " ")
                 this.Context.indentDec()
                 this.Context.write ">"
             code()
@@ -508,7 +512,7 @@ module HtmlWebExtensions =
                 this.Context.writei ("<"+t+" ")
                 this.Context.indentInc()
                 for a,s in lst do
-                    this.Context.writei (a + " = <?php echo \"\\\"\"." + s.code + " . \"\\\"\"; ?> ")
+                    this.Context.writei (phpAttributeCode a s + " ")
                 this.Context.indentDec()
                 this.Context.writen ">"
             code()
@@ -605,14 +609,16 @@ module HtmlWebExtensions =
         /// nameとvalueの型違いに対応したオーバーロードを提供する
         /// </para>
         /// </summary>
-        member this.submit(name:string,value:PHPdata) = this.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value",value.code)])
+        member this.submit(name:string,value:PHPdata) =
+            this.taga("input",["type",PHPdata "submit"; "name",PHPdata name; "value",value])
         member this.submit(name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value])
         /// <summary>
         /// フォーム送信用のsubmitボタンを生成する
         /// </summary>
         /// <param name="name">name属性に設定する文字列</param>
         /// <param name="value">value属性に設定する文字列</param>
-        member this.submit(name:string,value:string) = this.taga("input",[Atr("type","\"submit\""); Atr("name","\""+name+"\""); Atr("value","\""+value+"\"")])
+        member this.submit(name:string,value:string) =
+            this.taga("input",[Atr("type", "submit"); Atr("name", name); Atr("value", value)])
         /// <summary>
         /// 送信先URLを指定したsubmitボタンを生成する
         /// </summary>
@@ -643,7 +649,8 @@ module HtmlWebExtensions =
         /// </summary>
         /// <param name="url">href属性に設定するPHPデータ</param>
         /// <param name="s">文字の太さ、色を定義するスタイル情報</param>
-        member this.link(url:PHPdata, s:Style) = fun code -> this.tagb ("a",[s.atr; Atr("href","\""+url.code+"\"")]) code
+        member this.link(url:PHPdata, s:Style) = fun code ->
+            this.tagb ("a",["style",PHPdata s.code0; "href",url]) code
         /// <summary>
         /// select要素を生成する
         /// </summary>
@@ -665,7 +672,7 @@ module HtmlWebExtensions =
                 else
                     this.Context.writein ("<"+t+" ")
                     for a,s in lst do
-                        this.Context.writein (a + "=" + s.code + " ")
+                        this.Context.writein (phpAttributeCode a s + " ")
                     this.Context.writein ">"
             code b
             this.Context.writein ("</"+t+">")
@@ -811,31 +818,31 @@ module HtmlWebExtensions =
         /// <param name="borderV">垂直罫線の設定</param>
         /// <param name="tlist">表データ</param>
         member this.listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
-            this.tagb("div",[Atr("class","\"fig\"")]) <| fun () ->
-                this.tagb ("span",[Atr("class","\"caption\"")]) <| fun () ->
+            this.tagb("div",[Atr("class", "fig")]) <| fun () ->
+                this.tagb ("span",[Atr("class", "caption")]) <| fun () ->
                     this.Context.writein (caption)
-                this.tagb("table",[Atr("class","\"tab\"")]) <| fun () ->
+                this.tagb("table",[Atr("class", "tab")]) <| fun () ->
                     for j in 0..tlist.Length-1 do
-                        this.tagb ("tr",[Atr("class",match borderV[j] with |TrTB -> "\"trtb\"" |TrT -> "\"trt\"" |TrB -> "\"trb\"" |TrN -> "\"trn\"")]) <| fun () ->
+                        this.tagb ("tr",[Atr("class",match borderV[j] with |TrTB -> "trtb" |TrT -> "trt" |TrB -> "trb" |TrN -> "trn")]) <| fun () ->
                             for i in 0..tlist[j].Length-1 do
                                 this.tagb ("td",[Atr("class",
                                     match borderH[i] with
-                                    |TdL -> "\"tdl\""
-                                    |TdC -> "\"tdc\""
-                                    |TdR -> "\"tdr\""
-                                    |TdJ -> "\"tdj\""
-                                    |TdLL -> "\"tdlL\""
-                                    |TdCL -> "\"tdcL\""
-                                    |TdRL -> "\"tdrL\""
-                                    |TdJL -> "\"tdjL\""
-                                    |TdLR -> "\"tdlR\""
-                                    |TdCR -> "\"tdcR\""
-                                    |TdRR -> "\"tdrR\""
-                                    |TdJR -> "\"tdjR\""
-                                    |TdLLR -> "\"tdlLR\""
-                                    |TdCLR -> "\"tdcLR\""
-                                    |TdRLR -> "\"tdrLR\""
-                                    |TdJLR -> "\"tdjLR\"")]) <| fun () ->
+                                    |TdL -> "tdl"
+                                    |TdC -> "tdc"
+                                    |TdR -> "tdr"
+                                    |TdJ -> "tdj"
+                                    |TdLL -> "tdlL"
+                                    |TdCL -> "tdcL"
+                                    |TdRL -> "tdrL"
+                                    |TdJL -> "tdjL"
+                                    |TdLR -> "tdlR"
+                                    |TdCR -> "tdcR"
+                                    |TdRR -> "tdrR"
+                                    |TdJR -> "tdjR"
+                                    |TdLLR -> "tdlLR"
+                                    |TdCLR -> "tdcLR"
+                                    |TdRLR -> "tdrLR"
+                                    |TdJLR -> "tdjLR")]) <| fun () ->
                                     this.Context.writein (tlist[j][i])
         /// <summary>
         /// num0式を評価し、インラインMathJax文字列を返す
@@ -924,11 +931,11 @@ module HtmlGenerationExtensions2 =
         member this.video (s:Style,p:position) = fun (filename:string) ->
             let sourceUrl = this.ImportAsset filename
             let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.html.tagv ("video", [st.atr; Atr("src", sourceUrl); Atr("controls", "")])
+            this.html.tagv ("video", [st.atr; Atr("src", sourceUrl); Atr("controls")])
             this.html.tage "video"
         member this.video (s:Style) = fun (filename:string) ->
             let sourceUrl = this.ImportAsset filename
-            this.html.tagv ("video", [s.atr; Atr("src", sourceUrl); Atr("controls", "")])
+            this.html.tagv ("video", [s.atr; Atr("src", sourceUrl); Atr("controls")])
             this.html.tage "video"
         /// <summary>
         /// キャラクター付き解説ページ
@@ -940,20 +947,31 @@ module HtmlGenerationExtensions2 =
                 this.AddAudioFile(
                     match audioFile with |Some t -> t |None -> "")
                 // 字幕枠
-                this.html.tag "div" ("id = \"sb"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff \";") <| fun () ->
+                let subtitleBackgroundStyle =
+                    "width: 1880px; height: 160px; " +
+                    (if this.SubtitleEnabled then "display: block; " else "display: none; ") +
+                    "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff"
+                this.html.tagb ("div", [Atr("id", "sb" + animationCounter.ToString()); Atr("style", subtitleBackgroundStyle)]) <| fun () ->
                     ()
                 // キャラクター画像
-                this.html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
+                this.html.tagb (
+                    "div",
+                    [Atr("id", "c" + animationCounter.ToString())
+                     Atr("style", if this.CharacterEnabled then "display: block" else "display: none")]) <| fun () ->
                     for ci in c do
                         let sourceUrl = this.ImportAsset ci.CharacterImageFile
-                        this.html.tag_ "img" <| "src=\"" + sourceUrl + "\" style=\"" + ci.CharacterImageStyle + "\""
+                        this.html.taga ("img", [Atr("src", sourceUrl); Atr("style", ci.CharacterImageStyle)])
                 // 字幕
-                this.html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
+                let subtitleStyle =
+                    "width: 1880px; height: 160px; " +
+                    (if this.SubtitleEnabled then "display: block; " else "display: none; ") +
+                    "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: " + scriptColor + "; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff"
+                this.html.tagb ("div", [Atr("id", "s" + animationCounter.ToString()); Atr("style", subtitleStyle)])
                     <| fun () -> this.BodyContext.writein audio.Subtitle
                 this.switchAutoAnimation <| fun ctx ->
                     ctx.writein ("page"+animationCounter.ToString()+": () => {")
                 // メインコンテンツ
-                this.html.tag "div" "style=\"width: 1920px; height: 880px; position: absolute; z-index: 0;\"" <| fun () ->
+                this.html.tagb ("div", [Atr("style", "width: 1920px; height: 880px; position: absolute; z-index: 0")]) <| fun () ->
                     code2 p
                 this.switchAutoAnimation <| fun ctx ->
                     ctx.writein "},"
@@ -969,19 +987,22 @@ module HtmlGenerationExtensions2 =
         /// <param name="p">スライドの表示位置</param>
         member this.slide (p:position)  code =
                 let animationCounter = this.NextAnimationNumber()
-                this.html.tagb ("div", "id=\"p"+animationCounter.ToString()+"\" style=\"display: "+(if animationCounter=1 then "block" else "none")+"; position: absolute;\"") <| fun wr ->
+                this.html.tagb (
+                    "div",
+                    [Atr("id", "p" + animationCounter.ToString())
+                     Atr("style", "display: " + (if animationCounter=1 then "block" else "none") + "; position: absolute")]) <| fun wr ->
                     code p
         /// <summary>
         /// 前のページへ移動するボタンを生成
         /// </summary>
         member this.prevButton() =
-                this.html.tagb ("button", "id=\"prevButton\" style=\"position: absolute; z-index: 100;\" onclick=\"drawPrev()\"") <| fun () ->
+                this.html.tagb ("button", [Atr("id", "prevButton"); Atr("style", "position: absolute; z-index: 100"); Atr("onclick", "drawPrev()")]) <| fun () ->
                     this.BodyContext.writein "前へ"
         /// <summary>
         /// 次のページへ移動するボタンを生成
         /// </summary>
         member this.nextButton() =
-                this.html.tagb ("button", "id=\"nextButton\" style=\"position: absolute; margin-left: 75px; z-index: 100;\" onclick=\"drawNext()\"") <| fun () ->
+                this.html.tagb ("button", [Atr("id", "nextButton"); Atr("style", "position: absolute; margin-left: 75px; z-index: 100"); Atr("onclick", "drawNext()")]) <| fun () ->
                     this.BodyContext.writein "次へ"
         /// <summary>
         /// アニメーションを開始するボタンを生成
@@ -999,25 +1020,37 @@ module HtmlGenerationExtensions2 =
         /// キャラクター表示を制御するチェックボックスを生成
         /// </summary>
         member this.switchCharacter() =
-            this.html.taga ("input", ("type=\"checkbox\" id=\"switchCharacter\" style=\"position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100;\"  onclick=\"setCharacter()\" " + if this.CharacterEnabled then "checked" else ""))
-            this.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100;\"") <| fun () ->
+            let checkedAttribute = if this.CharacterEnabled then [Atr("checked")] else []
+            this.html.taga (
+                "input",
+                [Atr("type", "checkbox"); Atr("id", "switchCharacter"); Atr("style", "position: absolute; margin-top: 6px; margin-left: 150px; z-index: 100"); Atr("onclick", "setCharacter()")]
+                @ checkedAttribute)
+            this.html.tagb ("label", [Atr("style", "position: absolute; margin-top: 0px; margin-left: 165px; z-index: 100")]) <| fun () ->
                 this.BodyContext.writein "キャラクター"
         /// <summary>
         /// 字幕表示を制御するチェックボックスを生成
         /// </summary>
         member this.switchSubtitle() =
-            this.html.taga ("input", ("type=\"checkbox\" id=\"switchSubtitle\" style=\"position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.SubtitleEnabled then "checked" else ""))
-            this.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100;\"") <| fun () ->
+            let checkedAttribute = if this.SubtitleEnabled then [Atr("checked")] else []
+            this.html.taga (
+                "input",
+                [Atr("type", "checkbox"); Atr("id", "switchSubtitle"); Atr("style", "position: absolute; margin-top: 6px; margin-left: 270px; z-index: 100"); Atr("onclick", "setSubtitle()")]
+                @ checkedAttribute)
+            this.html.tagb ("label", [Atr("style", "position: absolute; margin-top: 0px; margin-left: 285px; z-index: 100")]) <| fun () ->
                 this.BodyContext.writein "字幕"
         /// <summary>
         /// 音声再生を制御するチェックボックスを生成
         /// </summary>
         member this.switchAudio() =
-            this.html.taga ("input", ("type=\"checkbox\" id=\"switchAudio\" style=\"position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100;\" onclick=\"setSubtitle()\" " + if this.VoiceEnabled then "checked" else ""))
-            this.html.tagb ("label", "style=\"position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100;\"") <| fun () ->
+            let checkedAttribute = if this.VoiceEnabled then [Atr("checked")] else []
+            this.html.taga (
+                "input",
+                [Atr("type", "checkbox"); Atr("id", "switchAudio"); Atr("style", "position: absolute; margin-top: 6px; margin-left: 330px; z-index: 100"); Atr("onclick", "setSubtitle()")]
+                @ checkedAttribute)
+            this.html.tagb ("label", [Atr("style", "position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100")]) <| fun () ->
                 this.BodyContext.writein "音声"
         member this.audioPlayer() =
-                this.html.tagb ("audio", "id=\"audioPlayer\"")  <| fun () -> ()
+                this.html.tagb ("audio", [Atr("id", "audioPlayer")]) ignore
         /// <summary>
         /// 指定位置に画像を表示
         /// </summary>
@@ -1372,9 +1405,9 @@ module dochtml =
         context.switchMain <| fun ctx ->
             ctx.writein "<!DOCTYPE html>"
             // html要素
-            ctx.html.tagb ("html", "lang=\"ja\"") <| fun () ->
+            ctx.html.tagb ("html", [Atr("lang", "ja")]) <| fun () ->
                 // head要素
-                ctx.html.tagb ("head", "") <| fun () ->
+                ctx.html.tagb "head" <| fun () ->
                     // titleタグ
                     ctx.writein ("<title>"+title+"</title>")
                     // metaタグ
@@ -1386,23 +1419,30 @@ module dochtml =
                     |Some width ->
                         ctx.writein ("<meta name=\"viewport\" content=\"width=" + width.ToString() + "\">")
                     // titleタグ
-                    ctx.html.tagb ("title", "") <| fun () ->
+                    ctx.html.tagb "title" <| fun () ->
                         ctx.writein filename
                     // MathJax
-                    ctx.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationSeq.js") + "\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationSeqReset.js") + "\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationStart.js") + "\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("animationReset.js") + "\"") <| fun () -> ()
-                    ctx.html.tagb ("script", "type=\"text/javascript\" src=\"" + context.AssetUrl("autoAnimation.js") + "\"") <| fun () -> ()
+                    ctx.html.tagb (
+                        "script",
+                        [Atr("type", "text/javascript")
+                         Atr("id", "MathJax-script")
+                         Atr("async")
+                         Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
+                    for asset in
+                        ["animationSeq.js"; "animationSeqReset.js"; "animationStart.js"; "animationReset.js"; "autoAnimation.js"] do
+                        ctx.html.tagb (
+                            "script",
+                            [Atr("type", "text/javascript"); Atr("src", context.AssetUrl(asset))]) ignore
                     // scriptタグ
-                    ctx.html.tagb ("script", "") <| fun () ->
+                    ctx.html.tagb "script" <| fun () ->
                         match codeDraw with |Some s -> ctx.writein s |None -> ()
                     // webフォント取得
                     ctx.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
                     ctx.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
                     ctx.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
-                    match cssfile with |Some x -> ctx.writein ("<link rel=\"stylesheet\" href=\""+x+"\" />") |None -> ()
+                    match cssfile with
+                    | Some stylesheet -> ctx.html.taga ("link", [Atr("rel", "stylesheet"); Atr("href", stylesheet)])
+                    | None -> ()
                 // body要素
                 match pagesizeX,pagesizeY with
                 |None,None ->

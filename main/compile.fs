@@ -392,18 +392,23 @@ namespace Aqualis
                     // html書き込みストリーム作成
                     main.writein "<!DOCTYPE html>"
                     // html要素
-                    main.html.tagb ("html", "lang=\"ja\"") <| fun () ->
+                    main.html.tagb ("html", [Atr("lang", "ja")]) <| fun () ->
                         // head要素
-                        main.html.tagb ("head", "") <| fun () ->
+                        main.html.tagb "head" <| fun () ->
                             // metaタグ
                             main.writein "<meta charset=\"UTF-8\">"
                             //追加（5/29）viewportタブ
                             main.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
                             // titleタグ
-                            main.html.tagb ("title", "") <| fun () ->
+                            main.html.tagb "title" <| fun () ->
                                 main.writein projectname
                             // MathJax
-                            main.html.tagb ("script", "type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"") <| fun () -> ()
+                            main.html.tagb (
+                                "script",
+                                [Atr("type", "text/javascript")
+                                 Atr("id", "MathJax-script")
+                                 Atr("async")
+                                 Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
                             for asset in
                                 [ "animationSeq.js"
                                   "animationSeqReset.js"
@@ -411,7 +416,9 @@ namespace Aqualis
                                   "animationReset.js"
                                   "autoAnimation.js" ] do
                                 let assetUrl = WebOutputLayout.assetUrl layout asset
-                                main.html.tagb ("script", "type=\"text/javascript\" src=\"" + assetUrl + "\"") <| fun () -> ()
+                                main.html.tagb (
+                                    "script",
+                                    [Atr("type", "text/javascript"); Atr("src", assetUrl)]) ignore
                             // webフォント取得
                             main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
                             main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"

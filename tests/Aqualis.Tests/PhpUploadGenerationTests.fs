@@ -72,9 +72,10 @@ module PhpUploadGenerationTests =
                 upload.files_select("receive.php"))
 
         Assert.DoesNotContain("<input input name", source)
-        Assert.Contains("name = <?php", source)
-        Assert.Contains("multiple = <?php", source)
-        Assert.Contains("enctype = \"multipart/form-data\"", source)
+        Assert.Contains("name=\"<?php echo htmlspecialchars", source)
+        Assert.Contains("multiple=\"<?php echo htmlspecialchars", source)
+        Assert.Contains("ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'", source)
+        Assert.Contains("enctype=\"multipart/form-data\"", source)
 
     [<Fact>]
     let ``upload policy rejects unsafe configuration`` () =

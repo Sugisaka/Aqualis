@@ -428,7 +428,7 @@ namespace Aqualis
                 expr.substH i (Add(It 4, i, Int 1)) c
                 c.indentDec()
                 c.codewritein "</div>"
-                c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                c.codewritein("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                 returnVar()
 
             ///<summary>条件を満たす間ループ</summary>
@@ -488,7 +488,7 @@ namespace Aqualis
                     code(exit,i)
                     c.indentDec()
                     c.comment "</div>"
-                    c.comment("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                    c.comment("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                     c.comment(label+" continue")
                     returnVar()
                 |_ ->
@@ -502,7 +502,7 @@ namespace Aqualis
                     code(exit,i)
                     c.indentDec()
                     c.codewritein "</div>"
-                    c.codewritein("<span class=\"continue\"><span id=\"" + label + "\">" + label + " continue</span></span>\n<br>")
+                    c.codewritein("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                     c.codewritein(label+" continue")
                     returnVar()
 
