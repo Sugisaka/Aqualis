@@ -23,6 +23,7 @@
     <Compile Include="FileResourceTests.fs" />
     <Compile Include="GenerationContextTests.fs" />
     <Compile Include="OpenMpGenerationTests.fs" />
+    <Compile Include="PythonFunctionGenerationTests.fs" />
     <Compile Include="StructureDependencyTests.fs" />
     <Compile Include="AssignmentTests.fs" />
     <Compile Include="NumericFormattingTests.fs" />

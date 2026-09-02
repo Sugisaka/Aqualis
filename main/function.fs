@@ -11,6 +11,30 @@ namespace Aqualis
     [<AutoOpen>]
     module Aqualis_function =
 
+        type private PythonFunctionArgument = {
+            ActualName:string
+            FormalName:string
+            Shape:VarType }
+
+        let private requiresPythonWriteBack argument =
+            match argument.Shape with
+            |A0 -> true
+            |A1 _|A2 _|A3 _ -> false
+
+        let private normalizePythonActualName typ shape (name:string) =
+            match typ,shape,name.StartsWith "(*" with
+            |(It _|Dt|Zt|Structure _),A0,true ->
+                name.Substring(2,name.Length-3)
+            |_ ->
+                name
+
+        let private pythonFunctionArguments arguments =
+            arguments
+            |> List.map (fun (actualName,(typ,shape,formalName)) -> {
+                ActualName = normalizePythonActualName typ shape actualName
+                FormalName = formalName
+                Shape = shape })
+
         ///<summary>関数定義</summary>
         let private inheritDependencies (parent:Aqualis) (child:Aqualis) =
             child.hlist.list |> List.iter parent.hlist.add
@@ -190,7 +214,7 @@ namespace Aqualis
                 context.writein  ("\\(" + projectname + "(" + args + ")\\)<br/>\n")
             |Python ->
                 context.flist.add projectname
-                let re_args,args = Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun childContext ->
+                let writeBackActualNames,actualNames = Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
@@ -200,47 +224,41 @@ namespace Aqualis
                     for _,(_,_,nm) in childContext.arg.list do
                         writer.codewritein("# " + nm + "\n")
                     writer.codewritein "#==========================================================================================\n"
-                    let argvar =
-                        childContext.arg.list
-                        |> List.map (fun (_,(_,_,n)) -> n)
-                        |> fun s -> String.Join(", ", s)
-                    let re_argvar =
-                        childContext.arg.list
-                        |> List.map (fun (_,(_,vtp,n)) ->
-                            match vtp with
-                            |A1 _|A2 _|A3 _ -> ""
-                            |_ -> n)
-                        |> List.filter (fun s -> s <> "")
-                        |> fun s -> String.Join(", ", s)
-                    //呼び出しコードを記述
-                    let args =
-                        childContext.arg.list
-                        |> List.map (fun (n,(typ,vtp,_)) ->
-                            match typ,vtp,n.StartsWith "(*" with
-                            |(It _|Dt|Zt|Structure _),A0,false -> n
-                            |(It _|Dt|Zt|Structure _),A0,true  -> n.Substring(2,n.Length-3)
-                            |_ -> n)
-                        |> fun s -> String.Join(", ", s)
-                    let re_args =
-                        childContext.arg.list
-                        |> List.map (fun (n,(_,vtp,_)) ->
-                            match vtp with
-                            |A1 _|A2 _|A3 _ -> ""
-                            |_ -> n)
-                        |> List.filter (fun s -> s <> "")
-                        |> fun s -> String.Join(", ", s)
-                    writer.codewritein("def " + projectname + "(" + argvar + "):\n")
+                    let functionArguments =
+                        pythonFunctionArguments childContext.arg.list
+                    let formalNames =
+                        functionArguments |> List.map _.FormalName
+                    let actualNames =
+                        functionArguments |> List.map _.ActualName
+                    let writeBackArguments =
+                        functionArguments |> List.filter requiresPythonWriteBack
+                    writer.codewritein(
+                        "def " + projectname + "(" + String.concat ", " formalNames + "):\n")
                     writer.indent.inc()
                     //グローバル変数の定義
                     declareall childContext writer
                     //メインコード
                     match childContext.allCodes with |Some s -> writer.codewritein s |None -> ()
-                    writer.codewritein("return " + re_argvar + "\n")
+                    match writeBackArguments with
+                    |[] ->
+                        writer.codewritein "return\n"
+                    |arguments ->
+                        arguments
+                        |> List.map _.FormalName
+                        |> String.concat ", "
+                        |> fun names -> writer.codewritein("return " + names + "\n")
                     writer.indent.dec()
                     writer.close()
                     childContext.delete()
-                    re_args,args
-                context.writein (re_args + " = " + projectname + "(" + args + ")\n")
+                    writeBackArguments |> List.map _.ActualName, actualNames
+                let callExpression =
+                    projectname + "(" + String.concat ", " actualNames + ")"
+                match writeBackActualNames with
+                |[] ->
+                    context.writein (callExpression + "\n")
+                |names ->
+                    context.writein (
+                        String.concat ", " names + " = " + callExpression + "\n")
             |_ -> ()
 
         type Aqualis with
