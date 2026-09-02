@@ -1,6 +1,7 @@
 namespace Aqualis.Tests
 
 open System.IO
+open System.Text.RegularExpressions
 open Xunit
 open Aqualis
 
@@ -122,3 +123,69 @@ module WebGenerationStateTests =
 
         Assert.Equal<string list>(["contentsID0"; "contentsID1"; "0"], firstValues)
         Assert.Equal<string list>(["contentsID0"; "contentsID1"; "0"], secondValues)
+
+    [<Fact>]
+    let ``web media assets are copied and referenced by relative URLs`` () =
+        use output = new TemporaryDirectory()
+        let imagePath = Path.Combine(output.Path, "source image #1.png")
+        let videoPath = Path.Combine(output.Path, "source video #1.mp4")
+        let characterPath = Path.Combine(output.Path, "character image #1.png")
+        File.WriteAllText(imagePath, "image")
+        File.WriteAllText(videoPath, "video")
+        File.WriteAllText(characterPath, "character")
+
+        let projectName = "web assets 日本語"
+        htmlpresentation output.Path projectName "Assets" None (None, None) false <| fun context ->
+            context.image Style.blank imagePath
+            context.video Style.blank videoPath
+            context.imageA Style.blank position.Origin imagePath
+            context.animationManual
+                { sX = 320
+                  sY = 180
+                  mX = 0
+                  mY = 0
+                  backgroundColor = "#ffffff" }
+                position.Origin
+                (0, 0)
+                (fun (figure,_) -> figure.image Style.blank position.Origin imagePath)
+            context.page
+                [{ CharacterImageFile = characterPath
+                   CharacterImageStyle = "display: block;" }]
+                ({ Subtitle = ""
+                   Script = ""
+                   AudioFileNumber = None
+                   AudioSourceNumber = None }, None, "#000000")
+                ignore
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, projectName + ".html"))
+        let urlPrefix = "contents_web%20assets%20%E6%97%A5%E6%9C%AC%E8%AA%9E/"
+        let imageUrl = urlPrefix + "source%20image%20%231.png"
+        let videoUrl = urlPrefix + "source%20video%20%231.mp4"
+        let characterUrl = urlPrefix + "character%20image%20%231.png"
+
+        Assert.True(Regex.Matches(generated, Regex.Escape(imageUrl)).Count >= 3)
+        Assert.Contains(videoUrl, generated)
+        Assert.Contains(characterUrl, generated)
+        Assert.True(File.Exists(Path.Combine(output.Path, "contents_" + projectName, Path.GetFileName imagePath)))
+        Assert.True(File.Exists(Path.Combine(output.Path, "contents_" + projectName, Path.GetFileName videoPath)))
+        Assert.True(File.Exists(Path.Combine(output.Path, "contents_" + projectName, Path.GetFileName characterPath)))
+
+        Regex.Matches(generated, "src\\s*=\\s*\"([^\"]*)\"")
+        |> Seq.cast<Match>
+        |> Seq.map (fun matched -> matched.Groups[1].Value)
+        |> Seq.filter (fun source -> source.StartsWith("contents_"))
+        |> Seq.iter (fun source ->
+            Assert.DoesNotContain("\\", source)
+            Assert.DoesNotContain(output.Path, source))
+
+    [<Fact>]
+    let ``missing web media asset stops generation`` () =
+        use output = new TemporaryDirectory()
+        let missingPath = Path.Combine(output.Path, "missing.png")
+
+        let error =
+            Assert.Throws<FileNotFoundException>(fun () ->
+                htmlpresentation output.Path "missing-asset" "Missing" None (None, None) false <| fun context ->
+                    context.image missingPath)
+
+        Assert.Equal(missingPath, error.FileName)

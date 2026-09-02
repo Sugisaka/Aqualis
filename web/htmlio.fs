@@ -30,7 +30,22 @@ module internal WebOutputLayout =
         }
 
     let assetUrl (layout:WebOutputLayout) (fileName:string) =
-        layout.ContentsName + "/" + fileName.Replace('\\', '/')
+        if String.IsNullOrWhiteSpace fileName then
+            invalidArg (nameof fileName) "An asset file name is required."
+
+        if Path.IsPathRooted fileName then
+            invalidArg (nameof fileName) "An asset URL cannot be built from an absolute path."
+
+        let segments = fileName.Replace('\\', '/').Split('/')
+        if segments |> Array.exists (fun segment -> String.IsNullOrWhiteSpace segment || segment = "." || segment = "..") then
+            invalidArg (nameof fileName) "An asset path must contain only non-empty relative path segments."
+
+        let encodedPath =
+            segments
+            |> Array.map Uri.EscapeDataString
+            |> String.concat "/"
+
+        Uri.EscapeDataString(layout.ContentsName) + "/" + encodedPath
 
 type HtmlGenerationContext internal (dir:string,projectName:string) =
     let gate = obj()
@@ -120,6 +135,31 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
 
     /// <summary>Builds a relative URL for a generated web asset.</summary>
     member _.AssetUrl(fileName:string) = WebOutputLayout.assetUrl layout fileName
+
+    /// <summary>Copies an asset into the generated content directory and returns its relative URL.</summary>
+    member internal this.ImportAsset(sourcePath:string) =
+        if String.IsNullOrWhiteSpace sourcePath then
+            invalidArg (nameof sourcePath) "An asset source path is required."
+
+        if not (File.Exists sourcePath) then
+            raise (FileNotFoundException("Asset file was not found.", sourcePath))
+
+        let fileName = Path.GetFileName sourcePath
+        if String.IsNullOrWhiteSpace fileName then
+            invalidArg (nameof sourcePath) "The asset source path must identify a file."
+
+        Directory.CreateDirectory(layout.ContentsDirectory) |> ignore
+        let destinationPath = Path.Combine(layout.ContentsDirectory, fileName)
+        let sourceFullPath = Path.GetFullPath sourcePath
+        let destinationFullPath = Path.GetFullPath destinationPath
+        let comparison =
+            if OperatingSystem.IsWindows() then StringComparison.OrdinalIgnoreCase
+            else StringComparison.Ordinal
+
+        if not (String.Equals(sourceFullPath, destinationFullPath, comparison)) then
+            File.Copy(sourceFullPath, destinationFullPath, true)
+
+        this.AssetUrl(fileName)
 
     /// <summary>Allocates the next unique HTML content number.</summary>
     member _.NextContentsNumber() =

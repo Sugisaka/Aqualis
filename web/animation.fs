@@ -903,46 +903,18 @@ module HtmlGenerationExtensions2 =
         /// <param name="p">表示位置</param>
         /// <param name="filename">表示する画像のファイル名</param>
         member this.image (s:Style,p:position) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.ContentsDirectory) then
-                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.ContentsDirectory)
-            else
-                printfn "image file not exist: %s" filename
+            let sourceUrl = this.ImportAsset filename
             let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.html.taga ("img", [st.atr;Atr("src", Path.GetFileName (this.ContentsDirectory) + "\\" + f)])
+            this.html.taga ("img", [st.atr; Atr("src", sourceUrl)])
         member this.image (s:Style, id:string) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists this.ContentsDirectory then
-                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" this.ContentsDirectory
-            else
-                printfn "image file not exist: %s" filename
-            this.html.taga ("img", [Atr("id",id); s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+            let sourceUrl = this.ImportAsset filename
+            this.html.taga ("img", [Atr("id",id); s.atr; Atr("src", sourceUrl)])
         member this.image (s:Style) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists this.ContentsDirectory then
-                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" this.ContentsDirectory
-            else
-                printfn "image file not exist: %s" filename
-            this.html.taga ("img", [s.atr;Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+            let sourceUrl = this.ImportAsset filename
+            this.html.taga ("img", [s.atr; Atr("src", sourceUrl)])
         member this.image (filename:string) =
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists this.ContentsDirectory then
-                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" this.ContentsDirectory
-            else
-                printfn "image file not exist: %s" filename
-            this.html.taga ("img", [Atr("src", Path.GetFileName this.ContentsDirectory + "\\" + f)])
+            let sourceUrl = this.ImportAsset filename
+            this.html.taga ("img", [Atr("src", sourceUrl)])
         /// <summary>
         /// 指定位置に動画を表示する
         /// </summary>
@@ -950,27 +922,13 @@ module HtmlGenerationExtensions2 =
         /// <param name="p">表示位置</param>
         /// <param name="filename">表示する動画のファイル名</param>
         member this.video (s:Style,p:position) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists this.ContentsDirectory then
-                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" this.ContentsDirectory
-            else
-                printfn "video file not exist: %s" filename
+            let sourceUrl = this.ImportAsset filename
             let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.html.tagv ("video", [st.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            this.html.tagv ("video", [st.atr; Atr("src", sourceUrl); Atr("controls", "")])
             this.html.tage "video"
         member this.video (s:Style) = fun (filename:string) ->
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists this.ContentsDirectory then
-                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" this.ContentsDirectory
-            else
-                printfn "video file not exist: %s" filename
-            this.html.tagv ("video", [s.atr;Atr("src", this.ContentsDirectory + "\\" + f); Atr("controls", "")])
+            let sourceUrl = this.ImportAsset filename
+            this.html.tagv ("video", [s.atr; Atr("src", sourceUrl); Atr("controls", "")])
             this.html.tage "video"
         /// <summary>
         /// キャラクター付き解説ページ
@@ -978,7 +936,6 @@ module HtmlGenerationExtensions2 =
         member this.page (c:list<CharacterImage>) (audio:Audio,audioFile:option<string>,scriptColor:string) code2 =
             this.slide position.Origin <| fun p ->
                 let animationCounter = this.AnimationCount
-                let contentsDirectory = this.ContentsDirectory
                 // 音声ファイル追加
                 this.AddAudioFile(
                     match audioFile with |Some t -> t |None -> "")
@@ -988,14 +945,8 @@ module HtmlGenerationExtensions2 =
                 // キャラクター画像
                 this.html.tag "div" ("id = \"c"+animationCounter.ToString()+"\"" + "style=\"" + (if this.CharacterEnabled then "display: block; " else "display: none; ") + "\"") <| fun () ->
                     for ci in c do
-                        if File.Exists ci.CharacterImageFile then
-                            if Directory.Exists contentsDirectory then
-                                File.Copy(ci.CharacterImageFile, contentsDirectory+"\\"+Path.GetFileName ci.CharacterImageFile, true)
-                                this.html.tag_ "img" <| "src=\"" + Path.GetFileName contentsDirectory + "/" + Path.GetFileName ci.CharacterImageFile + "\" style=\"" + ci.CharacterImageStyle + "\""
-                            else
-                                printfn "directory not exist: %s" contentsDirectory
-                        else
-                            printfn "character image file not exist: %s" ci.CharacterImageFile
+                        let sourceUrl = this.ImportAsset ci.CharacterImageFile
+                        this.html.tag_ "img" <| "src=\"" + sourceUrl + "\" style=\"" + ci.CharacterImageStyle + "\""
                 // 字幕
                 this.html.tag "div" ("id = \"s"+animationCounter.ToString()+"\" style=\"width: 1880px; height: 160px; " + (if this.SubtitleEnabled then "display: block; " else "display: none; ") + "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: "+scriptColor+"; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff ;\"")
                     <| fun () -> this.BodyContext.writein audio.Subtitle
@@ -1074,15 +1025,8 @@ module HtmlGenerationExtensions2 =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}]
-            let f = Path.GetFileName filename
-            if File.Exists filename then
-                if Directory.Exists (this.ContentsDirectory) then
-                    File.Copy(filename, this.ContentsDirectory + "\\" + f, true)
-                else
-                    printfn "directory not exist: %s" (this.ContentsDirectory)
-            else
-                printfn "image file not exist: %s" filename
-            this.html.taga ("img", [(s1+s).atr])
+            let sourceUrl = this.ImportAsset filename
+            this.html.taga ("img", [(s1+s).atr; Atr("src", sourceUrl)])
 
 /// <summary>
 /// 図形アニメーションを管理するクラス
@@ -1300,15 +1244,14 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
     /// </summary>
     /// <param name="filename">画像のファイル名</param>
     member this.image (s:Style) (center:position) (filename:string) =
-        let f = Path.GetFileName filename
-        File.Copy(filename, context.ContentsDirectory + "\\" + f, true)
+        let sourceUrl = context.ImportAsset filename
         let c = [
             {Key="display";Value="block"}
             {Key="position";Value="absolute"}
             {Key="margin-left";Value=InvariantFormat.number (double originX+center.x)+"px"}
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
-        context.html.taga ("img", [ss.atr; Atr("src",context.ContentsDirectory + "\\" + f)])
+        context.html.taga ("img", [ss.atr; Atr("src", sourceUrl)])
     /// <summary>
     /// 開始ボタンの制御用JavaScriptコードを生成
     /// </summary>
