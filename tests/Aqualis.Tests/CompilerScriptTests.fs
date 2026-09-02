@@ -111,6 +111,19 @@ module CompilerScriptTests =
                 outputDirectory,
                 "proc_" + projectName + "_F.sh"))
 
+    let private generatePythonScript outputDirectory projectName =
+        Compile
+            [Python]
+            outputDirectory
+            projectName
+            "1.0"
+            ignore
+
+        File.ReadAllText(
+            Path.Combine(
+                outputDirectory,
+                "proc_" + projectName + "_P.sh"))
+
     [<Fact>]
     let ``C compile scripts separate and quote every argument`` () =
         use output = new TemporaryDirectory()
@@ -183,6 +196,28 @@ module CompilerScriptTests =
 
         for project,script in ["normal",normal; "openmp",openMp; "openacc",openAcc] do
             assertCompileFailureStopsExecution ("./" + project + ".exe") script
+
+    [<Fact>]
+    let ``Python run scripts quote project names and stop option parsing`` () =
+        use output = new TemporaryDirectory()
+
+        let normal = generatePythonScript output.Path "python-normal"
+        let leadingDash = generatePythonScript output.Path "-python"
+        let specialProject = "python project '$HOME`;echo pwned"
+        let special = generatePythonScript output.Path specialProject
+
+        Assert.Contains("exec python3 -- python-normal.py", normal)
+        Assert.Contains("exec python3 -- -python.py", leadingDash)
+        Assert.Contains(
+            "exec python3 -- 'python project '\"'\"'$HOME`;echo pwned.py'",
+            special)
+        Assert.DoesNotContain("python3 " + specialProject + ".py", special)
+
+        for script in [normal; leadingDash; special] do
+            let executionLines =
+                script.Split('\n', System.StringSplitOptions.RemoveEmptyEntries)
+                |> Array.filter (_.StartsWith("exec "))
+            Assert.Single(executionLines) |> ignore
 
     [<Fact>]
     let ``generated shell scripts use LF and UTF-8 without BOM`` () =

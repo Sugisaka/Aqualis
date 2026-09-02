@@ -55,10 +55,18 @@ module internal ShellScriptWriter =
         writer.NewLine <- "\n"
         writer
 
+    let writeExec
+        (writer:StreamWriter)
+        executable
+        arguments =
+        let command = ShellCommand.buildCommand executable arguments
+        writer.WriteLine("exec " + command)
+
     let writeCompileAndRun
         (writer:StreamWriter)
         (compileCommand:string)
-        (runCommand:string) =
+        runExecutable
+        runArguments =
         writer.WriteLine compileCommand
         writer.WriteLine "aqualis_compile_status=$?"
         writer.WriteLine "if [ \"$aqualis_compile_status\" -ne 0 ]; then"
@@ -66,4 +74,4 @@ module internal ShellScriptWriter =
         writer.WriteLine "  exit \"$aqualis_compile_status\""
         writer.WriteLine "fi"
         writer.WriteLine()
-        writer.WriteLine("exec " + runCommand)
+        writeExec writer runExecutable runArguments

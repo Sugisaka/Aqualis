@@ -84,14 +84,11 @@ namespace Aqualis
                                 buildCompileCommand
                                     "/usr/bin/gfortran"
                                     ["-ffree-line-length-none"]
-                        let runCommand =
-                            ShellCommand.buildCommand
-                                ("./" + projectname + ".exe")
-                                []
                         ShellScriptWriter.writeCompileAndRun
                             wr
                             compileCommand
-                            runCommand
+                            ("./" + projectname + ".exe")
+                            []
                 |C99 ->
                     Aqualis.makeProgramWithContext (dir,projectname,C99) <| fun context ->
                         //メインコード生成
@@ -160,14 +157,11 @@ namespace Aqualis
                                 buildCompileCommand "pgcc" ["-acc"; "-Minfo=accel"]
                             else
                                 buildCompileCommand "gcc" []
-                        let runCommand =
-                            ShellCommand.buildCommand
-                                ("./" + projectname + ".exe")
-                                []
                         ShellScriptWriter.writeCompileAndRun
                             wr
                             compileCommand
-                            runCommand
+                            ("./" + projectname + ".exe")
+                            []
                 |LaTeX ->
                     Aqualis.makeProgramWithContext (dir,projectname,LaTeX) <| fun context ->
                         //メインコード生成
@@ -469,9 +463,12 @@ namespace Aqualis
                         //beeファイル削除
                         context.delete()
                         use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_P.sh")
-                        wr.Write "#!/bin/bash\n"
-                        wr.Write "\n"
-                        wr.Write("python3 " + projectname + ".py\n")
+                        wr.WriteLine "#!/bin/bash"
+                        wr.WriteLine()
+                        ShellScriptWriter.writeExec
+                            wr
+                            "python3"
+                            ["--"; projectname + ".py"]
                 |JavaScript ->
                     Aqualis.makeProgramWithContext (dir,projectname,JavaScript) <| fun context ->
                         //メインコード生成
