@@ -34,6 +34,43 @@ module GenerationContextTests =
         Assert.Contains(generatedVariable + " = 0;", generated)
 
     [<Fact>]
+    let ``Numeric Compile disposes its writerless context`` () =
+        use output = new TemporaryDirectory()
+        let mutable escapedContext:Aqualis option = None
+
+        Compile [Numeric] output.Path "numeric-lifetime" "1" <| fun context ->
+            Assert.Equal(1, context.Active)
+            Assert.True(context.CodeFile.IsNone)
+            Assert.False(context.IsNeutral)
+            escapedContext <- Some context
+
+        Assert.Equal(0, escapedContext.Value.Active)
+        Assert.Throws<InvalidOperationException>(fun () ->
+            escapedContext.Value.writein "invalid")
+        |> ignore
+        Assert.False(File.Exists(Path.Combine(output.Path, "numeric-lifetime")))
+
+    [<Fact>]
+    let ``Numeric Compile disposes its context when the callback throws`` () =
+        use output = new TemporaryDirectory()
+        let mutable escapedContext:Aqualis option = None
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            Compile [Numeric] output.Path "numeric-failure" "1" <| fun context ->
+                escapedContext <- Some context
+                invalidOp "expected")
+        |> ignore
+
+        Assert.Equal(0, escapedContext.Value.Active)
+
+    [<Fact>]
+    let ``neutral Numeric values keep their independent lifetime`` () =
+        let value = int0(Int 1)
+
+        Assert.True(value.Context.IsNeutral)
+        Assert.Equal(1, value.Context.Active)
+
+    [<Fact>]
     let ``PHP compilation writes a php file through explicit services`` () =
         use output = new TemporaryDirectory()
         Compile [PHP] output.Path "page" "1" <| fun context ->

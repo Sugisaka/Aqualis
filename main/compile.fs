@@ -509,4 +509,4 @@ namespace Aqualis
                     Aqualis.makeProgramWithContext (dir,projectname + ".php",PHP) <| fun context ->
                         code context
                         context.close()
-                |Numeric -> code (new Aqualis(None,None,Numeric))
+                |Numeric -> Aqualis.runWithWriterlessContext Numeric code

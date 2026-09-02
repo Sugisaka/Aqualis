@@ -307,18 +307,30 @@ namespace Aqualis
         member val varCopyIn = varCollector lang with get
 
         member val varCopyOut = varCollector lang with get
-        member private this.disposePrograms() = (this :> System.IDisposable).Dispose()
+        static member internal runWithOwnedContext
+            (createContext: unit -> Aqualis)
+            (code: Aqualis -> 'T)
+            : 'T =
+            use context = createContext()
+            code context
+
         static member makeProgramWithContext
             (programInfo: string * string * Language)
             (code: Aqualis -> 'T)
             : 'T =
-            let context =
-                let dir, name, language = programInfo
-                new Aqualis(Some dir, Some name, language)
-            try
-                code context
-            finally
-                context.disposePrograms()
+            Aqualis.runWithOwnedContext
+                (fun () ->
+                    let dir, name, language = programInfo
+                    new Aqualis(Some dir, Some name, language))
+                code
+
+        static member internal runWithWriterlessContext
+            (language:Language)
+            (code:Aqualis -> 'T)
+            : 'T =
+            Aqualis.runWithOwnedContext
+                (fun () -> new Aqualis(None, None, language))
+                code
 
     [<AutoOpen>]
     module SettingExtensions =
