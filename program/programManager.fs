@@ -105,6 +105,14 @@ namespace Aqualis
         member _.codewriten(s:string) = withWriter (fun writer -> writer.codewriten s)
         member _.codewritein(s:string) = withWriter (fun writer -> writer.codewritein s)
         member _.codewritein(h:string,s:string) = withWriter (fun writer -> writer.codewritein (h,s))
+        member internal _.writeRaw(s:string) = withWriter (fun writer -> writer.cwrite s)
+        member internal _.captureCode(action:unit -> 'T) =
+            ensureActive()
+            match cwriter with
+            |Some writer -> writer.capture action
+            |None ->
+                let result = action()
+                "", result
         member _.indentInc() = withWriter (fun writer -> writer.indent.inc())
         member _.indentDec() = withWriter (fun writer -> writer.indent.dec())
         member _.appendOpen() = withWriter (fun writer -> writer.appendOpen())

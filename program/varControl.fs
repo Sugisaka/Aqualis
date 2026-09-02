@@ -170,6 +170,7 @@ namespace Aqualis
         
         let gate = obj()
         let mutable cwriter:option<StreamWriter> = if filename = "" then None else Some (new StreamWriter(filename,false))
+        let captureWriters = ResizeArray<StringWriter>()
 
         let disposeWriter() =
             match cwriter with
@@ -199,7 +200,28 @@ namespace Aqualis
         
         member _.cwrite(s:string) =
             lock gate (fun () ->
-                (requireWriter()).Write s)
+                if captureWriters.Count > 0 then
+                    captureWriters[captureWriters.Count - 1].Write s
+                else
+                    (requireWriter()).Write s)
+
+        /// Captures code emitted by an action without closing or replacing the owned file.
+        member _.capture(action:unit -> 'T) =
+            let captureWriter = new StringWriter()
+            lock gate (fun () -> captureWriters.Add captureWriter)
+            try
+                let result = action()
+                captureWriter.ToString(), result
+            finally
+                lock gate (fun () ->
+                    let lastIndex = captureWriters.Count - 1
+                    if
+                        lastIndex < 0 ||
+                        not (Object.ReferenceEquals(captureWriters[lastIndex], captureWriter))
+                    then
+                        invalidOp "Code captures must be completed in stack order."
+                    captureWriters.RemoveAt lastIndex)
+                captureWriter.Dispose()
                 
         ///<summary>コード出力(インデントなし・改行なし)</summary>
         member this.codewrite (ss:string) = 
