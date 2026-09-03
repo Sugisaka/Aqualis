@@ -95,16 +95,16 @@ module GenerationContextTests =
 
         let mainPath = Path.Combine(output.Path, projectName + ".html")
         let contentsPath = Path.Combine(output.Path, "contents_" + projectName)
-        let misplacedMainPath = Path.Combine(contentsPath, projectName + ".html")
         let bodyTemporaryPath = Path.Combine(output.Path, projectName + "_body")
         let generated = File.ReadAllText mainPath
 
         Assert.True(File.Exists mainPath)
-        Assert.True(Directory.Exists contentsPath)
-        Assert.False(File.Exists misplacedMainPath)
+        Assert.False(Directory.Exists contentsPath)
         Assert.False(File.Exists bodyTemporaryPath)
         Assert.Contains("id=\"sequence-body\"", generated)
         Assert.Equal(1, generated.Split("<title>").Length - 1)
+        Assert.Contains("id=\"MathJax-script\"", generated)
+        Assert.Contains("https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js", generated)
 
         [ "animationSeq.js"
           "animationSeqReset.js"
@@ -112,9 +112,7 @@ module GenerationContextTests =
           "animationReset.js"
           "autoAnimation.js" ]
         |> List.iter (fun asset ->
-            Assert.Contains(
-                "src=\"contents_" + projectName + "/" + asset + "\"",
-                generated))
+            Assert.DoesNotContain(asset, generated))
 
     [<Fact>]
     let ``HTML sequence diagram failures remove the temporary body`` () =
@@ -130,6 +128,7 @@ module GenerationContextTests =
 
         Assert.False(File.Exists bodyTemporaryPath)
         Assert.False(File.Exists(Path.Combine(output.Path, projectName + ".html")))
+        Assert.False(Directory.Exists(Path.Combine(output.Path, "contents_" + projectName)))
 
     [<Fact>]
     let ``operators functions and indexers share context validation`` () =

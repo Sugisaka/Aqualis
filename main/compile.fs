@@ -372,9 +372,8 @@ namespace Aqualis
                         //beeファイル削除
                         context.delete()
                 |HTMLSequenceDiagram ->
-                    // ディレクトリ作成
+                    // 出力レイアウト作成
                     let layout = WebOutputLayout.create dir projectname
-                    Directory.CreateDirectory(layout.ContentsDirectory) |> ignore
                     // HTML本体の一時出力
                     use body = new Aqualis(
                         Some layout.OutputDirectory,
@@ -409,16 +408,6 @@ namespace Aqualis
                                  Atr("id", "MathJax-script")
                                  Atr("async")
                                  Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
-                            for asset in
-                                [ "animationSeq.js"
-                                  "animationSeqReset.js"
-                                  "animationStart.js"
-                                  "animationReset.js"
-                                  "autoAnimation.js" ] do
-                                let assetUrl = WebOutputLayout.assetUrl layout asset
-                                main.html.tagb (
-                                    "script",
-                                    [Atr("type", "text/javascript"); Atr("src", assetUrl)]) ignore
                             // webフォント取得
                             main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
                             main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
