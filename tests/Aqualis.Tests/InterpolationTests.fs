@@ -2,6 +2,7 @@ namespace Aqualis.Tests
 
 open System
 open System.IO
+open System.Text.RegularExpressions
 open Xunit
 open Aqualis
 
@@ -10,6 +11,48 @@ module InterpolationTests =
         use output = new TemporaryDirectory()
         Compile [C99] output.Path "interpolation" "1.0" code
         File.ReadAllText(Path.Combine(output.Path, "interpolation.c"))
+
+    let private assertSplineUsesLeftEndpointOrigin (source:string) =
+        Assert.Matches(
+            Regex(@"query\s*-\s*x\[i0\d+\]"),
+            source)
+        Assert.DoesNotMatch(
+            Regex(@"query\s*-\s*x\[i0\d+\s*\+\s*1\]"),
+            source)
+        Assert.Matches(
+            Regex(@"query\s*==\s*x\[x_size\[0\]\s*-\s*1\]"),
+            source)
+        Assert.Matches(
+            Regex(@"query\s*-\s*x\[x_size\[0\]\s*-\s*2\]"),
+            source)
+
+    [<Fact>]
+    let ``real spline value and derivative use the interval left endpoint`` () =
+        let source =
+            generateC (fun context ->
+                let interpolation = context.interpolate.splineDouble()
+                let query = context.var.d0 "query"
+                let value = context.var.d0 "value"
+                let derivative = context.var.d0 "derivative"
+
+                interpolation.p value query
+                interpolation.dp derivative query)
+
+        assertSplineUsesLeftEndpointOrigin source
+
+    [<Fact>]
+    let ``complex spline value and derivative use the interval left endpoint`` () =
+        let source =
+            generateC (fun context ->
+                let interpolation = context.interpolate.splineComplex(true)
+                let query = context.var.d0 "query"
+                let value = context.var.z0 "value"
+                let derivative = context.var.z0 "derivative"
+
+                interpolation.p value query
+                interpolation.dp derivative query)
+
+        assertSplineUsesLeftEndpointOrigin source
 
     [<Fact>]
     let ``linear interpolation uses the last valid real array index`` () =

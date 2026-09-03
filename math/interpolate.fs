@@ -185,10 +185,15 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.p (yy:double0) (xx:double0) =
                 yy.clear()
+                let evaluate (i:int0) =
+                    let t = xx-x.[i]
+                    yy <== g.[a(i+1)-1]*asm.pow(t,3) + g.[b(i+1)-1]*asm.pow(t,2) + g.[c(i+1)-1]*t + y.[i]
                 context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
                     context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
-                        yy <== g.[a(i+1)-1]*asm.pow(xx-x.[i],3) + g.[b(i+1)-1]*asm.pow(xx-x.[i],2) + g.[c(i+1)-1]*(xx-x.[i+1]) + y.[i]
+                        evaluate i
                         ex()
+                context.br.if1 (xx.=x.[x.size1-1]) <| fun () ->
+                    evaluate (x.size1-2)
 
             /// <summary>
             /// 補間後の関数の微分
@@ -197,10 +202,15 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.dp (yy:double0) (xx:double0) =
                 yy.clear()
+                let evaluate (i:int0) =
+                    let t = xx-x.[i]
+                    yy <== 3*g.[a(i+1)-1]*asm.pow(t,2) + 2*g.[b(i+1)-1]*t + g.[c(i+1)-1]
                 context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
                     context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
-                        yy <== 3*g.[a(i+1)-1]*asm.pow(xx-x.[i+1],2) + 2*g.[b(i+1)-1]*(xx-x.[i+1]) + g.[c(i+1)-1]
+                        evaluate i
                         ex()
+                context.br.if1 (xx.=x.[x.size1-1]) <| fun () ->
+                    evaluate (x.size1-2)
 
         type splineInterpolateComplex(context:Aqualis,iscpx:bool) =
 
@@ -349,10 +359,15 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.p (yy:complex0) (xx:double0) =
                 yy.clear()
+                let evaluate (i:int0) =
+                    let t = xx-x.[i]
+                    yy <== g.[a(i+1)-1]*asm.pow(t,3) + g.[b(i+1)-1]*asm.pow(t,2) + g.[c(i+1)-1]*t + y.[i]
                 context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
                     context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
-                        yy <== g.[a(i+1)-1]*asm.pow(xx-x.[i],3) + g.[b(i+1)-1]*asm.pow(xx-x.[i],2) + g.[c(i+1)-1]*(xx-x.[i+1]) + y.[i]
+                        evaluate i
                         ex()
+                context.br.if1 (xx.=x.[x.size1-1]) <| fun () ->
+                    evaluate (x.size1-2)
 
             /// <summary>
             /// 補間後の関数の微分
@@ -361,10 +376,15 @@ namespace Aqualis
             /// <param name="xx"></param>
             member __.dp (yy:complex0) (xx:double0) =
                 yy.clear()
+                let evaluate (i:int0) =
+                    let t = xx-x.[i]
+                    yy <== 3*g.[a(i+1)-1]*asm.pow(t,2) + 2*g.[b(i+1)-1]*t + g.[c(i+1)-1]
                 context.iter.num_exit (x.size1-1) <| fun (ex,i) ->
                     context.br.if1 (x.[i].<=xx.<x.[i+1]) <| fun () ->
-                        yy <== 3*g.[a(i+1)-1]*asm.pow(xx-x.[i+1],2) + 2*g.[b(i+1)-1]*(xx-x.[i+1]) + g.[c(i+1)-1]
+                        evaluate i
                         ex()
+                context.br.if1 (xx.=x.[x.size1-1]) <| fun () ->
+                    evaluate (x.size1-2)
 
     type ContextInterpolate internal (context:Aqualis) =
         member _.linearDouble(id,dataX,dataY) = interpolate.LinearInterpolate1d(context,id,dataX,dataY)
