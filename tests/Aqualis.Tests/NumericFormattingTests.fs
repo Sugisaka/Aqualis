@@ -31,6 +31,16 @@ module NumericFormattingTests =
             Assert.Equal("1.5", InvariantFormat.number 1.5)
 
     [<Fact>]
+    let ``complex expression strings preserve real and imaginary parts`` () =
+        let value = Cpx(1.25, -2.5)
+        let expression = Add(Zt, Cpx(1.0, 2.0), Cpx(3.0, 4.0))
+
+        Assert.Equal("Cpx(1.25, -2.5) ", value.ToString())
+        Assert.Contains("Cpx(1, 2)", expression.ToString())
+        Assert.Contains("Cpx(3, 4)", expression.ToString())
+        Assert.DoesNotContain("Cpx(1.25, 1.25)", value.ToString())
+
+    [<Fact>]
     let ``complex literals render without recursively simplifying their expansion`` () =
         use output = new TemporaryDirectory()
         let value = Cpx(1.0, 2.0)

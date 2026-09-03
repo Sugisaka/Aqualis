@@ -170,7 +170,7 @@ namespace Aqualis
                 |OR lst -> ss0 + "OR(" + String.Join(", ", lst |> List.map (fun p -> str(p, indent+indentStep))) + ") "
                 |Int x -> ss0 + x.ToString()
                 |Dbl x -> ss0 + x.ToString()
-                |Cpx (re,im) -> ss0 + re.ToString() + "," + re.ToString() + ") "
+                |Cpx (re,im) -> ss0 + "Cpx(" + re.ToString() + ", " + im.ToString() + ") "
                 |Var (t,n,_) -> ss0 + n
                 |Inv (t,x) -> ss0 + "Inv(" + str(x, indent+indentStep) + ") "
                 |Add (t,a,b) -> ss0 + "Add(" + str(a, indent+indentStep) + ", " + str(b, indent+indentStep) + ") "
