@@ -115,6 +115,29 @@ module GenerationContextTests =
             Assert.DoesNotContain(asset, generated))
 
     [<Fact>]
+    let ``sequence diagram figures use valid SVG dimensions and margins`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "sequence-figure"
+
+        Compile [HTMLSequenceDiagram] output.Path projectName "1" <| fun context ->
+            expr.fig context position.Origin <| fun (figure,_) ->
+                figure.line Style.blank
+                    (position(20.5, 30.25))
+                    (position(60.5, 80.25))
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, projectName + ".html"))
+
+        Assert.Contains("viewBox=\"0 0 60 70\"", generated)
+        Assert.Contains("width=\"60px\"", generated)
+        Assert.Contains("height=\"70px\"", generated)
+        Assert.Contains("margin-left: 10.5px", generated)
+        Assert.Contains("margin-top: 20.25px", generated)
+        Assert.DoesNotContain("heigth=", generated)
+        Assert.DoesNotContain("margin-left: 10.5;", generated)
+        Assert.DoesNotContain("margin-top: 20.25;", generated)
+
+    [<Fact>]
     let ``HTML sequence diagram failures remove the temporary body`` () =
         use output = new TemporaryDirectory()
         let projectName = "sequence-failure"

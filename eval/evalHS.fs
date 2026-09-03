@@ -103,21 +103,7 @@ namespace Aqualis
                 makeList e []
 
             static member fig (c:Aqualis) (p:position) code =
-                let writein = c.codewritein
-                let f = figure(html(c).taga)
-                code(f,p)
-                let sx,sy,mx,my = f.setWriteMode()
-                writein (
-                    "<svg viewBox=\"0 0 "+sx.ToString()+" "+sy.ToString()+"\" "+
-                    "width=\""+sx.ToString()+"px\" "+
-                    "heigth=\""+sy.ToString()+"px\" "+
-                    "xmlns=\"http://www.w3.org/2000/svg\" "+
-                    "style=\"margin-left: "+mx.ToString()+"; "+
-                    "margin-top: "+my.ToString()+"; "+
-                    "position: absolute;"+
-                    "\">")
-                code(f,p)
-                writein "</svg>"
+                html(c).fig p code
 
             /// ライフラインを描画
             static member drawLifeLine(c:Aqualis,x:float,y1:float,y2:float) =
