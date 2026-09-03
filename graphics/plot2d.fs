@@ -7,6 +7,7 @@
 namespace Aqualis
     
     open System
+    open System.Collections
     open System.Globalization
     open System.IO
     
@@ -257,6 +258,8 @@ namespace Aqualis
                     let mutable xmax = 0.0
                     let mutable ymin = 0.0
                     let mutable ymax = 0.0
+                    let mutable occupied : BitArray option = None
+                    let mutable gridPointCount = 0
 
                     // First pass: validate coordinates and determine the grid.
                     for line in File.ReadLines(filename) do
@@ -330,6 +333,8 @@ namespace Aqualis
                             else
                                 try
                                     data <- Array.zeroCreate(int elementCount)
+                                    gridPointCount <- nx * ny
+                                    occupied <- Some(BitArray(gridPointCount))
                                 with
                                 | :? OutOfMemoryException
                                 | :? ArgumentException
@@ -338,8 +343,17 @@ namespace Aqualis
 
                     if errors.Count = 0 then
                         // Second pass: parse each row once and store real/complex data.
-                        for line in File.ReadLines(filename) do
-                            if isDataLine line && errors.Count = 0 then
+                        let occupied = occupied |> Option.get
+                        let mutable occupiedCount = 0
+                        let mutable duplicateCount = 0
+                        let mutable firstDuplicate = None
+                        let mutable offGridCount = 0
+                        let mutable firstOffGrid = None
+                        let xTolerance = max 1e-12 (abs dx * 1e-9)
+                        let yTolerance = max 1e-12 (abs dy * 1e-9)
+
+                        for lineIndex,line in File.ReadLines(filename) |> Seq.indexed do
+                            if isDataLine line then
                                 let columns =
                                     line.Split(
                                         separator,
@@ -364,19 +378,57 @@ namespace Aqualis
                                         xIndex < 0 || xIndex >= nx ||
                                         yIndex < 0 || yIndex >= ny
                                     then
-                                        addError "データ座標が配列範囲外です"
+                                        addError $"データ座標が配列範囲外です: 行={lineIndex + 1}, x={x}, y={y}"
                                     else
-                                        let index = nx * yIndex + xIndex
-                                        if isCPXdata then
-                                            data[2 * index] <- real
-                                            data[2 * index + 1] <- imag
+                                        let expectedX = xmin + float xIndex * dx
+                                        let expectedY = ymin + float yIndex * dy
+                                        if
+                                            abs (x - expectedX) > xTolerance ||
+                                            abs (y - expectedY) > yTolerance
+                                        then
+                                            offGridCount <- offGridCount + 1
+                                            if firstOffGrid.IsNone then
+                                                firstOffGrid <- Some(lineIndex + 1, x, y)
                                         else
-                                            data[index] <- real
+                                            let index = nx * yIndex + xIndex
+                                            if occupied[index] then
+                                                duplicateCount <- duplicateCount + 1
+                                                if firstDuplicate.IsNone then
+                                                    firstDuplicate <- Some(lineIndex + 1, x, y)
+                                            else
+                                                occupied[index] <- true
+                                                occupiedCount <- occupiedCount + 1
+                                                if isCPXdata then
+                                                    data[2 * index] <- real
+                                                    data[2 * index + 1] <- imag
+                                                else
+                                                    data[index] <- real
                                 |_ ->
                                     ()
 
+                        match firstDuplicate with
+                        |Some(lineNumber,x,y) ->
+                            addError $"格子点が重複しています: 件数={duplicateCount}, 最初の行={lineNumber}, x={x}, y={y}"
+                        |None ->
+                            ()
+
+                        match firstOffGrid with
+                        |Some(lineNumber,x,y) ->
+                            addError $"等間隔格子上にない座標があります: 件数={offGridCount}, 最初の行={lineNumber}, x={x}, y={y}"
+                        |None ->
+                            ()
+
+                        let missingCount = gridPointCount - occupiedCount
+                        if missingCount > 0 then
+                            addError $"格子点が不足しています: 必要={gridPointCount}, 読込済み={occupiedCount}, 欠損={missingCount}"
+
                         isDataLoaded <- errors.Count = 0
 
+            if errors.Count > 0 then
+                isDataLoaded <- false
+                data <- [||]
+                nx <- 0
+                ny <- 0
             finishErrors()
                         
         /// <summary>

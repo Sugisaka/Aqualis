@@ -91,6 +91,130 @@ module Plot2dTests =
         Assert.Equal(2, plot.Ny)
 
     [<Fact>]
+    let ``unordered complete grid data is accepted`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "unordered-grid.dat")
+        File.WriteAllLines(
+            source,
+            [|
+                "1 1 4"
+                "0 0 1"
+                "1 0 2"
+                "0 1 3"
+            |])
+
+        let plot = plot2d()
+        plot.FileRead(source, 1, 2, 3, -1)
+
+        Assert.Equal("", plot.Error)
+        Assert.Equal(2, plot.Nx)
+        Assert.Equal(2, plot.Ny)
+
+    [<Fact>]
+    let ``missing real grid point is rejected and partial data is discarded`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "missing-grid.dat")
+        File.WriteAllLines(
+            source,
+            [|
+                "0 0 1"
+                "1 0 2"
+                "0 1 3"
+            |])
+
+        let plot = plot2d()
+        plot.FileRead(source, 1, 2, 3, -1)
+
+        Assert.Contains("格子点が不足しています", plot.Error)
+        Assert.Equal(0, plot.Nx)
+        Assert.Equal(0, plot.Ny)
+
+    [<Fact>]
+    let ``missing complex grid point is rejected`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "missing-complex-grid.csv")
+        File.WriteAllLines(
+            source,
+            [|
+                "0,0,1,2"
+                "1,0,3,4"
+                "0,1,5,6"
+            |])
+
+        let plot = plot2d()
+        plot.FileRead(source, 1, 2, 3, 4)
+
+        Assert.Contains("格子点が不足しています", plot.Error)
+        Assert.Equal(0, plot.Nx)
+        Assert.Equal(0, plot.Ny)
+
+    [<Fact>]
+    let ``duplicate point in an otherwise complete grid is rejected`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "duplicate-grid.dat")
+        File.WriteAllLines(
+            source,
+            [|
+                "0 0 1"
+                "1 0 2"
+                "0 1 3"
+                "1 1 4"
+                "1 1 5"
+            |])
+
+        let plot = plot2d()
+        plot.FileRead(source, 1, 2, 3, -1)
+
+        Assert.Contains("格子点が重複しています", plot.Error)
+        Assert.DoesNotContain("格子点が不足しています", plot.Error)
+        Assert.Equal(0, plot.Nx)
+        Assert.Equal(0, plot.Ny)
+
+    [<Fact>]
+    let ``duplicate and missing grid points cannot cancel each other`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "duplicate-and-missing-grid.dat")
+        File.WriteAllLines(
+            source,
+            [|
+                "0 0 1"
+                "1 0 2"
+                "0 1 3"
+                "0 1 4"
+            |])
+
+        let plot = plot2d()
+        plot.FileRead(source, 1, 2, 3, -1)
+
+        Assert.Contains("格子点が重複しています", plot.Error)
+        Assert.Contains("格子点が不足しています", plot.Error)
+        Assert.Contains("最初の行=4", plot.Error)
+        Assert.Equal(0, plot.Nx)
+        Assert.Equal(0, plot.Ny)
+
+    [<Fact>]
+    let ``coordinates outside the inferred regular grid are rejected`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "off-grid.dat")
+        File.WriteAllLines(
+            source,
+            [|
+                "0 0 1"
+                "1 0 2"
+                "2.1 0 3"
+                "0 1 4"
+                "1 1 5"
+                "2.1 1 6"
+            |])
+
+        let plot = plot2d()
+        plot.FileRead(source, 1, 2, 3, -1)
+
+        Assert.Contains("等間隔格子上にない座標があります", plot.Error)
+        Assert.Equal(0, plot.Nx)
+        Assert.Equal(0, plot.Ny)
+
+    [<Fact>]
     let ``invalid numeric data is reported without throwing`` () =
         use output = new TemporaryDirectory()
         let source = Path.Combine(output.Path, "invalid-grid.dat")
