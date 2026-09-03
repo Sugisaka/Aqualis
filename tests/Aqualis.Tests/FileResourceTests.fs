@@ -140,6 +140,20 @@ module FileResourceTests =
         assertUnlocked path
 
     [<Fact>]
+    let ``SVG generation preserves non-square canvas dimensions`` () =
+        use output = new TemporaryDirectory()
+        let path = Path.Combine(output.Path, "non-square.svg")
+
+        svgfile.make path (320.0, 180.0) 1.0 ignore
+
+        let generated = File.ReadAllText(path)
+        Assert.Contains("viewBox=\"0 0 320.000 180.000\"", generated)
+        Assert.Contains(
+            "enable-background:new 0 0 320.000 180.000;",
+            generated)
+        Assert.DoesNotContain("0 0 320.000 320.000", generated)
+
+    [<Fact>]
     let ``SVG generators remove temporary files after an exception`` () =
         use output = new TemporaryDirectory()
         let svgPath = Path.Combine(output.Path, "image.svg")

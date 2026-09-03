@@ -30,7 +30,7 @@ type ContextGenSvg internal (context:Aqualis) =
     member this.headerClose (wr:exprString->unit) =
         wr <| st "</svg>"
     member this.header (cvx:double,cvy:double) = fun (wr:exprString->unit) a code ->
-        this.headerOpen(cvx,cvx,wr)
+        this.headerOpen(cvx,cvy,wr)
         code a
         this.headerClose wr
 
