@@ -8,6 +8,7 @@ namespace Aqualis
 
 open System
 open System.IO
+open System.Text.Json
 
 type AnimationType =
     |Loop of int*int
@@ -304,11 +305,8 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
     /// </summary>
     member this.writeAudioList() =
         context.switchJSMain <| fun ctx ->
-            let audioFiles = context.AudioFiles
-            ctx.writein "const audioList = ["
-            for i in 0..audioFiles.Length-1 do
-                ctx.writein ("    \""+audioFiles[i] + "\"" + if i<audioFiles.Length-1 then "," else "")
-            ctx.writein "];"
+            let audioFilesJson = JsonSerializer.Serialize(context.AudioFiles)
+            ctx.writein ("const audioList = " + audioFilesJson + ";")
     /// <summary>
     /// キャラクター表示を制御するJavaScriptコードの生成
     /// </summary>
@@ -355,6 +353,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
     member this.jsDrawNext(audioDir:string) =
         context.switchJSMain <| fun ctx ->
             let animationCount = context.AnimationCount
+            let audioDirectoryLiteral = JsonSerializer.Serialize(audioDir + "/")
             ctx.writein "function drawNext()"
             ctx.writein "{"
             ctx.writein "    resetAll();"
@@ -402,7 +401,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
             ctx.writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
             ctx.writein "        {"
-            ctx.writein ("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
+            ctx.writein ("            audioPlayer.src = " + audioDirectoryLiteral + " + audioList[pagecount-1];")
             ctx.writein "            audioPlayer.play();"
             ctx.writein "        }"
             ctx.writein "        autoAnimationMap['page'+pagecount]();"
@@ -413,6 +412,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
     /// </summary>
     member this.jsDrawPrev(audioDir:string) =
         context.switchJSMain <| fun ctx ->
+            let audioDirectoryLiteral = JsonSerializer.Serialize(audioDir + "/")
             ctx.writein "function drawPrev()"
             ctx.writein "{"
             ctx.writein "    resetAll();"
@@ -459,7 +459,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        const audioPlayer = document.getElementById(\"audioPlayer\");"
             ctx.writein "        if(audioList[pagecount-1] != \"\" && swa.checked)"
             ctx.writein "        {"
-            ctx.writein ("            audioPlayer.src = \""+audioDir+"/\" + audioList[pagecount-1];")
+            ctx.writein ("            audioPlayer.src = " + audioDirectoryLiteral + " + audioList[pagecount-1];")
             ctx.writein "            audioPlayer.play();"
             ctx.writein "        }"
             ctx.writein "    }"

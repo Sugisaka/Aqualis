@@ -3,6 +3,7 @@ namespace Aqualis.Tests
 open System
 open System.IO
 open System.Text.RegularExpressions
+open System.Text.Json
 open Xunit
 open Aqualis
 
@@ -258,6 +259,33 @@ module WebGenerationStateTests =
         Assert.Equal(2, Regex.Matches(generated, Regex.Escape(firstUrl)).Count)
         Assert.Equal(1, Regex.Matches(generated, Regex.Escape(secondUrl)).Count)
         Assert.False(File.Exists(Path.Combine(contentsDirectory, "shared-3.png")))
+
+    [<Fact>]
+    let ``audio file names are emitted as safe JavaScript strings`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "audio-escaping"
+        let audioFile = "voice\"\\\r\n</script><script>alert(1)</script>.wav"
+
+        fixedPage output.Path projectName "Audio" 640 480 None <| fun context ->
+            context.page
+                []
+                ({ Subtitle = ""
+                   Script = ""
+                   AudioFileNumber = None
+                   AudioSourceNumber = None }, Some audioFile, "#000000")
+                ignore
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, projectName + ".html"))
+        let prefix = "const audioList = "
+        let audioListLine =
+            generated.Split([| "\r\n"; "\n" |], StringSplitOptions.None)
+            |> Array.find (fun line -> line.StartsWith(prefix, StringComparison.Ordinal))
+        let audioListJson =
+            audioListLine.Substring(prefix.Length).TrimEnd(';')
+        let decoded = JsonSerializer.Deserialize<string array>(audioListJson)
+
+        Assert.Equal<string>(audioFile, Assert.Single(decoded))
+        Assert.DoesNotContain("</script><script>alert(1)</script>", generated)
 
     [<Fact>]
     let ``missing web media asset stops generation`` () =
