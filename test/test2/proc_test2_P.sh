@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 test2.py
+exec python3 -- test2.py

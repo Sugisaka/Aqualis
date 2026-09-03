@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 test5bw.py
+exec python3 -- test5bw.py

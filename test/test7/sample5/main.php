@@ -16,7 +16,7 @@
 <h1>
 ログインページサンプル
 </h1>
-<form method = "post" action = "main.php" >
+<form method="post" action="main.php" >
 <?php if(isset($_POST["login"])): ?>
 <?php   $mdata = json_decode(file_get_contents("members.json"),True); ?>
 <?php   $loginState = 0; ?>
@@ -31,32 +31,32 @@
 <?php   if($loginState == 0): ?>
     ユーザーが存在しません<br>
     ID:
-    <input type = <?php echo "\""."text" . "\""; ?> name = <?php echo "\""."userid" . "\""; ?> value = <?php echo "\"".$_POST["userid"] . "\""; ?>  />
+    <input type="<?php echo htmlspecialchars((string)("text"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userid"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)($_POST["userid"]), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
     パスワード:
-    <input type = <?php echo "\""."password" . "\""; ?> name = <?php echo "\""."userpw" . "\""; ?> value = <?php echo "\"".$_POST["userpw"] . "\""; ?>  />
-    <input type = <?php echo "\""."submit" . "\""; ?> name = <?php echo "\""."login" . "\""; ?> value = <?php echo "\""."ログイン" . "\""; ?>  />
+    <input type="<?php echo htmlspecialchars((string)("password"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userpw"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)($_POST["userpw"]), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
+    <input type="<?php echo htmlspecialchars((string)("submit"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("login"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)("ログイン"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
 <?php   elseif($loginState == 1): ?>
     パスワードが誤りです<br>
     ID:
-    <input type = <?php echo "\""."text" . "\""; ?> name = <?php echo "\""."userid" . "\""; ?> value = <?php echo "\"".$_POST["userid"] . "\""; ?>  />
+    <input type="<?php echo htmlspecialchars((string)("text"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userid"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)($_POST["userid"]), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
     パスワード:
-    <input type = <?php echo "\""."password" . "\""; ?> name = <?php echo "\""."userpw" . "\""; ?> value = <?php echo "\"".$_POST["userpw"] . "\""; ?>  />
-    <input type = <?php echo "\""."submit" . "\""; ?> name = <?php echo "\""."login" . "\""; ?> value = <?php echo "\""."ログイン" . "\""; ?>  />
+    <input type="<?php echo htmlspecialchars((string)("password"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userpw"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)($_POST["userpw"]), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
+    <input type="<?php echo htmlspecialchars((string)("submit"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("login"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)("ログイン"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
 <?php   else: ?>
     ID:
-    <input type = <?php echo "\""."text" . "\""; ?> name = <?php echo "\""."userid" . "\""; ?> readonly = <?php echo "\""."readonly" . "\""; ?> value = <?php echo "\"".$_POST["userid"] . "\""; ?>  />
+    <input type="<?php echo htmlspecialchars((string)("text"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userid"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" readonly="<?php echo htmlspecialchars((string)("readonly"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)($_POST["userid"]), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
     パスワード:
-    <input type = <?php echo "\""."password" . "\""; ?> name = <?php echo "\""."userpw" . "\""; ?> readonly = <?php echo "\""."readonly" . "\""; ?> value = <?php echo "\"".$_POST["userpw"] . "\""; ?>  />
-    <input type = <?php echo "\""."submit" . "\""; ?> name = <?php echo "\""."login" . "\""; ?> value = <?php echo "\""."ログイン" . "\""; ?> disabled = <?php echo "\""."disabled" . "\""; ?>  />
+    <input type="<?php echo htmlspecialchars((string)("password"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userpw"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" readonly="<?php echo htmlspecialchars((string)("readonly"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)($_POST["userpw"]), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
+    <input type="<?php echo htmlspecialchars((string)("submit"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("login"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)("ログイン"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" disabled="<?php echo htmlspecialchars((string)("disabled"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
     <br>
     ログイン後のコンテンツ
 <?php   endif; ?>
 <?php else: ?>
   ID:
-  <input type = <?php echo "\""."text" . "\""; ?> name = <?php echo "\""."userid" . "\""; ?> value = <?php echo "\""."" . "\""; ?>  />
+  <input type="<?php echo htmlspecialchars((string)("text"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userid"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)(""), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
   パスワード:
-  <input type = <?php echo "\""."password" . "\""; ?> name = <?php echo "\""."userpw" . "\""; ?>  />
-  <input type = <?php echo "\""."submit" . "\""; ?> name = <?php echo "\""."login" . "\""; ?> value = <?php echo "\""."ログイン" . "\""; ?>  />
+  <input type="<?php echo htmlspecialchars((string)("password"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("userpw"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
+  <input type="<?php echo htmlspecialchars((string)("submit"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" name="<?php echo htmlspecialchars((string)("login"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>" value="<?php echo htmlspecialchars((string)("ログイン"), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"  />
 <?php endif; ?>
 </form>
 </body>

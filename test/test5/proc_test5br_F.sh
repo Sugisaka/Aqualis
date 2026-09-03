@@ -1,4 +1,10 @@
 #!/bin/bash
 
 /usr/bin/gfortran -ffree-line-length-none test5br.f90 -o test5br.exe
-./test5br.exe
+aqualis_compile_status=$?
+if [ "$aqualis_compile_status" -ne 0 ]; then
+  printf '%s\n' 'Aqualis: compilation failed.' >&2
+  exit "$aqualis_compile_status"
+fi
+
+exec ./test5br.exe
