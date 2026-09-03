@@ -231,6 +231,35 @@ module WebGenerationStateTests =
             Assert.DoesNotContain(output.Path, source))
 
     [<Fact>]
+    let ``same-named web assets receive distinct URLs without being overwritten`` () =
+        use output = new TemporaryDirectory()
+        let firstDirectory = Path.Combine(output.Path, "first")
+        let secondDirectory = Path.Combine(output.Path, "second")
+        Directory.CreateDirectory(firstDirectory) |> ignore
+        Directory.CreateDirectory(secondDirectory) |> ignore
+        let firstPath = Path.Combine(firstDirectory, "shared.png")
+        let secondPath = Path.Combine(secondDirectory, "shared.png")
+        File.WriteAllText(firstPath, "first image")
+        File.WriteAllText(secondPath, "second image")
+
+        let projectName = "asset-collision"
+        htmlpresentation output.Path projectName "Assets" None (None, None) false <| fun context ->
+            context.image firstPath
+            context.image firstPath
+            context.image secondPath
+
+        let contentsDirectory = Path.Combine(output.Path, "contents_" + projectName)
+        let generated = File.ReadAllText(Path.Combine(output.Path, projectName + ".html"))
+        let firstUrl = "contents_asset-collision/shared.png"
+        let secondUrl = "contents_asset-collision/shared-2.png"
+
+        Assert.Equal("first image", File.ReadAllText(Path.Combine(contentsDirectory, "shared.png")))
+        Assert.Equal("second image", File.ReadAllText(Path.Combine(contentsDirectory, "shared-2.png")))
+        Assert.Equal(2, Regex.Matches(generated, Regex.Escape(firstUrl)).Count)
+        Assert.Equal(1, Regex.Matches(generated, Regex.Escape(secondUrl)).Count)
+        Assert.False(File.Exists(Path.Combine(contentsDirectory, "shared-3.png")))
+
+    [<Fact>]
     let ``missing web media asset stops generation`` () =
         use output = new TemporaryDirectory()
         let missingPath = Path.Combine(output.Path, "missing.png")
