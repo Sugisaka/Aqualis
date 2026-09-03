@@ -178,6 +178,28 @@ module WebGenerationStateTests =
         Assert.Equal<string list>(["contentsID0"; "contentsID1"; "0"], secondValues)
 
     [<Fact>]
+    let ``web presentation emits one escaped title`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "title-project"
+        let title = "A&B </title><script>alert(1)</script>"
+
+        htmlpresentation output.Path projectName title None (None, None) false ignore
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, projectName + ".html"))
+        let openingTag = "<title>"
+        let closingTag = "</title>"
+        let titleStart = generated.IndexOf(openingTag, StringComparison.Ordinal) + openingTag.Length
+        let titleEnd = generated.IndexOf(closingTag, titleStart, StringComparison.Ordinal)
+        let generatedTitle = generated.Substring(titleStart, titleEnd - titleStart).Trim()
+
+        Assert.Equal(1, Regex.Matches(generated, Regex.Escape(openingTag)).Count)
+        Assert.Equal(
+            "A&amp;B &lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt;",
+            generatedTitle)
+        Assert.DoesNotContain("</title><script>alert(1)</script>", generated)
+        Assert.DoesNotContain("<title>" + projectName + "</title>", generated)
+
+    [<Fact>]
     let ``web media assets are copied and referenced by relative URLs`` () =
         use output = new TemporaryDirectory()
         let imagePath = Path.Combine(output.Path, "source image #1.png")

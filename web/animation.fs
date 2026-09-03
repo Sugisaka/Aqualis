@@ -1409,7 +1409,8 @@ module dochtml =
                 // head要素
                 ctx.html.tagb "head" <| fun () ->
                     // titleタグ
-                    ctx.writein ("<title>"+title+"</title>")
+                    ctx.html.tagb "title" <| fun () ->
+                        ctx.writein (HtmlEncoding.textContent title)
                     // metaタグ
                     ctx.writein "<meta charset=\"UTF-8\">"
                     //追加（5/29）viewportタブ
@@ -1418,9 +1419,6 @@ module dochtml =
                         ctx.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
                     |Some width ->
                         ctx.writein ("<meta name=\"viewport\" content=\"width=" + width.ToString() + "\">")
-                    // titleタグ
-                    ctx.html.tagb "title" <| fun () ->
-                        ctx.writein filename
                     // MathJax
                     ctx.html.tagb (
                         "script",

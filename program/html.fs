@@ -12,6 +12,14 @@ namespace Aqualis
 
     [<RequireQualifiedAccess>]
     module internal HtmlEncoding =
+        let textContent (value:string) =
+            if isNull value then nullArg (nameof value)
+
+            value
+                .Replace("&", "&amp;")
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;")
+
         let attributeValue (value:string) =
             if isNull value then nullArg (nameof value)
 
