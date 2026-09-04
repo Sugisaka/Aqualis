@@ -32,6 +32,13 @@ module NumericFormattingTests =
             Assert.Equal("1.5", InvariantFormat.number 1.5)
 
     [<Fact>]
+    let ``Python boolean literals use native capitalization`` () =
+        use target = Aqualis.BlankWriter Python
+
+        Assert.Equal("True", True.evalPy target)
+        Assert.Equal("False", False.evalPy target)
+
+    [<Fact>]
     let ``complex expression strings preserve real and imaginary parts`` () =
         let value = Cpx(1.25, -2.5)
         let expression = Add(Zt, Cpx(1.0, 2.0), Cpx(3.0, 4.0))

@@ -142,8 +142,8 @@ namespace Aqualis
                 
             member this.evalPy(c:Aqualis) =
                 match this.simp with
-                |False -> "false"
-                |True -> "true"
+                |False -> "False"
+                |True -> "True"
                 |Eq(x,y) -> x.evalPy c + " == " + y.evalPy c
                 |NEq(x,y) -> x.evalPy c + " != " + y.evalPy c
                 |Greater(x,y) -> x.evalPy c + " > " + y.evalPy c
