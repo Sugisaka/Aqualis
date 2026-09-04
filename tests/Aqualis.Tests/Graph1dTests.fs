@@ -2,6 +2,7 @@ namespace Aqualis.Tests
 
 open System
 open System.IO
+open System.Text.RegularExpressions
 open Xunit
 open Aqualis
 
@@ -151,6 +152,105 @@ module Graph1dTests =
         assertPoint 1.0 0.5 segments.[0].[1]
         assertPoint 3.0 0.5 segments.[1].[0]
         assertPoint 4.0 0.75 segments.[1].[1]
+
+    [<Fact>]
+    let ``data polyline does not connect across an outside excursion`` () =
+        let segments =
+            graph1d.clipPolylineSegments
+                (0.0,1.0)
+                (0.0,1.0)
+                [|(0.25,0.5); (2.0,0.5); (0.75,0.5)|]
+
+        Assert.Equal(2, segments.Length)
+        assertPoint 0.25 0.5 segments.[0].[0]
+        assertPoint 1.0 0.5 segments.[0].[1]
+        assertPoint 1.0 0.5 segments.[1].[0]
+        assertPoint 0.75 0.5 segments.[1].[1]
+
+    [<Fact>]
+    let ``data segment with both endpoints outside is clipped through the rectangle`` () =
+        let segments =
+            graph1d.clipPolylineSegments
+                (0.0,1.0)
+                (0.0,1.0)
+                [|(-1.0,0.5); (2.0,0.5)|]
+
+        Assert.Single(segments) |> ignore
+        Assert.Equal(2, segments.[0].Length)
+        assertPoint 0.0 0.5 segments.[0].[0]
+        assertPoint 1.0 0.5 segments.[0].[1]
+
+    [<Fact>]
+    let ``data segment clips correctly in reverse direction`` () =
+        let segments =
+            graph1d.clipPolylineSegments
+                (0.0,1.0)
+                (0.0,1.0)
+                [|(2.0,0.25); (-1.0,0.75)|]
+
+        Assert.Single(segments) |> ignore
+        assertPoint 1.0 (5.0/12.0) segments.[0].[0]
+        assertPoint 0.0 (7.0/12.0) segments.[0].[1]
+
+    [<Fact>]
+    let ``outside and nonfinite data segments are omitted`` () =
+        let outside =
+            graph1d.clipPolylineSegments
+                (0.0,1.0)
+                (0.0,1.0)
+                [|(-2.0,2.0); (-1.0,3.0)|]
+        let split =
+            graph1d.clipPolylineSegments
+                (0.0,1.0)
+                (0.0,1.0)
+                [|
+                    (0.0,0.25)
+                    (0.5,0.5)
+                    (Double.NaN,0.5)
+                    (0.5,0.5)
+                    (1.0,0.75)
+                |]
+
+        Assert.Empty(outside)
+        Assert.Equal(2, split.Length)
+        assertPoint 0.0 0.25 split.[0].[0]
+        assertPoint 0.5 0.5 split.[0].[1]
+        assertPoint 0.5 0.5 split.[1].[0]
+        assertPoint 1.0 0.75 split.[1].[1]
+
+    [<Fact>]
+    let ``data file rendering emits separate paths around an outside excursion`` () =
+        use output = new TemporaryDirectory()
+        let dataFileName = "clipped-lines.dat"
+        let graphFileName = "clipped-lines.svg"
+        File.WriteAllLines(
+            Path.Combine(output.Path, dataFileName),
+            [|"0.25 0.5"; "2.0 0.5"; "0.75 0.5"|])
+
+        graph1d.makeGraph output.Path graphFileName (graph1d.A4PTwoColSingle 1) <| fun addGraph ->
+            addGraph
+                (1, 1)
+                None
+                {
+                    Xaxis = {Scale=Linear; Range=MinMax(0.0,1.0); NumFormat=None}
+                    Yaxis = {Scale=Linear; Range=MinMax(0.0,1.0); NumFormat=None}
+                    Xlabel = "x"
+                    Ylabel = "y"
+                }
+                [
+                    Datafile {
+                        Style = Lines {Style=color.stroke.magenta 0.5}
+                        FileName = dataFileName
+                        Legend = None
+                        Xcolumn = fun data -> data 1
+                        Ycolumn = fun data -> data 2
+                    }
+                ]
+
+        let svg = File.ReadAllText(Path.Combine(output.Path, graphFileName))
+        Assert.Equal(2, Regex.Matches(svg, "stroke:rgb\\(255,0,255\\)").Count)
+        Assert.DoesNotContain("nan", svg.ToLowerInvariant())
+        Assert.DoesNotContain("infinity", svg.ToLowerInvariant())
 
     [<Fact>]
     let ``function plot rejects fewer than two samples`` () =

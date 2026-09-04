@@ -344,6 +344,83 @@ type graph1d =
                     flush()
         flush()
         List.ofSeq completed
+
+    static member internal clipPolylineSegments
+        (xr1:double,xr2:double)
+        (yr1:double,yr2:double)
+        (points:(double*double) array) =
+        if
+            not (Double.IsFinite xr1) || not (Double.IsFinite xr2) || xr1 >= xr2 ||
+            not (Double.IsFinite yr1) || not (Double.IsFinite yr2) || yr1 >= yr2
+        then
+            invalidArg "range" "The clipping rectangle must be finite and strictly increasing."
+
+        let finitePoint (x,y) = Double.IsFinite x && Double.IsFinite y
+        let inside (x,y) =
+            finitePoint (x,y) && xr1 <= x && x <= xr2 && yr1 <= y && y <= yr2
+
+        let clipSegment ((x0,y0) as p0) ((x1,y1) as p1) =
+            if not (finitePoint p0) || not (finitePoint p1) then
+                None
+            else
+                let dx = x1-x0
+                let dy = y1-y0
+                let mutable enterRatio = 0.0
+                let mutable exitRatio = 1.0
+                let mutable visible = true
+
+                let updateInterval boundaryDirection boundaryDistance =
+                    if boundaryDirection = 0.0 then
+                        if boundaryDistance < 0.0 then
+                            visible <- false
+                    else
+                        let ratio = boundaryDistance/boundaryDirection
+                        if boundaryDirection < 0.0 then
+                            enterRatio <- max enterRatio ratio
+                        else
+                            exitRatio <- min exitRatio ratio
+                        if enterRatio > exitRatio then
+                            visible <- false
+
+                updateInterval (-dx) (x0-xr1)
+                updateInterval dx (xr2-x0)
+                updateInterval (-dy) (y0-yr1)
+                updateInterval dy (yr2-y0)
+
+                if not visible || enterRatio >= exitRatio then
+                    None
+                else
+                    let pointAt ratio =
+                        if ratio = 0.0 then p0
+                        elif ratio = 1.0 then p1
+                        else x0+ratio*dx,y0+ratio*dy
+                    Some(pointAt enterRatio,pointAt exitRatio)
+
+        let completed = ResizeArray<(double*double) list>()
+        let current = ResizeArray<double*double>()
+        let flush() =
+            if current.Count >= 2 then
+                completed.Add(List.ofSeq current)
+            current.Clear()
+
+        for index in 0..points.Length-2 do
+            let p0 = points[index]
+            let p1 = points[index+1]
+            match clipSegment p0 p1 with
+            |None ->
+                flush()
+            |Some(segmentStart,segmentEnd) ->
+                if current.Count = 0 then
+                    current.Add segmentStart
+                elif current[current.Count-1] <> segmentStart then
+                    flush()
+                    current.Add segmentStart
+                if current[current.Count-1] <> segmentEnd then
+                    current.Add segmentEnd
+                if not (inside p1) then
+                    flush()
+        flush()
+        List.ofSeq completed
         
     ///<summary>グラフ生成</summary>
     /// <param name="outputdir">出力先ディレクトリ</param>
@@ -598,53 +675,36 @@ type graph1d =
                             let inside (x,y) = (xr1<=x && x<=xr2 && yr1<=y && y<=yr2)
                             // 線のプロット
                             (fun code -> match s.Style with |Lines l -> code l |LinesPoints lp -> code lp.Lines |_ -> ()) <| fun l ->
-                                /// プロット線(x1,y1)→(x2,y2)の間にあるグラフ境界線都の交点を計算
-                                let middle (x1,y1) (x2,y2) =
-                                    if x1<=xr1 && xr1<=x2 then
-                                        xr1,y1+(y2-y1)/(x2-x1)*(xr1-x1)
-                                    elif x1<=xr2 && xr2<=x2 then
-                                        xr2,y1+(y2-y1)/(x2-x1)*(xr2-x1)
-                                    elif y1<=yr1 && yr1<=y2 then
-                                        x1+(x2-x1)/(y2-y1)*(yr1-y1),yr1
-                                    else
-                                        x1+(x2-x1)/(y2-y1)*(yr2-y1),yr2
-                                let rec plot (i:int) (lst:list<double*double>) (xy0:(double*double) option) =
-                                    match i with
-                                    // スキャン終了,未プロットデータなし
-                                    |_ when i=xdata.Length && lst.Length=0 ->
-                                        ()
-                                    // スキャン終了,未プロットデータあり
-                                    |_ when i=xdata.Length ->
-                                        // 10000点ずつ分けてプロット（ノード数が多すぎる折れ線はIllustratorで表示エラー）
-                                        let rec polplot (lstA:list<double*double>) lstB =
-                                            match lstB with
-                                            |[] ->
-                                                sv.polygon(lstA, color.fill.none, l.Style)
-                                            |(x,y)::_ when lstA.Length=9999 ->
-                                                sv.polygon(lstA@[mmtopt <| fx x,mmtopt <| fy y], color.fill.none, l.Style)
-                                                polplot [] lstB
-                                            |(x,y)::lst0 ->
-                                                polplot (lstA@[mmtopt <| fx x,mmtopt <| fy y]) lst0
-                                        polplot [] lst
-                                    |_ ->
-                                        let x = xdata[i]
-                                        let y = ydata[i]
-                                        match xy0 with
-                                            // 前のプロット点は範囲外で現在のプロット点は範囲内
-                                            |Some(x0,y0) when not(inside(x0,y0)) && inside(x,y)  ->
-                                                let x1,y1 = middle (x0,y0) (x,y)
-                                                plot (i+1) (lst@[x1,y1;x,y]) (Some(x,y))
-                                            // 前のプロット点は範囲内で現在のプロット点は範囲外
-                                            |Some(x0,y0) when inside(x0,y0) && not(inside(x,y))  ->
-                                                let x1,y1 = middle (x0,y0) (x,y)
-                                                plot (i+1) (lst@[(x1,y1)]) (Some(x,y))
-                                            // 現在のプロット点は範囲内
-                                            |_ when inside(x,y) ->
-                                                plot (i+1) (lst@[(x,y)]) (Some(x,y))
-                                            // 現在のプロット点は範囲外
-                                            |_ ->
-                                                plot (i+1) lst (Some(x,y))
-                                plot 0 [] None
+                                let plotPoints =
+                                    Array.map2 (fun x y -> fx x,fy y) xdata ydata
+                                let plotX1,plotX2 = fx xr1,fx xr2
+                                let plotY1,plotY2 = fy yr1,fy yr2
+                                let segments =
+                                    graph1d.clipPolylineSegments
+                                        (min plotX1 plotX2,max plotX1 plotX2)
+                                        (min plotY1 plotY2,max plotY1 plotY2)
+                                        plotPoints
+
+                                let drawChunk (chunk:ResizeArray<double*double>) =
+                                    if chunk.Count >= 2 then
+                                        sv.polygon(
+                                            chunk
+                                            |> Seq.map (fun (x,y) -> mmtopt x,mmtopt y)
+                                            |> List.ofSeq,
+                                            color.fill.none,
+                                            l.Style)
+
+                                // 10000点ずつ分けてプロット（ノード数が多すぎる折れ線はIllustratorで表示エラー）
+                                for segment in segments do
+                                    let chunk = ResizeArray<double*double>()
+                                    for point in segment do
+                                        if chunk.Count = 10000 then
+                                            drawChunk chunk
+                                            let lastPoint = chunk[chunk.Count-1]
+                                            chunk.Clear()
+                                            chunk.Add lastPoint
+                                        chunk.Add point
+                                    drawChunk chunk
                             // 点のプロット
                             (fun code -> match s.Style with |Points p -> code p |LinesPoints lp -> code lp.Points |_ -> ()) <| fun p ->
                                 sv.group <| fun () ->
