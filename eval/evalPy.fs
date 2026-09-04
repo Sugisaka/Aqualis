@@ -190,7 +190,7 @@ namespace Aqualis
                     |(Add _|Sub _),_ -> "(" + x.evalPy c + ")/" + y.evalPy c
                     |_,(Add _|Sub _|Mul _|Div _) -> x.evalPy c + "/(" + y.evalPy c + ")"
                     |_ -> x.evalPy c + "/" + y.evalPy c
-                |Mod(_,x,y) -> "divmod(" + x.evalPy c + "," + y.evalPy c + ")"
+                |Mod(_,x,y) -> "(" + x.evalPy c + ") % (" + y.evalPy c + ")"
                 |Pow(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _|Mul _|Div _),(Add _|Sub _|Mul _|Div _) -> 

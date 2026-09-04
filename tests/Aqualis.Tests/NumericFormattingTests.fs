@@ -52,6 +52,35 @@ module NumericFormattingTests =
             Assert.Fail($"Expected a complex literal, but got {other}.")
 
     [<Fact>]
+    let ``Python modulo renders a scalar remainder with grouped operands`` () =
+        use target = Aqualis.BlankWriter Python
+        let left = Add(It 4, Var(It 4, "left", NaN), Var(It 4, "right", NaN))
+        let right = Sub(It 4, Var(It 4, "modulus", NaN), Var(It 4, "offset", NaN))
+
+        let simple = Mod(It 4, Var(It 4, "value", NaN), Int 2).evalPy target
+        let compound = Mod(It 4, left, right).evalPy target
+
+        Assert.Equal("(value) % (2)", simple)
+        Assert.Equal("(left+right) % (modulus-offset)", compound)
+        Assert.DoesNotContain("divmod", simple)
+        Assert.DoesNotContain("divmod", compound)
+
+    [<Fact>]
+    let ``Python FFT uses scalar modulo for its even-size branch`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [Python] output.Path "python-fft-modulo" "1.0" <| fun context ->
+            context.ch.z1 4 <| fun input ->
+                context.ch.z1 4 <| fun transformed ->
+                    context.fft1.fft("plan", input, transformed)
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "python-fft-modulo.py"))
+
+        Assert.Contains(") % (2) == 0", generated)
+        Assert.DoesNotContain("divmod", generated)
+
+    [<Fact>]
     let ``complex literals render without recursively simplifying their expansion`` () =
         use output = new TemporaryDirectory()
         let value = Cpx(1.0, 2.0)
