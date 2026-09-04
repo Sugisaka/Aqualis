@@ -39,62 +39,67 @@ type ContextOptimization internal (context:Aqualis) =
             context.iter.num df.size1 <| fun i ->
                 norm_df <== norm_df + df.[i]*df.[i]
             norm_df <== asm.sqrt(norm_df)
-            xa.foreach <| fun i -> xa.[i] <== x0_.[i]
-            f fa xa
-            xb.foreach <| fun i -> xb.[i] <== x0_.[i] + dd * df.[i]/norm_df
-            f fb xb
-            x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
-            f f1 x1
-            x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
-            f f2 x2
-            counter.clear()
-            expansionCounter.clear()
-            expansionLimitReached.clear()
-            fa_ <== fa
-            context.iter.whiledo (And [counter.<m; expansionLimitReached.=0]) <| fun _ ->
-                context.br.branch <| fun b ->
-                    b.IF (fa .> f1 .> f2 .> fb) <| fun () ->
-                        context.br.if2 (expansionCounter.<maxBracketExpansions)
-                        <| fun () ->
-                            expansionCounter.inc()
-                            //xa: そのまま
+            context.br.if2 (norm_df.>0.0)
+            <| fun () ->
+                xa.foreach <| fun i -> xa.[i] <== x0_.[i]
+                f fa xa
+                xb.foreach <| fun i -> xb.[i] <== x0_.[i] + dd * df.[i]/norm_df
+                f fb xb
+                x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
+                f f1 x1
+                x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
+                f f2 x2
+                counter.clear()
+                expansionCounter.clear()
+                expansionLimitReached.clear()
+                fa_ <== fa
+                context.iter.whiledo (And [counter.<m; expansionLimitReached.=0]) <| fun _ ->
+                    context.br.branch <| fun b ->
+                        b.IF (fa .> f1 .> f2 .> fb) <| fun () ->
+                            context.br.if2 (expansionCounter.<maxBracketExpansions)
+                            <| fun () ->
+                                expansionCounter.inc()
+                                //xa: そのまま
+                                x1 <== x2
+                                f1 <== f2
+                                x2 <== xb
+                                f2 <== fb
+                                //xb: 新規計算
+                                xb.foreach <| fun i -> xb.[i] <== xa.[i] + (x1.[i]-xa.[i])*(1.0+r)
+                                f fb xb
+                            <| fun () ->
+                                expansionLimitReached <== 1
+                        b.IF (And [f1.>f2; fa.>f2;]) <| fun () ->
+                            counter.inc()
+                            xa <== x1
+                            fa <== f1
                             x1 <== x2
                             f1 <== f2
-                            x2 <== xb
-                            f2 <== fb
-                            //xb: 新規計算
-                            xb.foreach <| fun i -> xb.[i] <== xa.[i] + (x1.[i]-xa.[i])*(1.0+r)
-                            f fb xb
-                        <| fun () ->
-                            expansionLimitReached <== 1
-                    b.IF (And [f1.>f2; fa.>f2;]) <| fun () ->
-                        counter.inc()
-                        xa <== x1
-                        fa <== f1
-                        x1 <== x2
-                        f1 <== f2
-                        //xb: そのまま
-                        //x2: 新規計算
-                        x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
-                        f f2 x2
-                    b.IF (Or [And [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
-                        counter.inc()
-                        //xa: そのまま
-                        xb <== x2
-                        fb <== f2
-                        x2 <== x1
-                        f2 <== f1
-                        //x1: 新規計算
-                        x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
-                        f f1 x1
-                    b.EL <| fun () ->
-                        context.print.s "error: findmin"
-            context.br.if2 (expansionLimitReached.=0)
+                            //xb: そのまま
+                            //x2: 新規計算
+                            x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
+                            f f2 x2
+                        b.IF (Or [And [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
+                            counter.inc()
+                            //xa: そのまま
+                            xb <== x2
+                            fb <== f2
+                            x2 <== x1
+                            f2 <== f1
+                            //x1: 新規計算
+                            x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
+                            f f1 x1
+                        b.EL <| fun () ->
+                            context.print.s "error: findmin"
+                context.br.if2 (expansionLimitReached.=0)
+                <| fun () ->
+                    xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])
+                <| fun () ->
+                    xx <== xb
+                    context.print.s "Aqualis: line-search bracket expansion limit reached."
             <| fun () ->
-                xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])
-            <| fun () ->
-                xx <== xb
-                context.print.s "Aqualis: line-search bracket expansion limit reached."
+                xx <== x0_
+                context.print.s "Aqualis: line-search direction is zero; initial point retained."
 
     /// 探索区間の拡張回数に既定の上限を用いて、直線上の極小値を探索します。
     member this.findmin (m:int) (x0_:double1,df:double1) (dd:double0) (f:double0->double1->unit) (xx:double1) =
