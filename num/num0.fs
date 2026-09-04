@@ -84,148 +84,51 @@ namespace Aqualis
         static member (++) (x:bool0,y:bool0) = exprString x ++ exprString y
 
         static member (++) (x:bool0,y:exprString) = exprString x ++ y
+
+        static member private appendComparison
+            (v1:bool0,rightExpr:expr,rightContext:Aqualis,makeComparison:(expr*expr)->expr) =
+            let result expression =
+                bool0(expression, Aqualis.merge v1.Context rightContext)
+            match v1.Expr with
+            |((Less(_,middle)
+              |LessEq(_,middle)
+              |Greater(_,middle)
+              |GreaterEq(_,middle)) as previous) ->
+                result (AND [previous; makeComparison(middle,rightExpr)])
+            |AND expressions ->
+                match List.tryLast expressions with
+                |Some (Less(_,middle)
+                      |LessEq(_,middle)
+                      |Greater(_,middle)
+                      |GreaterEq(_,middle)) ->
+                    result (AND (expressions @ [makeComparison(middle,rightExpr)]))
+                |_ ->
+                    result NaN
+            |_ ->
+                result NaN
+
         static member (.<) (v1:bool0,v2:int0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[Less(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,Less)
         static member (.<) (v1:bool0,v2:double0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);Less(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[Less(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,Less)
         static member (.<) (v1:bool0,v2:double) = v1 .< double0(Dbl v2)
         static member (.<) (v1:bool0,v2:int) = v1 .< int0(Int v2)
         static member (.<=) (v1:bool0,v2:int0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[LessEq(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,LessEq)
         static member (.<=) (v1:bool0,v2:double0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);LessEq(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[LessEq(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,LessEq)
         static member (.<=) (v1:bool0,v2:double) = v1 .<= double0(Dbl v2)
         static member (.<=) (v1:bool0,v2:int) = v1 .<= int0(Int v2)
         static member (.>) (v1:bool0,v2:int0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[Greater(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,Greater)
         static member (.>) (v1:bool0,v2:double0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);Greater(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[Greater(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,Greater)
         static member (.>) (v1:bool0,v2:double) = v1 .> double0(Dbl v2)
         static member (.>) (v1:bool0,v2:int) = v1 .> int0(Int v2)
         static member (.>=) (v1:bool0,v2:int0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[GreaterEq(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,GreaterEq)
         static member (.>=) (v1:bool0,v2:double0) =
-            let result expression = bool0(expression, Aqualis.merge v1.Context v2.Context)
-            match v1.Expr with
-            |Less(u1,u2) -> result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |LessEq(u1,u2) -> result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |Greater(u1,u2) ->result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |GreaterEq(u1,u2) ->result (AND[Less(u1,u2);GreaterEq(u2,v2.Expr)])
-            |AND lst ->
-                match lst with
-                |[] -> result NaN
-                |_ ->
-                    match lst[lst.Length-1] with
-                    |Less(_,u2) |LessEq(_,u2) |Greater(_,u2) |GreaterEq(_,u2) ->
-                        result (AND <| lst@[GreaterEq(u2,v2.Expr)])
-                    |_ -> result NaN
-            |_ ->
-                result NaN
+            bool0.appendComparison(v1,v2.Expr,v2.Context,GreaterEq)
         static member (.>=) (v1:bool0,v2:double) = v1 .>= double0(Dbl v2)
         static member (.>=) (v1:bool0,v2:int) = v1 .>= int0(Int v2)
 

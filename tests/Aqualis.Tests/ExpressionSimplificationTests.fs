@@ -4,6 +4,24 @@ open Xunit
 open Aqualis
 
 module ExpressionSimplificationTests =
+    let private namedInteger name =
+        int0(Var(It 4, name, Int 0))
+
+    let private assertComparisonChain expected actual =
+        let comparisonShape expression =
+            match expression with
+            |Less(Var(_,left,_),Var(_,right,_)) -> "<", left, right
+            |LessEq(Var(_,left,_),Var(_,right,_)) -> "<=", left, right
+            |Greater(Var(_,left,_),Var(_,right,_)) -> ">", left, right
+            |GreaterEq(Var(_,left,_),Var(_,right,_)) -> ">=", left, right
+            |_ -> failwithf "Expected a comparison expression, but got %A." expression
+
+        match actual with
+        |AND expressions ->
+            Assert.Equal<(string*string*string) list>(expected, List.map comparisonShape expressions)
+        |_ ->
+            Assert.Fail($"Expected a comparison chain, but got {actual}.")
+
     [<Theory>]
     [<InlineData(1, 1, true)>]
     [<InlineData(2, 1, true)>]
@@ -44,3 +62,51 @@ module ExpressionSimplificationTests =
 
         Assert.True(trueBranchRan)
         Assert.False(falseBranchRan)
+
+    [<Fact>]
+    let ``chained comparisons preserve each leading comparison operator`` () =
+        let a = namedInteger "a"
+        let b = namedInteger "b"
+        let c = namedInteger "c"
+
+        assertComparisonChain ["<", "a", "b"; "<", "b", "c"] ((a .< b .< c).Expr)
+        assertComparisonChain ["<", "a", "b"; "<=", "b", "c"] ((a .< b .<= c).Expr)
+        assertComparisonChain ["<", "a", "b"; ">", "b", "c"] ((a .< b .> c).Expr)
+        assertComparisonChain ["<", "a", "b"; ">=", "b", "c"] ((a .< b .>= c).Expr)
+        assertComparisonChain ["<=", "a", "b"; "<", "b", "c"] ((a .<= b .< c).Expr)
+        assertComparisonChain ["<=", "a", "b"; "<=", "b", "c"] ((a .<= b .<= c).Expr)
+        assertComparisonChain ["<=", "a", "b"; ">", "b", "c"] ((a .<= b .> c).Expr)
+        assertComparisonChain ["<=", "a", "b"; ">=", "b", "c"] ((a .<= b .>= c).Expr)
+        assertComparisonChain [">", "a", "b"; "<", "b", "c"] ((a .> b .< c).Expr)
+        assertComparisonChain [">", "a", "b"; "<=", "b", "c"] ((a .> b .<= c).Expr)
+        assertComparisonChain [">", "a", "b"; ">", "b", "c"] ((a .> b .> c).Expr)
+        assertComparisonChain [">", "a", "b"; ">=", "b", "c"] ((a .> b .>= c).Expr)
+        assertComparisonChain [">=", "a", "b"; "<", "b", "c"] ((a .>= b .< c).Expr)
+        assertComparisonChain [">=", "a", "b"; "<=", "b", "c"] ((a .>= b .<= c).Expr)
+        assertComparisonChain [">=", "a", "b"; ">", "b", "c"] ((a .>= b .> c).Expr)
+        assertComparisonChain [">=", "a", "b"; ">=", "b", "c"] ((a .>= b .>= c).Expr)
+
+    [<Fact>]
+    let ``comparison chains retain all expressions beyond three operands`` () =
+        let a = namedInteger "a"
+        let b = namedInteger "b"
+        let c = namedInteger "c"
+        let d = namedInteger "d"
+
+        assertComparisonChain
+            [">=", "a", "b"; "<=", "b", "c"; "<", "c", "d"]
+            ((a .>= b .<= c .< d).Expr)
+
+    [<Fact>]
+    let ``numeric chained comparisons retain inclusive boundaries`` () =
+        let mutable ascendingBranchRan = false
+        let mutable descendingBranchRan = false
+
+        Aqualis.runWithWriterlessContext Numeric (fun context ->
+            context.br.if1 (int0(Int 1) .<= int0(Int 1) .< int0(Int 2))
+                (fun () -> ascendingBranchRan <- true)
+            context.br.if1 (int0(Int 3) .>= int0(Int 2) .> int0(Int 1))
+                (fun () -> descendingBranchRan <- true))
+
+        Assert.True(ascendingBranchRan)
+        Assert.True(descendingBranchRan)

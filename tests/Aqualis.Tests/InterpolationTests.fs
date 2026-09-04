@@ -71,6 +71,9 @@ module InterpolationTests =
         Assert.Contains("sample_x[sample_x_size[0]-1]", source)
         Assert.Contains("sample_y[sample_x_size[0]-1]", source)
         Assert.Contains("sample_x[0]", source)
+        Assert.Matches(
+            Regex(@"sample_x\[i0\d+\]\s*<=.+&&.+<\s*sample_x\[i0\d+\s*\+\s*1\]"),
+            source)
         Assert.DoesNotContain("sample_x[sample_x_size[0]]", source)
         Assert.DoesNotContain("sample_y[sample_x_size[0]]", source)
 

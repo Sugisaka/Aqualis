@@ -603,16 +603,22 @@ namespace Aqualis
                 |_ -> GreaterEq(x,y)
                 
             static member simpAND(x:list<expr>) = 
-                x 
-                |> List.map (fun s -> s.simp) 
-                |> List.filter (fun s -> match s with |True -> false |_ -> true)
-                |> fun g -> match List.tryFind (fun s -> match s with |False -> true |_ -> false) g with |Some _ -> False |None -> AND g
-                
+                let expressions = x |> List.map (fun s -> s.simp)
+                if expressions |> List.exists (function |False -> true |_ -> false) then
+                    False
+                else
+                    match expressions |> List.filter (function |True -> false |_ -> true) with
+                    |[] -> True
+                    |remaining -> AND remaining
+
             static member simpOR(x:list<expr>) = 
-                x 
-                |> List.map (fun s -> s.simp) 
-                |> List.filter (fun s -> match s with |False -> false |_ -> true)
-                |> fun g -> match List.tryFind (fun s -> match s with |True -> true |_ -> false) g with |Some _ -> True |None -> OR g
+                let expressions = x |> List.map (fun s -> s.simp)
+                if expressions |> List.exists (function |True -> true |_ -> false) then
+                    True
+                else
+                    match expressions |> List.filter (function |False -> false |_ -> true) with
+                    |[] -> False
+                    |remaining -> OR remaining
                 
             member this.simp with get() =
                 match this with
