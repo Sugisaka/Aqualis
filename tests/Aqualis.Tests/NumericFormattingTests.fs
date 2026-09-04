@@ -41,6 +41,17 @@ module NumericFormattingTests =
         Assert.DoesNotContain("Cpx(1.25, 1.25)", value.ToString())
 
     [<Fact>]
+    let ``integer divided by a complex literal simplifies to the quotient`` () =
+        let simplified = (Int 2 / Cpx(1.0, 1.0)).simp
+
+        match simplified with
+        |Cpx(real, imaginary) ->
+            Assert.Equal(1.0, real, 12)
+            Assert.Equal(-1.0, imaginary, 12)
+        |other ->
+            Assert.Fail($"Expected a complex literal, but got {other}.")
+
+    [<Fact>]
     let ``complex literals render without recursively simplifying their expansion`` () =
         use output = new TemporaryDirectory()
         let value = Cpx(1.0, 2.0)

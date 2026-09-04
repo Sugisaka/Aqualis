@@ -242,7 +242,9 @@ namespace Aqualis
                 |Int x,Int y when x%y=0 -> Int (x/y)
                 |Int x,Int y -> Dbl (double x / double y)
                 |Int x,Dbl y -> Dbl (double x / y)
-                |Int x, Cpx (yre,yim) -> Cpx (yre,yim)
+                |Int x, Cpx (yre,yim) ->
+                    let d = yre*yre+yim*yim
+                    Cpx (double x*yre/d,-double x*yim/d)
                 |Dbl x, Int y -> Dbl (x / double y)
                 |Dbl x, Dbl y -> Dbl (x/y)
                 |Dbl x, Cpx (yre,yim) -> let d = yre*yre+yim*yim in Cpx (x*yre/d,-x*yim/d)
