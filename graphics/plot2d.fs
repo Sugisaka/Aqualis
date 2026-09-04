@@ -651,13 +651,26 @@ namespace Aqualis
         /// <param name="autoscale">プロット範囲指定（自動又は手動）</param>
         /// <param name="eval">複素数→プロット値</param>
         member public this.writeColorBar(filename:string, width:int, height:int, gradation:Gradation, autoscale:PlotColorRange, eval:(double*double)->double) =
+            if width < 2 then
+                invalidArg (nameof width) "The color-bar width must be at least 2 pixels."
+            if height < 2 then
+                invalidArg (nameof height) "The color-bar height must be at least 2 pixels."
+
+            let rowBytes = 3L * int64 width
+            let padding = (4L - rowBytes % 4L) % 4L
+            let rowStride = rowBytes + padding
+            let maximumPixelBytes = int64 Int32.MaxValue - 54L
+            if rowStride > maximumPixelBytes / int64 height then
+                invalidArg "dimensions" "The requested color bar is too large for the BMP format."
+            let fileSize = 54L + rowStride * int64 height
+
             if not isDataLoaded then
                 if error = "" then
                     error <- "data is not loaded"
             else
                 let nx = width
                 let ny = height
-                let rest = if (3*nx)%4=0 then 0 else 4-(3*nx)%4
+                let rest = int padding
                 //---データの規格化------------------------------------------------------
                 let min,max =
                     match autoscale with
@@ -675,7 +688,7 @@ namespace Aqualis
                 use f_strm = new FileStream(filename, FileMode.Create)
                 use bw = new BinaryWriter(f_strm)
                 //---BMPFILEHEADER構造体--------------------------------------------------
-                let bfSize:int32 = 54 + (3 * nx + rest) * ny //ファイル全体のバイト数
+                let bfSize = int32 fileSize                  //ファイル全体のバイト数
                 let bfReserved1:int16 = 0s          //常に0
                 let bfReserved2:int16 = 0s          //常に0
                 let bfOffBits:int32 = 54            //ファイルの最初から画像データまでのデータサイズ

@@ -6,6 +6,21 @@ open Xunit
 open Aqualis
 
 module Plot2dTests =
+    let private createLoadedPlot (output:TemporaryDirectory) =
+        let source = Path.Combine(output.Path, "color-bar-source.dat")
+        File.WriteAllLines(
+            source,
+            [|
+                "0 0 1"
+                "1 0 2"
+                "0 1 3"
+                "1 1 4"
+            |])
+        let plot = plot2d()
+        plot.FileRead(source, 1, 2, 3, -1)
+        Assert.Equal("", plot.Error)
+        plot
+
     [<Fact>]
     let ``constant x values report an error without dividing by zero`` () =
         use output = new TemporaryDirectory()
@@ -315,3 +330,73 @@ module Plot2dTests =
         Assert.Contains("データが不足しています", plot.Error)
         Assert.Equal(0, plot.Nx)
         Assert.Equal(0, plot.Ny)
+
+    [<Fact>]
+    let ``color bar rejects dimensions below two before creating a file`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+
+        for width,height in [(-1, 2); (0, 2); (1, 2); (2, -1); (2, 0); (2, 1)] do
+            let target = Path.Combine(output.Path, $"invalid-{width}-{height}.bmp")
+            let thrown =
+                Assert.Throws<ArgumentException>(fun () ->
+                    plot.writeColorBar(
+                        target,
+                        width,
+                        height,
+                        colorMap.Gray,
+                        PlotColorRange.Auto,
+                        plot2d.getRe))
+
+            Assert.Equal((if width < 2 then "width" else "height"), thrown.ParamName)
+            Assert.False(File.Exists target)
+
+    [<Fact>]
+    let ``minimum color bar has matching BMP dimensions and file size`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let target = Path.Combine(output.Path, "minimum-color-bar.bmp")
+
+        plot.writeColorBar(target, 2, 2, colorMap.Gray, PlotColorRange.Auto, plot2d.getRe)
+
+        use stream = File.OpenRead target
+        use reader = new BinaryReader(stream)
+        Assert.Equal(byte 'B', reader.ReadByte())
+        Assert.Equal(byte 'M', reader.ReadByte())
+        let headerFileSize = reader.ReadInt32()
+        stream.Position <- 18L
+        Assert.Equal(2, reader.ReadInt32())
+        Assert.Equal(2, reader.ReadInt32())
+        Assert.Equal(70L, stream.Length)
+        Assert.Equal(int64 headerFileSize, stream.Length)
+
+    [<Fact>]
+    let ``complex minimum color bar produces finite pixel bytes`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let target = Path.Combine(output.Path, "minimum-complex-color-bar.bmp")
+
+        plot.writeColorBar(target, 2, 2, colorMap.ComplexVivid, PlotColorRange.Auto, plot2d.getAbs)
+
+        let bytes = File.ReadAllBytes target
+        Assert.Equal(70, bytes.Length)
+        Assert.True(bytes[54..] |> Array.exists ((<>) 0uy))
+
+    [<Fact>]
+    let ``oversized color bar is rejected before creating a file`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let target = Path.Combine(output.Path, "oversized-color-bar.bmp")
+
+        let thrown =
+            Assert.Throws<ArgumentException>(fun () ->
+                plot.writeColorBar(
+                    target,
+                    Int32.MaxValue,
+                    2,
+                    colorMap.Gray,
+                    PlotColorRange.Auto,
+                    plot2d.getRe))
+
+        Assert.Equal("dimensions", thrown.ParamName)
+        Assert.False(File.Exists target)
