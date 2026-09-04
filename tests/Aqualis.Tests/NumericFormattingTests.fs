@@ -66,6 +66,23 @@ module NumericFormattingTests =
         Assert.DoesNotContain("divmod", compound)
 
     [<Fact>]
+    let ``normal random generation uses unit-variance Box-Muller scaling`` () =
+        for language, extension in
+            [C99, ".c"; Fortran, ".f90"; Python, ".py"; JavaScript, ".js"; PHP, ".php"] do
+            use output = new TemporaryDirectory()
+            let project = "normal-random-scaling"
+
+            Compile [language] output.Path project "1.0" <| fun context ->
+                context.ch.d <| fun sample ->
+                    context.asm.random_normaldistribution <| fun (_, getNormal) ->
+                        getNormal (D 3.0, D 2.0, sample)
+
+            let generated = File.ReadAllText(Path.Combine(output.Path, project + extension))
+
+            Assert.Contains("sqrt(-2", generated)
+            Assert.DoesNotContain("sqrt(-log", generated)
+
+    [<Fact>]
     let ``Python FFT uses scalar modulo for its even-size branch`` () =
         use output = new TemporaryDirectory()
 

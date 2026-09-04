@@ -66,5 +66,5 @@ module asm_random =
                         context.ch.d (fun b ->
                             getrand a
                             getrand b
-                            target <== standardDeviation * asm.sqrt(-asm.log(a)) * asm.sin(2 * asm.pi * b) + mean))
+                            target <== standardDeviation * asm.sqrt(-2.0 * asm.log(a)) * asm.sin(2 * asm.pi * b) + mean))
                 code(setseed,getrandNormal))
