@@ -64,7 +64,11 @@ module asm_random =
                 let getrandNormal (standardDeviation:double0, mean:double0, target:double0) =
                     context.ch.d (fun a ->
                         context.ch.d (fun b ->
-                            getrand a
+                            let getPositiveRandom value =
+                                getrand value
+                                context.iter.whiledo (value .<= 0.0) (fun _ ->
+                                    getrand value)
+                            getPositiveRandom a
                             getrand b
                             target <== standardDeviation * asm.sqrt(-2.0 * asm.log(a)) * asm.sin(2 * asm.pi * b) + mean))
                 code(setseed,getrandNormal))

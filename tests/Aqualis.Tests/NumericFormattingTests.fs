@@ -3,6 +3,7 @@ namespace Aqualis.Tests
 open System
 open System.Globalization
 open System.IO
+open System.Text.RegularExpressions
 open Xunit
 open Aqualis
 
@@ -67,8 +68,14 @@ module NumericFormattingTests =
 
     [<Fact>]
     let ``normal random generation uses unit-variance Box-Muller scaling`` () =
-        for language, extension in
-            [C99, ".c"; Fortran, ".f90"; Python, ".py"; JavaScript, ".js"; PHP, ".php"] do
+        for language, extension, randomCall in
+            [
+                C99, ".c", "rand()/RAND_MAX"
+                Fortran, ".f90", "call random_number("
+                Python, ".py", "random_seed.uniform(0.0, 1.0)"
+                JavaScript, ".js", "Math.random()"
+                PHP, ".php", "random_int(0, PHP_INT_MAX)"
+            ] do
             use output = new TemporaryDirectory()
             let project = "normal-random-scaling"
 
@@ -81,6 +88,25 @@ module NumericFormattingTests =
 
             Assert.Contains("sqrt(-2", generated)
             Assert.DoesNotContain("sqrt(-log", generated)
+            Assert.Equal(3, Regex.Matches(generated, Regex.Escape(randomCall)).Count)
+            let loopIndex = generated.IndexOf("while(", StringComparison.Ordinal)
+            let logarithmIndex = generated.IndexOf("log(", StringComparison.Ordinal)
+            Assert.True(loopIndex >= 0)
+            Assert.True(logarithmIndex > loopIndex)
+            Assert.Matches(Regex(@"while\([^\r\n]+\s<=\s[^\r\n]+\)"), generated)
+
+    [<Fact>]
+    let ``Python while loop includes the required colon`` () =
+        use output = new TemporaryDirectory()
+        let project = "normal-random-python-loop"
+
+        Compile [Python] output.Path project "1.0" <| fun context ->
+            context.ch.d <| fun sample ->
+                context.asm.random_normaldistribution <| fun (_, getNormal) ->
+                    getNormal (D 1.0, D 0.0, sample)
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, project + ".py"))
+        Assert.Matches(Regex(@"while\([^\r\n]+\):"), generated)
 
     [<Fact>]
     let ``Python FFT uses scalar modulo for its even-size branch`` () =

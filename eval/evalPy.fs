@@ -57,7 +57,7 @@ namespace Aqualis
                 
             ///<summary>条件を満たす間ループ</summary>
             static member whiledoPy (c:Aqualis) (cond:expr) = fun code ->
-                c.codewritein("while(" + cond.evalPy c + ")")
+                c.codewritein("while(" + cond.evalPy c + "):")
                 c.indentInc()
                 code()
                 c.indentDec()
