@@ -277,7 +277,7 @@ type graph1d =
                 elif t.Contains "\t" then sep <- [|'\t'|]
             let k = t.Split(sep,StringSplitOptions.RemoveEmptyEntries)
             let pd i = 
-                if i<0 || i>k.Length then
+                if i<=0 || i>k.Length then
                     printfn "column index over: %d %d" i k.Length
                     nan
                 else
@@ -336,11 +336,14 @@ type graph1d =
                             cx0+double (ix-1) *dx, cy0+double (iy-1) *dy+setting.SubCaptionShiftY
                     /// 目盛り
                     let setTicInterval(range:double) =
-                        let c = 
-                            if log10 range<0.0 then
-                                -ceil(-log10(range))
+                        if not (Double.IsFinite range) || range<=0.0 then
+                            invalidArg (nameof range) "The plot range must be positive and finite."
+                        let rangeOrder = log10 range
+                        let c =
+                            if rangeOrder<0.0 then
+                                -ceil(-rangeOrder)
                             else
-                                floor(log10 range)
+                                floor rangeOrder
                         let n = int(range*10.0**(-c))
                         if n=1 then
                             0.2*10.0**c
@@ -421,13 +424,22 @@ type graph1d =
                         let autoRange(axis:Axis,x1:double,x2:double) =
                             match axis.Scale with
                             |Linear ->
+                                let x1,x2 =
+                                    if x1=x2 then
+                                        let padding = if x1=0.0 then 1.0 else 0.1*abs x1
+                                        x1-padding,x2+padding
+                                    else
+                                        x1,x2
                                 let dt = setTicInterval(x2-x1)
                                 let r1 = if x1<0.0 then -dt*ceil(-x1/dt) else dt*floor(x1/dt)
                                 let r2 = if x2<0.0 then -dt*floor(-x2/dt) else dt*ceil(x2/dt)
                                 r1,r2
                             |Log10 ->
-                                if x1<0.0 then printfn "負の値は対数軸にプロットできません"
-                                10.0**floor(log10 x1),10.0**ceil(log10 x2)
+                                if not (Double.IsFinite x1) || not (Double.IsFinite x2) || x1<=0.0 || x2<=0.0 then
+                                    invalidArg "range" "A logarithmic plot range must contain only positive finite values."
+                                let r1 = 10.0**floor(log10 x1)
+                                let r2 = 10.0**ceil(log10 x2)
+                                if r1=r2 then r1/10.0,r2*10.0 else r1,r2
                         let dataxr,datayr = mergeRange data
                         // データの範囲表示(x)
                         match dataxr with

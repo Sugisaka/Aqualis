@@ -31,6 +31,7 @@
     <Compile Include="GeometryCrtpTests.fs" />
     <Compile Include="InterpolationTests.fs" />
     <Compile Include="OptimizationTests.fs" />
+    <Compile Include="Graph1dTests.fs" />
     <Compile Include="LapackRankGenerationTests.fs" />
     <Compile Include="LapackDeterminantGenerationTests.fs" />
     <Compile Include="PhpUploadGenerationTests.fs" />
