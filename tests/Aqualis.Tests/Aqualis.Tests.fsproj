@@ -26,6 +26,7 @@
     <Compile Include="PythonFunctionGenerationTests.fs" />
     <Compile Include="StructureDependencyTests.fs" />
     <Compile Include="AssignmentTests.fs" />
+    <Compile Include="ExpressionSimplificationTests.fs" />
     <Compile Include="NumericFormattingTests.fs" />
     <Compile Include="NumericArrayGenericTests.fs" />
     <Compile Include="GeometryCrtpTests.fs" />

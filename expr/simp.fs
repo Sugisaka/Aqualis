@@ -592,13 +592,13 @@ namespace Aqualis
                 
             static member simpGreaterEq(x:expr,y:expr) =
                 match x,y with
-                |Int x,Int y when x > y -> True
+                |Int x,Int y when x >= y -> True
                 |Int x,Int y -> False
-                |Dbl x,Dbl y when x > y -> True
+                |Dbl x,Dbl y when x >= y -> True
                 |Dbl x,Dbl y -> False
-                |Int x,Dbl y when double x > y -> True
+                |Int x,Dbl y when double x >= y -> True
                 |Int x,Dbl y -> False
-                |Dbl x,Int y when x > double y -> True
+                |Dbl x,Int y when x >= double y -> True
                 |Dbl x,Int y -> False
                 |_ -> GreaterEq(x,y)
                 
