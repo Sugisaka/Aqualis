@@ -291,39 +291,88 @@ and ContextPhp internal (context:Aqualis) =
         this.phpcode <| fun () -> context.writei "mb_language(\"ja\");"
         this.phpcode <| fun () -> context.writei "mb_internal_encoding(\"UTF-8\");"
         this.phpcode <| fun () -> context.writei("mb_send_mail("+toAddress.code+","+subject.code+","+body.code+","+("From: "++fromAddress).code+");")
-    // /// メール送信
-    // member this sendMail(body:exprString,subject:exprString,fromAddress:string,toAddress:PHPdata) =
-    //     this.phpcode <| fun () -> write("mb_language(\"ja\");")
-    //     this.phpcode <| fun () -> write("mb_internal_encoding(\"UTF-8\");")
-    //     this.phpcode <| fun () -> write("mb_send_mail("+toAddress.code+","+subject.toString(".",StrQuotation)+","+body.toString(".",StrQuotation)+","+"\"From: "+fromAddress+"\");")
-    // /// メール送信
-    // member this sendMail(body:PHPdata,subject:PHPdata,fromAddress:string,toAddress:PHPdata) =
-    //     this.phpcode <| fun () -> write("mb_language(\"ja\");")
-    //     this.phpcode <| fun () -> write("mb_internal_encoding(\"UTF-8\");")
-    //     this.phpcode <| fun () -> write("mb_send_mail("+toAddress.code+","+subject.code+","+body.code+","+"\"From: "+fromAddress+"\");")
     /// メール送信
     member this.sendMail(body:PHPdata,subject:PHPdata,smtp:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
-        let cmd = PHPdata.var(context,"cmd")
-        cmd <== "echo \\\"" ++ body ++ "\\\" | mail -s \\\"" ++ subject ++ "\\\" -S smtp=smtp://" ++ smtp ++ ":25 -r " ++ fromAddress ++ " " ++ toAddress
-        this.phpcode <| fun () -> context.writei("exec("+cmd.code+");")
-    // /// メール送信
-    // member this sendMail(body:PHPdata,subject:PHPdata,fromAddress:string,toAddress:PHPdata) =
-    //     this.phpcode <| fun () -> write("mb_language(\"ja\");")
-    //     this.phpcode <| fun () -> write("mb_internal_encoding(\"UTF-8\");")
-    //     this.phpcode <| fun () -> write("mb_send_mail("+toAddress.code+","+subject.code+","+body.code+","+"\"From: "+fromAddress+"\");")
-    // /// メール送信
-    // member this sendMail(body:string,subject:string,fromAddress:string,toAddress:string) =
-    //     this.phpcode <| fun () -> write("mb_language(\"ja\");")
-    //     this.phpcode <| fun () -> write("mb_internal_encoding(\"UTF-8\");")
-    //     this.phpcode <| fun () -> write("mb_send_mail(\""+toAddress+"\",\""+subject+"\",\""+body+"\","+"\"From: "+fromAddress+"\");")
+        merge [body.Context; subject.Context; smtp.Context; fromAddress.Context; toAddress.Context] |> ignore
+        this.phpcode <| fun () ->
+            context.writei "(function ($body, $subject, $smtp, $fromAddress, $toAddress): void {"
+            context.writei "if (preg_match('/[\\r\\n]/', $subject) === 1) {"
+            context.writei "throw new \\InvalidArgumentException('The mail subject must not contain CR or LF characters.');"
+            context.writei "}"
+            context.writei "if (filter_var($fromAddress, FILTER_VALIDATE_EMAIL) === false || strncmp($fromAddress, '-', 1) === 0) {"
+            context.writei "throw new \\InvalidArgumentException('Invalid sender email address.');"
+            context.writei "}"
+            context.writei "if (filter_var($toAddress, FILTER_VALIDATE_EMAIL) === false || strncmp($toAddress, '-', 1) === 0) {"
+            context.writei "throw new \\InvalidArgumentException('Invalid recipient email address.');"
+            context.writei "}"
+            context.writei "if (filter_var($smtp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false && filter_var($smtp, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) === false) {"
+            context.writei "throw new \\InvalidArgumentException('Invalid SMTP host.');"
+            context.writei "}"
+            context.writei "$command = ['mail', '-s', $subject, '-S', 'smtp=smtp://' . $smtp . ':25', '-r', $fromAddress, $toAddress];"
+            context.writei "$descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];"
+            context.writei "$process = proc_open($command, $descriptors, $pipes);"
+            context.writei "if (!is_resource($process)) {"
+            context.writei "throw new \\RuntimeException('Failed to start the mail command.');"
+            context.writei "}"
+            context.writei "try {"
+            context.writei "if (fwrite($pipes[0], $body) === false) {"
+            context.writei "throw new \\RuntimeException('Failed to write the mail body.');"
+            context.writei "}"
+            context.writei "fclose($pipes[0]);"
+            context.writei "$stdout = stream_get_contents($pipes[1]);"
+            context.writei "fclose($pipes[1]);"
+            context.writei "$stderr = stream_get_contents($pipes[2]);"
+            context.writei "fclose($pipes[2]);"
+            context.writei "} catch (\\Throwable $error) {"
+            context.writei "foreach ($pipes as $pipe) {"
+            context.writei "if (is_resource($pipe)) { fclose($pipe); }"
+            context.writei "}"
+            context.writei "proc_terminate($process);"
+            context.writei "proc_close($process);"
+            context.writei "throw $error;"
+            context.writei "}"
+            context.writei "$exitCode = proc_close($process);"
+            context.writei "if ($exitCode !== 0) {"
+            context.writei "throw new \\RuntimeException('The mail command failed: ' . trim((string)$stderr));"
+            context.writei "}"
+            context.writei ("})("+body.code+", "+subject.code+", "+smtp.code+", "+fromAddress.code+", "+toAddress.code+");")
     member this.sendDiscord(body:PHPdata,webhookURL:PHPdata) =
-        let cmd = PHPdata.var(context,"cmd")
-        cmd <== "curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\""++body++"\\\\\\\"}\\\" " ++ webhookURL
-        this.phpcode <| fun () -> context.writei("exec("+cmd.code+");")
-    // member this sendDiscord(body:string,webhookURL:string) =
-    //     let cmd = PHPdata.v "cmd"
-    //     cmd <== this.fnvar("curl -H \\\"Content-Type: application/json\\\" -X POST -d \\\"{\\\\\\\"username\\\\\\\": \\\\\\\"Ediass Notification\\\\\\\", \\\\\\\"content\\\\\\\": \\\\\\\"" + body + "\\\\\\\"}\\\" " + webhookURL)
-    //     this.phpcode <| fun () -> write("exec("+cmd.code+");")
+        merge [body.Context; webhookURL.Context] |> ignore
+        this.phpcode <| fun () ->
+            context.writei "(function ($body, $webhookURL): void {"
+            context.writei "$urlParts = parse_url($webhookURL);"
+            context.writei "$allowedHosts = ['discord.com', 'ptb.discord.com', 'canary.discord.com', 'discordapp.com'];"
+            context.writei "if ($urlParts === false || ($urlParts['scheme'] ?? null) !== 'https' || !isset($urlParts['host']) || !in_array(strtolower($urlParts['host']), $allowedHosts, true)) {"
+            context.writei "throw new \\InvalidArgumentException('Invalid Discord webhook URL.');"
+            context.writei "}"
+            context.writei "$payload = json_encode(['username' => 'Ediass Notification', 'content' => $body], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);"
+            context.writei "$curl = curl_init($webhookURL);"
+            context.writei "if ($curl === false) {"
+            context.writei "throw new \\RuntimeException('Failed to initialize cURL.');"
+            context.writei "}"
+            context.writei "try {"
+            context.writei "curl_setopt_array($curl, ["
+            context.writei "CURLOPT_POST => true,"
+            context.writei "CURLOPT_POSTFIELDS => $payload,"
+            context.writei "CURLOPT_HTTPHEADER => ['Content-Type: application/json'],"
+            context.writei "CURLOPT_RETURNTRANSFER => true,"
+            context.writei "CURLOPT_CONNECTTIMEOUT => 5,"
+            context.writei "CURLOPT_TIMEOUT => 15,"
+            context.writei "CURLOPT_FOLLOWLOCATION => false,"
+            context.writei "CURLOPT_PROTOCOLS => CURLPROTO_HTTPS"
+            context.writei "]);"
+            context.writei "$response = curl_exec($curl);"
+            context.writei "if ($response === false) {"
+            context.writei "throw new \\RuntimeException('Discord webhook request failed: ' . curl_error($curl));"
+            context.writei "}"
+            context.writei "$statusCode = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);"
+            context.writei "if ($statusCode < 200 || $statusCode >= 300) {"
+            context.writei "throw new \\RuntimeException('Discord webhook returned HTTP ' . $statusCode . '.');"
+            context.writei "}"
+            context.writei "} finally {"
+            context.writei "curl_close($curl);"
+            context.writei "}"
+            context.writei ("})("+body.code+", "+webhookURL.code+");")
     member this.str_replace(strfrom:string,strto:string,str:PHPdata) = data ("str_replace("+"\""+strfrom+"\""+","+"\""+strto+"\""+","+str.code+")") [str.Context]
     member this.str_pad(num:PHPdata,ndigit:int,paddingnum:int) = data ("str_pad("+num.code+","+ndigit.ToString()+","+paddingnum.ToString()+", STR_PAD_LEFT)") [num.Context]
     member this.file_download(file:PHPdata) =
