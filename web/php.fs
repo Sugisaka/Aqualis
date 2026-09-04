@@ -195,6 +195,14 @@ and ContextPhp internal (context:Aqualis) =
     let boolean code contexts = bool0(Var(Nt,code,NaN), merge contexts)
     /// Creates a PHP variable associated with this generation context.
     member _.var(name:string) = PHPdata.var(context,name)
+    member _.var(name:string,init:PHPdata) = PHPdata.var(context,name,init)
+    member _.var(name:string,init:int0) = PHPdata.var(context,name,init)
+    member _.var(name:string,init:int) = PHPdata.var(context,name,init)
+    member _.var(name:string,init:double0) = PHPdata.var(context,name,init)
+    member _.var(name:string,init:double) = PHPdata.var(context,name,init)
+    member _.array(name:string) = PHPdata.array(context,name)
+    member _.array(arrayname:string,data:list<string*string>) = PHPdata.array(context,arrayname,data)
+    member _.array(arrayname:string,data:list<string*PHPdata>) = PHPdata.array(context,arrayname,data)
     member this.phpcode (code:unit->unit) =
         context.write "<?php "
         code()
