@@ -81,6 +81,33 @@ module NumericFormattingTests =
         Assert.DoesNotContain("divmod", generated)
 
     [<Fact>]
+    let ``Python inverse FFT disables pyFFTW inverse normalization`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [Python] output.Path "python-fft-scaling" "1.0" <| fun context ->
+            context.ch.z1 4 <| fun input ->
+                context.ch.z1 4 <| fun transformed ->
+                    context.fft1.fft("forwardPlan1", input, transformed)
+                    context.fft1.ifft("inversePlan1", transformed, input)
+            context.ch.z2 (2, 3) <| fun input ->
+                context.ch.z2 (2, 3) <| fun transformed ->
+                    context.fft2.fft("forwardPlan2", input, transformed)
+                    context.fft2.ifft("inversePlan2", transformed, input)
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "python-fft-scaling.py"))
+
+        Assert.Contains("forwardPlan1()", generated)
+        Assert.Contains("inversePlan1(normalise_idft=False)", generated)
+        Assert.Contains("forwardPlan2()", generated)
+        Assert.Contains("inversePlan2(normalise_idft=False)", generated)
+        Assert.DoesNotContain("forwardPlan1(normalise_idft=False)", generated)
+        Assert.DoesNotContain("forwardPlan2(normalise_idft=False)", generated)
+        Assert.Equal(
+            2,
+            System.Text.RegularExpressions.Regex.Matches(generated, "#normalize").Count)
+
+    [<Fact>]
     let ``complex literals render without recursively simplifying their expansion`` () =
         use output = new TemporaryDirectory()
         let value = Cpx(1.0, 2.0)

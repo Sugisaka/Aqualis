@@ -136,7 +136,7 @@ namespace Aqualis
                         ifftshift1 context data1
                         context.codewritein(data1.code+"_empty[:] = "+data1.code+"[:]")
                         context.group.comment "FFT"
-                        context.codewritein(data2.code+" = "+plan.code+"()")
+                        context.codewritein(data2.code+" = "+plan.code+"(normalise_idft=False)")
                         ifftshift1 context data2
                         context.codewritein("del "+plan.code+"")
                 |_ -> ()
