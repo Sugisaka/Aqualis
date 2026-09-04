@@ -6,6 +6,10 @@ open Xunit
 open Aqualis
 
 module Graph1dTests =
+    let private assertPoint (expectedX:double) (expectedY:double) (actualX:double,actualY:double) =
+        Assert.Equal(expectedX, actualX, 10)
+        Assert.Equal(expectedY, actualY, 10)
+
     let private writeDataFile () =
         let output = new TemporaryDirectory()
         let source = Path.Combine(output.Path, "columns.dat")
@@ -99,3 +103,78 @@ module Graph1dTests =
 
         Assert.DoesNotContain("nan", normalized)
         Assert.DoesNotContain("infinity", normalized)
+
+    [<Fact>]
+    let ``function segments use the lower boundary when leaving and reentering the range`` () =
+        let segments =
+            graph1d.clipFunctionSegments
+                (0.0,1.0)
+                [|(0.0,0.5); (1.0,-1.0); (2.0,0.5)|]
+
+        Assert.Equal(2, segments.Length)
+        Assert.Equal(2, segments.[0].Length)
+        Assert.Equal(2, segments.[1].Length)
+        assertPoint 0.0 0.5 segments.[0].[0]
+        assertPoint (1.0/3.0) 0.0 segments.[0].[1]
+        assertPoint (5.0/3.0) 0.0 segments.[1].[0]
+        assertPoint 2.0 0.5 segments.[1].[1]
+
+    [<Fact>]
+    let ``function segment crossing the complete range is clipped at both boundaries`` () =
+        let segments =
+            graph1d.clipFunctionSegments
+                (0.0,1.0)
+                [|(0.0,-1.0); (1.0,2.0)|]
+
+        Assert.Single(segments) |> ignore
+        Assert.Equal(2, segments.[0].Length)
+        assertPoint (1.0/3.0) 0.0 segments.[0].[0]
+        assertPoint (2.0/3.0) 1.0 segments.[0].[1]
+
+    [<Fact>]
+    let ``nonfinite function samples split visible segments`` () =
+        let segments =
+            graph1d.clipFunctionSegments
+                (0.0,1.0)
+                [|
+                    (0.0,0.25)
+                    (1.0,0.5)
+                    (2.0,Double.NaN)
+                    (3.0,0.5)
+                    (4.0,0.75)
+                |]
+
+        Assert.Equal(2, segments.Length)
+        Assert.Equal(2, segments.[0].Length)
+        Assert.Equal(2, segments.[1].Length)
+        assertPoint 0.0 0.25 segments.[0].[0]
+        assertPoint 1.0 0.5 segments.[0].[1]
+        assertPoint 3.0 0.5 segments.[1].[0]
+        assertPoint 4.0 0.75 segments.[1].[1]
+
+    [<Fact>]
+    let ``function plot rejects fewer than two samples`` () =
+        use output = new TemporaryDirectory()
+
+        let thrown =
+            Assert.Throws<ArgumentException>(fun () ->
+                graph1d.makeGraph output.Path "invalid-sampling.svg" (graph1d.A4PTwoColSingle 1) <| fun addGraph ->
+                    addGraph
+                        (1, 1)
+                        None
+                        {
+                            Xaxis = {Scale=Linear; Range=MinMax(0.0,1.0); NumFormat=None}
+                            Yaxis = {Scale=Linear; Range=MinMax(0.0,1.0); NumFormat=None}
+                            Xlabel = "x"
+                            Ylabel = "y"
+                        }
+                        [
+                            Function {
+                                Style = Lines {Style=color.stroke.black 0.5}
+                                Legend = None
+                                Sampling = 1
+                                Function = id
+                            }
+                        ])
+
+        Assert.Equal("Sampling", thrown.ParamName)

@@ -290,6 +290,60 @@ type graph1d =
             x[i] <- colx pd
             y[i] <- coly pd
         x,y
+
+    static member internal clipFunctionSegments
+        (yr1:double,yr2:double)
+        (points:(double*double) array) =
+        if not (Double.IsFinite yr1) || not (Double.IsFinite yr2) || yr1 >= yr2 then
+            invalidArg "range" "The clipping range must be finite and strictly increasing."
+
+        let inside (_,y) = Double.IsFinite y && yr1 <= y && y <= yr2
+        let finitePoint (x,y) = Double.IsFinite x && Double.IsFinite y
+        let interpolate boundary (x0,y0) (x1,y1) =
+            let ratio = (boundary-y0)/(y1-y0)
+            x0+ratio*(x1-x0),boundary
+        let clipSegment ((x0,y0) as p0) ((x1,y1) as p1) =
+            if not (finitePoint p0) || not (finitePoint p1) then
+                None
+            elif y0 = y1 then
+                if inside p0 then Some(p0,p1) else None
+            else
+                let lowerRatio = (yr1-y0)/(y1-y0)
+                let upperRatio = (yr2-y0)/(y1-y0)
+                let enterRatio = max 0.0 (min lowerRatio upperRatio)
+                let exitRatio = min 1.0 (max lowerRatio upperRatio)
+                if enterRatio >= exitRatio then
+                    None
+                else
+                    let pointAt ratio =
+                        if ratio = 0.0 then p0
+                        elif ratio = 1.0 then p1
+                        else
+                            let boundary = if y0+ratio*(y1-y0) < 0.5*(yr1+yr2) then yr1 else yr2
+                            interpolate boundary p0 p1
+                    Some(pointAt enterRatio,pointAt exitRatio)
+
+        let completed = ResizeArray<(double*double) list>()
+        let current = ResizeArray<double*double>()
+        let flush() =
+            if current.Count >= 2 then
+                completed.Add(List.ofSeq current)
+            current.Clear()
+
+        for index in 0..points.Length-2 do
+            let p0 = points[index]
+            let p1 = points[index+1]
+            match clipSegment p0 p1 with
+            |None ->
+                flush()
+            |Some(segmentStart,segmentEnd) ->
+                if current.Count = 0 then
+                    current.Add segmentStart
+                current.Add segmentEnd
+                if not (inside p1) then
+                    flush()
+        flush()
+        List.ofSeq completed
         
     ///<summary>グラフ生成</summary>
     /// <param name="outputdir">出力先ディレクトリ</param>
@@ -527,27 +581,17 @@ type graph1d =
                     let dataplot d (xlegend,ylegend) =
                         match d with
                         |Function s ->
-                            let rec xylist lst xy0 i =
-                                match xy0 with
-                                |_ when i=s.Sampling+1 ->
-                                    lst
-                                |None ->
-                                    let x = xr1+(xr2-xr1)*(double(i-1))/double (s.Sampling-1)
-                                    let y = s.Function x
-                                    xylist (lst@[x,y]) (Some(x,y)) (i+1)
-                                |Some(x0,y0) ->
-                                    let x = xr1+(xr2-xr1)*(double(i-1))/double (s.Sampling-1)
-                                    let y = s.Function x
-                                    if y>yr2 then
-                                        let xx = (yr2-y0)*(x-x0)/(y-y0)+x0
-                                        lst@[xx,yr2]
-                                    elif y<yr1 then
-                                        let xx = (yr1-y0)*(x-x0)/(y-y0)+x0
-                                        lst@[xx,yr2]
-                                    else
-                                        xylist (lst@[x,y]) (Some(x,y)) (i+1)
-                            let datxy = xylist [] None 1
-                            sv.polygon(List.map (fun (x,y) -> mmtopt <| fx x,mmtopt <| fy y) datxy, color.fill.none, s.Style.lineStroke)
+                            if s.Sampling < 2 then
+                                invalidArg "Sampling" "A function plot requires at least two sampling points."
+                            let samples =
+                                Array.init s.Sampling (fun index ->
+                                    let x = xr1+(xr2-xr1)*double index/double (s.Sampling-1)
+                                    x,s.Function x)
+                            for segment in graph1d.clipFunctionSegments (yr1,yr2) samples do
+                                sv.polygon(
+                                    List.map (fun (x,y) -> mmtopt <| fx x,mmtopt <| fy y) segment,
+                                    color.fill.none,
+                                    s.Style.lineStroke)
                         |Datafile s ->
                             let (xdata,ydata) = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
                             /// (x,y)がプロット範囲内にあるか判定
