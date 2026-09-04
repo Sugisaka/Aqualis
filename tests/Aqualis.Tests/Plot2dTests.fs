@@ -400,3 +400,92 @@ module Plot2dTests =
 
         Assert.Equal("dimensions", thrown.ParamName)
         Assert.False(File.Exists target)
+
+    [<Fact>]
+    let ``bitmap rejects nonpositive enlargement before creating a file`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+
+        for enlarge in [0; -1] do
+            let target = Path.Combine(output.Path, $"invalid-enlarge-{enlarge}.bmp")
+            let thrown =
+                Assert.Throws<ArgumentException>(fun () ->
+                    plot.writeBMP24(
+                        target,
+                        colorMap.Gray,
+                        PlotColorRange.Auto,
+                        plot2d.getRe,
+                        None,
+                        enlarge))
+
+            Assert.Equal("enlarge", thrown.ParamName)
+            Assert.False(File.Exists target)
+
+    [<Theory>]
+    [<InlineData(20000)>]
+    [<InlineData(Int32.MaxValue)>]
+    let ``oversized bitmap is rejected before creating a file`` enlarge =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let target = Path.Combine(output.Path, $"oversized-{enlarge}.bmp")
+
+        let thrown =
+            Assert.Throws<ArgumentException>(fun () ->
+                plot.writeBMP24(
+                    target,
+                    colorMap.Gray,
+                    PlotColorRange.Auto,
+                    plot2d.getRe,
+                    None,
+                    enlarge))
+
+        Assert.Equal("enlarge", thrown.ParamName)
+        Assert.False(File.Exists target)
+
+    [<Fact>]
+    let ``invalid bitmap request does not truncate an existing file`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let target = Path.Combine(output.Path, "existing.bmp")
+        let original = [|1uy; 2uy; 3uy; 4uy|]
+        File.WriteAllBytes(target, original)
+
+        Assert.Throws<ArgumentException>(fun () ->
+            plot.writeBMP24(
+                target,
+                colorMap.Gray,
+                PlotColorRange.Auto,
+                plot2d.getRe,
+                None,
+                Int32.MaxValue))
+        |> ignore
+
+        Assert.Equal<byte>(original, File.ReadAllBytes target)
+
+    [<Fact>]
+    let ``enlarged bitmap header dimensions and sizes match the file`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let target = Path.Combine(output.Path, "enlarged.bmp")
+
+        plot.writeBMP24(
+            target,
+            colorMap.Gray,
+            PlotColorRange.Auto,
+            plot2d.getRe,
+            None,
+            2)
+
+        use stream = File.OpenRead target
+        use reader = new BinaryReader(stream)
+        Assert.Equal(byte 'B', reader.ReadByte())
+        Assert.Equal(byte 'M', reader.ReadByte())
+        let headerFileSize = reader.ReadInt32()
+        stream.Position <- 18L
+        Assert.Equal(4, reader.ReadInt32())
+        Assert.Equal(4, reader.ReadInt32())
+        stream.Position <- 34L
+        let headerPixelBytes = reader.ReadInt32()
+        Assert.Equal(48, headerPixelBytes)
+        Assert.Equal(102L, stream.Length)
+        Assert.Equal(int64 headerFileSize, stream.Length)

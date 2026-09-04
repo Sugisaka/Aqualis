@@ -33,6 +33,38 @@ namespace Aqualis
         |Int32Value
         |Float64Value
         |Complex128Value
+
+    type private Bmp24Layout =
+        {
+            Width: int
+            Height: int
+            Padding: int
+            PixelBytes: int64
+            FileSize: int64
+        }
+
+    module private Bmp24Layout =
+        let create parameterName (width:int64) (height:int64) =
+            if width < 1L || height < 1L then
+                invalidArg parameterName "The bitmap dimensions must be positive."
+            if width > int64 Int32.MaxValue || height > int64 Int32.MaxValue then
+                invalidArg parameterName "The requested bitmap dimensions exceed the BMP format limits."
+
+            let rowBytes = 3L * width
+            let padding = (4L - rowBytes % 4L) % 4L
+            let rowStride = rowBytes + padding
+            let maximumPixelBytes = int64 Int32.MaxValue - 54L
+            if rowStride > maximumPixelBytes / height then
+                invalidArg parameterName "The requested bitmap is too large for the BMP format."
+
+            let pixelBytes = rowStride * height
+            {
+                Width = int width
+                Height = int height
+                Padding = int padding
+                PixelBytes = pixelBytes
+                FileSize = 54L + pixelBytes
+            }
         
     module colorMap  =
         /// 黒→白
@@ -558,19 +590,27 @@ namespace Aqualis
         /// <param name="phaseshift">位相シフト量</param>
         /// <param name="enlarge">データ値をenlarge×enlargeの正方形画素で表現</param>
         member public this.writeBMP24(filename:string, gradation:Gradation, autoscale:PlotColorRange, eval:(double*double)->double, phaseshift:option<double>, enlarge:int) =
+            if enlarge < 1 then
+                invalidArg (nameof enlarge) "The enlargement factor must be at least 1."
+
             if not isDataLoaded then
                 if error = "" then
                     error <- "data is not loaded"
             else
-                let Nx = enlarge*nx
-                let Ny = enlarge*ny
+                let layout =
+                    Bmp24Layout.create
+                        (nameof enlarge)
+                        (int64 enlarge * int64 nx)
+                        (int64 enlarge * int64 ny)
+                let Nx = layout.Width
+                let Ny = layout.Height
                 let zabs(re,im) = sqrt(re*re+im*im)
                 let zpha(re,im) = atan2 im re
                 let pshift(re,im,ps) =
                     let a = zabs(re,im)
                     let p = zpha(re,im)+ps
                     a*cos p,a*sin p
-                let rest = if (3*Nx)%4=0 then 0 else 4-(3*Nx)%4
+                let rest = layout.Padding
                 //---データの規格化------------------------------------------------------
                 let min,max =
                     match autoscale with
@@ -589,7 +629,7 @@ namespace Aqualis
                 use f_strm = new FileStream(filename, FileMode.Create)
                 use bw = new BinaryWriter(f_strm)
                 //---BMPFILEHEADER構造体--------------------------------------------------
-                let bfSize:int32 = 54 + (3 * Nx + rest) * Ny //ファイル全体のバイト数
+                let bfSize = int32 layout.FileSize     //ファイル全体のバイト数
                 let bfReserved1:int16 = 0s          //常に0
                 let bfReserved2:int16 = 0s          //常に0
                 let bfOffBits:int32 = 54            //ファイルの最初から画像データまでのデータサイズ
@@ -600,7 +640,7 @@ namespace Aqualis
                 let biPlanes:int16 = 1s             //常に1
                 let biBitCount:int16 = 24s          //色ビット数[bit]
                 let biCompression:int32 = 0         //圧縮形式
-                let biSizeimage:int32 = 0           //ビットマップデータのサイズ(0でもよい)
+                let biSizeimage = int32 layout.PixelBytes //ビットマップデータのサイズ
                 let biXPelsPerMeter:int32 = 0       //水平解像度(0でもよい)
                 let biYPelsPerMeter:int32 = 0       //垂直解像度(0でもよい)
                 let biClrUsed:int32 = 0             //ビットマップが実際に使用するカラーテーブルのエントリ数
@@ -656,21 +696,16 @@ namespace Aqualis
             if height < 2 then
                 invalidArg (nameof height) "The color-bar height must be at least 2 pixels."
 
-            let rowBytes = 3L * int64 width
-            let padding = (4L - rowBytes % 4L) % 4L
-            let rowStride = rowBytes + padding
-            let maximumPixelBytes = int64 Int32.MaxValue - 54L
-            if rowStride > maximumPixelBytes / int64 height then
-                invalidArg "dimensions" "The requested color bar is too large for the BMP format."
-            let fileSize = 54L + rowStride * int64 height
+            let layout =
+                Bmp24Layout.create "dimensions" (int64 width) (int64 height)
 
             if not isDataLoaded then
                 if error = "" then
                     error <- "data is not loaded"
             else
-                let nx = width
-                let ny = height
-                let rest = int padding
+                let nx = layout.Width
+                let ny = layout.Height
+                let rest = layout.Padding
                 //---データの規格化------------------------------------------------------
                 let min,max =
                     match autoscale with
@@ -688,7 +723,7 @@ namespace Aqualis
                 use f_strm = new FileStream(filename, FileMode.Create)
                 use bw = new BinaryWriter(f_strm)
                 //---BMPFILEHEADER構造体--------------------------------------------------
-                let bfSize = int32 fileSize                  //ファイル全体のバイト数
+                let bfSize = int32 layout.FileSize     //ファイル全体のバイト数
                 let bfReserved1:int16 = 0s          //常に0
                 let bfReserved2:int16 = 0s          //常に0
                 let bfOffBits:int32 = 54            //ファイルの最初から画像データまでのデータサイズ
@@ -699,7 +734,7 @@ namespace Aqualis
                 let biPlanes:int16 = 1s             //常に1
                 let biBitCount:int16 = 24s          //色ビット数[bit]
                 let biCompression:int32 = 0         //圧縮形式
-                let biSizeimage:int32 = 0           //ビットマップデータのサイズ(0でもよい)
+                let biSizeimage = int32 layout.PixelBytes //ビットマップデータのサイズ
                 let biXPelsPerMeter:int32 = 0       //水平解像度(0でもよい)
                 let biYPelsPerMeter:int32 = 0       //垂直解像度(0でもよい)
                 let biClrUsed:int32 = 0             //ビットマップが実際に使用するカラーテーブルのエントリ数
