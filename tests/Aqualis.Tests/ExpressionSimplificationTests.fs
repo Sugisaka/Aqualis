@@ -7,6 +7,16 @@ module ExpressionSimplificationTests =
     let private namedInteger name =
         int0(Var(It 4, name, Int 0))
 
+    let private assertRemainsDivision (expression:expr) =
+        match expression.simp with
+        |Div _ -> ()
+        |actual -> Assert.Fail($"Expected division to remain symbolic, but got {actual}.")
+
+    let private assertRemainsModulo (expression:expr) =
+        match expression.simp with
+        |Mod _ -> ()
+        |actual -> Assert.Fail($"Expected modulo to remain symbolic, but got {actual}.")
+
     let private assertComparisonChain expected actual =
         let comparisonShape expression =
             match expression with
@@ -49,6 +59,40 @@ module ExpressionSimplificationTests =
         match expr.simpGreaterEq(variable, Int 1) with
         |GreaterEq(Var(It 4, "value", _), Int 1) -> ()
         |actual -> Assert.Fail($"Expected a symbolic greater-or-equal expression, but got {actual}.")
+
+    [<Fact>]
+    let ``division preserves expressions whose denominator may be zero`` () =
+        let realValue = Var(Dt, "realValue", NaN)
+        let complexValue = Var(Zt, "complexValue", NaN)
+
+        assertRemainsDivision (Div(Dt, Dbl 0.0, realValue))
+        assertRemainsDivision (Div(Dt, realValue, realValue))
+        assertRemainsDivision (Div(Zt, Cpx(0.0, 0.0), complexValue))
+        assertRemainsDivision (Div(Zt, complexValue, complexValue))
+
+    [<Fact>]
+    let ``integer division and modulo preserve expressions whose denominator may be zero`` () =
+        let value = Var(It 4, "value", NaN)
+
+        assertRemainsDivision (Div(It 4, Int 0, value))
+        assertRemainsDivision (Div(It 4, value, value))
+        assertRemainsModulo (Mod(It 4, Int 0, value))
+
+    [<Fact>]
+    let ``division and modulo still fold safe constants`` () =
+        match Div(Dt, Dbl 0.0, Dbl 2.0).simp with
+        |Dbl value -> Assert.Equal(0.0, value)
+        |actual -> Assert.Fail($"Expected a folded double zero, but got {actual}.")
+
+        for expression,expected in
+            [
+                Div(It 4, Int 6, Int 3), 2
+                Div(It 4, Int 0, Int 2), 0
+                Mod(It 4, Int 0, Int 2), 0
+            ] do
+            match expression.simp with
+            |Int value -> Assert.Equal(expected, value)
+            |actual -> Assert.Fail($"Expected a folded integer, but got {actual}.")
 
     [<Fact>]
     let ``numeric greater-or-equal executes true branch for equal constants`` () =

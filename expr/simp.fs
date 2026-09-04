@@ -233,9 +233,6 @@ namespace Aqualis
                 |_,Int 0 |_,Dbl 0.0 |_,Cpx (0.0,0.0) ->
                     Console.WriteLine "Error: ゼロ割りを検出しました"
                     NaN
-                |Int 0,_ -> Int 0
-                |Dbl 0.0,_ -> Dbl 0.0
-                |Cpx (0.0,0.0),_ -> Cpx (0.0,0.0)
                 |_,Int 1 -> x
                 |_,Dbl 1.0 -> x
                 |_,Cpx (1.0,0.0) -> x
@@ -251,7 +248,6 @@ namespace Aqualis
                 |Cpx (xre,xim), Int y -> Cpx (xre/double y,xim/double y)
                 |Cpx (xre,xim), Dbl y -> Cpx (xre/y,xim/y)
                 |Cpx (xre,xim), Cpx (yre,yim) -> let d = yre*yre+yim*yim in Cpx((xre*yre+xim*yim)/d, (-xre*yim+xim*yre)/d)
-                |_ when expr.equal(x,y) -> Int 1
                 |Int xx,Inv(_,y) when xx<0 -> (Int -xx / y).simp
                 |Dbl xx,Inv(_,y) when xx<0.0 -> (Dbl -xx / y).simp
                 |Inv(_,x),Int yy when yy<0 -> (x / Int -yy).simp
@@ -306,10 +302,8 @@ namespace Aqualis
                 |_,Int 0 -> 
                     Console.WriteLine "Error: ゼロ割りを検出しました"
                     NaN
-                |Int 0,_ -> Int 0
                 |_,Int 1 -> x
                 |Int x,Int y -> Int (x/y)
-                |_ when expr.equal(x,y) -> Int 1
                 |Inv(_,x),Inv(_,y) -> (x./y).simp
                 |_,Inv(_,v2) -> (-(x./v2).simp).simp
                 |Inv(_,v1),_ -> (-(v1./y).simp).simp
@@ -322,7 +316,6 @@ namespace Aqualis
                 |_,Int 0 -> 
                     Console.WriteLine "Error: ゼロ割りを検出しました"
                     NaN
-                |Int 0,_ -> Int 0
                 |_,Int 1 -> Int 0
                 |Int v1,Int v2 -> Int(v1 % v2)
                 |_ -> Mod(It 4, x,y)
