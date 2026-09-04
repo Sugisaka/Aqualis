@@ -172,12 +172,34 @@ module NumericFormattingTests =
             try
                 let format = numericFormatController language
                 let expected =
-                    format.DtoS 1.0 + "+uj*" + format.DtoS 2.0
+                    match language with
+                    |Fortran ->
+                        "(" + format.DtoS 1.0 + "," + format.DtoS 2.0 + ")"
+                    |Python ->
+                        format.DtoS 1.0 + "+1j*" + format.DtoS 2.0
+                    |_ ->
+                        format.DtoS 1.0 + "+uj*" + format.DtoS 2.0
 
                 Assert.Equal(expected, render value target)
             finally
                 target.close()
                 target.delete()
+
+    [<Fact>]
+    let ``Fortran imaginary unit uses a complex literal without declaring uj`` () =
+        use output = new TemporaryDirectory()
+        let project = "fortran-imaginary-unit"
+
+        Compile [Fortran] output.Path project "1.0" <| fun context ->
+            context.ch.z <| fun value ->
+                value <== context.asm.uj
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, project + ".f90"))
+
+        Assert.Contains("(0d0,1d0)", generated)
+        Assert.DoesNotContain(":: uj", generated)
+        Assert.DoesNotMatch(Regex(@"\buj\b"), generated)
 
     [<Fact>]
     let ``JavaScript conversions use valid JavaScript syntax`` () =

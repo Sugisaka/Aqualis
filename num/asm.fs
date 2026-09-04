@@ -155,8 +155,7 @@ namespace Aqualis
         member _.uj =
             match c.Language with
             |Fortran ->
-                c.cvar.setUniqVar(Zt,A0,"uj","(0d0,1d0)")
-                complex0(Var(Zt,"uj",NaN), context=c)
+                complex0(Cpx(0.0,1.0), context=c)
             |C99 ->
                 complex0(Var(Zt,"uj",NaN), context=c)
             |LaTeX ->

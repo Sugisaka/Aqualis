@@ -41,7 +41,6 @@ namespace Aqualis
                         //構造体の定義
                         context.str.Def_Structure writer
                         //グローバル変数の定義
-                        writer.codewritein "complex(kind(0d0)) :: uj=(0d0,1d0)\n"
                         declareall context writer
                         //メインコード
                         match context.allCodes with |Some s -> writer.codewritein s |None -> ()

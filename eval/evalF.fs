@@ -154,8 +154,8 @@ namespace Aqualis
                     |> fun lst -> String.Join(" .or. ", lst)
                 |Int x -> c.numFormat.ItoS x
                 |Dbl x -> c.numFormat.DtoS x
-                |Cpx (0.0,1.0) -> "uj"
-                |Cpx (re,im) -> c.numFormat.DtoS re + "+uj*" + c.numFormat.DtoS im
+                |Cpx (0.0,1.0) -> "(0d0,1d0)"
+                |Cpx (re,im) -> "(" + c.numFormat.DtoS re + "," + c.numFormat.DtoS im + ")"
                 |Var (_,s,x) -> s
                 |Inv(_,x) ->
                     match x with
