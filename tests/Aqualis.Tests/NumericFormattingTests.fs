@@ -60,18 +60,33 @@ module NumericFormattingTests =
             Assert.Fail($"Expected a complex literal, but got {other}.")
 
     [<Fact>]
-    let ``Python modulo renders a scalar remainder with grouped operands`` () =
+    let ``Python integer division and modulo truncate toward zero`` () =
         use target = Aqualis.BlankWriter Python
+        use cTarget = Aqualis.BlankWriter C99
+        use fortranTarget = Aqualis.BlankWriter Fortran
+        let dividend = Var(It 4, "dividend", NaN)
+        let divisor = Var(It 4, "divisor", NaN)
         let left = Add(It 4, Var(It 4, "left", NaN), Var(It 4, "right", NaN))
         let right = Sub(It 4, Var(It 4, "modulus", NaN), Var(It 4, "offset", NaN))
 
+        let division = Div(It 4, dividend, divisor)
+        let modulo = Mod(It 4, dividend, divisor)
         let simple = Mod(It 4, Var(It 4, "value", NaN), Int 2).evalPy target
         let compound = Mod(It 4, left, right).evalPy target
 
-        Assert.Equal("(value) % (2)", simple)
-        Assert.Equal("(left+right) % (modulus-offset)", compound)
-        Assert.DoesNotContain("divmod", simple)
-        Assert.DoesNotContain("divmod", compound)
+        let pythonDivision = division.evalPy target
+        let pythonModulo = modulo.evalPy target
+        Assert.Contains("abs(_aqualis_dividend) // abs(_aqualis_divisor)", pythonDivision)
+        Assert.Contains("(_aqualis_dividend < 0) == (_aqualis_divisor < 0)", pythonDivision)
+        Assert.Contains("_aqualis_dividend - ", pythonModulo)
+        Assert.Contains(" * _aqualis_divisor", pythonModulo)
+        Assert.Contains("(value, 2)", simple)
+        Assert.Contains("(left+right, modulus-offset)", compound)
+
+        Assert.Equal("dividend/divisor", division.evalC cTarget)
+        Assert.Equal("dividend/divisor", division.evalF fortranTarget)
+        Assert.Equal("dividend%divisor", modulo.evalC cTarget)
+        Assert.Equal("mod(dividend,divisor)", modulo.evalF fortranTarget)
 
     [<Fact>]
     let ``normal random generation uses unit-variance Box-Muller scaling`` () =
@@ -127,8 +142,8 @@ module NumericFormattingTests =
         let generated =
             File.ReadAllText(Path.Combine(output.Path, "python-fft-modulo.py"))
 
-        Assert.Contains(") % (2) == 0", generated)
-        Assert.DoesNotContain("divmod", generated)
+        Assert.Contains("abs(_aqualis_dividend) // abs(_aqualis_divisor)", generated)
+        Assert.Contains(", 2) == 0", generated)
 
     [<Fact>]
     let ``Python inverse FFT disables pyFFTW inverse normalization`` () =

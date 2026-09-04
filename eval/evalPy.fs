@@ -10,6 +10,27 @@ namespace Aqualis
     module exprEvalPy =
         
         open System
+
+        let private truncatingQuotient dividend divisor =
+            let magnitude =
+                "abs(" + dividend + ") // abs(" + divisor + ")"
+            let sameSign =
+                "(" + dividend + " < 0) == (" + divisor + " < 0)"
+            "(" + magnitude + " if " + sameSign + " else -(" + magnitude + "))"
+
+        let private truncatingIntegerDivision dividend divisor =
+            let dividendName = "_aqualis_dividend"
+            let divisorName = "_aqualis_divisor"
+            "(lambda " + dividendName + ", " + divisorName + ": " +
+            truncatingQuotient dividendName divisorName + ")(" +
+            dividend + ", " + divisor + ")"
+
+        let private truncatingIntegerRemainder dividend divisor =
+            let dividendName = "_aqualis_dividend"
+            let divisorName = "_aqualis_divisor"
+            "(lambda " + dividendName + ", " + divisorName + ": " +
+            dividendName + " - " + truncatingQuotient dividendName divisorName +
+            " * " + divisorName + ")(" + dividend + ", " + divisor + ")"
         
         type expr with
             
@@ -179,18 +200,15 @@ namespace Aqualis
                     |_,(Add _|Sub _) -> x.evalPy c + "*(" + y.evalPy c + ")"
                     |_ -> x.evalPy c + "*" + y.evalPy c
                 |Div(It _,x,y) ->
-                    match x,y with
-                    |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalPy c + ")//(" + y.evalPy c + ")"
-                    |(Add _|Sub _),_ -> "(" + x.evalPy c + ")//" + y.evalPy c
-                    |_,(Add _|Sub _|Mul _|Div _) -> x.evalPy c + "//(" + y.evalPy c + ")"
-                    |_ -> x.evalPy c + "//" + y.evalPy c
+                    truncatingIntegerDivision (x.evalPy c) (y.evalPy c)
                 |Div(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalPy c + ")/(" + y.evalPy c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalPy c + ")/" + y.evalPy c
                     |_,(Add _|Sub _|Mul _|Div _) -> x.evalPy c + "/(" + y.evalPy c + ")"
                     |_ -> x.evalPy c + "/" + y.evalPy c
-                |Mod(_,x,y) -> "(" + x.evalPy c + ") % (" + y.evalPy c + ")"
+                |Mod(_,x,y) ->
+                    truncatingIntegerRemainder (x.evalPy c) (y.evalPy c)
                 |Pow(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _|Mul _|Div _),(Add _|Sub _|Mul _|Div _) -> 
