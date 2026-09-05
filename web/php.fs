@@ -72,7 +72,11 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
             printfn "%s" (this.toString(".",StrQuotation))
             complex0 NaN
 
+    [<Obsolete("Use PHPdata.array(context) or context.php.array() so the empty array expression has a GenerationContext.")>]
     static member array() = PHPdata.f ("array()",Aqualis.BlankWriter PHP)
+
+    /// Creates an empty PHP array expression associated with the generation context.
+    static member array(context:Aqualis) = PHPdata.f(context,"array()")
 
     static member array(context:Aqualis,arrayname:string) =
         let c = PHPdata.var(context,arrayname)
@@ -200,6 +204,8 @@ and ContextPhp internal (context:Aqualis) =
     member _.var(name:string,init:int) = PHPdata.var(context,name,init)
     member _.var(name:string,init:double0) = PHPdata.var(context,name,init)
     member _.var(name:string,init:double) = PHPdata.var(context,name,init)
+    /// Creates an empty PHP array expression associated with this generation context.
+    member _.array() = PHPdata.array(context)
     member _.array(name:string) = PHPdata.array(context,name)
     member _.array(arrayname:string,data:list<string*string>) = PHPdata.array(context,arrayname,data)
     member _.array(arrayname:string,data:list<string*PHPdata>) = PHPdata.array(context,arrayname,data)

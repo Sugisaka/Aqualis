@@ -17,6 +17,26 @@ module PhpCommunicationGenerationTests =
             "Generated PHP must not invoke the shell exec function.")
 
     [<Fact>]
+    let ``empty array expressions and variables use the PHP generation context`` () =
+        let source =
+            generate (fun context ->
+                let values = context.php.var "values"
+                let empty = context.php.array()
+                let initialized = context.php.var("initialized", context.php.array())
+                let staticInitialized =
+                    PHPdata.var(context, "staticInitialized", PHPdata.array(context))
+
+                Assert.Same(context, empty.Context)
+                Assert.Same(context, values.Context)
+                Assert.Same(context, initialized.Context)
+                Assert.Same(context, staticInitialized.Context)
+                values <== empty)
+
+        Assert.Contains("$values = array();", source)
+        Assert.Contains("$initialized = array();", source)
+        Assert.Contains("$staticInitialized = array();", source)
+
+    [<Fact>]
     let ``SMTP mail uses proc open without a shell`` () =
         let source =
             generate (fun context ->
