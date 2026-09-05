@@ -513,32 +513,6 @@ module UploadPolicy =
         AllowedMimeTypes = allowedMimeTypes
         RandomNameBytes = 16 }
 
-    let internal legacy destinationDirectory = {
-        DestinationDirectory = destinationDirectory
-        MaxBytes = 10L * 1024L * 1024L
-        MaxFiles = 10
-        AllowedMimeTypes = [
-            "image/jpeg", "jpg"
-            "image/png", "png"
-            "image/gif", "gif"
-            "image/webp", "webp"
-            "application/pdf", "pdf"
-            "text/plain", "txt"
-            "text/csv", "csv"
-            "application/json", "json"
-            "application/zip", "zip" ]
-        RandomNameBytes = 16 }
-
-/// Values produced by a secure single-file upload.
-type UploadedFile = {
-    Success:bool0
-    StoredName:PHPdata
-    OriginalName:PHPdata
-    OriginalNameHtml:PHPdata
-    MimeType:PHPdata
-    Size:PHPdata
-    Error:PHPdata }
-
 /// Values produced by a validated multiple-file upload.
 type UploadedFiles = {
     /// One result record for every submitted file, including failures.
@@ -649,71 +623,83 @@ module private UploadGeneration =
         context.php.phpcode <| fun () ->
             lines |> List.iter context.writein
 
-    let uploadedFile (context:Aqualis) (prefix:string) =
-        let result = prefix + "_result"
-        let data (expression:string) = PHPdata.f(expression,context)
-        {
-            Success = bool0(Var(Nt,prefix + "_success",NaN),context)
-            StoredName = data (result + "['stored_name'] ?? null")
-            OriginalName = data (result + "['original_name'] ?? null")
-            OriginalNameHtml = data ("htmlspecialchars(" + result + "['original_name'] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')")
-            MimeType = data (result + "['mime_type'] ?? null")
-            Size = data (result + "['size'] ?? null")
-            Error = data (prefix + "_error")
-        }
+[<RequireQualifiedAccess>]
+type UploadCardinality =
+    | Single
+    | Multiple
 
-type postFile(context:Aqualis,id:PHPdata) =
-    let mutable singleSaveEmitted = false
-    let mutable multipleSaveEmitted = false
+/// A single- or multiple-file upload field with one consistent API.
+type postFile private (context:Aqualis,id:PHPdata,cardinality:UploadCardinality) =
+    let mutable saveEmitted = false
+    let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
 
-    let duplicateSave operation =
-        invalidOp (
-            operation + " was called more than once for upload field '" + id.code + "'. " +
-            "Store and reuse the first result instead.")
+    let appendFailure prefix message =
+        context.writein (
+            "$result = ['success' => false, 'stored_name' => null, 'original_name' => '', " +
+            "'mime_type' => null, 'size' => null, 'error' => '" + message + "'];")
+        context.writein(prefix + "_results[] = $result;")
+        context.writein(prefix + "_errors[] = $result['error'];")
 
-    new(ctx:Aqualis,x:string) = postFile(ctx,PHPdata x)
-    member _.files with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"name\"]")
-    member _.err with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"error\"]")
+    static member single(ctx:Aqualis,id:PHPdata) =
+        postFile(ctx,id,UploadCardinality.Single)
 
-    /// Generates a validated single-file upload and returns its result variables.
+    static member single(ctx:Aqualis,id:string) =
+        postFile.single(ctx,PHPdata id)
+
+    static member multiple(ctx:Aqualis,id:PHPdata) =
+        postFile(ctx,id,UploadCardinality.Multiple)
+
+    static member multiple(ctx:Aqualis,id:string) =
+        postFile.multiple(ctx,PHPdata id)
+
+    member _.cardinality = cardinality
+
+    /// True when the request contains at least one selected file for this field.
+    member _.isFileSpecified with get() =
+        let expression =
+            match cardinality with
+            | UploadCardinality.Single ->
+                "isset(" + fileExpression + "['error']) && " +
+                "!is_array(" + fileExpression + "['error']) && " +
+                "(int)" + fileExpression + "['error'] !== UPLOAD_ERR_NO_FILE"
+            | UploadCardinality.Multiple ->
+                "isset(" + fileExpression + "['error'][0]) && " +
+                "(int)" + fileExpression + "['error'][0] !== UPLOAD_ERR_NO_FILE"
+        bool0(Var(Nt,"(" + expression + ")",NaN),context)
+
+    /// Emits the file input. The surrounding form must use multipart/form-data.
+    member _.select() =
+        let attributes =
+            match cardinality with
+            | UploadCardinality.Single ->
+                ["name",id; "type",PHPdata "file"]
+            | UploadCardinality.Multiple ->
+                ["multiple",PHPdata "multiple"; "name",id++"[]"; "type",PHPdata "file"]
+        context.html.taga("input",attributes)
+
+    /// Emits a standalone multipart form containing this field and a submit button.
+    member this.select(actionPhpFile:string) =
+        context.html.tagb (
+            "form",
+            [Atr("action",actionPhpFile); Atr("enctype","multipart/form-data"); Atr("method","post")])
+        <| fun () ->
+            this.select()
+            context.html.taga("input",[Atr("type","submit"); Atr("value","アップロード")])
+
+    /// Validates and stores the upload. Single uploads are returned as a one-item result collection.
     member _.save(policy:UploadPolicy) =
-        if multipleSaveEmitted then
-            invalidOp ("Upload field '" + id.code + "' is already configured for multiple-file storage.")
-        if singleSaveEmitted then
-            duplicateSave "save"
-        let prefix = UploadGeneration.prefix "single" id
-        let saveFunction = prefix + "_save_one"
-        let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
-        UploadGeneration.emitSaveFunction context saveFunction policy
-        context.php.phpcode <| fun () ->
-            context.writein(prefix + "_success = false;")
-            context.writein(prefix + "_result = null;")
-            context.writein(prefix + "_error = null;")
-            context.writein "try {"
-            context.writein("if (!isset(" + fileExpression + ") || !is_array(" + fileExpression + ")) {")
-            context.writein "throw new \\RuntimeException('Invalid upload data.');"
-            context.writein "}"
-            context.writein("if (isset(" + fileExpression + "['error']) && is_array(" + fileExpression + "['error'])) {")
-            context.writein "throw new \\RuntimeException('Multiple-file upload data received. Use saveMany.');"
-            context.writein "}"
-            context.writein(prefix + "_result = " + saveFunction + "(" + fileExpression + ");")
-            context.writein(prefix + "_success = true;")
-            context.writein "} catch (\\Throwable $exception) {"
-            context.writein(prefix + "_error = $exception->getMessage();")
-            context.writein "}"
-        let result = UploadGeneration.uploadedFile context prefix
-        singleSaveEmitted <- true
-        result
+        if saveEmitted then
+            invalidOp (
+                "save was called more than once for upload field '" + id.code + "'. " +
+                "Store and reuse the first result instead.")
 
-    /// Generates validated multiple-file uploads and exposes storage metadata.
-    member _.saveManyDetailed(policy:UploadPolicy) =
-        if singleSaveEmitted then
-            invalidOp ("Upload field '" + id.code + "' is already configured for single-file storage.")
-        if multipleSaveEmitted then
-            duplicateSave "saveManyDetailed/saveMany"
-        let prefix = UploadGeneration.prefix "many" id
+        let mode =
+            match cardinality with
+            | UploadCardinality.Single -> "single"
+            | UploadCardinality.Multiple -> "many"
+        let prefix = UploadGeneration.prefix mode id
         let saveFunction = prefix + "_save_one"
-        let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
+        let processFunction = prefix + "_process_one"
         UploadGeneration.emitSaveFunction context saveFunction policy
         context.php.phpcode <| fun () ->
             context.writein(prefix + "_results = [];")
@@ -721,22 +707,10 @@ type postFile(context:Aqualis,id:PHPdata) =
             context.writein(prefix + "_stored_names = [];")
             context.writein(prefix + "_original_names = [];")
             context.writein(prefix + "_errors = [];")
-            context.writein("if (!isset(" + fileExpression + "['error']) || !is_array(" + fileExpression + "['error'])) {")
-            context.writein "$result = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Invalid upload data.'];"
-            context.writein(prefix + "_results[] = $result;")
-            context.writein(prefix + "_errors[] = $result['error'];")
-            context.writein("} elseif (count(" + fileExpression + "['error']) > " + string policy.MaxFiles + ") {")
-            context.writein "$result = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Too many uploaded files.'];"
-            context.writein(prefix + "_results[] = $result;")
-            context.writein(prefix + "_errors[] = $result['error'];")
-            context.writein "} else {"
-            context.writein("foreach (" + fileExpression + "['error'] as $index => $uploadError) {")
-            context.writein "$upload = ["
-            context.writein("'name' => " + fileExpression + "['name'][$index] ?? '',")
-            context.writein("'tmp_name' => " + fileExpression + "['tmp_name'][$index] ?? '',")
-            context.writein "'error' => $uploadError,"
-            context.writein("'size' => " + fileExpression + "['size'][$index] ?? -1,")
-            context.writein "];"
+            context.writein(
+                processFunction + " = static function (array $upload) use (" +
+                saveFunction + ", &" + prefix + "_results, &" + prefix + "_successful, &" +
+                prefix + "_stored_names, &" + prefix + "_original_names, &" + prefix + "_errors): void {")
             context.writein "try {"
             context.writein("$result = " + saveFunction + "($upload);")
             context.writein "$result['success'] = true;"
@@ -748,7 +722,7 @@ type postFile(context:Aqualis,id:PHPdata) =
             context.writein "$result = ["
             context.writein "'success' => false,"
             context.writein "'stored_name' => null,"
-            context.writein "'original_name' => basename((string)$upload['name']),"
+            context.writein "'original_name' => basename((string)($upload['name'] ?? '')),"
             context.writein "'mime_type' => null,"
             context.writein "'size' => isset($upload['size']) ? (int)$upload['size'] : null,"
             context.writein "'error' => $exception->getMessage(),"
@@ -756,8 +730,34 @@ type postFile(context:Aqualis,id:PHPdata) =
             context.writein(prefix + "_errors[] = $result['error'];")
             context.writein "}"
             context.writein(prefix + "_results[] = $result;")
-            context.writein "}"
-            context.writein "}"
+            context.writein "};"
+
+            match cardinality with
+            | UploadCardinality.Single ->
+                context.writein(
+                    "if (!isset(" + fileExpression + ") || !is_array(" + fileExpression + ") || " +
+                    "!array_key_exists('error', " + fileExpression + ") || is_array(" + fileExpression + "['error'])) {")
+                appendFailure prefix "Invalid single-file upload data."
+                context.writein "} else {"
+                context.writein(processFunction + "(" + fileExpression + ");")
+                context.writein "}"
+            | UploadCardinality.Multiple ->
+                context.writein("if (!isset(" + fileExpression + "['error']) || !is_array(" + fileExpression + "['error'])) {")
+                appendFailure prefix "Invalid multiple-file upload data."
+                context.writein("} elseif (count(" + fileExpression + "['error']) > " + string policy.MaxFiles + ") {")
+                appendFailure prefix "Too many uploaded files."
+                context.writein "} else {"
+                context.writein("foreach (" + fileExpression + "['error'] as $index => $uploadError) {")
+                context.writein "$upload = ["
+                context.writein("'name' => " + fileExpression + "['name'][$index] ?? '',")
+                context.writein("'tmp_name' => " + fileExpression + "['tmp_name'][$index] ?? '',")
+                context.writein "'error' => $uploadError,"
+                context.writein("'size' => " + fileExpression + "['size'][$index] ?? -1,")
+                context.writein "];"
+                context.writein(processFunction + "($upload);")
+                context.writein "}"
+                context.writein "}"
+
         let data suffix = PHPdata.f(context,prefix + suffix)
         let result = {
             Results = data "_results"
@@ -766,77 +766,11 @@ type postFile(context:Aqualis,id:PHPdata) =
             OriginalNames = data "_original_names"
             Errors = data "_errors"
             AllSucceeded = bool0(Var(Nt,"count(" + prefix + "_errors) === 0",NaN),context) }
-        multipleSaveEmitted <- true
+        saveEmitted <- true
         result
 
-    /// Generates and consumes a multiple-file result at the same code-generation location.
-    member this.saveManyDetailedWith(policy:UploadPolicy) = fun (code:UploadedFiles -> unit) ->
+    /// Generates storage and consumes its result at the same code-generation location.
+    member this.saveWith(policy:UploadPolicy) = fun (code:UploadedFiles -> unit) ->
         if isNull (box code) then nullArg (nameof code)
-        let result = this.saveManyDetailed(policy)
+        let result = this.save(policy)
         code result
-
-    /// Generates validated multiple-file uploads and returns an array of result records.
-    member this.saveMany(policy:UploadPolicy) =
-        (this.saveManyDetailed(policy)).Results
-
-    [<Obsolete("Use save with an explicit UploadPolicy.")>]
-    member this.file_upload dir =
-        this.save(UploadPolicy.legacy dir) |> ignore
-
-    [<Obsolete("Use save with an explicit UploadPolicy.")>]
-    member this.file_upload_check dir =
-        let result = this.save(UploadPolicy.legacy dir)
-        context.br.if2 result.Success <| fun () ->
-            context.php.echo "アップロード完了"
-        <| fun () ->
-            context.php.echo result.Error
-
-    member this.file_select() =
-        context.html.tagb ("form", [Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            context.html.taga ("input", ["name",id; "type",PHPdata "file"])
-            context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
-    member this.file_select(action_phpfile:string) =
-        context.html.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post");]) <| fun () ->
-            context.html.taga ("input", ["name",id; "type",PHPdata "file"])
-            context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード");])
-
-    [<Obsolete("Use saveMany with an explicit UploadPolicy.")>]
-    member this.files_upload dir =
-        this.saveMany(UploadPolicy.legacy dir) |> ignore
-
-    [<Obsolete("Use saveMany with an explicit UploadPolicy.")>]
-    member this.files_upload_check(dir) =
-        this.saveMany(UploadPolicy.legacy dir) |> ignore
-
-    member this.files_select() =
-        context.html.taga ("input", ["multiple",PHPdata "multiple"; "name", id++"[]"; "type",PHPdata "file"])
-        
-    member this.files_select(action_phpfile:string) =
-        context.html.tagb ("form", [Atr("action",action_phpfile); Atr("enctype","multipart/form-data"); Atr("method","post")]) <| fun () ->
-            context.html.taga ("input", ["multiple",PHPdata "multiple"; "name", id++"[]"; "type",PHPdata "file"])
-            context.html.taga ("input", [Atr("type","submit"); Atr("value","アップロード")])
-        
-    /// ファイルが指定されているか
-    member this.isFileSpecified with get() =
-        //ファイルが指定されていないとき、post_newfiles.err[0] = 4になる
-        this.err[0].int0 .=/ 4
-
-/// A multiple-file upload whose API cannot accidentally select single-file storage.
-type postFiles(context:Aqualis,id:PHPdata) =
-    let upload = postFile(context,id)
-
-    new(ctx:Aqualis,id:string) = postFiles(ctx,PHPdata id)
-
-    member _.files with get() = upload.files
-    member _.err with get() = upload.err
-    member _.isFileSpecified with get() = upload.isFileSpecified
-
-    /// Generates validated storage and returns detailed results.
-    member _.save(policy:UploadPolicy) = upload.saveManyDetailed(policy)
-
-    /// Generates and consumes detailed results at the same code-generation location.
-    member _.saveWith(policy:UploadPolicy) = fun (code:UploadedFiles -> unit) ->
-        upload.saveManyDetailedWith policy code
-
-    member _.select() = upload.files_select()
-    member _.select(actionPhpFile:string) = upload.files_select(actionPhpFile)
