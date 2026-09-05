@@ -136,3 +136,56 @@ module NumericArrayGenericTests =
             realResults1 |> List.iter (fun result -> Assert.Equal(Dt,result.etype))
             realResults2 |> List.iter (fun result -> Assert.Equal(Dt,result.etype))
             realResults3 |> List.iter (fun result -> Assert.Equal(Dt,result.etype))
+
+    [<Fact>]
+    let ``array math results preserve their generation context`` () =
+        use output = new TemporaryDirectory()
+        Aqualis.makeProgramWithContext (output.Path,"array-context.c",C99) <| fun context ->
+            let exponent = context.var.i0 "exponent"
+            let i1 = context.var.i1("integers1",2)
+            let d1 = context.var.d1("reals1",2)
+            let z1 = context.var.z1("complex1",2)
+            let i2 = context.var.i2("integers2",2,2)
+            let d2 = context.var.d2("reals2",2,2)
+            let z2 = context.var.z2("complex2",2,2)
+            let i3 = context.var.i3("integers3",2,2,2)
+            let d3 = context.var.d3("reals3",2,2,2)
+            let z3 = context.var.z3("complex3",2,2,2)
+
+            let resultContexts : Aqualis list = [
+                (asm.sin i1).Context
+                (asm.pow(i1,exponent)).Context
+                (i1 ./ exponent).Context
+                (asm.floor d1).Context
+                (asm.atan2(d1,d1)).Context
+                (asm.conj z1).Context
+                (asm.abs z1).Context
+                (asm.pow(z1,exponent)).Context
+                (asm.sin i2).Context
+                (i2 ./ exponent).Context
+                (asm.atan2(d2,d2)).Context
+                (asm.conj z2).Context
+                (asm.pow(z2,exponent)).Context
+                (asm.sin i3).Context
+                (i3 ./ exponent).Context
+                (asm.atan2(d3,d3)).Context
+                (asm.conj z3).Context
+                (asm.pow(z3,exponent)).Context ]
+
+            resultContexts |> List.iter (fun resultContext -> Assert.Same(context,resultContext))
+
+    [<Fact>]
+    let ``array math rejects operands from different generation contexts`` () =
+        use output = new TemporaryDirectory()
+        Aqualis.makeProgramWithContext (output.Path,"left-context.c",C99) <| fun leftContext ->
+            let left = leftContext.var.d1("left",2)
+            let leftIntegers = leftContext.var.i1("leftIntegers",2)
+            Aqualis.makeProgramWithContext (output.Path,"right-context.c",C99) <| fun rightContext ->
+                let right = rightContext.var.d1("right",2)
+                let rightExponent = rightContext.var.i0 "rightExponent"
+                Assert.Throws<System.InvalidOperationException>(fun () -> asm.atan2(left,right) |> ignore)
+                |> ignore
+                Assert.Throws<System.InvalidOperationException>(fun () -> asm.pow(leftIntegers,rightExponent) |> ignore)
+                |> ignore
+                Assert.Throws<System.InvalidOperationException>(fun () -> leftIntegers ./ rightExponent |> ignore)
+                |> ignore

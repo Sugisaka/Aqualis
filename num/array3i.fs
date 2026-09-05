@@ -22,10 +22,10 @@ namespace Aqualis
         override _.AssignAt(i,j,k,value)=this[i,j,k] <== int0(value,this.Context)
         override _.clear()=this.AssignScalar(I 0)
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
-        static member (./)(x:int3,y:int3)=base3.sizeMismatchError(x,y);int3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->Div(It 4,x[i,j,k].Expr,y[i,j,k].Expr)))
-        static member (./)(x:int0,y:int3)=int3(x.etype%%y.etype,Arx3(y.size1,y.size2,y.size3,fun(i,j,k)->Div(It 4,x.Expr,y[i,j,k].Expr)))
+        static member (./)(x:int3,y:int3)=base3.sizeMismatchError(x,y);int3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->Div(It 4,x[i,j,k].Expr,y[i,j,k].Expr)),Aqualis.merge x.Context y.Context)
+        static member (./)(x:int0,y:int3)=int3(x.etype%%y.etype,Arx3(y.size1,y.size2,y.size3,fun(i,j,k)->Div(It 4,x.Expr,y[i,j,k].Expr)),Aqualis.merge x.Context y.Context)
         static member (./)(x:int,y:int3)=I x ./ y
-        static member (./)(x:int3,y:int0)=int3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->Div(It 4,x[i,j,k].Expr,y.Expr)))
+        static member (./)(x:int3,y:int0)=int3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->Div(It 4,x[i,j,k].Expr,y.Expr)),Aqualis.merge x.Context y.Context)
         static member (./)(x:int3,y:int)=x ./ I y
         static member (<==)(x:int3,y:int3)=x.AssignArray y
         static member (<==)(x:int3,y:int0)=x.AssignScalar y
@@ -34,16 +34,16 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_int3=
         type asm with
-            static member pow(x:int3,y:int0)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.pow(x[i,j,k],y).Expr))
-            static member sin(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sin(x[i,j,k]).Expr))
-            static member cos(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.cos(x[i,j,k]).Expr))
-            static member tan(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.tan(x[i,j,k]).Expr))
-            static member asin(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.asin(x[i,j,k]).Expr))
-            static member acos(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.acos(x[i,j,k]).Expr))
-            static member atan(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan(x[i,j,k]).Expr))
-            static member atan2(x:int3,y:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan2(x[i,j,k],y[i,j,k]).Expr))
-            static member exp(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.exp(x[i,j,k]).Expr))
-            static member abs(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.abs(x[i,j,k]).Expr))
-            static member log(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log(x[i,j,k]).Expr))
-            static member log10(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log10(x[i,j,k]).Expr))
-            static member sqrt(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sqrt(x[i,j,k]).Expr))
+            static member pow(x:int3,y:int0)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.pow(x[i,j,k],y).Expr),Aqualis.merge x.Context y.Context)
+            static member sin(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sin(x[i,j,k]).Expr),x.Context)
+            static member cos(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.cos(x[i,j,k]).Expr),x.Context)
+            static member tan(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.tan(x[i,j,k]).Expr),x.Context)
+            static member asin(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.asin(x[i,j,k]).Expr),x.Context)
+            static member acos(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.acos(x[i,j,k]).Expr),x.Context)
+            static member atan(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan(x[i,j,k]).Expr),x.Context)
+            static member atan2(x:int3,y:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan2(x[i,j,k],y[i,j,k]).Expr),Aqualis.merge x.Context y.Context)
+            static member exp(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.exp(x[i,j,k]).Expr),x.Context)
+            static member abs(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.abs(x[i,j,k]).Expr),x.Context)
+            static member log(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log(x[i,j,k]).Expr),x.Context)
+            static member log10(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log10(x[i,j,k]).Expr),x.Context)
+            static member sqrt(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sqrt(x[i,j,k]).Expr),x.Context)

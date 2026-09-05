@@ -17,10 +17,10 @@ namespace Aqualis
         override _.AssignAt(i,j,value)=this[i,j] <== int0(value,this.Context)
         override _.clear()=this.AssignScalar(I 0)
         override _.sizeinit()=this.size1<== -1; this.size2<== -1
-        static member (./)(x:int2,y:int2)=base2.sizeMismatchError(x,y);int2(x.etype%%y.etype,Arx2(x.size1,x.size2,fun(i,j)->Div(It 4,x[i,j].Expr,y[i,j].Expr)))
-        static member (./)(x:int0,y:int2)=int2(x.etype%%y.etype,Arx2(y.size1,y.size2,fun(i,j)->Div(It 4,x.Expr,y[i,j].Expr)))
+        static member (./)(x:int2,y:int2)=base2.sizeMismatchError(x,y);int2(x.etype%%y.etype,Arx2(x.size1,x.size2,fun(i,j)->Div(It 4,x[i,j].Expr,y[i,j].Expr)),Aqualis.merge x.Context y.Context)
+        static member (./)(x:int0,y:int2)=int2(x.etype%%y.etype,Arx2(y.size1,y.size2,fun(i,j)->Div(It 4,x.Expr,y[i,j].Expr)),Aqualis.merge x.Context y.Context)
         static member (./)(x:int,y:int2)=I x ./ y
-        static member (./)(x:int2,y:int0)=int2(x.etype%%y.etype,Arx2(x.size1,x.size2,fun(i,j)->Div(It 4,x[i,j].Expr,y.Expr)))
+        static member (./)(x:int2,y:int0)=int2(x.etype%%y.etype,Arx2(x.size1,x.size2,fun(i,j)->Div(It 4,x[i,j].Expr,y.Expr)),Aqualis.merge x.Context y.Context)
         static member (./)(x:int2,y:int)=x ./ I y
         static member (<==)(x:int2,y:int2)=x.AssignArray y
         static member (<==)(x:int2,y:int0)=x.AssignScalar y
@@ -29,16 +29,16 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_int2 =
         type asm with
-            static member pow(x:int2,y:int0)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.pow(x[i,j],y).Expr))
-            static member sin(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.sin(x[i,j]).Expr))
-            static member cos(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.cos(x[i,j]).Expr))
-            static member tan(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.tan(x[i,j]).Expr))
-            static member asin(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.asin(x[i,j]).Expr))
-            static member acos(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.acos(x[i,j]).Expr))
-            static member atan(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.atan(x[i,j]).Expr))
-            static member atan2(x:int2,y:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.atan2(x[i,j],y[i,j]).Expr))
-            static member exp(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.exp(x[i,j]).Expr))
-            static member abs(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.abs(x[i,j]).Expr))
-            static member log(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.log(x[i,j]).Expr))
-            static member log10(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.log10(x[i,j]).Expr))
-            static member sqrt(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.sqrt(x[i,j]).Expr))
+            static member pow(x:int2,y:int0)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.pow(x[i,j],y).Expr),Aqualis.merge x.Context y.Context)
+            static member sin(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.sin(x[i,j]).Expr),x.Context)
+            static member cos(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.cos(x[i,j]).Expr),x.Context)
+            static member tan(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.tan(x[i,j]).Expr),x.Context)
+            static member asin(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.asin(x[i,j]).Expr),x.Context)
+            static member acos(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.acos(x[i,j]).Expr),x.Context)
+            static member atan(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.atan(x[i,j]).Expr),x.Context)
+            static member atan2(x:int2,y:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.atan2(x[i,j],y[i,j]).Expr),Aqualis.merge x.Context y.Context)
+            static member exp(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.exp(x[i,j]).Expr),x.Context)
+            static member abs(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.abs(x[i,j]).Expr),x.Context)
+            static member log(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.log(x[i,j]).Expr),x.Context)
+            static member log10(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.log10(x[i,j]).Expr),x.Context)
+            static member sqrt(x:int2)=double2(Dt,Arx2(x.size1,x.size2,fun(i,j)->asm.sqrt(x[i,j]).Expr),x.Context)

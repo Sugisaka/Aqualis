@@ -33,23 +33,23 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_complex1 =
         type asm with
-            static member pow(x:complex1,y:int0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr))
-            static member pow(x:complex1,y:double0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr))
-            static member pow(x:complex1,y:complex0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr))
+            static member pow(x:complex1,y:int0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
+            static member pow(x:complex1,y:double0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
+            static member pow(x:complex1,y:complex0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
             static member pow(x:complex1,y:int) = asm.pow(x,I y)
             static member pow(x:complex1,y:double) = asm.pow(x,D y)
-            static member sin(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.sin(x[i]).Expr))
-            static member cos(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.cos(x[i]).Expr))
-            static member tan(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.tan(x[i]).Expr))
-            static member asin(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.asin(x[i]).Expr))
-            static member acos(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.acos(x[i]).Expr))
-            static member atan(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.atan(x[i]).Expr))
-            static member exp(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.exp(x[i]).Expr))
-            static member abs(x:complex1) = double1(Dt,Arx1(x.size1,fun i -> asm.abs(x[i]).Expr))
-            static member log(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.log(x[i]).Expr))
-            static member log10(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.log10(x[i]).Expr))
-            static member sqrt(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.sqrt(x[i]).Expr))
-            static member conj(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.conj(x[i]).Expr))
+            static member sin(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.sin(x[i]).Expr),x.Context)
+            static member cos(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.cos(x[i]).Expr),x.Context)
+            static member tan(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.tan(x[i]).Expr),x.Context)
+            static member asin(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.asin(x[i]).Expr),x.Context)
+            static member acos(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.acos(x[i]).Expr),x.Context)
+            static member atan(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.atan(x[i]).Expr),x.Context)
+            static member exp(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.exp(x[i]).Expr),x.Context)
+            static member abs(x:complex1) = double1(Dt,Arx1(x.size1,fun i -> asm.abs(x[i]).Expr),x.Context)
+            static member log(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.log(x[i]).Expr),x.Context)
+            static member log10(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.log10(x[i]).Expr),x.Context)
+            static member sqrt(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.sqrt(x[i]).Expr),x.Context)
+            static member conj(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.conj(x[i]).Expr),x.Context)
 
     [<AutoOpen>]
     module Real1Extensions =
