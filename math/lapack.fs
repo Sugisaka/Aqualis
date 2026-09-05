@@ -1406,7 +1406,7 @@ namespace Aqualis
                 context.ch.d2 (mat.size1, mat.size2) <| fun vt ->
                     this.svd mat (u,s,vt)
                     context.group.comment "0に近いほど正確な解"
-                    context.print.tt <| "solve_homogeneq"++s[mat.size1]
+                    context.print.tt <| "solve_homogeneq"++s[mat.size1-1]
                     context.iter.num mat.size1 <| fun i ->
                         f[i] <== vt[mat.size1,i]
 
@@ -1421,7 +1421,7 @@ namespace Aqualis
                 context.ch.z2 (mat.size1, mat.size2) <| fun vt ->
                     this.svd mat (u,s,vt)
                     context.group.comment "0に近いほど正確な解"
-                    context.print.tt <| "solve_homogeneq"++s[mat.size1]
+                    context.print.tt <| "solve_homogeneq"++s[mat.size1-1]
                     context.iter.num mat.size1 <| fun i ->
                         f[i] <== asm.conj(vt[mat.size1,i])
 
