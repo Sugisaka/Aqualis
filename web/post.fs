@@ -539,6 +539,21 @@ type UploadedFile = {
     Size:PHPdata
     Error:PHPdata }
 
+/// Values produced by a validated multiple-file upload.
+type UploadedFiles = {
+    /// One result record for every submitted file, including failures.
+    Results:PHPdata
+    /// Result records for files that were successfully stored.
+    Successful:PHPdata
+    /// Server-generated names for successfully stored files.
+    StoredNames:PHPdata
+    /// Client-provided base names for successfully stored files.
+    OriginalNames:PHPdata
+    /// Error messages for files that could not be stored.
+    Errors:PHPdata
+    /// True only when every submitted file was stored successfully.
+    AllSucceeded:bool0 }
+
 module private UploadGeneration =
     let phpString (value:string) =
         if isNull value then nullArg (nameof value)
@@ -648,69 +663,121 @@ module private UploadGeneration =
         }
 
 type postFile(context:Aqualis,id:PHPdata) =
+    let mutable singleSave: (UploadPolicy * UploadedFile) option = None
+    let mutable multipleSave: (UploadPolicy * UploadedFiles) option = None
+
+    let ensureSamePolicy operation requestedPolicy cachedPolicy =
+        if requestedPolicy <> cachedPolicy then
+            invalidOp (
+                "Upload field '" + id.code + "' already uses a different policy for " + operation + ".")
+
     new(ctx:Aqualis,x:string) = postFile(ctx,PHPdata x)
     member _.files with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"name\"]")
     member _.err with get() = PHPdata.f(context,"$_FILES["+id.toString(".",StrQuotation)+"][\"error\"]")
 
     /// Generates a validated single-file upload and returns its result variables.
     member _.save(policy:UploadPolicy) =
-        let prefix = UploadGeneration.prefix "single" id
-        let saveFunction = prefix + "_save_one"
-        let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
-        UploadGeneration.emitSaveFunction context saveFunction policy
-        context.php.phpcode <| fun () ->
-            context.writein(prefix + "_success = false;")
-            context.writein(prefix + "_result = null;")
-            context.writein(prefix + "_error = null;")
-            context.writein "try {"
-            context.writein("if (!isset(" + fileExpression + ") || !is_array(" + fileExpression + ")) {")
-            context.writein "throw new \\RuntimeException('Invalid upload data.');"
-            context.writein "}"
-            context.writein(prefix + "_result = " + saveFunction + "(" + fileExpression + ");")
-            context.writein(prefix + "_success = true;")
-            context.writein "} catch (\\Throwable $exception) {"
-            context.writein(prefix + "_error = $exception->getMessage();")
-            context.writein "}"
-        UploadGeneration.uploadedFile context prefix
+        if multipleSave.IsSome then
+            invalidOp ("Upload field '" + id.code + "' is already configured for multiple-file storage.")
+        match singleSave with
+        | Some(cachedPolicy,result) ->
+            ensureSamePolicy "single-file storage" policy cachedPolicy
+            result
+        | None ->
+            let prefix = UploadGeneration.prefix "single" id
+            let saveFunction = prefix + "_save_one"
+            let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
+            UploadGeneration.emitSaveFunction context saveFunction policy
+            context.php.phpcode <| fun () ->
+                context.writein(prefix + "_success = false;")
+                context.writein(prefix + "_result = null;")
+                context.writein(prefix + "_error = null;")
+                context.writein "try {"
+                context.writein("if (!isset(" + fileExpression + ") || !is_array(" + fileExpression + ")) {")
+                context.writein "throw new \\RuntimeException('Invalid upload data.');"
+                context.writein "}"
+                context.writein("if (isset(" + fileExpression + "['error']) && is_array(" + fileExpression + "['error'])) {")
+                context.writein "throw new \\RuntimeException('Multiple-file upload data received. Use saveMany.');"
+                context.writein "}"
+                context.writein(prefix + "_result = " + saveFunction + "(" + fileExpression + ");")
+                context.writein(prefix + "_success = true;")
+                context.writein "} catch (\\Throwable $exception) {"
+                context.writein(prefix + "_error = $exception->getMessage();")
+                context.writein "}"
+            let result = UploadGeneration.uploadedFile context prefix
+            singleSave <- Some(policy,result)
+            result
+
+    /// Generates validated multiple-file uploads and exposes storage metadata.
+    member _.saveManyDetailed(policy:UploadPolicy) =
+        if singleSave.IsSome then
+            invalidOp ("Upload field '" + id.code + "' is already configured for single-file storage.")
+        match multipleSave with
+        | Some(cachedPolicy,result) ->
+            ensureSamePolicy "multiple-file storage" policy cachedPolicy
+            result
+        | None ->
+            let prefix = UploadGeneration.prefix "many" id
+            let saveFunction = prefix + "_save_one"
+            let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
+            UploadGeneration.emitSaveFunction context saveFunction policy
+            context.php.phpcode <| fun () ->
+                context.writein(prefix + "_results = [];")
+                context.writein(prefix + "_successful = [];")
+                context.writein(prefix + "_stored_names = [];")
+                context.writein(prefix + "_original_names = [];")
+                context.writein(prefix + "_errors = [];")
+                context.writein("if (!isset(" + fileExpression + "['error']) || !is_array(" + fileExpression + "['error'])) {")
+                context.writein "$result = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Invalid upload data.'];"
+                context.writein(prefix + "_results[] = $result;")
+                context.writein(prefix + "_errors[] = $result['error'];")
+                context.writein("} elseif (count(" + fileExpression + "['error']) > " + string policy.MaxFiles + ") {")
+                context.writein "$result = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Too many uploaded files.'];"
+                context.writein(prefix + "_results[] = $result;")
+                context.writein(prefix + "_errors[] = $result['error'];")
+                context.writein "} else {"
+                context.writein("foreach (" + fileExpression + "['error'] as $index => $uploadError) {")
+                context.writein "$upload = ["
+                context.writein("'name' => " + fileExpression + "['name'][$index] ?? '',")
+                context.writein("'tmp_name' => " + fileExpression + "['tmp_name'][$index] ?? '',")
+                context.writein "'error' => $uploadError,"
+                context.writein("'size' => " + fileExpression + "['size'][$index] ?? -1,")
+                context.writein "];"
+                context.writein "try {"
+                context.writein("$result = " + saveFunction + "($upload);")
+                context.writein "$result['success'] = true;"
+                context.writein "$result['error'] = null;"
+                context.writein(prefix + "_successful[] = $result;")
+                context.writein(prefix + "_stored_names[] = $result['stored_name'];")
+                context.writein(prefix + "_original_names[] = $result['original_name'];")
+                context.writein "} catch (\\Throwable $exception) {"
+                context.writein "$result = ["
+                context.writein "'success' => false,"
+                context.writein "'stored_name' => null,"
+                context.writein "'original_name' => basename((string)$upload['name']),"
+                context.writein "'mime_type' => null,"
+                context.writein "'size' => isset($upload['size']) ? (int)$upload['size'] : null,"
+                context.writein "'error' => $exception->getMessage(),"
+                context.writein "];"
+                context.writein(prefix + "_errors[] = $result['error'];")
+                context.writein "}"
+                context.writein(prefix + "_results[] = $result;")
+                context.writein "}"
+                context.writein "}"
+            let data suffix = PHPdata.f(context,prefix + suffix)
+            let result = {
+                Results = data "_results"
+                Successful = data "_successful"
+                StoredNames = data "_stored_names"
+                OriginalNames = data "_original_names"
+                Errors = data "_errors"
+                AllSucceeded = bool0(Var(Nt,"count(" + prefix + "_errors) === 0",NaN),context) }
+            multipleSave <- Some(policy,result)
+            result
 
     /// Generates validated multiple-file uploads and returns an array of result records.
-    member _.saveMany(policy:UploadPolicy) =
-        let prefix = UploadGeneration.prefix "many" id
-        let saveFunction = prefix + "_save_one"
-        let fileExpression = "$_FILES[" + id.toString(".",StrQuotation) + "]"
-        UploadGeneration.emitSaveFunction context saveFunction policy
-        context.php.phpcode <| fun () ->
-            context.writein(prefix + "_results = [];")
-            context.writein("if (!isset(" + fileExpression + "['error']) || !is_array(" + fileExpression + "['error'])) {")
-            context.writein(prefix + "_results[] = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Invalid upload data.'];")
-            context.writein("} elseif (count(" + fileExpression + "['error']) > " + string policy.MaxFiles + ") {")
-            context.writein(prefix + "_results[] = ['success' => false, 'stored_name' => null, 'original_name' => '', 'mime_type' => null, 'size' => null, 'error' => 'Too many uploaded files.'];")
-            context.writein "} else {"
-            context.writein("foreach (" + fileExpression + "['error'] as $index => $uploadError) {")
-            context.writein "$upload = ["
-            context.writein("'name' => " + fileExpression + "['name'][$index] ?? '',")
-            context.writein("'tmp_name' => " + fileExpression + "['tmp_name'][$index] ?? '',")
-            context.writein "'error' => $uploadError,"
-            context.writein("'size' => " + fileExpression + "['size'][$index] ?? -1,")
-            context.writein "];"
-            context.writein "try {"
-            context.writein("$result = " + saveFunction + "($upload);")
-            context.writein "$result['success'] = true;"
-            context.writein "$result['error'] = null;"
-            context.writein "} catch (\\Throwable $exception) {"
-            context.writein "$result = ["
-            context.writein "'success' => false,"
-            context.writein "'stored_name' => null,"
-            context.writein "'original_name' => basename((string)$upload['name']),"
-            context.writein "'mime_type' => null,"
-            context.writein "'size' => isset($upload['size']) ? (int)$upload['size'] : null,"
-            context.writein "'error' => $exception->getMessage(),"
-            context.writein "];"
-            context.writein "}"
-            context.writein(prefix + "_results[] = $result;")
-            context.writein "}"
-            context.writein "}"
-        PHPdata.f(context,prefix + "_results")
+    member this.saveMany(policy:UploadPolicy) =
+        (this.saveManyDetailed(policy)).Results
 
     [<Obsolete("Use save with an explicit UploadPolicy.")>]
     member this.file_upload dir =

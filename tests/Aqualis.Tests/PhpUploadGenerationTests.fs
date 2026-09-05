@@ -23,6 +23,9 @@ module PhpUploadGenerationTests =
             line.Contains("$destination =") ||
             line.Contains("move_uploaded_file("))
 
+    let private occurrences (needle:string) (source:string) =
+        source.Split(needle, StringSplitOptions.None).Length - 1
+
     [<Fact>]
     let ``single upload uses a server generated file name`` () =
         let source =
@@ -62,6 +65,65 @@ module PhpUploadGenerationTests =
         storageLines source |> Array.iter (fun line ->
             Assert.DoesNotContain("['name']", line)
             Assert.DoesNotContain("$_FILES", line))
+
+    [<Fact>]
+    let ``multiple upload exposes stored and original names for JSON persistence`` () =
+        let source =
+            generate (fun context ->
+                let upload = postFile(context, "attachments")
+                let result = upload.saveManyDetailed(policy)
+                let issue = context.php.array("issue")
+                issue["Files"] <== result.Successful
+                issue["StoredNames"] <== result.StoredNames
+                issue["OriginalNames"] <== result.OriginalNames)
+
+        Assert.Contains("_successful[] = $result", source)
+        Assert.Contains("_stored_names[] = $result['stored_name']", source)
+        Assert.Contains("_original_names[] = $result['original_name']", source)
+        Assert.Contains("$issue[\"Files\"] = $aqualis_upload_", source)
+
+    [<Fact>]
+    let ``repeated save calls on one field emit storage only once`` () =
+        let source =
+            generate (fun context ->
+                let upload = postFile(context, "attachments")
+                upload.saveMany(policy) |> ignore
+                upload.saveMany(policy) |> ignore)
+
+        Assert.Equal(1, occurrences "move_uploaded_file($upload['tmp_name'], $destination)" source)
+        Assert.Equal(1, occurrences "foreach ($_FILES[\"attachments\"]['error'] as $index => $uploadError)" source)
+
+    [<Fact>]
+    let ``single save reports a multiple upload API mismatch`` () =
+        let source =
+            generate (fun context ->
+                let upload = postFile(context, "attachments")
+                upload.save(policy) |> ignore)
+
+        Assert.Contains("Multiple-file upload data received. Use saveMany.", source)
+
+    [<Fact>]
+    let ``one upload field cannot mix single and multiple storage`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "mixed.php", PHP)
+        let upload = postFile(context, "attachments")
+        upload.saveMany(policy) |> ignore
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            upload.save(policy) |> ignore)
+        |> ignore
+
+    [<Fact>]
+    let ``independent multiple fields retain their own input names`` () =
+        let source =
+            generate (fun context ->
+                let newFiles = postFile(context, "newfiles")
+                let commentFiles = postFile(context, "comfiles")
+                newFiles.saveMany(policy) |> ignore
+                commentFiles.saveMany(policy) |> ignore)
+
+        Assert.Contains("foreach ($_FILES[\"newfiles\"]['error']", source)
+        Assert.Contains("foreach ($_FILES[\"comfiles\"]['error']", source)
 
     [<Fact>]
     let ``upload form emits valid name and multiple attributes`` () =
