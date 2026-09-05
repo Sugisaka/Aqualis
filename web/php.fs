@@ -8,6 +8,31 @@ namespace Aqualis
 
 open System
 open System.IO
+open System.Text
+
+module private PhpEncoding =
+    /// Renders a .NET string as a PHP double-quoted string literal.
+    let stringLiteral (value:string) =
+        if isNull value then nullArg (nameof value)
+
+        let result = StringBuilder(value.Length + 2)
+        result.Append('"') |> ignore
+
+        for character in value do
+            match character with
+            | '\\' -> result.Append("\\\\") |> ignore
+            | '"' -> result.Append("\\\"") |> ignore
+            | '$' -> result.Append("\\$") |> ignore
+            | control when int control <= 0x1F || control = '\u007F' ->
+                result.Append(sprintf "\\x%02X" (int control)) |> ignore
+            | character -> result.Append(character) |> ignore
+
+        result.Append('"').ToString()
+
+    /// Renders a PHP string literal for inclusion in another quoted code string.
+    let codeStringLiteral value =
+        let literal = stringLiteral value
+        literal.Replace("\\", "\\\\").Replace("\"", "\\\"")
 
 type PHPbool(x:string, context:Aqualis) =
 
@@ -110,19 +135,19 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     member this.push (x:string) = this.push [x]
     member this.toString(c:string,op:ExprConcatOption) =
         x
-        |> List.map (function
-            |RStr x ->
-                match op with
-                |Direct -> x
-                |StrQuotation -> "\""+x+"\""
-                |CodeStrQuotation -> "\\\""+x+"\\\""
-            |RNvr (value,_) ->
-                match context.CodeFile, value with
-                |Some _, _ -> value.eval context
-                |None, Int value -> string value
-                |None, Dbl value -> string value
-                |None, Cpx(real, imaginary) -> sprintf "(%g+%g*I)" real imaginary
-                |None, _ -> invalidOp "A symbolic PHP value without a GenerationContext cannot be rendered as code.")
+            |> List.map (function
+                |RStr x ->
+                    match op with
+                    |Direct -> x
+                    |StrQuotation -> PhpEncoding.stringLiteral x
+                    |CodeStrQuotation -> PhpEncoding.codeStringLiteral x
+                |RNvr (value,_) ->
+                    match context.CodeFile, value with
+                    |Some _, _ -> value.eval context
+                    |None, Int value -> string value
+                    |None, Dbl value -> string value
+                    |None, Cpx(real, imaginary) -> sprintf "(%g+%g*I)" real imaginary
+                    |None, _ -> invalidOp "A symbolic PHP value without a GenerationContext cannot be rendered as code.")
         |> fun s -> String.Join(c,s)
     member this.Item(i:PHPdata) =
         let resultContext = Aqualis.merge context i.Context

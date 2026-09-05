@@ -37,6 +37,22 @@ module PhpCommunicationGenerationTests =
         Assert.Contains("$staticInitialized = array();", source)
 
     [<Fact>]
+    let ``PHP string literals escape quotes interpolation and control characters`` () =
+        let literal = PHPdata "quote: \" slash: \\ variable: $name\r\n"
+
+        Assert.Equal(
+            "\"quote: \\\" slash: \\\\ variable: \\$name\\x0D\\x0A\"",
+            literal.code)
+
+        let source =
+            generate (fun context ->
+                let textBox = context.form.textBox "newselect"
+                textBox.show("\"確認\"", [Atr("class", "textinput")]))
+
+        Assert.Contains("\\\"確認\\\"", source)
+        Assert.DoesNotContain("(string)(\"\"確認\"\")", source)
+
+    [<Fact>]
     let ``SMTP mail uses proc open without a shell`` () =
         let source =
             generate (fun context ->
