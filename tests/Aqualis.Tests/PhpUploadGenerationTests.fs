@@ -23,9 +23,6 @@ module PhpUploadGenerationTests =
             line.Contains("$destination =") ||
             line.Contains("move_uploaded_file("))
 
-    let private occurrences (needle:string) (source:string) =
-        source.Split(needle, StringSplitOptions.None).Length - 1
-
     [<Fact>]
     let ``single upload uses a server generated file name`` () =
         let source =
@@ -83,15 +80,31 @@ module PhpUploadGenerationTests =
         Assert.Contains("$issue[\"Files\"] = $aqualis_upload_", source)
 
     [<Fact>]
-    let ``repeated save calls on one field emit storage only once`` () =
+    let ``repeated save calls fail instead of reusing branch local variables`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "duplicate.php", PHP)
+        let upload = postFile(context, "attachments")
+        upload.saveMany(policy) |> ignore
+
+        let error =
+            Assert.Throws<InvalidOperationException>(fun () ->
+                upload.saveMany(policy) |> ignore)
+
+        Assert.Contains("Store and reuse the first result instead", error.Message)
+
+    [<Fact>]
+    let ``callback API initializes results before consuming them`` () =
         let source =
             generate (fun context ->
                 let upload = postFile(context, "attachments")
-                upload.saveMany(policy) |> ignore
-                upload.saveMany(policy) |> ignore)
+                upload.saveManyDetailedWith policy <| fun result ->
+                        context.br.if1 result.AllSucceeded <| fun () ->
+                            context.php.echo "stored")
 
-        Assert.Equal(1, occurrences "move_uploaded_file($upload['tmp_name'], $destination)" source)
-        Assert.Equal(1, occurrences "foreach ($_FILES[\"attachments\"]['error'] as $index => $uploadError)" source)
+        let initialization = source.IndexOf("_errors = [];", StringComparison.Ordinal)
+        let consumption = source.IndexOf("if(count($aqualis_upload_", StringComparison.Ordinal)
+        Assert.True(initialization >= 0)
+        Assert.True(consumption > initialization)
 
     [<Fact>]
     let ``single save reports a multiple upload API mismatch`` () =
@@ -124,6 +137,20 @@ module PhpUploadGenerationTests =
 
         Assert.Contains("foreach ($_FILES[\"newfiles\"]['error']", source)
         Assert.Contains("foreach ($_FILES[\"comfiles\"]['error']", source)
+
+    [<Fact>]
+    let ``postFiles exposes only the multiple-file save workflow`` () =
+        let source =
+            generate (fun context ->
+                let uploads = postFiles(context, "attachments")
+                uploads.select()
+                uploads.saveWith policy <| fun result ->
+                        let storedNames = context.php.array("storedNames")
+                        storedNames <== result.StoredNames)
+
+        Assert.Contains("name=\"<?php echo htmlspecialchars((string)(\"attachments\".\"[]\")", source)
+        Assert.Contains("foreach ($_FILES[\"attachments\"]['error']", source)
+        Assert.DoesNotContain("_single_", source)
 
     [<Fact>]
     let ``upload form emits valid name and multiple attributes`` () =
