@@ -65,9 +65,11 @@ module PhpCommunicationGenerationTests =
 
                 let users = context.php.array("users")
                 let user = context.php.array("user")
+                let newPassword = (post(context, "newPassword")).get
                 user["ID"] <== "user001"
                 user["Auth"] <== 1
                 user["State"] <== context.php.array()
+                user["PasswordHash"] <== context.php.password_hash(newPassword)
                 users.push(user)
                 issue["Users"] <== users
 
@@ -81,6 +83,10 @@ module PhpCommunicationGenerationTests =
         Assert.Contains("$user[\"ID\"] = \"user001\";", source)
         Assert.Contains("$user[\"Auth\"] = 1;", source)
         Assert.Contains("$user[\"State\"] = array();", source)
+        Assert.Contains(
+            "$user[\"PasswordHash\"] = password_hash($_POST[\"newPassword\"], PASSWORD_DEFAULT);",
+            source)
+        Assert.DoesNotContain("$user[\"PassWord\"]", source)
         Assert.Contains("array_push($users, $user);", source)
         Assert.Contains("$issue[\"Users\"] = $users;", source)
         Assert.Contains(
@@ -89,6 +95,32 @@ module PhpCommunicationGenerationTests =
         Assert.Contains("file_put_contents(\"issue.json\", json_encode(", source)
         Assert.Contains(", LOCK_EX) === false", source)
         Assert.Contains("throw new \\RuntimeException('Failed to write the file.');", source)
+
+    [<Fact>]
+    let ``password APIs hash verify and detect stale hashes`` () =
+        let source =
+            generate (fun context ->
+                let password = (post(context, "password")).get
+                let passwordHash =
+                    context.php.var("passwordHash", context.php.password_hash(password))
+
+                context.br.if1(context.php.password_verify(password, passwordHash)) <| fun () ->
+                    context.php.echo "verified"
+                context.br.if1(context.php.password_needs_rehash(passwordHash)) <| fun () ->
+                    passwordHash <== context.php.password_hash(password))
+
+        Assert.Contains(
+            "$passwordHash = password_hash($_POST[\"password\"], PASSWORD_DEFAULT);",
+            source)
+        Assert.Contains(
+            "if(password_verify($_POST[\"password\"], $passwordHash)):",
+            source)
+        Assert.Contains(
+            "if(password_needs_rehash($passwordHash, PASSWORD_DEFAULT)):",
+            source)
+        Assert.Contains(
+            "$passwordHash = password_hash($_POST[\"password\"], PASSWORD_DEFAULT);",
+            source)
 
     [<Fact>]
     let ``SMTP mail uses proc open without a shell`` () =

@@ -279,6 +279,19 @@ and ContextPhp internal (context:Aqualis) =
             ("json_encode(" + x.code +
              ", JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)")
             [x.Context]
+    /// Creates a password hash using PHP's current default password algorithm.
+    member this.password_hash(password:PHPdata) =
+        data ("password_hash(" + password.code + ", PASSWORD_DEFAULT)") [password.Context]
+    /// Verifies a plaintext password against a hash produced by password_hash.
+    member this.password_verify(password:PHPdata,passwordHash:PHPdata) =
+        boolean
+            ("password_verify(" + password.code + ", " + passwordHash.code + ")")
+            [password.Context; passwordHash.Context]
+    /// Checks whether a stored password hash should be refreshed for PASSWORD_DEFAULT.
+    member this.password_needs_rehash(passwordHash:PHPdata) =
+        boolean
+            ("password_needs_rehash(" + passwordHash.code + ", PASSWORD_DEFAULT)")
+            [passwordHash.Context]
     /// Encodes a value as JSON and writes it with an exclusive lock.
     member this.writeJson(filename:PHPdata,value:PHPdata) =
         this.file_put_contents(filename, this.json_encode(value))
