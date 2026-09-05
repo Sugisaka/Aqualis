@@ -17,6 +17,22 @@ module PhpCommunicationGenerationTests =
             "Generated PHP must not invoke the shell exec function.")
 
     [<Fact>]
+    let ``file download separates stored path from original client name`` () =
+        let source =
+            generate (fun context ->
+                let file = context.php.var "storedPath"
+                let originalName = context.php.var "originalName"
+                context.php.file_download(file, originalName))
+
+        Assert.Contains("is_file($file) || !is_readable($file)", source)
+        Assert.Contains("basename(str_replace('\\\\', '/', (string)$requestedName))", source)
+        Assert.Contains("str_contains($downloadName, \"\\r\")", source)
+        Assert.Contains("filename*=UTF-8\\'\\'' . rawurlencode($downloadName)", source)
+        Assert.Contains("readfile($file)", source)
+        Assert.Contains("})($storedPath, $originalName);", source)
+        Assert.DoesNotContain("readfile($requestedName)", source)
+
+    [<Fact>]
     let ``empty array expressions and variables use the PHP generation context`` () =
         let source =
             generate (fun context ->

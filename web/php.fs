@@ -454,21 +454,42 @@ and ContextPhp internal (context:Aqualis) =
             context.writei ("})("+body.code+", "+webhookURL.code+");")
     member this.str_replace(strfrom:string,strto:string,str:PHPdata) = data ("str_replace("+"\""+strfrom+"\""+","+"\""+strto+"\""+","+str.code+")") [str.Context]
     member this.str_pad(num:PHPdata,ndigit:int,paddingnum:int) = data ("str_pad("+num.code+","+ndigit.ToString()+","+paddingnum.ToString()+", STR_PAD_LEFT)") [num.Context]
-    member this.file_download(file:PHPdata) =
+    /// Downloads a server-side file while presenting a separate, safe client file name.
+    member this.file_download(file:PHPdata,downloadName:PHPdata) =
+        Aqualis.mergeMany [context; file.Context; downloadName.Context] |> ignore
         this.phpcode <| fun () ->
+            context.writei "(function ($file, $requestedName): void {"
+            context.writei "if (!is_string($file) || !is_file($file) || !is_readable($file)) {"
+            context.writei "throw new \\RuntimeException('The download file is unavailable.');"
+            context.writei "}"
+            context.writei "$downloadName = basename(str_replace('\\\\', '/', (string)$requestedName));"
+            context.writei "if ($downloadName === '' || str_contains($downloadName, \"\\r\") || str_contains($downloadName, \"\\n\")) {"
+            context.writei "throw new \\InvalidArgumentException('Invalid download file name.');"
+            context.writei "}"
+            context.writei "$fallbackName = preg_replace('/[^A-Za-z0-9._-]/', '_', $downloadName);"
+            context.writei "if (!is_string($fallbackName) || $fallbackName === '') { $fallbackName = 'download'; }"
+            context.writei "$fileSize = filesize($file);"
+            context.writei "if ($fileSize === false) {"
+            context.writei "throw new \\RuntimeException('Failed to determine the download file size.');"
+            context.writei "}"
             context.writei "header('Content-Type: application/octet-stream');"
-        this.phpcode <| fun () ->
             context.writei "header('Content-Transfer-Encoding: Binary');"
-        this.phpcode <| fun () ->
-            context.writei("header('Content-disposition: attachment; filename='.basename("+file.code+"));")
-        this.phpcode <| fun () ->
-            context.writei("header('Content-Length: '.filesize("+file.code+"));")
-        this.phpcode <| fun () ->
+            context.writei "header('X-Content-Type-Options: nosniff');"
+            context.writei "header('Content-Disposition: attachment; filename=\"' . $fallbackName . '\"; filename*=UTF-8\\'\\'' . rawurlencode($downloadName));"
+            context.writei "header('Content-Length: ' . $fileSize);"
             context.writei "while (ob_get_level()) { ob_end_clean(); }"
-        this.phpcode <| fun () ->
-            context.writei("readfile("+file.code+");")
-        this.phpcode <| fun () ->
+            context.writei "if (readfile($file) === false) {"
+            context.writei "throw new \\RuntimeException('Failed to read the download file.');"
+            context.writei "}"
             context.writei "exit;"
+            context.writei ("})(" + file.code + ", " + downloadName.code + ");")
+
+    member this.file_download(file:PHPdata,downloadName:string) =
+        this.file_download(file,PHPdata downloadName)
+
+    member this.file_download(file:PHPdata) =
+        let inferredDownloadName:PHPdata = this.basename(file)
+        this.file_download(file,inferredDownloadName)
     member this.basename(file:PHPdata) = data ("basename("+file.code+")") [file.Context]
     member this.br = "\\n"
     member this.tb = "\\t"
