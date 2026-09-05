@@ -53,6 +53,44 @@ module PhpCommunicationGenerationTests =
         Assert.DoesNotContain("(string)(\"\"確認\"\")", source)
 
     [<Fact>]
+    let ``structured JSON output uses the encoder and checks file writes`` () =
+        let source =
+            generate (fun context ->
+                let issue = context.php.array("issue")
+                issue["ID"] <== 42
+                issue["Title"] <== "A \"quoted\" title with $name"
+                issue["Main"] <== "first line\r\nsecond line"
+                issue["Time"] <== context.php.date("Y-m-d \"H:i\" $zone")
+                issue["Comment"] <== context.php.array()
+
+                let users = context.php.array("users")
+                let user = context.php.array("user")
+                user["ID"] <== "user001"
+                user["Auth"] <== 1
+                user["State"] <== context.php.array()
+                users.push(user)
+                issue["Users"] <== users
+
+                context.php.writeJson("issue.json", issue))
+
+        Assert.Contains("$issue[\"ID\"] = 42;", source)
+        Assert.Contains("$issue[\"Title\"] = \"A \\\"quoted\\\" title with \\$name\";", source)
+        Assert.Contains("$issue[\"Main\"] = \"first line\\x0D\\x0Asecond line\";", source)
+        Assert.Contains("$issue[\"Time\"] = date(\"Y-m-d \\\"H:i\\\" \\$zone\");", source)
+        Assert.Contains("$issue[\"Comment\"] = array();", source)
+        Assert.Contains("$user[\"ID\"] = \"user001\";", source)
+        Assert.Contains("$user[\"Auth\"] = 1;", source)
+        Assert.Contains("$user[\"State\"] = array();", source)
+        Assert.Contains("array_push($users, $user);", source)
+        Assert.Contains("$issue[\"Users\"] = $users;", source)
+        Assert.Contains(
+            "json_encode($issue, JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)",
+            source)
+        Assert.Contains("file_put_contents(\"issue.json\", json_encode(", source)
+        Assert.Contains(", LOCK_EX) === false", source)
+        Assert.Contains("throw new \\RuntimeException('Failed to write the file.');", source)
+
+    [<Fact>]
     let ``SMTP mail uses proc open without a shell`` () =
         let source =
             generate (fun context ->

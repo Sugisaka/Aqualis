@@ -111,14 +111,24 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     static member array(context:Aqualis,arrayname:string,data:list<string*string>) =
         let c = PHPdata.var(context,arrayname)
         context.codewritein("<?php ", "$"+arrayname+" = array(); ?>")
-        context.codewritein("<?php ", "$"+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>'"+b+"'"))+"); ?>")
+        context.codewritein(
+            "<?php ",
+            "$" + arrayname + "[] = array(" +
+            String.Join(",", data |> List.map (fun (key,value) ->
+                PhpEncoding.stringLiteral key + "=>" + PhpEncoding.stringLiteral value)) +
+            "); ?>")
         c
 
     static member array(context:Aqualis,arrayname:string,data:list<string*PHPdata>) =
         let c = PHPdata.var(context,arrayname)
         data |> Seq.map (fun (_, value) -> value.Context) |> Aqualis.mergeMany |> Aqualis.merge context |> ignore
         context.codewritein("<?php ", "$"+arrayname+" = array(); ?>")
-        context.codewritein("<?php ", "$"+arrayname+"[] = array("+String.Join(",",data |> List.map (fun (a,b) -> "'"+a+"'=>"+b.code))+"); ?>")
+        context.codewritein(
+            "<?php ",
+            "$" + arrayname + "[] = array(" +
+            String.Join(",", data |> List.map (fun (key,value) ->
+                PhpEncoding.stringLiteral key + "=>" + value.code)) +
+            "); ?>")
         c
 
     member this.push (x:list<PHPdata>) =
@@ -254,10 +264,27 @@ and ContextPhp internal (context:Aqualis) =
     member this.echo (x:complex0) = this.echo (PHPdata x)
     member this.file_get_contents (filename:PHPdata) = data ("file_get_contents(" + filename.code + ")") [filename.Context]
     member this.file_get_contents (filename:string) = this.file_get_contents (PHPdata filename)
-    member this.file_put_contents (filename:PHPdata,x:PHPdata) = this.phpcode <| fun () -> context.writei("file_put_contents("+filename.code+","+x.code+");")
+    member this.file_put_contents (filename:PHPdata,x:PHPdata) =
+        merge [filename.Context; x.Context] |> ignore
+        this.phpcode <| fun () ->
+            context.writei("if (file_put_contents(" + filename.code + ", " + x.code + ", LOCK_EX) === false) {")
+            context.indentInc()
+            context.writei "throw new \\RuntimeException('Failed to write the file.');"
+            context.indentDec()
+            context.writei "}"
     member this.file_put_contents (filename:string,x:PHPdata) = this.file_put_contents(PHPdata filename, x)
     member this.json_decode (x:PHPdata,p:bool) = data ("json_decode("+x.code+","+p.ToString()+")") [x.Context]
-    member this.json_encode (x:PHPdata) = data ("json_encode("+x.code+", JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES )") [x.Context]
+    member this.json_encode (x:PHPdata) =
+        data
+            ("json_encode(" + x.code +
+             ", JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)")
+            [x.Context]
+    /// Encodes a value as JSON and writes it with an exclusive lock.
+    member this.writeJson(filename:PHPdata,value:PHPdata) =
+        this.file_put_contents(filename, this.json_encode(value))
+    /// Encodes a value as JSON and writes it with an exclusive lock.
+    member this.writeJson(filename:string,value:PHPdata) =
+        this.writeJson(PHPdata filename, value)
     member this.array_column(value:PHPdata,id:PHPdata) = data ("array_column("+value.code+","+id.code+")") [value.Context;id.Context]
     member this.in_array_strict(s:PHPdata, idArray:PHPdata) = boolean ("in_array("+s.code+", "+idArray.code+", true)") [s.Context;idArray.Context]
     member this.in_array_strict(s:int0, idArray:PHPdata) = this.in_array_strict(PHPdata s, idArray)
@@ -305,7 +332,7 @@ and ContextPhp internal (context:Aqualis) =
     member this.set_nocache() = this.phpcode <| fun () -> context.writei "header( 'Cache-Control: no-store, no-cache, must-revalidate' );"
     member this.header(data:PHPdata) = this.phpcode <| fun () -> context.writei("header("+data.code+");")
     member this.header(data:string) = this.header(PHPdata data)
-    member this.date(fmt:string) = data ("date(\""+fmt+"\")") []
+    member this.date(fmt:string) = data ("date(" + PhpEncoding.stringLiteral fmt + ")") []
     member this.round(x:PHPdata) = data ("round("+x.code+")") [x.Context]
     member this.round(x:double0) = this.round(PHPdata x)
     member this.substr(x:PHPdata,n:PHPdata) = data ("substr("+x.code+","+n.code+")") [x.Context;n.Context]
