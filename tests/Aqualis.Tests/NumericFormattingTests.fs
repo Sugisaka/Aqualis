@@ -19,6 +19,22 @@ module NumericFormattingTests =
             CultureInfo.CurrentCulture <- previousCulture
             CultureInfo.CurrentUICulture <- previousUiCulture
 
+    [<Fact>]
+    let ``integer power promotes its base before evaluating in every backend`` () =
+        let result:double0 = asm.pow(int0(Var(It 4,"base",NaN)), int0(Var(It 4,"exponent",NaN)))
+        let negativeResult:double0 = asm.pow(int0(Var(It 4,"base",NaN)), -3)
+        use cTarget = Aqualis.BlankWriter C99
+        use fortranTarget = Aqualis.BlankWriter Fortran
+        use pythonTarget = Aqualis.BlankWriter Python
+
+        Assert.Equal(Dt,result.etype)
+        Assert.Equal("pow((double)base,exponent)",result.Expr.evalC cTarget)
+        Assert.Equal("dble(base)**exponent",result.Expr.evalF fortranTarget)
+        Assert.Equal("float(base)**exponent",result.Expr.evalPy pythonTarget)
+        Assert.Equal("pow((double)base,-3)",negativeResult.Expr.evalC cTarget)
+        Assert.Equal("dble(base)**(-3)",negativeResult.Expr.evalF fortranTarget)
+        Assert.Equal("float(base)**(-3)",negativeResult.Expr.evalPy pythonTarget)
+
     [<Theory>]
     [<InlineData("ja-JP")>]
     [<InlineData("fr-FR")>]

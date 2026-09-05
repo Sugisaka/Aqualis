@@ -17,7 +17,7 @@ namespace Aqualis
         static member todouble(x:int0) = double0(ToDbl x.Expr, x.Context)
         static member toint(x:double0) = int0(ToInt x.Expr, x.Context)
         ///<summary>累乗</summary>
-        static member pow(x:int0, y:int0) = int0(Pow(It 4,x.Expr,y.Expr), NumericContext.binary x y)
+        static member pow(x:int0, y:int0) = double0(Pow(Dt,ToDbl x.Expr,y.Expr), NumericContext.binary x y)
         static member pow(x:int0, y:double0) = double0(Pow(Dt,x.Expr,y.Expr), NumericContext.binary x y)
         static member pow(x:int0, y:complex0) = complex0(Pow(Zt,x.Expr,y.Expr), NumericContext.binary x y)
         static member pow(x:double0, y:int0) = double0(Pow(Dt,x.Expr,y.Expr), NumericContext.binary x y)

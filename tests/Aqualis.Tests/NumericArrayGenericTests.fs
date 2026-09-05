@@ -100,3 +100,39 @@ module NumericArrayGenericTests =
             Assert.Equal(Dt,real.etype)
             Assert.Equal(Zt,complex.etype)
             Assert.Equal(It 4,integer.etype)
+
+    [<Fact>]
+    let ``integer array math functions follow scalar result types`` () =
+        withinContext <| fun () ->
+            let values1 = i1 2
+            let values2 = i2 2
+            let values3 = i3 2
+            let integerPower1:double1 = asm.pow(values1, I -3)
+            let integerPower2:double2 = asm.pow(values2, I -3)
+            let integerPower3:double3 = asm.pow(values3, I -3)
+            let realPower:double1 = asm.pow(values1, D 0.5)
+            let complexPower:complex1 = asm.pow(values1, complex0(Cpx(0.0, 1.0)))
+            let realResults1:double1 list =
+                [ asm.sin values1; asm.cos values1; asm.tan values1
+                  asm.asin values1; asm.acos values1; asm.atan values1
+                  asm.atan2(values1,values1); asm.exp values1; asm.abs values1
+                  asm.log values1; asm.log10 values1; asm.sqrt values1 ]
+            let realResults2:double2 list =
+                [ asm.sin values2; asm.cos values2; asm.tan values2
+                  asm.asin values2; asm.acos values2; asm.atan values2
+                  asm.atan2(values2,values2); asm.exp values2; asm.abs values2
+                  asm.log values2; asm.log10 values2; asm.sqrt values2 ]
+            let realResults3:double3 list =
+                [ asm.sin values3; asm.cos values3; asm.tan values3
+                  asm.asin values3; asm.acos values3; asm.atan values3
+                  asm.atan2(values3,values3); asm.exp values3; asm.abs values3
+                  asm.log values3; asm.log10 values3; asm.sqrt values3 ]
+
+            Assert.Equal(Dt,integerPower1.etype)
+            Assert.Equal(Dt,integerPower2.etype)
+            Assert.Equal(Dt,integerPower3.etype)
+            Assert.Equal(Dt,realPower.etype)
+            Assert.Equal(Zt,complexPower.etype)
+            realResults1 |> List.iter (fun result -> Assert.Equal(Dt,result.etype))
+            realResults2 |> List.iter (fun result -> Assert.Equal(Dt,result.etype))
+            realResults3 |> List.iter (fun result -> Assert.Equal(Dt,result.etype))

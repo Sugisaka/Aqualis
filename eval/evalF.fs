@@ -183,15 +183,17 @@ namespace Aqualis
                     |_ -> x.evalF c + "/" + y.evalF c
                 |Mod(_,x,y) -> "mod(" + x.evalF c + "," + y.evalF c + ")"
                 |Pow(_,x,y) ->
-                    match x,y with
-                    |(Add _|Sub _|Mul _|Div _),(Add _|Sub _|Mul _|Div _) ->
-                        "(" + x.evalF c + ")**(" + y.evalF c + ")"
-                    |(Add _|Sub _|Mul _|Div _),_ ->
-                        "(" + x.evalF c + ")**" + y.evalF c + ""
-                    |_,(Add _|Sub _|Mul _|Div _) ->
-                        "" + x.evalF c + "**(" + y.evalF c + ")"
-                    |_ ->
-                        x.evalF c + "**" + y.evalF c
+                    let baseValue =
+                        match x with
+                        |Add _|Sub _|Mul _|Div _ -> "(" + x.evalF c + ")"
+                        |_ -> x.evalF c
+                    let exponentValue =
+                        match y with
+                        |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + y.evalF c + ")"
+                        |Int value when value < 0 -> "(" + y.evalF c + ")"
+                        |Dbl value when value < 0.0 -> "(" + y.evalF c + ")"
+                        |_ -> y.evalF c
+                    baseValue + "**" + exponentValue
                 |Exp(_,x) -> "exp(" + x.evalF c + ")"
                 |Sin(_,x) -> "sin(" + x.evalF c + ")"
                 |Cos(_,x) -> "cos(" + x.evalF c + ")"

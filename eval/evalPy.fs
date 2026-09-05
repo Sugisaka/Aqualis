@@ -210,15 +210,17 @@ namespace Aqualis
                 |Mod(_,x,y) ->
                     truncatingIntegerRemainder (x.evalPy c) (y.evalPy c)
                 |Pow(_,x,y) ->
-                    match x,y with
-                    |(Add _|Sub _|Mul _|Div _),(Add _|Sub _|Mul _|Div _) -> 
-                        "(" + x.evalPy c + ")**(" + y.evalPy c + ")"
-                    |(Add _|Sub _|Mul _|Div _),_ -> 
-                        "(" + x.evalPy c + ")**" + y.evalPy c + ""
-                    |_,(Add _|Sub _|Mul _|Div _) -> 
-                        "" + x.evalPy c + "**(" + y.evalPy c + ")"
-                    |_ -> 
-                        x.evalPy c + "**" + y.evalPy c
+                    let baseValue =
+                        match x with
+                        |Add _|Sub _|Mul _|Div _ -> "(" + x.evalPy c + ")"
+                        |_ -> x.evalPy c
+                    let exponentValue =
+                        match y with
+                        |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + y.evalPy c + ")"
+                        |Int value when value < 0 -> "(" + y.evalPy c + ")"
+                        |Dbl value when value < 0.0 -> "(" + y.evalPy c + ")"
+                        |_ -> y.evalPy c
+                    baseValue + "**" + exponentValue
                 |Exp(Zt,x) -> "cmath.exp(" + x.evalPy c + ")"
                 |Sin(Zt,x) -> "cmath.sin(" + x.evalPy c + ")"
                 |Cos(Zt,x) -> "cmath.cos(" + x.evalPy c + ")"
