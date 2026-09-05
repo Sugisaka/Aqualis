@@ -33,6 +33,7 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_complex1 =
         type asm with
+            static member pow(x:double1,y:complex0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
             static member pow(x:complex1,y:int0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
             static member pow(x:complex1,y:double0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
             static member pow(x:complex1,y:complex0) = complex1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)

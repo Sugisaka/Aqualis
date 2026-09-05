@@ -102,6 +102,20 @@ module NumericArrayGenericTests =
             Assert.Equal(It 4,integer.etype)
 
     [<Fact>]
+    let ``complex powers return complex scalar and array wrappers`` () =
+        withinContext <| fun () ->
+            let value = complex0(Cpx(1.0,1.0))
+            let integerExpressionPower:complex0 = asm.pow(value,I 2)
+            let realExpressionPower:complex0 = asm.pow(value,D 0.5)
+            let integerPower:complex0 = asm.pow(value,2)
+            let realPower:complex0 = asm.pow(value,0.5)
+            let arrayPower:complex1 = asm.pow(d1 2.0,value)
+
+            [ integerExpressionPower; realExpressionPower; integerPower; realPower ]
+            |> List.iter (fun result -> Assert.Equal(Zt,result.etype))
+            Assert.Equal(Zt,arrayPower.etype)
+
+    [<Fact>]
     let ``integer array math functions follow scalar result types`` () =
         withinContext <| fun () ->
             let values1 = i1 2
@@ -142,6 +156,7 @@ module NumericArrayGenericTests =
         use output = new TemporaryDirectory()
         Aqualis.makeProgramWithContext (output.Path,"array-context.c",C99) <| fun context ->
             let exponent = context.var.i0 "exponent"
+            let complexExponent = context.var.z0 "complexExponent"
             let i1 = context.var.i1("integers1",2)
             let d1 = context.var.d1("reals1",2)
             let z1 = context.var.z1("complex1",2)
@@ -157,6 +172,7 @@ module NumericArrayGenericTests =
                 (asm.pow(i1,exponent)).Context
                 (i1 ./ exponent).Context
                 (asm.floor d1).Context
+                (asm.pow(d1,complexExponent)).Context
                 (asm.atan2(d1,d1)).Context
                 (asm.conj z1).Context
                 (asm.abs z1).Context

@@ -36,7 +36,6 @@ namespace Aqualis
         type asm with
             static member pow(x:double1,y:int0) = double1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
             static member pow(x:double1,y:double0) = double1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
-            static member pow(x:double1,y:complex0) = double1(x.etype%%y.etype,Arx1(x.size1,fun i -> asm.pow(x[i],y).Expr),Aqualis.merge x.Context y.Context)
             static member pow(x:double1,y:int) = asm.pow(x,I y)
             static member pow(x:double1,y:double) = asm.pow(x,D y)
             static member sin(x:double1) = double1(x.etype,Arx1(x.size1,fun i -> asm.sin(x[i]).Expr),x.Context)
