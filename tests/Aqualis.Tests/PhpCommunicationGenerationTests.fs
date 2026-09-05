@@ -59,6 +59,7 @@ module PhpCommunicationGenerationTests =
         Assert.Equal(
             "\"quote: \\\" slash: \\\\ variable: \\$name\\x0D\\x0A\"",
             literal.code)
+        Assert.Equal("\"\\x00\\x7F\"",PhpEncoding.stringLiteral "\u0000\u007F")
 
         let source =
             generate (fun context ->
@@ -67,6 +68,48 @@ module PhpCommunicationGenerationTests =
 
         Assert.Contains("\\\"確認\\\"", source)
         Assert.DoesNotContain("(string)(\"\"確認\"\")", source)
+
+    [<Fact>]
+    let ``PHP string overloads consistently use the shared literal encoder`` () =
+        let literal = "quote: \" slash: \\ variable: $name apostrophe: '\r\n"
+        let replacement = "replacement: \"$value\""
+        let encodedLiteral = PhpEncoding.stringLiteral literal
+        let encodedReplacement = PhpEncoding.stringLiteral replacement
+
+        let source =
+            generate (fun context ->
+                let integerText = context.var.i0 "integerText"
+                let realText = context.var.d0 "realText"
+                let complexText = context.var.z0 "complexText"
+                let sourceValue = context.var.i0 "sourceValue"
+                let handle = context.php.var "handle"
+                let text = context.php.var "text"
+
+                integerText <== literal
+                realText <== literal
+                complexText <== literal
+                integerText <== ("prefix: \"$prefix\" " ++ sourceValue)
+                context.php.fwrite_SJIS(handle,literal)
+                context.php.setTimeZone literal
+
+                Assert.Equal("file_exists("+encodedLiteral+")",context.php.file_exists(literal).code)
+                Assert.Equal("glob("+encodedLiteral+")",context.php.glob(literal).code)
+                Assert.Equal("strncmp("+text.code+","+encodedLiteral+",7)",context.php.strncmp(text,literal,7).code)
+                Assert.Equal("explode("+encodedLiteral+","+text.code+")",context.php.explode(literal,text).code)
+                Assert.Equal(
+                    "str_replace("+encodedLiteral+","+encodedReplacement+","+text.code+")",
+                    context.php.str_replace(literal,replacement,text).code)
+
+                context.php.download literal)
+
+        Assert.Contains("$integerText = "+encodedLiteral+";",source)
+        Assert.Contains("$realText = "+encodedLiteral+";",source)
+        Assert.Contains("$complexText = "+encodedLiteral+";",source)
+        Assert.Contains("$integerText = \"prefix: \\\"\\$prefix\\\" \".$sourceValue;",source)
+        Assert.Contains("mb_convert_encoding("+encodedLiteral+", 'SJIS-win', 'UTF-8')",source)
+        Assert.Contains("date_default_timezone_set("+encodedLiteral+");",source)
+        Assert.Contains("})("+encodedLiteral+", basename("+encodedLiteral+"));",source)
+        Assert.Contains("rawurlencode($downloadName)",source)
 
     [<Fact>]
     let ``structured JSON output uses the encoder and checks file writes`` () =

@@ -258,7 +258,7 @@ namespace Aqualis
             //         invalidOp "The assignment target is not associated with a program.")
             match x.Context.language with
             |PHP ->
-                expr.subst x.Expr (Var(Nt,y.toString(".",StrQuotation),NaN)) x.Context
+                expr.subst x.Expr (Var(Nt,y.toPhpString(".",x.Context),NaN)) x.Context
             |_ ->
                 printfn "この言語では文字列を含む値を代入できません"
         static member (<==) (x:int0,y:string) = x <== exprString y
@@ -432,7 +432,7 @@ namespace Aqualis
             //         invalidOp "The assignment target is not associated with a program.")
             match x.Context.language with
             |PHP ->
-                expr.subst x.Expr (Var(Nt,y.toString(".",StrQuotation),NaN)) x.Context
+                expr.subst x.Expr (Var(Nt,y.toPhpString(".",x.Context),NaN)) x.Context
             |_ ->
                 printfn "この言語では文字列を含む値を代入できません"
         static member (<==) (x:double0,y:string) = x <== exprString y
@@ -571,7 +571,7 @@ namespace Aqualis
             //         invalidOp "The assignment target is not associated with a program.")
             match x.Context.language with
             |PHP ->
-                expr.subst x.Expr (Var(Nt,y.toString(".",StrQuotation),NaN)) x.Context
+                expr.subst x.Expr (Var(Nt,y.toPhpString(".",x.Context),NaN)) x.Context
             |_ ->
                 printfn "この言語では文字列を含む値を代入できません"
         static member (<==) (x:complex0,y:string) = x <== exprString y
@@ -623,6 +623,15 @@ namespace Aqualis
                 |RNvr (x,_) ->
                     x.eval context)
             |> fun s -> String.Join(c,s)
+
+        member internal this.toPhpString(separator:string,target:Aqualis) =
+            x
+            |> List.map (function
+                |RStr value -> PhpEncoding.stringLiteral value
+                |RNvr (value,valueContext) ->
+                    Aqualis.merge target valueContext |> ignore
+                    value.eval target)
+            |> fun values -> String.Join(separator,values)
         static member (++) (a:exprString,b:exprString) : exprString =
             exprString(a.data@b.data, Aqualis.merge a.Context b.Context)
         static member (++) (a:string,b:exprString) = exprString a ++ b

@@ -8,31 +8,6 @@ namespace Aqualis
 
 open System
 open System.IO
-open System.Text
-
-module private PhpEncoding =
-    /// Renders a .NET string as a PHP double-quoted string literal.
-    let stringLiteral (value:string) =
-        if isNull value then nullArg (nameof value)
-
-        let result = StringBuilder(value.Length + 2)
-        result.Append('"') |> ignore
-
-        for character in value do
-            match character with
-            | '\\' -> result.Append("\\\\") |> ignore
-            | '"' -> result.Append("\\\"") |> ignore
-            | '$' -> result.Append("\\$") |> ignore
-            | control when int control <= 0x1F || control = '\u007F' ->
-                result.Append(sprintf "\\x%02X" (int control)) |> ignore
-            | character -> result.Append(character) |> ignore
-
-        result.Append('"').ToString()
-
-    /// Renders a PHP string literal for inclusion in another quoted code string.
-    let codeStringLiteral value =
-        let literal = stringLiteral value
-        literal.Replace("\\", "\\\\").Replace("\"", "\\\"")
 
 type PHPbool(x:string, context:Aqualis) =
 
@@ -325,17 +300,12 @@ and ContextPhp internal (context:Aqualis) =
     member this.fwrite_SJIS(fp:PHPdata,t:double0) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
     member this.fwrite_SJIS(fp:PHPdata,t:complex0) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
     /// ファイルにShift-JISで書き込み
-    member this.fwrite_SJIS(fp:PHPdata,t:string) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", mb_convert_encoding(\""+t+"\", 'SJIS-win', 'UTF-8'));")
+    member this.fwrite_SJIS(fp:PHPdata,t:string) = this.fwrite_SJIS(fp, PHPdata t)
     /// ファイルを閉じる
     member this.fclose(filename:PHPdata) = this.phpcode <| fun () -> context.writei("fclose("+filename.code+");")
     /// 正規表現
     member this.preg_match(p:PHPdata,text:PHPdata,mat:PHPdata) = this.phpcode <| fun () -> context.writei("preg_match("+p.code+","+text.code+","+mat.code+");")
-    member this.download(filename:string) =
-        this.phpcode <| fun () -> context.writei "header('Content-Type: application/octet-stream');"
-        this.phpcode <| fun () -> context.writei("header('Content-Length: '.filesize(\""+filename+"\"));")
-        this.phpcode <| fun () -> context.writei("header('Content-Disposition: attachment; filename=\""+filename+"\"');")
-        this.phpcode <| fun () -> context.writei("readfile(\""+filename+"\");")
-        this.phpcode <| fun () -> context.writei "exit;"
+    member this.download(filename:string) = this.file_download(PHPdata filename)
     /// 整数に変換
     member this.intval(s:PHPdata) = data ("intval("+s.code+")") [s.Context]
     member this.array_sum(value:PHPdata) = data ("array_sum("+value.code+")") [value.Context]
@@ -351,21 +321,25 @@ and ContextPhp internal (context:Aqualis) =
     member this.substr(x:PHPdata,n:PHPdata) = data ("substr("+x.code+","+n.code+")") [x.Context;n.Context]
     member this.substr(x:PHPdata,n:int) = data ("substr("+x.code+","+n.ToString()+")") [x.Context]
     member this.file_exists(x:PHPdata) = boolean ("file_exists("+x.code+")") [x.Context]
-    member this.file_exists(x:string) = boolean ("file_exists(\""+x+"\")") []
+    member this.file_exists(x:string) = this.file_exists(PHPdata x)
     member this.mb_strlen(x:PHPdata) = data ("mb_strlen("+x.code+")") [x.Context]
     member this.mb_strwidth(x:PHPdata) = data ("mb_strwidth("+x.code+")") [x.Context]
-    member this.strncmp(x:PHPdata,y:string,n:int) = data ("strncmp("+x.code+",\""+y+"\","+n.ToString()+")") [x.Context]
+    member this.strncmp(x:PHPdata,y:PHPdata,n:int) = data ("strncmp("+x.code+","+y.code+","+n.ToString()+")") [x.Context;y.Context]
+    member this.strncmp(x:PHPdata,y:string,n:int) = this.strncmp(x,PHPdata y,n)
     member this.glob(x:PHPdata) = data ("glob("+x.code+")") [x.Context]
-    member this.glob(x:string) = data ("glob(\""+x+"\")") []
+    member this.glob(x:string) = this.glob(PHPdata x)
     member this.explode(x:PHPdata,y:PHPdata) = data ("explode("+x.code+","+y.code+")") [x.Context;y.Context]
-    member this.explode(x:string,y:PHPdata) = data ("explode('"+x+"',"+y.code+")") [y.Context]
+    member this.explode(x:string,y:PHPdata) = this.explode(PHPdata x,y)
     member this.sort(data:PHPdata) = this.phpcode <| fun () -> context.writei("sort("+data.code+");")
     member this.toint(x:PHPdata) = int0(Var(It 4, "(int)"+x.code, NaN), merge [x.Context])
     member this.count(x:PHPdata) = int0(Var(It 4, "count("+x.code+")", NaN), merge [x.Context])
     member this.filename_withoutExtension(x:PHPdata) = data ("pathinfo("+x.code+", PATHINFO_FILENAME)") [x.Context]
     member this.unlink(data:PHPdata) = this.phpcode <| fun () -> context.writei("unlink("+data.code+");")
     member this.shuffle(data:PHPdata) = this.phpcode <| fun () -> context.writei("shuffle("+data.code+");")
-    member this.setTimeZone(location:string) = this.phpcode <| fun () -> context.writei("date_default_timezone_set('"+location+"');")
+    member this.setTimeZone(location:PHPdata) =
+        merge [location.Context] |> ignore
+        this.phpcode <| fun () -> context.writei("date_default_timezone_set("+location.code+");")
+    member this.setTimeZone(location:string) = this.setTimeZone(PHPdata location)
     member this.sendMail(body:PHPdata,subject:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
         this.phpcode <| fun () -> context.writei "mb_language(\"ja\");"
         this.phpcode <| fun () -> context.writei "mb_internal_encoding(\"UTF-8\");"
@@ -452,7 +426,10 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "curl_close($curl);"
             context.writei "}"
             context.writei ("})("+body.code+", "+webhookURL.code+");")
-    member this.str_replace(strfrom:string,strto:string,str:PHPdata) = data ("str_replace("+"\""+strfrom+"\""+","+"\""+strto+"\""+","+str.code+")") [str.Context]
+    member this.str_replace(strfrom:PHPdata,strto:PHPdata,str:PHPdata) =
+        data ("str_replace("+strfrom.code+","+strto.code+","+str.code+")") [strfrom.Context;strto.Context;str.Context]
+    member this.str_replace(strfrom:string,strto:string,str:PHPdata) =
+        this.str_replace(PHPdata strfrom,PHPdata strto,str)
     member this.str_pad(num:PHPdata,ndigit:int,paddingnum:int) = data ("str_pad("+num.code+","+ndigit.ToString()+","+paddingnum.ToString()+", STR_PAD_LEFT)") [num.Context]
     /// Downloads a server-side file while presenting a separate, safe client file name.
     member this.file_download(file:PHPdata,downloadName:PHPdata) =

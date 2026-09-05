@@ -26,7 +26,7 @@ namespace Aqualis
 
         static member (./) (x:int1,y:int1) =
             base1.sizeMismatchError(x,y)
-            Arx1(x.size1,fun i -> Div(It 4,x[i].Expr,y[i].Expr))
+            int1(x.etype%%y.etype,Arx1(x.size1,fun i -> Div(It 4,x[i].Expr,y[i].Expr)))
         static member (./) (x:int0,y:int1) = int1(x.etype%%y.etype,Arx1(y.size1,fun i -> Div(It 4,x.Expr,y[i].Expr)))
         static member (./) (x:int,y:int1) = I x ./ y
         static member (./) (x:int1,y:int0) = int1(x.etype%%y.etype,Arx1(x.size1,fun i -> Div(It 4,x[i].Expr,y.Expr)))

@@ -45,7 +45,7 @@ namespace Aqualis
             static member acos(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.acos(x[i]).Expr))
             static member atan(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.atan(x[i]).Expr))
             static member exp(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.exp(x[i]).Expr))
-            static member abs(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.abs(x[i]).Expr))
+            static member abs(x:complex1) = double1(Dt,Arx1(x.size1,fun i -> asm.abs(x[i]).Expr))
             static member log(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.log(x[i]).Expr))
             static member log10(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.log10(x[i]).Expr))
             static member sqrt(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.sqrt(x[i]).Expr))
