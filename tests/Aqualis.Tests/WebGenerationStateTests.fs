@@ -254,6 +254,41 @@ module WebGenerationStateTests =
             Assert.DoesNotContain(output.Path, source))
 
     [<Fact>]
+    let ``explicit web asset context supports shared assets in PHP pages`` () =
+        use output = new TemporaryDirectory()
+        let imagePath = Path.Combine(output.Path, "source image #1.png")
+        File.WriteAllText(imagePath, "image")
+        let assets = WebAssetContext(output.Path, "shared images")
+
+        Compile [PHP] output.Path "first-page" "1.0" <| fun context ->
+            context.html.image (assets, [Atr("class", "cimage")], imagePath)
+
+        Compile [PHP] output.Path "second-page" "1.0" <| fun context ->
+            context.html.image (assets, Style [size.maxWidth "100%"], imagePath)
+
+        let firstPage = File.ReadAllText(Path.Combine(output.Path, "first-page.php"))
+        let secondPage = File.ReadAllText(Path.Combine(output.Path, "second-page.php"))
+        let imageUrl = "shared%20images/source%20image%20%231.png"
+
+        Assert.Contains("class=\"cimage\"", firstPage)
+        Assert.Contains("src=\"" + imageUrl + "\"", firstPage)
+        Assert.Contains("style=\"max-width: 100%\"", secondPage)
+        Assert.Contains("src=\"" + imageUrl + "\"", secondPage)
+        Assert.Equal("image", File.ReadAllText(Path.Combine(assets.ContentsDirectory, "source image #1.png")))
+
+    [<Fact>]
+    let ``explicit image assets reject caller supplied src attributes`` () =
+        use output = new TemporaryDirectory()
+        let imagePath = Path.Combine(output.Path, "source.png")
+        File.WriteAllText(imagePath, "image")
+        let assets = WebAssetContext(output.Path, "images")
+        use context = new Aqualis(Some output.Path, Some "page.php", PHP)
+
+        Assert.Throws<ArgumentException>(fun () ->
+            context.html.image (assets, [Atr("src", "unmanaged.png")], imagePath))
+        |> ignore
+
+    [<Fact>]
     let ``same-named web assets receive distinct URLs without being overwritten`` () =
         use output = new TemporaryDirectory()
         let firstDirectory = Path.Combine(output.Path, "first")

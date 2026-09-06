@@ -30,7 +30,7 @@ module internal WebOutputLayout =
             ContentsDirectory = Path.Combine(outputDirectory, contentsName)
         }
 
-    let assetUrl (layout:WebOutputLayout) (fileName:string) =
+    let assetUrl (contentsName:string) (fileName:string) =
         if String.IsNullOrWhiteSpace fileName then
             invalidArg (nameof fileName) "An asset file name is required."
 
@@ -46,16 +46,102 @@ module internal WebOutputLayout =
             |> Array.map Uri.EscapeDataString
             |> String.concat "/"
 
-        Uri.EscapeDataString(layout.ContentsName) + "/" + encodedPath
+        Uri.EscapeDataString(contentsName) + "/" + encodedPath
 
-type HtmlGenerationContext internal (dir:string,projectName:string) =
+/// <summary>
+/// Manages files that are copied beside generated web pages and referenced by relative URLs.
+/// One instance can be shared by multiple PHP or HTML generation contexts.
+/// </summary>
+type WebAssetContext(outputDirectory:string, contentsName:string) =
     let gate = obj()
-    let layout = WebOutputLayout.create dir projectName
     let pathComparer =
         if OperatingSystem.IsWindows() then StringComparer.OrdinalIgnoreCase
         else StringComparer.Ordinal
     let importedAssetsBySource = Dictionary<string,string>(pathComparer)
     let importedAssetSourcesByName = Dictionary<string,string>(pathComparer)
+
+    let outputDirectory =
+        if String.IsNullOrWhiteSpace outputDirectory then
+            invalidArg (nameof outputDirectory) "An output directory is required."
+        Path.GetFullPath outputDirectory
+
+    let contentsName =
+        if String.IsNullOrWhiteSpace contentsName then
+            invalidArg (nameof contentsName) "A content directory name is required."
+        if Path.IsPathRooted contentsName
+           || contentsName = "."
+           || contentsName = ".."
+           || contentsName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
+           || contentsName.IndexOfAny([| Path.DirectorySeparatorChar; Path.AltDirectorySeparatorChar |]) >= 0 then
+            invalidArg (nameof contentsName) "The content directory name must be one relative path segment."
+        contentsName
+
+    let contentsDirectory = Path.Combine(outputDirectory, contentsName)
+
+    do Directory.CreateDirectory(contentsDirectory) |> ignore
+
+    /// <summary>Gets the directory that receives imported asset files.</summary>
+    member _.ContentsDirectory = contentsDirectory
+
+    /// <summary>Gets the relative URL prefix used by imported assets.</summary>
+    member _.UrlPrefix = contentsName
+
+    /// <summary>Builds a relative, URL-encoded reference to a file in this asset directory.</summary>
+    member _.AssetUrl(fileName:string) = WebOutputLayout.assetUrl contentsName fileName
+
+    /// <summary>
+    /// Copies an asset into this directory and returns its relative URL. Repeated imports are
+    /// deduplicated, while different source files with the same name receive numeric suffixes.
+    /// </summary>
+    member this.Import(sourcePath:string) =
+        if String.IsNullOrWhiteSpace sourcePath then
+            invalidArg (nameof sourcePath) "An asset source path is required."
+
+        if not (File.Exists sourcePath) then
+            raise (FileNotFoundException("Asset file was not found.", sourcePath))
+
+        let fileName = Path.GetFileName sourcePath
+        if String.IsNullOrWhiteSpace fileName then
+            invalidArg (nameof sourcePath) "The asset source path must identify a file."
+
+        let sourceFullPath = Path.GetFullPath sourcePath
+        let comparison =
+            if OperatingSystem.IsWindows() then StringComparison.OrdinalIgnoreCase
+            else StringComparison.Ordinal
+
+        lock gate (fun () ->
+            match importedAssetsBySource.TryGetValue(sourceFullPath) with
+            | true, allocatedFileName -> this.AssetUrl(allocatedFileName)
+            | false, _ ->
+                let allocatedFileName =
+                    if not (importedAssetSourcesByName.ContainsKey(fileName)) then
+                        fileName
+                    else
+                        let stem = Path.GetFileNameWithoutExtension(fileName)
+                        let extension = Path.GetExtension(fileName)
+                        let mutable suffix = 2
+                        let mutable candidate = stem + "-" + suffix.ToString() + extension
+                        while importedAssetSourcesByName.ContainsKey(candidate) do
+                            suffix <- suffix + 1
+                            candidate <- stem + "-" + suffix.ToString() + extension
+                        candidate
+
+                Directory.CreateDirectory(contentsDirectory) |> ignore
+                let destinationFullPath =
+                    Path.Combine(contentsDirectory, allocatedFileName)
+                    |> Path.GetFullPath
+
+                if not (String.Equals(sourceFullPath, destinationFullPath, comparison)) then
+                    File.Copy(sourceFullPath, destinationFullPath, true)
+
+                importedAssetsBySource.Add(sourceFullPath, allocatedFileName)
+                importedAssetSourcesByName.Add(allocatedFileName, sourceFullPath)
+                this.AssetUrl(allocatedFileName))
+
+type HtmlGenerationContext internal (dir:string,projectName:string) =
+    let gate = obj()
+    let layout = WebOutputLayout.create dir projectName
+    let assets = WebAssetContext(layout.OutputDirectory, layout.ContentsName)
     let mutable contentsCounter = -1
     let mutable animationSequenceCounter = -1
     let mutable animationGroupCounter = -1
@@ -66,7 +152,6 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
     let mutable voiceEnabled = true
     let animationButtons = ResizeArray<string * string * int * int>()
     let audioFiles = ResizeArray<string>()
-    do Directory.CreateDirectory(layout.ContentsDirectory) |> ignore
     // メインファイル
     let main = new Aqualis(
         Some layout.OutputDirectory,
@@ -134,59 +219,19 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
     member _.VoiceEnabled with get() = voiceEnabled and set(v) = voiceEnabled <- v
     
     /// <summary>Gets the directory that receives generated web content.</summary>
-    member _.ContentsDirectory = layout.ContentsDirectory
+    member _.ContentsDirectory = assets.ContentsDirectory
 
     /// <summary>Gets the relative URL prefix used by generated web assets.</summary>
-    member _.ContentsUrlPrefix = layout.ContentsName
+    member _.ContentsUrlPrefix = assets.UrlPrefix
+
+    /// <summary>Gets the asset context used by this HTML generation context.</summary>
+    member _.Assets = assets
 
     /// <summary>Builds a relative URL for a generated web asset.</summary>
-    member _.AssetUrl(fileName:string) = WebOutputLayout.assetUrl layout fileName
+    member _.AssetUrl(fileName:string) = assets.AssetUrl(fileName)
 
     /// <summary>Copies an asset into the generated content directory and returns its relative URL.</summary>
-    member internal this.ImportAsset(sourcePath:string) =
-        if String.IsNullOrWhiteSpace sourcePath then
-            invalidArg (nameof sourcePath) "An asset source path is required."
-
-        if not (File.Exists sourcePath) then
-            raise (FileNotFoundException("Asset file was not found.", sourcePath))
-
-        let fileName = Path.GetFileName sourcePath
-        if String.IsNullOrWhiteSpace fileName then
-            invalidArg (nameof sourcePath) "The asset source path must identify a file."
-
-        let sourceFullPath = Path.GetFullPath sourcePath
-        let comparison =
-            if OperatingSystem.IsWindows() then StringComparison.OrdinalIgnoreCase
-            else StringComparison.Ordinal
-
-        lock gate (fun () ->
-            match importedAssetsBySource.TryGetValue(sourceFullPath) with
-            | true, allocatedFileName -> this.AssetUrl(allocatedFileName)
-            | false, _ ->
-                let allocatedFileName =
-                    if not (importedAssetSourcesByName.ContainsKey(fileName)) then
-                        fileName
-                    else
-                        let stem = Path.GetFileNameWithoutExtension(fileName)
-                        let extension = Path.GetExtension(fileName)
-                        let mutable suffix = 2
-                        let mutable candidate = stem + "-" + suffix.ToString() + extension
-                        while importedAssetSourcesByName.ContainsKey(candidate) do
-                            suffix <- suffix + 1
-                            candidate <- stem + "-" + suffix.ToString() + extension
-                        candidate
-
-                Directory.CreateDirectory(layout.ContentsDirectory) |> ignore
-                let destinationFullPath =
-                    Path.Combine(layout.ContentsDirectory, allocatedFileName)
-                    |> Path.GetFullPath
-
-                if not (String.Equals(sourceFullPath, destinationFullPath, comparison)) then
-                    File.Copy(sourceFullPath, destinationFullPath, true)
-
-                importedAssetsBySource.Add(sourceFullPath, allocatedFileName)
-                importedAssetSourcesByName.Add(allocatedFileName, sourceFullPath)
-                this.AssetUrl(allocatedFileName))
+    member internal _.ImportAsset(sourcePath:string) = assets.Import(sourcePath)
 
     /// <summary>Allocates the next unique HTML content number.</summary>
     member _.NextContentsNumber() =

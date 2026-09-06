@@ -901,6 +901,25 @@ module HtmlWebExtensions =
 
 [<AutoOpen>]
 module HtmlGenerationExtensions2 =
+    type html with
+        /// <summary>
+        /// Copies an image through an explicit asset context and writes an img element.
+        /// This overload is available to ordinary HTML and PHP generation contexts.
+        /// </summary>
+        member this.image (assets:WebAssetContext, attributes:list<Atr>, filename:string) =
+            if attributes |> List.exists (fun attribute -> String.Equals(attribute.name, "src", StringComparison.OrdinalIgnoreCase)) then
+                invalidArg (nameof attributes) "The image source is managed by the asset context; do not supply a src attribute."
+            let sourceUrl = assets.Import filename
+            this.taga ("img", attributes @ [Atr("src", sourceUrl)])
+
+        /// <summary>Copies an image through an explicit asset context and writes a styled img element.</summary>
+        member this.image (assets:WebAssetContext, style:Style, filename:string) =
+            this.image (assets, [style.atr], filename)
+
+        /// <summary>Copies an image through an explicit asset context and writes an img element.</summary>
+        member this.image (assets:WebAssetContext, filename:string) =
+            this.image (assets, [], filename)
+
     type HtmlGenerationContext with
         
         /// <summary>
@@ -910,18 +929,14 @@ module HtmlGenerationExtensions2 =
         /// <param name="p">表示位置</param>
         /// <param name="filename">表示する画像のファイル名</param>
         member this.image (s:Style,p:position) = fun (filename:string) ->
-            let sourceUrl = this.ImportAsset filename
             let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.html.taga ("img", [st.atr; Atr("src", sourceUrl)])
+            this.html.image (this.Assets, st, filename)
         member this.image (s:Style, id:string) = fun (filename:string) ->
-            let sourceUrl = this.ImportAsset filename
-            this.html.taga ("img", [Atr("id",id); s.atr; Atr("src", sourceUrl)])
+            this.html.image (this.Assets, [Atr("id",id); s.atr], filename)
         member this.image (s:Style) = fun (filename:string) ->
-            let sourceUrl = this.ImportAsset filename
-            this.html.taga ("img", [s.atr; Atr("src", sourceUrl)])
+            this.html.image (this.Assets, s, filename)
         member this.image (filename:string) =
-            let sourceUrl = this.ImportAsset filename
-            this.html.taga ("img", [Atr("src", sourceUrl)])
+            this.html.image (this.Assets, filename)
         /// <summary>
         /// 指定位置に動画を表示する
         /// </summary>
