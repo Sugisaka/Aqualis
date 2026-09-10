@@ -213,6 +213,49 @@ namespace Aqualis
                 if ctx.z3.maxcounter>0 then
                     writer.codewritein("\t\t\t<li>Cache array (complex,3d): \\(\\dddot{z}_m (m = 1" + (if ctx.z3.maxcounter=1 then "" else " \\cdots " + ctx.z3.varList.ToString() + ")") + ")\\)</li>")
 
+            |JavaScript ->
+                let declareVariable etyp vtyp name initialValue =
+                    writer.codewritein(ctx.cvar.declare(etyp, vtyp, name, initialValue, ctx.numFormat))
+
+                let declareSize name vtyp =
+                    match vtyp with
+                    |A1 size1 ->
+                        let sizes = if size1 = 0 then "[-1]" else "[" + size1.ToString() + "]"
+                        declareVariable (It 4) (A1 1) (name + "_size") sizes
+                    |A2(size1,size2) ->
+                        let sizes =
+                            if size1 = 0 && size2 = 0 then "[-1, -1]"
+                            else "[" + size1.ToString() + ", " + size2.ToString() + "]"
+                        declareVariable (It 4) (A1 2) (name + "_size") sizes
+                    |A3(size1,size2,size3) ->
+                        let sizes =
+                            if size1 = 0 && size2 = 0 && size3 = 0 then "[-1, -1, -1]"
+                            else "[" + size1.ToString() + ", " + size2.ToString() + ", " + size3.ToString() + "]"
+                        declareVariable (It 4) (A1 3) (name + "_size") sizes
+                    |_ -> ()
+
+                let declareCacheArray etyp vtyp name =
+                    declareVariable etyp vtyp name ""
+                    declareSize name vtyp
+
+                for etyp,vtyp,name,initialValue in ctx.cvar.list do
+                    declareVariable etyp vtyp name initialValue
+                    declareSize name vtyp
+
+                for name in ctx.i0.varList do declareVariable (It 4) A0 name ""
+                for name in ctx.d0.varList do declareVariable Dt A0 name ""
+                for name in ctx.z0.varList do declareVariable Zt A0 name ""
+                for name in ctx.c0.varList do declareVariable (Structure "char") A0 name ""
+                for name in ctx.i1.varList do declareCacheArray (It 4) (A1 0) name
+                for name in ctx.d1.varList do declareCacheArray Dt (A1 0) name
+                for name in ctx.z1.varList do declareCacheArray Zt (A1 0) name
+                for name in ctx.i2.varList do declareCacheArray (It 4) (A2(0,0)) name
+                for name in ctx.d2.varList do declareCacheArray Dt (A2(0,0)) name
+                for name in ctx.z2.varList do declareCacheArray Zt (A2(0,0)) name
+                for name in ctx.i3.varList do declareCacheArray (It 4) (A3(0,0,0)) name
+                for name in ctx.d3.varList do declareCacheArray Dt (A3(0,0,0)) name
+                for name in ctx.z3.varList do declareCacheArray Zt (A3(0,0,0)) name
+
             |Python ->
                 for etyp,vtyp,name,p in ctx.cvar.list do
                     writer.codewritein(ctx.cvar.declare(etyp,vtyp,name,p,ctx.numFormat))

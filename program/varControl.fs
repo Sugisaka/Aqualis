@@ -711,14 +711,19 @@ namespace Aqualis
                     |Zt                     -> name + " = " + (if param<>"" then "numpy.array(" + param + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")" else "numpy.zeros(" + fmt.ItoS size1 + "*" + (fmt.ItoS size2) + "*" + (fmt.ItoS size3) + ", dtype=numpy.complex128).reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")") + ""
                     |_                      -> name + " = " + (if param<>"" then "numpy.array(" + param + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")" else "numpy.zeros(" + fmt.ItoS size1 + "*" + (fmt.ItoS size2) + "*" + (fmt.ItoS size3) + ").reshape(" + fmt.ItoS size1 + "," + fmt.ItoS size2 + "," + fmt.ItoS size3 + ")") + ""
             |JavaScript ->
+                let declaration initialValue =
+                    "let " + name + " = " + initialValue + ";"
                 match vtp with 
-                |A0        -> name + if param<>"" then " = " + param else " = 0;"
-                |A1 0      -> name + " = Array();"
-                |A2(0,0)   -> name + " = Array();"
-                |A3(0,0,0) -> name + " = Array();"
-                |A1 _      -> name + " = " + if param<>"" then param else "Array();"
-                |A2(_,_)   -> name + " = " + if param<>"" then param else "Array();"
-                |A3(_,_,_) -> name + " = " + if param<>"" then param else "Array();"
+                |A0 -> declaration (if param<>"" then param else "0")
+                |A1 0
+                |A2(0,0)
+                |A3(0,0,0) -> declaration "Array()"
+                |A1 size1 ->
+                    declaration (if param<>"" then param else "Array(" + fmt.ItoS size1 + ")")
+                |A2(size1,size2) ->
+                    declaration (if param<>"" then param else "Array(" + fmt.ItoS (size1*size2) + ")")
+                |A3(size1,size2,size3) ->
+                    declaration (if param<>"" then param else "Array(" + fmt.ItoS (size1*size2*size3) + ")")
             |PHP ->
                 match vtp with 
                 |A0        -> name + if param<>"" then " = " + param else " = 0;"

@@ -308,6 +308,73 @@ module NumericFormattingTests =
                 error.Message)
 
     [<Fact>]
+    let ``JavaScript public multidimensional arrays use flat indexing`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [JavaScript] output.Path "javascript-arrays" "1.0" <| fun context ->
+            let matrix = context.var.d2("matrix", 2, 3)
+            let tensor = context.var.i3("tensor", 2, 3, 4)
+            let matrixElement = matrix[1,2]
+            let tensorElement = tensor[1,2,3]
+
+            match matrixElement.Expr with
+            |Idx1(_,name,index) ->
+                Assert.Equal("matrix", name)
+                Assert.Contains("matrix_size[0]", index.evalJ context)
+            |expression -> failwithf "Expected flat matrix indexing, but got %A." expression
+
+            match tensorElement.Expr with
+            |Idx1(_,name,index) ->
+                Assert.Equal("tensor", name)
+                Assert.Contains("tensor_size[0]", index.evalJ context)
+                Assert.Contains("tensor_size[1]", index.evalJ context)
+            |expression -> failwithf "Expected flat tensor indexing, but got %A." expression
+
+            matrixElement <== 5.0
+            tensorElement <== 7
+            matrix <== 1.5
+            tensor <== 2
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, "javascript-arrays.js"))
+        Assert.Contains("let matrix = Array(6);", generated)
+        Assert.Contains("let matrix_size = [2, 3];", generated)
+        Assert.Contains("let tensor = Array(24);", generated)
+        Assert.Contains("let tensor_size = [2, 3, 4];", generated)
+        Assert.Contains("matrix_size[0]", generated)
+        Assert.Contains("tensor_size[0]", generated)
+        Assert.Contains("tensor_size[1]", generated)
+
+    [<Fact>]
+    let ``JavaScript dynamic multidimensional arrays initialize and reset every dimension`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [JavaScript] output.Path "javascript-dynamic-arrays" "1.0" <| fun context ->
+            let matrix = context.var.i2 "matrix"
+            let tensor = context.var.d3 "tensor"
+            matrix.allocate(2,3)
+            tensor.allocate(2,3,4)
+            matrix[1,2] <== 5
+            tensor[1,2,3] <== 7.0
+            matrix.deallocate()
+            tensor.deallocate()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, "javascript-dynamic-arrays.js"))
+        Assert.Contains("let matrix = Array();", generated)
+        Assert.Contains("let matrix_size = [-1, -1];", generated)
+        Assert.Contains("let tensor = Array();", generated)
+        Assert.Contains("let tensor_size = [-1, -1, -1];", generated)
+        Assert.Contains("matrix_size[0] = 2;", generated)
+        Assert.Contains("matrix_size[1] = 3;", generated)
+        Assert.Contains("tensor_size[0] = 2;", generated)
+        Assert.Contains("tensor_size[1] = 3;", generated)
+        Assert.Contains("tensor_size[2] = 4;", generated)
+        Assert.Contains("matrix_size[0] = -1;", generated)
+        Assert.Contains("matrix_size[1] = -1;", generated)
+        Assert.Contains("tensor_size[0] = -1;", generated)
+        Assert.Contains("tensor_size[1] = -1;", generated)
+        Assert.Contains("tensor_size[2] = -1;", generated)
+
+    [<Fact>]
     let ``JavaScript loop exits use break instead of goto`` () =
         use output = new TemporaryDirectory()
         let path = Path.Combine(output.Path, "javascript-loop.js")

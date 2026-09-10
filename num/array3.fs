@@ -139,7 +139,7 @@ namespace Aqualis
             let targetLanguage = c.language
             match x,targetLanguage with
             |Var3(_,name),Fortran -> Idx3(typ,name,(i+1).Expr,(j+1).Expr,(k+1).Expr)
-            |Var3(_,name),C99 -> Idx1(typ,name,(i + j * this.size1 + k * this.size1 * this.size2).Expr)
+            |Var3(_,name),(C99|JavaScript) -> Idx1(typ,name,(i + j * this.size1 + k * this.size1 * this.size2).Expr)
             |Var3(_,name),_ -> Idx3(typ,name,i.Expr,j.Expr,k.Expr)
             |Arx3(_,_,_,f),_ -> f (i,j,k)
 
@@ -646,6 +646,8 @@ namespace Aqualis
                     match size with
                     |A3(0,0,0) ->
                         this.size1 <== -1
+                        this.size2 <== -1
+                        this.size3 <== -1
                         writein(name+"= null;"+"\n")
                     |_ -> ()
                 |PHP ->
