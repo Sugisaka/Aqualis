@@ -126,3 +126,51 @@ module AssignmentTests =
         Assert.Contains("values1", generated)
         Assert.Contains("values2", generated)
         Assert.Contains("values3", generated)
+
+    [<Fact>]
+    let ``dynamic one and two dimensional arrays are registered for declaration`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [Fortran; C99] output.Path "dynamic-arrays" "1.0" <| fun context ->
+            let integers1 = context.var.i1 "integers1"
+            let doubles1 = context.var.d1 "doubles1"
+            let complexes1 = context.var.z1 "complexes1"
+            let integers2 = context.var.i2 "integers2"
+            let doubles2 = context.var.d2 "doubles2"
+            let complexes2 = context.var.z2 "complexes2"
+
+            Assert.Equal(It 4, integers1.Etype)
+            Assert.Contains((It 4,A1 0,"integers1",""), context.cvar.list)
+            Assert.Contains((Dt,A1 0,"doubles1",""), context.cvar.list)
+            Assert.Contains((Zt,A1 0,"complexes1",""), context.cvar.list)
+            Assert.Contains((It 4,A2(0,0),"integers2",""), context.cvar.list)
+            Assert.Contains((Dt,A2(0,0),"doubles2",""), context.cvar.list)
+            Assert.Contains((Zt,A2(0,0),"complexes2",""), context.cvar.list)
+
+            integers1.allocate 2
+            doubles1.allocate 2
+            complexes1.allocate 2
+            integers2.allocate(2,3)
+            doubles2.allocate(2,3)
+            complexes2.allocate(2,3)
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, "dynamic-arrays.c"))
+        Assert.Contains("int *integers1;", generated)
+        Assert.Contains("int integers1_size[1] = { -1 };", generated)
+        Assert.Contains("double *doubles1;", generated)
+        Assert.Contains("double complex *complexes1;", generated)
+        Assert.Contains("int *integers2;", generated)
+        Assert.Contains("int integers2_size[2] = { -1, -1 };", generated)
+        Assert.Contains("double *doubles2;", generated)
+        Assert.Contains("double complex *complexes2;", generated)
+        Assert.Contains("integers1 = (int *)malloc(sizeof(int)*integers1_size[0]);", generated)
+
+        let fortran = File.ReadAllText(Path.Combine(output.Path, "dynamic-arrays.f90"))
+        Assert.Contains("integer,allocatable :: integers1(:)", fortran)
+        Assert.Contains("integer :: integers1_size(1:1) = (/ -1 /)", fortran)
+        Assert.Contains("double precision,allocatable :: doubles1(:)", fortran)
+        Assert.Contains("complex(kind(0d0)),allocatable :: complexes1(:)", fortran)
+        Assert.Contains("integer,allocatable :: integers2(:,:)", fortran)
+        Assert.Contains("integer :: integers2_size(1:2) = (/ -1,-1 /)", fortran)
+        Assert.Contains("double precision,allocatable :: doubles2(:,:)", fortran)
+        Assert.Contains("complex(kind(0d0)),allocatable :: complexes2(:,:)", fortran)

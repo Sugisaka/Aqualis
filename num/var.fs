@@ -57,14 +57,17 @@ namespace Aqualis
             
         member _.i1(name:string) =
             let name = nameFor ctx name
-            int1(Dt,Var1(A1 0,name),context=ctx)
-            
+            ctx.cvar.setUniqVarWarning(It 4,A1 0,name,"")
+            int1(It 4,Var1(A1 0,name),context=ctx)
+
         member _.d1(name:string) =
             let name = nameFor ctx name
+            ctx.cvar.setUniqVarWarning(Dt,A1 0,name,"")
             double1(Dt,Var1(A1 0,name),context=ctx)
 
         member _.z1(name:string) =
             let name = nameFor ctx name
+            ctx.cvar.setUniqVarWarning(Zt,A1 0,name,"")
             complex1(Zt,Var1(A1 0,name),context=ctx)
 
         member _.ip1(name:string, values:int list) =
@@ -104,13 +107,19 @@ namespace Aqualis
             complex2(Zt,Var2(A2(size1,size2),name),context=ctx)
 
         member _.i2(name:string) =
-            int2(It 4,Var2(A2(0,0),nameFor ctx name),context=ctx)
-            
+            let name = nameFor ctx name
+            ctx.cvar.setUniqVarWarning(It 4,A2(0,0),name,"")
+            int2(It 4,Var2(A2(0,0),name),context=ctx)
+
         member _.d2(name:string) =
-            double2(Dt,Var2(A2(0,0),nameFor ctx name),context=ctx)
+            let name = nameFor ctx name
+            ctx.cvar.setUniqVarWarning(Dt,A2(0,0),name,"")
+            double2(Dt,Var2(A2(0,0),name),context=ctx)
 
         member _.z2(name:string) =
-            complex2(Zt,Var2(A2(0,0),nameFor ctx name),context=ctx)
+            let name = nameFor ctx name
+            ctx.cvar.setUniqVarWarning(Zt,A2(0,0),name,"")
+            complex2(Zt,Var2(A2(0,0),name),context=ctx)
 
         member _.i3(name:string,size1:int,size2:int,size3:int) =
             let name = nameFor ctx name
