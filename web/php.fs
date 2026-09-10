@@ -468,8 +468,8 @@ and ContextPhp internal (context:Aqualis) =
         let inferredDownloadName:PHPdata = this.basename(file)
         this.file_download(file,inferredDownloadName)
     member this.basename(file:PHPdata) = data ("basename("+file.code+")") [file.Context]
-    member this.br = "\\n"
-    member this.tb = "\\t"
+    member this.br = "\n"
+    member this.tb = "\t"
 
 [<AutoOpen>]
 module num0ForPHP =
