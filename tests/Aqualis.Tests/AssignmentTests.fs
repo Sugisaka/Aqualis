@@ -174,3 +174,64 @@ module AssignmentTests =
         Assert.Contains("integer :: integers2_size(1:2) = (/ -1,-1 /)", fortran)
         Assert.Contains("double precision,allocatable :: doubles2(:,:)", fortran)
         Assert.Contains("complex(kind(0d0)),allocatable :: complexes2(:,:)", fortran)
+
+    [<Fact>]
+    let ``widening array assignments reject scalars from different contexts`` () =
+        use output = new TemporaryDirectory()
+        use leftContext = createContext output.Path "left-arrays.c"
+        use rightContext = createContext output.Path "right-scalars.c"
+        let integerValue = rightContext.var.i0 "integerValue"
+        let doubleValue = rightContext.var.d0 "doubleValue"
+        let assignments : (unit -> unit) list =
+            [
+                fun () -> leftContext.var.d1("double1", 1) <== integerValue
+                fun () -> leftContext.var.z1("complex1FromInt", 1) <== integerValue
+                fun () -> leftContext.var.z1("complex1FromDouble", 1) <== doubleValue
+                fun () -> leftContext.var.d2("double2", 1, 1) <== integerValue
+                fun () -> leftContext.var.z2("complex2FromInt", 1, 1) <== integerValue
+                fun () -> leftContext.var.z2("complex2FromDouble", 1, 1) <== doubleValue
+                fun () -> leftContext.var.d3("double3", 1, 1, 1) <== integerValue
+                fun () -> leftContext.var.z3("complex3FromInt", 1, 1, 1) <== integerValue
+                fun () -> leftContext.var.z3("complex3FromDouble", 1, 1, 1) <== doubleValue
+            ]
+
+        for assignment in assignments do
+            Assert.Throws<InvalidOperationException>(Action(fun () -> assignment()))
+            |> ignore
+
+        leftContext.close()
+        Assert.Equal("", File.ReadAllText(Path.Combine(output.Path, "left-arrays.c")))
+
+    [<Fact>]
+    let ``widening array assignments generate code in the shared context`` () =
+        use output = new TemporaryDirectory()
+
+        Aqualis.makeProgramWithContext (output.Path, "widening-arrays.c", C99) <| fun context ->
+            let integerValue = context.var.i0 "integerValue"
+            let doubleValue = context.var.d0 "doubleValue"
+            context.var.d1("double1", 1) <== integerValue
+            context.var.z1("complex1FromInt", 1) <== integerValue
+            context.var.z1("complex1FromDouble", 1) <== doubleValue
+            context.var.d2("double2", 1, 1) <== integerValue
+            context.var.z2("complex2FromInt", 1, 1) <== integerValue
+            context.var.z2("complex2FromDouble", 1, 1) <== doubleValue
+            context.var.d3("double3", 1, 1, 1) <== integerValue
+            context.var.z3("complex3FromInt", 1, 1, 1) <== integerValue
+            context.var.z3("complex3FromDouble", 1, 1, 1) <== doubleValue
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, "widening-arrays.c"))
+        for arrayName in
+            [
+                "double1"
+                "complex1FromInt"
+                "complex1FromDouble"
+                "double2"
+                "complex2FromInt"
+                "complex2FromDouble"
+                "double3"
+                "complex3FromInt"
+                "complex3FromDouble"
+            ] do
+            Assert.Contains(arrayName, generated)
+        Assert.Contains("= integerValue;", generated)
+        Assert.Contains("= doubleValue;", generated)

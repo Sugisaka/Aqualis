@@ -27,7 +27,7 @@ namespace Aqualis
 
         static member (<==) (x:double1,y:double1) = x.AssignArray y
         static member (<==) (x:double1,y:double0) = x.AssignScalar y
-        static member (<==) (x:double1,y:int0) = x.AssignScalar(double0 y.Expr)
+        static member (<==) (x:double1,y:int0) = x.AssignScalar((y :> IReal0).ToDouble0)
         static member (<==) (x:double1,y:double) = x.AssignScalar(D y)
         static member (<==) (x:double1,y:int) = x.AssignScalar(I y)
 

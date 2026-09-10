@@ -23,8 +23,8 @@ namespace Aqualis
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
         static member (<==)(x:complex3,y:complex3)=x.AssignArray y
         static member (<==)(x:complex3,y:complex0)=x.AssignScalar y
-        static member (<==)(x:complex3,y:double0)=x.AssignScalar(complex0 y.Expr)
-        static member (<==)(x:complex3,y:int0)=x.AssignScalar(complex0 y.Expr)
+        static member (<==)(x:complex3,y:double0)=x.AssignScalar((y :> INum0).ToComplex0)
+        static member (<==)(x:complex3,y:int0)=x.AssignScalar((y :> INum0).ToComplex0)
         static member (<==)(x:complex3,y:double)=x.AssignScalar(complex0(Dbl y))
         static member (<==)(x:complex3,y:int)=x.AssignScalar(complex0(Int y))
 
