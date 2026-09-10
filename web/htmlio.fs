@@ -78,6 +78,38 @@ type WebAssetContext(outputDirectory:string, contentsName:string) =
 
     let contentsDirectory = Path.Combine(outputDirectory, contentsName)
 
+    let filesHaveSameContent leftPath rightPath =
+        try
+            let leftInfo = FileInfo(leftPath)
+            let rightInfo = FileInfo(rightPath)
+            if leftInfo.Length <> rightInfo.Length then
+                false
+            else
+                use leftStream = File.Open(leftPath, FileMode.Open, FileAccess.Read, FileShare.Read)
+                use rightStream = File.Open(rightPath, FileMode.Open, FileAccess.Read, FileShare.Read)
+                let leftBuffer = Array.zeroCreate<byte> 81920
+                let rightBuffer = Array.zeroCreate<byte> 81920
+
+                let rec compareNextBlock () =
+                    let leftCount = leftStream.Read(leftBuffer, 0, leftBuffer.Length)
+                    let rightCount = rightStream.Read(rightBuffer, 0, rightBuffer.Length)
+                    if leftCount <> rightCount then
+                        false
+                    elif leftCount = 0 then
+                        true
+                    else
+                        let mutable index = 0
+                        let mutable equal = true
+                        while equal && index < leftCount do
+                            equal <- leftBuffer[index] = rightBuffer[index]
+                            index <- index + 1
+                        equal && compareNextBlock ()
+
+                compareNextBlock ()
+        with
+        | :? IOException
+        | :? UnauthorizedAccessException -> false
+
     do Directory.CreateDirectory(contentsDirectory) |> ignore
 
     /// <summary>Gets the directory that receives imported asset files.</summary>
@@ -91,7 +123,8 @@ type WebAssetContext(outputDirectory:string, contentsName:string) =
 
     /// <summary>
     /// Copies an asset into this directory and returns its relative URL. Repeated imports are
-    /// deduplicated, while different source files with the same name receive numeric suffixes.
+    /// deduplicated, while occupied names receive numeric suffixes. Existing files are reused
+    /// when their content matches the source and are never overwritten.
     /// </summary>
     member this.Import(sourcePath:string) =
         if String.IsNullOrWhiteSpace sourcePath then
@@ -113,26 +146,37 @@ type WebAssetContext(outputDirectory:string, contentsName:string) =
             match importedAssetsBySource.TryGetValue(sourceFullPath) with
             | true, allocatedFileName -> this.AssetUrl(allocatedFileName)
             | false, _ ->
-                let allocatedFileName =
-                    if not (importedAssetSourcesByName.ContainsKey(fileName)) then
-                        fileName
-                    else
-                        let stem = Path.GetFileNameWithoutExtension(fileName)
-                        let extension = Path.GetExtension(fileName)
-                        let mutable suffix = 2
-                        let mutable candidate = stem + "-" + suffix.ToString() + extension
-                        while importedAssetSourcesByName.ContainsKey(candidate) do
-                            suffix <- suffix + 1
-                            candidate <- stem + "-" + suffix.ToString() + extension
-                        candidate
-
                 Directory.CreateDirectory(contentsDirectory) |> ignore
-                let destinationFullPath =
-                    Path.Combine(contentsDirectory, allocatedFileName)
-                    |> Path.GetFullPath
+                let stem = Path.GetFileNameWithoutExtension(fileName)
+                let extension = Path.GetExtension(fileName)
 
-                if not (String.Equals(sourceFullPath, destinationFullPath, comparison)) then
-                    File.Copy(sourceFullPath, destinationFullPath, true)
+                let rec allocateAndCopy suffix =
+                    let candidate =
+                        if suffix = 1 then fileName
+                        else stem + "-" + suffix.ToString() + extension
+                    let destinationFullPath =
+                        Path.Combine(contentsDirectory, candidate)
+                        |> Path.GetFullPath
+
+                    if importedAssetSourcesByName.ContainsKey(candidate) then
+                        allocateAndCopy (suffix + 1)
+                    elif String.Equals(sourceFullPath, destinationFullPath, comparison) then
+                        candidate
+                    elif Directory.Exists(destinationFullPath) then
+                        allocateAndCopy (suffix + 1)
+                    elif File.Exists(destinationFullPath) then
+                        if filesHaveSameContent sourceFullPath destinationFullPath then
+                            candidate
+                        else
+                            allocateAndCopy (suffix + 1)
+                    else
+                        try
+                            File.Copy(sourceFullPath, destinationFullPath, false)
+                            candidate
+                        with :? IOException when File.Exists(destinationFullPath) || Directory.Exists(destinationFullPath) ->
+                            allocateAndCopy suffix
+
+                let allocatedFileName = allocateAndCopy 1
 
                 importedAssetsBySource.Add(sourceFullPath, allocatedFileName)
                 importedAssetSourcesByName.Add(allocatedFileName, sourceFullPath)

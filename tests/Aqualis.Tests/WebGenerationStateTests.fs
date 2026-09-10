@@ -318,6 +318,70 @@ module WebGenerationStateTests =
         Assert.False(File.Exists(Path.Combine(contentsDirectory, "shared-3.png")))
 
     [<Fact>]
+    let ``existing web assets with different content are preserved`` () =
+        use output = new TemporaryDirectory()
+        let sourceDirectory = Path.Combine(output.Path, "source")
+        let contentsDirectory = Path.Combine(output.Path, "images")
+        Directory.CreateDirectory(sourceDirectory) |> ignore
+        Directory.CreateDirectory(contentsDirectory) |> ignore
+        let sourcePath = Path.Combine(sourceDirectory, "shared.png")
+        let existingPath = Path.Combine(contentsDirectory, "shared.png")
+        File.WriteAllText(sourcePath, "new image")
+        File.WriteAllText(existingPath, "existing image")
+
+        let firstContext = WebAssetContext(output.Path, "images")
+        let firstUrl = firstContext.Import sourcePath
+        let repeatedUrl = firstContext.Import sourcePath
+
+        Assert.Equal("images/shared-2.png", firstUrl)
+        Assert.Equal(firstUrl, repeatedUrl)
+        Assert.Equal("existing image", File.ReadAllText(existingPath))
+        Assert.Equal("new image", File.ReadAllText(Path.Combine(contentsDirectory, "shared-2.png")))
+
+        let secondContext = WebAssetContext(output.Path, "images")
+        Assert.Equal(firstUrl, secondContext.Import sourcePath)
+        Assert.False(File.Exists(Path.Combine(contentsDirectory, "shared-3.png")))
+
+    [<Fact>]
+    let ``existing web assets with matching content are reused`` () =
+        use output = new TemporaryDirectory()
+        let sourceDirectory = Path.Combine(output.Path, "source")
+        let contentsDirectory = Path.Combine(output.Path, "images")
+        Directory.CreateDirectory(sourceDirectory) |> ignore
+        Directory.CreateDirectory(contentsDirectory) |> ignore
+        let sourcePath = Path.Combine(sourceDirectory, "shared.png")
+        let existingPath = Path.Combine(contentsDirectory, "shared.png")
+        File.WriteAllText(sourcePath, "same image")
+        File.WriteAllText(existingPath, "same image")
+
+        let assets = WebAssetContext(output.Path, "images")
+
+        Assert.Equal("images/shared.png", assets.Import sourcePath)
+        Assert.Equal("same image", File.ReadAllText(existingPath))
+        Assert.False(File.Exists(Path.Combine(contentsDirectory, "shared-2.png")))
+
+    [<Fact>]
+    let ``web asset allocation skips occupied files and directories`` () =
+        use output = new TemporaryDirectory()
+        let sourceDirectory = Path.Combine(output.Path, "source")
+        let contentsDirectory = Path.Combine(output.Path, "images")
+        Directory.CreateDirectory(sourceDirectory) |> ignore
+        Directory.CreateDirectory(contentsDirectory) |> ignore
+        let sourcePath = Path.Combine(sourceDirectory, "shared.png")
+        File.WriteAllText(sourcePath, "new image")
+        File.WriteAllText(Path.Combine(contentsDirectory, "shared.png"), "first")
+        File.WriteAllText(Path.Combine(contentsDirectory, "shared-2.png"), "second")
+        Directory.CreateDirectory(Path.Combine(contentsDirectory, "shared-3.png")) |> ignore
+
+        let assets = WebAssetContext(output.Path, "images")
+
+        Assert.Equal("images/shared-4.png", assets.Import sourcePath)
+        Assert.Equal("first", File.ReadAllText(Path.Combine(contentsDirectory, "shared.png")))
+        Assert.Equal("second", File.ReadAllText(Path.Combine(contentsDirectory, "shared-2.png")))
+        Assert.True(Directory.Exists(Path.Combine(contentsDirectory, "shared-3.png")))
+        Assert.Equal("new image", File.ReadAllText(Path.Combine(contentsDirectory, "shared-4.png")))
+
+    [<Fact>]
     let ``audio file names are emitted as safe JavaScript strings`` () =
         use output = new TemporaryDirectory()
         let projectName = "audio-escaping"
