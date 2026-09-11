@@ -228,7 +228,7 @@ namespace Aqualis
                         writer.codewritein "\t\t<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>\n"
                         writer.codewritein "\t\t<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n"
                         writer.codewritein "\t\t<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n"
-                        writer.codewritein "\t\t<link href=\"https://fonts.googleapis.com/css2?family=Noto + Sans + JP:wght@500;600;700&display=swap\" rel=\"stylesheet\">\n"
+                        writer.codewritein "\t\t<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap\" rel=\"stylesheet\">\n"
                         writer.codewritein "\t\t<style type=\"text/css\">\n"
                         writer.codewritein "\t\t<!--\n"
                         writer.codewritein "\t\tbody {\n"

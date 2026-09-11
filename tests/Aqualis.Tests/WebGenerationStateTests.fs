@@ -234,6 +234,10 @@ module WebGenerationStateTests =
         Assert.Contains("<h1>A&amp;B</h1>", generated)
         Assert.Contains("Project version: 1&lt;/li&gt;&lt;script&gt;alert(1)&lt;/script&gt;", generated)
         Assert.DoesNotContain("</li><script>alert(1)</script>", generated)
+        Assert.Contains(
+            "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap",
+            generated)
+        Assert.DoesNotContain("family=Noto + Sans + JP", generated)
 
         let sequenceProjectName = "sequence&A"
         Compile [HTMLSequenceDiagram] output.Path sequenceProjectName "1" ignore
