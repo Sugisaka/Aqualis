@@ -207,6 +207,7 @@ and ContextPhp internal (context:Aqualis) =
     let merge contexts = Aqualis.mergeMany (context :: contexts)
     let data code contexts = PHPdata.f(code, merge contexts)
     let boolean code contexts = bool0(Var(Nt,code,NaN), merge contexts)
+    member internal _.Context = context
     /// Creates a PHP variable associated with this generation context.
     member _.var(name:string) = PHPdata.var(context,name)
     member _.var(name:string,init:PHPdata) = PHPdata.var(context,name,init)

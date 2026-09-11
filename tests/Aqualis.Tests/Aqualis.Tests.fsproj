@@ -43,6 +43,7 @@
     <Compile Include="MarkdownTests.fs" />
     <Compile Include="Plot2dTests.fs" />
     <Compile Include="WebGenerationStateTests.fs" />
+    <Compile Include="SecurityGenerationTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

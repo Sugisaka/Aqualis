@@ -95,6 +95,7 @@
     <Compile Include="web\php.fs" />
     <Compile Include="web\table.fs" />
     <Compile Include="web\animation.fs" />
+    <Compile Include="web\security.fs" />
     <Compile Include="web\post.fs" />
     <Compile Include="web\form.fs" />
     <Compile Include="main\function.fs" />
