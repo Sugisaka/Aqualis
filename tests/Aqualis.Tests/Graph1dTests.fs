@@ -1,6 +1,7 @@
 namespace Aqualis.Tests
 
 open System
+open System.Globalization
 open System.IO
 open System.Text.RegularExpressions
 open Xunit
@@ -74,6 +75,26 @@ module Graph1dTests =
         Assert.Equal(2.0, first[1])
         Assert.Equal(10.0, last[0])
         Assert.Equal(20.0, last[1])
+
+    [<Theory>]
+    [<InlineData("en-US")>]
+    [<InlineData("de-DE")>]
+    [<InlineData("fr-FR")>]
+    let ``readdata parses invariant decimals and exponents in every culture`` (cultureName:string) =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "invariant-columns.dat")
+        File.WriteAllLines(source, [| "1.25 -2.5e3"; "3.5 4.75" |])
+        let previousCulture = CultureInfo.CurrentCulture
+
+        try
+            CultureInfo.CurrentCulture <- CultureInfo(cultureName)
+            let x, y =
+                graph1d.readdata source ((fun data -> data 1), (fun data -> data 2))
+
+            Assert.Equal<double array>([|1.25; 3.5|], x)
+            Assert.Equal<double array>([|-2500.0; 4.75|], y)
+        finally
+            CultureInfo.CurrentCulture <- previousCulture
 
     [<Fact>]
     let ``columns outside the one-based range return NaN`` () =

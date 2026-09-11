@@ -7,6 +7,7 @@
 namespace Aqualis
 
 open System
+open System.Globalization
 open System.IO
 
 ///<summary>プロット範囲の指定</summary>
@@ -254,7 +255,7 @@ type graph1d =
         }
     ///<summary>グラフ生成(ダミー)</summary>
     static member dummy_makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code = ()
-    ///<summary>データファイルの読み込み</summary>
+    ///<summary>カルチャに依存しない形式（小数点はピリオド）でデータファイルを読み込みます。</summary>
     static member readdata (filename:string) (colx:(int->double)->double,coly:(int->double)->double) =
         //データファイルの行数
         let nline =
@@ -281,7 +282,11 @@ type graph1d =
                     printfn "column index over: %d %d" i k.Length
                     nan
                 else
-                    let (r,v) = Double.TryParse(k[i-1])
+                    let (r,v) =
+                        Double.TryParse(
+                            k[i-1],
+                            NumberStyles.Float,
+                            CultureInfo.InvariantCulture)
                     if not r then 
                         printfn "Not a number: %s" k[i-1]
                         nan
