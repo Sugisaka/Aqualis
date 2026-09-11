@@ -212,11 +212,11 @@ namespace Aqualis
         member this.head title = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
-            writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
+            writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
@@ -230,11 +230,11 @@ namespace Aqualis
         member this.head (title,refresh:int) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
-            writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
+            writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
@@ -249,11 +249,11 @@ namespace Aqualis
         member this.head (title,cssfile,jsfile,refresh:int) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
-            writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
+            writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
@@ -269,11 +269,11 @@ namespace Aqualis
         member this.head (title,cssfile,jsfile) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
-            writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
+            writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
@@ -288,11 +288,11 @@ namespace Aqualis
         member this.head (title,cssfile) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
-            writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
+            writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"

@@ -60,6 +60,47 @@ module WebGenerationStateTests =
         Assert.DoesNotContain("href=\"theme\" onload", generated)
 
     [<Fact>]
+    let ``all HTML head overloads keep metadata inside the head element`` () =
+        use output = new TemporaryDirectory()
+
+        let generate fileName (render:Aqualis -> unit) =
+            use context = new Aqualis(Some output.Path, Some fileName, HTML)
+            render context
+            context.close()
+            File.ReadAllText(Path.Combine(output.Path, fileName))
+
+        let pages =
+            [ generate "head-basic.html" (fun context ->
+                  context.html.head "Title" ignore)
+              generate "head-refresh.html" (fun context ->
+                  context.html.head("Title", 5) ignore)
+              generate "head-css.html" (fun context ->
+                  context.html.head("Title", "site.css") ignore)
+              generate "head-assets.html" (fun context ->
+                  context.html.head("Title", "site.css", "site.js") ignore)
+              generate "head-assets-refresh.html" (fun context ->
+                  context.html.head("Title", "site.css", "site.js", 5) ignore) ]
+
+        for generated in pages do
+            let htmlIndex = generated.IndexOf("<html", StringComparison.Ordinal)
+            let headIndex = generated.IndexOf("<head>", StringComparison.Ordinal)
+            let charsetIndex = generated.IndexOf("<meta charset=", StringComparison.Ordinal)
+            let titleIndex = generated.IndexOf("<title>", StringComparison.Ordinal)
+            let headEndIndex = generated.IndexOf("</head>", StringComparison.Ordinal)
+            let bodyIndex = generated.IndexOf("<body>", StringComparison.Ordinal)
+
+            Assert.Equal(1, Regex.Matches(generated, Regex.Escape("<head>")).Count)
+            Assert.Equal(1, Regex.Matches(generated, Regex.Escape("</head>")).Count)
+            Assert.True(htmlIndex < headIndex)
+            Assert.True(headIndex < charsetIndex)
+            Assert.True(charsetIndex < titleIndex)
+            Assert.True(titleIndex < headEndIndex)
+            Assert.True(headEndIndex < bodyIndex)
+
+            for metadata in Regex.Matches(generated, "<meta\\b") do
+                Assert.True(headIndex < metadata.Index && metadata.Index < headEndIndex)
+
+    [<Fact>]
     let ``block text code emits border color separately from border width`` () =
         use output = new TemporaryDirectory()
         let fileName = "block-text-border.html"
