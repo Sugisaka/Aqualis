@@ -37,6 +37,7 @@
     <Compile Include="LapackDeterminantGenerationTests.fs" />
     <Compile Include="PhpUploadGenerationTests.fs" />
     <Compile Include="PhpCommunicationGenerationTests.fs" />
+    <Compile Include="PhpArrayGenerationTests.fs" />
     <Compile Include="ChTests.fs" />
     <Compile Include="GoldenFileTests.fs" />
     <Compile Include="MarkdownTests.fs" />

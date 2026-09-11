@@ -105,6 +105,11 @@ namespace Aqualis
         member _.codewriten(s:string) = withWriter (fun writer -> writer.codewriten s)
         member _.codewritein(s:string) = withWriter (fun writer -> writer.codewritein s)
         member _.codewritein(h:string,s:string) = withWriter (fun writer -> writer.codewritein (h,s))
+        member internal _.writePhpStatement(statement:string) =
+            ensureActive()
+            if lang <> PHP then
+                invalidOp "PHP statements can only be emitted by a PHP generation context."
+            withWriter (fun writer -> writer.codewritein("<?php ", statement + " ?>"))
         member internal _.writeRaw(s:string) = withWriter (fun writer -> writer.cwrite s)
         member internal _.captureCode(action:unit -> 'T) =
             ensureActive()

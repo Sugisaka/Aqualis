@@ -573,7 +573,7 @@ namespace Aqualis
                             this.size1 <== n1
                             this.size2 <== n2
                             this.size3 <== n3
-                            writein(name+" = [];\n")
+                            c.writePhpStatement(name+" = [];")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長3次元配列ではありません")
                     |Numeric ->
@@ -654,7 +654,9 @@ namespace Aqualis
                     match size with
                     |A3(0,0,0) ->
                         this.size1 <== -1
-                        writein("unset("+name+");"+"\n")
+                        this.size2 <== -1
+                        this.size3 <== -1
+                        c.writePhpStatement("unset("+name+");")
                     |_ -> ()
                 |Numeric ->
                     ()

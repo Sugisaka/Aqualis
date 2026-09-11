@@ -180,7 +180,7 @@ namespace Aqualis
                         match size1 with
                         |A1 0 ->
                             this.size1 <== n1
-                            writein(name+" = [];\n")
+                            c.writePhpStatement(name+" = [];")
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |Numeric ->
@@ -246,7 +246,7 @@ namespace Aqualis
                     match size with
                     |A1 0 ->
                         this.size1 <== -1
-                        writein("unset("+name+");"+"\n")
+                        c.writePhpStatement("unset("+name+");")
                     |_ -> ()
                 |Numeric ->
                     ()
