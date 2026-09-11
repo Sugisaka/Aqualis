@@ -93,11 +93,13 @@
     <Compile Include="web\style.fs" />
     <Compile Include="web\param.fs" />
     <Compile Include="web\php.fs" />
+    <Compile Include="web\typedPhp.fs" />
     <Compile Include="web\table.fs" />
     <Compile Include="web\animation.fs" />
     <Compile Include="web\security.fs" />
     <Compile Include="web\post.fs" />
     <Compile Include="web\form.fs" />
+    <Compile Include="web\request.fs" />
     <Compile Include="main\function.fs" />
     <Compile Include="main\compile.fs" />
   </ItemGroup>

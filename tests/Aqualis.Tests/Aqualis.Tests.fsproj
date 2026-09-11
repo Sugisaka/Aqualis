@@ -44,6 +44,7 @@
     <Compile Include="Plot2dTests.fs" />
     <Compile Include="WebGenerationStateTests.fs" />
     <Compile Include="SecurityGenerationTests.fs" />
+    <Compile Include="TypedWebApiTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

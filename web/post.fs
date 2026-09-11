@@ -12,6 +12,7 @@ open System.Text
 
 type post(context:Aqualis,id:PHPdata) =
     new(ctx:Aqualis,x:string) = post(ctx,PHPdata ([RStr x],Aqualis.BlankWriter PHP))
+    new(ctx:Aqualis,x:FieldName) = post(ctx,PHPdata (FieldName.value x))
     new(ctx:Aqualis,x:int0) = post(ctx,PHPdata([RNvr(x.Expr,x.Context)], x.Context))
     member _.get with get() = PHPdata.f(context,"$_POST["+id.toString(".",StrQuotation)+"]")
     member this.get_html with get() = PHPdata.f(context,"htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")

@@ -194,6 +194,64 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
             "if (" + methodExpression + " === 'POST' && !(" + this.IsValidPost.code + ")) { " +
             "http_response_code(403); exit('Invalid CSRF token.'); } ?>")
 
+/// A session key carrying the expected PHP value category.
+[<Struct>]
+type SessionKey<'T> =
+    private
+    | SessionKey of FieldName
+    member internal this.Name =
+        let (SessionKey fieldName) = this
+        FieldName.value fieldName
+
+[<RequireQualifiedAccess>]
+module SessionKey =
+    /// Creates a string-valued session key.
+    let string name : SessionKey<PhpString> = SessionKey(FieldName.create name)
+
+    /// Creates an integer-valued session key.
+    let integer name : SessionKey<PhpInt> = SessionKey(FieldName.create name)
+
+    /// Creates a floating-point-valued session key.
+    let floatingPoint name : SessionKey<PhpFloat> = SessionKey(FieldName.create name)
+
+/// A PHP session that has already been configured and started.
+type ActiveSession internal (session:WebSession) =
+    member internal _.Session = session
+
+    /// Gets a typed expression for a value in this session.
+    member _.Get(key:SessionKey<'T>) =
+        PhpExpr.ofUntyped<'T> (session.Item key.Name)
+
+    /// Tests whether a typed session key exists.
+    member _.Isset(key:SessionKey<'T>) =
+        session.Isset key.Name
+
+    /// Sets a typed session value.
+    member _.Set(key:SessionKey<'T>, value:PhpExpr<'T>) =
+        session.Item(key.Name) <== value.Untyped
+
+    /// Sets a string-valued session value.
+    member _.Set(key:SessionKey<PhpString>, value:string) =
+        session.Item(key.Name) <== value
+
+    member _.RegenerateId() = session.RegenerateId()
+    member _.Destroy() = session.Destroy()
+
+    /// Ensures that a CSRF token exists and returns an initialized token capability.
+    member _.CsrfToken() =
+        let protection = CsrfProtection(session.Context, session)
+        protection.EnsureToken()
+        CsrfToken(protection)
+
+/// An initialized CSRF token that is safe to validate or render.
+and CsrfToken internal (protection:CsrfProtection) =
+    member internal _.Protection = protection
+    member internal _.Context = protection.Context
+    member _.IsValidPost = protection.IsValidPost
+    member _.RequireValidPost() = protection.RequireValidPost()
+    member _.Rotate() = protection.RotateToken()
+    member _.Field() = protection.Field()
+
 [<AutoOpen>]
 module SecurityExtensions =
     type ContextPhp with
@@ -202,6 +260,12 @@ module SecurityExtensions =
 
         /// CSRF protection associated with this PHP generation context.
         member this.csrf = CsrfProtection(this.Context, this.session)
+
+        /// Starts a session and returns a capability that only represents an active session.
+        member this.startSession(options:SessionOptions) =
+            let session = this.session
+            session.Start options
+            ActiveSession(session)
 
     type html with
         /// Generates a POST form whose first element is a CSRF hidden field.
@@ -219,3 +283,15 @@ module SecurityExtensions =
             this.form_fileUpload action <| fun () ->
                 csrf.Field()
                 code()
+
+        /// Generates a CSRF-protected POST form with a validated action URL.
+        member this.postForm(action:Url, csrf:CsrfToken) = fun code ->
+            if not (Object.ReferenceEquals(this.Context, csrf.Context)) then
+                invalidArg (nameof csrf) "The form and CSRF token must use the same generation context."
+            this.formWithCsrf(Url.value action, csrf.Protection) code
+
+        /// Generates a CSRF-protected multipart form with a validated action URL.
+        member this.postFileUploadForm(action:Url, csrf:CsrfToken) = fun code ->
+            if not (Object.ReferenceEquals(this.Context, csrf.Context)) then
+                invalidArg (nameof csrf) "The form and CSRF token must use the same generation context."
+            this.formFileUploadWithCsrf(Url.value action, csrf.Protection) code

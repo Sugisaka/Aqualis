@@ -12,6 +12,7 @@ open System.IO
 type Button(context:Aqualis,name:PHPdata) =
     let b = post(context,name)
     new(ctx:Aqualis,name:string) = Button(ctx,PHPdata name)
+    new(ctx:Aqualis,name:FieldName) = Button(ctx,PHPdata (FieldName.value name))
     /// ボタンが押されたか判定
     member _.isset with get() = context.php.isset b.get
     /// ボタンが押されていないか判定
@@ -66,6 +67,7 @@ type ButtonVar(context:Aqualis) =
 type TextBox(context:Aqualis,name:PHPdata) =
     let t = post(context,name)
     new(ctx:Aqualis,name:string) = TextBox(ctx,PHPdata name)
+    new(ctx:Aqualis,name:FieldName) = TextBox(ctx,PHPdata (FieldName.value name))
     /// テキストが送信されたか判定
     member _.isset with get() = context.php.isset t.get
     /// 送信されたテキスト
@@ -184,6 +186,7 @@ type TextArea(context:Aqualis,name:PHPdata) =
     let a = post(context,name)
     /// 送信されたテキスト
     new(ctx:Aqualis,name:string) = TextArea(ctx,PHPdata name)
+    new(ctx:Aqualis,name:FieldName) = TextArea(ctx,PHPdata (FieldName.value name))
     member _.text with get() = a.get
     member _.text_html with get() = a.get_html
     member _.isset with get() = context.php.isset a.get
@@ -199,6 +202,7 @@ type ComboBoxItem = {Tag:string; Text:string}
 type ComboBox(context:Aqualis,name:PHPdata,items:list<ComboBoxItem>) =
     let c = post(context,name)
     new(ctx:Aqualis,name:string,items) = ComboBox(ctx,PHPdata name,items)
+    new(ctx:Aqualis,name:FieldName,items) = ComboBox(ctx,PHPdata (FieldName.value name),items)
     /// 選択されたテキスト
     member _.selectedTag with get() = c.get
     /// コンボボックスを表示（指定された選択項目を選択状態にする）
@@ -318,6 +322,7 @@ type ComboBoxVar(context:Aqualis) =
 type CheckBox(context:Aqualis,name:PHPdata) =
     let cb = post(context,name)
     new(ctx:Aqualis,name:string) = CheckBox(ctx,PHPdata name)
+    new(ctx:Aqualis,name:FieldName) = CheckBox(ctx,PHPdata (FieldName.value name))
     member _.isChecked with get() = cb.get .= 1
     member _.status with get() = cb.get
     member _.show() = context.html.checkbox name
@@ -344,7 +349,9 @@ type CheckBoxVar(context:Aqualis) =
 module CompilationEnvironmentFormExtensions =
     type ContextForm internal (context:Aqualis) =
         member _.textBox(name:string) = TextBox(context,name)
+        member _.textBox(name:FieldName) = TextBox(context,name)
         member _.button(name:string) = Button(context,name)
+        member _.button(name:FieldName) = Button(context,name)
 
     type Aqualis with
         ///<summary>HTMLフォーム生成</summary>
