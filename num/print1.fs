@@ -182,10 +182,10 @@ namespace Aqualis
             |LaTeX ->
                 program.codewritein("print, \""+str+"\"\n")
             |HTML ->
-                program.codewritein("Print \\("+str+"\\)\n")
+                program.codewritein(HtmlEncoding.textContent ("Print \\(" + str + "\\)") + "\n")
                 program.codewritein "<br/>\n"
             |HTMLSequenceDiagram ->
-                program.codewritein("Print \\("+str+"\\)\n")
+                program.codewritein(HtmlEncoding.textContent ("Print \\(" + str + "\\)") + "\n")
                 program.codewritein "<br/>\n"
             |Python ->
                 program.codewritein("print(\""+str+"\")\n")

@@ -46,7 +46,7 @@ module Aqualis_str =
                     writer.codewritein "\\end{itemize}\n"
             |HTML ->
                 for s in definitions.sort() do
-                    writer.codewritein("<h3>"+s.sname+"</h3>\n")
+                    writer.codewritein("<h3>" + HtmlEncoding.textContent s.sname + "</h3>\n")
                     writer.codewritein "<ul>\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do
@@ -56,7 +56,7 @@ module Aqualis_str =
                     writer.codewritein "</ul>\n"
             |HTMLSequenceDiagram ->
                 for s in definitions.sort() do
-                    writer.codewritein("<h3>"+s.sname+"</h3>\n")
+                    writer.codewritein("<h3>" + HtmlEncoding.textContent s.sname + "</h3>\n")
                     writer.codewritein "<ul>\n"
                     writer.indent.inc()
                     for i in 0..s.memlist.Length-1 do

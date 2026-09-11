@@ -28,7 +28,7 @@ type ContextGroup internal (ctx:Aqualis) =
             code()
         |HTML ->
             write "<details open>"
-            write ("<summary><span class=\"op-section\">section</span>" + label + "</summary>")
+            write ("<summary><span class=\"op-section\">section</span>" + HtmlEncoding.textContent label + "</summary>")
             write "<div class=\"insidecode-section\">"
             ctx.indentInc()
             try code() finally ctx.indentDec()
@@ -43,7 +43,7 @@ type ContextGroup internal (ctx:Aqualis) =
             |LaTeX -> write ("\\subsection{" + text + "}")
             |HTML ->
                 write "<details open>"
-                write ("<summary><span class=\"op-section\">section</span>" + text + "</summary>")
+                write ("<summary><span class=\"op-section\">section</span>" + HtmlEncoding.textContent text + "</summary>")
                 write "<div class=\"insidecode-section\">"
             |_ -> emitComment ("---" + text.PadRight(76,'-'))
         header label
@@ -62,7 +62,7 @@ type ContextGroup internal (ctx:Aqualis) =
         |LaTeX -> write ("\\section{" + label + "}")
         |HTML|HTMLSequenceDiagram ->
             write "<details open>"
-            write ("<summary><span class=\"op-section\">section</span>" + label + "</summary>")
+            write ("<summary><span class=\"op-section\">section</span>" + HtmlEncoding.textContent label + "</summary>")
             write "<div class=\"insidecode-section\">"
         |Numeric -> ()
 

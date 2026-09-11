@@ -200,6 +200,100 @@ module WebGenerationStateTests =
         Assert.DoesNotContain("<title>" + projectName + "</title>", generated)
 
     [<Fact>]
+    let ``HTML head and text helpers encode markup exactly once`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "html-text-escaping.html"
+        let payload = "A&B </title><script>alert(1)</script>"
+
+        use context = new Aqualis(Some output.Path, Some fileName, HTML)
+        context.html.head payload <| fun () ->
+            context.html.h1 payload ignore
+            context.html.para payload
+            context.print.s payload
+            context.html.rawHtml "<em>trusted</em>"
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        let encoded = "A&amp;B &lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt;"
+        Assert.Contains("<title>" + encoded + "</title>", generated)
+        Assert.Contains(encoded, generated)
+        Assert.DoesNotContain("A&amp;amp;B", generated)
+        Assert.DoesNotContain("</title><script>alert(1)</script>", generated)
+        Assert.Contains("<em>trusted</em>", generated)
+
+    [<Fact>]
+    let ``HTML compiler encodes project metadata`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "A&B"
+        let version = "1</li><script>alert(1)</script>"
+
+        Compile [HTML] output.Path projectName version ignore
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, projectName + ".html"))
+        Assert.Contains("<title>A&amp;B</title>", generated)
+        Assert.Contains("<h1>A&amp;B</h1>", generated)
+        Assert.Contains("Project version: 1&lt;/li&gt;&lt;script&gt;alert(1)&lt;/script&gt;", generated)
+        Assert.DoesNotContain("</li><script>alert(1)</script>", generated)
+
+        let sequenceProjectName = "sequence&A"
+        Compile [HTMLSequenceDiagram] output.Path sequenceProjectName "1" ignore
+        let sequenceGenerated =
+            File.ReadAllText(Path.Combine(output.Path, sequenceProjectName + ".html"))
+        Assert.Contains("<title>", sequenceGenerated)
+        Assert.Contains("sequence&amp;A", sequenceGenerated)
+        Assert.DoesNotContain("<title>sequence&A</title>", sequenceGenerated)
+
+    [<Fact>]
+    let ``document headings captions and cells encode HTML text`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "document-text-escaping.html"
+        let payload = "A&B </h1><script>alert(1)</script>"
+
+        use context = new Aqualis(Some output.Path, Some fileName, HTML)
+        let document =
+            new TeXWriter(
+                context,
+                ReadLabel [],
+                ReadLabel [],
+                ReadLabel [],
+                ReadLabel [],
+                HTML,
+                output.Path)
+        document.title payload
+        document.section payload ignore
+        document.table "table" "" "" payload [[payload]]
+        (document :> IDisposable).Dispose()
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        let encoded = "A&amp;B &lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;"
+        Assert.True(Regex.Matches(generated, Regex.Escape(encoded)).Count >= 4)
+        Assert.DoesNotContain("</h1><script>alert(1)</script>", generated)
+
+    [<Fact>]
+    let ``PHP headings escape dynamic values at runtime`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "php-heading-escaping.php"
+
+        use context = new Aqualis(Some output.Path, Some fileName, PHP)
+        let heading = PHPdata.var(context, "heading")
+        context.html.h1 heading ignore
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.Contains(
+            "htmlspecialchars((string)($heading), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')",
+            generated)
+
+    [<Fact>]
+    let ``HTML helpers reject invalid element names`` () =
+        use context = Aqualis.BlankWriter HTML
+
+        Assert.Throws<ArgumentException>(fun () ->
+            context.html.tagb "div><script" ignore)
+        |> ignore
+
+    [<Fact>]
     let ``web media assets are copied and referenced by relative URLs`` () =
         use output = new TemporaryDirectory()
         let imagePath = Path.Combine(output.Path, "source image #1.png")

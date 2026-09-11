@@ -233,6 +233,12 @@ and ContextPhp internal (context:Aqualis) =
     member this.isNotset (x:PHPdata) = boolean ("!isset(" + x.code + ")") [x.Context]
     member this.echo (x:PHPdata) = this.phpcode <| fun () -> context.writei("echo " + x.code + ";")
     member this.echo (x:string) = this.echo (PHPdata x)
+    /// Emits a PHP value as escaped HTML text.
+    member this.echoHtmlText (x:PHPdata) =
+        this.phpcode <| fun () ->
+            context.writei(
+                "echo htmlspecialchars((string)(" + x.code + "), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');")
+    member this.echoHtmlText (x:string) = this.echoHtmlText (PHPdata x)
     /// 変数を表示
     member this.echo (x:int0) = this.echo (PHPdata x)
     member this.echo (x:double0) = this.echo (PHPdata x)
@@ -484,10 +490,18 @@ module num0ForPHP =
         member this.phpdata with get() = PHPdata([RNvr(this.Expr,this.Context)], this.Context)
 
     type html with
-        member this.h1 (t:PHPdata) = this.h1 t.phpcode
-        member this.h2 (t:PHPdata) = this.h2 t.phpcode
-        member this.h3 (t:PHPdata) = this.h3 t.phpcode
-        member this.h4 (t:PHPdata) = this.h4 t.phpcode
+        member this.h1 (t:PHPdata) = fun code ->
+            this.tagb "h1" <| fun () -> ContextPhp(this.Context).echoHtmlText t
+            code()
+        member this.h2 (t:PHPdata) = fun code ->
+            this.tagb "h2" <| fun () -> ContextPhp(this.Context).echoHtmlText t
+            code()
+        member this.h3 (t:PHPdata) = fun code ->
+            this.tagb "h3" <| fun () -> ContextPhp(this.Context).echoHtmlText t
+            code()
+        member this.h4 (t:PHPdata) = fun code ->
+            this.tagb "h4" <| fun () -> ContextPhp(this.Context).echoHtmlText t
+            code()
 
     type Aqualis with
         ///<summary>PHPコード生成</summary>

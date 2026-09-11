@@ -13,6 +13,7 @@ namespace Aqualis
 
     type TeXWriter(context:Aqualis,figlabel:Label,equlabel:Label,tablabel:Label,codelabel:Label,lang:Language,figdir:string) =
         let writein text = context.codewritein(text + "\n")
+        let htmlText text = HtmlEncoding.textContent text
         let mutable equnum = 0
         let mutable fignum = 0
         let mutable tabnum = 0
@@ -39,9 +40,10 @@ namespace Aqualis
         member this.tag (tagname:string) code =
             match lang with
             |HTML ->
-                writein("<"+tagname+">")
+                let tag = HtmlEncoding.elementName tagname
+                writein("<"+tag+">")
                 code()
-                writein("</"+tagname+">")
+                writein("</"+tag+">")
             |LaTeX ->
                 writein("\\begin{"+tagname+"}")
                 code()
@@ -75,7 +77,7 @@ namespace Aqualis
                         let allAttributes =
                             [Atr("type", "radio"); Atr("name", name); Atr("value", value)] @
                             checkedAttribute @ attributes
-                        writein("<input " + Atr.list allAttributes + ">" + text)
+                        writein("<input " + Atr.list allAttributes + ">" + htmlText text)
             | _ -> ()
 
         [<Obsolete("Use radioButtonAttributes so additional attribute values are HTML-encoded.")>]
@@ -87,12 +89,12 @@ namespace Aqualis
                         writein(
                             "<input type=\"radio\" name=\"" + HtmlEncoding.attributeValue name +
                             "\" value=\"" + HtmlEncoding.attributeValue a + "\"" +
-                            (if c then " checked" else "") + " " + d + ">" + b)
+                            (if c then " checked" else "") + " " + d + ">" + htmlText b)
             |_ -> ()
         member this.title txt =
             match lang with
             |HTML ->
-                writein("<h1>"+txt+"</h1>")
+                writein("<h1>" + htmlText txt + "</h1>")
             |LaTeX ->
                 writein("\\MyTitle{"+txt+"}")
             |_ -> ()
@@ -102,7 +104,7 @@ namespace Aqualis
             sssecnum <- 0
             match lang with
             |HTML ->
-                writein("<h2>" + secnum.ToString() + " "+title+"</h2>")
+                writein("<h2>" + secnum.ToString() + " " + htmlText title + "</h2>")
             |LaTeX ->
                 writein("\\section{"+title+"}")
             |_ -> ()
@@ -112,7 +114,7 @@ namespace Aqualis
             sssecnum <- 0
             match lang with
             |HTML ->
-                writein("<h3>" + secnum.ToString() + "." + ssecnum.ToString() + " " + title+"</h3>")
+                writein("<h3>" + secnum.ToString() + "." + ssecnum.ToString() + " " + htmlText title + "</h3>")
             |LaTeX ->
                 writein("\\subsection{"+title+"}")
             |_ -> ()
@@ -120,7 +122,7 @@ namespace Aqualis
         member this.subsection_ title code =
             match lang with
             |HTML ->
-                writein("<h3>" + title + "</h3>")
+                writein("<h3>" + htmlText title + "</h3>")
             |LaTeX ->
                 writein("\\subsection*{"+title+"}")
             |_ -> ()
@@ -129,7 +131,7 @@ namespace Aqualis
             sssecnum <- sssecnum + 1
             match lang with
             |HTML ->
-                writein("<h4>" + secnum.ToString() + "." + ssecnum.ToString() + "." + sssecnum.ToString() + " " + title+"</h4>")
+                writein("<h4>" + secnum.ToString() + "." + ssecnum.ToString() + "." + sssecnum.ToString() + " " + htmlText title + "</h4>")
             |LaTeX ->
                 writein("\\subsubsection{"+title+"}")
             |_ -> ()
@@ -137,7 +139,7 @@ namespace Aqualis
         member this.subsubsection_ title code =
             match lang with
             |HTML ->
-                writein("<h4>" + title + "</h4>")
+                writein("<h4>" + htmlText title + "</h4>")
             |LaTeX ->
                 writein("\\subsubsection*{"+title+"}")
             |_ -> ()
@@ -151,7 +153,7 @@ namespace Aqualis
                 let addfootnote(txt:string) =
                     ftnnum <- ftnnum + 1
                     writein("<sup><a name=\"xft"+ftnnum.ToString()+"\"><a href=\"#ft"+ftnnum.ToString()+"\">"+ftnnum.ToString()+")</a></a></sup>")
-                    wr.WriteLine("<a name=\"ft"+ftnnum.ToString()+"\">"+ftnnum.ToString()+") <a href=\"#xft"+ftnnum.ToString()+"\">↑</a>　"+txt+"</a><br/>")
+                    wr.WriteLine("<a name=\"ft"+ftnnum.ToString()+"\">"+ftnnum.ToString()+") <a href=\"#xft"+ftnnum.ToString()+"\">↑</a>　" + htmlText txt + "</a><br/>")
                 writein "<p>"
                 code addfootnote
                 writein "</p>"
@@ -175,13 +177,13 @@ namespace Aqualis
             match lang with
             |HTML ->
                 writein "<div class=\"fig\">"
-                writein("<span class=\"caption\">"+this.tabref(label)+"&emsp;"+caption+"</span>")
+                writein("<span class=\"caption\">" + this.tabref(label) + "&emsp;" + htmlText caption + "</span>")
                 writein "<table class=\"tab\">"
                 for m in 0..lst.Length-1 do
                     writein "<tr>"
                     for s in lst[m] do
                         writein "<td>"
-                        writein s
+                        writein (htmlText s)
                         writein "</td>"
                     writein "</tr>"
                 writein "</table>"
@@ -287,7 +289,7 @@ namespace Aqualis
                     "    <img src=\"" + HtmlEncoding.attributeValue (figdir + "/" + filename + ".svg") +
                     "\" alt=\"" + HtmlEncoding.attributeValue caption + "\">")
                 writein("  </a>")
-                writein("  <div class=\"caption\">"+this.figref_nolink filename+"&emsp;"+caption+"</div>")
+                writein("  <div class=\"caption\">" + this.figref_nolink filename + "&emsp;" + htmlText caption + "</div>")
                 writein "</div>"
             |LaTeX ->
                 writein("\\inputfigure{"+filename+"}{"+caption+"}")
@@ -394,7 +396,7 @@ namespace Aqualis
                 |ReadLabel lst ->
                     ()
                 writein "<div class=\"fig\">"
-                writein("<span class=\"caption\">ソースコード"+codenum.ToString()+"&emsp;"+caption+"</span>")
+                writein("<span class=\"caption\">ソースコード" + codenum.ToString() + "&emsp;" + htmlText caption + "</span>")
                 writein "<div class=\"sourcecode\">"
                 c()
                 writein "</div>"
@@ -658,7 +660,7 @@ namespace Aqualis
                         writein "            }"
                         writein "        }"
                         writein "        </script>"
-                        writein("        <title>"+title+"</title>")
+                        writein("        <title>" + HtmlEncoding.textContent title + "</title>")
                         writein "        <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
                         writein "        <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
                         writein "        <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
@@ -666,7 +668,7 @@ namespace Aqualis
                         writein "        <link rel='stylesheet' href='style.css' />"
                         writein "    </head>"
                         writein "    <body>"
-                        writein("    <span class='headtitle'>"+titlelong+"</span>")
+                        writein("    <span class='headtitle'>" + HtmlEncoding.textContent titlelong + "</span>")
                         use document =
                             new TeXWriter(
                                 context,

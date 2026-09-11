@@ -44,6 +44,18 @@ namespace Aqualis
 
             name
 
+        let elementName (name:string) =
+            if String.IsNullOrWhiteSpace name then
+                invalidArg (nameof name) "An HTML element name is required."
+
+            let valid character =
+                Char.IsLetterOrDigit character || character = '-' || character = ':'
+
+            if not (Char.IsLetter name[0]) || name |> Seq.exists (valid >> not) then
+                invalidArg (nameof name) "The HTML element name contains invalid characters."
+
+            name
+
     type Atr private (s:string,t:string option) =
         new(s:string,t:string) = Atr(s,Some t)
         new(s:string) = Atr(s,None)
@@ -193,12 +205,16 @@ namespace Aqualis
         let writen(s:string) = c.codewriten s
         let writein(s:string) = c.codewritein s
         member _.Context with get() = c
+        /// Writes a value as an HTML text node.
+        member _.text(value:string) = writein(HtmlEncoding.textContent value)
+        /// Writes a trusted HTML fragment without encoding it.
+        member _.rawHtml(value:string) = writein value
         member this.head title = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>"+title+"</title>")
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
@@ -216,7 +232,7 @@ namespace Aqualis
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>"+title+"</title>")
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
@@ -235,7 +251,7 @@ namespace Aqualis
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>"+title+"</title>")
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
@@ -255,7 +271,7 @@ namespace Aqualis
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>"+title+"</title>")
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
@@ -274,7 +290,7 @@ namespace Aqualis
             writein "<html lang=\"ja\">"
             writein "<meta http-equiv=\"content-language\" content=\"ja\">"
             writein "<head>"
-            writein("    <title>"+title+"</title>")
+            writein("    <title>" + HtmlEncoding.textContent title + "</title>")
             writein "    <meta charset=\"utf-8\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
@@ -292,7 +308,8 @@ namespace Aqualis
         //     writein("<"+t+" "+s.code+" />")
         /// 内部要素のないタグ
         member this.taga (t:string,atr:list<Atr>) =
-            writein("<"+t+" "+Atr.list atr+" />")
+            let tag = HtmlEncoding.elementName t
+            writein("<"+tag+" "+Atr.list atr+" />")
         // 内部要素のないタグ
         // member this.taga (t:string,lst:list<string*string>) =
         //     writein("<"+t+" ")
@@ -301,12 +318,14 @@ namespace Aqualis
         //     writein " />"
         /// 内部要素のないタグ
         member this.taga (t:string) =
-            writein("<"+t+" ")
+            let tag = HtmlEncoding.elementName t
+            writein("<"+tag+" ")
             writein " />"
         /// 内部要素のないタグ
         [<Obsolete("Use the list<Atr> overload so attribute values are HTML-encoded.")>]
         member this.taga (t:string,a:string) =
-            writein("<"+t+" "+a+" />")
+            let tag = HtmlEncoding.elementName t
+            writein("<"+tag+" "+a+" />")
         // /// 内部要素のあるタグ
         // member this.tagb (t:string,atr:Style) = fun code ->
         //     let a = atr.code
@@ -318,13 +337,14 @@ namespace Aqualis
         //     writein ("</"+t+">")
         /// 内部要素のあるタグ
         member this.tagb (t:string,atr:list<Atr>) = fun code ->
+            let tag = HtmlEncoding.elementName t
             let a = Atr.list atr
             if a = "" then
-                writein("<"+t+">")
+                writein("<"+tag+">")
             else
-                writein("<"+t+" "+a+" >")
+                writein("<"+tag+" "+a+" >")
             code()
-            writein ("</"+t+">")
+            writein ("</"+tag+">")
 
         // /// 内部要素のあるタグ
         // member this.tagb (t:string,lst:list<string*string>) = fun code ->
@@ -340,17 +360,19 @@ namespace Aqualis
         /// 内部要素のあるタグ
         [<Obsolete("Use the list<Atr> overload so attribute values are HTML-encoded.")>]
         member this.tagb (t:string,a:string) = fun code ->
+            let tag = HtmlEncoding.elementName t
             if a="" then
-                writein("<"+t+">")
+                writein("<"+tag+">")
             else
-                writein("<"+t+" "+a+">")
+                writein("<"+tag+" "+a+">")
             code()
-            writein ("</"+t+">")
+            writein ("</"+tag+">")
         /// 内部要素のあるタグ
         member this.tagb (t:string) = fun code ->
-            writein("<"+t+">")
+            let tag = HtmlEncoding.elementName t
+            writein("<"+tag+">")
             code()
-            writein ("</"+t+">")
+            writein ("</"+tag+">")
 
         // /// 内部要素のあるタグ
         // member this.tagb0 (t:string,lst:list<string*string>) = fun code ->
@@ -365,43 +387,43 @@ namespace Aqualis
         //     writen ("</"+t+">")
 
         member this.tagv (t:string,atr:list<Atr>) =
-            writein("<" + t + " " + Atr.list atr + ">")
+            writein("<" + HtmlEncoding.elementName t + " " + Atr.list atr + ">")
 
         member this.tage (t:string) =
-            writein("</" + t + ">")
+            writein("</" + HtmlEncoding.elementName t + ">")
 
         member this.h1 (t:string) = fun code ->
-            this.tagb "h1" <| fun () -> writein t
+            this.tagb "h1" <| fun () -> this.text t
             code()
 
         member this.h1 (t:string,s:Style) = fun code ->
-            this.tagb ("h1",[s.atr]) <| fun () -> writein t
+            this.tagb ("h1",[s.atr]) <| fun () -> this.text t
             code()
 
         member this.h2 (t:string) = fun code ->
-            this.tagb "h2" <| fun () -> writein t
+            this.tagb "h2" <| fun () -> this.text t
             code()
 
         member this.h2 (t:string,s:Style) = fun code ->
-            this.tagb ("h2",[s.atr]) <| fun () -> writein t
+            this.tagb ("h2",[s.atr]) <| fun () -> this.text t
             code()
         member this.h3 (t:string) = fun code ->
-            this.tagb "h3" <| fun () -> writein t
+            this.tagb "h3" <| fun () -> this.text t
             code()
         member this.h3 (t:string,s:Style) = fun code ->
-            this.tagb ("h3",[s.atr]) <| fun () -> writein t
+            this.tagb ("h3",[s.atr]) <| fun () -> this.text t
             code()
         member this.h4 (t:string) = fun code ->
-            this.tagb "h4" <| fun () -> writein t
+            this.tagb "h4" <| fun () -> this.text t
             code()
         member this.h4 (t:string,s:Style) = fun code ->
-            this.tagb ("h4",[s.atr]) <| fun () -> writein t
+            this.tagb ("h4",[s.atr]) <| fun () -> this.text t
             code()
         member this.h5 (t:string) = fun code ->
-            this.tagb "h5" <| fun () -> writein t
+            this.tagb "h5" <| fun () -> this.text t
             code()
         member this.h5 (t:string,s:Style) = fun code ->
-            this.tagb ("h5",[s.atr]) <| fun () -> writein t
+            this.tagb ("h5",[s.atr]) <| fun () -> this.text t
             code()
         member this.form (action:string) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("action",action);]) code
         member this.form_fileUpload (action:string) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("enctype","multipart/form-data"); Atr("action",action);]) code
@@ -414,7 +436,7 @@ namespace Aqualis
                 writein "<tr>"
                 for s in lst[m] do
                     writein "<td>"
-                    writein s
+                    this.text s
                     writein "</td>"
                 writein "</tr>"
             writein "</table>"
@@ -424,7 +446,7 @@ namespace Aqualis
         member this.th (a:list<Atr>) code = this.tagb ("th",a) code
         member this.td (a:list<Atr>) code = this.tagb ("td",a) code
         // member this.td (a:list<string*string>) = fun code -> this.tagb ("td",a) code
-        member this.strong(t:string) = this.tagb "strong" <| fun () -> writein t
+        member this.strong(t:string) = this.tagb "strong" <| fun () -> this.text t
         // member this.enumerate code = this.tagb "ol" code
         member this.enumerate (a:list<Atr>) = fun code -> this.tagb ("ol",a) code
         // member this.enumerate (a:Style) = fun code -> this.tagb ("ol",a) code
@@ -444,8 +466,8 @@ namespace Aqualis
         member this.item (a:list<Atr>) = fun code -> this.tagb ("li",a) code
         member this.para code = this.tagb "p" code
         member this.para (a:list<Atr>) = this.tagb ("p",a)
-        member this.para (t:string) = this.tagb "p" <| fun () -> writein(t)
-        member this.span(cls:string,t) = this.tagb ("span",[Atr("class",cls)]) <| fun () -> writein(t)
+        member this.para (t:string) = this.tagb "p" <| fun () -> this.text t
+        member this.span(cls:string,t:string) = this.tagb ("span",[Atr("class",cls)]) <| fun () -> this.text t
         member this.span(cls:string) = fun code -> this.tagb ("span",[Atr("class",cls)]) code
         member this.span(cls:string, s:Style) = fun code -> this.tagb ("span",[s.atr; Atr("class",cls)]) code
         member this.link(url:string) = fun code -> this.tagb ("a",[Atr("href",url);]) code
@@ -487,7 +509,7 @@ namespace Aqualis
                             {Key = "white-space"; Value = "nowrap";}
                             {Key = "font-size"; Value = "90px";}]
             this.tagb ("div",[(s1+s).atr]) <| fun () ->
-                writein text
+                this.text text
         member this.contents (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
@@ -501,7 +523,7 @@ namespace Aqualis
                             {Key = "border-left-color"; Value= "#1e6eff";}
                             {Key = "padding-left"; Value="10px";}]
             this.tagb ("div",[(s1+s).atr]) <| fun () ->
-                writein text
+                this.text text
         member this.subtitle1 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
@@ -515,7 +537,7 @@ namespace Aqualis
                             {Key = "border-left-color"; Value= "#1e6eff";}
                             {Key = "padding-left"; Value="10px";}]
             this.tagb ("div",[(s1+s).atr]) <| fun () ->
-                writein text
+                this.text text
         member this.subtitle2 (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
@@ -533,7 +555,7 @@ namespace Aqualis
                             {Key = "padding-left"; Value="10px";}
                             {Key = "display"; Value="inline-block";}]
             this.tagb ("div",[(s1+s).atr]) <| fun () ->
-                writein text
+                this.text text
         member this.div (s:Style) = fun (p:position) code ->
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
@@ -544,7 +566,7 @@ namespace Aqualis
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}]
             this.tagb ("div", [(s1+s).atr]) <| fun () ->
-                writein text
+                this.text text
 
         member this.canvas (s:Style) code =
             this.tagb ("div", [s.atr]) <| fun () ->
@@ -558,16 +580,17 @@ namespace Aqualis
 
         [<Obsolete("Use tagb with list<Atr> so attribute values are HTML-encoded.")>]
         member this.tag (tagname:string) (s:string) code =
+            let tag = HtmlEncoding.elementName tagname
             if s = "" then
-                writein("<" + tagname + ">")
+                writein("<" + tag + ">")
             else
-                writein("<" + tagname + " " + s + ">")
+                writein("<" + tag + " " + s + ">")
             code()
-            writein("</" + tagname + ">")
+            writein("</" + tag + ">")
 
         [<Obsolete("Use taga with list<Atr> so attribute values are HTML-encoded.")>]
         member this.tag_ (tagname:string) (s:string) =
-            writein("<" + tagname + " " + s + " />")
+            writein("<" + HtmlEncoding.elementName tagname + " " + s + " />")
 
         member this.fig (p:position) code =
             let f = figure(this.taga)
@@ -599,7 +622,9 @@ namespace Aqualis
                             {Key = "border-color"; Value = borderColor;}]
             this.tagb ("div", [(s1+s).atr])
                 <| fun () ->
-                    text |> List.iter (fun s -> writein (s+"<br>"))
+                    text |> List.iter (fun s ->
+                        this.text s
+                        writein "<br>")
                     writein ""
             {Left = p.x;
             Right = p.x+double width+2.0*double padding+2.0*double borderWidth;

@@ -179,25 +179,26 @@ namespace Aqualis
             |HTML ->
                 context.flist.add projectname
                 let args = Aqualis.makeProgramWithContext (dir,projectname,HTML) <| fun childContext ->
+                    let encodedProjectName = HtmlEncoding.textContent projectname
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
                     use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, childContext.language)
-                    writer.codewritein("<h3>" + projectname + "</h3>\n")
+                    writer.codewritein("<h3>" + encodedProjectName + "</h3>\n")
                     writer.codewritein "<ul>\n"
                     for _,(_,_,nm) in childContext.arg.list do
-                        writer.codewritein("<li>\\(" + nm + "\\)</li>\n")
+                        writer.codewritein("<li>" + HtmlEncoding.textContent ("\\(" + nm + "\\)") + "</li>\n")
                     writer.codewritein "</ul>\n"
                     let argvar = String.Join(", ", childContext.arg.list |> List.map (fun (_,(_,_,n)) -> n))
                     writer.codewritein "<div class=\"codeblock\">\n"
                     writer.codewritein "<details>\n"
-                    writer.codewritein("<summary><span class=\"op-func\">function</span> \\(" + projectname + "(" + argvar + ")\\)</summary>\n")
+                    writer.codewritein("<summary><span class=\"op-func\">function</span> \\(" + encodedProjectName + "(" + HtmlEncoding.textContent argvar + ")\\)</summary>\n")
                     writer.codewritein "<div class=\"insidecode-func\">\n"
                     writer.indent.inc()
                     writer.codewritein "<ul>\n"
                     //サブルーチン引数の定義
                     for _,s in childContext.arg.list do
-                        writer.codewritein("<li>" + fdeclare childContext.language s + "</li>\n")
+                        writer.codewritein("<li>" + HtmlEncoding.textContent (fdeclare childContext.language s) + "</li>\n")
                     //グローバル変数の定義
                     declareall childContext writer
                     writer.codewritein "</ul>"
@@ -211,7 +212,7 @@ namespace Aqualis
                     childContext.delete()
                     //呼び出しコードを記述
                     String.Join(", ", childContext.arg.list |> List.map (fun (n,(_,_,_)) -> n))
-                context.writein  ("\\(" + projectname + "(" + args + ")\\)<br/>\n")
+                context.writein (HtmlEncoding.textContent ("\\(" + projectname + "(" + args + ")\\)") + "<br/>\n")
             |Python ->
                 context.flist.add projectname
                 let writeBackActualNames,actualNames = Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun childContext ->

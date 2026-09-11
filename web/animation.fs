@@ -481,7 +481,8 @@ module HtmlWebExtensions =
         /// 内部要素のないタグ
         /// </summary>
         member this.taga (t:string,lst:list<string*PHPdata>) =
-            this.Context.writei("<"+t+" ")
+            let tag = HtmlEncoding.elementName t
+            this.Context.writei("<"+tag+" ")
             this.Context.indentInc()
             for a,s in lst do
                 this.Context.write (phpAttributeCode a s + " ")
@@ -491,38 +492,40 @@ module HtmlWebExtensions =
         /// 内部要素のあるタグ
         /// </summary>
         member this.tagb0 (t:string,lst:list<string*PHPdata>) = fun code ->
+            let tag = HtmlEncoding.elementName t
             if lst.Length=0 then
-                this.Context.write ("<"+t+">")
+                this.Context.write ("<"+tag+">")
             else
-                this.Context.write ("<"+t+" ")
+                this.Context.write ("<"+tag+" ")
                 this.Context.indentInc()
                 for a,s in lst do
                     this.Context.write (phpAttributeCode a s + " ")
                 this.Context.indentDec()
                 this.Context.write ">"
             code()
-            this.Context.writen ("</"+t+">")
+            this.Context.writen ("</"+tag+">")
         /// <summary>
         /// 内部要素のあるタグ
         /// </summary>
         member this.tagb (t:string,lst:list<string*PHPdata>) = fun code ->
+            let tag = HtmlEncoding.elementName t
             if lst.Length=0 then
-                this.Context.writein ("<"+t+">")
+                this.Context.writein ("<"+tag+">")
             else
-                this.Context.writei ("<"+t+" ")
+                this.Context.writei ("<"+tag+" ")
                 this.Context.indentInc()
                 for a,s in lst do
                     this.Context.writei (phpAttributeCode a s + " ")
                 this.Context.indentDec()
                 this.Context.writen ">"
             code()
-            this.Context.writein ("</"+t+">")
+            this.Context.writein ("</"+tag+">")
         /// <summary>
         /// 見出し（h1）要素を生成する
         /// </summary>
         /// <param name="t">見出しに表示する内容</param>
         member this.h1 (t:int0) = fun code ->
-            this.tagb "h1" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h1" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         /// <summary>
         /// 見出し（h1）要素を生成する
@@ -530,42 +533,42 @@ module HtmlWebExtensions =
         /// <param name="t">見出しに表示する内容</param>
         /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
         member this.h1 (t:int0,s:Style) = fun code ->
-            this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h2 (t:int0) = fun code ->
-            this.tagb "h2" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h2" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h2 (t:int0,s:Style) = fun code ->
-            this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h3 (t:int0) = fun code ->
-            this.tagb "h3" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h3" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h3 (t:int0,s:Style) = fun code ->
-            this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h4 (t:int0) = fun code ->
-            this.tagb "h4" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h4" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h4 (t:int0,s:Style) = fun code ->
-            this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h5 (t:int0) = fun code ->
-            this.tagb "h5" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h5" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h5 (t:int0,s:Style) = fun code ->
-            this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         /// <summary>
         /// 見出し（h1）要素を生成する
         /// </summary>
         /// <param name="t">見出しに表示する内容</param>
         member this.h1 (t:double0) = fun code ->
-            this.tagb "h1" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h1" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         /// <summary>
         /// 見出し（h1）要素を生成する
@@ -573,35 +576,35 @@ module HtmlWebExtensions =
         /// <param name="t">見出しに表示する内容</param>
         /// <param name="atr">文字の太さ、色を定義するスタイル情報</param>
         member this.h1 (t:double0,s:Style) = fun code ->
-            this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h2 (t:double0) = fun code ->
-            this.tagb "h2" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h2" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h2 (t:double0,s:Style) = fun code ->
-            this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h3 (t:double0) = fun code ->
-            this.tagb "h3" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h3" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h3 (t:double0,s:Style) = fun code ->
-            this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h4 (t:double0) = fun code ->
-            this.tagb "h4" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h4" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h4 (t:double0,s:Style) = fun code ->
-            this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
         member this.h5 (t:double0) = fun code ->
-            this.tagb "h5" <| fun () -> this.Context.php.echo t.code
+            this.tagb "h5" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         member this.h5 (t:double0,s:Style) = fun code ->
-            this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echo t.code
+            this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
         /// <summary>
         /// フォーム送信用のsubmitボタンを生成する
@@ -666,16 +669,17 @@ module HtmlWebExtensions =
         /// <param name="t">タグ名</param>
         /// <param name="code">タグ内部の内容を生成する関数</param>
         member this.splitTag t code =
+            let tag = HtmlEncoding.elementName t
             let b (lst:list<string*PHPdata>) =
                 if lst.Length=0 then
-                    this.Context.writein ("<"+t+">")
+                    this.Context.writein ("<"+tag+">")
                 else
-                    this.Context.writein ("<"+t+" ")
+                    this.Context.writein ("<"+tag+" ")
                     for a,s in lst do
                         this.Context.writein (phpAttributeCode a s + " ")
                     this.Context.writein ">"
             code b
-            this.Context.writein ("</"+t+">")
+            this.Context.writein ("</"+tag+">")
         /// <summary>
         /// select要素を生成
         /// </summary>
@@ -820,7 +824,7 @@ module HtmlWebExtensions =
         member this.listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
             this.tagb("div",[Atr("class", "fig")]) <| fun () ->
                 this.tagb ("span",[Atr("class", "caption")]) <| fun () ->
-                    this.Context.writein (caption)
+                    this.Context.html.text caption
                 this.tagb("table",[Atr("class", "tab")]) <| fun () ->
                     for j in 0..tlist.Length-1 do
                         this.tagb ("tr",[Atr("class",match borderV[j] with |TrTB -> "trtb" |TrT -> "trt" |TrB -> "trb" |TrN -> "trn")]) <| fun () ->
@@ -843,7 +847,7 @@ module HtmlWebExtensions =
                                     |TdCLR -> "tdcLR"
                                     |TdRLR -> "tdrLR"
                                     |TdJLR -> "tdjLR")]) <| fun () ->
-                                    this.Context.writein (tlist[j][i])
+                                    this.Context.html.text (tlist[j][i])
         /// <summary>
         /// num0式を評価し、インラインMathJax文字列を返す
         /// </summary>
@@ -892,7 +896,9 @@ module HtmlWebExtensions =
                             {Key = "position"; Value = "absolute";}
                             {Key = "overflow-wrap"; Value = "break-word";}]
             this.tagb ("div", [(s1+s).atr]) <| fun () ->
-                text |> List.iter (fun s -> this.Context.writein (s+"<br>"))
+                text |> List.iter (fun s ->
+                    this.Context.html.text s
+                    this.Context.writein "<br>")
                 this.Context.writein ("\r\n")
             {Left = p.x;
             Right = p.x+double width+2.0*double padding;
@@ -982,7 +988,7 @@ module HtmlGenerationExtensions2 =
                     (if this.SubtitleEnabled then "display: block; " else "display: none; ") +
                     "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: " + scriptColor + "; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff"
                 this.html.tagb ("div", [Atr("id", "s" + animationCounter.ToString()); Atr("style", subtitleStyle)])
-                    <| fun () -> this.BodyContext.writein audio.Subtitle
+                    <| fun () -> this.BodyContext.html.text audio.Subtitle
                 this.switchAutoAnimation <| fun ctx ->
                     ctx.writein ("page"+animationCounter.ToString()+": () => {")
                 // メインコンテンツ
@@ -1247,7 +1253,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             {Key="margin-top";Value=InvariantFormat.number (double originY+double canvasY-center.y)+"px"}]
         let ss = Style (s.list@c)
         context.html.tagb ("div", [ss.atr]) <| fun () ->
-            context.BodyContext.writein str
+            context.BodyContext.html.text str
     /// <summary>
     /// 数式を描画
     /// </summary>
