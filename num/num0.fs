@@ -643,6 +643,15 @@ namespace Aqualis
         static member (++) (a:exprString,b:double) = a ++ double0(Dbl b)
 
     [<AutoOpen>]
+    module ExprStringOutputExtensions =
+        type Aqualis with
+            ///<summary>文字列と数式を連結した値をインラインMathJax形式で出力</summary>
+            member this.writein(value:exprString) = this.writein(double0.html value)
+            member this.writein(value:int0) = this.writein(exprString(value))
+            member this.writein(value:double0) = this.writein(exprString(value))
+            member this.writein(value:complex0) = this.writein(exprString(value))
+            
+    [<AutoOpen>]
     module Real0Extensions =
         type IReal0 with
             /// Views this real scalar expression as a double-precision expression.

@@ -22,14 +22,33 @@ module NumericFormattingTests =
     [<Fact>]
     let ``display math builds inline MathJax from typed expressions in a PHP context`` () =
         use context = Aqualis.BlankWriter PHP
-        let math = context.math
-        let f = math.d0 "f(t)"
-        let alpha = math.d0 @"\alpha"
-        let t = math.d0 "t"
+        let f = context.html.d0 "f(t)"
+        let alpha = context.html.d0 @"\alpha"
+        let t = context.html.d0 "t"
 
         let rendered = context.html.eq (f === asm.sin (alpha * t))
 
         Assert.Equal(@"\(f(t) = \sin\left(\alpha t\right)\)", rendered)
+
+    [<Fact>]
+    let ``writein accepts text combined with typed display math`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [PHP] output.Path "expression-text" "1.0" <| fun context ->
+            let f = context.html.d0 "f(t)"
+            let alpha = context.html.d0 @"\alpha"
+            let t = context.html.d0 "t"
+
+            context.writein(
+                "正弦波信号を"
+                ++ (f === asm.sin(alpha*t))
+                ++ "とする。")
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, "expression-text.php"))
+
+        Assert.Contains(
+            @"正弦波信号を\(f(t) = \sin\left(\alpha t\right)\)とする。",
+            generated)
 
     [<Fact>]
     let ``integer power promotes its base before evaluating in every backend`` () =

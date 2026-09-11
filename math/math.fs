@@ -216,6 +216,10 @@ namespace Aqualis
             member _.eq(value:bool0) =
                 "\\(" + value.Expr.evalH value.Context + "\\)"
 
+            ///<summary>空白</summary>
+            static member NL with get() = 
+                double0(Var(Dt,"",NaN))
+
         type Aqualis with
             ///<summary>特殊関数</summary>
             member this.math = ContextMath(this)
