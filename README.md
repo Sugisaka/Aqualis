@@ -14,6 +14,6 @@ Run the script file `sample1.fsx` to generate C, Fortran, and Python source file
 See also the [Japanese manual](docs/doc-jp.md) or [English manual](docs/doc-en.md).
 
 ## License
-[MIT License](license)
+[MIT License](LICENSE.txt)
 
 Copyright (c) 2023 Jun-ichiro Sugisaka
