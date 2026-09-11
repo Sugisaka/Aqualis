@@ -290,6 +290,25 @@ module WebGenerationStateTests =
             generated)
 
     [<Fact>]
+    let ``typed PHP table cells render dynamic values with runtime HTML escaping`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "php-table-cells.php"
+
+        use context = new Aqualis(Some output.Path, Some fileName, PHP)
+        let dynamicValue = PHPdata.var(context, "tableValue")
+        context.html.listTableCells "A&B" [TdC; TdC] [TrB]
+            [[TableCell.Text "<static>"; TableCell.Php dynamicValue]]
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.Contains("A&amp;B", generated)
+        Assert.Contains("&lt;static&gt;", generated)
+        Assert.Contains(
+            "htmlspecialchars((string)($tableValue), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')",
+            generated)
+        Assert.DoesNotContain("&lt;?php", generated)
+
+    [<Fact>]
     let ``HTML helpers reject invalid element names`` () =
         use context = Aqualis.BlankWriter HTML
 

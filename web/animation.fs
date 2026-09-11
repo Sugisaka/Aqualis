@@ -821,7 +821,7 @@ module HtmlWebExtensions =
         /// <param name="borderH">水平罫線の設定</param>
         /// <param name="borderV">垂直罫線の設定</param>
         /// <param name="tlist">表データ</param>
-        member this.listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
+        member this.listTableCells (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<TableCell>>) ->
             this.tagb("div",[Atr("class", "fig")]) <| fun () ->
                 this.tagb ("span",[Atr("class", "caption")]) <| fun () ->
                     this.Context.html.text caption
@@ -847,7 +847,16 @@ module HtmlWebExtensions =
                                     |TdCLR -> "tdcLR"
                                     |TdRLR -> "tdrLR"
                                     |TdJLR -> "tdjLR")]) <| fun () ->
-                                    this.Context.html.text (tlist[j][i])
+                                    match tlist[j][i] with
+                                    |TableCell.Text text -> this.Context.html.text text
+                                    |TableCell.Php value -> this.Context.php.echoHtmlText value
+        /// <summary>
+        /// 罫線指定付きの静的テキスト表を生成
+        /// </summary>
+        member this.listTable (caption:string) = fun (borderH:list<BorderH>) (borderV:list<BorderV>) (tlist:list<list<string>>) ->
+            tlist
+            |> List.map (List.map TableCell.Text)
+            |> this.listTableCells caption borderH borderV
         /// <summary>
         /// num0式を評価し、インラインMathJax文字列を返す
         /// </summary>
