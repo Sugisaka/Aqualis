@@ -266,8 +266,7 @@ namespace Aqualis
 
         ///<summary>等式(TeX、HTMLのみ)</summary>
         static member (===) (x:int0,y:int0) =
-            let value, context = NumericContext.renderedBinary " = " x y
-            int0(value, context)
+            int0(Eq(x.Expr,y.Expr), NumericContext.binary x y)
         static member (===) (x:int0,y:int) = x === int0(Int y)
         static member (===) (x:int0,y:double) = x === int0(Dbl y)
 
@@ -440,8 +439,7 @@ namespace Aqualis
 
         ///<summary>等式(TeX、HTMLのみ)</summary>
         static member (===) (x:double0,y:double0) =
-            let value, context = NumericContext.renderedBinary " = " x y
-            double0(value, context)
+            double0(Eq(x.Expr,y.Expr), NumericContext.binary x y)
         static member (===) (x:double0,y:int) = x === double0(Int y)
         static member (===) (x:double0,y:double) = x === double0(Dbl y)
 
@@ -579,8 +577,7 @@ namespace Aqualis
 
         ///<summary>等式(TeX、HTMLのみ)</summary>
         static member (===) (x:complex0,y:complex0) =
-            let value, context = NumericContext.renderedBinary " = " x y
-            complex0(value, context)
+            complex0(Eq(x.Expr,y.Expr), NumericContext.binary x y)
         static member (===) (x:complex0,y:int) = x === complex0(Int y)
         static member (===) (x:complex0,y:double) = x === complex0(Dbl y)
 

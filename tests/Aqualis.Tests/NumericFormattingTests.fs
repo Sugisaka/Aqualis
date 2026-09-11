@@ -20,6 +20,18 @@ module NumericFormattingTests =
             CultureInfo.CurrentUICulture <- previousUiCulture
 
     [<Fact>]
+    let ``display math builds inline MathJax from typed expressions in a PHP context`` () =
+        use context = Aqualis.BlankWriter PHP
+        let math = context.math
+        let f = math.d0 "f(t)"
+        let alpha = math.d0 @"\alpha"
+        let t = math.d0 "t"
+
+        let rendered = context.html.eq (f === asm.sin (alpha * t))
+
+        Assert.Equal(@"\(f(t) = \sin\left(\alpha t\right)\)", rendered)
+
+    [<Fact>]
     let ``integer power promotes its base before evaluating in every backend`` () =
         let result:double0 = asm.pow(int0(Var(It 4,"base",NaN)), int0(Var(It 4,"exponent",NaN)))
         let negativeResult:double0 = asm.pow(int0(Var(It 4,"base",NaN)), -3)

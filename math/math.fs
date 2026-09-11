@@ -186,6 +186,36 @@ namespace Aqualis
 
     [<AutoOpen>]
     module CompilationEnvironmentMathExtensions =
+        type html with
+
+            ///<summary>表示用の整数記号を作成（プログラム変数としては宣言しない）</summary>
+            member this.i0(name:string) =
+                int0(Var(It 4,name,NaN), this.Context)
+
+            ///<summary>表示用の実数記号を作成（プログラム変数としては宣言しない）</summary>
+            member this.d0(name:string) =
+                double0(Var(Dt,name,NaN), this.Context)
+
+            ///<summary>表示用の複素数記号を作成（プログラム変数としては宣言しない）</summary>
+            member this.z0(name:string) =
+                complex0(Var(Zt,name,NaN), this.Context)
+                
+            ///<summary>整数式をインラインMathJax形式へ変換</summary>
+            member _.eq(value:int0) =
+                "\\(" + value.Expr.evalH value.Context + "\\)"
+
+            ///<summary>実数式をインラインMathJax形式へ変換</summary>
+            member _.eq(value:double0) =
+                "\\(" + value.Expr.evalH value.Context + "\\)"
+
+            ///<summary>複素数式をインラインMathJax形式へ変換</summary>
+            member _.eq(value:complex0) =
+                "\\(" + value.Expr.evalH value.Context + "\\)"
+
+            ///<summary>比較式をインラインMathJax形式へ変換</summary>
+            member _.eq(value:bool0) =
+                "\\(" + value.Expr.evalH value.Context + "\\)"
+
         type Aqualis with
             ///<summary>特殊関数</summary>
             member this.math = ContextMath(this)
