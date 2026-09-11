@@ -12,6 +12,19 @@ module private OptimizationDefaults =
 
 type ContextOptimization internal (context:Aqualis) =
 
+    /// BFGS公式により逆ヘッセ行列の近似を更新します。
+    member internal _.updateInverseHessianBfgs (B:double2,y:double1,s:double1,p:double0) =
+        context.br.if1 (p.>0.0) <| fun () ->
+            context.ch.d2 (B.size1, B.size2) <| fun t ->
+                t.clear()
+                context.iter.num B.size1 <| fun j -> t.[j,j] <== 1.0
+                t.foreach <| fun (j1,j2) -> t.[j1,j2] <== t.[j1,j2] - y.[j1] * s.[j2] / p
+                context.ch.d2 (B.size1, B.size2) <| fun u ->
+                    context.la.matmul (u,B,t)
+                    context.la.matmulTransposeLeft(B,t,u)
+                    t.foreach <| fun (j1,j2) ->
+                        B.[j1,j2] <== B.[j1,j2] + s.[j1] * s.[j2] / p
+
     /// <summary>
     /// 1次元極小値検索
     /// </summary>
@@ -355,15 +368,7 @@ type ContextOptimization internal (context:Aqualis) =
                         context.ch.d <| fun p ->
                             p.clear()
                             y.foreach <| fun j -> p <== p + y.[j] * s.[j]
-                            context.ch.d2 (x0.size1, x0.size1) <| fun t ->
-                                t.clear()
-                                context.iter.num x0.size1 <| fun j -> t.[j,j] <== 1.0
-                                t.foreach <| fun (j1,j2) -> t.[j1,j2] <== t.[j1,j2] - y.[j1] * s.[j2] / p
-                                context.ch.d2 (x0.size1, x0.size1) <| fun u ->
-                                    context.la.matmul (u,t,B)
-                                    context.la.matmul (B,u,t)
-                                    t.foreach <| fun (j1,j2) ->
-                                        B.[j1,j2] <== B.[j1,j2] + s.[j1] * s.[j2] / p
+                            this.updateInverseHessianBfgs(B,y,s,p)
                     context.la.matmul (B,df0) <| fun a ->
                         context.la.norm a <| fun nr -> context.br.if1 (nr.=0.0) <| fun () -> ext()
                         a.foreach <| fun i -> a.[i] <== -a.[i]

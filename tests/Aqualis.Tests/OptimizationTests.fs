@@ -24,6 +24,19 @@ module OptimizationTests =
 
         File.ReadAllText(Path.Combine(output.Path, project + ".c"))
 
+    let private generateBfgsUpdate () =
+        use output = new TemporaryDirectory()
+        let project = "bfgs-update"
+
+        Compile [C99] output.Path project "1.0" <| fun context ->
+            let inverseHessian = context.var.d2("inverseHessian", 2, 2)
+            let gradientDelta = context.var.d1("gradientDelta", 2)
+            let step = context.var.d1("step", 2)
+            let curvature = context.var.d0("curvature")
+            context.optimization.updateInverseHessianBfgs(inverseHessian,gradientDelta,step,curvature)
+
+        File.ReadAllText(Path.Combine(output.Path, project + ".c"))
+
     [<Fact>]
     let ``findmin rejects a negative bracket expansion limit`` () =
         use context = Aqualis.BlankWriter C99
@@ -72,3 +85,41 @@ module OptimizationTests =
             "findmin_quasiNewtonWithBracketLimit"
         ]
         |> List.iter (fun name -> Assert.Contains(name, methodNames))
+
+    [<Fact>]
+    let ``transpose-left matrix multiplication transposes the left operand`` () =
+        use output = new TemporaryDirectory()
+        let project = "transpose-left-matmul"
+
+        Compile [C99] output.Path project "1.0" <| fun context ->
+            let result = context.var.d2("result", 3, 4)
+            let left = context.var.d2("left", 2, 3)
+            let right = context.var.d2("right", 2, 4)
+            context.la.matmulTransposeLeft(result,left,right)
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, project + ".c"))
+        let transposedProduct =
+            Regex(
+                @"result\[(?<i>i\d+)\+(?<j>i\d+)\*result_size\[0\]\]\s*=\s*result\[\k<i>\+\k<j>\*result_size\[0\]\]\+left\[(?<k>i\d+)\+\k<i>\*left_size\[0\]\]\*right\[\k<k>\+\k<j>\*right_size\[0\]\]")
+        Assert.Matches(transposedProduct, generated)
+
+    [<Fact>]
+    let ``quasi Newton update applies the right factor before its transposed left factor`` () =
+        let generated = generateBfgsUpdate()
+        Assert.Matches(Regex(@"if\s*\(curvature\s*>\s*0"), generated)
+
+        let rightProduct =
+            Regex.Match(
+                generated,
+                @"(?<u>d2\d+)\[[^\r\n]+\]\s*=\s*\k<u>\[[^\r\n]+\]\+inverseHessian\[[^\r\n]+\]\*(?<t>d2\d+)\[[^\r\n]+\]")
+        Assert.True(rightProduct.Success, "Expected the first matrix product to be B * T.")
+
+        let transposedLeftProduct =
+            Regex(
+                @"inverseHessian\[[^\r\n]+\]\s*=\s*inverseHessian\[[^\r\n]+\]\+"
+                + Regex.Escape(rightProduct.Groups.["t"].Value)
+                + @"\[[^\r\n]+\]\*"
+                + Regex.Escape(rightProduct.Groups.["u"].Value)
+                + @"\[[^\r\n]+\]")
+        let transposedLeftMatch = transposedLeftProduct.Match(generated, rightProduct.Index + rightProduct.Length)
+        Assert.True(transposedLeftMatch.Success, "Expected the second matrix product to be transpose(T) * (B * T).")

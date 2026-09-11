@@ -100,6 +100,14 @@ namespace Aqualis
                 context.iter.num b.size2 <| fun j ->
                     context.iter.num a.size2 <| fun k ->
                         u[i,j] <== u[i,j] + a[i,k] * b[k,j]
+
+        /// <summary>Calculates u = transpose(a) * b.</summary>
+        member internal _.matmulTransposeLeft (u:double2,a:double2,b:double2) =
+            u.clear()
+            context.iter.num a.size2 <| fun i ->
+                context.iter.num b.size2 <| fun j ->
+                    context.iter.num a.size1 <| fun k ->
+                        u[i,j] <== u[i,j] + a[k,i] * b[k,j]
         /// <summary>
         /// 行列×行列の計算
         /// </summary>
