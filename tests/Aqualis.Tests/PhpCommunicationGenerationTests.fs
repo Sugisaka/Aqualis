@@ -1,5 +1,6 @@
 namespace Aqualis.Tests
 
+open System
 open System.IO
 open System.Text.RegularExpressions
 open Xunit
@@ -154,6 +155,40 @@ module PhpCommunicationGenerationTests =
         Assert.Contains("file_put_contents(\"issue.json\", json_encode(", source)
         Assert.Contains(", LOCK_EX) === false", source)
         Assert.Contains("throw new \\RuntimeException('Failed to write the file.');", source)
+
+    [<Fact>]
+    let ``redirect defaults to 303 validates the location and exits`` () =
+        let source =
+            generate (fun context ->
+                context.php.redirect "main.php")
+
+        Assert.Contains("!is_string($location) || $location === ''", source)
+        Assert.Contains("str_contains($location, \"\\r\")", source)
+        Assert.Contains("str_contains($location, \"\\n\")", source)
+        Assert.Contains("header('Location: ' . $location, true, 303);", source)
+        Assert.Contains("exit;", source)
+        Assert.Contains("})(\"main.php\");", source)
+
+    [<Fact>]
+    let ``redirect accepts a dynamic location and an explicit supported status`` () =
+        let source =
+            generate (fun context ->
+                context.php.redirect(context.php.var "nextPage", 307))
+
+        Assert.Contains("header('Location: ' . $location, true, 307);", source)
+        Assert.Contains("})($nextPage);", source)
+
+    [<Fact>]
+    let ``redirect rejects unsafe static locations and invalid statuses`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "redirect.php", PHP)
+
+        Assert.Throws<ArgumentException>(fun () ->
+            context.php.redirect "main.php\r\nX-Injected: value")
+        |> ignore
+        Assert.Throws<ArgumentException>(fun () ->
+            context.php.redirect("main.php", 304))
+        |> ignore
 
     [<Fact>]
     let ``password APIs hash verify and detect stale hashes`` () =
