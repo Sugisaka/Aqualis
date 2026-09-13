@@ -451,9 +451,27 @@ and ContextPhp internal (context:Aqualis) =
         this.phpcode <| fun () -> context.writei("date_default_timezone_set("+location.code+");")
     member this.setTimeZone(location:string) = this.setTimeZone(PHPdata location)
     member this.sendMail(body:PHPdata,subject:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
-        this.phpcode <| fun () -> context.writei "mb_language(\"ja\");"
-        this.phpcode <| fun () -> context.writei "mb_internal_encoding(\"UTF-8\");"
-        this.phpcode <| fun () -> context.writei("mb_send_mail("+toAddress.code+","+subject.code+","+body.code+","+("From: "++fromAddress).code+");")
+        merge [body.Context; subject.Context; fromAddress.Context; toAddress.Context] |> ignore
+        this.phpcode <| fun () ->
+            context.writei "(function ($body, $subject, $fromAddress, $toAddress): void {"
+            context.writei "if (!is_string($body) || !is_string($subject) || !is_string($fromAddress) || !is_string($toAddress)) {"
+            context.writei "throw new \\InvalidArgumentException('Mail arguments must be strings.');"
+            context.writei "}"
+            context.writei "if (preg_match('/[\\r\\n]/', $subject) === 1) {"
+            context.writei "throw new \\InvalidArgumentException('The mail subject must not contain CR or LF characters.');"
+            context.writei "}"
+            context.writei "if (filter_var($fromAddress, FILTER_VALIDATE_EMAIL) === false) {"
+            context.writei "throw new \\InvalidArgumentException('Invalid sender email address.');"
+            context.writei "}"
+            context.writei "if (filter_var($toAddress, FILTER_VALIDATE_EMAIL) === false) {"
+            context.writei "throw new \\InvalidArgumentException('Invalid recipient email address.');"
+            context.writei "}"
+            context.writei "mb_language(\"ja\");"
+            context.writei "mb_internal_encoding(\"UTF-8\");"
+            context.writei "if (!mb_send_mail($toAddress, $subject, $body, ['From' => $fromAddress])) {"
+            context.writei "throw new \\RuntimeException('Failed to send the mail.');"
+            context.writei "}"
+            context.writei ("})("+body.code+", "+subject.code+", "+fromAddress.code+", "+toAddress.code+");")
     /// メール送信
     member this.sendMail(body:PHPdata,subject:PHPdata,smtp:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
         merge [body.Context; subject.Context; smtp.Context; fromAddress.Context; toAddress.Context] |> ignore

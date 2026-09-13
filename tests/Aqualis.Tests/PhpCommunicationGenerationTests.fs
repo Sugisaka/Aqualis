@@ -261,6 +261,25 @@ module PhpCommunicationGenerationTests =
             source)
 
     [<Fact>]
+    let ``mb send mail validates headers and reports delivery failure`` () =
+        let source =
+            generate (fun context ->
+                context.php.sendMail(
+                    PHPdata.var(context, "body"),
+                    PHPdata.var(context, "subject"),
+                    PHPdata.var(context, "fromAddress"),
+                    PHPdata.var(context, "toAddress")))
+
+        Assert.Contains("!is_string($body) || !is_string($subject)", source)
+        Assert.Contains("preg_match('/[\\r\\n]/', $subject)", source)
+        Assert.Contains("filter_var($fromAddress, FILTER_VALIDATE_EMAIL) === false", source)
+        Assert.Contains("filter_var($toAddress, FILTER_VALIDATE_EMAIL) === false", source)
+        Assert.Contains("['From' => $fromAddress]", source)
+        Assert.Contains("if (!mb_send_mail($toAddress, $subject, $body", source)
+        Assert.Contains("throw new \\RuntimeException('Failed to send the mail.');", source)
+        Assert.DoesNotContain("\"From: \".$fromAddress", source)
+
+    [<Fact>]
     let ``SMTP mail uses proc open without a shell`` () =
         let source =
             generate (fun context ->
