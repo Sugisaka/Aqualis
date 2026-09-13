@@ -443,9 +443,9 @@ type graph1d =
             let scale = 2.83466798951172844
             scale*x
         printfn "-----------------------------------------"
-        printfn "Plot %s" (outputdir+"\\"+filename)
+        printfn "Plot %s" (Path.Combine(outputdir, filename))
         //SVGファイル生成
-        svgfile.make (outputdir+"//"+filename) (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
+        svgfile.make (Path.Combine(outputdir, filename)) (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
             let addGraph (ix:int,iy:int) (subcaption:option<string>) (gstyle:GraphStyle) (data:list<Plot>) =
                 printfn "Subplot: (%d,%d)" ix iy
                 let gLx0,gLy0 = match subcaption with |None -> gLx,gLy |Some _ -> gLx,gLy-setting.SubCaptionShiftY
@@ -453,11 +453,12 @@ type graph1d =
                 let rec filecheck (lst:list<Plot>) =
                     match lst with
                     |Datafile f :: lst0 ->
-                        if File.Exists(outputdir+"\\"+f.FileName) then
-                            printfn "source: %s" (outputdir+"\\"+f.FileName)
+                        let sourcePath = Path.Combine(outputdir, f.FileName)
+                        if File.Exists sourcePath then
+                            printfn "source: %s" sourcePath
                             filecheck lst0
                         else
-                            printfn "Error: %s not found" (outputdir+"\\"+f.FileName)
+                            printfn "Error: %s not found" sourcePath
                             false
                     |a::lst0 ->
                         filecheck lst0
@@ -510,8 +511,9 @@ type graph1d =
                             match data with
                             |Function _ -> None,None
                             |Datafile s ->
-                                if File.Exists(outputdir+"\\"+s.FileName) then
-                                    let xdata,ydata = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
+                                let sourcePath = Path.Combine(outputdir, s.FileName)
+                                if File.Exists sourcePath then
+                                    let xdata,ydata = graph1d.readdata sourcePath (s.Xcolumn,s.Ycolumn)
                                     let xr = 
                                         List.fold (fun (acc:option<double*double>) (i:int) -> 
                                             match acc with
@@ -675,7 +677,8 @@ type graph1d =
                                     color.fill.none,
                                     s.Style.lineStroke)
                         |Datafile s ->
-                            let (xdata,ydata) = graph1d.readdata (outputdir+"\\"+s.FileName) (s.Xcolumn,s.Ycolumn)
+                            let sourcePath = Path.Combine(outputdir, s.FileName)
+                            let (xdata,ydata) = graph1d.readdata sourcePath (s.Xcolumn,s.Ycolumn)
                             /// (x,y)がプロット範囲内にあるか判定
                             let inside (x,y) = (xr1<=x && x<=xr2 && yr1<=y && y<=yr2)
                             // 線のプロット

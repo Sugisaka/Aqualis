@@ -30,7 +30,7 @@ module memberinfo =
         static member makeJSON(outputdir, filename, data) =
             let options = new JsonSerializerOptions(Encoder = JavaScriptEncoder.Create UnicodeRanges.All, WriteIndented = true)
             let memberJson = JsonSerializer.Serialize({List=List.toArray data},options)
-            let wr0 = new StreamWriter(outputdir+"\\"+filename)
+            let wr0 = new StreamWriter(Path.Combine(outputdir, filename))
             wr0.Write memberJson
             wr0.Close()
             

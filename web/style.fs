@@ -47,7 +47,7 @@ type AnimationSetting = {
 [<AbstractClass>]
 type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
     /// jsonファイル名（フルパス）
-    let scriptDataFileName = scriptDataDir + "\\" + name + ".json"
+    let scriptDataFileName = Path.Combine(scriptDataDir, name + ".json")
     let jsonOptions =
         JsonSerializerOptions(
             WriteIndented = true,

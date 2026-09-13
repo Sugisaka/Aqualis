@@ -7,6 +7,7 @@
 namespace Aqualis
 
 open System
+open System.IO
 
 /// グラフの描画領域、サイズ、マージンを設定
 type Layout = 
@@ -334,7 +335,7 @@ module graph =
     
     /// 指定したレイアウトでグラフ作成
     let make (L:Layout) (outputdir:string) filename (nX:int,nY:int) code =
-        svgfile.make (outputdir+"\\"+filename) (L.sizeX,L.sizeY) 1.0 <| fun sv ->
+        svgfile.make (Path.Combine(outputdir, filename)) (L.sizeX,L.sizeY) 1.0 <| fun sv ->
             //グラフの描画領域
             let sx = (L.sizeX-double(nX-1)*L.dX-L.marginXl-L.marginXr)/double nX
             let sy = (L.sizeY-double(nY-1)*L.dY-L.marginYb-L.marginYt)/double nY

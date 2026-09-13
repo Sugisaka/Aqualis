@@ -37,7 +37,7 @@ type CSSdata(lab:CSSLabel,s:Style,substyle:list<CSSdata>) =
     member _.alter(s:Style) = CSSdata(lab,s)
     
 type CSSFile(outputdir:string,filename:string) =
-    let wr = new StreamWriter(outputdir+"\\"+filename)
+    let wr = new StreamWriter(Path.Combine(outputdir, filename))
     member this.add (x:CSSdata) =
         let rec write (header:string) (x:CSSdata) =
             let header1 = 

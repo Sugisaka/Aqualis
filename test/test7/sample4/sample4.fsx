@@ -21,7 +21,7 @@ type Tale(ctx,dir:string,name:string) =
         match a.AudioSourceNumber, a.AudioFileNumber with
         |Some n, Some m -> Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav") 
         |_ -> None
-    override _.scriptFile(n:int) = dir + "\\" + name + "_" + n.ToString() + ".txt"
+    override _.scriptFile(n:int) = Path.Combine(dir, name + "_" + n.ToString() + ".txt")
     member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\テール右斜AAA-.png"; CharacterImageStyle = st}
 
 type Dango(ctx,dir:string,name:string) =
@@ -32,7 +32,7 @@ type Dango(ctx,dir:string,name:string) =
         match a.AudioSourceNumber, a.AudioFileNumber with
         |Some n, Some m ->Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav")
         |_ -> None
-    override _.scriptFile(n:int) = dir + "\\" + name + "_" + n.ToString() + ".txt"
+    override _.scriptFile(n:int) = Path.Combine(dir, name + "_" + n.ToString() + ".txt")
     member _.D00 with get() = {CharacterImageFile = @"C:\home\contents\dango.png"; CharacterImageStyle = st}
     
 type Armillaris(ctx,dir:string,name:string) =
@@ -43,7 +43,7 @@ type Armillaris(ctx,dir:string,name:string) =
         match a.AudioSourceNumber, a.AudioFileNumber with
         |Some n, Some m ->Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav")
         |_ -> None
-    override _.scriptFile(n:int) = dir + "\\" + name + "_" + n.ToString() + ".txt"
+    override _.scriptFile(n:int) = Path.Combine(dir, name + "_" + n.ToString() + ".txt")
     member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\armi.png"; CharacterImageStyle = st}
     
 let scriptDir = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "script"))

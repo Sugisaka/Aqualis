@@ -13,7 +13,7 @@ namespace Aqualis
         let cwriter = 
             match outputdir,pjname with
             |Some dir,Some filename ->
-                let wr = new codeWriter(dir+"\\"+filename,2,lang)
+                let wr = new codeWriter(Path.Combine(dir, filename),2,lang)
                 Some wr
             |_ -> None
 
@@ -53,7 +53,7 @@ namespace Aqualis
         static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true)
         member _.Dir with get() = outputdir
         member _.ProjectName with get() = pjname
-        member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(dir+"\\"+src) |_ -> None
+        member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(Path.Combine(dir, src)) |_ -> None
         member _.ContextId with get() = contextId
         member internal _.IsNeutral = isNeutral
         member internal _.ParallelMode with get() = parallelMode and set v = parallelMode <- v

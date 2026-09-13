@@ -7,6 +7,7 @@
 namespace Aqualis
 
     open System
+    open System.IO
 
     [<AutoOpen>]
     module Aqualis_function =
@@ -74,7 +75,7 @@ namespace Aqualis
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "!=============================================================================================\n"
                     writer.codewritein("! Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in childContext.arg.list do
@@ -108,7 +109,7 @@ namespace Aqualis
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "/*==========================================================================================*/\n"
                     writer.codewritein("/* Subroutine name: " + projectname + " */\n")
                     for _,(_,_,nm) in childContext.arg.list do
@@ -148,7 +149,7 @@ namespace Aqualis
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "%=============================================================================================\n"
                     writer.codewritein("% Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in childContext.arg.list do
@@ -183,7 +184,7 @@ namespace Aqualis
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
                     writer.codewritein("<h3>" + encodedProjectName + "</h3>\n")
                     writer.codewritein "<ul>\n"
                     for _,(_,_,nm) in childContext.arg.list do
@@ -219,7 +220,7 @@ namespace Aqualis
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(dir + "\\" + projectname + "_main", 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "#==========================================================================================\n"
                     writer.codewritein("# Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in childContext.arg.list do

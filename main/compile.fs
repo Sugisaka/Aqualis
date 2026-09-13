@@ -22,7 +22,7 @@ namespace Aqualis
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(dir + "\\" + projectname + ".f90", 2, Fortran)
+                        use writer = new codeWriter(Path.Combine(dir, projectname + ".f90"), 2, Fortran)
                         writer.codewritein "!=============================================================================================\n"
                         writer.codewritein("! Project name: " + projectname + "\n")
                         writer.codewritein("! Project version: " + codever + "\n")
@@ -49,15 +49,16 @@ namespace Aqualis
                         writer.codewritein "contains\n"
                         writer.codewritein "\n"
                         for funname in context.flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
-                            File.Delete(dir + "\\" + funname + "_main")
+                            let functionPath = Path.Combine(dir, funname + "_main")
+                            writer.codewritein(File.ReadAllText functionPath)
+                            File.Delete functionPath
                             writer.codewritein "\n"
                         writer.codewritein("end program " + projectname + "\n")
                         writer.close()
                         //beeファイル削除
                         context.delete()
                         //コンパイル・実行用スクリプト生成
-                        use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_F.sh")
+                        use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_F.sh"))
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
                         let sources = context.slist.list
@@ -97,7 +98,7 @@ namespace Aqualis
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(dir + "\\" + projectname + ".c", 2, C99)
+                        use writer = new codeWriter(Path.Combine(dir, projectname + ".c"), 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")
@@ -123,8 +124,9 @@ namespace Aqualis
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
                         for funname in context.flist.list do
-                            writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
-                            File.Delete(dir + "\\" + funname + "_main")
+                            let functionPath = Path.Combine(dir, funname + "_main")
+                            writer.codewritein (File.ReadAllText functionPath)
+                            File.Delete functionPath
                             writer.codewritein ("\n")
                         //Main関数
                         writer.codewritein "int main()\n"
@@ -136,7 +138,7 @@ namespace Aqualis
                         //beeファイル削除
                         context.delete()
                         //コンパイル・実行用スクリプト生成
-                        use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_C.sh")
+                        use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_C.sh"))
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
                         let sources = context.slist.list
@@ -167,7 +169,7 @@ namespace Aqualis
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(dir + "\\" + projectname + ".tex", 2, LaTeX)
+                        use writer = new codeWriter(Path.Combine(dir, projectname + ".tex"), 2, LaTeX)
                         writer.codewritein "\\documentclass[a4paper,fleqn]{ltjsarticle}\n"
                         writer.codewritein "\\usepackage{amsmath}\n"
                         List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| context.hlist.list
@@ -189,8 +191,9 @@ namespace Aqualis
                         //関数定義
                         writer.codewritein "\\section{subroutines}\n"
                         for funname in context.flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
-                            File.Delete(dir + "\\" + funname + "_main")
+                            let functionPath = Path.Combine(dir, funname + "_main")
+                            writer.codewritein(File.ReadAllText functionPath)
+                            File.Delete functionPath
                             writer.codewritein("\n")
                         //グローバル変数の定義
                         writer.codewritein "\\section{global variables}\n"
@@ -211,7 +214,7 @@ namespace Aqualis
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(dir + "\\" + projectname + ".html", 2, HTML)
+                        use writer = new codeWriter(Path.Combine(dir, projectname + ".html"), 2, HTML)
                         writer.codewritein "<!DOCTYPE html>\n"
                         writer.codewritein "<html lang='ja'>\n"
                         writer.codewritein "\t<head>\n"
@@ -347,8 +350,9 @@ namespace Aqualis
                         writer.codewritein "\t\t<div id=\"deffunc\">\n"
                         writer.codewritein "\t\t<h2>関数定義</h2>\n"
                         for funname in context.flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
-                            File.Delete(dir + "\\" + funname + "_main")
+                            let functionPath = Path.Combine(dir, funname + "_main")
+                            writer.codewritein(File.ReadAllText functionPath)
+                            File.Delete functionPath
                             writer.codewritein "\n"
                         writer.codewritein "\t\t</div>\n"
                         //グローバル変数の定義
@@ -422,7 +426,7 @@ namespace Aqualis
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(dir + "\\" + projectname + ".py", 2, Python)
+                        use writer = new codeWriter(Path.Combine(dir, projectname + ".py"), 2, Python)
                         writer.codewritein "#=============================================================================================\n"
                         writer.codewritein("# Project name: " + projectname + "\n")
                         writer.codewritein("# Project version: " + codever + "\n")
@@ -450,15 +454,16 @@ namespace Aqualis
                         declareall context writer
                         //関数定義
                         for funname in context.flist.list do
-                            writer.codewritein(File.ReadAllText(dir + "\\" + funname + "_main"))
-                            File.Delete(dir + "\\" + funname + "_main")
+                            let functionPath = Path.Combine(dir, funname + "_main")
+                            writer.codewritein(File.ReadAllText functionPath)
+                            File.Delete functionPath
                             writer.codewritein("\n")
                         //メインコード
                         match context.allCodes with |Some s -> writer.codewritein s |None -> ()
                         writer.close()
                         //beeファイル削除
                         context.delete()
-                        use wr = ShellScriptWriter.create(dir + "\\" + "proc_" + projectname + "_P.sh")
+                        use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_P.sh"))
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
                         ShellScriptWriter.writeExec
@@ -473,7 +478,7 @@ namespace Aqualis
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(dir + "\\" + projectname + ".js", 2, C99)
+                        use writer = new codeWriter(Path.Combine(dir, projectname + ".js"), 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")
@@ -486,8 +491,9 @@ namespace Aqualis
                         declareall context writer
                         //関数定義
                         for funname in context.flist.list do
-                            writer.codewritein (File.ReadAllText(dir + "\\" + funname + "_main"))
-                            File.Delete(dir + "\\" + funname + "_main")
+                            let functionPath = Path.Combine(dir, funname + "_main")
+                            writer.codewritein (File.ReadAllText functionPath)
+                            File.Delete functionPath
                             writer.codewritein ("\n")
                         //Main
                         match context.allCodes with |Some s -> writer.codewritein s |None -> ()
