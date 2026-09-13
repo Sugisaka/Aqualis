@@ -98,7 +98,8 @@ module TypedWebApiTests =
         Assert.Contains("(int)($_POST[\"score\"]) <= 100", generated)
         Assert.Contains("filter_var($_POST[\"ratio\"], FILTER_VALIDATE_FLOAT) !== false", generated)
         Assert.Contains("htmlspecialchars((string)($_POST[\"userid\"])", generated)
-        Assert.Contains("$storedUser == $_POST[\"userid\"]", generated)
+        Assert.Contains("$storedUser === $_POST[\"userid\"]", generated)
+        Assert.DoesNotContain("$storedUser == $_POST[\"userid\"]", generated)
         Assert.Contains("password_verify($_POST[\"userid\"], $passwordHash)", generated)
 
     [<Fact>]

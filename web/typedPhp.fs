@@ -80,10 +80,14 @@ module TypedPhpExtensions =
             Aqualis.merge this.Context value.Context |> ignore
             this.echoHtmlText value.Untyped
 
-        /// Compares an existing PHP string value with a typed PHP string.
+        /// Compares an existing PHP string value with a typed PHP string using
+        /// PHP's strict, case-sensitive equality operator.
         member this.stringEquals(left:PHPdata, right:PhpExpr<PhpString>) =
-            Aqualis.mergeMany [this.Context; left.Context; right.Context] |> ignore
-            left .= right.Untyped
+            let resultContext =
+                Aqualis.mergeMany [this.Context; left.Context; right.Context]
+            bool0(
+                Var(Nt, "(" + left.code + " === " + right.Code + ")", NaN),
+                resultContext)
 
         /// Verifies a typed submitted password against an existing PHP password hash.
         member this.password_verify(password:PhpExpr<PhpString>, passwordHash:PHPdata) =
