@@ -115,7 +115,19 @@ type WebSession internal (context:Aqualis) =
         SecurityCode.requireStarted context "session.Destroy"
         context.codewritein(
             "<?php ",
-            "if (session_status() === PHP_SESSION_ACTIVE) { $_SESSION = []; session_destroy(); } ?>")
+            "if (session_status() === PHP_SESSION_ACTIVE) { " +
+            "$_SESSION = []; " +
+            "if (ini_get('session.use_cookies')) { " +
+            "$sessionCookieParams = session_get_cookie_params(); " +
+            "setcookie(session_name(), '', [" +
+            "'expires' => time() - 42000, " +
+            "'path' => $sessionCookieParams['path'], " +
+            "'domain' => $sessionCookieParams['domain'], " +
+            "'secure' => $sessionCookieParams['secure'], " +
+            "'httponly' => $sessionCookieParams['httponly'], " +
+            "'samesite' => $sessionCookieParams['samesite'] ?? 'Lax']); " +
+            "} " +
+            "session_destroy(); } ?>")
 
     /// Returns an expression for a value in the PHP session array.
     member _.Item(key:string) =

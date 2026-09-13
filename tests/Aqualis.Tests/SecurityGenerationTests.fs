@@ -64,6 +64,29 @@ module SecurityGenerationTests =
         |> ignore
 
     [<Fact>]
+    let ``session destroy expires the active session cookie with matching attributes`` () =
+        let generated =
+            generate "session-destroy" <| fun context ->
+                context.php.session.Start SessionOptions.production
+                context.php.session.Destroy()
+
+        Assert.Contains("$_SESSION = [];", generated)
+        Assert.Contains("ini_get('session.use_cookies')", generated)
+        Assert.Contains("$sessionCookieParams = session_get_cookie_params();", generated)
+        Assert.Contains("setcookie(session_name(), '', [", generated)
+        Assert.Contains("'expires' => time() - 42000", generated)
+        Assert.Contains("'path' => $sessionCookieParams['path']", generated)
+        Assert.Contains("'domain' => $sessionCookieParams['domain']", generated)
+        Assert.Contains("'secure' => $sessionCookieParams['secure']", generated)
+        Assert.Contains("'httponly' => $sessionCookieParams['httponly']", generated)
+        Assert.Contains("'samesite' => $sessionCookieParams['samesite'] ?? 'Lax'", generated)
+        Assert.Contains("session_destroy();", generated)
+
+        let deleteCookieIndex = generated.IndexOf("setcookie(session_name()", StringComparison.Ordinal)
+        let destroyIndex = generated.IndexOf("session_destroy();", StringComparison.Ordinal)
+        Assert.True(deleteCookieIndex < destroyIndex)
+
+    [<Fact>]
     let ``CSRF token and field are emitted once and HTML escaped at runtime`` () =
         let generated =
             generate "csrf-field" <| fun context ->
