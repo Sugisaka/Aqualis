@@ -9,6 +9,20 @@ namespace Aqualis
 open System
 open System.IO
 
+/// Limits applied while reading and decoding a JSON file in generated PHP.
+type JsonReadOptions = {
+    MaxBytes: int
+    MaxDepth: int
+}
+
+[<RequireQualifiedAccess>]
+module JsonReadOptions =
+    /// Conservative defaults for small application data files.
+    let defaults = {
+        MaxBytes = 1024 * 1024
+        MaxDepth = 64
+    }
+
 type PHPbool(x:string, context:Aqualis) =
 
     member this.name with get() = x
@@ -203,6 +217,15 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     static member (.>=) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,GreaterEq(Var(Nt,a.code,NaN),b.Expr))
     static member (.>=) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,GreaterEq(Var(Nt,a.code,NaN),Int b))
 
+/// Result of a checked JSON file read emitted into generated PHP.
+and JsonReadResult internal (result:PHPdata) =
+    member _.IsSuccess =
+        bool0(
+            Var(Nt, "(" + result["success"].code + " === true)", NaN),
+            result.Context)
+    member _.Value = result["value"]
+    member _.ErrorCode = result["error"]
+
 and ContextPhp internal (context:Aqualis) =
     let merge contexts = Aqualis.mergeMany (context :: contexts)
     let data code contexts = PHPdata.f(code, merge contexts)
@@ -255,6 +278,57 @@ and ContextPhp internal (context:Aqualis) =
     member this.echo (x:complex0) = this.echo (PHPdata x)
     member this.file_get_contents (filename:PHPdata) = data ("file_get_contents(" + filename.code + ")") [filename.Context]
     member this.file_get_contents (filename:string) = this.file_get_contents (PHPdata filename)
+    /// Reads a bounded JSON file and reports path, I/O, and JSON syntax failures without exposing warnings.
+    member this.tryReadJsonFile(resultName:PhpVariableName, filename:PHPdata, options:JsonReadOptions) =
+        if options.MaxBytes <= 0 then
+            invalidArg (nameof options) "The maximum JSON file size must be positive."
+        if options.MaxBytes = Int32.MaxValue then
+            invalidArg (nameof options) "The maximum JSON file size is too large."
+        if options.MaxDepth <= 0 then
+            invalidArg (nameof options) "The maximum JSON depth must be positive."
+
+        merge [filename.Context] |> ignore
+        let name = PhpVariableName.value resultName
+        let result = PHPdata.var(context,name)
+        let resultCode = result.code
+        let fileSize = "$" + name + "_fileSize"
+        let jsonText = "$" + name + "_jsonText"
+        let decoded = "$" + name + "_decoded"
+        let maxBytes = InvariantFormat.integer options.MaxBytes
+        let readLimit = InvariantFormat.integer (options.MaxBytes + 1)
+        let maxDepth = InvariantFormat.integer options.MaxDepth
+        let error code = PhpEncoding.stringLiteral code
+        let source =
+            resultCode + " = ['success' => false, 'value' => null, 'error' => null]; " +
+            "if (!is_string(" + filename.code + ") || " + filename.code + " === '') { " +
+            resultCode + "['error'] = " + error "invalid_path" + "; " +
+            "} elseif (!is_file(" + filename.code + ")) { " +
+            resultCode + "['error'] = " + error "file_missing" + "; " +
+            "} elseif (!is_readable(" + filename.code + ")) { " +
+            resultCode + "['error'] = " + error "file_unreadable" + "; " +
+            "} else { " +
+            fileSize + " = @filesize(" + filename.code + "); " +
+            "if (" + fileSize + " === false) { " +
+            resultCode + "['error'] = " + error "read_failed" + "; " +
+            "} elseif (" + fileSize + " > " + maxBytes + ") { " +
+            resultCode + "['error'] = " + error "file_too_large" + "; " +
+            "} else { " +
+            jsonText + " = @file_get_contents(" + filename.code + ", false, null, 0, " + readLimit + "); " +
+            "if (" + jsonText + " === false) { " +
+            resultCode + "['error'] = " + error "read_failed" + "; " +
+            "} elseif (strlen(" + jsonText + ") > " + maxBytes + ") { " +
+            resultCode + "['error'] = " + error "file_too_large" + "; " +
+            "} else { try { " +
+            decoded + " = json_decode(" + jsonText + ", true, " + maxDepth + ", JSON_THROW_ON_ERROR); " +
+            resultCode + " = ['success' => true, 'value' => " + decoded + ", 'error' => null]; " +
+            "} catch (\\JsonException $error) { " +
+            resultCode + "['error'] = " + error "invalid_json" + "; " +
+            "} } } }"
+        context.codewritein("<?php ", source + " ?>")
+        JsonReadResult(result)
+    /// Reads a bounded JSON file using a static path.
+    member this.tryReadJsonFile(resultName:PhpVariableName, filename:string, options:JsonReadOptions) =
+        this.tryReadJsonFile(resultName, PHPdata filename, options)
     member this.file_put_contents (filename:PHPdata,x:PHPdata) =
         merge [filename.Context; x.Context] |> ignore
         this.phpcode <| fun () ->

@@ -157,6 +157,50 @@ module PhpCommunicationGenerationTests =
         Assert.Contains("throw new \\RuntimeException('Failed to write the file.');", source)
 
     [<Fact>]
+    let ``checked JSON input detects file and decoding failures`` () =
+        let source =
+            generate (fun context ->
+                let result =
+                    context.php.tryReadJsonFile(
+                        PhpVariableName.create "settingsRead",
+                        context.php.var "settingsPath",
+                        { MaxBytes = 4096; MaxDepth = 32 })
+                context.br.if1 result.IsSuccess <| fun () ->
+                    context.php.echo result.Value
+                context.php.echo result.ErrorCode)
+
+        Assert.Contains("!is_string($settingsPath) || $settingsPath === ''", source)
+        Assert.Contains("!is_file($settingsPath)", source)
+        Assert.Contains("!is_readable($settingsPath)", source)
+        Assert.Contains("@filesize($settingsPath)", source)
+        Assert.Contains("@file_get_contents($settingsPath, false, null, 0, 4097)", source)
+        Assert.Contains("strlen($settingsRead_jsonText) > 4096", source)
+        Assert.Contains("json_decode($settingsRead_jsonText, true, 32, JSON_THROW_ON_ERROR)", source)
+        Assert.Contains("catch (\\JsonException $error)", source)
+        for errorCode in
+            ["invalid_path"; "file_missing"; "file_unreadable"; "file_too_large"; "read_failed"; "invalid_json"] do
+            Assert.Contains(PhpEncoding.stringLiteral errorCode, source)
+
+    [<Fact>]
+    let ``checked JSON input validates configured limits`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "json-limits.php", PHP)
+        let name = PhpVariableName.create "jsonRead"
+
+        Assert.Throws<ArgumentException>(fun () ->
+            context.php.tryReadJsonFile(name, "settings.json", { MaxBytes = 0; MaxDepth = 64 })
+            |> ignore)
+        |> ignore
+        Assert.Throws<ArgumentException>(fun () ->
+            context.php.tryReadJsonFile(name, "settings.json", { MaxBytes = 1024; MaxDepth = 0 })
+            |> ignore)
+        |> ignore
+        Assert.Throws<ArgumentException>(fun () ->
+            context.php.tryReadJsonFile(name, "settings.json", { MaxBytes = Int32.MaxValue; MaxDepth = 64 })
+            |> ignore)
+        |> ignore
+
+    [<Fact>]
     let ``redirect defaults to 303 validates the location and exits`` () =
         let source =
             generate (fun context ->
