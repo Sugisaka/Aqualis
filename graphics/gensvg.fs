@@ -437,9 +437,9 @@ type svgfilemaker(context:Aqualis,cvx:double,cvy:double,writer:StreamWriter,scal
                 |RNvr (s,_) ->
                     let p = s.simp
                     match p with
-                    |Inv(_,Int s) -> writer.Write((-s).ToString())
+                    |Inv(_,Int s) -> writer.Write(InvariantFormat.integer (-s))
                     |Inv(_,Dbl s) -> writer.Write(InvariantFormat.numberWithFormat "0.000" (-s))
-                    |Int s -> writer.Write(s.ToString())
+                    |Int s -> writer.Write(InvariantFormat.integer s)
                     |Dbl s -> writer.Write(InvariantFormat.numberWithFormat "0.000" s)
                     |_ -> printfn "出力できない値です：%s" <| p.ToString()
         write x

@@ -78,6 +78,36 @@ module NumericFormattingTests =
             Assert.Equal("1.5E0", numericFormatController(Python).DtoS 1.5)
             Assert.Equal("1.5", InvariantFormat.number 1.5)
 
+    [<Theory>]
+    [<InlineData("de-DE")>]
+    [<InlineData("fr-FR")>]
+    let ``HTML and LaTeX unit values use invariant decimals`` cultureName =
+        withCulture cultureName <| fun () ->
+            use htmlContext = Aqualis.BlankWriter HTML
+            use htmlWriter =
+                new TeXWriter(
+                    htmlContext,
+                    ReadLabel [],
+                    ReadLabel [],
+                    ReadLabel [],
+                    ReadLabel [],
+                    HTML,
+                    "")
+            use latexContext = Aqualis.BlankWriter LaTeX
+            use latexWriter =
+                new TeXWriter(
+                    latexContext,
+                    ReadLabel [],
+                    ReadLabel [],
+                    ReadLabel [],
+                    ReadLabel [],
+                    LaTeX,
+                    "")
+
+            Assert.Equal("1.5 m", htmlWriter.numunit 1.5 "m")
+            Assert.Equal("1.5 [m]", htmlWriter.numunitbr 1.5 "m")
+            Assert.Equal("\\SI{1.5}{m}", latexWriter.numunit 1.5 "m")
+
     [<Fact>]
     let ``Python boolean literals use native capitalization`` () =
         use target = Aqualis.BlankWriter Python

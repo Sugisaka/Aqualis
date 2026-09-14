@@ -100,7 +100,7 @@ namespace Aqualis
 
     [<AutoOpen>]
     module style =
-        let zindex(n:int) = {Key="z-index"; Value=n.ToString()}
+        let zindex(n:int) = {Key="z-index"; Value=InvariantFormat.integer n}
         module area =
             let backGroundColor (s:string) = {Key="background-color"; Value=s}
             let backGroundSize (s:string) = {Key="background-size"; Value=s}
@@ -147,7 +147,7 @@ namespace Aqualis
         module stroke =
             let color (s:string) = {Key="stroke"; Value=s}
             let width (s:float) = {Key="stroke-width"; Value=CssLength.pixels s}
-            let dasharray (s:list<int>) = {Key="stroke-dasharray"; Value=String.Join(" ",s |> List.map (fun i -> i.ToString()))}
+            let dasharray (s:list<int>) = {Key="stroke-dasharray"; Value=String.Join(" ",s |> List.map InvariantFormat.integer)}
             let opacity(s:float) = {Key="stroke-opacity"; Value=InvariantFormat.number s}
         module fill =
             let color (s:string) = {Key="fill"; Value=s}
@@ -180,7 +180,7 @@ namespace Aqualis
             let wrap (s:string) = {Key="flex-wrap"; Value=s}
         module position =
             let position (s:string) = {Key="position"; Value=s}
-            let index (s:int) = {Key="z-index"; Value=s.ToString()}
+            let index (s:int) = {Key="z-index"; Value=InvariantFormat.integer s}
         module space =
             let space (s:string) = {Key = "white-space"; Value = s.ToString();}
 
@@ -240,7 +240,7 @@ namespace Aqualis
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
             writein "    <link rel='stylesheet' href='style.css' />"
-            writein("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+            writein("    <meta http-equiv=\"refresh\" content=\""+InvariantFormat.integer refresh+"\">")
             writein "</head>"
             writein "<body>"
             code()
@@ -260,7 +260,7 @@ namespace Aqualis
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
             this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", cssfile)])
             this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", jsfile)]) ignore
-            writein("    <meta http-equiv=\"refresh\" content=\""+refresh.ToString()+"\">")
+            writein("    <meta http-equiv=\"refresh\" content=\""+InvariantFormat.integer refresh+"\">")
             writein "</head>"
             writein "<body>"
             code()
@@ -431,7 +431,7 @@ namespace Aqualis
         // member this.table_ code = this.tagb "table" code
         member this.table (a:list<Atr>) = fun code -> this.tagb ("table",a) code
         member this.tableData (lst:list<list<string>>) = fun (p:position) (size:int) ->
-            writein ("<table style =\"margin-left: "+InvariantFormat.number p.x+"px; margin-top: "+InvariantFormat.number p.y+"px; font-size: "+size.ToString()+"px; position: absolute;\">")
+            writein ("<table style =\"margin-left: "+InvariantFormat.number p.x+"px; margin-top: "+InvariantFormat.number p.y+"px; font-size: "+InvariantFormat.integer size+"px; position: absolute;\">")
             for m in 0..lst.Length-1 do
                 writein "<tr>"
                 for s in lst[m] do
@@ -635,7 +635,7 @@ namespace Aqualis
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}
                             {Key = "position"; Value = "absolute";}
-                            {Key = "font-size"; Value = size.ToString()+"px";}
+                            {Key = "font-size"; Value = CssLength.pixelsInt size;}
                             {Key = "color"; Value = color.ToString();}]
             this.tagb ("div", [(s1+s).atr]) <| fun () ->
                 code()

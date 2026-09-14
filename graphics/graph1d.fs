@@ -645,18 +645,18 @@ type graph1d =
                         mline (fx x, fy yr1) (fx x, fy yr1+1.0)
                         match gstyle.Xaxis.Scale with
                         |Linear ->
-                            mtextC (fx x, fy yr1-3.0) <| x.ToString(match gstyle.Xaxis.NumFormat with |None -> "0.0" |Some s -> s)
+                            mtextC (fx x, fy yr1-3.0) <| InvariantFormat.numberWithFormat (match gstyle.Xaxis.NumFormat with |None -> "0.0" |Some s -> s) x
                         |Log10 ->
-                            mtextC (fx x, fy yr1-3.5) <| "10<tspan font-size=\"7\" baseline-shift=\"super\">"+(log10(x)).ToString("F0")+"</tspan>"
+                            mtextC (fx x, fy yr1-3.5) <| "10<tspan font-size=\"7\" baseline-shift=\"super\">"+InvariantFormat.numberWithFormat "F0" (log10 x)+"</tspan>"
                     /// y軸目盛り
                     let ytic = ticList (gstyle.Yaxis,yr1,yr2)
                     for y in ytic do 
                         mline (fx xr1, fy y) (fx xr1+1.0, fy y)
                         match gstyle.Yaxis.Scale with
                         |Linear ->
-                            mtextR (fx xr1, fy y-1.0) <| y.ToString(match gstyle.Yaxis.NumFormat with |None -> "0.0" |Some s -> s)
+                            mtextR (fx xr1, fy y-1.0) <| InvariantFormat.numberWithFormat (match gstyle.Yaxis.NumFormat with |None -> "0.0" |Some s -> s) y
                         |Log10 ->
-                            mtextR (fx xr1, fy y-1.0) <| "10<tspan font-size=\"7\" baseline-shift=\"super\">"+(log10(y)).ToString("F0")+"</tspan>"
+                            mtextR (fx xr1, fy y-1.0) <| "10<tspan font-size=\"7\" baseline-shift=\"super\">"+InvariantFormat.numberWithFormat "F0" (log10 y)+"</tspan>"
                     // x軸ラベル
                     mtextC (cx+0.5*gLx0, fy yr1-6.0) <| gstyle.Xlabel
                     // y軸ラベル

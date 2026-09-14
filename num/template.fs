@@ -460,30 +460,30 @@ namespace Aqualis
         member this.numunit (n:int) = fun (u:string) ->
             match lang with
             |LaTeX ->
-                "\\SI{"+n.ToString()+"}{"+u+"}"
+                "\\SI{"+InvariantFormat.integer n+"}{"+u+"}"
             |HTML ->
-                n.ToString()+" "+u
+                InvariantFormat.integer n+" "+u
             |_ -> ""
         member this.numunitbr (n:int) = fun (u:string) ->
             match lang with
             |LaTeX ->
-                "\\SI{"+n.ToString()+"}{["+u+"]}"
+                "\\SI{"+InvariantFormat.integer n+"}{["+u+"]}"
             |HTML ->
-                n.ToString()+" ["+u+"]"
+                InvariantFormat.integer n+" ["+u+"]"
             |_ -> ""
         member this.numunit (n:float) = fun (u:string) ->
             match lang with
             |LaTeX ->
-                "\\SI{"+n.ToString()+"}{"+u+"}"
+                "\\SI{"+InvariantFormat.number n+"}{"+u+"}"
             |HTML ->
-                n.ToString()+" "+u
+                InvariantFormat.number n+" "+u
             |_ -> ""
         member this.numunitbr (n:float) = fun (u:string) ->
             match lang with
             |LaTeX ->
-                "\\SI{"+n.ToString()+"}{["+u+"]}"
+                "\\SI{"+InvariantFormat.number n+"}{["+u+"]}"
             |HTML ->
-                n.ToString()+" ["+u+"]"
+                InvariantFormat.number n+" ["+u+"]"
             |_ -> ""
         member this.unit (u:string) =
             match lang with

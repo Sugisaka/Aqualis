@@ -357,7 +357,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "function drawNext()"
             ctx.writein "{"
             ctx.writein "    resetAll();"
-            ctx.writein ("    if(pagecount<"+animationCount.ToString()+")")
+            ctx.writein ("    if(pagecount<"+InvariantFormat.integer animationCount+")")
             ctx.writein "    {"
             ctx.writein "        const swc = document.getElementById(\"switchCharacter\");"
             ctx.writein "        const sws = document.getElementById(\"switchSubtitle\");"
@@ -981,12 +981,12 @@ module HtmlGenerationExtensions2 =
                     "width: 1880px; height: 160px; " +
                     (if this.SubtitleEnabled then "display: block; " else "display: none; ") +
                     "position: absolute; z-index: 1; margin-top: 880px; padding: 20px; background-color: #aaaaff; font-family: 'Noto Sans JP'; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff"
-                this.html.tagb ("div", [Atr("id", "sb" + animationCounter.ToString()); Atr("style", subtitleBackgroundStyle)]) <| fun () ->
+                this.html.tagb ("div", [Atr("id", "sb" + InvariantFormat.integer animationCounter); Atr("style", subtitleBackgroundStyle)]) <| fun () ->
                     ()
                 // キャラクター画像
                 this.html.tagb (
                     "div",
-                    [Atr("id", "c" + animationCounter.ToString())
+                    [Atr("id", "c" + InvariantFormat.integer animationCounter)
                      Atr("style", if this.CharacterEnabled then "display: block" else "display: none")]) <| fun () ->
                     for ci in c do
                         let sourceUrl = this.ImportAsset ci.CharacterImageFile
@@ -996,10 +996,10 @@ module HtmlGenerationExtensions2 =
                     "width: 1880px; height: 160px; " +
                     (if this.SubtitleEnabled then "display: block; " else "display: none; ") +
                     "position: absolute; z-index: 5; margin-top: 880px; padding: 20px; font-family: 'Noto Sans JP'; color: " + scriptColor + "; font-size: 48px; font-weight: 800; text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff"
-                this.html.tagb ("div", [Atr("id", "s" + animationCounter.ToString()); Atr("style", subtitleStyle)])
+                this.html.tagb ("div", [Atr("id", "s" + InvariantFormat.integer animationCounter); Atr("style", subtitleStyle)])
                     <| fun () -> this.BodyContext.html.text audio.Subtitle
                 this.switchAutoAnimation <| fun ctx ->
-                    ctx.writein ("page"+animationCounter.ToString()+": () => {")
+                    ctx.writein ("page"+InvariantFormat.integer animationCounter+": () => {")
                 // メインコンテンツ
                 this.html.tagb ("div", [Atr("style", "width: 1920px; height: 880px; position: absolute; z-index: 0")]) <| fun () ->
                     code2 p
@@ -1007,8 +1007,8 @@ module HtmlGenerationExtensions2 =
                     ctx.writein "},"
                 match this.TryLastAnimationButton() with
                 | Some(fStartName,fResetName,btnx,btny) ->
-                    this.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top (btny.ToString()+"px"); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
-                    this.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (btnx.ToString()+"px"); margin.top ((btny+25).ToString()+"px"); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
+                    this.startButton2 ("startButton"+fStartName) (Style[position.position "absolute"; margin.left (CssLength.pixelsInt btnx); margin.top (CssLength.pixelsInt btny); position.index 1000;]) ("animationStartMap['"+fStartName+"']()")
+                    this.resetButton2 ("resetButton"+fStartName) (Style[position.position "absolute"; margin.left (CssLength.pixelsInt btnx); margin.top (CssLength.pixelsInt (btny+25)); position.index 1000;]) ("animationResetMap['"+fResetName+"']()")
                 | None -> ()
                 this.ClearAnimationButtons()
         /// <summary>
@@ -1019,7 +1019,7 @@ module HtmlGenerationExtensions2 =
                 let animationCounter = this.NextAnimationNumber()
                 this.html.tagb (
                     "div",
-                    [Atr("id", "p" + animationCounter.ToString())
+                    [Atr("id", "p" + InvariantFormat.integer animationCounter)
                      Atr("style", "display: " + (if animationCounter=1 then "block" else "none") + "; position: absolute")]) <| fun wr ->
                     code p
         /// <summary>
@@ -1108,7 +1108,7 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
     let mutable animeFlow:list<string*string*AnimationSetting*bool> = []
     let mutable counter = 0
     member _.Padding with get() = padding
-    member _.id with get() = "fa"+figcounter.ToString()+"_"+counter.ToString()
+    member _.id with get() = "fa"+InvariantFormat.integer figcounter+"_"+InvariantFormat.integer counter
     /// <summary>
     /// アニメーションの実行順序を返す
     /// </summary>
@@ -1325,9 +1325,9 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
             ctx.writein (fname+": () => {")
             for idstart,_,setting,isLoop in animeFlow do
                 if isLoop then
-                    ctx.writein ("    repeat(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ");")
+                    ctx.writein ("    repeat(" + idstart + ", " + InvariantFormat.integer setting.FrameTime + ", " + InvariantFormat.integer setting.FrameNumber + ");")
                 else
-                    ctx.writein ("    repeatSeq(" + idstart + ", " + setting.FrameTime.ToString() + ", " + setting.FrameNumber.ToString() + ", () => {")
+                    ctx.writein ("    repeatSeq(" + idstart + ", " + InvariantFormat.integer setting.FrameTime + ", " + InvariantFormat.integer setting.FrameNumber + ", () => {")
             for _,_,_,isLoop in animeFlow do
                 if isLoop then
                     ()
@@ -1448,7 +1448,7 @@ module dochtml =
                     |None ->
                         ctx.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
                     |Some width ->
-                        ctx.writein ("<meta name=\"viewport\" content=\"width=" + width.ToString() + "\">")
+                        ctx.writein ("<meta name=\"viewport\" content=\"width=" + InvariantFormat.integer width + "\">")
                     // MathJax
                     ctx.html.tagb (
                         "script",
@@ -1484,7 +1484,7 @@ module dochtml =
                             area.backGroundColor "#ffffff"
                             margin.left "auto"
                             margin.right "auto"
-                            size.width (x.ToString()+"px")]
+                            size.width (CssLength.pixelsInt x)]
                         ctx.html.tagb ("div", [s1.atr]) <| fun () ->
                             match codeBody with |Some s -> ctx.writein s |None -> ()
                 |None,Some y->
@@ -1494,7 +1494,7 @@ module dochtml =
                             area.backGroundColor "#ffffff"
                             margin.left "auto"
                             margin.right "auto"
-                            size.height (y.ToString()+"px")]
+                            size.height (CssLength.pixelsInt y)]
                         ctx.html.tagb ("div", [s1.atr]) <| fun () ->
                             match codeBody with |Some s -> ctx.writein s |None -> ()
                 |Some x,Some y ->
@@ -1504,8 +1504,8 @@ module dochtml =
                             area.backGroundColor "#ffffff"
                             margin.left "auto"
                             margin.right "auto"
-                            size.width (x.ToString()+"px")
-                            size.height (y.ToString()+"px")]
+                            size.width (CssLength.pixelsInt x)
+                            size.height (CssLength.pixelsInt y)]
                         ctx.html.tagb ("div", [s1.atr]) <| fun () ->
                             match codeBody with |Some s -> ctx.writein s |None -> ()
 
@@ -1589,7 +1589,7 @@ module htmlexpr2 =
                     this, this.NextFigureNumber(),
                     s.mX,s.mY,s.sX,s.sY)
             this.switchBody <| fun ctx ->
-                ctx.writein  ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
+                ctx.writein  ("<svg viewBox=\"0 0 "+InvariantFormat.integer s.sX+" "+InvariantFormat.integer s.sY+"\" ")
                 ctx.writein  ("width=\""+CssLength.pixelsInt s.sX+"\" ")
                 ctx.writein  ("height=\""+CssLength.pixelsInt s.sY+"\" ")
                 ctx.writein  "xmlns=\"http://www.w3.org/2000/svg\" "
@@ -1614,7 +1614,7 @@ module htmlexpr2 =
                     this, this.NextFigureNumber(),
                     s.mX,s.mY,s.sX,s.sY)
             this.switchBody <| fun ctx ->
-                ctx.writein  ("<svg viewBox=\"0 0 "+s.sX.ToString()+" "+s.sY.ToString()+"\" ")
+                ctx.writein  ("<svg viewBox=\"0 0 "+InvariantFormat.integer s.sX+" "+InvariantFormat.integer s.sY+"\" ")
                 ctx.writein  ("width=\""+CssLength.pixelsInt s.sX+"\" ")
                 ctx.writein  ("height=\""+CssLength.pixelsInt s.sY+"\" ")
                 ctx.writein  "xmlns=\"http://www.w3.org/2000/svg\" "

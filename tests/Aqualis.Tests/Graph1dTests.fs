@@ -96,6 +96,32 @@ module Graph1dTests =
         finally
             CultureInfo.CurrentCulture <- previousCulture
 
+    [<Theory>]
+    [<InlineData("de-DE")>]
+    [<InlineData("fr-FR")>]
+    let ``SVG tick labels use invariant decimal separators in every culture`` (cultureName:string) =
+        use output = new TemporaryDirectory()
+        let graphFileName = "invariant-ticks.svg"
+        let previousCulture = CultureInfo.CurrentCulture
+        let previousUiCulture = CultureInfo.CurrentUICulture
+
+        try
+            CultureInfo.CurrentCulture <- CultureInfo(cultureName)
+            CultureInfo.CurrentUICulture <- CultureInfo(cultureName)
+            graph.make (graph.layoutA4_twocol 40.0) output.Path graphFileName (1, 1) <| fun regions ->
+                regions[0, 0].plot Quadrant.Center <| fun plot ->
+                    plot.xntic(0.5, 1.25, 8.0)
+                    plot.yntic(0.5, 2.75, 8.0, "0.00")
+
+            let svg = File.ReadAllText(Path.Combine(output.Path, graphFileName))
+            Assert.Contains("1.25", svg)
+            Assert.Contains("2.75", svg)
+            Assert.DoesNotContain("1,25", svg)
+            Assert.DoesNotContain("2,75", svg)
+        finally
+            CultureInfo.CurrentCulture <- previousCulture
+            CultureInfo.CurrentUICulture <- previousUiCulture
+
     [<Fact>]
     let ``columns outside the one-based range return NaN`` () =
         let output, source = writeDataFile ()

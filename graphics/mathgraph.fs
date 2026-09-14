@@ -220,88 +220,88 @@ type drawGraph(sv:svgfilemaker, q:Quadrant, x1,y1,x2,y2, marginX,marginY) =
         this.xtic x
         let x1,y1 = trans (x,0.0)
         let w = 
-            x.ToString().ToCharArray() 
+            (InvariantFormat.number x).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),x.ToString().Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),(InvariantFormat.number x).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 縦軸の目盛りと数字を描画
     member this.yntic (y:double,size:double) =
         this.ytic y
         let x1,y1 = trans (0.0,y)
         let w = 
-            y.ToString().ToCharArray() 
+            (InvariantFormat.number y).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),y.ToString().Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),(InvariantFormat.number y).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 横軸の目盛りと数字を描画(目盛り位置と数字が異なる場合)
     member this.xntic (x:double,num:double,size:double) =
         this.xtic x
         let x1,y1 = trans (x,0.0)
         let w = 
-            num.ToString().ToCharArray() 
+            (InvariantFormat.number num).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),num.ToString().Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),(InvariantFormat.number num).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 縦軸の目盛りと数字を描画(目盛り位置と数字が異なる場合)
     member this.yntic (y:double,num:double,size:double) =
         this.ytic y
         let x1,y1 = trans (0.0,y)
         let w = 
-            num.ToString().ToCharArray() 
+            (InvariantFormat.number num).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),num.ToString().Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),(InvariantFormat.number num).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 横軸の目盛りと数字を描画
     member this.xntic (x:double,size:double,format:string) =
         this.xtic x
         let x1,y1 = trans (x,0.0)
         let w = 
-            x.ToString(format).ToCharArray() 
+            (InvariantFormat.numberWithFormat format x).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),x.ToString(format).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),(InvariantFormat.numberWithFormat format x).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 縦軸の目盛りと数字を描画
     member this.yntic (y:double,size:double,format:string) =
         this.ytic y
         let x1,y1 = trans (0.0,y)
         let w = 
-            y.ToString(format).ToCharArray() 
+            (InvariantFormat.numberWithFormat format y).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),y.ToString(format).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),(InvariantFormat.numberWithFormat format y).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 横軸の目盛りと数字を描画(目盛り位置と数字が異なる場合)
     member this.xntic (x:double,num:double,size:double,format:string) =
         this.xtic x
         let x1,y1 = trans (x,0.0)
         let w = 
-            x.ToString(format).ToCharArray() 
+            (InvariantFormat.numberWithFormat format x).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),x.ToString(format).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-0.5*w-0.88*size/10.0/0.353,y1-h-0.5*1.764*size/10.0/0.353),(InvariantFormat.numberWithFormat format x).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 縦軸の目盛りと数字を描画(目盛り位置と数字が異なる場合)
     member this.yntic (y:double,num:double,size:double,format:string) =
         this.ytic y
         let x1,y1 = trans (0.0,y)
         let w = 
-            num.ToString(format).ToCharArray() 
+            (InvariantFormat.numberWithFormat format num).ToCharArray()
             |> Array.fold (fun acc c -> match c with |'.' -> acc+0.882 |'-' -> acc+1.990 |_ -> acc+1.764) 0.0
             |> fun x -> x*size/10.0/0.353
         let h = 2.434*size/10.0/0.353
-        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),num.ToString(format).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
+        sv.text((x1-w-0.5*1.764*size/10.0/0.353-0.88*size/10.0/0.353,y1-0.5*h),(InvariantFormat.numberWithFormat format num).Replace("-","\u2212"),size,color.fill.black,color.stroke.none)
         
     /// 関数を描画[y=f(x):関数]
     member this.func (N:int) (scol:color.stroke) (f:double->double) =
