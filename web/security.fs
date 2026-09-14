@@ -61,6 +61,29 @@ module private SecurityCode =
         | SameSite.Lax -> "Lax"
         | SameSite.Strict -> "Strict"
 
+    let sessionCookieOptions options =
+        "[" +
+        "'lifetime' => " + string options.Lifetime + ", " +
+        "'path' => " + PhpEncoding.stringLiteral options.Path + ", " +
+        "'domain' => '', " +
+        "'secure' => " + boolLiteral options.Secure + ", " +
+        "'httponly' => " + boolLiteral options.HttpOnly + ", " +
+        "'samesite' => " + PhpEncoding.stringLiteral (sameSiteLiteral options.SameSite) +
+        "]"
+
+    let emittedCookieOptions options =
+        let expires =
+            if options.Lifetime = 0 then "0"
+            else "time() + " + string options.Lifetime
+        "[" +
+        "'expires' => " + expires + ", " +
+        "'path' => " + PhpEncoding.stringLiteral options.Path + ", " +
+        "'domain' => '', " +
+        "'secure' => " + boolLiteral options.Secure + ", " +
+        "'httponly' => " + boolLiteral options.HttpOnly + ", " +
+        "'samesite' => " + PhpEncoding.stringLiteral (sameSiteLiteral options.SameSite) +
+        "]"
+
     let validateSessionOptions options =
         if options.Lifetime < 0 then
             invalidArg (nameof options) "Session lifetime must be non-negative."
@@ -73,11 +96,19 @@ module private SecurityCode =
             if state.SessionOptions.IsNone then
                 invalidOp (operation + " requires session.Start to be called first."))
 
+    let getStartedOptions context operation =
+        let state = SecurityGenerationStates.get context
+        lock state.Gate (fun () ->
+            match state.SessionOptions with
+            | Some options -> options
+            | None -> invalidOp (operation + " requires session.Start to be called first."))
+
 /// Emits PHP session operations for one Aqualis generation context.
 type WebSession internal (context:Aqualis) =
     member internal _.Context = context
 
-    /// Configures the session cookie and starts a session when one is not active.
+    /// Configures a host-only session cookie and starts a session when needed.
+    /// An already-active session is accepted only when all requested security settings match.
     member _.Start(options:SessionOptions) =
         SecurityCode.validateSessionOptions options
         let state = SecurityGenerationStates.get context
@@ -88,27 +119,67 @@ type WebSession internal (context:Aqualis) =
             | Some _ ->
                 invalidOp "The session has already been started with different options in this generation context."
             | None ->
-                let cookieOptions =
-                    "[" +
-                    "'lifetime' => " + string options.Lifetime + ", " +
-                    "'path' => " + PhpEncoding.stringLiteral options.Path + ", " +
-                    "'secure' => " + SecurityCode.boolLiteral options.Secure + ", " +
-                    "'httponly' => " + SecurityCode.boolLiteral options.HttpOnly + ", " +
-                    "'samesite' => " + PhpEncoding.stringLiteral (SecurityCode.sameSiteLiteral options.SameSite) +
-                    "]"
+                let cookieOptions = SecurityCode.sessionCookieOptions options
+                let emittedCookieOptions = SecurityCode.emittedCookieOptions options
+                let expectedPath = PhpEncoding.stringLiteral options.Path
+                let expectedSameSite =
+                    PhpEncoding.stringLiteral (SecurityCode.sameSiteLiteral options.SameSite)
+                let expectedSecure = SecurityCode.boolLiteral options.Secure
+                let expectedHttpOnly = SecurityCode.boolLiteral options.HttpOnly
 
                 context.codewritein(
                     "<?php ",
-                    "session_set_cookie_params(" + cookieOptions + "); " +
-                    "if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); } ?>")
+                    "$aqualisSessionHeaderFile = ''; $aqualisSessionHeaderLine = 0; " +
+                    "if (headers_sent($aqualisSessionHeaderFile, $aqualisSessionHeaderLine)) { " +
+                    "throw new \\RuntimeException('Session cookies must be configured before output is sent.'); } " +
+                    "$aqualisSessionStatus = session_status(); " +
+                    "if ($aqualisSessionStatus === PHP_SESSION_ACTIVE) { " +
+                    "$aqualisSessionCookieParams = session_get_cookie_params(); " +
+                    "$aqualisSessionConfigurationMatches = " +
+                    "(int)$aqualisSessionCookieParams['lifetime'] === " + string options.Lifetime + " " +
+                    "&& (string)$aqualisSessionCookieParams['path'] === " + expectedPath + " " +
+                    "&& (string)$aqualisSessionCookieParams['domain'] === '' " +
+                    "&& (bool)$aqualisSessionCookieParams['secure'] === " + expectedSecure + " " +
+                    "&& (bool)$aqualisSessionCookieParams['httponly'] === " + expectedHttpOnly + " " +
+                    "&& (string)($aqualisSessionCookieParams['samesite'] ?? '') === " + expectedSameSite + " " +
+                    "&& (bool)ini_get('session.use_cookies') " +
+                    "&& (bool)ini_get('session.use_only_cookies') " +
+                    "&& (bool)ini_get('session.use_strict_mode'); " +
+                    "if (!$aqualisSessionConfigurationMatches) { " +
+                    "throw new \\RuntimeException('An active PHP session uses cookie settings that differ from the requested SessionOptions. Start the session through Aqualis before other middleware.'); } " +
+                    "if (!setcookie(session_name(), session_id(), " + emittedCookieOptions + ")) { " +
+                    "throw new \\RuntimeException('Failed to reissue the active session cookie with the requested security settings.'); } " +
+                    "} elseif ($aqualisSessionStatus === PHP_SESSION_NONE) { " +
+                    "if (ini_set('session.use_cookies', '1') === false " +
+                    "|| ini_set('session.use_only_cookies', '1') === false " +
+                    "|| ini_set('session.use_strict_mode', '1') === false " +
+                    "|| !(bool)ini_get('session.use_cookies') " +
+                    "|| !(bool)ini_get('session.use_only_cookies') " +
+                    "|| !(bool)ini_get('session.use_strict_mode')) { " +
+                    "throw new \\RuntimeException('Failed to enable secure PHP session settings.'); } " +
+                    "if (!session_set_cookie_params(" + cookieOptions + ")) { " +
+                    "throw new \\RuntimeException('Failed to configure the PHP session cookie.'); } " +
+                    "if (!session_start()) { throw new \\RuntimeException('Failed to start the PHP session.'); } " +
+                    "if (!setcookie(session_name(), session_id(), " + emittedCookieOptions + ")) { " +
+                    "throw new \\RuntimeException('Failed to issue the session cookie with the requested security settings.'); } " +
+                    "} else { throw new \\RuntimeException('PHP sessions are disabled.'); } ?>")
                 state.SessionOptions <- Some options)
 
-    /// Replaces the active session identifier and deletes the old session data file.
+    /// Replaces the active session identifier, deletes the old session data file,
+    /// and reissues the cookie with the settings supplied to Start.
     member _.RegenerateId() =
-        SecurityCode.requireStarted context "session.RegenerateId"
+        let options = SecurityCode.getStartedOptions context "session.RegenerateId"
+        let emittedCookieOptions = SecurityCode.emittedCookieOptions options
         context.codewritein(
             "<?php ",
-            "if (session_status() === PHP_SESSION_ACTIVE) { session_regenerate_id(true); } ?>")
+            "if (session_status() !== PHP_SESSION_ACTIVE) { " +
+            "throw new \\RuntimeException('Cannot regenerate an inactive PHP session.'); } " +
+            "if (!session_regenerate_id(true)) { " +
+            "throw new \\RuntimeException('Failed to regenerate the PHP session identifier.'); } " +
+            "$aqualisSessionHeaderFile = ''; $aqualisSessionHeaderLine = 0; " +
+            "if (headers_sent($aqualisSessionHeaderFile, $aqualisSessionHeaderLine) " +
+            "|| !setcookie(session_name(), session_id(), " + emittedCookieOptions + ")) { " +
+            "throw new \\RuntimeException('Failed to reissue the regenerated session cookie with the requested security settings.'); } ?>")
 
     /// Clears the session data and destroys the active PHP session.
     member _.Destroy() =

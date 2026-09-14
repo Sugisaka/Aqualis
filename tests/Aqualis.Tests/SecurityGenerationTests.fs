@@ -22,23 +22,49 @@ module SecurityGenerationTests =
         count 0 0
 
     [<Fact>]
-    let ``session start emits secure cookie options before one guarded start`` () =
+    let ``session start securely handles both new and matching active sessions`` () =
         let generated =
             generate "session-start" <| fun context ->
                 context.php.session.Start SessionOptions.production
                 context.php.session.Start SessionOptions.production
 
         Assert.Equal(1, occurrences "session_set_cookie_params(" generated)
-        Assert.Equal(1, occurrences "session_start();" generated)
+        Assert.Equal(1, occurrences "session_start()" generated)
         Assert.Contains("'lifetime' => 0", generated)
         Assert.Contains("'path' => \"/\"", generated)
+        Assert.Contains("'domain' => ''", generated)
         Assert.Contains("'secure' => true", generated)
         Assert.Contains("'httponly' => true", generated)
         Assert.Contains("'samesite' => \"Lax\"", generated)
-        Assert.Contains("session_status() !== PHP_SESSION_ACTIVE", generated)
+        Assert.Contains("headers_sent($aqualisSessionHeaderFile, $aqualisSessionHeaderLine)", generated)
+        Assert.Contains("$aqualisSessionStatus === PHP_SESSION_ACTIVE", generated)
+        Assert.Contains("session_get_cookie_params()", generated)
+        Assert.Contains("$aqualisSessionConfigurationMatches", generated)
+        Assert.Contains("Start the session through Aqualis before other middleware", generated)
+        Assert.Contains("ini_set('session.use_cookies', '1')", generated)
+        Assert.Contains("ini_set('session.use_only_cookies', '1')", generated)
+        Assert.Contains("ini_set('session.use_strict_mode', '1')", generated)
+        Assert.Equal(2, occurrences "setcookie(session_name(), session_id()," generated)
+        Assert.Contains("PHP sessions are disabled", generated)
         let cookieOptionsIndex = generated.IndexOf("session_set_cookie_params(", StringComparison.Ordinal)
-        let sessionStartIndex = generated.IndexOf("session_start();", StringComparison.Ordinal)
+        let sessionStartIndex = generated.IndexOf("session_start()", StringComparison.Ordinal)
         Assert.True(cookieOptionsIndex < sessionStartIndex)
+
+    [<Fact>]
+    let ``session regeneration fails closed and reissues the cookie securely`` () =
+        let generated =
+            generate "session-regenerate" <| fun context ->
+                context.php.session.Start SessionOptions.production
+                context.php.session.RegenerateId()
+
+        Assert.Contains("session_status() !== PHP_SESSION_ACTIVE", generated)
+        Assert.Contains("if (!session_regenerate_id(true))", generated)
+        Assert.Contains("Cannot regenerate an inactive PHP session", generated)
+        Assert.Contains("Failed to regenerate the PHP session identifier", generated)
+        Assert.Equal(3, occurrences "setcookie(session_name(), session_id()," generated)
+        let regenerateIndex = generated.IndexOf("session_regenerate_id(true)", StringComparison.Ordinal)
+        let reissueIndex = generated.IndexOf("setcookie(session_name(), session_id(),", regenerateIndex, StringComparison.Ordinal)
+        Assert.True(regenerateIndex < reissueIndex)
 
     [<Fact>]
     let ``development session permits an HTTP cookie`` () =

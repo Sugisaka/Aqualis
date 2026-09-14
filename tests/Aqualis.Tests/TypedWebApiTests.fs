@@ -115,7 +115,7 @@ module TypedWebApiTests =
                 csrf.RequireValidPost()
                 context.html.postForm(Url.relative "main.php", csrf) ignore
 
-        Assert.Contains("session_start();", generated)
+        Assert.Contains("session_start()", generated)
         Assert.Contains("$_SESSION[\"student_user_id\"] = \"student01\"", generated)
         Assert.Contains("hash_equals($_SESSION[\"_aqualis_csrf\"], $_POST[\"_aqualis_csrf\"])", generated)
         Assert.Contains("<form method=\"post\" action=\"main.php\"", generated)
