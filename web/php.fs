@@ -23,6 +23,24 @@ module JsonReadOptions =
         MaxDepth = 64
     }
 
+/// Limits applied while updating a JSON file under an exclusive lock.
+type JsonUpdateOptions = {
+    MaxInputBytes: int
+    MaxOutputBytes: int
+    MaxDepth: int
+    FilePermissions: int
+}
+
+[<RequireQualifiedAccess>]
+module JsonUpdateOptions =
+    /// Conservative defaults for small private application data files.
+    let defaults = {
+        MaxInputBytes = 1024 * 1024
+        MaxOutputBytes = 1024 * 1024
+        MaxDepth = 64
+        FilePermissions = 0o640
+    }
+
 type PHPbool(x:string, context:Aqualis) =
 
     member this.name with get() = x
@@ -226,6 +244,15 @@ and JsonReadResult internal (result:PHPdata) =
     member _.Value = result["value"]
     member _.ErrorCode = result["error"]
 
+/// Result of an atomic JSON update emitted into generated PHP.
+and JsonUpdateResult internal (result:PHPdata) =
+    member _.IsSuccess =
+        bool0(
+            Var(Nt, "(" + result["success"].code + " === true)", NaN),
+            result.Context)
+    member _.Value = result["value"]
+    member _.ErrorCode = result["error"]
+
 /// A PHP stream handle that can only be created by checked Aqualis file APIs.
 and PhpFileHandle internal (value:PHPdata) =
     member internal _.Value = value
@@ -334,6 +361,98 @@ and ContextPhp internal (context:Aqualis) =
     /// Reads a bounded JSON file using a static path.
     member this.tryReadJsonFile(resultName:PhpVariableName, filename:string, options:JsonReadOptions) =
         this.tryReadJsonFile(resultName, PHPdata filename, options)
+    /// Reads, changes, and atomically replaces a JSON file while holding one stable sidecar lock.
+    member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:PHPdata, options:JsonUpdateOptions, update:PHPdata -> unit) =
+        if isNull (box update) then nullArg (nameof update)
+        if options.MaxInputBytes <= 0 || options.MaxInputBytes = Int32.MaxValue then
+            invalidArg (nameof options) "The maximum input JSON size must be positive and leave room for a bounded read."
+        if options.MaxOutputBytes <= 0 then
+            invalidArg (nameof options) "The maximum output JSON size must be positive."
+        if options.MaxDepth <= 0 then
+            invalidArg (nameof options) "The maximum JSON depth must be positive."
+        if options.FilePermissions < 0 || options.FilePermissions > 0o777 then
+            invalidArg (nameof options) "File permissions must be between 0000 and 0777."
+
+        merge [filename.Context] |> ignore
+        let name = PhpVariableName.value resultName
+        let result = PHPdata.var(context,name)
+        let prefix = "$" + name + "_"
+        let target = prefix + "target"
+        let directory = prefix + "directory"
+        let lockPath = prefix + "lockPath"
+        let lockHandle = prefix + "lockHandle"
+        let locked = prefix + "locked"
+        let fileSize = prefix + "fileSize"
+        let jsonText = prefix + "jsonText"
+        let dataName = prefix + "data"
+        let encoded = prefix + "encoded"
+        let temporaryPath = prefix + "temporaryPath"
+        let temporaryHandle = prefix + "temporaryHandle"
+        let length = prefix + "length"
+        let offset = prefix + "offset"
+        let written = prefix + "written"
+        let errorCode = prefix + "errorCode"
+        let error = prefix + "exception"
+        let inputLimit = InvariantFormat.integer options.MaxInputBytes
+        let inputReadLimit = InvariantFormat.integer (options.MaxInputBytes + 1)
+        let outputLimit = InvariantFormat.integer options.MaxOutputBytes
+        let maxDepth = InvariantFormat.integer options.MaxDepth
+        let permissions = "0" + Convert.ToString(options.FilePermissions,8)
+        let fail code message =
+            errorCode + " = " + PhpEncoding.stringLiteral code + "; throw new \\RuntimeException(" + PhpEncoding.stringLiteral message + ");"
+
+        this.phpcode <| fun () ->
+            context.writei (result.code + " = (function (" + target + "): array {")
+            context.writei (lockHandle + " = null; " + locked + " = false; " + temporaryPath + " = null; " + temporaryHandle + " = null;")
+            context.writei (errorCode + " = " + PhpEncoding.stringLiteral "update_failed" + ";")
+            context.writei "try {"
+            context.writei ("if (!is_string(" + target + ") || " + target + " === '') { " + fail "invalid_path" "The JSON update path is invalid." + " }")
+            context.writei (directory + " = realpath(dirname(" + target + "));")
+            context.writei ("if (" + directory + " === false || !is_dir(" + directory + ") || !is_writable(" + directory + ")) { " + fail "directory_unavailable" "The JSON update directory is unavailable." + " }")
+            context.writei (target + " = " + directory + ".DIRECTORY_SEPARATOR.basename(" + target + ");")
+            context.writei ("if (is_link(" + target + ") || !is_file(" + target + ") || !is_readable(" + target + ")) { " + fail "file_unavailable" "The JSON update file is unavailable." + " }")
+            context.writei (lockPath + " = " + target + ".'.lock';")
+            context.writei ("if (is_link(" + lockPath + ")) { " + fail "lock_unavailable" "The JSON update lock is unavailable." + " }")
+            context.writei (lockHandle + " = @fopen(" + lockPath + ", 'c');")
+            context.writei ("if (" + lockHandle + " === false) { " + fail "lock_open_failed" "Failed to open the JSON update lock." + " }")
+            context.writei ("if (!@chmod(" + lockPath + ", " + permissions + ")) { " + fail "lock_protection_failed" "Failed to protect the JSON update lock." + " }")
+            context.writei ("if (!flock(" + lockHandle + ", LOCK_EX)) { " + fail "lock_failed" "Failed to lock the JSON update file." + " }")
+            context.writei (locked + " = true;")
+            context.writei ("if (is_link(" + target + ") || !is_file(" + target + ") || !is_readable(" + target + ")) { " + fail "file_unavailable" "The JSON update file became unavailable." + " }")
+            context.writei (fileSize + " = @filesize(" + target + ");")
+            context.writei ("if (" + fileSize + " === false) { " + fail "read_failed" "Failed to inspect the JSON update file." + " }")
+            context.writei ("if (" + fileSize + " > " + inputLimit + ") { " + fail "file_too_large" "The JSON update file is too large." + " }")
+            context.writei (jsonText + " = @file_get_contents(" + target + ", false, null, 0, " + inputReadLimit + ");")
+            context.writei ("if (!is_string(" + jsonText + ")) { " + fail "read_failed" "Failed to read the JSON update file." + " }")
+            context.writei ("if (strlen(" + jsonText + ") > " + inputLimit + ") { " + fail "file_too_large" "The JSON update file is too large." + " }")
+            context.writei ("try { " + dataName + " = json_decode(" + jsonText + ", true, " + maxDepth + ", JSON_THROW_ON_ERROR); } catch (\\JsonException " + error + ") { " + fail "invalid_json" "The JSON update file is invalid." + " }")
+
+        update (PHPdata.f(dataName,context))
+
+        this.phpcode <| fun () ->
+            context.writei (encoded + " = json_encode(" + dataName + ", JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);")
+            context.writei ("if (strlen(" + encoded + ") > " + outputLimit + ") { " + fail "output_too_large" "The updated JSON data is too large." + " }")
+            context.writei (temporaryPath + " = tempnam(" + directory + ", '.aqualis-json-');")
+            context.writei ("if (" + temporaryPath + " === false) { " + fail "temporary_file_failed" "Failed to create a temporary JSON file." + " }")
+            context.writei (temporaryHandle + " = @fopen(" + temporaryPath + ", 'wb');")
+            context.writei ("if (" + temporaryHandle + " === false) { " + fail "temporary_open_failed" "Failed to open the temporary JSON file." + " }")
+            context.writei (length + " = strlen(" + encoded + "); " + offset + " = 0;")
+            context.writei ("while (" + offset + " < " + length + ") { " + written + " = @fwrite(" + temporaryHandle + ", substr(" + encoded + ", " + offset + ")); if (" + written + " === false || " + written + " === 0) { " + fail "write_failed" "Failed to write the complete JSON data." + " } " + offset + " += " + written + "; }")
+            context.writei ("if (!@fflush(" + temporaryHandle + ")) { " + fail "flush_failed" "Failed to flush the JSON data." + " }")
+            context.writei ("if (function_exists('fsync') && !@fsync(" + temporaryHandle + ")) { " + fail "sync_failed" "Failed to synchronize the JSON data." + " }")
+            context.writei ("if (!@fclose(" + temporaryHandle + ")) { " + fail "close_failed" "Failed to close the JSON data." + " }")
+            context.writei (temporaryHandle + " = null;")
+            context.writei ("if (!@chmod(" + temporaryPath + ", " + permissions + ")) { " + fail "file_protection_failed" "Failed to protect the JSON data." + " }")
+            context.writei ("if (!@rename(" + temporaryPath + ", " + target + ")) { " + fail "publish_failed" "Failed to publish the JSON data." + " }")
+            context.writei (temporaryPath + " = null;")
+            context.writei ("return ['success' => true, 'value' => " + dataName + ", 'error' => null];")
+            context.writei ("} catch (\\Throwable " + error + ") { error_log('Aqualis atomic JSON update failed: '." + error + "->getMessage()); return ['success' => false, 'value' => null, 'error' => " + errorCode + "]; }")
+            context.writei ("finally { if (is_resource(" + temporaryHandle + ")) { @fclose(" + temporaryHandle + "); } if (is_string(" + temporaryPath + ") && is_file(" + temporaryPath + ")) { @unlink(" + temporaryPath + "); } if (" + locked + ") { flock(" + lockHandle + ", LOCK_UN); } if (is_resource(" + lockHandle + ")) { fclose(" + lockHandle + "); } }")
+            context.writei ("})(" + filename.code + ");")
+        JsonUpdateResult(result)
+    /// Reads, changes, and atomically replaces a JSON file at a static path.
+    member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:string, options:JsonUpdateOptions, update:PHPdata -> unit) =
+        this.updateJsonFileAtomic(resultName, PHPdata filename, options, update)
     member this.file_put_contents (filename:PHPdata,x:PHPdata) =
         merge [filename.Context; x.Context] |> ignore
         this.phpcode <| fun () ->

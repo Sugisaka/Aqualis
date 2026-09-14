@@ -233,6 +233,56 @@ module PhpCommunicationGenerationTests =
         |> ignore
 
     [<Fact>]
+    let ``atomic JSON update reads and mutates while holding a stable sidecar lock`` () =
+        let source =
+            generate (fun context ->
+                let result =
+                    context.php.updateJsonFileAtomic(
+                        PhpVariableName.create "settingsUpdate",
+                        context.php.var "settingsPath",
+                        { MaxInputBytes = 4096
+                          MaxOutputBytes = 8192
+                          MaxDepth = 32
+                          FilePermissions = 0o640 },
+                        fun data -> data["count"] <== data["count"].int0 + 1)
+                context.br.if1 result.IsSuccess <| fun () ->
+                    context.php.echo result.Value
+                context.php.echo result.ErrorCode)
+
+        let lockIndex = source.IndexOf("flock($settingsUpdate_lockHandle, LOCK_EX)", StringComparison.Ordinal)
+        let readIndex = source.IndexOf("@file_get_contents($settingsUpdate_target", StringComparison.Ordinal)
+        let updateIndex = source.IndexOf("$settingsUpdate_data[\"count\"] =", StringComparison.Ordinal)
+        let renameIndex = source.IndexOf("@rename($settingsUpdate_temporaryPath, $settingsUpdate_target)", StringComparison.Ordinal)
+
+        Assert.True(lockIndex >= 0)
+        Assert.True(lockIndex < readIndex)
+        Assert.True(readIndex < updateIndex)
+        Assert.True(updateIndex < renameIndex)
+        Assert.Contains("$settingsUpdate_lockPath = $settingsUpdate_target.'.lock'", source)
+        Assert.Contains("is_link($settingsUpdate_lockPath)", source)
+        Assert.Contains("json_decode($settingsUpdate_jsonText, true, 32, JSON_THROW_ON_ERROR)", source)
+        Assert.Contains("strlen($settingsUpdate_encoded) > 8192", source)
+        Assert.Contains("tempnam($settingsUpdate_directory, '.aqualis-json-')", source)
+        Assert.Contains("@chmod($settingsUpdate_temporaryPath, 0640)", source)
+        Assert.Contains("flock($settingsUpdate_lockHandle, LOCK_UN)", source)
+
+    [<Fact>]
+    let ``atomic JSON update validates configured limits`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "json-update-limits.php", PHP)
+        let name = PhpVariableName.create "jsonUpdate"
+        let valid = JsonUpdateOptions.defaults
+        let invoke options =
+            context.php.updateJsonFileAtomic(name, "settings.json", options, ignore)
+            |> ignore
+
+        Assert.Throws<ArgumentException>(fun () -> invoke { valid with MaxInputBytes = 0 }) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> invoke { valid with MaxInputBytes = Int32.MaxValue }) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> invoke { valid with MaxOutputBytes = 0 }) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> invoke { valid with MaxDepth = 0 }) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> invoke { valid with FilePermissions = 0o1000 }) |> ignore
+
+    [<Fact>]
     let ``redirect defaults to 303 validates the location and exits`` () =
         let source =
             generate (fun context ->
