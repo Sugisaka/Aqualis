@@ -182,3 +182,7 @@ type FileOpenMode =
         |Adp -> "\"a+\""
         |Nw  -> "\"c\""
         |Nwp -> "\"c+\""
+    member internal this.CanWrite =
+        match this with
+        | Rd -> false
+        | _ -> true

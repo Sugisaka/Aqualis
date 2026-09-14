@@ -226,6 +226,11 @@ and JsonReadResult internal (result:PHPdata) =
     member _.Value = result["value"]
     member _.ErrorCode = result["error"]
 
+/// A PHP stream handle that can only be created by checked Aqualis file APIs.
+and PhpFileHandle internal (value:PHPdata) =
+    member internal _.Value = value
+    member _.Context = value.Context
+
 and ContextPhp internal (context:Aqualis) =
     let merge contexts = Aqualis.mergeMany (context :: contexts)
     let data code contexts = PHPdata.f(code, merge contexts)
@@ -270,8 +275,14 @@ and ContextPhp internal (context:Aqualis) =
     member this.echo (x:int0) = this.echo (PHPdata x)
     member this.echo (x:double0) = this.echo (PHPdata x)
     member this.echo (x:complex0) = this.echo (PHPdata x)
-    member this.file_get_contents (filename:PHPdata) = data ("file_get_contents(" + filename.code + ")") [filename.Context]
-    member this.file_get_contents (filename:string) = this.file_get_contents (PHPdata filename)
+    /// Reads an entire file and throws when PHP reports an I/O failure.
+    member this.readFile(filename:PHPdata) =
+        data
+            ("(function ($filename) { $contents = @file_get_contents($filename); " +
+             "if ($contents === false) { throw new \\RuntimeException('Failed to read the file.'); } " +
+             "return $contents; })(" + filename.code + ")")
+            [filename.Context]
+    member this.readFile(filename:string) = this.readFile(PHPdata filename)
     /// Reads a bounded JSON file and reports path, I/O, and JSON syntax failures without exposing warnings.
     member this.tryReadJsonFile(resultName:PhpVariableName, filename:PHPdata, options:JsonReadOptions) =
         if options.MaxBytes <= 0 then
@@ -363,30 +374,69 @@ and ContextPhp internal (context:Aqualis) =
     member this.in_array_strict(s:double0, idArray:PHPdata) = this.in_array_strict(PHPdata s, idArray)
     member this.in_array_strict(s:complex0, idArray:PHPdata) = this.in_array_strict(PHPdata s, idArray)
     member this.array_search(s:PHPdata, idArray:PHPdata) = data ("array_search("+s.code+", "+idArray.code+")") [s.Context;idArray.Context]
-    member this.file(filename:PHPdata, flag:list<FileFlag>) =
-        data ("file("+filename.code+", "+(flag |> List.map (fun s -> s.str) |> (fun p -> String.Join(" | ",p)) )+")") [filename.Context]
-    member this.fopen(filename:PHPdata,rw:FileOpenMode) = data ("fopen("+filename.code+", "+rw.str+")") [filename.Context]
-    member this.fopen(filename:string,rw:FileOpenMode) = this.fopen(PHPdata filename, rw)
-    /// ファイルに書き込み
-    member this.fwrite(fp:PHPdata,t:PHPdata) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", "+t.code+");")
-    /// ファイルに書き込み
-    member this.fwrite(fp:PHPdata,t:int0) = this.fwrite(fp, PHPdata t)
-    member this.fwrite(fp:PHPdata,t:double0) = this.fwrite(fp, PHPdata t)
-    member this.fwrite(fp:PHPdata,t:complex0) = this.fwrite(fp, PHPdata t)
-    /// ファイルに書き込み
-    member this.fwrite(fp:PHPdata,t:string) = this.fwrite(fp, PHPdata t)
-    /// ファイルに書き込み
-    member this.fwrite(fp:PHPdata,t:int) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", "+t.ToString()+");")
-    /// ファイルにShift-JISで書き込み
-    member this.fwrite_SJIS(fp:PHPdata,t:PHPdata) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
-    /// ファイルにShift-JISで書き込み
-    member this.fwrite_SJIS(fp:PHPdata,t:int0) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
-    member this.fwrite_SJIS(fp:PHPdata,t:double0) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
-    member this.fwrite_SJIS(fp:PHPdata,t:complex0) = this.phpcode <| fun () -> context.writei("fwrite("+fp.code+", mb_convert_encoding("+t.code+", 'SJIS-win', 'UTF-8'));")
-    /// ファイルにShift-JISで書き込み
-    member this.fwrite_SJIS(fp:PHPdata,t:string) = this.fwrite_SJIS(fp, PHPdata t)
-    /// ファイルを閉じる
-    member this.fclose(filename:PHPdata) = this.phpcode <| fun () -> context.writei("fclose("+filename.code+");")
+    /// Reads a file into lines and throws when PHP reports an I/O failure.
+    member this.readLines(filename:PHPdata, flags:list<FileFlag>) =
+        let flagExpression =
+            match flags with
+            | [] -> "0"
+            | values -> values |> List.map (fun value -> value.str) |> String.concat " | "
+        data
+            ("(function ($filename) { $lines = @file($filename, " + flagExpression + "); " +
+             "if ($lines === false) { throw new \\RuntimeException('Failed to read the file.'); } " +
+             "return $lines; })(" + filename.code + ")")
+            [filename.Context]
+    member this.readLines(filename:string, flags:list<FileFlag>) = this.readLines(PHPdata filename, flags)
+
+    /// Runs generated code with a checked PHP stream and always verifies flush and close operations.
+    member this.withFile(filename:PHPdata, mode:FileOpenMode, code:PhpFileHandle -> unit) =
+        if isNull (box code) then nullArg (nameof code)
+        merge [filename.Context] |> ignore
+        let handleValue = PHPdata.f(context,"$aqualisFileHandle")
+        this.phpcode <| fun () ->
+            context.writei "(function ($aqualisFilename): void {"
+            context.writei ("$aqualisFileHandle = @fopen($aqualisFilename, " + mode.str + ");")
+            context.writei "if ($aqualisFileHandle === false) { throw new \\RuntimeException('Failed to open the file.'); }"
+            context.writei "$aqualisPrimaryFileError = null;"
+            context.writei "try {"
+        code (PhpFileHandle handleValue)
+        this.phpcode <| fun () ->
+            context.writei "} catch (\\Throwable $error) { $aqualisPrimaryFileError = $error; }"
+            if mode.CanWrite then
+                context.writei "$aqualisFlushSucceeded = @fflush($aqualisFileHandle);"
+            context.writei "$aqualisCloseSucceeded = @fclose($aqualisFileHandle);"
+            context.writei "if ($aqualisPrimaryFileError !== null) { throw $aqualisPrimaryFileError; }"
+            if mode.CanWrite then
+                context.writei "if (!$aqualisFlushSucceeded) { throw new \\RuntimeException('Failed to flush the file.'); }"
+            context.writei "if (!$aqualisCloseSucceeded) { throw new \\RuntimeException('Failed to close the file.'); }"
+            context.writei ("})(" + filename.code + ");")
+    member this.withFile(filename:string, mode:FileOpenMode, code:PhpFileHandle -> unit) =
+        this.withFile(PHPdata filename, mode, code)
+
+    /// Writes every byte, retrying partial writes and failing on false or zero-byte writes.
+    member this.writeAll(handle:PhpFileHandle, value:PHPdata) =
+        merge [handle.Context; value.Context] |> ignore
+        this.phpcode <| fun () ->
+            context.writei ("$aqualisRemaining = (string)(" + value.code + ");")
+            context.writei "while ($aqualisRemaining !== '') {"
+            context.writei ("$aqualisWritten = @fwrite(" + handle.Value.code + ", $aqualisRemaining);")
+            context.writei "if ($aqualisWritten === false || $aqualisWritten === 0) { throw new \\RuntimeException('Failed to write the complete file.'); }"
+            context.writei "$aqualisRemaining = (string)substr($aqualisRemaining, $aqualisWritten);"
+            context.writei "}"
+    member this.writeAll(handle:PhpFileHandle, value:string) = this.writeAll(handle, PHPdata value)
+    member this.writeAll(handle:PhpFileHandle, value:int0) = this.writeAll(handle, PHPdata value)
+    member this.writeAll(handle:PhpFileHandle, value:double0) = this.writeAll(handle, PHPdata value)
+    member this.writeAll(handle:PhpFileHandle, value:complex0) = this.writeAll(handle, PHPdata value)
+    member this.writeAll(handle:PhpFileHandle, value:int) = this.writeAll(handle, PHPdata (I value))
+
+    /// Converts text to Shift-JIS and writes every resulting byte.
+    member this.writeAllSjis(handle:PhpFileHandle, value:PHPdata) =
+        let convertedContext = merge [handle.Context; value.Context]
+        let converted = PHPdata.f("mb_convert_encoding(" + value.code + ", 'SJIS-win', 'UTF-8')", convertedContext)
+        this.writeAll(handle, converted)
+    member this.writeAllSjis(handle:PhpFileHandle, value:string) = this.writeAllSjis(handle, PHPdata value)
+    member this.writeAllSjis(handle:PhpFileHandle, value:int0) = this.writeAllSjis(handle, PHPdata value)
+    member this.writeAllSjis(handle:PhpFileHandle, value:double0) = this.writeAllSjis(handle, PHPdata value)
+    member this.writeAllSjis(handle:PhpFileHandle, value:complex0) = this.writeAllSjis(handle, PHPdata value)
     /// 正規表現
     member this.preg_match(p:PHPdata,text:PHPdata,mat:PHPdata) = this.phpcode <| fun () -> context.writei("preg_match("+p.code+","+text.code+","+mat.code+");")
     member this.download(filename:string) = this.file_download(PHPdata filename)
@@ -427,7 +477,21 @@ and ContextPhp internal (context:Aqualis) =
     member this.toint(x:PHPdata) = int0(Var(It 4, "(int)"+x.code, NaN), merge [x.Context])
     member this.count(x:PHPdata) = int0(Var(It 4, "count("+x.code+")", NaN), merge [x.Context])
     member this.filename_withoutExtension(x:PHPdata) = data ("pathinfo("+x.code+", PATHINFO_FILENAME)") [x.Context]
-    member this.unlink(data:PHPdata) = this.phpcode <| fun () -> context.writei("unlink("+data.code+");")
+    /// Deletes an existing file and throws when it is absent or cannot be removed.
+    member this.deleteFile(path:PHPdata) =
+        merge [path.Context] |> ignore
+        this.phpcode <| fun () ->
+            context.writei ("if ((!is_file(" + path.code + ") && !is_link(" + path.code + ")) || !@unlink(" + path.code + ")) {")
+            context.writei "throw new \\RuntimeException('Failed to delete the file.');"
+            context.writei "}"
+    member this.deleteFile(path:string) = this.deleteFile(PHPdata path)
+
+    /// Treats an absent path as success and reports whether an existing path was deleted.
+    member this.tryDeleteFile(path:PHPdata) =
+        boolean
+            ("((!file_exists(" + path.code + ") && !is_link(" + path.code + ")) || @unlink(" + path.code + "))")
+            [path.Context]
+    member this.tryDeleteFile(path:string) = this.tryDeleteFile(PHPdata path)
     member this.shuffle(data:PHPdata) = this.phpcode <| fun () -> context.writei("shuffle("+data.code+");")
     member this.setTimeZone(location:PHPdata) =
         merge [location.Context] |> ignore
@@ -479,14 +543,24 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "throw new \\RuntimeException('Failed to start the mail command.');"
             context.writei "}"
             context.writei "try {"
-            context.writei "if (fwrite($pipes[0], $body) === false) {"
-            context.writei "throw new \\RuntimeException('Failed to write the mail body.');"
+            context.writei "$remainingBody = $body;"
+            context.writei "while ($remainingBody !== '') {"
+            context.writei "$written = fwrite($pipes[0], $remainingBody);"
+            context.writei "if ($written === false || $written === 0) {"
+            context.writei "throw new \\RuntimeException('Failed to write the complete mail body.');"
             context.writei "}"
-            context.writei "fclose($pipes[0]);"
+            context.writei "$remainingBody = (string)substr($remainingBody, $written);"
+            context.writei "}"
+            context.writei "if (!fclose($pipes[0])) { throw new \\RuntimeException('Failed to close the mail input pipe.'); }"
+            context.writei "$pipes[0] = null;"
             context.writei "$stdout = stream_get_contents($pipes[1]);"
-            context.writei "fclose($pipes[1]);"
+            context.writei "if ($stdout === false) { throw new \\RuntimeException('Failed to read the mail output pipe.'); }"
+            context.writei "if (!fclose($pipes[1])) { throw new \\RuntimeException('Failed to close the mail output pipe.'); }"
+            context.writei "$pipes[1] = null;"
             context.writei "$stderr = stream_get_contents($pipes[2]);"
-            context.writei "fclose($pipes[2]);"
+            context.writei "if ($stderr === false) { throw new \\RuntimeException('Failed to read the mail error pipe.'); }"
+            context.writei "if (!fclose($pipes[2])) { throw new \\RuntimeException('Failed to close the mail error pipe.'); }"
+            context.writei "$pipes[2] = null;"
             context.writei "} catch (\\Throwable $error) {"
             context.writei "foreach ($pipes as $pipe) {"
             context.writei "if (is_resource($pipe)) { fclose($pipe); }"

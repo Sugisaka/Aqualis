@@ -75,14 +75,14 @@ module GenerationContextTests =
         use output = new TemporaryDirectory()
         Compile [PHP] output.Path "page" "1" <| fun context ->
             let value = context.php.var "value"
-            value <== context.php.file_get_contents "data.json"
+            value <== context.php.readFile "data.json"
             let input = context.form.textBox "user"
             context.html.form (Url.relative "page.php") <| fun () -> input.show()
         let phpPath = Path.Combine(output.Path, "page.php")
         Assert.True(File.Exists phpPath)
         Assert.False(File.Exists(Path.Combine(output.Path, "page.c")))
         let generated = File.ReadAllText phpPath
-        Assert.Contains("$value = file_get_contents", generated)
+        Assert.Contains("$value = (function ($filename) { $contents = @file_get_contents", generated)
         Assert.Contains("<form", generated)
 
     [<Fact>]

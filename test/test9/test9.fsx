@@ -47,7 +47,7 @@ module memberinfo =
         member _.List with get() = _Members memberList
         /// メンバーリストをjsonファイルから読み込み
         member _.ReadJSON(filename:string) =
-            memberData <== ctx.php.json_decode (ctx.php.file_get_contents filename,true)
+            memberData <== ctx.php.json_decode (ctx.php.readFile filename,true)
         member _.Length with get() = ctx.php.count memberList
         member _.foreach code =
             memberList.foreach <| fun i -> 

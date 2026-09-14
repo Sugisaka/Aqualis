@@ -83,14 +83,14 @@ module PhpCommunicationGenerationTests =
                 let realText = context.var.d0 "realText"
                 let complexText = context.var.z0 "complexText"
                 let sourceValue = context.var.i0 "sourceValue"
-                let handle = context.php.var "handle"
                 let text = context.php.var "text"
 
                 integerText <== literal
                 realText <== literal
                 complexText <== literal
                 integerText <== ("prefix: \"$prefix\" " ++ sourceValue)
-                context.php.fwrite_SJIS(handle,literal)
+                context.php.withFile("encoded.txt", Nw, fun handle ->
+                    context.php.writeAllSjis(handle,literal))
                 context.php.setTimeZone literal
 
                 Assert.Equal("file_exists("+encodedLiteral+")",context.php.file_exists(literal).code)
@@ -111,6 +111,38 @@ module PhpCommunicationGenerationTests =
         Assert.Contains("date_default_timezone_set("+encodedLiteral+");",source)
         Assert.Contains("})("+encodedLiteral+", basename("+encodedLiteral+"));",source)
         Assert.Contains("rawurlencode($downloadName)",source)
+
+    [<Fact>]
+    let ``checked file scope writes every byte and verifies flush close read and delete failures`` () =
+        let source =
+            generate (fun context ->
+                let contents = context.php.var "contents"
+                context.php.withFile("result.txt", Nw, fun handle ->
+                    context.php.writeAll(handle, contents))
+                context.php.echo(context.php.readFile "result.txt")
+                context.php.deleteFile "result.txt"
+                context.br.if1 (context.php.tryDeleteFile "optional.txt") ignore)
+
+        Assert.Contains("$aqualisFileHandle = @fopen($aqualisFilename, \"c\");", source)
+        Assert.Contains("while ($aqualisRemaining !== '')", source)
+        Assert.Contains("$aqualisWritten === false || $aqualisWritten === 0", source)
+        Assert.Contains("substr($aqualisRemaining, $aqualisWritten)", source)
+        Assert.Contains("$aqualisFlushSucceeded = @fflush($aqualisFileHandle);", source)
+        Assert.Contains("$aqualisCloseSucceeded = @fclose($aqualisFileHandle);", source)
+        Assert.Contains("if ($aqualisPrimaryFileError !== null) { throw $aqualisPrimaryFileError; }", source)
+        Assert.Contains("$contents = @file_get_contents($filename)", source)
+        Assert.Contains("throw new \\RuntimeException('Failed to delete the file.')", source)
+        Assert.Contains("|| @unlink(\"optional.txt\")", source)
+
+    [<Fact>]
+    let ``unchecked stream operations are not part of the public ContextPhp API`` () =
+        let projectRoot = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
+        let phpSource = File.ReadAllText(Path.Combine(projectRoot, "web", "php.fs"))
+
+        for removedMember in
+            ["member this.fopen"; "member this.fwrite"; "member this.fwrite_SJIS"
+             "member this.fclose"; "member this.unlink"; "member this.file_get_contents"] do
+            Assert.DoesNotContain(removedMember, phpSource)
 
     [<Fact>]
     let ``structured JSON output uses the encoder and checks file writes`` () =
@@ -274,7 +306,11 @@ module PhpCommunicationGenerationTests =
 
         Assert.Contains("proc_open($command, $descriptors, $pipes)", source)
         Assert.Contains("$command = ['mail', '-s', $subject", source)
-        Assert.Contains("fwrite($pipes[0], $body)", source)
+        Assert.Contains("while ($remainingBody !== '')", source)
+        Assert.Contains("fwrite($pipes[0], $remainingBody)", source)
+        Assert.Contains("$written === false || $written === 0", source)
+        Assert.Contains("if (!fclose($pipes[0]))", source)
+        Assert.Contains("if ($stderr === false)", source)
         Assert.Contains("FILTER_VALIDATE_EMAIL", source)
         Assert.Contains("FILTER_VALIDATE_DOMAIN", source)
         assertNoShellExec source

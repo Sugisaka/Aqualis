@@ -18,7 +18,7 @@
 </h1>
 <form method="post" action="main.php" >
 <?php if(isset($_POST["login"])): ?>
-<?php   $mdata = json_decode(file_get_contents("members.json"),True); ?>
+<?php   $mdata = json_decode((function ($filename) { $contents = @file_get_contents($filename); if ($contents === false) { throw new \RuntimeException('Failed to read the file.'); } return $contents; })("members.json"),True); ?>
 <?php   $loginState = 0; ?>
 <?php   for($i0001=0; $i0001<count($mdata["List"]); $i0001++): ?>
 <?php     if($mdata["List"][$i0001]["ID"] == $_POST["userid"]): ?>
