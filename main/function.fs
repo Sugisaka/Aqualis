@@ -12,6 +12,70 @@ namespace Aqualis
     [<AutoOpen>]
     module Aqualis_function =
 
+        [<Literal>]
+        let private MaximumPortableFunctionNameLength = 128
+
+        let private c99Keywords =
+            set [
+                "_Bool"; "_Complex"; "_Imaginary"
+                "auto"; "break"; "case"; "char"; "const"; "continue"
+                "default"; "do"; "double"; "else"; "enum"; "extern"
+                "float"; "for"; "goto"; "if"; "inline"; "int"; "long"
+                "register"; "restrict"; "return"; "short"; "signed"
+                "sizeof"; "static"; "struct"; "switch"; "typedef"
+                "union"; "unsigned"; "void"; "volatile"; "while" ]
+
+        let private pythonKeywords =
+            set [
+                "False"; "None"; "True"; "and"; "as"; "assert"; "async"
+                "await"; "break"; "class"; "continue"; "def"; "del"
+                "elif"; "else"; "except"; "finally"; "for"; "from"
+                "global"; "if"; "import"; "in"; "is"; "lambda"
+                "nonlocal"; "not"; "or"; "pass"; "raise"; "return"
+                "try"; "while"; "with"; "yield" ]
+
+        let private validateFunctionName language (functionName:string) =
+            if isNull functionName then
+                nullArg (nameof functionName)
+            if String.IsNullOrWhiteSpace functionName then
+                invalidArg (nameof functionName) "A function name is required."
+
+            let asciiLetter character =
+                ('A' <= character && character <= 'Z')
+                || ('a' <= character && character <= 'z')
+            let validFirst character =
+                asciiLetter character || (language <> Fortran && character = '_')
+            let validRest character =
+                asciiLetter character
+                || ('0' <= character && character <= '9')
+                || character = '_'
+
+            if not (validFirst functionName[0])
+               || functionName |> Seq.skip 1 |> Seq.exists (validRest >> not) then
+                invalidArg
+                    (nameof functionName)
+                    "A function name must be a portable ASCII identifier; Fortran names must start with a letter."
+            let maximumLength =
+                if language = Fortran then 63
+                else MaximumPortableFunctionNameLength
+            if functionName.Length > maximumLength then
+                invalidArg
+                    (nameof functionName)
+                    ("A function name cannot exceed " + string maximumLength + " characters for the target language.")
+            match language with
+            |C99 when functionName[0] = '_' ->
+                invalidArg
+                    (nameof functionName)
+                    "A global C99 function name cannot start with an implementation-reserved underscore."
+            |C99 when functionName = "main" ->
+                invalidArg (nameof functionName) "A generated C99 function cannot replace the program entry point."
+            |C99 when Set.contains functionName c99Keywords ->
+                invalidArg (nameof functionName) "A function name cannot be a C99 keyword."
+            |Python when Set.contains functionName pythonKeywords ->
+                invalidArg (nameof functionName) "A function name cannot be a Python keyword."
+            |_ -> ()
+            functionName
+
         type private PythonFunctionArgument = {
             ActualName:string
             FormalName:string
@@ -47,6 +111,7 @@ namespace Aqualis
             parent.IsOpenAccUsed <- parent.IsOpenAccUsed || child.IsOpenAccUsed
 
         let private generateFunction (context:Aqualis) (projectname:string) (code:Aqualis->unit) =
+            let projectname = validateFunctionName context.language projectname
             let fdeclare language (typ:Etype,vtp:VarType,name:string) =
                 match language with
                 |HTML ->

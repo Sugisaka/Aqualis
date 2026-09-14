@@ -1,5 +1,6 @@
 namespace Aqualis.Tests
 
+open System
 open System.IO
 open Xunit
 open Aqualis
@@ -378,3 +379,74 @@ module CompilerScriptTests =
         Assert.Contains("/* parent remains open */", generated)
         Assert.Contains("gcc -fopenmp", compileScript)
         Assert.Contains("-lchild", compileScript)
+
+    [<Theory>]
+    [<InlineData("")>]
+    [<InlineData("two words")>]
+    [<InlineData("../outside")>]
+    [<InlineData("name-with-dash")>]
+    [<InlineData("9starts_with_digit")>]
+    [<InlineData("_implementation_reserved")>]
+    let ``C function generation rejects invalid portable identifiers`` functionName =
+        use output = new TemporaryDirectory()
+
+        let error =
+            Assert.Throws<ArgumentException>(fun () ->
+                Compile [C99] output.Path "invalid-function-name" "1.0" (fun context ->
+                    context.func functionName ignore))
+
+        Assert.Equal("functionName", error.ParamName)
+        Assert.False(File.Exists(Path.Combine(output.Path, functionName + "_main")))
+
+    [<Fact>]
+    let ``function generation rejects a null name before invoking its body`` () =
+        use output = new TemporaryDirectory()
+        let mutable bodyInvoked = false
+
+        let error =
+            Assert.Throws<ArgumentNullException>(fun () ->
+                Compile [C99] output.Path "null-function-name" "1.0" (fun context ->
+                    context.func null (fun _ -> bodyInvoked <- true)))
+
+        Assert.Equal("functionName", error.ParamName)
+        Assert.False(bodyInvoked)
+
+    [<Theory>]
+    [<InlineData("while")>]
+    [<InlineData("return")>]
+    [<InlineData("_Bool")>]
+    [<InlineData("main")>]
+    let ``C function generation rejects reserved names`` functionName =
+        use output = new TemporaryDirectory()
+
+        let error =
+            Assert.Throws<ArgumentException>(fun () ->
+                Compile [C99] output.Path "invalid-c-function-keyword" "1.0" (fun context ->
+                    context.func functionName ignore))
+
+        Assert.Equal("functionName", error.ParamName)
+
+    [<Theory>]
+    [<InlineData("def")>]
+    [<InlineData("class")>]
+    [<InlineData("await")>]
+    let ``Python function generation rejects language keywords`` functionName =
+        use output = new TemporaryDirectory()
+
+        let error =
+            Assert.Throws<ArgumentException>(fun () ->
+                Compile [Python] output.Path "invalid-python-function-keyword" "1.0" (fun context ->
+                    context.func functionName ignore))
+
+        Assert.Equal("functionName", error.ParamName)
+
+    [<Fact>]
+    let ``Fortran function names start with a letter and fit the language limit`` () =
+        use output = new TemporaryDirectory()
+
+        for functionName in ["_private"; String.replicate 64 "a"] do
+            let error =
+                Assert.Throws<ArgumentException>(fun () ->
+                    Compile [Fortran] output.Path "invalid-fortran-function" "1.0" (fun context ->
+                        context.func functionName ignore))
+            Assert.Equal("functionName", error.ParamName)
