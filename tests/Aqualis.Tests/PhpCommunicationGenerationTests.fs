@@ -241,6 +241,7 @@ module PhpCommunicationGenerationTests =
     let ``atomic JSON update reads and mutates while holding a stable sidecar lock`` () =
         let source =
             generate (fun context ->
+                let callerValue = context.php.var "callerValue"
                 let result =
                     context.php.updateJsonFileAtomic(
                         PhpVariableName.create "settingsUpdate",
@@ -249,7 +250,7 @@ module PhpCommunicationGenerationTests =
                           MaxOutputBytes = 8192
                           MaxDepth = 32
                           FilePermissions = 0o640 },
-                        fun data -> data["count"] <== data["count"].int0 + 1)
+                        fun data -> data["count"] <== callerValue)
                 context.br.if1 result.IsSuccess <| fun () ->
                     context.php.echo result.Value
                 context.php.echo result.ErrorCode)
@@ -263,6 +264,9 @@ module PhpCommunicationGenerationTests =
         Assert.True(lockIndex < readIndex)
         Assert.True(readIndex < updateIndex)
         Assert.True(updateIndex < renameIndex)
+        Assert.Contains("$settingsUpdate_target = $settingsPath;", source)
+        Assert.Contains("$settingsUpdate_data[\"count\"] = $callerValue;", source)
+        Assert.DoesNotContain("function ($settingsUpdate_target)", source)
         Assert.Contains("$settingsUpdate_lockPath = $settingsUpdate_target.'.lock'", source)
         Assert.Contains("is_link($settingsUpdate_lockPath)", source)
         Assert.Contains("json_decode($settingsUpdate_jsonText, true, 32, JSON_THROW_ON_ERROR)", source)

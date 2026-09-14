@@ -362,6 +362,7 @@ and ContextPhp internal (context:Aqualis) =
     member this.tryReadJsonFile(resultName:PhpVariableName, filename:string, options:JsonReadOptions) =
         this.tryReadJsonFile(resultName, PHPdata filename, options)
     /// Reads, changes, and atomically replaces a JSON file while holding one stable sidecar lock.
+    /// The update is emitted in the caller's PHP variable scope so its callback can use caller variables.
     member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:PHPdata, options:JsonUpdateOptions, update:PHPdata -> unit) =
         if isNull (box update) then nullArg (nameof update)
         if options.MaxInputBytes <= 0 || options.MaxInputBytes = Int32.MaxValue then
@@ -402,7 +403,8 @@ and ContextPhp internal (context:Aqualis) =
             errorCode + " = " + PhpEncoding.stringLiteral code + "; throw new \\RuntimeException(" + PhpEncoding.stringLiteral message + ");"
 
         this.phpcode <| fun () ->
-            context.writei (result.code + " = (function (" + target + "): array {")
+            context.writei (target + " = " + filename.code + ";")
+            context.writei (result.code + " = ['success' => false, 'value' => null, 'error' => " + PhpEncoding.stringLiteral "update_failed" + "];")
             context.writei (lockHandle + " = null; " + locked + " = false; " + temporaryPath + " = null; " + temporaryHandle + " = null;")
             context.writei (errorCode + " = " + PhpEncoding.stringLiteral "update_failed" + ";")
             context.writei "try {"
@@ -445,10 +447,9 @@ and ContextPhp internal (context:Aqualis) =
             context.writei ("if (!@chmod(" + temporaryPath + ", " + permissions + ")) { " + fail "file_protection_failed" "Failed to protect the JSON data." + " }")
             context.writei ("if (!@rename(" + temporaryPath + ", " + target + ")) { " + fail "publish_failed" "Failed to publish the JSON data." + " }")
             context.writei (temporaryPath + " = null;")
-            context.writei ("return ['success' => true, 'value' => " + dataName + ", 'error' => null];")
-            context.writei ("} catch (\\Throwable " + error + ") { error_log('Aqualis atomic JSON update failed: '." + error + "->getMessage()); return ['success' => false, 'value' => null, 'error' => " + errorCode + "]; }")
+            context.writei (result.code + " = ['success' => true, 'value' => " + dataName + ", 'error' => null];")
+            context.writei ("} catch (\\Throwable " + error + ") { error_log('Aqualis atomic JSON update failed: '." + error + "->getMessage()); " + result.code + " = ['success' => false, 'value' => null, 'error' => " + errorCode + "]; }")
             context.writei ("finally { if (is_resource(" + temporaryHandle + ")) { @fclose(" + temporaryHandle + "); } if (is_string(" + temporaryPath + ") && is_file(" + temporaryPath + ")) { @unlink(" + temporaryPath + "); } if (" + locked + ") { flock(" + lockHandle + ", LOCK_UN); } if (is_resource(" + lockHandle + ")) { fclose(" + lockHandle + "); } }")
-            context.writei ("})(" + filename.code + ");")
         JsonUpdateResult(result)
     /// Reads, changes, and atomically replaces a JSON file at a static path.
     member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:string, options:JsonUpdateOptions, update:PHPdata -> unit) =
