@@ -9,6 +9,49 @@ module GenerationContextTests =
     let private createContext path name language =
         new Aqualis(Some path, Some name, language)
 
+    [<Theory>]
+    [<InlineData(null)>]
+    [<InlineData("")>]
+    [<InlineData("   ")>]
+    [<InlineData(".")>]
+    [<InlineData("..")>]
+    [<InlineData("../escape")>]
+    [<InlineData("folder/escape")>]
+    [<InlineData("folder\\escape")>]
+    [<InlineData("/absolute")>]
+    [<InlineData("C:\\absolute")>]
+    [<InlineData("line\nbreak")>]
+    [<InlineData("trailing.")>]
+    [<InlineData("trailing ")>]
+    [<InlineData("bad:name")>]
+    [<InlineData("CON")>]
+    [<InlineData("com1.txt")>]
+    let ``Compile rejects project names that are not portable file-name segments`` (projectName:string) =
+        use output = new TemporaryDirectory()
+        let mutable callbackInvoked = false
+
+        let error =
+            Assert.Throws<ArgumentException>(fun () ->
+                Compile [PHP] output.Path projectName "1" <| fun _ ->
+                    callbackInvoked <- true)
+
+        Assert.Equal("projectname", error.ParamName)
+        Assert.False(callbackInvoked)
+        Assert.Empty(Directory.EnumerateFileSystemEntries(output.Path))
+
+    [<Fact>]
+    let ``Compile rejects project names longer than the portable staging limit`` () =
+        use output = new TemporaryDirectory()
+
+        for projectName in [String.replicate 201 "a"; String.replicate 67 "あ"] do
+            let error =
+                Assert.Throws<ArgumentException>(fun () ->
+                    Compile [C99] output.Path projectName "1" ignore)
+
+            Assert.Equal("projectname", error.ParamName)
+
+        Assert.Empty(Directory.EnumerateFileSystemEntries(output.Path))
+
     [<Fact>]
     let ``Compile supplies generated and Numeric contexts explicitly`` () =
         use output = new TemporaryDirectory()
