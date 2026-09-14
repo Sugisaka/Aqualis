@@ -15,10 +15,10 @@ module TypedWebApiTests =
         File.ReadAllText(Path.Combine(output.Path, fileName))
 
     [<Fact>]
-    let ``field names reject markup whitespace and dynamic array syntax`` () =
-        FieldName.create "student_user-id.1" |> ignore
+    let ``field names reject dots markup whitespace and dynamic array syntax`` () =
+        FieldName.create "student_user-id:1" |> ignore
 
-        for invalid in [""; "1field"; "user id"; "user[]"; "x\" autofocus"] do
+        for invalid in [""; "1field"; "student.id"; "user id"; "user[]"; "x\" autofocus"] do
             Assert.Throws<ArgumentException>(fun () -> FieldName.create invalid |> ignore)
             |> ignore
 

@@ -29,10 +29,10 @@ module FieldName =
             ('A' <= character && character <= 'Z') || ('a' <= character && character <= 'z')
         let validFirst character = asciiLetter character || character = '_'
         let validRest character =
-            validFirst character || ('0' <= character && character <= '9') || character = '-' || character = '.' || character = ':'
+            validFirst character || ('0' <= character && character <= '9') || character = '-' || character = ':'
 
         if not (validFirst value[0]) || value |> Seq.skip 1 |> Seq.exists (validRest >> not) then
-            invalidArg (nameof value) "A field name must start with a letter or underscore and contain only letters, digits, '_', '-', '.', or ':'."
+            invalidArg (nameof value) "A field name must start with a letter or underscore and contain only letters, digits, '_', '-', or ':'."
 
         FieldName value
 
