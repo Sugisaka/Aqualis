@@ -36,13 +36,17 @@ module private RequestCode =
 
 /// Typed access to POST request fields.
 type PostRequest internal (context:Aqualis) =
-    /// Creates a required UTF-8 text field with optional length bounds.
-    member _.RequiredText(fieldName:FieldName, ?minLength:int, ?maxLength:int) =
+    /// Creates a required UTF-8 text field with optional character and encoded-byte bounds.
+    member _.RequiredText(fieldName:FieldName, ?minLength:int, ?maxLength:int, ?maxUtf8Bytes:int) =
         let minimum = defaultArg minLength 1
         if minimum < 0 then invalidArg (nameof minLength) "The minimum length must be non-negative."
         match maxLength with
         | Some maximum when maximum < minimum ->
             invalidArg (nameof maxLength) "The maximum length cannot be less than the minimum length."
+        | _ -> ()
+        match maxUtf8Bytes with
+        | Some maximum when maximum < 0 ->
+            invalidArg (nameof maxUtf8Bytes) "The maximum UTF-8 byte count must be non-negative."
         | _ -> ()
 
         let expression = RequestCode.postExpression fieldName
@@ -53,6 +57,9 @@ type PostRequest internal (context:Aqualis) =
             " && " + length + " >= " + string minimum +
             (match maxLength with
              | Some maximum -> " && " + length + " <= " + string maximum
+             | None -> "") +
+            (match maxUtf8Bytes with
+             | Some maximum -> " && strlen(" + expression + ") <= " + string maximum
              | None -> "")
         ValidatedPost<PhpString>(
             present,

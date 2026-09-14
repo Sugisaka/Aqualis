@@ -84,7 +84,8 @@ module TypedWebApiTests =
                     context.request.post.RequiredText(
                         FieldName.create "userid",
                         minLength = 3,
-                        maxLength = 32)
+                        maxLength = 32,
+                        maxUtf8Bytes = 72)
                 let score =
                     context.request.post.RequiredInt(
                         FieldName.create "score",
@@ -110,6 +111,7 @@ module TypedWebApiTests =
 
         Assert.Contains("mb_strlen($_POST[\"userid\"], 'UTF-8') >= 3", generated)
         Assert.Contains("mb_strlen($_POST[\"userid\"], 'UTF-8') <= 32", generated)
+        Assert.Contains("strlen($_POST[\"userid\"]) <= 72", generated)
         Assert.Contains("filter_var($_POST[\"score\"], FILTER_VALIDATE_INT) !== false", generated)
         Assert.Contains("(int)($_POST[\"score\"]) >= 0", generated)
         Assert.Contains("(int)($_POST[\"score\"]) <= 100", generated)
