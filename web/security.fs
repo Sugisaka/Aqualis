@@ -17,6 +17,7 @@ type SameSite =
 
 /// Options passed to PHP's session cookie configuration.
 type SessionOptions = {
+    Name: string
     Lifetime: int
     Path: string
     Secure: bool
@@ -26,19 +27,21 @@ type SessionOptions = {
 
 [<RequireQualifiedAccess>]
 module SessionOptions =
-    /// Secure defaults for an HTTPS production site.
-    let production = {
+    let private create name path secure = {
+        Name = name
         Lifetime = 0
-        Path = "/"
-        Secure = true
+        Path = path
+        Secure = secure
         HttpOnly = true
         SameSite = SameSite.Lax
     }
 
-    /// Defaults suitable for local HTTP development.
-    let development = {
-        production with Secure = false
-    }
+    /// Secure defaults for one HTTPS application. Use a distinct alphanumeric
+    /// session name and the narrowest cookie path served by the application.
+    let production name path = create name path true
+
+    /// Defaults suitable for one local HTTP development application.
+    let development name path = create name path false
 
 type private SecurityGenerationState() =
     member val SessionOptions: SessionOptions option = None with get, set
@@ -85,10 +88,30 @@ module private SecurityCode =
         "]"
 
     let validateSessionOptions options =
+        let isAsciiLetter character =
+            ('A' <= character && character <= 'Z') ||
+            ('a' <= character && character <= 'z')
+        let isAsciiLetterOrDigit character =
+            isAsciiLetter character || ('0' <= character && character <= '9')
+
+        if isNull options.Name ||
+           options.Name.Length < 1 ||
+           options.Name.Length > 64 ||
+           not (isAsciiLetter options.Name[0]) ||
+           not (options.Name |> Seq.forall isAsciiLetterOrDigit) then
+            invalidArg
+                (nameof options)
+                "A session name must start with an ASCII letter and contain 1 to 64 ASCII letters or digits. Use a distinct name for each application."
         if options.Lifetime < 0 then
             invalidArg (nameof options) "Session lifetime must be non-negative."
-        if isNull options.Path || String.IsNullOrWhiteSpace options.Path then
-            invalidArg (nameof options) "A session cookie path is required."
+        if isNull options.Path ||
+           String.IsNullOrWhiteSpace options.Path ||
+           not (options.Path.StartsWith("/", StringComparison.Ordinal)) ||
+           options.Path.Contains(';') ||
+           (options.Path |> Seq.exists Char.IsControl) then
+            invalidArg
+                (nameof options)
+                "A session cookie path must be an absolute HTTP path without control characters or semicolons."
 
     let requireStarted context operation =
         let state = SecurityGenerationStates.get context
@@ -121,6 +144,7 @@ type WebSession internal (context:Aqualis) =
             | None ->
                 let cookieOptions = SecurityCode.sessionCookieOptions options
                 let emittedCookieOptions = SecurityCode.emittedCookieOptions options
+                let expectedName = PhpEncoding.stringLiteral options.Name
                 let expectedPath = PhpEncoding.stringLiteral options.Path
                 let expectedSameSite =
                     PhpEncoding.stringLiteral (SecurityCode.sameSiteLiteral options.SameSite)
@@ -136,7 +160,8 @@ type WebSession internal (context:Aqualis) =
                     "if ($aqualisSessionStatus === PHP_SESSION_ACTIVE) { " +
                     "$aqualisSessionCookieParams = session_get_cookie_params(); " +
                     "$aqualisSessionConfigurationMatches = " +
-                    "(int)$aqualisSessionCookieParams['lifetime'] === " + string options.Lifetime + " " +
+                    "session_name() === " + expectedName + " " +
+                    "&& (int)$aqualisSessionCookieParams['lifetime'] === " + string options.Lifetime + " " +
                     "&& (string)$aqualisSessionCookieParams['path'] === " + expectedPath + " " +
                     "&& (string)$aqualisSessionCookieParams['domain'] === '' " +
                     "&& (bool)$aqualisSessionCookieParams['secure'] === " + expectedSecure + " " +
@@ -150,6 +175,8 @@ type WebSession internal (context:Aqualis) =
                     "if (!setcookie(session_name(), session_id(), " + emittedCookieOptions + ")) { " +
                     "throw new \\RuntimeException('Failed to reissue the active session cookie with the requested security settings.'); } " +
                     "} elseif ($aqualisSessionStatus === PHP_SESSION_NONE) { " +
+                    "if (session_name(" + expectedName + ") === false || session_name() !== " + expectedName + ") { " +
+                    "throw new \\RuntimeException('Failed to configure the application-specific PHP session name.'); } " +
                     "if (ini_set('session.use_cookies', '1') === false " +
                     "|| ini_set('session.use_only_cookies', '1') === false " +
                     "|| ini_set('session.use_strict_mode', '1') === false " +

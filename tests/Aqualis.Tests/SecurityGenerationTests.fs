@@ -6,6 +6,12 @@ open Xunit
 open Aqualis
 
 module SecurityGenerationTests =
+    let private productionOptions =
+        SessionOptions.production "AqualisTestSession" "/aqualis-test/"
+
+    let private developmentOptions =
+        SessionOptions.development "AqualisTestSession" "/aqualis-test/"
+
     let private generate name code =
         use output = new TemporaryDirectory()
         let fileName = name + ".php"
@@ -25,19 +31,22 @@ module SecurityGenerationTests =
     let ``session start securely handles both new and matching active sessions`` () =
         let generated =
             generate "session-start" <| fun context ->
-                context.php.session.Start SessionOptions.production
-                context.php.session.Start SessionOptions.production
+                context.php.session.Start productionOptions
+                context.php.session.Start productionOptions
 
         Assert.Equal(1, occurrences "session_set_cookie_params(" generated)
         Assert.Equal(1, occurrences "session_start()" generated)
         Assert.Contains("'lifetime' => 0", generated)
-        Assert.Contains("'path' => \"/\"", generated)
+        Assert.Contains("'path' => \"/aqualis-test/\"", generated)
         Assert.Contains("'domain' => ''", generated)
         Assert.Contains("'secure' => true", generated)
         Assert.Contains("'httponly' => true", generated)
         Assert.Contains("'samesite' => \"Lax\"", generated)
         Assert.Contains("headers_sent($aqualisSessionHeaderFile, $aqualisSessionHeaderLine)", generated)
         Assert.Contains("$aqualisSessionStatus === PHP_SESSION_ACTIVE", generated)
+        Assert.Contains("session_name() === \"AqualisTestSession\"", generated)
+        Assert.Contains("session_name(\"AqualisTestSession\")", generated)
+        Assert.Contains("Failed to configure the application-specific PHP session name", generated)
         Assert.Contains("session_get_cookie_params()", generated)
         Assert.Contains("$aqualisSessionConfigurationMatches", generated)
         Assert.Contains("Start the session through Aqualis before other middleware", generated)
@@ -54,7 +63,7 @@ module SecurityGenerationTests =
     let ``session regeneration fails closed and reissues the cookie securely`` () =
         let generated =
             generate "session-regenerate" <| fun context ->
-                context.php.session.Start SessionOptions.production
+                context.php.session.Start productionOptions
                 context.php.session.RegenerateId()
 
         Assert.Contains("session_status() !== PHP_SESSION_ACTIVE", generated)
@@ -70,7 +79,7 @@ module SecurityGenerationTests =
     let ``development session permits an HTTP cookie`` () =
         let generated =
             generate "development-session" <| fun context ->
-                context.php.session.Start SessionOptions.development
+                context.php.session.Start developmentOptions
 
         Assert.Contains("'secure' => false", generated)
         Assert.Contains("'httponly' => true", generated)
@@ -81,19 +90,29 @@ module SecurityGenerationTests =
         use context = new Aqualis(Some output.Path, Some "invalid-session.php", PHP)
 
         Assert.Throws<ArgumentException>(fun () ->
-            context.php.session.Start { SessionOptions.production with Lifetime = -1 })
+            context.php.session.Start { productionOptions with Lifetime = -1 })
         |> ignore
 
-        context.php.session.Start SessionOptions.production
+        for invalidOptions in
+            [ { productionOptions with Name = "" }
+              { productionOptions with Name = "12345" }
+              { productionOptions with Name = "shared_session" }
+              { productionOptions with Path = "relative" }
+              { productionOptions with Path = "/bad;path" } ] do
+            Assert.Throws<ArgumentException>(fun () ->
+                context.php.session.Start invalidOptions)
+            |> ignore
+
+        context.php.session.Start productionOptions
         Assert.Throws<InvalidOperationException>(fun () ->
-            context.php.session.Start SessionOptions.development)
+            context.php.session.Start developmentOptions)
         |> ignore
 
     [<Fact>]
     let ``session destroy expires the active session cookie with matching attributes`` () =
         let generated =
             generate "session-destroy" <| fun context ->
-                context.php.session.Start SessionOptions.production
+                context.php.session.Start productionOptions
                 context.php.session.Destroy()
 
         Assert.Contains("$_SESSION = [];", generated)
@@ -118,7 +137,7 @@ module SecurityGenerationTests =
             generate "csrf-field" <| fun context ->
                 let session = context.php.session
                 let csrf = context.php.csrf
-                session.Start SessionOptions.production
+                session.Start productionOptions
                 csrf.EnsureToken()
                 csrf.EnsureToken()
                 context.html.formWithCsrf(Url.relative "save.php", csrf) ignore
@@ -136,7 +155,7 @@ module SecurityGenerationTests =
     let ``CSRF validation rejects only invalid POST requests`` () =
         let generated =
             generate "csrf-validation" <| fun context ->
-                context.php.session.Start SessionOptions.production
+                context.php.session.Start productionOptions
                 let csrf = context.php.csrf
                 csrf.EnsureToken()
                 csrf.RequireValidPost()
@@ -158,7 +177,7 @@ module SecurityGenerationTests =
 
         Assert.Throws<InvalidOperationException>(fun () -> csrf.EnsureToken()) |> ignore
 
-        context.php.session.Start SessionOptions.production
+        context.php.session.Start productionOptions
         Assert.Throws<InvalidOperationException>(fun () -> csrf.Field()) |> ignore
         Assert.Throws<InvalidOperationException>(fun () -> csrf.RequireValidPost()) |> ignore
 
@@ -166,7 +185,7 @@ module SecurityGenerationTests =
     let ``CSRF token can be rotated and multipart forms can be protected`` () =
         let generated =
             generate "csrf-upload" <| fun context ->
-                context.php.session.Start SessionOptions.production
+                context.php.session.Start productionOptions
                 let csrf = context.php.csrf
                 csrf.RotateToken()
                 context.html.formFileUploadWithCsrf(Url.relative "upload.php", csrf) ignore
@@ -180,7 +199,7 @@ module SecurityGenerationTests =
         use output = new TemporaryDirectory()
         use first = new Aqualis(Some output.Path, Some "first.php", PHP)
         use second = new Aqualis(Some output.Path, Some "second.php", PHP)
-        first.php.session.Start SessionOptions.production
+        first.php.session.Start productionOptions
         let csrf = first.php.csrf
         csrf.EnsureToken()
 

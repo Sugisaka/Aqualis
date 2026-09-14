@@ -125,7 +125,11 @@ module TypedWebApiTests =
     let ``active session creates initialized typed CSRF and typed session values`` () =
         let generated =
             generate "typed-session" <| fun context ->
-                let session = context.php.startSession SessionOptions.production
+                let session =
+                    context.php.startSession (
+                        SessionOptions.production
+                            "TypedWebApiTestSession"
+                            "/typed-web-api-test/")
                 let csrf = session.CsrfToken()
                 let userIdKey = SessionKey.string "student_user_id"
                 session.Set(userIdKey, "student01")
