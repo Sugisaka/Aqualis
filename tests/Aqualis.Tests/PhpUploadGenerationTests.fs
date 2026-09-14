@@ -152,7 +152,7 @@ module PhpUploadGenerationTests =
                 let singleUpload = postFile.single(context, "avatar")
                 let multipleUpload = postFile.multiple(context, "documents")
                 singleUpload.select()
-                multipleUpload.select("receive.php"))
+                multipleUpload.select(Url.relative "receive.php"))
 
         Assert.DoesNotContain("<input input name", source)
         Assert.Contains("name=\"<?php echo htmlspecialchars", source)

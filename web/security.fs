@@ -352,7 +352,7 @@ module SecurityExtensions =
 
     type html with
         /// Generates a POST form whose first element is a CSRF hidden field.
-        member this.formWithCsrf(action:string, csrf:CsrfProtection) = fun code ->
+        member internal this.formWithCsrf(action:Url, csrf:CsrfProtection) = fun code ->
             if not (Object.ReferenceEquals(this.Context, csrf.Context)) then
                 invalidArg (nameof csrf) "The form and CSRF protection must use the same generation context."
             this.form action <| fun () ->
@@ -360,7 +360,7 @@ module SecurityExtensions =
                 code()
 
         /// Generates a multipart POST form whose first element is a CSRF hidden field.
-        member this.formFileUploadWithCsrf(action:string, csrf:CsrfProtection) = fun code ->
+        member internal this.formFileUploadWithCsrf(action:Url, csrf:CsrfProtection) = fun code ->
             if not (Object.ReferenceEquals(this.Context, csrf.Context)) then
                 invalidArg (nameof csrf) "The form and CSRF protection must use the same generation context."
             this.form_fileUpload action <| fun () ->
@@ -371,10 +371,10 @@ module SecurityExtensions =
         member this.postForm(action:Url, csrf:CsrfToken) = fun code ->
             if not (Object.ReferenceEquals(this.Context, csrf.Context)) then
                 invalidArg (nameof csrf) "The form and CSRF token must use the same generation context."
-            this.formWithCsrf(Url.value action, csrf.Protection) code
+            this.formWithCsrf(action, csrf.Protection) code
 
         /// Generates a CSRF-protected multipart form with a validated action URL.
         member this.postFileUploadForm(action:Url, csrf:CsrfToken) = fun code ->
             if not (Object.ReferenceEquals(this.Context, csrf.Context)) then
                 invalidArg (nameof csrf) "The form and CSRF token must use the same generation context."
-            this.formFileUploadWithCsrf(Url.value action, csrf.Protection) code
+            this.formFileUploadWithCsrf(action, csrf.Protection) code

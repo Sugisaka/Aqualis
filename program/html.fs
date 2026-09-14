@@ -246,7 +246,7 @@ namespace Aqualis
             code()
             writein "</body>"
             writein "</html>"
-        member this.head (title,cssfile,jsfile,refresh:int) = fun code ->
+        member this.head (title:string,cssfile:Url,jsfile:Url,refresh:int) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<head>"
@@ -258,15 +258,15 @@ namespace Aqualis
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", cssfile)])
-            this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", jsfile)]) ignore
+            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value cssfile)])
+            this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", Url.value jsfile)]) ignore
             writein("    <meta http-equiv=\"refresh\" content=\""+InvariantFormat.integer refresh+"\">")
             writein "</head>"
             writein "<body>"
             code()
             writein "</body>"
             writein "</html>"
-        member this.head (title,cssfile,jsfile) = fun code ->
+        member this.head (title:string,cssfile:Url,jsfile:Url) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<head>"
@@ -278,14 +278,14 @@ namespace Aqualis
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", cssfile)])
-            this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", jsfile)]) ignore
+            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value cssfile)])
+            this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", Url.value jsfile)]) ignore
             writein "</head>"
             writein "<body>"
             code()
             writein "</body>"
             writein "</html>"
-        member this.head (title,cssfile) = fun code ->
+        member this.head (title:string,cssfile:Url) = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
             writein "<head>"
@@ -297,7 +297,7 @@ namespace Aqualis
             writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
             writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
             writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
-            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", cssfile)])
+            this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value cssfile)])
             writein "</head>"
             writein "<body>"
             code()
@@ -425,9 +425,9 @@ namespace Aqualis
         member this.h5 (t:string,s:Style) = fun code ->
             this.tagb ("h5",[s.atr]) <| fun () -> this.text t
             code()
-        member this.form (action:string) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("action",action);]) code
-        member this.form_fileUpload (action:string) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("enctype","multipart/form-data"); Atr("action",action);]) code
-        member this.submit(url:string,name:string,value:string) = this.taga("input",[Atr("type","submit"); Atr("name",name); Atr("value",value); Atr("formaction",url)])
+        member this.form (action:Url) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("action",Url.value action);]) code
+        member this.form_fileUpload (action:Url) = fun code -> this.tagb ("form",[Atr("method","post"); Atr("enctype","multipart/form-data"); Atr("action",Url.value action);]) code
+        member this.submit(url:Url,name:string,value:string) = this.taga("input",[Atr("type","submit"); Atr("name",name); Atr("value",value); Atr("formaction",Url.value url)])
         // member this.table_ code = this.tagb "table" code
         member this.table (a:list<Atr>) = fun code -> this.tagb ("table",a) code
         member this.tableData (lst:list<list<string>>) = fun (p:position) (size:int) ->
@@ -470,9 +470,9 @@ namespace Aqualis
         member this.span(cls:string,t:string) = this.tagb ("span",[Atr("class",cls)]) <| fun () -> this.text t
         member this.span(cls:string) = fun code -> this.tagb ("span",[Atr("class",cls)]) code
         member this.span(cls:string, s:Style) = fun code -> this.tagb ("span",[s.atr; Atr("class",cls)]) code
-        member this.link(url:string) = fun code -> this.tagb ("a",[Atr("href",url);]) code
-        member this.link(url:string, s:Style) = fun code -> this.tagb ("a",[s.atr; Atr("href",url)]) code
-        member this.link_newtab(url:string) = fun code -> this.tagb ("a",[Atr("href",url); Atr("target","_blank")]) code
+        member this.link(url:Url) = fun code -> this.tagb ("a",[Atr("href",Url.value url);]) code
+        member this.link(url:Url, s:Style) = fun code -> this.tagb ("a",[s.atr; Atr("href",Url.value url)]) code
+        member this.link_newtab(url:Url) = fun code -> this.tagb ("a",[Atr("href",Url.value url); Atr("target","_blank"); Atr("rel","noopener noreferrer")]) code
         member this.select_disabled(x:string) = fun code -> this.tagb ("select",[Atr("name",x); Atr("disabled","disabled")]) code
         member this.time(datatime:string, s:Style) = fun code -> this.tagb ("time",[s.atr; Atr("datatime",datatime)]) code
         member this.article(cls:string) = fun code -> this.tagb ("article", [Atr("class", cls)]) code
@@ -497,8 +497,8 @@ namespace Aqualis
         member this.footer (s:Style) = fun code -> this.tagb ("footer", [s.atr]) <| fun () -> code()
         member this.br() = writein "<br>"
         member this.hr() = writein "<hr>"
-        member this.setjs filename =
-            this.tagb ("script",[Atr("src",filename)]) <| fun () -> ()
+        member this.setjs (filename:Url) =
+            this.tagb ("script",[Atr("src",Url.value filename)]) <| fun () -> ()
         member this.title (s:Style) (p:position) (text:string) =
             let s1 = Style [{Key = "margin-left"; Value = InvariantFormat.number p.x+"px";}
                             {Key = "margin-top"; Value = InvariantFormat.number p.y+"px";}

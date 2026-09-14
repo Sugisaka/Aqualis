@@ -121,7 +121,7 @@ module SecurityGenerationTests =
                 session.Start SessionOptions.production
                 csrf.EnsureToken()
                 csrf.EnsureToken()
-                context.html.formWithCsrf("save.php", csrf) ignore
+                context.html.formWithCsrf(Url.relative "save.php", csrf) ignore
 
         Assert.Equal(1, occurrences "bin2hex(random_bytes(32))" generated)
         Assert.Contains("!isset($_SESSION[\"_aqualis_csrf\"])", generated)
@@ -169,7 +169,7 @@ module SecurityGenerationTests =
                 context.php.session.Start SessionOptions.production
                 let csrf = context.php.csrf
                 csrf.RotateToken()
-                context.html.formFileUploadWithCsrf("upload.php", csrf) ignore
+                context.html.formFileUploadWithCsrf(Url.relative "upload.php", csrf) ignore
 
         Assert.Equal(1, occurrences "bin2hex(random_bytes(32))" generated)
         Assert.Contains("enctype=\"multipart/form-data\"", generated)
@@ -185,5 +185,5 @@ module SecurityGenerationTests =
         csrf.EnsureToken()
 
         Assert.Throws<ArgumentException>(fun () ->
-            second.html.formWithCsrf("save.php", csrf) ignore)
+            second.html.formWithCsrf(Url.relative "save.php", csrf) ignore)
         |> ignore

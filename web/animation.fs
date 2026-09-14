@@ -628,7 +628,7 @@ module HtmlWebExtensions =
         /// <param name="url">formaction属性に設定するURL</param>
         /// <param name="name">name属性に設定するPHPデータ</param>
         /// <param name="value">value属性に設定する文字列</param>
-        member this.submit(url:string,name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "formaction",PHPdata url])
+        member this.submit(url:Url,name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "formaction",PHPdata (Url.value url)])
         /// <summary>
         /// 無効化されたsubmitボタンを生成する
         /// </summary>
@@ -642,18 +642,6 @@ module HtmlWebExtensions =
         /// </summary>
         /// <param name="a">li要素に設定する属性のリスト</param>
         member this.item (a:list<string*PHPdata>) = fun code -> this.tagb ("li",a) code
-        /// <summary>
-        /// a要素を生成する
-        /// </summary>
-        /// <param name="url">href属性に設定するPHPデータ</param>
-        member this.link(url:PHPdata) = fun code -> this.tagb ("a",["href",url]) code
-        /// <summary>
-        /// a要素を生成する
-        /// </summary>
-        /// <param name="url">href属性に設定するPHPデータ</param>
-        /// <param name="s">文字の太さ、色を定義するスタイル情報</param>
-        member this.link(url:PHPdata, s:Style) = fun code ->
-            this.tagb ("a",["style",PHPdata s.code0; "href",url]) code
         /// <summary>
         /// select要素を生成する
         /// </summary>
@@ -1372,7 +1360,7 @@ module dochtml =
         (dir:string)
         (filename:string)
         (title:string)
-        (cssfile:option<string>)
+        (cssfile:option<Url>)
         (pagesizeX:option<int>,pagesizeY:option<int>)
         isPageAnimation
         code =
@@ -1469,7 +1457,7 @@ module dochtml =
                     ctx.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
                     ctx.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
                     match cssfile with
-                    | Some stylesheet -> ctx.html.taga ("link", [Atr("rel", "stylesheet"); Atr("href", stylesheet)])
+                    | Some stylesheet -> ctx.html.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value stylesheet)])
                     | None -> ()
                 // body要素
                 match pagesizeX,pagesizeY with
@@ -1536,7 +1524,7 @@ module dochtml =
         (dir:string)
         (filename:string)
         (title:string)
-        (cssfile:option<string>)
+        (cssfile:option<Url>)
         pagesize
         isPageAnimation
         code =

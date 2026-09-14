@@ -22,7 +22,7 @@ type Button(context:Aqualis,name:PHPdata) =
     /// </summary>
     /// <param name="file">ボタン押下時の移動先ファイル</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(file:string,text:string) = b.submit(file,text)
+    member _.show(file:Url,text:string) = b.submit(file,text)
     member _.show(text:string) = context.html.submit(name,text)
     member _.show_disabled(text:string) = context.html.submit_disabled(name,text)
     
@@ -36,7 +36,7 @@ type ButtonVar(context:Aqualis) =
     /// <param name="id">ボタンID</param>
     /// <param name="file">ボタン押下時の移動先ファイル</param>
     /// <param name="text">ボタンに表示するテキスト</param>
-    member _.show(id:PHPdata,file:string,text:string) = (post(context,id)).submit(file,text)
+    member _.show(id:PHPdata,file:Url,text:string) = (post(context,id)).submit(file,text)
     /// <summary>
     /// ボタンの表示
     /// </summary>

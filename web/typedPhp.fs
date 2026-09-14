@@ -96,7 +96,7 @@ module TypedPhpExtensions =
 
         /// Emits a validated redirect and terminates the generated PHP script.
         member this.redirect(location:Url,status:RedirectStatus) =
-            this.redirect(Url.value location, RedirectStatus.code status)
+            this.redirectValidated(location, RedirectStatus.code status)
 
         /// Emits an HTTP 303 See Other redirect to a validated URL.
         member this.redirect(location:Url) =
@@ -111,21 +111,9 @@ module TypedPhpExtensions =
         member this.raw(value:TrustedHtml) =
             this.rawHtml value.Value
 
-        /// Generates a POST form with a validated action URL.
-        member this.form(action:Url) =
-            this.form(Url.value action)
-
-        /// Generates a link with a validated target URL.
-        member this.link(url:Url) =
-            this.link(Url.value url)
-
         /// Generates a link with validated URL and CSS class values.
         member this.link(url:Url, cssClass:CssClass) = fun code ->
             this.tagb(
                 "a",
                 [ Atr("class", CssClass.value cssClass)
                   Atr("href", Url.value url) ]) code
-
-        /// Generates a new-tab link with a validated target URL.
-        member this.link_newtab(url:Url) =
-            this.link_newtab(Url.value url)

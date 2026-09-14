@@ -233,12 +233,6 @@ and ContextPhp internal (context:Aqualis) =
     let validateRedirectStatus statusCode =
         if not (List.contains statusCode [301; 302; 303; 307; 308]) then
             invalidArg (nameof statusCode) "Redirect status must be 301, 302, 303, 307, or 308."
-    let validateStaticRedirectLocation (location:string) =
-        if isNull location then nullArg (nameof location)
-        if String.IsNullOrWhiteSpace location then
-            invalidArg (nameof location) "A redirect location is required."
-        if location.Contains('\r') || location.Contains('\n') then
-            invalidArg (nameof location) "A redirect location cannot contain CR or LF characters."
     member internal _.Context = context
     /// Creates a PHP variable associated with this generation context.
     member _.var(name:string) = PHPdata.var(context,name)
@@ -405,26 +399,15 @@ and ContextPhp internal (context:Aqualis) =
     member this.set_nocache() = this.phpcode <| fun () -> context.writei "header( 'Cache-Control: no-store, no-cache, must-revalidate' );"
     member this.header(data:PHPdata) = this.phpcode <| fun () -> context.writei("header("+data.code+");")
     member this.header(data:string) = this.header(PHPdata data)
-    /// Emits an HTTP redirect and terminates the generated PHP script.
-    member this.redirect(location:PHPdata,statusCode:int) =
+    /// Internal sink used only after a public API has supplied a validated URL.
+    member internal this.redirectValidated(location:Url,statusCode:int) =
         validateRedirectStatus statusCode
-        merge [location.Context] |> ignore
+        let locationLiteral = PHPdata (Url.value location)
         this.phpcode <| fun () ->
             context.writei "(function ($location): void {"
-            context.writei "if (!is_string($location) || $location === '' || str_contains($location, \"\\r\") || str_contains($location, \"\\n\")) {"
-            context.writei "throw new \\InvalidArgumentException('Invalid redirect location.');"
-            context.writei "}"
             context.writei ("header('Location: ' . $location, true, " + string statusCode + ");")
             context.writei "exit;"
-            context.writei ("})(" + location.code + ");")
-    /// Emits an HTTP redirect to a static location and terminates the generated PHP script.
-    member this.redirect(location:string,statusCode:int) =
-        validateStaticRedirectLocation location
-        this.redirect(PHPdata location,statusCode)
-    /// Emits an HTTP 303 See Other redirect and terminates the generated PHP script.
-    member this.redirect(location:PHPdata) = this.redirect(location,303)
-    /// Emits an HTTP 303 See Other redirect to a static location and terminates the generated PHP script.
-    member this.redirect(location:string) = this.redirect(location,303)
+            context.writei ("})(" + locationLiteral.code + ");")
     member this.date(fmt:string) = data ("date(" + PhpEncoding.stringLiteral fmt + ")") []
     member this.round(x:PHPdata) = data ("round("+x.code+")") [x.Context]
     member this.round(x:double0) = this.round(PHPdata x)

@@ -41,23 +41,20 @@ module WebGenerationStateTests =
         Assert.DoesNotContain("value=\"x\" autofocus", generated)
 
     [<Fact>]
-    let ``HTML head resource attributes are encoded`` () =
+    let ``HTML head requires validated and encoded resource URLs`` () =
         use output = new TemporaryDirectory()
         let fileName = "head-attribute-escaping.html"
 
         use context = new Aqualis(Some output.Path, Some fileName, HTML)
         context.html.head (
             "Title",
-            "theme\" onload=\"alert(1).css",
-            "application&bundle.js") ignore
+            Url.relative "theme.css?x=1&y=2",
+            Url.relative "application.js?x=1&y=2") ignore
         context.close()
 
         let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
-        Assert.Contains(
-            "href=\"theme&quot; onload=&quot;alert(1).css\"",
-            generated)
-        Assert.Contains("src=\"application&amp;bundle.js\"", generated)
-        Assert.DoesNotContain("href=\"theme\" onload", generated)
+        Assert.Contains("href=\"theme.css?x=1&amp;y=2\"", generated)
+        Assert.Contains("src=\"application.js?x=1&amp;y=2\"", generated)
 
     [<Fact>]
     let ``all HTML head overloads keep metadata inside the head element`` () =
@@ -75,11 +72,11 @@ module WebGenerationStateTests =
               generate "head-refresh.html" (fun context ->
                   context.html.head("Title", 5) ignore)
               generate "head-css.html" (fun context ->
-                  context.html.head("Title", "site.css") ignore)
+                  context.html.head("Title", Url.relative "site.css") ignore)
               generate "head-assets.html" (fun context ->
-                  context.html.head("Title", "site.css", "site.js") ignore)
+                  context.html.head("Title", Url.relative "site.css", Url.relative "site.js") ignore)
               generate "head-assets-refresh.html" (fun context ->
-                  context.html.head("Title", "site.css", "site.js", 5) ignore) ]
+                  context.html.head("Title", Url.relative "site.css", Url.relative "site.js", 5) ignore) ]
 
         for generated in pages do
             let htmlIndex = generated.IndexOf("<html", StringComparison.Ordinal)

@@ -77,7 +77,7 @@ module GenerationContextTests =
             let value = context.php.var "value"
             value <== context.php.file_get_contents "data.json"
             let input = context.form.textBox "user"
-            context.html.form "page.php" <| fun () -> input.show()
+            context.html.form (Url.relative "page.php") <| fun () -> input.show()
         let phpPath = Path.Combine(output.Path, "page.php")
         Assert.True(File.Exists phpPath)
         Assert.False(File.Exists(Path.Combine(output.Path, "page.c")))

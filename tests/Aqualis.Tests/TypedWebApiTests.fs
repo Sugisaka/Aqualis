@@ -60,6 +60,23 @@ module TypedWebApiTests =
         Assert.Contains("})(\"main.php\");", generated)
 
     [<Fact>]
+    let ``public navigation APIs do not accept unvalidated strings or PHP data`` () =
+        let projectRoot = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
+        let source relativePath = File.ReadAllText(Path.Combine(projectRoot, relativePath))
+        let phpSource = source (Path.Combine("web", "php.fs"))
+        let animationSource = source (Path.Combine("web", "animation.fs"))
+        let htmlSource = source (Path.Combine("program", "html.fs"))
+
+        Assert.DoesNotContain("member this.redirect(location:PHPdata", phpSource)
+        Assert.DoesNotContain("member this.redirect(location:string", phpSource)
+        Assert.DoesNotContain("member this.link(url:PHPdata", animationSource)
+        Assert.DoesNotContain("member this.link(url:string", htmlSource)
+        Assert.DoesNotContain("member this.form (action:string", htmlSource)
+        Assert.DoesNotContain("member this.form_fileUpload (action:string", htmlSource)
+        Assert.Contains("member this.link(url:Url", htmlSource)
+        Assert.Contains("member this.form (action:Url", htmlSource)
+
+    [<Fact>]
     let ``typed POST fields generate presence type and range validation`` () =
         let generated =
             generate "typed-post" <| fun context ->

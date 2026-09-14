@@ -463,24 +463,24 @@ type post(context:Aqualis,id:PHPdata) =
                 "value",PHPdata value
             ]
         )
-    member _.submit(url:string,value:string) =
+    member _.submit(url:Url,value:string) =
         context.html.taga(
             "input",
             [
                 "type", PHPdata "submit"
                 "name", id
                 "value", PHPdata value
-                "formaction", PHPdata url
+                "formaction", PHPdata (Url.value url)
             ]
         )
-    member _.submit(url:string,value:string,style:string) =
+    member _.submit(url:Url,value:string,style:string) =
         context.html.taga("input",
             [
                 "type", PHPdata "submit"
                 "name", id
                 "class", PHPdata style
                 "value", PHPdata value
-                "formaction", PHPdata url
+                "formaction", PHPdata (Url.value url)
             ]
         )
     member _.select code = 
@@ -679,10 +679,10 @@ type postFile private (context:Aqualis,id:PHPdata,cardinality:UploadCardinality)
         context.html.taga("input",attributes)
 
     /// Emits a standalone multipart form containing this field and a submit button.
-    member this.select(actionPhpFile:string) =
+    member this.select(actionPhpFile:Url) =
         context.html.tagb (
             "form",
-            [Atr("action",actionPhpFile); Atr("enctype","multipart/form-data"); Atr("method","post")])
+            [Atr("action",Url.value actionPhpFile); Atr("enctype","multipart/form-data"); Atr("method","post")])
         <| fun () ->
             this.select()
             context.html.taga("input",[Atr("type","submit"); Atr("value","アップロード")])
