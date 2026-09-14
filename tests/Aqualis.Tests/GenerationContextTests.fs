@@ -86,6 +86,54 @@ module GenerationContextTests =
         Assert.Contains("<form", generated)
 
     [<Fact>]
+    let ``PHP compilation preserves the previous file when generation fails`` () =
+        use output = new TemporaryDirectory()
+        let phpPath = Path.Combine(output.Path, "page.php")
+        File.WriteAllText(phpPath, "previous PHP")
+        let mutable observedCodeFile = None
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            Compile [PHP] output.Path "page" "1" <| fun context ->
+                observedCodeFile <- context.CodeFile
+                context.writein "partial PHP"
+                invalidOp "expected")
+        |> ignore
+
+        Assert.Equal(Some phpPath, observedCodeFile)
+        Assert.Equal("previous PHP", File.ReadAllText(phpPath))
+        Assert.Empty(Directory.GetFiles(output.Path, ".page.php.aqualis-*.tmp"))
+
+    [<Fact>]
+    let ``compiled language sources remain unchanged when final assembly fails`` () =
+        use output = new TemporaryDirectory()
+        let cases =
+            [ Fortran, "fortran", ".f90"
+              C99, "c99", ".c"
+              LaTeX, "latex", ".tex"
+              HTML, "html", ".html"
+              Python, "python", ".py"
+              JavaScript, "javascript", ".js" ]
+
+        for language, projectName, extension in cases do
+            let targetPath = Path.Combine(output.Path, projectName + extension)
+            let intermediatePath = Path.Combine(output.Path, projectName)
+            let previousContents = "previous " + projectName
+            File.WriteAllText(targetPath, previousContents)
+
+            Assert.Throws<FileNotFoundException>(fun () ->
+                Compile [language] output.Path projectName "1" <| fun context ->
+                    context.writein "partial generated source"
+                    context.flist.add ("missing-function-" + projectName))
+            |> ignore
+
+            Assert.Equal(previousContents, File.ReadAllText(targetPath))
+            Assert.False(File.Exists(intermediatePath))
+            Assert.Empty(
+                Directory.GetFiles(
+                    output.Path,
+                    "." + projectName + extension + ".aqualis-*.tmp"))
+
+    [<Fact>]
     let ``HTML sequence diagrams use the shared web output layout`` () =
         use output = new TemporaryDirectory()
         let projectName = "sequence-layout"

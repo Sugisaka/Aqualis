@@ -47,9 +47,10 @@ module CodeWriterTests =
             File.ReadAllText(path))
 
     [<Fact>]
-    let ``makeProgram releases its files when generation throws`` () =
+    let ``makeProgram preserves an existing file when generation throws`` () =
         use output = new TemporaryDirectory()
         let path = Path.Combine(output.Path, "exception.c")
+        File.WriteAllText(path, "previous generation")
 
         Assert.Throws<InvalidOperationException>(
             Action(fun () ->
@@ -58,11 +59,33 @@ module CodeWriterTests =
                     invalidOp "expected"))
         |> ignore
 
-        use reopened =
-            new FileStream(
-                path,
-                FileMode.Open,
-                FileAccess.ReadWrite,
-                FileShare.None)
+        Assert.Equal("previous generation", File.ReadAllText(path))
+        Assert.Empty(Directory.GetFiles(output.Path, ".exception.c.aqualis-*.tmp"))
 
-        Assert.True(reopened.Length > 0L)
+    [<Fact>]
+    let ``makeProgram does not publish a new file when generation throws`` () =
+        use output = new TemporaryDirectory()
+        let path = Path.Combine(output.Path, "new-file.php")
+
+        Assert.Throws<InvalidOperationException>(
+            Action(fun () ->
+                Aqualis.makeProgramWithContext (output.Path, "new-file.php", PHP) <| fun context ->
+                    context.writein "partial output"
+                    invalidOp "expected"))
+        |> ignore
+
+        Assert.False(File.Exists(path))
+        Assert.Empty(Directory.GetFiles(output.Path, ".new-file.php.aqualis-*.tmp"))
+
+    [<Fact>]
+    let ``atomic code writer publishes a complete replacement`` () =
+        use output = new TemporaryDirectory()
+        let path = Path.Combine(output.Path, "replacement.py")
+        File.WriteAllText(path, "previous generation")
+
+        use writer = codeWriter.CreateAtomic(path, 2, Python)
+        writer.codewritein "complete replacement"
+        writer.publish()
+
+        Assert.Equal("complete replacement\n", File.ReadAllText(path))
+        Assert.Empty(Directory.GetFiles(output.Path, ".replacement.py.aqualis-*.tmp"))

@@ -71,7 +71,7 @@ namespace Aqualis
             match context.language with
             |Fortran ->
                 context.flist.add projectname
-                let args = Aqualis.makeProgramWithContext (dir,projectname,Fortran) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,Fortran) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
@@ -105,7 +105,7 @@ namespace Aqualis
                 context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
                 context.flist.add projectname
-                let args = Aqualis.makeProgramWithContext (dir,projectname,C99) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,C99) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
@@ -145,7 +145,7 @@ namespace Aqualis
                 context.writein (projectname + "(" + args + ");\n")
             |LaTeX ->
                 context.flist.add projectname
-                let args = Aqualis.makeProgramWithContext (dir,projectname,LaTeX) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,LaTeX) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
@@ -179,7 +179,7 @@ namespace Aqualis
                 context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |HTML ->
                 context.flist.add projectname
-                let args = Aqualis.makeProgramWithContext (dir,projectname,HTML) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,HTML) <| fun childContext ->
                     let encodedProjectName = HtmlEncoding.textContent projectname
                     code childContext
                     inheritDependencies context childContext
@@ -216,7 +216,7 @@ namespace Aqualis
                 context.writein (HtmlEncoding.textContent ("\\(" + projectname + "(" + args + ")\\)") + "<br/>\n")
             |Python ->
                 context.flist.add projectname
-                let writeBackActualNames,actualNames = Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun childContext ->
+                let writeBackActualNames,actualNames = Aqualis.makeIntermediateProgramWithContext (dir,projectname,Python) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力

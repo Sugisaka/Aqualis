@@ -17,12 +17,12 @@ namespace Aqualis
             for lang in langgList do
                 match lang with
                 |Fortran ->
-                    Aqualis.makeProgramWithContext (dir,projectname,Fortran) <| fun context ->
+                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,Fortran) <| fun context ->
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(Path.Combine(dir, projectname + ".f90"), 2, Fortran)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".f90"), 2, Fortran)
                         writer.codewritein "!=============================================================================================\n"
                         writer.codewritein("! Project name: " + projectname + "\n")
                         writer.codewritein("! Project version: " + codever + "\n")
@@ -57,6 +57,7 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         context.delete()
+                        writer.publish()
                         //コンパイル・実行用スクリプト生成
                         use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_F.sh"))
                         wr.WriteLine "#!/bin/bash"
@@ -90,7 +91,7 @@ namespace Aqualis
                             ("./" + projectname + ".exe")
                             []
                 |C99 ->
-                    Aqualis.makeProgramWithContext (dir,projectname,C99) <| fun context ->
+                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,C99) <| fun context ->
                         //メインコード生成
                         context.indentInc()
                         code context
@@ -98,7 +99,7 @@ namespace Aqualis
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(Path.Combine(dir, projectname + ".c"), 2, C99)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".c"), 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")
@@ -137,6 +138,7 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         context.delete()
+                        writer.publish()
                         //コンパイル・実行用スクリプト生成
                         use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_C.sh"))
                         wr.WriteLine "#!/bin/bash"
@@ -164,12 +166,12 @@ namespace Aqualis
                             ("./" + projectname + ".exe")
                             []
                 |LaTeX ->
-                    Aqualis.makeProgramWithContext (dir,projectname,LaTeX) <| fun context ->
+                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,LaTeX) <| fun context ->
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(Path.Combine(dir, projectname + ".tex"), 2, LaTeX)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".tex"), 2, LaTeX)
                         writer.codewritein "\\documentclass[a4paper,fleqn]{ltjsarticle}\n"
                         writer.codewritein "\\usepackage{amsmath}\n"
                         List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| context.hlist.list
@@ -207,14 +209,15 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         context.delete()
+                        writer.publish()
                 |HTML ->
-                    Aqualis.makeProgramWithContext (dir,projectname,HTML) <| fun context ->
+                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,HTML) <| fun context ->
                         let encodedProjectName = HtmlEncoding.textContent projectname
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(Path.Combine(dir, projectname + ".html"), 2, HTML)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".html"), 2, HTML)
                         writer.codewritein "<!DOCTYPE html>\n"
                         writer.codewritein "<html lang='ja'>\n"
                         writer.codewritein "\t<head>\n"
@@ -375,6 +378,7 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         context.delete()
+                        writer.publish()
                 |HTMLSequenceDiagram ->
                     // 出力レイアウト作成
                     let layout = WebOutputLayout.create dir projectname
@@ -388,45 +392,44 @@ namespace Aqualis
                             member _.Dispose() = body.delete() }
                     code body
                     let bodyCode = body.allCodes |> Option.defaultValue ""
-                    use main = new Aqualis(
-                        Some layout.OutputDirectory,
-                        Some layout.MainFileName,
-                        HTMLSequenceDiagram)
-                    // html書き込みストリーム作成
-                    main.writein "<!DOCTYPE html>"
-                    // html要素
-                    main.html.tagb ("html", [Atr("lang", "ja")]) <| fun () ->
-                        // head要素
-                        main.html.tagb "head" <| fun () ->
-                            // metaタグ
-                            main.writein "<meta charset=\"UTF-8\">"
-                            //追加（5/29）viewportタブ
-                            main.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
-                            // titleタグ
-                            main.html.tagb "title" <| fun () ->
-                                main.html.text projectname
-                            // MathJax
-                            main.html.tagb (
-                                "script",
-                                [Atr("type", "text/javascript")
-                                 Atr("id", "MathJax-script")
-                                 Atr("async")
-                                 Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
-                            // webフォント取得
-                            main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                            main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                            main.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
-                        // body要素
-                        let s0 = Style [area.backGroundColor "#ffffff"]
-                        main.html.tagb ("body", [s0.atr]) <| fun () ->
-                            main.writein bodyCode
+                    Aqualis.makeAtomicProgramWithContext
+                        (layout.OutputDirectory, layout.MainFileName, HTMLSequenceDiagram)
+                    <| fun main ->
+                        // html書き込みストリーム作成
+                        main.writein "<!DOCTYPE html>"
+                        // html要素
+                        main.html.tagb ("html", [Atr("lang", "ja")]) <| fun () ->
+                            // head要素
+                            main.html.tagb "head" <| fun () ->
+                                // metaタグ
+                                main.writein "<meta charset=\"UTF-8\">"
+                                //追加（5/29）viewportタブ
+                                main.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                                // titleタグ
+                                main.html.tagb "title" <| fun () ->
+                                    main.html.text projectname
+                                // MathJax
+                                main.html.tagb (
+                                    "script",
+                                    [Atr("type", "text/javascript")
+                                     Atr("id", "MathJax-script")
+                                     Atr("async")
+                                     Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
+                                // webフォント取得
+                                main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                                main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                                main.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                            // body要素
+                            let s0 = Style [area.backGroundColor "#ffffff"]
+                            main.html.tagb ("body", [s0.atr]) <| fun () ->
+                                main.writein bodyCode
                 |Python ->
-                    Aqualis.makeProgramWithContext (dir,projectname,Python) <| fun context ->
+                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,Python) <| fun context ->
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(Path.Combine(dir, projectname + ".py"), 2, Python)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".py"), 2, Python)
                         writer.codewritein "#=============================================================================================\n"
                         writer.codewritein("# Project name: " + projectname + "\n")
                         writer.codewritein("# Project version: " + codever + "\n")
@@ -463,6 +466,7 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         context.delete()
+                        writer.publish()
                         use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_P.sh"))
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
@@ -471,14 +475,14 @@ namespace Aqualis
                             "python3"
                             ["--"; projectname + ".py"]
                 |JavaScript ->
-                    Aqualis.makeProgramWithContext (dir,projectname,JavaScript) <| fun context ->
+                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,JavaScript) <| fun context ->
                         //メインコード生成
                         context.indentInc()
                         code context
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = new codeWriter(Path.Combine(dir, projectname + ".js"), 2, C99)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".js"), 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("/* Project version: " + codever + " */\n")
@@ -500,6 +504,7 @@ namespace Aqualis
                         writer.close()
                         //beeファイル削除
                         context.delete()
+                        writer.publish()
                 |PHP ->
                     Aqualis.makeProgramWithContext (dir,projectname + ".php",PHP) <| fun context ->
                         code context

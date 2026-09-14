@@ -684,7 +684,7 @@ namespace Aqualis
                         context.close()
                 |LaTeX ->
                     Aqualis.makeProgramWithContext (outputdir,filename+".tex",LaTeX) <| fun context ->
-                    Aqualis.makeProgramWithContext (outputdir,filename+"_temp.tex",LaTeX) <| fun child ->
+                    Aqualis.makeIntermediateProgramWithContext (outputdir,filename+"_temp.tex",LaTeX) <| fun child ->
                         let writein text = context.codewritein(text + "\n")
                         use document =
                             new TeXWriter(

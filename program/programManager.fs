@@ -9,11 +9,14 @@ namespace Aqualis
     open System.IO
     open System.Threading
    
-    type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool) =
+    type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool) =
         let cwriter = 
             match outputdir,pjname with
             |Some dir,Some filename ->
-                let wr = new codeWriter(Path.Combine(dir, filename),2,lang)
+                let targetPath = Path.Combine(dir, filename)
+                let wr =
+                    if publishAtomically then codeWriter.CreateAtomic(targetPath,2,lang)
+                    else new codeWriter(targetPath,2,lang)
                 Some wr
             |_ -> None
 
@@ -48,9 +51,9 @@ namespace Aqualis
         /// 条件分岐枠スタックリスト
         member _.BranchStack with get() = sequenceBranches and set(v) = sequenceBranches <- v 
         new(outputdir:string option,pjname:string option,lang:Language) =
-            new Aqualis(outputdir,pjname,lang,false)
+            new Aqualis(outputdir,pjname,lang,false,false)
         static member Version = "188.0.0.0"
-        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true)
+        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true,false)
         member _.Dir with get() = outputdir
         member _.ProjectName with get() = pjname
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(Path.Combine(dir, src)) |_ -> None
@@ -122,6 +125,11 @@ namespace Aqualis
         member _.indentDec() = withWriter (fun writer -> writer.indent.dec())
         member _.appendOpen() = withWriter (fun writer -> writer.appendOpen())
         member _.close() = withWriter (fun writer -> writer.close())
+        member internal _.publish() =
+            ensureActive()
+            match cwriter with
+            |Some writer -> writer.publish()
+            |None -> invalidOp "A writerless Aqualis context cannot publish output."
         member _.allCodes with get() =
             ensureActive()
             match cwriter with
@@ -319,15 +327,41 @@ namespace Aqualis
             use context = createContext()
             code context
 
+        static member internal runWithOwnedAtomicContext
+            (createContext: unit -> Aqualis)
+            (code: Aqualis -> 'T)
+            : 'T =
+            use context = createContext()
+            let result = code context
+            context.publish()
+            result
+
+        static member internal makeAtomicProgramWithContext
+            (programInfo: string * string * Language)
+            (code: Aqualis -> 'T)
+            : 'T =
+            Aqualis.runWithOwnedAtomicContext
+                (fun () ->
+                    let dir, name, language = programInfo
+                    new Aqualis(Some dir, Some name, language, false, true))
+                code
+
+        static member internal makeIntermediateProgramWithContext
+            (programInfo: string * string * Language)
+            (code: Aqualis -> 'T)
+            : 'T =
+            let dir, name, language = programInfo
+            use context = new Aqualis(Some dir, Some name, language)
+            try
+                code context
+            finally
+                context.delete()
+
         static member makeProgramWithContext
             (programInfo: string * string * Language)
             (code: Aqualis -> 'T)
             : 'T =
-            Aqualis.runWithOwnedContext
-                (fun () ->
-                    let dir, name, language = programInfo
-                    new Aqualis(Some dir, Some name, language))
-                code
+            Aqualis.makeAtomicProgramWithContext programInfo code
 
         static member internal runWithWriterlessContext
             (language:Language)

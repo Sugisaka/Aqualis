@@ -166,11 +166,12 @@ namespace Aqualis
             System.Threading.Interlocked.Increment(&errorid) |> ignore
         
     ///<summary>コード書き込み管理</summary>
-    type codeWriter(filename:string,indentsize:int,lan:Language) =
+    type codeWriter private (filename:string,indentsize:int,lan:Language,publishTarget:string option) =
         
         let gate = obj()
         let mutable cwriter:option<StreamWriter> = if filename = "" then None else Some (new StreamWriter(filename,false))
         let captureWriters = ResizeArray<StringWriter>()
+        let mutable published = false
 
         let disposeWriter() =
             match cwriter with
@@ -194,6 +195,32 @@ namespace Aqualis
             disposeWriter()
             if not (String.IsNullOrEmpty filename) then
                 cwriter <- Some(new StreamWriter(filename, append))
+
+        let deleteUnpublishedStagingFile() =
+            match publishTarget with
+            |Some _ when not published && File.Exists filename ->
+                try
+                    File.Delete filename
+                with
+                | :? IOException
+                | :? UnauthorizedAccessException -> ()
+            |_ -> ()
+
+        new(filename:string,indentsize:int,lan:Language) =
+            new codeWriter(filename,indentsize,lan,None)
+
+        static member internal CreateAtomic(targetPath:string,indentsize:int,lan:Language) =
+            if String.IsNullOrWhiteSpace targetPath then
+                invalidArg (nameof targetPath) "An atomic output target path is required."
+            let fullTargetPath = Path.GetFullPath targetPath
+            let targetFileName = Path.GetFileName fullTargetPath
+            if String.IsNullOrWhiteSpace targetFileName then
+                invalidArg (nameof targetPath) "An atomic output target must identify a file."
+            let targetDirectory = Path.GetDirectoryName fullTargetPath
+            let stagingFileName =
+                "." + targetFileName + ".aqualis-" + Guid.NewGuid().ToString("N") + ".tmp"
+            let stagingPath = Path.Combine(targetDirectory, stagingFileName)
+            new codeWriter(stagingPath,indentsize,lan,Some fullTargetPath)
         
         member _.FilePath with get() = filename
         member val indent = IndentController indentsize with get
@@ -494,6 +521,17 @@ namespace Aqualis
         ///<summary>ファイルを閉じる</summary>
         member this.close() =
             lock gate disposeWriter
+
+        ///<summary>一時ファイルに生成したコードを最終パスへ公開する</summary>
+        member internal _.publish() =
+            lock gate (fun () ->
+                match publishTarget with
+                |None -> invalidOp "Only an atomic code writer can publish its output."
+                |Some targetPath when not published ->
+                    disposeWriter()
+                    File.Move(filename, targetPath, true)
+                    published <- true
+                |Some _ -> ())
             
         ///<summary>ファイルの書き込みを再開</summary>
         member this.appendOpen() =
@@ -513,7 +551,9 @@ namespace Aqualis
 
         interface IDisposable with
             member _.Dispose() =
-                lock gate disposeWriter
+                lock gate (fun () ->
+                    disposeWriter()
+                    deleteUnpublishedStagingFile())
         
     type argumentController(lang:Language) =
         let gate = obj()
