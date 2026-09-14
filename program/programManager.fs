@@ -9,9 +9,18 @@ namespace Aqualis
     open System.IO
     open System.Threading
    
-    type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool) =
+    type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool,writerDirectory:string option) =
+        let contextId = System.Guid.NewGuid()
+        let intermediateDirectory =
+            lazy
+                let path =
+                    Path.Combine(
+                        Path.GetTempPath(),
+                        "aqualis-" + contextId.ToString("N"))
+                Directory.CreateDirectory(path) |> ignore
+                path
         let cwriter = 
-            match outputdir,pjname with
+            match (writerDirectory |> Option.orElse outputdir),pjname with
             |Some dir,Some filename ->
                 let targetPath = Path.Combine(dir, filename)
                 let wr =
@@ -22,7 +31,6 @@ namespace Aqualis
 
         /// 構造体
         let structData = structure()
-        let contextId = System.Guid.NewGuid()
         let sequenceGate = obj()
         let mutable active = 1
         let ensureActive() =
@@ -51,13 +59,14 @@ namespace Aqualis
         /// 条件分岐枠スタックリスト
         member _.BranchStack with get() = sequenceBranches and set(v) = sequenceBranches <- v 
         new(outputdir:string option,pjname:string option,lang:Language) =
-            new Aqualis(outputdir,pjname,lang,false,false)
+            new Aqualis(outputdir,pjname,lang,false,false,None)
         static member Version = "188.0.0.0"
-        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true,false)
+        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true,false,None)
         member _.Dir with get() = outputdir
         member _.ProjectName with get() = pjname
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(Path.Combine(dir, src)) |_ -> None
         member _.ContextId with get() = contextId
+        member internal _.IntermediateDirectory = intermediateDirectory.Value
         member internal _.IsNeutral = isNeutral
         member internal _.ParallelMode with get() = parallelMode and set v = parallelMode <- v
         member internal _.SequenceGate = sequenceGate
@@ -150,6 +159,8 @@ namespace Aqualis
                 match cwriter with
                 |Some wr -> (wr :> System.IDisposable).Dispose()
                 |None -> ()
+                if intermediateDirectory.IsValueCreated && Directory.Exists(intermediateDirectory.Value) then
+                    Directory.Delete(intermediateDirectory.Value, true)
 
         static member sameTarget (left:Aqualis) (right:Aqualis) =
             left.ContextId = right.ContextId
@@ -343,7 +354,7 @@ namespace Aqualis
             Aqualis.runWithOwnedAtomicContext
                 (fun () ->
                     let dir, name, language = programInfo
-                    new Aqualis(Some dir, Some name, language, false, true))
+                    new Aqualis(Some dir, Some name, language, false, true, None))
                 code
 
         static member internal makeIntermediateProgramWithContext
@@ -352,6 +363,25 @@ namespace Aqualis
             : 'T =
             let dir, name, language = programInfo
             use context = new Aqualis(Some dir, Some name, language)
+            try
+                code context
+            finally
+                context.delete()
+
+        static member internal makeIntermediateProgramInDirectoryWithContext
+            (programInfo: string * string * Language)
+            (writerDirectory:string)
+            (code: Aqualis -> 'T)
+            : 'T =
+            let dir, name, language = programInfo
+            use context =
+                new Aqualis(
+                    Some dir,
+                    Some name,
+                    language,
+                    false,
+                    false,
+                    Some writerDirectory)
             try
                 code context
             finally

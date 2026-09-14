@@ -1,7 +1,10 @@
 namespace Aqualis.Tests
 
 open System
+open System.Collections.Concurrent
 open System.IO
+open System.Threading
+open System.Threading.Tasks
 open Xunit
 open Aqualis
 
@@ -380,6 +383,36 @@ module CompilerScriptTests =
         Assert.Contains("gcc -fopenmp", compileScript)
         Assert.Contains("-lchild", compileScript)
 
+    [<Fact>]
+    let ``parallel projects isolate function intermediates in temporary directories`` () =
+        use output = new TemporaryDirectory()
+        use ready = new Barrier(2)
+        let workspaces = ConcurrentBag<string>()
+
+        let generate projectName marker =
+            Task.Run(fun () ->
+                Compile [C99] output.Path projectName "1.0" (fun context ->
+                    workspaces.Add(context.IntermediateDirectory)
+                    Assert.True(ready.SignalAndWait(TimeSpan.FromSeconds(10.0)))
+                    context.func "shared_name" (fun child ->
+                        child.writein("/* " + marker + " */"))))
+
+        let first = generate "parallel-first" "first function body"
+        let second = generate "parallel-second" "second function body"
+        Task.WaitAll [| first; second |]
+
+        let firstSource = File.ReadAllText(Path.Combine(output.Path, "parallel-first.c"))
+        let secondSource = File.ReadAllText(Path.Combine(output.Path, "parallel-second.c"))
+        Assert.Contains("first function body", firstSource)
+        Assert.DoesNotContain("second function body", firstSource)
+        Assert.Contains("second function body", secondSource)
+        Assert.DoesNotContain("first function body", secondSource)
+        Assert.Equal(2, workspaces |> Seq.distinct |> Seq.length)
+        for workspace in workspaces do
+            Assert.False(Directory.Exists(workspace))
+        Assert.False(File.Exists(Path.Combine(output.Path, "shared_name")))
+        Assert.False(File.Exists(Path.Combine(output.Path, "shared_name_main")))
+
     [<Theory>]
     [<InlineData("")>]
     [<InlineData("two words")>]
@@ -416,16 +449,19 @@ module CompilerScriptTests =
         for language in [Fortran; C99; LaTeX; HTML; Python] do
             use output = new TemporaryDirectory()
             let mutable duplicateBodyInvoked = false
+            let mutable workspace = None
 
             let error =
                 Assert.Throws<ArgumentException>(fun () ->
                     Compile [language] output.Path "duplicate-function" "1.0" (fun context ->
+                        workspace <- Some context.IntermediateDirectory
                         context.func "same_name" ignore
                         context.func "same_name" (fun _ -> duplicateBodyInvoked <- true)))
 
             Assert.Equal("functionName", error.ParamName)
             Assert.Contains("already been defined", error.Message)
             Assert.False(duplicateBodyInvoked)
+            Assert.False(Directory.Exists(workspace.Value))
 
     [<Theory>]
     [<InlineData("while")>]

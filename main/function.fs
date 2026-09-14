@@ -140,13 +140,14 @@ namespace Aqualis
                     |A2(_,_) -> typ.tostring language + " :: " + name + "(:,:)"
                     |A3(_,_,_) -> typ.tostring language + " :: " + name + "(:,:,:)"
             let dir = match context.dir with |Some d -> d |None -> ""
+            let intermediateDirectory = context.IntermediateDirectory
             match context.language with
             |Fortran ->
-                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,Fortran) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,Fortran) intermediateDirectory <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "!=============================================================================================\n"
                     writer.codewritein("! Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in childContext.arg.list do
@@ -175,11 +176,11 @@ namespace Aqualis
                     String.Join(", ", childContext.arg.list |> List.map(fun (n,(_,_,_)) -> n))
                 context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
-                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,C99) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,C99) intermediateDirectory <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "/*==========================================================================================*/\n"
                     writer.codewritein("/* Subroutine name: " + projectname + " */\n")
                     for _,(_,_,nm) in childContext.arg.list do
@@ -214,11 +215,11 @@ namespace Aqualis
                     |> fun s -> String.Join(", ", s)
                 context.writein (projectname + "(" + args + ");\n")
             |LaTeX ->
-                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,LaTeX) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,LaTeX) intermediateDirectory <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "%=============================================================================================\n"
                     writer.codewritein("% Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in childContext.arg.list do
@@ -247,12 +248,12 @@ namespace Aqualis
                     String.Join(", ", childContext.arg.list |> List.map (fun (n,(_,_,_)) -> n))
                 context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |HTML ->
-                let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,HTML) <| fun childContext ->
+                let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,HTML) intermediateDirectory <| fun childContext ->
                     let encodedProjectName = HtmlEncoding.textContent projectname
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
                     writer.codewritein("<h3>" + encodedProjectName + "</h3>\n")
                     writer.codewritein "<ul>\n"
                     for _,(_,_,nm) in childContext.arg.list do
@@ -283,11 +284,11 @@ namespace Aqualis
                     String.Join(", ", childContext.arg.list |> List.map (fun (n,(_,_,_)) -> n))
                 context.writein (HtmlEncoding.textContent ("\\(" + projectname + "(" + args + ")\\)") + "<br/>\n")
             |Python ->
-                let writeBackActualNames,actualNames = Aqualis.makeIntermediateProgramWithContext (dir,projectname,Python) <| fun childContext ->
+                let writeBackActualNames,actualNames = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,Python) intermediateDirectory <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
-                    use writer = new codeWriter(Path.Combine(dir, projectname + "_main"), 2, childContext.language)
+                    use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
                     writer.codewritein "#==========================================================================================\n"
                     writer.codewritein("# Subroutine name: " + projectname + "\n")
                     for _,(_,_,nm) in childContext.arg.list do

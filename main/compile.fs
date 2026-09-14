@@ -87,7 +87,7 @@ namespace Aqualis
                         writer.codewritein "contains\n"
                         writer.codewritein "\n"
                         for funname in context.flist.list do
-                            let functionPath = Path.Combine(dir, funname + "_main")
+                            let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
                             writer.codewritein(File.ReadAllText functionPath)
                             File.Delete functionPath
                             writer.codewritein "\n"
@@ -163,7 +163,7 @@ namespace Aqualis
                             writer.codewritein ("extern " + s + ";\n")
                         //関数定義
                         for funname in context.flist.list do
-                            let functionPath = Path.Combine(dir, funname + "_main")
+                            let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
                             writer.codewritein (File.ReadAllText functionPath)
                             File.Delete functionPath
                             writer.codewritein ("\n")
@@ -231,7 +231,7 @@ namespace Aqualis
                         //関数定義
                         writer.codewritein "\\section{subroutines}\n"
                         for funname in context.flist.list do
-                            let functionPath = Path.Combine(dir, funname + "_main")
+                            let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
                             writer.codewritein(File.ReadAllText functionPath)
                             File.Delete functionPath
                             writer.codewritein("\n")
@@ -391,7 +391,7 @@ namespace Aqualis
                         writer.codewritein "\t\t<div id=\"deffunc\">\n"
                         writer.codewritein "\t\t<h2>関数定義</h2>\n"
                         for funname in context.flist.list do
-                            let functionPath = Path.Combine(dir, funname + "_main")
+                            let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
                             writer.codewritein(File.ReadAllText functionPath)
                             File.Delete functionPath
                             writer.codewritein "\n"
@@ -495,7 +495,7 @@ namespace Aqualis
                         declareall context writer
                         //関数定義
                         for funname in context.flist.list do
-                            let functionPath = Path.Combine(dir, funname + "_main")
+                            let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
                             writer.codewritein(File.ReadAllText functionPath)
                             File.Delete functionPath
                             writer.codewritein("\n")
@@ -533,7 +533,7 @@ namespace Aqualis
                         declareall context writer
                         //関数定義
                         for funname in context.flist.list do
-                            let functionPath = Path.Combine(dir, funname + "_main")
+                            let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
                             writer.codewritein (File.ReadAllText functionPath)
                             File.Delete functionPath
                             writer.codewritein ("\n")
