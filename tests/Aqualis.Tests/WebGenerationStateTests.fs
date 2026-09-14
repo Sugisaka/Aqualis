@@ -7,7 +7,76 @@ open System.Text.Json
 open Xunit
 open Aqualis
 
+type private TestCharacter(context:HtmlGenerationContext, directory:string, name:string) =
+    inherit Character(context, directory, name)
+    override _.audioFile _ = None
+    override _.scriptFile number =
+        Path.Combine(directory, name + "_" + string number + ".txt")
+    override _.scriptColor = "#000000"
+
 module WebGenerationStateTests =
+    [<Theory>]
+    [<InlineData(null)>]
+    [<InlineData("")>]
+    [<InlineData(" ")>]
+    [<InlineData("../outside")>]
+    [<InlineData("nested/name")>]
+    [<InlineData(@"nested\name")>]
+    [<InlineData(@"C:\outside")>]
+    [<InlineData(".")>]
+    [<InlineData("..")>]
+    [<InlineData("CON")>]
+    [<InlineData("LPT1.txt")>]
+    [<InlineData("name.")>]
+    [<InlineData("bad:name")>]
+    let ``Character rejects names that are unsafe as file-name segments`` (name:string) =
+        use output = new TemporaryDirectory()
+        use context = new HtmlGenerationContext(output.Path, "character-name-test")
+
+        let error =
+            Assert.ThrowsAny<ArgumentException>(fun () ->
+                TestCharacter(context, output.Path, name) |> ignore)
+
+        Assert.Equal("name", error.ParamName)
+
+    [<Fact>]
+    let ``Character rejects names that exceed the portable UTF-8 length limit`` () =
+        use output = new TemporaryDirectory()
+        use context = new HtmlGenerationContext(output.Path, "character-name-test")
+        let name = String.replicate 201 "a"
+
+        let error =
+            Assert.Throws<ArgumentException>(fun () ->
+                TestCharacter(context, output.Path, name) |> ignore)
+
+        Assert.Equal("name", error.ParamName)
+
+    [<Fact>]
+    let ``Character rejects path traversal before writing outside its directory`` () =
+        use output = new TemporaryDirectory()
+        use context = new HtmlGenerationContext(output.Path, "character-name-test")
+        let escapedName = "../escaped-" + Guid.NewGuid().ToString("N")
+        let escapedPath = Path.GetFullPath(Path.Combine(output.Path, escapedName + ".json"))
+
+        Assert.Throws<ArgumentException>(fun () ->
+            TestCharacter(context, output.Path, escapedName) |> ignore)
+        |> ignore
+
+        Assert.False(File.Exists escapedPath)
+
+    [<Fact>]
+    let ``Character accepts a Unicode file-name segment and writes within its directory`` () =
+        use output = new TemporaryDirectory()
+        use context = new HtmlGenerationContext(output.Path, "character-name-test")
+        let character = TestCharacter(context, output.Path, "テール右")
+
+        character.script("字幕", "読み上げ") |> ignore
+        character.saveScriptData()
+
+        Assert.Equal("テール右", character.Name)
+        Assert.True(File.Exists(Path.Combine(output.Path, "テール右.json")))
+        Assert.True(File.Exists(Path.Combine(output.Path, "テール右_0.txt")))
+
     [<Fact>]
     let ``HTML attributes encode markup characters exactly once`` () =
         let attribute = Atr("data-value", "a&b\"c'd<e>f")

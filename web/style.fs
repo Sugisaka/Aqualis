@@ -8,6 +8,7 @@ namespace Aqualis
 
 open System
 open System.IO
+open System.Text
 open System.Text.Json
 open System.Text.Encodings.Web
 
@@ -44,8 +45,48 @@ type AnimationSetting = {
     /// アニメーションのフレーム数（時間は0からFrameNumber-1まで進む）
     FrameNumber:int}
 
+[<RequireQualifiedAccess>]
+module private CharacterName =
+    [<Literal>]
+    let MaximumUtf8Bytes = 200
+
+    let private isWindowsDeviceName (value:string) =
+        let stem = (value.Split('.')[0]).ToUpperInvariant()
+        match stem with
+        |"CON"|"PRN"|"AUX"|"NUL" -> true
+        |_ when stem.Length = 4
+                && (stem.StartsWith("COM", StringComparison.Ordinal)
+                    || stem.StartsWith("LPT", StringComparison.Ordinal))
+                && stem[3] >= '1'
+                && stem[3] <= '9' -> true
+        |_ -> false
+
+    let validate (value:string) =
+        if isNull value then nullArg "name"
+        if String.IsNullOrWhiteSpace value then
+            invalidArg "name" "A character name is required."
+        if not (String.Equals(value, value.Trim(), StringComparison.Ordinal)) then
+            invalidArg "name" "A character name cannot start or end with whitespace."
+        if value = "." || value = ".." || Path.IsPathRooted value then
+            invalidArg "name" "A character name must be one relative file-name segment."
+        if value.IndexOfAny([| '/'; '\\' |]) >= 0 then
+            invalidArg "name" "A character name cannot contain directory separators."
+        if value |> Seq.exists Char.IsControl then
+            invalidArg "name" "A character name cannot contain control characters."
+        if value.IndexOfAny([| '<'; '>'; ':'; '"'; '|'; '?'; '*' |]) >= 0
+           || value.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 then
+            invalidArg "name" "A character name contains characters that are not portable in file names."
+        if value.EndsWith(".", StringComparison.Ordinal) then
+            invalidArg "name" "A character name cannot end with a period."
+        if isWindowsDeviceName value then
+            invalidArg "name" "A character name cannot use a reserved device name."
+        if Encoding.UTF8.GetByteCount(value) > MaximumUtf8Bytes then
+            invalidArg "name" "A character name cannot exceed 200 bytes in UTF-8."
+        value
+
 [<AbstractClass>]
 type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
+    let name = CharacterName.validate name
     /// jsonファイル名（フルパス）
     let scriptDataFileName = Path.Combine(scriptDataDir, name + ".json")
     let jsonOptions =
