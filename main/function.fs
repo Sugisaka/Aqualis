@@ -112,6 +112,13 @@ namespace Aqualis
 
         let private generateFunction (context:Aqualis) (projectname:string) (code:Aqualis->unit) =
             let projectname = validateFunctionName context.language projectname
+            match context.language with
+            |Fortran|C99|LaTeX|HTML|Python ->
+                if not (context.flist.tryAdd projectname) then
+                    invalidArg
+                        "functionName"
+                        ("A function named '" + projectname + "' has already been defined in this generation context.")
+            |_ -> ()
             let fdeclare language (typ:Etype,vtp:VarType,name:string) =
                 match language with
                 |HTML ->
@@ -135,7 +142,6 @@ namespace Aqualis
             let dir = match context.dir with |Some d -> d |None -> ""
             match context.language with
             |Fortran ->
-                context.flist.add projectname
                 let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,Fortran) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
@@ -169,7 +175,6 @@ namespace Aqualis
                     String.Join(", ", childContext.arg.list |> List.map(fun (n,(_,_,_)) -> n))
                 context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
-                context.flist.add projectname
                 let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,C99) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
@@ -209,7 +214,6 @@ namespace Aqualis
                     |> fun s -> String.Join(", ", s)
                 context.writein (projectname + "(" + args + ");\n")
             |LaTeX ->
-                context.flist.add projectname
                 let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,LaTeX) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext
@@ -243,7 +247,6 @@ namespace Aqualis
                     String.Join(", ", childContext.arg.list |> List.map (fun (n,(_,_,_)) -> n))
                 context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |HTML ->
-                context.flist.add projectname
                 let args = Aqualis.makeIntermediateProgramWithContext (dir,projectname,HTML) <| fun childContext ->
                     let encodedProjectName = HtmlEncoding.textContent projectname
                     code childContext
@@ -280,7 +283,6 @@ namespace Aqualis
                     String.Join(", ", childContext.arg.list |> List.map (fun (n,(_,_,_)) -> n))
                 context.writein (HtmlEncoding.textContent ("\\(" + projectname + "(" + args + ")\\)") + "<br/>\n")
             |Python ->
-                context.flist.add projectname
                 let writeBackActualNames,actualNames = Aqualis.makeIntermediateProgramWithContext (dir,projectname,Python) <| fun childContext ->
                     code childContext
                     inheritDependencies context childContext

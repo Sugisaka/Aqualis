@@ -89,6 +89,14 @@ namespace Aqualis
                 match List.exists (fun t -> t=s) ulist with
                 |true -> ()
                 |false -> ulist <- ulist@[s])
+        ///<summary>未登録の場合だけ項目を追加</summary>
+        member _.tryAdd(s:string) =
+            lock gate (fun () ->
+                match List.exists (fun t -> t=s) ulist with
+                |true -> false
+                |false ->
+                    ulist <- ulist@[s]
+                    true)
         ///<summary>リスト</summary>
         member _.list with get() = lock gate (fun () -> ulist)
         

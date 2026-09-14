@@ -411,6 +411,22 @@ module CompilerScriptTests =
         Assert.Equal("functionName", error.ParamName)
         Assert.False(bodyInvoked)
 
+    [<Fact>]
+    let ``function generation rejects duplicate names before invoking the duplicate body`` () =
+        for language in [Fortran; C99; LaTeX; HTML; Python] do
+            use output = new TemporaryDirectory()
+            let mutable duplicateBodyInvoked = false
+
+            let error =
+                Assert.Throws<ArgumentException>(fun () ->
+                    Compile [language] output.Path "duplicate-function" "1.0" (fun context ->
+                        context.func "same_name" ignore
+                        context.func "same_name" (fun _ -> duplicateBodyInvoked <- true)))
+
+            Assert.Equal("functionName", error.ParamName)
+            Assert.Contains("already been defined", error.Message)
+            Assert.False(duplicateBodyInvoked)
+
     [<Theory>]
     [<InlineData("while")>]
     [<InlineData("return")>]
