@@ -119,17 +119,22 @@ module PhpCommunicationGenerationTests =
                 let contents = context.php.var "contents"
                 context.php.withFile("result.txt", Nw, fun handle ->
                     context.php.writeAll(handle, contents))
+                context.php.withFile("second.txt", Nw, fun handle ->
+                    context.php.writeAll(handle, contents))
                 context.php.echo(context.php.readFile "result.txt")
                 context.php.deleteFile "result.txt"
                 context.br.if1 (context.php.tryDeleteFile "optional.txt") ignore)
 
-        Assert.Contains("$aqualisFileHandle = @fopen($aqualisFilename, \"c\");", source)
+        Assert.Contains("$aqualisFileScope1_handle = @fopen($aqualisFileScope1_filename, \"c\");", source)
+        Assert.Contains("$aqualisFileScope2_handle = @fopen($aqualisFileScope2_filename, \"c\");", source)
+        Assert.DoesNotContain("function ($aqualisFilename)", source)
+        Assert.Contains("(string)($contents)", source)
         Assert.Contains("while ($aqualisRemaining !== '')", source)
         Assert.Contains("$aqualisWritten === false || $aqualisWritten === 0", source)
         Assert.Contains("substr($aqualisRemaining, $aqualisWritten)", source)
-        Assert.Contains("$aqualisFlushSucceeded = @fflush($aqualisFileHandle);", source)
-        Assert.Contains("$aqualisCloseSucceeded = @fclose($aqualisFileHandle);", source)
-        Assert.Contains("if ($aqualisPrimaryFileError !== null) { throw $aqualisPrimaryFileError; }", source)
+        Assert.Contains("} finally {", source)
+        Assert.Contains("$aqualisFileScope1_flushSucceeded = @fflush($aqualisFileScope1_handle);", source)
+        Assert.Contains("$aqualisFileScope1_closeSucceeded = @fclose($aqualisFileScope1_handle);", source)
         Assert.Contains("$contents = @file_get_contents($filename)", source)
         Assert.Contains("throw new \\RuntimeException('Failed to delete the file.')", source)
         Assert.Contains("|| @unlink(\"optional.txt\")", source)

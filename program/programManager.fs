@@ -49,6 +49,7 @@ namespace Aqualis
         let mutable sequenceVariables : (string*int*float) list = []
         let mutable sequenceFrames : (float*float*float*float) list = []
         let mutable sequenceBranches : ((string*float) list) list = []
+        let mutable phpFileScopeCounter = 0
         member _.TerminalLifeLine with get() = terminalLifeLine and set(v) = terminalLifeLine <- v
         /// シーケンス図に描画済み変数リスト
         member _.SequenceVariables with get() = sequenceVariables and set(v) = sequenceVariables <- v
@@ -70,6 +71,11 @@ namespace Aqualis
         member internal _.IsNeutral = isNeutral
         member internal _.ParallelMode with get() = parallelMode and set v = parallelMode <- v
         member internal _.SequenceGate = sequenceGate
+        /// Allocates a unique suffix for generated PHP file-operation variables.
+        member internal _.NextPhpFileScopeNumber() =
+            lock sequenceGate (fun () ->
+                phpFileScopeCounter <- phpFileScopeCounter + 1
+                phpFileScopeCounter)
         member _.Active = active
         member _.DisplaySection with get() = displaySection and set v = displaySection <- v
         member _.IsOpenMpUsed with get() = isOpenMpUsed and set v = isOpenMpUsed <- v

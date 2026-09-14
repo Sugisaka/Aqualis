@@ -506,28 +506,38 @@ and ContextPhp internal (context:Aqualis) =
             [filename.Context]
     member this.readLines(filename:string, flags:list<FileFlag>) = this.readLines(PHPdata filename, flags)
 
-    /// Runs generated code with a checked PHP stream and always verifies flush and close operations.
+    /// Runs generated code with a checked PHP stream in the caller's PHP variable scope.
+    /// Internal variables are unique so file scopes can be nested safely.
     member this.withFile(filename:PHPdata, mode:FileOpenMode, code:PhpFileHandle -> unit) =
         if isNull (box code) then nullArg (nameof code)
         merge [filename.Context] |> ignore
-        let handleValue = PHPdata.f(context,"$aqualisFileHandle")
+        let scopeNumber = context.NextPhpFileScopeNumber() |> InvariantFormat.integer
+        let prefix = "$aqualisFileScope" + scopeNumber + "_"
+        let filenameName = prefix + "filename"
+        let handleName = prefix + "handle"
+        let flushSucceededName = prefix + "flushSucceeded"
+        let closeSucceededName = prefix + "closeSucceeded"
+        let handleValue = PHPdata.f(context,handleName)
         this.phpcode <| fun () ->
-            context.writei "(function ($aqualisFilename): void {"
-            context.writei ("$aqualisFileHandle = @fopen($aqualisFilename, " + mode.str + ");")
-            context.writei "if ($aqualisFileHandle === false) { throw new \\RuntimeException('Failed to open the file.'); }"
-            context.writei "$aqualisPrimaryFileError = null;"
+            context.writei (filenameName + " = " + filename.code + ";")
+            context.writei (handleName + " = @fopen(" + filenameName + ", " + mode.str + ");")
+            context.writei ("if (" + handleName + " === false) { throw new \\RuntimeException('Failed to open the file.'); }")
+            if mode.CanWrite then
+                context.writei (flushSucceededName + " = false;")
+            context.writei (closeSucceededName + " = false;")
             context.writei "try {"
         code (PhpFileHandle handleValue)
         this.phpcode <| fun () ->
-            context.writei "} catch (\\Throwable $error) { $aqualisPrimaryFileError = $error; }"
+            context.writei "} finally {"
+            context.writei ("if (is_resource(" + handleName + ")) {")
             if mode.CanWrite then
-                context.writei "$aqualisFlushSucceeded = @fflush($aqualisFileHandle);"
-            context.writei "$aqualisCloseSucceeded = @fclose($aqualisFileHandle);"
-            context.writei "if ($aqualisPrimaryFileError !== null) { throw $aqualisPrimaryFileError; }"
+                context.writei (flushSucceededName + " = @fflush(" + handleName + ");")
+            context.writei (closeSucceededName + " = @fclose(" + handleName + ");")
+            context.writei "}"
+            context.writei "}"
             if mode.CanWrite then
-                context.writei "if (!$aqualisFlushSucceeded) { throw new \\RuntimeException('Failed to flush the file.'); }"
-            context.writei "if (!$aqualisCloseSucceeded) { throw new \\RuntimeException('Failed to close the file.'); }"
-            context.writei ("})(" + filename.code + ");")
+                context.writei ("if (!" + flushSucceededName + ") { throw new \\RuntimeException('Failed to flush the file.'); }")
+            context.writei ("if (!" + closeSucceededName + ") { throw new \\RuntimeException('Failed to close the file.'); }")
     member this.withFile(filename:string, mode:FileOpenMode, code:PhpFileHandle -> unit) =
         this.withFile(PHPdata filename, mode, code)
 
