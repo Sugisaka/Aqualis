@@ -75,6 +75,9 @@ module PhpResponseGenerationTests =
         Assert.Contains("DIRECTORY_SEPARATOR.\".course-login-rate-limit.json\"",generated)
         Assert.Contains("DIRECTORY_SEPARATOR.\".course-login-rate-limit.invalid-*.json\"",generated)
         Assert.DoesNotContain("DIRECTORY_SEPARATOR.'.login-rate-limit",generated)
+        Assert.Contains("'user_ip:'.hash_hmac('sha256', $remoteAddress.\"\\0\".$normalizedUserId, $secret)",generated)
+        Assert.DoesNotContain("hash_hmac('sha256', $normalizedUserId, $secret)",generated)
+        Assert.Contains("(?:ip|user|user_ip):[0-9a-f]{64}",generated)
         Assert.Contains("course_reserve_login_attempt($userId)",generated)
         Assert.Contains("course_release_successful_login_attempt($userId)",generated)
 
