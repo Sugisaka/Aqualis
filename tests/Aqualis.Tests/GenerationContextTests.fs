@@ -10,6 +10,13 @@ module GenerationContextTests =
     let private createContext path name language =
         new Aqualis(Some path, Some name, language)
 
+    [<Fact>]
+    let ``Public version matches the assembly version`` () =
+        let assemblyVersion = typeof<Aqualis>.Assembly.GetName().Version
+
+        Assert.Equal("188.0.0", Aqualis.Version)
+        Assert.Equal(Aqualis.Version, assemblyVersion.ToString(3))
+
     [<Theory>]
     [<InlineData(null)>]
     [<InlineData("")>]

@@ -61,7 +61,7 @@ namespace Aqualis
         member _.BranchStack with get() = sequenceBranches and set(v) = sequenceBranches <- v 
         new(outputdir:string option,pjname:string option,lang:Language) =
             new Aqualis(outputdir,pjname,lang,false,false,None)
-        static member Version = "188.0.0.0"
+        static member Version = typeof<Aqualis>.Assembly.GetName().Version.ToString(3)
         static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true,false,None)
         member _.Dir with get() = outputdir
         member _.ProjectName with get() = pjname
