@@ -43,7 +43,16 @@ module TypedWebApiTests =
         Assert.Equal("main.php?tab=1", Url.value (Url.relative "main.php?tab=1"))
         Assert.Equal("https://example.com/path", Url.value (Url.https "https://example.com/path"))
 
-        for invalid in ["javascript:alert(1)"; "//example.com/path"; "\\\\example.com\\path"; "page.php\r\nX-Test: x"] do
+        for invalid in
+            [ "javascript:alert(1)"
+              "java\tscript:alert(1)"
+              "java\u0000script:alert(1)"
+              "//example.com/path"
+              " //example.com/path"
+              "\\\\example.com\\path"
+              " main.php"
+              "main.php "
+              "page.php\r\nX-Test: x" ] do
             Assert.Throws<ArgumentException>(fun () -> Url.relative invalid |> ignore)
             |> ignore
 

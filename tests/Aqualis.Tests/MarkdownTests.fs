@@ -22,6 +22,7 @@ module MarkdownTests =
                 "**strong** *italic* $x+1$ `code`"
                 "`*literal* $literal$`"
                 "[label](page.html)"
+                "[external](https://example.com/a?x=1&y=2)"
                 "[[page|wiki label]]"
                 "[[page#section|section label]]"
                 "![](figure.png)"
@@ -49,6 +50,7 @@ module MarkdownTests =
         Assert.Contains("<code>code</code>", html)
         Assert.Contains("<code>*literal* $literal$</code>", html)
         Assert.Contains("<a href=\"page.html\">label</a>", html)
+        Assert.Contains("<a href=\"https://example.com/a?x=1&amp;y=2\">external</a>", html)
         Assert.Contains("<a href=\"page\">wiki label</a>", html)
         Assert.Contains("<a href=\"page#section\">section label</a>", html)
         Assert.Contains("<img src=\"img/figure.png\" alt=\"\"", html)
@@ -69,6 +71,9 @@ module MarkdownTests =
                 "**<img src=x onerror=alert(1)>**"
                 "`<b>not html</b>`"
                 "[unsafe](javascript:alert(1))"
+                "[control-obfuscated](java\u0000script:alert(2))"
+                "[protocol-relative](//example.com/path)"
+                "[backslash-relative](\\\\example.com/path)"
                 "| <svg onload=alert(1)> |"
                 "| --- |"
                 ""
@@ -89,5 +94,8 @@ module MarkdownTests =
             html)
         Assert.Contains("<code>&lt;b&gt;not html&lt;/b&gt;</code>", html)
         Assert.Contains("<a href=\"#\">unsafe</a>", html)
+        Assert.Contains("<a href=\"#\">control-obfuscated</a>", html)
+        Assert.Contains("<a href=\"#\">protocol-relative</a>", html)
+        Assert.Contains("<a href=\"#\">backslash-relative</a>", html)
         Assert.Contains("&lt;svg onload=alert(1)&gt;", html)
         Assert.Contains("&lt;script&gt;alert(2)&lt;/script&gt;", html)

@@ -309,13 +309,15 @@ module markDown =
 
     let private sanitizeUrl (value:string) =
         let value = value.Trim()
-        match Uri.TryCreate(value, UriKind.RelativeOrAbsolute) with
-        |true, uri when
-            not uri.IsAbsoluteUri ||
-            uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
-            uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ->
+        match Uri.TryCreate(value, UriKind.Absolute) with
+        | true, uri when
+            not (WebUrlValidation.containsControlCharacters value) &&
+            (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+             uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)) ->
             value
-        |_ ->
+        | _ when WebUrlValidation.isRelative value ->
+            value
+        | _ ->
             "#"
 
     let private renderInline nodes =

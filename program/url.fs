@@ -8,6 +8,21 @@ namespace Aqualis
 
 open System
 
+[<RequireQualifiedAccess>]
+module internal WebUrlValidation =
+    let containsControlCharacters (value:string) =
+        value |> Seq.exists Char.IsControl
+
+    let isRelative (value:string) =
+        not (String.IsNullOrWhiteSpace value) &&
+        String.Equals(value, value.Trim(), StringComparison.Ordinal) &&
+        not (containsControlCharacters value) &&
+        not (value.Contains '\\') &&
+        not (value.StartsWith("//", StringComparison.Ordinal)) &&
+        match Uri.TryCreate(value, UriKind.Relative), Uri.TryCreate(value, UriKind.Absolute) with
+        | (true, _), (false, _) -> true
+        | _ -> false
+
 /// A validated relative or HTTPS URL for generated HTML and HTTP redirects.
 [<Struct>]
 type Url =
@@ -29,7 +44,7 @@ module Url =
     /// Creates a relative URL. Scheme-relative and absolute URLs are rejected.
     let relative (value:string) =
         validateCommon value
-        if value.Contains('\\') || value.StartsWith("//", StringComparison.Ordinal) || Uri.IsWellFormedUriString(value, UriKind.Absolute) then
+        if not (WebUrlValidation.isRelative value) then
             invalidArg (nameof value) "An application-relative URL is required."
         Url value
 
