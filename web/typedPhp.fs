@@ -107,10 +107,6 @@ module TypedPhpExtensions =
         member this.text(value:PhpExpr<PhpString>) =
             this.Context.php.echoHtmlText value
 
-        /// Emits HTML that the caller has explicitly marked as trusted.
-        member this.raw(value:TrustedHtml) =
-            this.rawHtml value.Value
-
         /// Generates a link with validated URL and CSS class values.
         member this.link(url:Url, cssClass:CssClass) = fun code ->
             this.tagb(

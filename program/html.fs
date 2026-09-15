@@ -207,8 +207,6 @@ namespace Aqualis
         member _.Context with get() = c
         /// Writes a value as an HTML text node.
         member _.text(value:string) = writein(HtmlEncoding.textContent value)
-        /// Writes a trusted HTML fragment without encoding it.
-        member _.rawHtml(value:string) = writein value
         member this.head title = fun code ->
             writein "<!doctype html>"
             writein "<html lang=\"ja\">"
@@ -321,11 +319,6 @@ namespace Aqualis
             let tag = HtmlEncoding.elementName t
             writein("<"+tag+" ")
             writein " />"
-        /// 内部要素のないタグ
-        [<Obsolete("Use the list<Atr> overload so attribute values are HTML-encoded.")>]
-        member this.taga (t:string,a:string) =
-            let tag = HtmlEncoding.elementName t
-            writein("<"+tag+" "+a+" />")
         // /// 内部要素のあるタグ
         // member this.tagb (t:string,atr:Style) = fun code ->
         //     let a = atr.code
@@ -357,16 +350,6 @@ namespace Aqualis
         //         writein ">"
         //     code()
         //     writein ("</"+t+">")
-        /// 内部要素のあるタグ
-        [<Obsolete("Use the list<Atr> overload so attribute values are HTML-encoded.")>]
-        member this.tagb (t:string,a:string) = fun code ->
-            let tag = HtmlEncoding.elementName t
-            if a="" then
-                writein("<"+tag+">")
-            else
-                writein("<"+tag+" "+a+">")
-            code()
-            writein ("</"+tag+">")
         /// 内部要素のあるタグ
         member this.tagb (t:string) = fun code ->
             let tag = HtmlEncoding.elementName t
@@ -577,20 +560,6 @@ namespace Aqualis
 
         member this.div (s:list<Atr>) = fun code ->
             this.tagb ("div", s) code
-
-        [<Obsolete("Use tagb with list<Atr> so attribute values are HTML-encoded.")>]
-        member this.tag (tagname:string) (s:string) code =
-            let tag = HtmlEncoding.elementName tagname
-            if s = "" then
-                writein("<" + tag + ">")
-            else
-                writein("<" + tag + " " + s + ">")
-            code()
-            writein("</" + tag + ">")
-
-        [<Obsolete("Use taga with list<Atr> so attribute values are HTML-encoded.")>]
-        member this.tag_ (tagname:string) (s:string) =
-            writein("<" + HtmlEncoding.elementName tagname + " " + s + " />")
 
         member this.fig (p:position) code =
             let f = figure(this.taga)

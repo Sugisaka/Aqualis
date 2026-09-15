@@ -104,9 +104,6 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
             printfn "%s" (this.toString(".",StrQuotation))
             complex0 NaN
 
-    [<Obsolete("Use PHPdata.array(context) or context.php.array() so the empty array expression has a GenerationContext.")>]
-    static member array() = PHPdata.f ("array()",Aqualis.BlankWriter PHP)
-
     /// Creates an empty PHP array expression associated with the generation context.
     static member array(context:Aqualis) = PHPdata.f(context,"array()")
 

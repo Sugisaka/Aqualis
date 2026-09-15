@@ -80,17 +80,6 @@ namespace Aqualis
                         writein("<input " + Atr.list allAttributes + ">" + htmlText text)
             | _ -> ()
 
-        [<Obsolete("Use radioButtonAttributes so additional attribute values are HTML-encoded.")>]
-        member this.radioButton (name:string) lst =
-            match lang with
-            |HTML ->
-                this.form ("f_"+name) <| fun () ->
-                    for (a,b,c,d) in lst do
-                        writein(
-                            "<input type=\"radio\" name=\"" + HtmlEncoding.attributeValue name +
-                            "\" value=\"" + HtmlEncoding.attributeValue a + "\"" +
-                            (if c then " checked" else "") + " " + d + ">" + htmlText b)
-            |_ -> ()
         member this.title txt =
             match lang with
             |HTML ->

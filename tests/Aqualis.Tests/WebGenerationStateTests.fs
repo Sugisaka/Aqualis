@@ -317,7 +317,7 @@ module WebGenerationStateTests =
             context.html.h1 payload ignore
             context.html.para payload
             context.print.s payload
-            context.html.rawHtml "<em>trusted</em>"
+            context.html.tagb "em" <| fun () -> context.html.text "trusted"
         context.close()
 
         let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
@@ -326,7 +326,7 @@ module WebGenerationStateTests =
         Assert.Contains(encoded, generated)
         Assert.DoesNotContain("A&amp;amp;B", generated)
         Assert.DoesNotContain("</title><script>alert(1)</script>", generated)
-        Assert.Contains("<em>trusted</em>", generated)
+        Assert.Matches(Regex("<em>\\s*trusted\\s*</em>"), generated)
 
     [<Fact>]
     let ``HTML compiler encodes project metadata`` () =

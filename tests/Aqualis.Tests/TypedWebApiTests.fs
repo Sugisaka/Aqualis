@@ -147,12 +147,22 @@ module TypedWebApiTests =
         Assert.Contains("_aqualis_csrf", generated)
 
     [<Fact>]
-    let ``raw HTML requires an explicit trusted value`` () =
-        let generated =
-            generate "trusted-html" <| fun context ->
-                context.html.raw(Unsafe.trustedHtml "<strong>trusted</strong>")
+    let ``public HTML APIs do not expose raw markup bypasses`` () =
+        let projectRoot = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
+        let parameterSource = File.ReadAllText(Path.Combine(projectRoot, "web", "param.fs"))
+        let typedSource = File.ReadAllText(Path.Combine(projectRoot, "web", "typedPhp.fs"))
+        let htmlSource = File.ReadAllText(Path.Combine(projectRoot, "program", "html.fs"))
+        let templateSource = File.ReadAllText(Path.Combine(projectRoot, "num", "template.fs"))
 
-        Assert.Contains("<strong>trusted</strong>", generated)
+        Assert.DoesNotContain("type TrustedHtml", parameterSource)
+        Assert.DoesNotContain("module Unsafe", parameterSource)
+        Assert.DoesNotContain("member this.raw(", typedSource)
+        Assert.DoesNotContain("member _.rawHtml", htmlSource)
+        Assert.DoesNotContain("member this.taga (t:string,a:string)", htmlSource)
+        Assert.DoesNotContain("member this.tagb (t:string,a:string)", htmlSource)
+        Assert.DoesNotContain("member this.tag (tagname:string) (s:string)", htmlSource)
+        Assert.DoesNotContain("member this.tag_ (tagname:string) (s:string)", htmlSource)
+        Assert.DoesNotContain("member this.radioButton (name:string)", templateSource)
 
     [<Fact>]
     let ``typed literal factories reject non-finite floating point values`` () =

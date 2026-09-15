@@ -149,6 +149,8 @@ module PhpCommunicationGenerationTests =
              "member this.fclose"; "member this.unlink"; "member this.file_get_contents"] do
             Assert.DoesNotContain(removedMember, phpSource)
 
+        Assert.DoesNotContain("static member array()", phpSource)
+
     [<Fact>]
     let ``structured JSON output uses the encoder and checks file writes`` () =
         let source =

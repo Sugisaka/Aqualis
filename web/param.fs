@@ -107,23 +107,6 @@ module internal RedirectStatus =
         | RedirectStatus.TemporaryRedirect -> 307
         | RedirectStatus.PermanentRedirect -> 308
 
-/// HTML markup that has been explicitly designated as trusted by the caller.
-[<Struct>]
-type TrustedHtml =
-    private
-    | TrustedHtml of string
-    member internal this.Value =
-        let (TrustedHtml value) = this
-        value
-
-/// Explicit escape hatch for content that cannot be represented by the typed HTML API.
-[<RequireQualifiedAccess>]
-module Unsafe =
-    /// Marks a string as trusted HTML. The caller is responsible for ensuring it contains no untrusted data.
-    let trustedHtml (value:string) =
-        if isNull value then nullArg (nameof value)
-        TrustedHtml value
-
 /// 水平方向アライメント
 type BorderH = |TdL |TdC |TdR |TdJ |TdLL |TdCL |TdRL |TdJL |TdLR |TdCR |TdRR |TdJR |TdLLR |TdCLR |TdRLR |TdJLR
 
