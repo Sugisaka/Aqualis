@@ -727,17 +727,22 @@ namespace Aqualis
                 |A1 0 -> 
                     match typ with 
                     |Structure _            -> name + " = numpy.array([], dtype=object)"
+                    |It _ |It 1             -> name + " = numpy.array([], dtype=int)"
+                    |Dt                     -> name + " = numpy.array([], dtype=float)"
+                    |Zt                     -> name + " = numpy.array([], dtype=numpy.complex128)"
                     |_                      -> name + " = numpy.array([])"
                 |A2(0,0) -> 
                     match typ with 
                     |Structure _           -> name + " = numpy.array([[]], dtype=object)"
                     |It _ |It 1            -> name + " = numpy.array([[]], dtype=" + this.Stype typ + ")"
+                    |Dt                    -> name + " = numpy.array([[]], dtype=float)"
                     |Zt                    -> name + " = numpy.array([[]], dtype=numpy.complex128)"
                     |_                     -> name + " = numpy.array([[]])"
                 |A3(0,0,0) -> 
                     match typ with 
                     |Structure _            -> name + " = numpy.array([[[]]], dtype=object)"
                     |It _ |It 1             -> name + " = numpy.array([[[]]], dtype=" + this.Stype typ + ")"
+                    |Dt                     -> name + " = numpy.array([[[]]], dtype=float)"
                     |Zt                     -> name + " = numpy.array([[[]]], dtype=numpy.complex128)"
                     |_                      -> name + " = numpy.array([[[]]])"
                 |A1 size1 ->

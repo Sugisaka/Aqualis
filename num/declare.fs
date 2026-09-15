@@ -291,11 +291,11 @@ namespace Aqualis
                     writer.codewritein(ctx.cvar.declare(It 4, A1 1, s + "_size", "[-1]", ctx.numFormat))
 
                 for s in ctx.d1.varList do
-                    writer.codewritein(ctx.cvar.declare(It 4, A1 0, s, "", ctx.numFormat))
+                    writer.codewritein(ctx.cvar.declare(Dt, A1 0, s, "", ctx.numFormat))
                     writer.codewritein(ctx.cvar.declare(It 4, A1 1, s + "_size", "[-1]", ctx.numFormat))
 
                 for s in ctx.z1.varList do
-                    writer.codewritein(ctx.cvar.declare(It 4, A1 0, s, "", ctx.numFormat))
+                    writer.codewritein(ctx.cvar.declare(Zt, A1 0, s, "", ctx.numFormat))
                     writer.codewritein(ctx.cvar.declare(It 4, A1 1, s + "_size", "[-1]", ctx.numFormat))
 
                 for s in ctx.i2.varList do
@@ -303,11 +303,11 @@ namespace Aqualis
                     writer.codewritein(ctx.cvar.declare(It 4, A1 2, s + "_size", "[-1,-1]", ctx.numFormat))
 
                 for s in ctx.d2.varList do
-                    writer.codewritein(ctx.cvar.declare(It 4, A2 (0,0), s, "", ctx.numFormat))
+                    writer.codewritein(ctx.cvar.declare(Dt, A2 (0,0), s, "", ctx.numFormat))
                     writer.codewritein(ctx.cvar.declare(It 4, A1 2, s + "_size", "[-1,-1]", ctx.numFormat))
 
                 for s in ctx.z2.varList do
-                    writer.codewritein(ctx.cvar.declare(It 4, A2 (0,0), s, "", ctx.numFormat))
+                    writer.codewritein(ctx.cvar.declare(Zt, A2 (0,0), s, "", ctx.numFormat))
                     writer.codewritein(ctx.cvar.declare(It 4, A1 2, s + "_size", "[-1,-1]", ctx.numFormat))
 
                 for s in ctx.i3.varList do
@@ -315,10 +315,10 @@ namespace Aqualis
                     writer.codewritein(ctx.cvar.declare(It 4, A1 3, s + "_size", "[-1,-1,-1]", ctx.numFormat))
 
                 for s in ctx.d3.varList do
-                    writer.codewritein(ctx.cvar.declare(It 4, A3 (0,0,0), s, "", ctx.numFormat))
+                    writer.codewritein(ctx.cvar.declare(Dt, A3 (0,0,0), s, "", ctx.numFormat))
                     writer.codewritein(ctx.cvar.declare(It 4, A1 3, s + "_size", "[-1,-1,-1]", ctx.numFormat))
 
                 for s in ctx.z3.varList do
-                    writer.codewritein(ctx.cvar.declare(It 4, A3 (0,0,0), s, "", ctx.numFormat))
+                    writer.codewritein(ctx.cvar.declare(Zt, A3 (0,0,0), s, "", ctx.numFormat))
                     writer.codewritein(ctx.cvar.declare(It 4, A1 3, s + "_size", "[-1,-1,-1]", ctx.numFormat))
             |_ -> ()

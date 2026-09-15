@@ -208,6 +208,34 @@ module NumericFormattingTests =
         Assert.Matches(Regex(@"while\([^\r\n]+\):"), generated)
 
     [<Fact>]
+    let ``Python temporary arrays are declared with their numeric dtype`` () =
+        use output = new TemporaryDirectory()
+        let project = "python-temporary-array-dtypes"
+
+        Compile [Python] output.Path project "1.0" <| fun context ->
+            context.ch.i01 ignore
+            context.ch.d01 ignore
+            context.ch.z01 ignore
+            context.ch.i02 ignore
+            context.ch.d02 ignore
+            context.ch.z02 ignore
+            context.ch.i03 ignore
+            context.ch.d03 ignore
+            context.ch.z03 ignore
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, project + ".py"))
+
+        Assert.Contains("i1001 = numpy.array([], dtype=int)", generated)
+        Assert.Contains("d1001 = numpy.array([], dtype=float)", generated)
+        Assert.Contains("z1001 = numpy.array([], dtype=numpy.complex128)", generated)
+        Assert.Contains("i2001 = numpy.array([[]], dtype=int)", generated)
+        Assert.Contains("d2001 = numpy.array([[]], dtype=float)", generated)
+        Assert.Contains("z2001 = numpy.array([[]], dtype=numpy.complex128)", generated)
+        Assert.Contains("i3001 = numpy.array([[[]]], dtype=int)", generated)
+        Assert.Contains("d3001 = numpy.array([[[]]], dtype=float)", generated)
+        Assert.Contains("z3001 = numpy.array([[[]]], dtype=numpy.complex128)", generated)
+
+    [<Fact>]
     let ``Python FFT uses scalar modulo for its even-size branch`` () =
         use output = new TemporaryDirectory()
 
