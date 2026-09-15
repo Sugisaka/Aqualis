@@ -7,6 +7,35 @@ open Aqualis
 
 module CodeWriterTests =
     [<Fact>]
+    let ``HTML comments encode text instead of emitting markup`` () =
+        use output = new TemporaryDirectory()
+        for language,fileName in [HTML, "comment.html"; HTMLSequenceDiagram, "sequence-comment.html"] do
+            let path = Path.Combine(output.Path, fileName)
+            use writer = new codeWriter(path, 2, language)
+
+            writer.comment "A&B </span><script>alert(1)</script>"
+            writer.close()
+
+            let generated = File.ReadAllText(path)
+            Assert.Contains(
+                "<span class=\"comment\">A&amp;B &lt;/span&gt;&lt;script&gt;alert(1)&lt;/script&gt;</span><br/>",
+                generated)
+            Assert.DoesNotContain("</span><script>alert(1)</script>", generated)
+
+    [<Fact>]
+    let ``internal HTML code view markup remains structured`` () =
+        use output = new TemporaryDirectory()
+        let path = Path.Combine(output.Path, "code-view.html")
+        use context = new Aqualis(Some output.Path, Some "code-view.html", HTML)
+
+        context.iter.range(2, 1) ignore
+        context.close()
+
+        let generated = File.ReadAllText(path)
+        Assert.Contains("<summary><span class=\"op-loop\">for</span>", generated)
+        Assert.DoesNotContain("&lt;summary&gt;", generated)
+
+    [<Fact>]
     let ``disposing a code writer is idempotent and closes the file`` () =
         use output = new TemporaryDirectory()
         let path = Path.Combine(output.Path, "dispose.txt")

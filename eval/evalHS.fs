@@ -468,13 +468,13 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
-                    c.comment("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
-                    c.comment "<div class=\"insidecode-loop\">"
+                    c.commentHtmlMarkup("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
+                    c.commentHtmlMarkup "<div class=\"insidecode-loop\">"
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.comment "</div>"
-                    c.comment("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
+                    c.commentHtmlMarkup "</div>"
+                    c.commentHtmlMarkup("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                     c.comment(label+" continue")
                     returnVar()
                 |_ ->

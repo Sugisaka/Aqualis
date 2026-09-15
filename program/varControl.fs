@@ -502,15 +502,13 @@ namespace Aqualis
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
                     Array.iter (fun code -> this.cwrite(this.indent.space + "%" + code + "\n")) slist
             |HTML ->
-                let comment_line (str:string) = this.codewritein("<span class=\"comment\">" + str + "</span><br/>\n")
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
-                    Array.iter (fun code -> this.cwrite(this.indent.space + "<span class=\"comment\">" + code + "</span><br/>\n")) slist
+                    Array.iter (fun code -> this.cwrite(this.indent.space + "<span class=\"comment\">" + HtmlTextEncoding.textContent code + "</span><br/>\n")) slist
             |HTMLSequenceDiagram ->
-                let comment_line (str:string) = this.codewritein("<span class=\"comment\">" + str + "</span><br/>\n")
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
-                    Array.iter (fun code -> this.cwrite(this.indent.space + "<span class=\"comment\">" + code + "</span><br/>\n")) slist
+                    Array.iter (fun code -> this.cwrite(this.indent.space + "<span class=\"comment\">" + HtmlTextEncoding.textContent code + "</span><br/>\n")) slist
             |Python ->
                 if ss<>"" then 
                     let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries) //改行文字で分割
@@ -525,6 +523,16 @@ namespace Aqualis
                     Array.iter (fun code -> this.cwrite(this.indent.space + "/*" + code + "*/\n")) slist
             |Numeric ->
                 ()
+
+        /// Emits trusted markup used internally to render structured HTML code views.
+        member internal this.commentHtmlMarkup(ss:string) =
+            match lan with
+            |HTML|HTMLSequenceDiagram ->
+                if ss<>"" then
+                    let slist = ss.Split([|'\n'|],StringSplitOptions.RemoveEmptyEntries)
+                    Array.iter (fun code -> this.cwrite(this.indent.space + "<span class=\"comment\">" + code + "</span><br/>\n")) slist
+            |_ ->
+                invalidOp "Trusted HTML comment markup can only be emitted for an HTML generation target."
                 
         ///<summary>ファイルを閉じる</summary>
         member this.close() =

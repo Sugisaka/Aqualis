@@ -83,16 +83,16 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    c.comment "<div class=\"codeblock\">"
-                    c.comment "<details open>"
-                    c.comment("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
-                    c.comment "<div class=\"insidecode-loop\">"
+                    c.commentHtmlMarkup "<div class=\"codeblock\">"
+                    c.commentHtmlMarkup "<details open>"
+                    c.commentHtmlMarkup("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
+                    c.commentHtmlMarkup "<div class=\"insidecode-loop\">"
                     c.indentInc()
                     code i
                     c.indentDec()
-                    c.comment "</div>"
-                    c.comment "</details>"
-                    c.comment "</div>"
+                    c.commentHtmlMarkup "</div>"
+                    c.commentHtmlMarkup "</details>"
+                    c.commentHtmlMarkup "</div>"
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -117,17 +117,17 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
-                    c.comment "<div class=\"codeblock\">"
-                    c.comment "<details open>"
-                    c.comment("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
-                    c.comment "<div class=\"insidecode-loop\">"
+                    c.commentHtmlMarkup "<div class=\"codeblock\">"
+                    c.commentHtmlMarkup "<details open>"
+                    c.commentHtmlMarkup("<summary><span class=\"op-loop\">for</span> \\(" + i.evalH c + "=" + i1.evalH c + "," + i2.evalH c + "\\)</summary>")
+                    c.commentHtmlMarkup "<div class=\"insidecode-loop\">"
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    c.comment "</div>"
-                    c.comment("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
-                    c.comment "</details>"
-                    c.comment "</div>"
+                    c.commentHtmlMarkup "</div>"
+                    c.commentHtmlMarkup("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
+                    c.commentHtmlMarkup "</details>"
+                    c.commentHtmlMarkup "</div>"
                     c.comment(label+" continue")
                     returnVar()
                 |_ ->

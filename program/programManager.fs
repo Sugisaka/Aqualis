@@ -114,6 +114,7 @@ namespace Aqualis
         member val internal Errors = errorIDController() with get
         member val internal Debug = debugController() with get
         member _.comment(s:string) = withWriter (fun writer -> writer.comment s)
+        member internal _.commentHtmlMarkup(s:string) = withWriter (fun writer -> writer.commentHtmlMarkup s)
         member _.codewrite(s:string) = withWriter (fun writer -> writer.codewrite s)
         member _.write(s:string) = withWriter (fun writer -> writer.codewrite s)
         member _.writen(s:string) = withWriter (fun writer -> writer.codewriten s)

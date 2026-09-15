@@ -88,6 +88,16 @@ namespace Aqualis
             else
                 finiteLiteral language value
 
+    [<RequireQualifiedAccess>]
+    module internal HtmlTextEncoding =
+        let textContent (value:string) =
+            if isNull value then nullArg (nameof value)
+
+            value
+                .Replace("&", "&amp;")
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;")
+
     ///<summary>設定のONまたはOFFを指定</summary>
     type Switch =
         |ON
