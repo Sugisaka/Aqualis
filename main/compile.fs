@@ -583,7 +583,7 @@ namespace Aqualis
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".js"), 2, C99)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".js"), 2, JavaScript)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("// Project version: " + codever + "\n")
