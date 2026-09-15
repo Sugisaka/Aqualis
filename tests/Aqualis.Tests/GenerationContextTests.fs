@@ -2,6 +2,7 @@ namespace Aqualis.Tests
 
 open System
 open System.IO
+open System.Text.RegularExpressions
 open Xunit
 open Aqualis
 
@@ -32,7 +33,7 @@ module GenerationContextTests =
 
         let error =
             Assert.Throws<ArgumentException>(fun () ->
-                Compile [PHP] output.Path projectName "1" <| fun _ ->
+                Compile [C99; Fortran] output.Path projectName "1" <| fun _ ->
                     callbackInvoked <- true)
 
         Assert.Equal("projectname", error.ParamName)
@@ -50,6 +51,63 @@ module GenerationContextTests =
 
             Assert.Equal("projectname", error.ParamName)
 
+        Assert.Empty(Directory.EnumerateFileSystemEntries(output.Path))
+
+    [<Theory>]
+    [<InlineData("project-name")>]
+    [<InlineData("project name")>]
+    [<InlineData("_project")>]
+    [<InlineData("1project")>]
+    [<InlineData("日本語")>]
+    [<InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")>]
+    let ``Compile derives a valid Fortran identifier from every portable project file name`` projectName =
+        use output = new TemporaryDirectory()
+
+        Compile [Fortran] output.Path projectName "1" ignore
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, projectName + ".f90"))
+        let programDeclaration = Regex.Match(generated, "(?m)^program (?<name>[A-Za-z][A-Za-z0-9_]{0,62})$")
+        Assert.True(programDeclaration.Success)
+        let identifier = programDeclaration.Groups["name"].Value
+        Assert.Contains("end program " + identifier, generated)
+
+    [<Fact>]
+    let ``Compile escapes project titles according to LaTeX text rules`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "A&B#C%_D$E^{F}~"
+
+        Compile [LaTeX] output.Path projectName "1" ignore
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, projectName + ".tex"))
+        Assert.Contains(
+            "{\\Large A\\&B\\#C\\%\\_D\\$E\\textasciicircum{}\\{F\\}\\textasciitilde{}}",
+            generated)
+
+    [<Fact>]
+    let ``Compile keeps version metadata on one comment line in every source language`` () =
+        use output = new TemporaryDirectory()
+        let version = "1 */\r\n#error injected\u2028alert(1)\u0000"
+        let encodedVersion = "1 */\\r\\n#error injected\\u2028alert(1)\\u0000"
+
+        Compile [Fortran; C99; Python; JavaScript] output.Path "metadata_1" version ignore
+
+        let source extension = File.ReadAllText(Path.Combine(output.Path, "metadata_1" + extension))
+        Assert.Contains("! Project version: " + encodedVersion, source ".f90")
+        Assert.Contains("// Project version: " + encodedVersion, source ".c")
+        Assert.Contains("# Project version: " + encodedVersion, source ".py")
+        Assert.Contains("// Project version: " + encodedVersion, source ".js")
+        for extension in [".f90"; ".c"; ".py"; ".js"] do
+            Assert.DoesNotContain("\n#error injected", source extension)
+
+    [<Fact>]
+    let ``Compile rejects null version metadata before creating output`` () =
+        use output = new TemporaryDirectory()
+
+        let error =
+            Assert.Throws<ArgumentNullException>(fun () ->
+                Compile [C99] output.Path "metadata" null ignore)
+
+        Assert.Equal("codever", error.ParamName)
         Assert.Empty(Directory.EnumerateFileSystemEntries(output.Path))
 
     [<Fact>]
