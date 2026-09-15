@@ -413,6 +413,26 @@ module WebGenerationStateTests =
         Assert.DoesNotContain("<?php echo $submittedAnswer ?>", generated)
 
     [<Fact>]
+    let ``PHP text areas escape dynamic values at runtime`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "php-text-area-escaping.php"
+
+        use context = new Aqualis(Some output.Path, Some fileName, PHP)
+        let submittedAnswer = PHPdata.var(context, "submittedAnswer")
+        let answerField = TextArea(context, "answer")
+        answerField.show_value(
+            submittedAnswer,
+            [Atr("class", "textmessage"); Atr("rows", "3")])
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.Contains("<textarea", generated)
+        Assert.Contains(
+            "htmlspecialchars((string)($submittedAnswer), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')",
+            generated)
+        Assert.DoesNotContain("<?php echo $submittedAnswer ?>", generated)
+
+    [<Fact>]
     let ``typed PHP table cells render dynamic values with runtime HTML escaping`` () =
         use output = new TemporaryDirectory()
         let fileName = "php-table-cells.php"

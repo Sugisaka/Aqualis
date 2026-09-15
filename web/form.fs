@@ -193,6 +193,12 @@ type TextArea(context:Aqualis,name:PHPdata) =
     member _.show() = a.textArea()
     member _.show_contents_ (code:unit->unit) = a.textArea code
     member _.show_contents (atr:list<Atr>) = fun (code:unit->unit) -> a.textArea_contents atr code
+    /// Displays a dynamic value in the textarea after escaping it for HTML text content.
+    member _.show_value(value:PHPdata) =
+        a.textArea((fun () -> context.php.echoHtmlText value) : unit -> unit)
+    /// Displays a dynamic value and attributes after escaping the value for HTML text content.
+    member _.show_value(value:PHPdata, atr:list<Atr>) =
+        a.textArea_contents atr <| fun () -> context.php.echoHtmlText value
     member _.show(atr:list<Atr>) = a.textArea atr
     member _.show_copy() = a.textArea()
     member _.show_copy(atr:list<Atr>) = a.textArea_copy atr

@@ -311,11 +311,15 @@ and ContextPhp internal (context:Aqualis) =
             [value.Context]
     member this.echo (x:PHPdata) = this.phpcode <| fun () -> context.writei("echo " + x.code + ";")
     member this.echo (x:string) = this.echo (PHPdata x)
+    /// Produces a PHP expression whose value is safe for an HTML text-content context.
+    member this.escapeHtmlText (x:PHPdata) =
+        data
+            ("htmlspecialchars((string)(" + x.code + "), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')")
+            [x.Context]
+    member this.escapeHtmlText (x:string) = this.escapeHtmlText (PHPdata x)
     /// Emits a PHP value as escaped HTML text.
     member this.echoHtmlText (x:PHPdata) =
-        this.phpcode <| fun () ->
-            context.writei(
-                "echo htmlspecialchars((string)(" + x.code + "), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');")
+        this.echo (this.escapeHtmlText x)
     member this.echoHtmlText (x:string) = this.echoHtmlText (PHPdata x)
     /// 変数を表示
     member this.echo (x:int0) = this.echo (PHPdata x)
