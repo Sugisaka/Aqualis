@@ -164,7 +164,7 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                program.codewritein("print(" + code + ");\n")
+                program.writePhpStatement("print(" + code + ");")
             |Numeric ->
                 for v in lst.data do
                     match v with
@@ -192,7 +192,7 @@ namespace Aqualis
             |JavaScript ->
                 program.codewritein("print(\""+str+"\")\n")
             |PHP ->
-                program.codewritein("print(\""+str+"\")\n")
+                program.writePhpStatement("print(" + PhpEncoding.stringLiteral str + ");")
             |Numeric ->
                 printfn "%s" str
 

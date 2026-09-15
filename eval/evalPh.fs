@@ -67,11 +67,7 @@ namespace Aqualis
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.comment("<?php for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
-                    c.indentInc()
-                    code i
-                    c.indentDec()
-                    c.comment "<?php endfor; ?>"
+                    c.captureCode(fun () -> code i) |> ignore
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -90,28 +86,22 @@ namespace Aqualis
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = c.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("<?php ", "goto "+label+" ?>")
+                    let exit() = ()
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.comment("<?php for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
-                    c.indentInc()
-                    code(exit,i)
-                    c.indentDec()
-                    c.comment "<?php endfor; ?>"
-                    c.comment(label+":")
+                    c.captureCode(fun () -> code(exit,i)) |> ignore
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = c.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("<?php ", "goto "+label+" ?>")
+                    let label = "_" + c.GotoLabels.nextGotoLabel()
+                    let exit() = c.codewritein("<?php ", "goto "+label+"; ?>")
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                     c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
                     c.codewritein("<?php ", "endfor; ?>")
-                    c.codewritein(label+":")
+                    c.codewritein("<?php ", label+":; ?>")
                     returnVar()
 
             static member branchPh (c:Aqualis) code =

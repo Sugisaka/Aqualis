@@ -58,22 +58,25 @@ namespace Aqualis
             static member loopPy (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let label = c.GotoLabels.nextGotoLabel()
-                let exit() = c.codewritein("goto "+label)
+                let exitType = "_AqualisLoopExit" + c.GotoLabels.nextGotoLabel()
+                let exit() = c.codewritein("raise " + exitType + "()")
+                c.codewritein("class " + exitType + "(Exception):")
+                c.indentInc()
+                c.codewritein "pass"
+                c.indentDec()
                 expr.substPy i (Int 1) c
+                c.codewritein "try:"
+                c.indentInc()
                 c.codewritein "while True:"
                 c.indentInc()
                 code(exit,i)
-                c.codewritein("flag = " + label)
                 expr.substPy i (Add(It 4, i, Int 1)) c
                 c.indentDec()
-                if label = "10" then
-                    c.GotoLabels.exit_reset()
-                else 
-                    c.codewritein("if flag < " + label + ":")
-                    c.indentInc()
-                    c.codewritein "break"
-                    c.indentDec()
+                c.indentDec()
+                c.codewritein("except " + exitType + ":")
+                c.indentInc()
+                c.codewritein "pass"
+                c.indentDec()
                 returnVar()
                 
             ///<summary>条件を満たす間ループ</summary>
@@ -89,10 +92,7 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    c.comment("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
-                    c.indentInc()
-                    code i
-                    c.indentDec()
+                    c.captureCode(fun () -> code i) |> ignore
                     returnVar()
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -109,36 +109,29 @@ namespace Aqualis
                 |Int a, Int b when a>b -> 
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = c.GotoLabels.nextGotoLabel()
-                    let exit() = c.comment("goto "+label)
-                    c.comment("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
-                    c.indentInc()
-                    code(exit,i)
-                    c.indentDec()
-                    if label = "10" then
-                        c.GotoLabels.exit_reset()
-                    else 
-                        c.comment("if flag < "+label)
-                        c.indentInc()
-                        c.comment "break"
-                        c.indentDec()
+                    let exit() = ()
+                    c.captureCode(fun () -> code(exit,i)) |> ignore
                     returnVar()
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let label = c.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("goto "+label)
+                    let exitType = "_AqualisLoopExit" + c.GotoLabels.nextGotoLabel()
+                    let exit() = c.codewritein("raise " + exitType + "()")
+                    c.codewritein("class " + exitType + "(Exception):")
+                    c.indentInc()
+                    c.codewritein "pass"
+                    c.indentDec()
+                    c.codewritein "try:"
+                    c.indentInc()
                     c.codewritein("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
                     code(exit,i)
                     c.indentDec()
-                    if label = "10" then
-                        c.GotoLabels.exit_reset()
-                    else 
-                        c.codewritein("if flag < "+label+":")
-                        c.indentInc()
-                        c.codewritein "break"
-                        c.indentDec()
+                    c.indentDec()
+                    c.codewritein("except " + exitType + ":")
+                    c.indentInc()
+                    c.codewritein "pass"
+                    c.indentDec()
                     returnVar()
                     
             static member branchPy (c:Aqualis) code =

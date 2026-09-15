@@ -73,12 +73,7 @@ namespace Aqualis
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.comment("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
-                    c.comment "{"
-                    c.indentInc()
-                    code i
-                    c.indentDec()
-                    c.comment "}"
+                    c.captureCode(fun () -> code i) |> ignore
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -98,14 +93,9 @@ namespace Aqualis
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    let exit() = c.comment "break;"
+                    let exit() = ()
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.comment("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
-                    c.comment "{"
-                    c.indentInc()
-                    code(exit,i)
-                    c.indentDec()
-                    c.comment "}"
+                    c.captureCode(fun () -> code(exit,i)) |> ignore
                     returnVar()
                 |i1,i2 ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
