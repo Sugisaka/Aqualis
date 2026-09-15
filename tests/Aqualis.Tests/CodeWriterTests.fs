@@ -6,6 +6,73 @@ open Xunit
 open Aqualis
 
 module CodeWriterTests =
+    let private outputLanguages =
+        [ Fortran; C99; LaTeX; HTML; HTMLSequenceDiagram; Python; JavaScript; PHP ]
+
+    [<Fact>]
+    let ``code writing layouts are shared by every output language`` () =
+        use output = new TemporaryDirectory()
+        let text = "first\n\nsecond\n"
+        let cases : (string * (codeWriter -> unit) * string) list =
+            [ "codewrite", (fun writer -> writer.codewrite text), "firstsecond"
+              "codewritei", (fun writer -> writer.codewritei text), "  first  second"
+              "codewritei-header", (fun writer -> writer.codewritei(">", text)), ">  first>  second"
+              "codewriten", (fun writer -> writer.codewriten text), "first\nsecond\n"
+              "codewritein", (fun writer -> writer.codewritein text), "  first\n  second\n"
+              "codewritein-header", (fun writer -> writer.codewritein(">", text)), ">  first\n>  second\n" ]
+
+        for language in outputLanguages do
+            for caseName,write,expected in cases do
+                let path = Path.Combine(output.Path, $"{language}-{caseName}.txt")
+                use writer = new codeWriter(path, 2, language)
+                writer.indent.inc()
+
+                write writer
+                writer.close()
+
+                Assert.Equal(expected, File.ReadAllText(path))
+
+    [<Fact>]
+    let ``comments retain only their language-specific formatting`` () =
+        use output = new TemporaryDirectory()
+        let cases =
+            [ Fortran, "  !A&B\n"
+              C99, "  /*A&B*/\n"
+              LaTeX, "  %A&B\n"
+              HTML, "  <span class=\"comment\">A&amp;B</span><br/>\n"
+              HTMLSequenceDiagram, "  <span class=\"comment\">A&amp;B</span><br/>\n"
+              Python, "  #A&B\n"
+              JavaScript, "  //A&B\n"
+              PHP, "  /*A&B*/\n" ]
+
+        for language,expected in cases do
+            let path = Path.Combine(output.Path, $"{language}-comment.txt")
+            use writer = new codeWriter(path, 2, language)
+            writer.indent.inc()
+
+            writer.comment "A&B"
+            writer.close()
+
+            Assert.Equal(expected, File.ReadAllText(path))
+
+    [<Fact>]
+    let ``Numeric code writer keeps every writing operation as a no-op`` () =
+        use output = new TemporaryDirectory()
+        let path = Path.Combine(output.Path, "numeric.txt")
+        use writer = new codeWriter(path, 2, Numeric)
+        writer.indent.inc()
+
+        writer.codewrite "raw"
+        writer.codewritei "indented"
+        writer.codewritei(">", "headed")
+        writer.codewriten "line"
+        writer.codewritein "indented line"
+        writer.codewritein(">", "headed line")
+        writer.comment "comment"
+        writer.close()
+
+        Assert.Equal("", File.ReadAllText(path))
+
     [<Fact>]
     let ``HTML comments encode text instead of emitting markup`` () =
         use output = new TemporaryDirectory()
