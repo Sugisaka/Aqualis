@@ -70,6 +70,7 @@ type FileLoginThrottle(context:Aqualis, options:FileLoginThrottleOptions) =
     let fn name = id + "_" + name
     let c name = constant + "_LOGIN_" + name
     let appMessage suffix = PhpEncoding.stringLiteral (options.ApplicationName + suffix)
+    let stateFile suffix = PhpEncoding.stringLiteral ("." + id + "-login-rate-limit" + suffix)
 
     static member DummyPasswordHash = "$2a$12$KoAU7tfTo34q7Kp7ypc4ROhSCM2Eoif/iJZ5z0sLl3RsbAkrJfIde"
 
@@ -104,10 +105,10 @@ type FileLoginThrottle(context:Aqualis, options:FileLoginThrottleOptions) =
             "finally { if (is_string($temporaryPath) && is_file($temporaryPath)) { @unlink($temporaryPath); } }"
             "}"
             "function " + recover + "(string $statePath, string $reason): void {"
-            "$quarantinePath = dirname($statePath).DIRECTORY_SEPARATOR.'.login-rate-limit.invalid-'.gmdate('Ymd-His').'-'.bin2hex(random_bytes(4)).'.json';"
+            "$quarantinePath = dirname($statePath).DIRECTORY_SEPARATOR." + stateFile ".invalid-" + ".gmdate('Ymd-His').'-'.bin2hex(random_bytes(4)).'.json';"
             "if (!@rename($statePath, $quarantinePath)) { throw new \\RuntimeException('Failed to quarantine invalid login rate-limit data.'); }"
             atomicWrite + "($statePath, '{\"entries\":[]}');"
-            "$quarantineFiles = glob(dirname($statePath).DIRECTORY_SEPARATOR.'.login-rate-limit.invalid-*.json', GLOB_NOSORT);"
+            "$quarantineFiles = glob(dirname($statePath).DIRECTORY_SEPARATOR." + stateFile ".invalid-*.json" + ", GLOB_NOSORT);"
             "if (is_array($quarantineFiles)) { rsort($quarantineFiles, SORT_STRING); foreach (array_slice($quarantineFiles, " + maxQuarantine + ") as $expiredQuarantine) { if (is_file($expiredQuarantine) && !@unlink($expiredQuarantine)) { error_log(" + appMessage " could not remove an old login rate-limit quarantine file." + "); } } }"
             "error_log(" + appMessage " reset invalid login rate-limit data: " + ".$reason.'. Quarantine: '.basename($quarantinePath));"
             "}"
@@ -125,15 +126,15 @@ type FileLoginThrottle(context:Aqualis, options:FileLoginThrottleOptions) =
             "function " + withState + "(callable $operation): array {"
             "$dataDirectory = dirname(__DIR__, 2).DIRECTORY_SEPARATOR." + PhpEncoding.stringLiteral options.DataDirectoryName + ";"
             "if (!is_dir($dataDirectory) || !is_writable($dataDirectory)) { error_log(" + appMessage " login rate-limit directory is unavailable." + "); return ['ok' => false, 'value' => null]; }"
-            "$lockPath = $dataDirectory.DIRECTORY_SEPARATOR.'.login-rate-limit.lock'; $lockHandle = @fopen($lockPath, 'c+');"
+            "$lockPath = $dataDirectory.DIRECTORY_SEPARATOR." + stateFile ".lock" + "; $lockHandle = @fopen($lockPath, 'c+');"
             "if ($lockHandle === false) { error_log(" + appMessage " login rate-limit lock could not be opened." + "); return ['ok' => false, 'value' => null]; }"
             "if (!@chmod($lockPath, 0640)) { fclose($lockHandle); error_log(" + appMessage " login rate-limit lock could not be protected." + "); return ['ok' => false, 'value' => null]; }"
             "$locked = false;"
             "try {"
             "if (!flock($lockHandle, LOCK_EX)) { throw new \\RuntimeException('Failed to lock login rate-limit data.'); } $locked = true;"
-            "$secretPath = $dataDirectory.DIRECTORY_SEPARATOR.'.login-rate-limit-secret'; if (!is_file($secretPath)) { " + atomicWrite + "($secretPath, bin2hex(random_bytes(32))); }"
+            "$secretPath = $dataDirectory.DIRECTORY_SEPARATOR." + stateFile "-secret" + "; if (!is_file($secretPath)) { " + atomicWrite + "($secretPath, bin2hex(random_bytes(32))); }"
             "$secret = @file_get_contents($secretPath, false, null, 0, 65); if (!is_string($secret) || preg_match('/\\A[0-9a-f]{64}\\z/D', $secret) !== 1) { throw new \\RuntimeException('Invalid login rate-limit secret.'); }"
-            "$statePath = $dataDirectory.DIRECTORY_SEPARATOR.'.login-rate-limit.json'; $state = ['entries' => []];"
+            "$statePath = $dataDirectory.DIRECTORY_SEPARATOR." + stateFile ".json" + "; $state = ['entries' => []];"
             "if (is_file($statePath)) { $stateSize = @filesize($statePath); if ($stateSize === false) { throw new \\RuntimeException('Failed to inspect login rate-limit state.'); } if ($stateSize > " + hardBytes + ") { " + recover + "($statePath, 'state exceeded the hard size limit ('.(string)$stateSize.' bytes)'); return ['ok' => false, 'value' => null]; } $stateText = @file_get_contents($statePath, false, null, 0, " + hardBytes + " + 1); if (!is_string($stateText)) { throw new \\RuntimeException('Failed to read login rate-limit state.'); } if (strlen($stateText) > " + hardBytes + ") { " + recover + "($statePath, 'state exceeded the hard size limit while being read'); return ['ok' => false, 'value' => null]; } try { $decodedState = json_decode($stateText, true, 16, JSON_THROW_ON_ERROR); } catch (\\JsonException $error) { $decodedState = null; } $state = " + normalize + "($decodedState); if ($state === null) { " + recover + "($statePath, 'state JSON or schema was invalid'); return ['ok' => false, 'value' => null]; } }"
             prune + "($state, time()); $value = $operation($state, $secret); $encoded = json_encode($state, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES); if (strlen($encoded) > " + softBytes + ") { throw new \\RuntimeException('Login rate-limit state exceeded the soft size limit.'); } " + atomicWrite + "($statePath, $encoded); return ['ok' => true, 'value' => $value];"
             "} catch (\\Throwable $error) { error_log(" + appMessage " login rate-limit failure: " + ".$error->getMessage()); return ['ok' => false, 'value' => null]; }"

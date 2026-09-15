@@ -70,6 +70,11 @@ module PhpResponseGenerationTests =
         Assert.Contains("function course_reserve_login_attempt($userId): array",generated)
         Assert.Contains("function course_release_successful_login_attempt($userId): bool",generated)
         Assert.Contains("DIRECTORY_SEPARATOR.\"data-course\"",generated)
+        Assert.Contains("DIRECTORY_SEPARATOR.\".course-login-rate-limit.lock\"",generated)
+        Assert.Contains("DIRECTORY_SEPARATOR.\".course-login-rate-limit-secret\"",generated)
+        Assert.Contains("DIRECTORY_SEPARATOR.\".course-login-rate-limit.json\"",generated)
+        Assert.Contains("DIRECTORY_SEPARATOR.\".course-login-rate-limit.invalid-*.json\"",generated)
+        Assert.DoesNotContain("DIRECTORY_SEPARATOR.'.login-rate-limit",generated)
         Assert.Contains("course_reserve_login_attempt($userId)",generated)
         Assert.Contains("course_release_successful_login_attempt($userId)",generated)
 
