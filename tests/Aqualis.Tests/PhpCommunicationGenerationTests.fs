@@ -238,6 +238,36 @@ module PhpCommunicationGenerationTests =
         |> ignore
 
     [<Fact>]
+    let ``general JSON decoding is bounded and reports malformed input`` () =
+        let source =
+            generate (fun context ->
+                let decoded = context.php.var "decoded"
+                decoded <==
+                    context.php.json_decode(
+                        context.php.var "jsonText",
+                        true,
+                        { MaxBytes = 2048; MaxDepth = 16 }))
+
+        Assert.Contains("if (!is_string($aqualisJson))", source)
+        Assert.Contains("strlen($aqualisJson) > 2048", source)
+        Assert.Contains("json_decode($aqualisJson, true, 16, JSON_THROW_ON_ERROR)", source)
+        Assert.DoesNotContain("json_decode($jsonText,true)", source)
+
+    [<Fact>]
+    let ``general JSON decoding validates configured limits`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "json-decode-limits.php", PHP)
+        let input = context.php.var "jsonText"
+        let valid = JsonReadOptions.defaults
+
+        Assert.Throws<ArgumentException>(fun () ->
+            context.php.json_decode(input, true, { valid with MaxBytes = 0 }) |> ignore)
+        |> ignore
+        Assert.Throws<ArgumentException>(fun () ->
+            context.php.json_decode(input, true, { valid with MaxDepth = 0 }) |> ignore)
+        |> ignore
+
+    [<Fact>]
     let ``atomic JSON update reads and mutates while holding a stable sidecar lock`` () =
         let source =
             generate (fun context ->

@@ -463,7 +463,26 @@ and ContextPhp internal (context:Aqualis) =
             context.indentDec()
             context.writei "}"
     member this.file_put_contents (filename:string,x:PHPdata) = this.file_put_contents(PHPdata filename, x)
-    member this.json_decode (x:PHPdata,p:bool) = data ("json_decode("+x.code+","+p.ToString()+")") [x.Context]
+    /// Decodes JSON with bounded input and depth, and throws instead of silently returning null.
+    member this.json_decode(x:PHPdata, associative:bool, options:JsonReadOptions) =
+        if options.MaxBytes <= 0 then
+            invalidArg (nameof options) "The maximum JSON size must be positive."
+        if options.MaxDepth <= 0 then
+            invalidArg (nameof options) "The maximum JSON depth must be positive."
+
+        let maxBytes = InvariantFormat.integer options.MaxBytes
+        let maxDepth = InvariantFormat.integer options.MaxDepth
+        let associativeLiteral = if associative then "true" else "false"
+        data
+            ("(function ($aqualisJson) { " +
+             "if (!is_string($aqualisJson)) { throw new \\UnexpectedValueException('The JSON input must be a string.'); } " +
+             "if (strlen($aqualisJson) > " + maxBytes + ") { throw new \\LengthException('The JSON input is too large.'); } " +
+             "return json_decode($aqualisJson, " + associativeLiteral + ", " + maxDepth + ", JSON_THROW_ON_ERROR); " +
+             "})(" + x.code + ")")
+            [x.Context]
+    /// Decodes JSON using the conservative application-data limits.
+    member this.json_decode(x:PHPdata, associative:bool) =
+        this.json_decode(x, associative, JsonReadOptions.defaults)
     member this.json_encode (x:PHPdata) =
         data
             ("json_encode(" + x.code +
