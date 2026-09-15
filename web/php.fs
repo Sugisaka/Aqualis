@@ -290,6 +290,25 @@ and ContextPhp internal (context:Aqualis) =
     member this.Or (x:list<bool0>) = boolean ("(" + String.Join(" || ", x |> List.map (fun s -> s.code)) + ")") (x |> List.map _.Context)
     member this.isset (x:PHPdata) = boolean ("isset(" + x.code + ")") [x.Context]
     member this.isNotset (x:PHPdata) = boolean ("!isset(" + x.code + ")") [x.Context]
+    /// Tests whether a PHP expression contains a string value.
+    member this.isString (x:PHPdata) = boolean ("is_string(" + x.code + ")") [x.Context]
+    /// Tests whether a PHP expression contains an integer value.
+    member this.isInt (x:PHPdata) = boolean ("is_int(" + x.code + ")") [x.Context]
+    /// Tests whether a PHP expression contains an array value.
+    member this.isArray (x:PHPdata) = boolean ("is_array(" + x.code + ")") [x.Context]
+    /// Tests whether a PHP expression is exactly the boolean value true.
+    member this.isTrue (x:PHPdata) = boolean ("(" + x.code + " === true)") [x.Context]
+    /// Compares two PHP expressions using strict equality.
+    member this.strictEquals (left:PHPdata, right:PHPdata) =
+        boolean ("(" + left.code + " === " + right.code + ")") [left.Context;right.Context]
+    /// Compares two strings without leaking timing information.
+    member this.hashEquals (known:PHPdata, submitted:PHPdata) =
+        boolean ("hash_equals(" + known.code + ", " + submitted.code + ")") [known.Context;submitted.Context]
+    /// Tests a PHP string using a statically supplied regular expression.
+    member this.matches (pattern:string, value:PHPdata) =
+        boolean
+            ("preg_match(" + PhpEncoding.stringLiteral pattern + ", " + value.code + ") === 1")
+            [value.Context]
     member this.echo (x:PHPdata) = this.phpcode <| fun () -> context.writei("echo " + x.code + ";")
     member this.echo (x:string) = this.echo (PHPdata x)
     /// Emits a PHP value as escaped HTML text.
