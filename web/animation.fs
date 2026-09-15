@@ -795,7 +795,7 @@ module HtmlWebExtensions =
         member this.code (style:list<string*PHPdata>, cd:PHPdata) =
             this.tagb0 ("pre",style) <| fun () ->
                 this.tagb0 ("code",[]) <| fun () ->
-                    this.Context.write cd.phpcode
+                    this.Context.php.echoHtmlText cd
 
         member this.code (style:list<string*string>) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b))
 

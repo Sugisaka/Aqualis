@@ -397,6 +397,22 @@ module WebGenerationStateTests =
             generated)
 
     [<Fact>]
+    let ``PHP code blocks escape dynamic values at runtime`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "php-code-block-escaping.php"
+
+        use context = new Aqualis(Some output.Path, Some fileName, PHP)
+        let submittedAnswer = PHPdata.var(context, "submittedAnswer")
+        context.html.code submittedAnswer
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.Contains(
+            "htmlspecialchars((string)($submittedAnswer), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')",
+            generated)
+        Assert.DoesNotContain("<?php echo $submittedAnswer ?>", generated)
+
+    [<Fact>]
     let ``typed PHP table cells render dynamic values with runtime HTML escaping`` () =
         use output = new TemporaryDirectory()
         let fileName = "php-table-cells.php"
