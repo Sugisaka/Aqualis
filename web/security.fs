@@ -252,7 +252,8 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
                 let token = this.Token.code
                 context.codewritein(
                     "<?php ",
-                    "if (!isset(" + token + ") || !is_string(" + token + ")) { " +
+                    "if (!isset(" + token + ") || !is_string(" + token + ") || " +
+                    "preg_match('/\\A[0-9a-f]{64}\\z/D', " + token + ") !== 1) { " +
                     token + " = bin2hex(random_bytes(32)); } ?>")
                 state.CsrfTokenEmitted <- true)
 
@@ -274,7 +275,9 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
         let postToken = "$_POST[" + PhpEncoding.stringLiteral SecurityCode.CsrfTokenName + "]"
         let expression =
             "isset(" + sessionToken + ") && is_string(" + sessionToken + ") && " +
+            "preg_match('/\\A[0-9a-f]{64}\\z/D', " + sessionToken + ") === 1 && " +
             "isset(" + postToken + ") && is_string(" + postToken + ") && " +
+            "preg_match('/\\A[0-9a-f]{64}\\z/D', " + postToken + ") === 1 && " +
             "hash_equals(" + sessionToken + ", " + postToken + ")"
         bool0(Var(Nt, expression, NaN), context)
 

@@ -144,6 +144,7 @@ module SecurityGenerationTests =
 
         Assert.Equal(1, occurrences "bin2hex(random_bytes(32))" generated)
         Assert.Contains("!isset($_SESSION[\"_aqualis_csrf\"])", generated)
+        Assert.Contains("preg_match('/\\A[0-9a-f]{64}\\z/D', $_SESSION[\"_aqualis_csrf\"]) !== 1", generated)
         Assert.Contains("name=\"<?php echo htmlspecialchars", generated)
         Assert.Contains("value=\"<?php echo htmlspecialchars((string)($_SESSION[\"_aqualis_csrf\"])", generated)
         Assert.Contains("ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'", generated)
@@ -163,6 +164,8 @@ module SecurityGenerationTests =
         Assert.Contains("$_SERVER[\"REQUEST_METHOD\"] === 'POST'", generated)
         Assert.Contains("isset($_POST[\"_aqualis_csrf\"])", generated)
         Assert.Contains("is_string($_POST[\"_aqualis_csrf\"])", generated)
+        Assert.Contains("preg_match('/\\A[0-9a-f]{64}\\z/D', $_SESSION[\"_aqualis_csrf\"]) === 1", generated)
+        Assert.Contains("preg_match('/\\A[0-9a-f]{64}\\z/D', $_POST[\"_aqualis_csrf\"]) === 1", generated)
         Assert.Contains(
             "hash_equals($_SESSION[\"_aqualis_csrf\"], $_POST[\"_aqualis_csrf\"])",
             generated)

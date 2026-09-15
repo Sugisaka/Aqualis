@@ -141,6 +141,8 @@ module TypedWebApiTests =
         Assert.Contains("session_start()", generated)
         Assert.Contains("$_SESSION[\"student_user_id\"] = \"student01\"", generated)
         Assert.Contains("hash_equals($_SESSION[\"_aqualis_csrf\"], $_POST[\"_aqualis_csrf\"])", generated)
+        Assert.Contains("preg_match('/\\A[0-9a-f]{64}\\z/D', $_SESSION[\"_aqualis_csrf\"]) === 1", generated)
+        Assert.Contains("preg_match('/\\A[0-9a-f]{64}\\z/D', $_POST[\"_aqualis_csrf\"]) === 1", generated)
         Assert.Contains("<form method=\"post\" action=\"main.php\"", generated)
         Assert.Contains("_aqualis_csrf", generated)
 
