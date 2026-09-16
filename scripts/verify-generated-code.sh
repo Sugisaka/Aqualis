@@ -272,6 +272,38 @@ for language in c fortran python; do
     printf '%s complex rank returned an unexpected result: %s\n' "$language" "$complex_rank" >&2
     exit 1
   fi
+  for homogeneous_case in real complex-wide; do
+    homogeneous_output="$(cd "$output_root/homogeneous-$homogeneous_case-$language" && "${run_command[@]}")"
+    homogeneous_result="$(printf '%s\n' "$homogeneous_output" | tail -n 1)"
+    if ! awk -v value="$homogeneous_result" 'BEGIN { exit !(value + 0 > 0.999999 && value + 0 < 1.000001) }'; then
+      printf '%s %s homogeneous solution was incorrect: %s\n' "$language" "$homogeneous_case" "$homogeneous_output" >&2
+      exit 1
+    fi
+  done
+  expect_generated_failure "$language short homogeneous solution" "$output_root/homogeneous-short-output-$language" 'Aqualis: LAPACK homogeneous solution length must match matrix columns.' "${run_command[@]}"
+  pseudoinverse_result="$(cd "$output_root/pseudoinverse-real-$language" && "${run_command[@]}")"
+  if ! awk -v value="$pseudoinverse_result" 'BEGIN { exit !(value + 0 > 1.499999 && value + 0 < 1.500001) }'; then
+    printf '%s pseudoinverse was incorrect: %s\n' "$language" "$pseudoinverse_result" >&2
+    exit 1
+  fi
+  complex_pseudoinverse="$(cd "$output_root/pseudoinverse-complex-$language" && "${run_command[@]}")"
+  if ! awk -v value="$complex_pseudoinverse" 'BEGIN { exit !(value + 0 > -0.500001 && value + 0 < -0.499999) }'; then
+    printf '%s complex pseudoinverse was incorrect: %s\n' "$language" "$complex_pseudoinverse" >&2
+    exit 1
+  fi
+  expect_generated_failure "$language small pseudoinverse output" "$output_root/pseudoinverse-small-output-$language" 'Aqualis: LAPACK pseudoinverse output shape must be matrix columns by rows.' "${run_command[@]}"
+  tikhonov_output="$(cd "$output_root/tikhonov-complex-$language" && "${run_command[@]}")"
+  if ! awk 'NR == 1 { real = $1 + 0 } NR == 2 { imaginary = $1 + 0 } END { exit !(NR == 2 && real > 0.333332 && real < 0.333334 && imaginary > -0.333334 && imaginary < -0.333332) }' <<< "$tikhonov_output"; then
+    printf '%s complex Tikhonov solution was incorrect: %s\n' "$language" "$tikhonov_output" >&2
+    exit 1
+  fi
+  tikhonov_column="$(cd "$output_root/tikhonov-column-$language" && "${run_command[@]}")"
+  if ! awk -v value="$tikhonov_column" 'BEGIN { exit !(value + 0 > 0.999999 && value + 0 < 1.000001) }'; then
+    printf '%s one-column Tikhonov solution was incorrect: %s\n' "$language" "$tikhonov_column" >&2
+    exit 1
+  fi
+  expect_generated_failure "$language short Tikhonov RHS" "$output_root/tikhonov-short-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side length must match matrix rows.' "${run_command[@]}"
+  expect_generated_failure "$language wide Tikhonov RHS" "$output_root/tikhonov-wide-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side must have one column.' "${run_command[@]}"
   if [[ "$language" != python ]]; then
     for matrix_type in real complex; do
       svd_directory="$output_root/svd-$matrix_type-$language"

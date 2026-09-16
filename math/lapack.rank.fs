@@ -8,6 +8,13 @@ namespace Aqualis
 
     [<AutoOpen>]
     module ContextLaRankExtensions =
+        let private requirePseudoInverseShapes (context:Aqualis) (rows:int0) (columns:int0)
+                                               (resultRows:int0) (resultColumns:int0) =
+            LapackValidation.require context (rows .<= 0) "LAPACK pseudoinverse matrix rows must be positive."
+            LapackValidation.require context (columns .<= 0) "LAPACK pseudoinverse matrix columns must be positive."
+            LapackValidation.require context (resultRows .=/ columns) "LAPACK pseudoinverse output shape must be matrix columns by rows."
+            LapackValidation.require context (resultColumns .=/ rows) "LAPACK pseudoinverse output shape must be matrix columns by rows."
+
         type ContextLa with
             ///<summary>行列の階数</summary>
             ///<param name="rank">行列matの階数</param>
@@ -201,6 +208,7 @@ namespace Aqualis
             ///<param name="cond">特異値を0とみなす上限値</param>
             member this.inverse_matrix2 (mat2:complex2,mat:complex2,cond:double0) =
                 this.GenerationContext.group.section "疑似逆行列" <| fun () ->
+                    requirePseudoInverseShapes this.GenerationContext mat.size1 mat.size2 mat2.size1 mat2.size2
                     this.GenerationContext.ch.i <| fun ns ->
                         this.GenerationContext.br.if2  (mat.size1.<mat.size2)
                         <| fun () ->
@@ -231,6 +239,7 @@ namespace Aqualis
             ///<param name="cond">特異値を0とみなす上限値</param>
             member this.inverse_matrix2 (mat2:double2,mat:double2,cond:double0) =
                 this.GenerationContext.group.section "疑似逆行列" <| fun () ->
+                    requirePseudoInverseShapes this.GenerationContext mat.size1 mat.size2 mat2.size1 mat2.size2
                     this.GenerationContext.ch.i <| fun ns ->
                         this.GenerationContext.br.if2  (mat.size1.<mat.size2)
                         <| fun () ->

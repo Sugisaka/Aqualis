@@ -420,6 +420,103 @@ module Program =
             context.la.rank(rank, matrix, double0(Dbl 1e-10))
             context.print.t rank
 
+        generate "homogeneous-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let solution = context.var.d1 "solution"
+            matrix.allocate(2, 2)
+            solution.allocate 2
+            matrix.clear()
+            matrix[0,0] <== 1.0
+            context.la.solve_homogeneq(matrix, solution)
+            context.print.t (asm.abs solution[1])
+
+        generate "homogeneous-complex-wide" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let solution = context.var.z1 "solution"
+            matrix.allocate(2, 3)
+            solution.allocate 3
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(1.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(1.0, 0.0))
+            context.la.solve_homogeneq(matrix, solution)
+            context.print.t (asm.abs solution[2])
+
+        generate "homogeneous-short-output" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let solution = context.var.d1 "solution"
+            matrix.allocate(2, 2)
+            solution.allocate 1
+            context.la.solve_homogeneq(matrix, solution)
+
+        generate "pseudoinverse-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let inverse = context.var.d2 "inverse"
+            matrix.allocate(2, 3)
+            inverse.allocate(3, 2)
+            matrix.clear()
+            matrix[0,0] <== 1.0
+            matrix[1,1] <== 2.0
+            context.la.inverse_matrix2(inverse, matrix, double0(Dbl 1e-10))
+            context.print.t (inverse[0,0] + inverse[1,1])
+
+        generate "pseudoinverse-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let inverse = context.var.z2 "inverse"
+            matrix.allocate(2, 2)
+            inverse.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(1.0, 1.0))
+            matrix[1,1] <== complex0(Cpx(2.0, 0.0))
+            context.la.inverse_matrix2(inverse, matrix, double0(Dbl 1e-10))
+            context.print.t inverse[0,0].im
+
+        generate "pseudoinverse-small-output" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let inverse = context.var.d2 "inverse"
+            matrix.allocate(2, 3)
+            inverse.allocate(1, 1)
+            context.la.inverse_matrix2(inverse, matrix, double0(Dbl 1e-10))
+
+        generate "tikhonov-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let rhs = context.var.z1 "rhs"
+            matrix.allocate(2, 1)
+            rhs.allocate 2
+            matrix.clear()
+            rhs.clear()
+            matrix[0,0] <== complex0(Cpx(1.0, 1.0))
+            matrix[1,0] <== complex0(Cpx(1.0, 0.0))
+            rhs[0] <== complex0(Cpx(1.0, 0.0))
+            context.la.solve_simuleq_t(matrix, rhs) <| fun solution ->
+                context.print.t solution[0].re
+                context.print.t solution[0].im
+
+        generate "tikhonov-column" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let rhs = context.var.z2 "rhs"
+            matrix.allocate(2, 1)
+            rhs.allocate(2, 1)
+            matrix.clear()
+            rhs.clear()
+            matrix[0,0] <== complex0(Cpx(1.0, 0.0))
+            rhs[0,0] <== complex0(Cpx(1.0, 0.0))
+            context.la.solve_simuleq_tt2(matrix, rhs, double0(Dbl 1e-6)) <| fun solution ->
+                context.print.t solution[0].re
+
+        generate "tikhonov-short-rhs" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let rhs = context.var.d1 "rhs"
+            matrix.allocate(2, 1)
+            rhs.allocate 1
+            context.la.solve_simuleq_t(matrix, rhs) ignore
+
+        generate "tikhonov-wide-rhs" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let rhs = context.var.z2 "rhs"
+            matrix.allocate(2, 1)
+            rhs.allocate(2, 2)
+            context.la.solve_simuleq_tt2(matrix, rhs, double0(Dbl 1e-6)) ignore
+
         let generateEigenStandard caseName (rows:int) (columns:int) (valueCount:int) (vectorOrder:int) =
             generate caseName <| fun context ->
                 let matrix = context.var.z2 "matrix"
