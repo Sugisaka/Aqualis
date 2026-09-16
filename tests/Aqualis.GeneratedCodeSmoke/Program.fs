@@ -672,6 +672,36 @@ module Program =
             matrix.allocate(2, 3)
             context.la.determinant matrix <| fun result -> context.print.t result
 
+        generate "determinant-regular-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 5.0
+            context.la.determinant matrix <| fun result -> context.print.t result
+
+        generate "determinant-regular-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(5.0, 0.0))
+            context.la.determinant matrix <| fun result -> context.print.t result
+
+        generate "determinant-singular-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            context.la.determinant matrix <| fun result -> context.print.t result
+
+        generate "determinant-singular-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            context.la.determinant matrix <| fun result -> context.print.t result
+
         generate "rank-real" <| fun context ->
             let matrix = context.var.d2 "matrix"
             let rank = context.var.i0 "rank"

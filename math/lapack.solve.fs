@@ -8,6 +8,11 @@ namespace Aqualis
 
     [<AutoOpen>]
     module ContextLaSolveExtensions =
+        let private requireSolveBackend (context:Aqualis) =
+            match context.Language with
+            | C99 | Fortran | Python | LaTeX | HTML -> ()
+            | language -> UnsupportedOperation.codeGeneration (string language) "LAPACK linear solve"
+
         let private checkSolveInfo (context:Aqualis) (info:int0) =
             match context.language with
             |Fortran ->
@@ -38,6 +43,7 @@ namespace Aqualis
             ///<param name="matrix">係数行列</param>
             ///<param name="y">定数項ベクトル→解ベクトル</param>
             member this.solve_simuleq (matrix:complex2,y:complex1) =
+                requireSolveBackend this.GenerationContext
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
@@ -60,7 +66,7 @@ namespace Aqualis
                                 this.GenerationContext.codewritein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
                                 checkSolveInfo this.GenerationContext info
                     |LaTeX ->
-                        this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$$\\\\\n")
+                        this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                     |HTML ->
                         this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
@@ -72,6 +78,7 @@ namespace Aqualis
             ///<param name="matrix">係数行列</param>
             ///<param name="y">定数項ベクトル→解ベクトル</param>
             member this.solve_simuleq (matrix:double2,y:double1) =
+                requireSolveBackend this.GenerationContext
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
@@ -106,6 +113,7 @@ namespace Aqualis
             ///<param name="matrix">係数行列</param>
             ///<param name="y">定数項ベクトルを列方向に並べた配列→解ベクトルを列方向に並べた配列</param>
             member this.solve_simuleqs (matrix:complex2,y:complex2) =
+                requireSolveBackend this.GenerationContext
                 if matrix.code = y.code then
                     invalidArg (nameof y) "LAPACK coefficient matrix and right-hand side must be different matrices."
                 this.GenerationContext.olist.add "-llapack"
@@ -143,6 +151,7 @@ namespace Aqualis
             ///<param name="matrix">係数行列</param>
             ///<param name="y">定数項ベクトルを列方向に並べた配列→解ベクトルを列方向に並べた配列</param>
             member this.solve_simuleqs (matrix:double2,y:double2) =
+                requireSolveBackend this.GenerationContext
                 if matrix.code = y.code then
                     invalidArg (nameof y) "LAPACK coefficient matrix and right-hand side must be different matrices."
                 this.GenerationContext.olist.add "-llapack"

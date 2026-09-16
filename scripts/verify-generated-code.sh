@@ -78,6 +78,28 @@ run_and_verify_number() {
   printf '%s: generated program returned %s\n' "$label" "$actual"
 }
 
+verify_negative_infinity() {
+  local label="$1"
+  local working_directory="$2"
+  shift 2
+
+  local actual
+  actual="$(cd "$working_directory" && "$@")"
+  if ! python3 - "$actual" <<'PY'
+import math
+import sys
+
+value = float(sys.argv[1].strip())
+if not (math.isinf(value) and value < 0):
+    sys.exit(f"Expected negative infinity, received {value}.")
+PY
+  then
+    printf '%s returned an unexpected result: %s\n' "$label" "$actual" >&2
+    exit 1
+  fi
+  printf '%s: generated program returned negative infinity\n' "$label"
+}
+
 verify_fft2_coefficients() {
   local language="$1"
   local working_directory="$2"
@@ -335,6 +357,10 @@ for language in c fortran python; do
   expect_generated_failure "$language wrong solve RHS rows" "$output_root/solve-wrong-rhs-rows-$language" 'Aqualis: LAPACK right-hand side rows must match matrix order.' "${run_command[@]}"
   expect_generated_failure "$language non-square determinant" "$output_root/determinant-non-square-$language" 'Aqualis: LAPACK determinant matrix must be square.' "${run_command[@]}"
   expect_generated_failure "$language non-square complex determinant" "$output_root/determinant-complex-non-square-$language" 'Aqualis: LAPACK determinant matrix must be square.' "${run_command[@]}"
+  run_and_verify_number "$language regular real determinant" "$output_root/determinant-regular-real-$language" '1' "${run_command[@]}"
+  run_and_verify_number "$language regular complex determinant" "$output_root/determinant-regular-complex-$language" '1' "${run_command[@]}"
+  verify_negative_infinity "$language singular real determinant" "$output_root/determinant-singular-real-$language" "${run_command[@]}"
+  verify_negative_infinity "$language singular complex determinant" "$output_root/determinant-singular-complex-$language" "${run_command[@]}"
   for eigen_case in standard generalized; do
     eigen_directory="$output_root/eigen-$eigen_case-$language"
     eigen_result="$(cd "$eigen_directory" && "${run_command[@]}")"
