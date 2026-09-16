@@ -39,6 +39,7 @@
     <Compile Include="Graph1dTests.fs" />
     <Compile Include="LapackRankGenerationTests.fs" />
     <Compile Include="LapackSvdGenerationTests.fs" />
+    <Compile Include="LapackAliasGenerationTests.fs" />
     <Compile Include="LapackDeterminantGenerationTests.fs" />
     <Compile Include="PhpUploadGenerationTests.fs" />
     <Compile Include="PhpCommunicationGenerationTests.fs" />

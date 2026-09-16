@@ -106,6 +106,8 @@ namespace Aqualis
             ///<param name="matrix">係数行列</param>
             ///<param name="y">定数項ベクトルを列方向に並べた配列→解ベクトルを列方向に並べた配列</param>
             member this.solve_simuleqs (matrix:complex2,y:complex2) =
+                if matrix.code = y.code then
+                    invalidArg (nameof y) "LAPACK coefficient matrix and right-hand side must be different matrices."
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
@@ -141,6 +143,8 @@ namespace Aqualis
             ///<param name="matrix">係数行列</param>
             ///<param name="y">定数項ベクトルを列方向に並べた配列→解ベクトルを列方向に並べた配列</param>
             member this.solve_simuleqs (matrix:double2,y:double2) =
+                if matrix.code = y.code then
+                    invalidArg (nameof y) "LAPACK coefficient matrix and right-hand side must be different matrices."
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->

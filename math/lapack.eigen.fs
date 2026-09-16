@@ -28,6 +28,8 @@ namespace Aqualis
             /// <param name="eigenvectors">固有ベクトル</param>
             /// <param name="mat1">複素非対称行列</param>
             member this.eigen_matrix (eigenvalues:complex1,eigenvectors:complex2) (mat1:complex2) =
+                if eigenvectors.code = mat1.code then
+                    invalidArg (nameof eigenvectors) "LAPACK eigenvector output must be different from input matrices."
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "非対称複素行列の固有値" <| fun () ->
@@ -110,6 +112,10 @@ namespace Aqualis
             /// <param name="mat1">行列A</param>
             /// <param name="mat2">行列B</param>
             member this.eigen_matrix2 (eigenvalues1:complex1,eigenvalues2:complex1,eigenvectors:complex2) (mat1:complex2) (mat2:complex2) =
+                    if eigenvalues1.code = eigenvalues2.code then
+                        invalidArg (nameof eigenvalues2) "LAPACK generalized eigenvalue outputs must be different vectors."
+                    if eigenvectors.code = mat1.code || eigenvectors.code = mat2.code then
+                        invalidArg (nameof eigenvectors) "LAPACK eigenvector output must be different from input matrices."
                     this.GenerationContext.group.section "非対称複素行列の一般化固有値" <| fun () ->
                         this.GenerationContext.olist.add "-llapack"
                         this.GenerationContext.olist.add "-lblas"
