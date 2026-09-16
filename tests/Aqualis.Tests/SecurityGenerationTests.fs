@@ -60,6 +60,29 @@ module SecurityGenerationTests =
         Assert.True(cookieOptionsIndex < sessionStartIndex)
 
     [<Fact>]
+    let ``session and CSRF initialization are hoisted out of generated branches`` () =
+        let generated =
+            generate "security-prologue" <| fun context ->
+                context.writein "BODY_BEFORE_SECURITY"
+                let guard = context.php.isset(context.php.var "initializeSecurity")
+                context.br.if1 guard <| fun () ->
+                    context.php.session.Start productionOptions
+                    context.php.csrf.EnsureToken()
+                context.php.csrf.Field()
+
+        let sessionIndex = generated.IndexOf("session_start()", StringComparison.Ordinal)
+        let tokenIndex = generated.IndexOf("bin2hex(random_bytes(32))", StringComparison.Ordinal)
+        let bodyIndex = generated.IndexOf("BODY_BEFORE_SECURITY", StringComparison.Ordinal)
+        let branchIndex = generated.IndexOf("isset($initializeSecurity)", StringComparison.Ordinal)
+
+        Assert.True(sessionIndex >= 0)
+        Assert.True(sessionIndex < tokenIndex)
+        Assert.True(tokenIndex < bodyIndex)
+        Assert.True(tokenIndex < branchIndex)
+        Assert.Equal(1, occurrences "session_start()" generated)
+        Assert.Equal(1, occurrences "bin2hex(random_bytes(32))" generated)
+
+    [<Fact>]
     let ``session regeneration fails closed and reissues the cookie securely`` () =
         let generated =
             generate "session-regenerate" <| fun context ->
@@ -132,6 +155,31 @@ module SecurityGenerationTests =
         Assert.True(deleteCookieIndex < destroyIndex)
 
     [<Fact>]
+    let ``session destroy requires explicit restart and reinitializes CSRF`` () =
+        let generated =
+            generate "session-restart" <| fun context ->
+                let session = context.php.session
+                let csrf = context.php.csrf
+                session.Start productionOptions
+                csrf.EnsureToken()
+                session.Destroy()
+
+                Assert.Throws<InvalidOperationException>(fun () -> csrf.Field())
+                |> ignore
+
+                session.Start productionOptions
+                csrf.EnsureToken()
+                csrf.Field()
+
+        Assert.Equal(2, occurrences "session_start()" generated)
+        Assert.Equal(2, occurrences "bin2hex(random_bytes(32))" generated)
+        let destroyIndex = generated.IndexOf("session_destroy();", StringComparison.Ordinal)
+        let restartIndex = generated.IndexOf("session_start()", destroyIndex, StringComparison.Ordinal)
+        let reinitializeIndex = generated.IndexOf("bin2hex(random_bytes(32))", restartIndex, StringComparison.Ordinal)
+        Assert.True(destroyIndex < restartIndex)
+        Assert.True(restartIndex < reinitializeIndex)
+
+    [<Fact>]
     let ``CSRF token and field are emitted once and HTML escaped at runtime`` () =
         let generated =
             generate "csrf-field" <| fun context ->
@@ -193,7 +241,7 @@ module SecurityGenerationTests =
                 csrf.RotateToken()
                 context.html.formFileUploadWithCsrf(Url.relative "upload.php", csrf) ignore
 
-        Assert.Equal(1, occurrences "bin2hex(random_bytes(32))" generated)
+        Assert.Equal(2, occurrences "bin2hex(random_bytes(32))" generated)
         Assert.Contains("enctype=\"multipart/form-data\"", generated)
         Assert.Contains("_aqualis_csrf", generated)
 

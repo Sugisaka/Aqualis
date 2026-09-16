@@ -283,6 +283,7 @@ namespace Aqualis
         let gate = obj()
         let mutable cwriter:option<StreamWriter> = if filename = "" then None else Some (new StreamWriter(filename,false))
         let captureWriters = ResizeArray<StringWriter>()
+        let prefixes = ResizeArray<string>()
         let mutable published = false
 
         let disposeWriter() =
@@ -318,6 +319,40 @@ namespace Aqualis
                 | :? UnauthorizedAccessException -> ()
             |_ -> ()
 
+        let applyPrefixes() =
+            if prefixes.Count > 0 then
+                (requireWriter()).Flush()
+                disposeWriter()
+                let output = AtomicOutputFile.create filename
+                try
+                    let writeStagedFile() =
+                        use destination =
+                            new FileStream(
+                                output.StagingPath,
+                                FileMode.CreateNew,
+                                FileAccess.Write,
+                                FileShare.None)
+                        let prefixBytes =
+                            prefixes
+                            |> String.concat ""
+                            |> Text.UTF8Encoding(false).GetBytes
+                        destination.Write(prefixBytes, 0, prefixBytes.Length)
+                        use source =
+                            new FileStream(
+                                filename,
+                                FileMode.Open,
+                                FileAccess.Read,
+                                FileShare.Read)
+                        source.CopyTo(destination)
+                        destination.Flush(true)
+                    writeStagedFile()
+                    AtomicOutputFile.publish output
+                    prefixes.Clear()
+                with _ ->
+                    AtomicOutputFile.discard output
+                    reopen true
+                    reraise()
+
         new(filename:string,indentsize:int,lan:Language) =
             new codeWriter(filename,indentsize,lan,None)
 
@@ -334,6 +369,12 @@ namespace Aqualis
                     captureWriters[captureWriters.Count - 1].Write s
                 else
                     (requireWriter()).Write s)
+
+        /// Registers text that is written before all ordinary generated output.
+        member internal _.prepend(s:string) =
+            lock gate (fun () ->
+                requireWriter() |> ignore
+                prefixes.Add s)
 
         member private this.writeLines(ss:string, transform:string -> string) =
             match lan with
@@ -414,7 +455,9 @@ namespace Aqualis
                 
         ///<summary>ファイルを閉じる</summary>
         member this.close() =
-            lock gate disposeWriter
+            lock gate (fun () ->
+                applyPrefixes()
+                disposeWriter())
 
         ///<summary>一時ファイルに生成したコードを最終パスへ公開する</summary>
         member internal _.publish() =
@@ -422,6 +465,7 @@ namespace Aqualis
                 match publishTarget with
                 |None -> invalidOp "Only an atomic code writer can publish its output."
                 |Some targetPath when not published ->
+                    applyPrefixes()
                     disposeWriter()
                     AtomicOutputFile.publish {
                         TargetPath = targetPath

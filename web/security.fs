@@ -45,7 +45,9 @@ module SessionOptions =
 
 type private SecurityGenerationState() =
     member val SessionOptions: SessionOptions option = None with get, set
+    member val SessionPrologueRegistered = false with get, set
     member val CsrfTokenEmitted = false with get, set
+    member val CsrfPrologueRegistered = false with get, set
     member val Gate = obj() with get
 
 [<RequireQualifiedAccess>]
@@ -130,7 +132,8 @@ module private SecurityCode =
 type WebSession internal (context:Aqualis) =
     member internal _.Context = context
 
-    /// Configures a host-only session cookie and starts a session when needed.
+    /// Registers an unconditional file prologue that configures a host-only
+    /// session cookie and starts a session when needed.
     /// An already-active session is accepted only when all requested security settings match.
     member _.Start(options:SessionOptions) =
         SecurityCode.validateSessionOptions options
@@ -151,8 +154,7 @@ type WebSession internal (context:Aqualis) =
                 let expectedSecure = SecurityCode.boolLiteral options.Secure
                 let expectedHttpOnly = SecurityCode.boolLiteral options.HttpOnly
 
-                context.codewritein(
-                    "<?php ",
+                let startCode =
                     "$aqualisSessionHeaderFile = ''; $aqualisSessionHeaderLine = 0; " +
                     "if (headers_sent($aqualisSessionHeaderFile, $aqualisSessionHeaderLine)) { " +
                     "throw new \\RuntimeException('Session cookies must be configured before output is sent.'); } " +
@@ -189,7 +191,12 @@ type WebSession internal (context:Aqualis) =
                     "if (!session_start()) { throw new \\RuntimeException('Failed to start the PHP session.'); } " +
                     "if (!setcookie(session_name(), session_id(), " + emittedCookieOptions + ")) { " +
                     "throw new \\RuntimeException('Failed to issue the session cookie with the requested security settings.'); } " +
-                    "} else { throw new \\RuntimeException('PHP sessions are disabled.'); } ?>")
+                    "} else { throw new \\RuntimeException('PHP sessions are disabled.'); } ?>"
+                if state.SessionPrologueRegistered then
+                    context.codewritein("<?php ", startCode)
+                else
+                    context.prependRaw("<?php " + startCode + Environment.NewLine)
+                    state.SessionPrologueRegistered <- true
                 state.SessionOptions <- Some options)
 
     /// Replaces the active session identifier, deletes the old session data file,
@@ -226,6 +233,10 @@ type WebSession internal (context:Aqualis) =
             "'samesite' => $sessionCookieParams['samesite'] ?? 'Lax']); " +
             "} " +
             "session_destroy(); } ?>")
+        let state = SecurityGenerationStates.get context
+        lock state.Gate (fun () ->
+            state.SessionOptions <- None
+            state.CsrfTokenEmitted <- false)
 
     /// Returns an expression for a value in the PHP session array.
     member _.Item(key:string) =
@@ -242,7 +253,7 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
 
     member private _.Token = session.Item SecurityCode.CsrfTokenName
 
-    /// Creates a cryptographically random session token once when it is absent or invalid.
+    /// Registers unconditional token initialization in the file prologue once.
     member this.EnsureToken() =
         SecurityCode.requireStarted context "csrf.EnsureToken"
         let state = SecurityGenerationStates.get context
@@ -250,16 +261,21 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
         lock state.Gate (fun () ->
             if not state.CsrfTokenEmitted then
                 let token = this.Token.code
-                context.codewritein(
-                    "<?php ",
+                let ensureCode =
                     "if (!isset(" + token + ") || !is_string(" + token + ") || " +
                     "preg_match('/\\A[0-9a-f]{64}\\z/D', " + token + ") !== 1) { " +
-                    token + " = bin2hex(random_bytes(32)); } ?>")
+                    token + " = bin2hex(random_bytes(32)); } ?>"
+                if state.CsrfPrologueRegistered then
+                    context.codewritein("<?php ", ensureCode)
+                else
+                    context.prependRaw("<?php " + ensureCode + Environment.NewLine)
+                    state.CsrfPrologueRegistered <- true
                 state.CsrfTokenEmitted <- true)
 
     /// Replaces the current CSRF token, for example after a privilege change.
     member this.RotateToken() =
         SecurityCode.requireStarted context "csrf.RotateToken"
+        this.EnsureToken()
         let state = SecurityGenerationStates.get context
 
         lock state.Gate (fun () ->

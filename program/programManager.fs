@@ -152,6 +152,11 @@ namespace Aqualis
                 invalidOp "PHP statements can only be emitted by a PHP generation context."
             withWriter (fun writer -> writer.codewritein("<?php ", statement + " ?>"))
         member internal _.writeRaw(s:string) = withWriter (fun writer -> writer.cwrite s)
+        member internal _.prependRaw(s:string) =
+            ensureActive()
+            match cwriter with
+            |Some writer -> writer.prepend s
+            |None -> invalidOp "A writerless Aqualis context cannot register generated prologue code."
         member internal _.captureCode(action:unit -> 'T) =
             ensureActive()
             match cwriter with
