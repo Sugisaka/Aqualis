@@ -23,11 +23,13 @@ done
 if command -v node >/dev/null 2>&1; then
   node_command="node"
   javascript_path="$output_root/javascript/smoke.js"
+  javascript_division_path="$output_root/javascript-integer-division/smoke.js"
   javascript_dot_path="$output_root/dot-length-mismatch-javascript/smoke.js"
 elif command -v node.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
   # WSL can use the Windows Node.js runtime when a Linux node binary is absent.
   node_command="node.exe"
   javascript_path="$(wslpath -w "$output_root/javascript/smoke.js")"
+  javascript_division_path="$(wslpath -w "$output_root/javascript-integer-division/smoke.js")"
   javascript_dot_path="$(wslpath -w "$output_root/dot-length-mismatch-javascript/smoke.js")"
 else
   printf '%s\n' 'Required runtime is missing: node or node.exe' >&2
@@ -160,6 +162,8 @@ printf 'C99 Bessel functions: passed\n'
 
 "$node_command" --check "$javascript_path"
 run_and_verify 'JavaScript' "$output_root/javascript" '42' "$node_command" "$javascript_path"
+"$node_command" --check "$javascript_division_path"
+run_and_verify 'JavaScript integer division' "$output_root/javascript-integer-division" $'2\n-2\n2.5' "$node_command" "$javascript_division_path"
 
 php -l "$output_root/php/smoke.php" >/dev/null
 run_and_verify 'PHP' "$output_root/php" '42' php smoke.php

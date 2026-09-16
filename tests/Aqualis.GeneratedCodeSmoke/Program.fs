@@ -64,6 +64,23 @@ module Program =
             else
                 context.print.t value
 
+    let private generateJavaScriptIntegerDivision outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "javascript-integer-division")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [JavaScript] outputDirectory "smoke" "1.0" <| fun context ->
+            context.writein "globalThis.print = console.log;"
+            let left = context.var.i0 "left"
+            let right = context.var.i0 "right"
+            let negative = context.var.i0 "negative"
+            left <== 5
+            right <== 2
+            negative <== -5
+            let dividend = Var(It 4, "left", NaN)
+            let divisor = Var(It 4, "right", NaN)
+            context.print.t (int0(Div(It 4, dividend, divisor)))
+            context.print.t (int0(Div(It 4, Var(It 4, "negative", NaN), divisor)))
+            context.print.t (double0(Div(Dt, dividend, divisor)))
+
     let private generateCArrayCase outputRoot caseName debugMode (code:Aqualis -> unit) =
         let outputDirectory = Path.Combine(outputRoot, "c-array-" + caseName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1332,6 +1349,7 @@ module Program =
             let outputRoot = Path.GetFullPath(outputRoot)
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
+            generateJavaScriptIntegerDivision outputRoot
             generatePythonSciPy outputRoot
             generateCBessel outputRoot
             generateDistributedC outputRoot

@@ -202,6 +202,8 @@ namespace Aqualis
                     |_ -> x.evalJ c + "*" + y.evalJ c
                 |Div(Dt,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     (ToDbl x/ToDbl y).evalJ c
+                |Div(It _,x,y) ->
+                    "Math.trunc((" + x.evalJ c + ")/(" + y.evalJ c + "))"
                 |Div(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalJ c + ")/(" + y.evalJ c + ")"

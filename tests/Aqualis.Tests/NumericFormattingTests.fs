@@ -139,6 +139,7 @@ module NumericFormattingTests =
     [<Fact>]
     let ``Python integer division and modulo truncate toward zero`` () =
         use target = Aqualis.BlankWriter Python
+        use javascriptTarget = Aqualis.BlankWriter JavaScript
         use cTarget = Aqualis.BlankWriter C99
         use fortranTarget = Aqualis.BlankWriter Fortran
         let dividend = Var(It 4, "dividend", NaN)
@@ -162,6 +163,10 @@ module NumericFormattingTests =
 
         Assert.Equal("dividend/divisor", division.evalC cTarget)
         Assert.Equal("dividend/divisor", division.evalF fortranTarget)
+        Assert.Equal("Math.trunc((dividend)/(divisor))", division.evalJ javascriptTarget)
+        Assert.Equal(
+            "Number(dividend)/Number(divisor)",
+            Div(Dt, dividend, divisor).evalJ javascriptTarget)
         Assert.Equal("dividend%divisor", modulo.evalC cTarget)
         Assert.Equal("mod(dividend,divisor)", modulo.evalF fortranTarget)
 
@@ -294,7 +299,6 @@ module NumericFormattingTests =
             [
                 C99, fun expression target -> expression.evalC target
                 Fortran, fun expression target -> expression.evalF target
-                PHP, fun expression target -> expression.evalPh target
                 Python, fun expression target -> expression.evalPy target
             ]
 

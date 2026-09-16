@@ -11,6 +11,24 @@ module UnsupportedOperationTests =
         Assert.Equal(expectedMessage, error.Message)
 
     [<Fact>]
+    let ``PHP rejects executable complex expressions during generation`` () =
+        use context = Aqualis.BlankWriter PHP
+        assertNotSupported
+            "PHP code generation does not support complex-number literals."
+            (fun () -> Cpx(1.0, 2.0).evalPh context |> ignore)
+        assertNotSupported
+            "PHP code generation does not support the real-part operation (Re)."
+            (fun () -> Re(Cpx(1.0, 2.0)).evalPh context |> ignore)
+
+        use output = new TemporaryDirectory()
+        assertNotSupported
+            "PHP code generation does not support complex-number literals."
+            (fun () ->
+                Compile [PHP] output.Path "php-complex-scalar" "1" <| fun generated ->
+                    generated.ch.z <| fun value ->
+                        value <== complex0(Cpx(1.0, 2.0)))
+
+    [<Fact>]
     let ``JavaScript and PHP file output is rejected`` () =
         for language,targetName in [JavaScript,"JavaScript"; PHP,"PHP"] do
             use context = new Aqualis(None, None, language)

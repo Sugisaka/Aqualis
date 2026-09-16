@@ -14,7 +14,11 @@ namespace Aqualis
         type expr with
 
             static member substPh (x:expr) (y:expr) (c:Aqualis) =
-                c.codewritein ("<?php ", x.evalPh c + " = " + y.evalPh c + "; ?>")
+                let target =
+                    match x with
+                    |Var(_,name,_) -> name
+                    |_ -> x.evalPh c
+                c.codewritein ("<?php ", target + " = " + y.evalPh c + "; ?>")
 
             static member equivPh (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "PHP" "equation display"
@@ -129,6 +133,13 @@ namespace Aqualis
                 match this.simp with
                 |False -> "false"
                 |True -> "true"
+                |Eq(x,y)
+                |NEq(x,y)
+                |Greater(x,y)
+                |GreaterEq(x,y)
+                |Less(x,y)
+                |LessEq(x,y) when x.etype = Zt || y.etype = Zt ->
+                    UnsupportedOperation.codeGeneration "PHP" "complex-number comparisons"
                 |Eq(x,y) -> x.evalPh c + " == " + y.evalPh c
                 |NEq(x,y) -> x.evalPh c + " != " + y.evalPh c
                 |Greater(x,y) -> x.evalPh c + " > " + y.evalPh c
@@ -145,9 +156,30 @@ namespace Aqualis
                     |> fun lst -> String.Join(" || ", lst)
                 |Int x -> c.numFormat.ItoS x
                 |Dbl x -> c.numFormat.DtoS x
-                |Cpx (0.0,1.0) -> "uj"
-                |Cpx (re,im) -> c.numFormat.DtoS re + "+uj*" + c.numFormat.DtoS im
+                |Cpx _ -> UnsupportedOperation.codeGeneration "PHP" "complex-number literals"
+                |Var (Zt,_,_) -> UnsupportedOperation.codeGeneration "PHP" "complex-number values"
                 |Var (_,s,x) -> s
+                |Inv(Zt,_)
+                |Add(Zt,_,_)
+                |Sub(Zt,_,_)
+                |Mul(Zt,_,_)
+                |Div(Zt,_,_)
+                |Mod(Zt,_,_)
+                |Pow(Zt,_,_) ->
+                    UnsupportedOperation.codeGeneration "PHP" "complex-number arithmetic"
+                |Exp(Zt,_)
+                |Sin(Zt,_)
+                |Cos(Zt,_)
+                |Tan(Zt,_)
+                |Asin(Zt,_)
+                |Acos(Zt,_)
+                |Atan(Zt,_)
+                |Log(Zt,_)
+                |Log10(Zt,_)
+                |Sqrt(Zt,_) ->
+                    UnsupportedOperation.codeGeneration "PHP" "complex-number functions"
+                |Abs(_,x) when x.etype = Zt ->
+                    UnsupportedOperation.codeGeneration "PHP" "the absolute-value operation for complex numbers"
                 |Inv(_,x) ->
                     match x with
                     |Add _|Sub _ -> "-(" + x.evalPh c + ")"
@@ -199,14 +231,20 @@ namespace Aqualis
                         "(float)" + x.evalPh c
                 |Floor x -> "floor(" + x.evalPh c + ")"
                 |Ceil x -> "ceil(" + x.evalPh c + ")"
-                |Re x -> "creal(" + x.evalPh c + ")"
-                |Im x -> "cimag(" + x.evalPh c + ")"
-                |Conj x -> "conj(" + x.evalPh c + ")"
+                |Re _ -> UnsupportedOperation.codeGeneration "PHP" "the real-part operation (Re)"
+                |Im _ -> UnsupportedOperation.codeGeneration "PHP" "the imaginary-part operation (Im)"
+                |Conj _ -> UnsupportedOperation.codeGeneration "PHP" "the complex-conjugate operation (Conj)"
+                |Idx1 (Zt,_,_) -> UnsupportedOperation.codeGeneration "PHP" "complex-number array values"
                 |Idx1 (_,name,i) -> name + "[" + i.evalPh c + "]"
                 |Idx2 (_,name,i,j) ->
                     UnsupportedOperation.codeGeneration "PHP" "two-dimensional array indexing"
                 |Idx3 (_,name,i,j,k) ->
                     UnsupportedOperation.codeGeneration "PHP" "three-dimensional array indexing"
+                |Let (Zt,_,_,_)
+                |Sum(Zt,_,_,_) ->
+                    UnsupportedOperation.codeGeneration "PHP" "complex-number expressions"
+                |IfEl(_,n1,n2) when n1.etype = Zt || n2.etype = Zt ->
+                    UnsupportedOperation.codeGeneration "PHP" "complex-number expressions"
                 |Let (t,y,x,f) ->
                     // let x =
                     //     match t with
