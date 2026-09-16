@@ -332,12 +332,12 @@ namespace Aqualis
         ///<summary>配列のクリア</summary>
         abstract member clear: unit -> unit
         default __.clear() =
-            printfn "WARNING: abstract clear method"
+            UnsupportedOperation.raise "This two-dimensional array type does not support clearing."
 
         ///<summary>配列サイズの初期化</summary>
         abstract member sizeinit: unit -> unit
         default __.sizeinit() =
-            printfn "WARNING: abstract sizeinit method"
+            UnsupportedOperation.raise "This two-dimensional array type does not support size initialization."
 
         ///<summary>配列の全要素に対する処理</summary>
         member this.foreach code =

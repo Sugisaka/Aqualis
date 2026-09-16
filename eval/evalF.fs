@@ -17,10 +17,10 @@ namespace Aqualis
                 c.codewritein (x.evalF c  + " = " + y.evalF c)
 
             static member equivF (x:expr) (y:expr) (c:Aqualis) =
-                printfn "Fortranでこの文は使用できません"
+                UnsupportedOperation.codeGeneration "Fortran" "equation display"
 
             static member equivAlignF (x:expr) (y:expr) (c:Aqualis) =
-                printfn "Fortranでこの文は使用できません"
+                UnsupportedOperation.codeGeneration "Fortran" "aligned equation display"
 
             static member forLoopF (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()

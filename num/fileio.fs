@@ -9,6 +9,9 @@ namespace Aqualis
     open System
 
     module private FileIoReadTarget =
+        let reject() : 'T =
+            invalidOp "A file-read target must be a variable."
+
         let require (ctx:Aqualis) target =
             match target with
             |RNvr(_,c) when c.CodeFile=None ->
@@ -17,9 +20,9 @@ namespace Aqualis
                 Aqualis.merge ctx targetContext |> ignore
                 value,targetContext
             |RNvr _ ->
-                invalidOp "A file-read target must be a variable."
+                reject()
             |RStr _ ->
-                invalidOp "A file-read target must be a variable."
+                reject()
 
     type TextReader internal (ctx:Aqualis,fp:string,iostat:int0) =
         // let context() = ctx.RequireGenerationContext()
@@ -75,8 +78,7 @@ namespace Aqualis
                                     |_,RNvr(Var(_,n,_),_) ->
                                         yield n
                                     |_ ->
-                                        printfn "ファイル読み込みデータの保存先が変数ではありません"
-                                        yield ""
+                                        yield FileIoReadTarget.reject()
                                 ])
                             |> (fun b ->
                                   [for n in 0..(b.Length-1) do
@@ -122,8 +124,7 @@ namespace Aqualis
                                 |_,RNvr(Var(_,n,_),_) ->
                                     yield "&"+n
                                 |_ ->
-                                    printfn "ファイル読み込みデータの保存先が変数ではありません"
-                                    yield ""
+                                    yield FileIoReadTarget.reject()
                             ])
                       |> fun s -> String.Join(",",s)
                     writein("fscanf("+fp+",\""+format+"\","+code+");\n")
@@ -204,8 +205,7 @@ namespace Aqualis
                                 |_,RNvr(Var(_,n,_),_) ->
                                     yield n
                                 |_ ->
-                                    printfn "ファイル読み込みデータの保存先が変数ではありません"
-                                    yield ""
+                                    yield FileIoReadTarget.reject()
                             ])
                       |> fun s -> String.Join(",",s)
                     //書式指定をしてファイルから値を読み込み。まだ、完成してない
@@ -259,7 +259,7 @@ namespace Aqualis
                 |_,Var(_,n,_) ->
                     writein("read("+fp+",iostat="+iostat.Expr.eval ctx+") "+n+"\n")
                 |_ ->
-                    Console.WriteLine "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |C99 ->
                 match v.etype,v with
                 |Zt,Var _ ->
@@ -270,7 +270,7 @@ namespace Aqualis
                 |_,Var(_,n,_) ->
                     writein("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |LaTeX ->
                 match v.etype,v with
                 |Zt,Var _ ->
@@ -281,13 +281,13 @@ namespace Aqualis
                 |_,Var(_,n,_) ->
                     writein("read("+fp+",iostat="+iostat.Expr.eval ctx+") "+n+"\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |HTML ->
                 match v with
                 |Var(_,n,_) ->
                     writein("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |Python ->
                 match v.etype,v with
                 |Zt,Var _ ->
@@ -300,7 +300,7 @@ namespace Aqualis
                 |Dt,Var(_,n,_) ->
                     writein(n+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |_ -> ()
         member this.b (x:int0) = this.ReadBin(RNvr(x.Expr,x.Context))
         member this.b (x:double0) = this.ReadBin(RNvr(x.Expr,x.Context))
@@ -1356,8 +1356,7 @@ namespace Aqualis
                                     |_,RNvr(Var(_,n,_),_) ->
                                         yield n
                                     |_ ->
-                                        printfn "ファイル読み込みデータの保存先が変数ではありません"
-                                        yield ""
+                                        yield FileIoReadTarget.reject()
                                 ])
                             |> (fun b ->
                                   [for n in 0..(b.Length-1) do
@@ -1403,8 +1402,7 @@ namespace Aqualis
                                 |_,RNvr(Var(_,n,_),_) ->
                                     yield "&"+n
                                 |_ ->
-                                    printfn "ファイル読み込みデータの保存先が変数ではありません"
-                                    yield ""
+                                    yield FileIoReadTarget.reject()
                             ])
                       |> fun s -> String.Join(",",s)
                     writein("fscanf("+fp+",\""+format+"\","+code+");\n")
@@ -1485,8 +1483,7 @@ namespace Aqualis
                                 |_,RNvr(Var(_,n,_),_) ->
                                     yield n
                                 |_ ->
-                                    printfn "ファイル読み込みデータの保存先が変数ではありません"
-                                    yield ""
+                                    yield FileIoReadTarget.reject()
                             ])
                       |> fun s -> String.Join(",",s)
                     //書式指定をしてファイルから値を読み込み。まだ、完成してない
@@ -1520,7 +1517,7 @@ namespace Aqualis
                 |_,Var(_,n,_) ->
                     writein("read("+fp+",iostat="+iostat.Expr.eval ctx+") "+n+"\n")
                 |_ ->
-                    Console.WriteLine "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |C99 ->
                 match v.etype,v with
                 |Zt,Var _ ->
@@ -1531,7 +1528,7 @@ namespace Aqualis
                 |_,Var(_,n,_) ->
                     writein("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |LaTeX ->
                 match v.etype,v with
                 |Zt,Var _ ->
@@ -1542,13 +1539,13 @@ namespace Aqualis
                 |_,Var(_,n,_) ->
                     writein("read("+fp+",iostat="+iostat.Expr.eval ctx+") "+n+"\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |HTML ->
                 match v with
                 |Var(_,n,_) ->
                     writein("Read(binary): \\("+n+" \\leftarrow "+fp+"\\)<br/>\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |Python ->
                 match v.etype,v with
                 |Zt,Var _ ->
@@ -1561,7 +1558,7 @@ namespace Aqualis
                 |Dt,Var(_,n,_) ->
                     writein(n+" = struct.unpack('d', "+fp+".read(8))[0]"+"\n")
                 |_ ->
-                    printfn "ファイル読み込みデータの保存先が変数ではありません"
+                    FileIoReadTarget.reject()
             |_ -> ()
 
         member private this.Read_byte (fp:string) (iostat:int0) (e:expr) =
@@ -1569,7 +1566,7 @@ namespace Aqualis
             let ee =
                 match e.etype,e with
                 |It _,Var(_,n,_) -> n
-                |_ -> "byte値を整数型以外の変数に格納できません"
+                |_ -> FileIoReadTarget.reject()
             writein(ee + "=" + "byte_tmp\n")
 
         ///<summary>ファイル出力（タブ区切りデータ）</summary>

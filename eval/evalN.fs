@@ -20,7 +20,8 @@ namespace Aqualis
                     for i in a..b do
                         code (Int i)
                 |_ ->
-                    printfn "ループ範囲「%s → %s」を評価できません。" <| ii1.ToString() <| ii2.simp.ToString()
+                    UnsupportedOperation.numericEvaluation
+                        $"a loop whose bounds are not integers ('{ii1}' to '{ii2}')"
             member this.eval() =
                 match this with
                 |True -> 
@@ -49,8 +50,7 @@ namespace Aqualis
                     |Cpx _ ->
                         (f x).simp.eval()
                     |_ ->
-                        printfn "「%s」を数値演算できません" <| y.simp.ToString()
-                        NaN
+                        UnsupportedOperation.numericEvaluation $"the let-bound expression '{y.simp}'"
                 |IfEl (c,p,q) -> 
                     match c.simp.eval() with
                     |True ->
@@ -58,8 +58,7 @@ namespace Aqualis
                     |False ->
                         q.simp.eval()
                     |_ ->
-                        printfn "条件式「%s」を評価できません" <| c.simp.ToString()
-                        NaN
+                        UnsupportedOperation.numericEvaluation $"the condition '{c.simp}'"
                 |Sum(t, n1, n2, f) ->
                     match n1.simp.eval(), n2.simp.eval() with
                     |Int n1,Int n2 ->
@@ -67,8 +66,7 @@ namespace Aqualis
                         |> List.map (fun i -> (f (Int i)).simp.eval())
                         |> List.fold (fun x y -> (x+y).simp.eval() ) (Int 0)
                     |_ -> 
-                        printfn "総和の範囲指定「 %s → %s 」が整数ではありません：" <| n1.simp.ToString() <| n2.simp.ToString()
-                        NaN
+                        UnsupportedOperation.numericEvaluation
+                            $"a summation whose bounds are not integers ('{n1.simp}' to '{n2.simp}')"
                 |x -> 
-                    printfn "「%s」を数値演算できません" <| x.ToString()
-                    NaN
+                    UnsupportedOperation.numericEvaluation $"the expression '{x}'"

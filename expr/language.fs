@@ -30,6 +30,23 @@ namespace Aqualis
         ///<summary>直接計算</summary>
         |Numeric
 
+    [<RequireQualifiedAccess>]
+    module internal UnsupportedOperation =
+        let raise message : 'T =
+            raise (NotSupportedException message)
+
+        let codeGeneration target operation : 'T =
+            raise $"{target} code generation does not support {operation}."
+
+        let symbolicDifferentiation operation : 'T =
+            raise $"Symbolic differentiation does not support {operation}."
+
+        let numericEvaluation operation : 'T =
+            raise $"Numeric evaluation does not support {operation}."
+
+        let functionArgument operation : 'T =
+            raise $"Function arguments do not support {operation}."
+
     /// Culture-independent formatting for generated source code and other
     /// machine-readable artifacts.
     [<RequireQualifiedAccess>]

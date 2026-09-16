@@ -196,7 +196,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(int1(this.etype,Var1(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial one-dimensional arrays"
         type double1 with
             /// <summary>
             /// この変数を関数内変数に変換
@@ -207,7 +207,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(double1(this.etype,Var1(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial one-dimensional arrays"
         type complex1 with
             /// <summary>
             /// この変数を関数内変数に変換
@@ -218,7 +218,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(complex1(this.etype,Var1(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial one-dimensional arrays"
 
         type int2 with
             /// <summary>
@@ -230,7 +230,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(int2(this.etype,Var2(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial two-dimensional arrays"
         type double2 with
             /// <summary>
             /// この変数を関数内変数に変換
@@ -241,7 +241,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(double2(this.etype,Var2(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial two-dimensional arrays"
         type complex2 with
             /// <summary>
             /// この変数を関数内変数に変換
@@ -252,7 +252,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(complex2(this.etype,Var2(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial two-dimensional arrays"
 
         type int3 with
             /// <summary>
@@ -264,7 +264,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(int3(this.etype,Var3(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial three-dimensional arrays"
         type double3 with
             /// <summary>
             /// この変数を関数内変数に変換
@@ -275,7 +275,7 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(double3(this.etype,Var3(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial three-dimensional arrays"
         type complex3 with
             /// <summary>
             /// この変数を関数内変数に変換
@@ -286,4 +286,4 @@ namespace Aqualis
                     let _,targetContext = this.Context, targetEnvironment
                     fn.addarg (targetContext,this.etype,size,name) <| fun (v,n) -> code(complex3(this.etype,Var3(v,n), context=targetContext))
                 |_ ->
-                    printfn "部分配列を関数の引数にできません"
+                    UnsupportedOperation.functionArgument "partial three-dimensional arrays"

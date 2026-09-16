@@ -38,10 +38,10 @@ namespace Aqualis
                 c.codewritein (x.evalPy c  + " = " + y.evalPy c)
                 
             static member equivPy (x:expr) (y:expr) (c:Aqualis) =
-                printfn "Pythonでこの文は使用できません"
-                
+                UnsupportedOperation.codeGeneration "Python" "equation display"
+
             static member equivAlignPy (x:expr) (y:expr) (c:Aqualis) =
-                printfn "Pythonでこの文は使用できません"
+                UnsupportedOperation.codeGeneration "Python" "aligned equation display"
                 
             static member forLoopPy (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()

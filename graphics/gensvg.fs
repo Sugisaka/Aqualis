@@ -441,7 +441,10 @@ type svgfilemaker(context:Aqualis,cvx:double,cvy:double,writer:StreamWriter,scal
                     |Inv(_,Dbl s) -> writer.Write(InvariantFormat.numberWithFormat "0.000" (-s))
                     |Int s -> writer.Write(InvariantFormat.integer s)
                     |Dbl s -> writer.Write(InvariantFormat.numberWithFormat "0.000" s)
-                    |_ -> printfn "出力できない値です：%s" <| p.ToString()
+                    |_ ->
+                        UnsupportedOperation.codeGeneration
+                            "SVG"
+                            $"the non-numeric coordinate expression '{p}'"
         write x
         writer.Write "\n"
     /// <summary>

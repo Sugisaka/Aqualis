@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Compile Include="TestHelpers.fs" />
+    <Compile Include="UnsupportedOperationTests.fs" />
     <Compile Include="CodeWriterTests.fs" />
     <Compile Include="CompilerScriptTests.fs" />
     <Compile Include="FileResourceTests.fs" />

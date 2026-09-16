@@ -17,10 +17,10 @@ namespace Aqualis
                c.codewritein (x.evalC c  + " = " + y.evalC c + ";")
 
             static member equivC (x:expr) (y:expr) (c:Aqualis) =
-                printfn "C99でこの文は使用できません"
+                UnsupportedOperation.codeGeneration "C99" "equation display"
 
             static member equivAlignC (x:expr) (y:expr) (c:Aqualis) =
-                printfn "C99でこの文は使用できません"
+                UnsupportedOperation.codeGeneration "C99" "aligned equation display"
 
             static member forLoopC (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
@@ -226,11 +226,9 @@ namespace Aqualis
                 |Conj x -> "conj(" + x.evalC c + ")"
                 |Idx1 (_,name,i) -> name + "[" + i.evalC c + "]"
                 |Idx2 (_,name,i,j) ->
-                    printfn "C言語では2次元配列の代わりに1次元配列を使用します"
-                    "NaN"
+                    UnsupportedOperation.codeGeneration "C99" "two-dimensional array indexing"
                 |Idx3 (_,name,i,j,k) ->
-                    printfn "C言語では3次元配列の代わりに1次元配列を使用します"
-                    "NaN"
+                    UnsupportedOperation.codeGeneration "C99" "three-dimensional array indexing"
                 |Let (t,y,x,f) ->
                     // let x =
                     //     match t with

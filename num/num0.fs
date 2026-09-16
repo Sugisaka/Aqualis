@@ -260,7 +260,9 @@ namespace Aqualis
             |PHP ->
                 expr.subst x.Expr (Var(Nt,y.toPhpString(".",x.Context),NaN)) x.Context
             |_ ->
-                printfn "この言語では文字列を含む値を代入できません"
+                UnsupportedOperation.codeGeneration
+                    (x.Context.language.ToString())
+                    "assigning a string expression to an integer value"
         static member (<==) (x:int0,y:string) = x <== exprString y
         member this.clear() = this <== 0
 
@@ -433,7 +435,9 @@ namespace Aqualis
             |PHP ->
                 expr.subst x.Expr (Var(Nt,y.toPhpString(".",x.Context),NaN)) x.Context
             |_ ->
-                printfn "この言語では文字列を含む値を代入できません"
+                UnsupportedOperation.codeGeneration
+                    (x.Context.language.ToString())
+                    "assigning a string expression to a floating-point value"
         static member (<==) (x:double0,y:string) = x <== exprString y
         member this.clear() = this <== 0
 
@@ -571,7 +575,9 @@ namespace Aqualis
             |PHP ->
                 expr.subst x.Expr (Var(Nt,y.toPhpString(".",x.Context),NaN)) x.Context
             |_ ->
-                printfn "この言語では文字列を含む値を代入できません"
+                UnsupportedOperation.codeGeneration
+                    (x.Context.language.ToString())
+                    "assigning a string expression to a complex value"
         static member (<==) (x:complex0,y:string) = x <== exprString y
         member this.clear() = this <== 0
 

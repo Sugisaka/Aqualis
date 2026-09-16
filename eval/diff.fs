@@ -54,11 +54,9 @@ namespace Aqualis
                     |Atan(t,v),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Div(t, expr.diff v x g, Add(t, Int 1, Pow(v.etype,v,Int 2)))
                     |Atan2 _,_ ->
-                        printfn "atan2を微分できません"
-                        NaN
+                        UnsupportedOperation.symbolicDifferentiation "atan2"
                     |Abs(Zt,v),(Var _|Idx1 _|Idx2 _|Idx3 _) -> 
-                        printfn "複素数の絶対値を微分できません"
-                        NaN
+                        UnsupportedOperation.symbolicDifferentiation "the absolute value of a complex expression"
                     |Abs(t,v),(Var _|Idx1 _|Idx2 _|Idx3 _) -> 
                         Mul(t, Div(t, v, Abs(t,v)), expr.diff v x g)
                     |Log(t,v),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
@@ -96,8 +94,7 @@ namespace Aqualis
                         // expr.subst v eq g
                         expr.diff (f v) x g + expr.diff (f v) v g * expr.diff eq x g
                     |NaN,_ ->
-                        printfn "NaNを微分できません"
-                        NaN
+                        UnsupportedOperation.symbolicDifferentiation "NaN expressions"
                     |_ ->
-                        printfn "Error 「%s」を変数以外のもの「%s」で微分できません" (f.ToString()) (x.ToString())
-                        NaN
+                        UnsupportedOperation.symbolicDifferentiation
+                            $"differentiation of '{f}' with respect to the non-variable expression '{x}'"

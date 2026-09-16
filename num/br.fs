@@ -15,7 +15,7 @@ namespace Aqualis
         ///<summary>条件式(if)</summary>
         member __.IF (cond:bool0) code =
             if con=0 then
-                printfn "ELの後のIFは無視されます"
+                invalidOp "An IF branch cannot be added after the ELSE branch."
             elif con=1 then
                 ifcode cond.Expr code
             else

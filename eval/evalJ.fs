@@ -12,9 +12,7 @@ namespace Aqualis
         open System
 
         let private notSupported operation : 'T =
-            raise (
-                NotSupportedException(
-                    $"JavaScript code generation does not support {operation}."))
+            UnsupportedOperation.codeGeneration "JavaScript" operation
 
         type expr with
 
