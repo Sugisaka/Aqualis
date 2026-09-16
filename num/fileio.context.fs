@@ -7,6 +7,57 @@
 namespace Aqualis
 
     open System
+    open System.Text
+
+    [<RequireQualifiedAccess>]
+    module private FileNameCode =
+        let private appendCommonEscape (builder:StringBuilder) character =
+            match character with
+            | '\\' -> builder.Append("\\\\") |> ignore; true
+            | '"' -> builder.Append("\\\"") |> ignore; true
+            | '\n' -> builder.Append("\\n") |> ignore; true
+            | '\r' -> builder.Append("\\r") |> ignore; true
+            | '\t' -> builder.Append("\\t") |> ignore; true
+            | _ -> false
+
+        let cStringLiteral (value:string) =
+            if isNull value then nullArg (nameof value)
+            if value.IndexOf '\u0000' >= 0 then
+                invalidArg (nameof value) "A generated file name cannot contain NUL."
+
+            let builder = StringBuilder(value.Length + 2)
+            builder.Append('"') |> ignore
+            for character in value do
+                if not (appendCommonEscape builder character) then
+                    if Char.IsControl character then
+                        builder
+                            .Append('\\')
+                            .Append(Convert.ToString(int character, 8).PadLeft(3, '0'))
+                        |> ignore
+                    else
+                        builder.Append(character) |> ignore
+            builder.Append('"').ToString()
+
+        let fortranStringLiteral (value:string) =
+            if isNull value then nullArg (nameof value)
+            if value |> Seq.exists Char.IsControl then
+                invalidArg (nameof value) "A generated Fortran file name cannot contain control characters."
+            "'" + value.Replace("'", "''") + "'"
+
+        let pythonStringLiteral (value:string) =
+            if isNull value then nullArg (nameof value)
+            if value.IndexOf '\u0000' >= 0 then
+                invalidArg (nameof value) "A generated file name cannot contain NUL."
+
+            let builder = StringBuilder(value.Length + 2)
+            builder.Append('"') |> ignore
+            for character in value do
+                if not (appendCommonEscape builder character) then
+                    if Char.IsControl character then
+                        builder.Append("\\u").Append((int character).ToString("X4")) |> ignore
+                    else
+                        builder.Append(character) |> ignore
+            builder.Append('"').ToString()
 
     type ContextIo internal (ctx:Aqualis) =
         // let context() = ctx.RequireGenerationContext()
@@ -19,6 +70,11 @@ namespace Aqualis
             match ctx.language with
             |Fortran ->
                 ctx.ch.f <| fun fp ->
+                    let integerWidth =
+                        match intDigit with
+                        |None -> ctx.numFormat.iFormat
+                        |Some width when width > 0 -> width
+                        |Some _ -> invalidArg (nameof intDigit) "The file-name integer width must be positive."
                     let f =
                         filename.data
                         |> List.map (fun s ->
@@ -26,25 +82,37 @@ namespace Aqualis
                             |RStr _ ->
                                 "A"
                             |RNvr(x,_) when x.etype = It 4 ->
-                                "I" + match intDigit with |None -> ctx.numFormat.iFormat.ToString() |Some n -> n.ToString()
+                                "I" + integerWidth.ToString()
                             |_ ->
                                 "")
+                        |> List.filter (String.IsNullOrEmpty >> not)
                         |> fun s -> String.Join(",",s)
                     let s =
                         filename.data
                         |> List.map (fun s ->
                             match s with
                             |RStr t ->
-                                "\""+t+"\""
+                                FileNameCode.fortranStringLiteral t
                             |RNvr(x,_) when x.etype = It 4 ->
                                 x.eval ctx
                             |_ ->
                                 "")
+                        |> List.filter (String.IsNullOrEmpty >> not)
                         |> fun s -> String.Join(",",s)
+                    let requiredLength =
+                        filename.data
+                        |> List.choose (function
+                            |RStr value -> Some("len(" + FileNameCode.fortranStringLiteral value + ")")
+                            |RNvr(value,_) when value.etype = It 4 -> Some(integerWidth.ToString())
+                            |_ -> None)
+                        |> function
+                            |[] -> "0"
+                            |terms -> String.Join(" + ", terms)
                     ctx.ch.t <| A0 <| fun id ->
                         let btname = "byte_tmp"
                         //変数byte_tmpをリストに追加（存在していない場合のみ）
                         ctx.cvar.setUniqVar(Structure "integer(1)",A0,btname,"")
+                        writein("allocate(character(len=" + requiredLength + ") :: " + id + ")\n")
                         writein("write("+id+",\"("+f+")\") "+s+"\n")
                         ctx.ch.i <| fun counter ->
                             let c = counter.Expr.eval ctx
@@ -57,16 +125,22 @@ namespace Aqualis
                             writein("open("+fp+", file=trim("+id+"))"+"\n")
                         code fp
                         writein("close("+fp+")"+"\n")
+                        writein("deallocate(" + id + ")\n")
             |C99 ->
                 ctx.ch.f <| fun fp ->
+                    let integerWidth =
+                        match intDigit with
+                        |None -> ctx.numFormat.iFormat
+                        |Some width when width > 0 -> width
+                        |Some _ -> invalidArg (nameof intDigit) "The file-name integer width must be positive."
                     let f =
                         filename.data
                         |> List.map (fun s ->
                             match s with
                             |RStr t ->
-                                t
+                                t.Replace("%", "%%")
                             |RNvr(x,_) when x.etype = It 4 ->
-                                "%0" + (match intDigit with |None -> ctx.numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
+                                "%0" + integerWidth.ToString() + "d"
                             |_ ->
                                 "")
                         |> List.filter (fun s -> s<>"")
@@ -84,16 +158,24 @@ namespace Aqualis
                         |> List.filter (fun s -> s<>"")
                         |> fun s -> String.Join(",",s)
                     ctx.ch.t <| A0 <| fun id ->
-                        let btname = "byte_tmp"
-                        //変数byte_tmpをリストに追加（存在していない場合のみ）
-                        ctx.cvar.setUniqVar(Structure "char",A0,btname,"")
-                        writein("sprintf("+id+",\""+f+"\""+(if s="" then "" else ",")+s+");\n")
+                        let lengthName = id + "_length"
+                        let arguments = if s="" then "" else "," + s
+                        let formatLiteral = FileNameCode.cStringLiteral f
+                        ctx.cvar.setUniqVar(It 4,A0,lengthName,"")
+                        writein(lengthName + " = snprintf(NULL,0," + formatLiteral + arguments + ");\n")
+                        writein("if (" + lengthName + " < 0) { fprintf(stderr, \"Aqualis: failed to format a file name.\\n\"); exit(EXIT_FAILURE); }\n")
+                        writein(id + " = (char *)malloc((size_t)" + lengthName + " + 1U);\n")
+                        writein("if (" + id + " == NULL) { fprintf(stderr, \"Aqualis: failed to allocate a file name.\\n\"); exit(EXIT_FAILURE); }\n")
+                        writein("if (snprintf(" + id + ",(size_t)" + lengthName + " + 1U," + formatLiteral + arguments + ") != " + lengthName + ") { free(" + id + "); " + id + " = NULL; fprintf(stderr, \"Aqualis: failed to format a file name.\\n\"); exit(EXIT_FAILURE); }\n")
                         if isbinary then
                             writein(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
                         else
                             writein(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                        writein("if (" + fp + " == NULL) { fprintf(stderr, \"Aqualis: failed to open file %s.\\n\", " + id + "); free(" + id + "); " + id + " = NULL; exit(EXIT_FAILURE); }\n")
                         code fp
-                        writein("fclose("+fp+")"+";\n")
+                        writein("if (fclose(" + fp + ") != 0) { fprintf(stderr, \"Aqualis: failed to close file %s.\\n\", " + id + "); free(" + id + "); " + id + " = NULL; exit(EXIT_FAILURE); }\n")
+                        writein("free(" + id + ");\n")
+                        writein(id + " = NULL;\n")
             |LaTeX ->
                 ctx.ch.f <| fun fp ->
                     let s =
@@ -140,35 +222,26 @@ namespace Aqualis
                         writein("close("+fp+")"+";\n")
             |Python ->
                 ctx.ch.f <| fun fp ->
-                    let f =
+                    let integerWidth =
+                        match intDigit with
+                        |None -> ctx.numFormat.iFormat
+                        |Some width when width > 0 -> width
+                        |Some _ -> invalidArg (nameof intDigit) "The file-name integer width must be positive."
+                    let filenameExpression =
                         filename.data
-                        |> List.map (fun s ->
-                            match s with
+                        |> List.choose (fun part ->
+                            match part with
                             |RStr t ->
-                                t
+                                Some(FileNameCode.pythonStringLiteral t)
                             |RNvr(x,_) when x.etype = It 4 ->
-                                "%0" + (match intDigit with |None -> ctx.numFormat.iFormat.ToString() |Some n -> n.ToString()) + "d"
+                                Some("format(" + x.eval ctx + ", " + FileNameCode.pythonStringLiteral ("0" + integerWidth.ToString() + "d") + ")")
                             |_ ->
-                                "")
-                        |> List.filter (fun s -> s<>"")
-                        |> fun s -> String.Join("",s)
-                    let s =
-                        filename.data
-                        |> List.map (fun s ->
-                            match s with
-                            |RStr _ ->
-                                ""
-                            |RNvr(x,_) when x.etype = It 4 ->
-                                x.eval ctx
-                            |_ ->
-                                "")
-                        |> List.filter (fun s -> s<>"")
-                        |> fun s -> String.Join(",",s)
+                                None)
+                        |> function
+                            |[] -> FileNameCode.pythonStringLiteral ""
+                            |parts -> String.Join(" + ", parts)
                     ctx.ch.t <| A0 <| fun id ->
-                        let btname = "byte_tmp"
-                        //変数byte_tmpをリストに追加（存在していない場合のみ）
-                        ctx.cvar.setUniqVar(Structure "char",A0,btname,"")
-                        writein(id+"= \""+f+"\"%("+s+")\n")
+                        writein(id + " = " + filenameExpression + "\n")
                         if isbinary then
                             writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
                         else

@@ -54,7 +54,10 @@ module FileResourceTests =
             File.ReadAllText(Path.Combine(output.Path, "sequential-file-output.f90"))
             |> TestHelpers.normalizeGeneratedCode
 
-        Assert.Equal(1, occurrenceCount "character(100) :: t0001" generated)
+        Assert.Equal(1, occurrenceCount "character(len=:), allocatable :: t0001" generated)
+        Assert.DoesNotContain("character(100)", generated)
+        Assert.Contains("allocate(character(len=len('first.dat')) :: t0001)", generated)
+        Assert.Contains("deallocate(t0001)", generated)
         Assert.Equal(1, occurrenceCount "integer :: f0000=" generated)
         Assert.Equal(1, occurrenceCount "integer :: f0000=10" generated)
 
@@ -70,12 +73,77 @@ module FileResourceTests =
             File.ReadAllText(Path.Combine(output.Path, "nested-file-output.f90"))
             |> TestHelpers.normalizeGeneratedCode
 
-        Assert.Equal(1, occurrenceCount "character(100) :: t0001" generated)
-        Assert.Equal(1, occurrenceCount "character(100) :: t0002" generated)
+        Assert.Equal(1, occurrenceCount "character(len=:), allocatable :: t0001" generated)
+        Assert.Equal(1, occurrenceCount "character(len=:), allocatable :: t0002" generated)
+        Assert.DoesNotContain("character(100)", generated)
         Assert.Equal(1, occurrenceCount "integer :: f0000=" generated)
         Assert.Equal(1, occurrenceCount "integer :: f0001=" generated)
         Assert.Equal(1, occurrenceCount "integer :: f0000=10" generated)
         Assert.Equal(1, occurrenceCount "integer :: f0001=11" generated)
+
+    [<Fact>]
+    let ``C file names use measured dynamic storage and escaped format literals`` () =
+        use output = new TemporaryDirectory()
+        let longLiteral = String.replicate 256 "x" + "-%-\"quoted\"-\\-"
+
+        Compile [C99] output.Path "dynamic-c-file-name" "1" <| fun context ->
+            let index = context.var.i0 "index"
+            context.io.fileOutput (longLiteral ++ index ++ ".dat") (fun _ -> ())
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "dynamic-c-file-name.c"))
+            |> TestHelpers.normalizeGeneratedCode
+
+        Assert.Contains("char *t0001 = NULL;", generated)
+        Assert.DoesNotContain("[100]", generated)
+        Assert.DoesNotContain("sprintf(", generated)
+        Assert.Equal(2, occurrenceCount "snprintf(" generated)
+        Assert.Contains("t0001_length = snprintf(NULL,0,", generated)
+        Assert.Contains("%%", generated)
+        Assert.Contains("\\\"quoted\\\"", generated)
+        Assert.Contains("malloc((size_t)t0001_length + 1U)", generated)
+        Assert.Contains("if (f0000 == NULL)", generated)
+        Assert.Contains("free(t0001);", generated)
+        Assert.Contains("t0001 = NULL;", generated)
+
+    [<Fact>]
+    let ``Fortran file names use deferred length allocatable storage`` () =
+        use output = new TemporaryDirectory()
+        let longLiteral = String.replicate 256 "x" + "O'Brien"
+
+        Compile [Fortran] output.Path "dynamic-fortran-file-name" "1" <| fun context ->
+            let index = context.var.i0 "index"
+            context.io.fileOutput (longLiteral ++ index ++ ".dat") (fun _ -> ())
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "dynamic-fortran-file-name.f90"))
+            |> TestHelpers.normalizeGeneratedCode
+
+        Assert.Contains("character(len=:), allocatable :: t0001", generated)
+        Assert.DoesNotContain("character(100)", generated)
+        Assert.Contains("allocate(character(len=len('", generated)
+        Assert.Contains("O''Brien", generated)
+        Assert.Contains(" + 12 + len('.dat')) :: t0001)", generated)
+        Assert.Contains("deallocate(t0001)", generated)
+
+    [<Fact>]
+    let ``Python file names concatenate escaped literals and formatted integers`` () =
+        use output = new TemporaryDirectory()
+        let longLiteral = String.replicate 256 "x" + "-%-\"quoted\"-\\-"
+
+        Compile [Python] output.Path "dynamic-python-file-name" "1" <| fun context ->
+            let index = context.var.i0 "index"
+            context.io.fileOutput (longLiteral ++ index ++ ".dat") (fun _ -> ())
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "dynamic-python-file-name.py"))
+            |> TestHelpers.normalizeGeneratedCode
+
+        Assert.Contains("t0001 = \"", generated)
+        Assert.Contains("\\\"quoted\\\"", generated)
+        Assert.Contains("\\\\", generated)
+        Assert.Contains(" + format(index, \"012d\") + ", generated)
+        Assert.DoesNotContain("%(", generated)
 
     [<Fact>]
     let ``file input rejects a target without a context`` () =

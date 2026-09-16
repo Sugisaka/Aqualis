@@ -555,7 +555,7 @@ namespace Aqualis
                 |It _ -> "integer" 
                 |Dt -> "double precision" 
                 |Zt -> "complex(kind(0d0))" 
-                |Structure "string" -> "character(100)" 
+                |Structure "string" -> "character(len=:), allocatable"
                 |Structure "integer(1)" -> "integer(1)" 
                 |Structure "file" -> "integer"
                 |Structure sname -> "type(" + sname + ")"
@@ -566,7 +566,7 @@ namespace Aqualis
                 |It _ -> "int" 
                 |Dt -> "double" 
                 |Zt -> "double complex"
-                |Structure "string" -> "string" 
+                |Structure "string" -> "char*"
                 |Structure "char" -> "char" 
                 |Structure "file" -> "FILE*" 
                 |Structure sname -> sname 
@@ -609,6 +609,7 @@ namespace Aqualis
             match lang with
             |Fortran ->
                 match vtp with 
+                |A0 when typ = Structure "string" -> "character(len=:), allocatable :: " + name
                 |A0                    -> this.Stype typ + " :: " + name + if param<>"" then "=" + param else ""
                 |A1 0                  -> this.Stype typ + ",allocatable" + " :: " + name + "(:)" + if param<>"" then " = " + param else ""
                 |A2(0,0)               -> this.Stype typ + ",allocatable" + " :: " + name + "(:,:)" + if param<>"" then " = " + param else ""
@@ -618,7 +619,7 @@ namespace Aqualis
                 |A3(size1,size2,size3) -> this.Stype typ + " :: " + name + "(1:" + fmt.ItoS size1 + ",1:" + fmt.ItoS size2 + ",1:" + fmt.ItoS size3 + ")" + if param<>"" then " = " + param else ""
             |C99 ->
                 match vtp, this.Stype typ with 
-                |A0,"string"              -> "char" + " " + name + "[100]" + ";"
+                |A0,"char*"               -> "char *" + name + (if param<>"" then " = " + param else " = NULL") + ";"
                 |A0,st                    -> st + " " + name + (if param<>"" then " = " + param else "") + ";"
                 |A1 0,st                  -> st + " *" + name + (if param<>"" then " = " + param else "") + ";"
                 |A2(0,0),st               -> st + " *" + name + (if param<>"" then " = " + param else "") + ";"

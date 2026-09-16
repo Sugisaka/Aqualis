@@ -40,7 +40,7 @@ namespace Aqualis
                 |It _ -> "integer" 
                 |Dt -> "double precision" 
                 |Zt -> "complex(kind(0d0))" 
-                |Structure "string" -> "character(100)" 
+                |Structure "string" -> "character(len=:), allocatable"
                 |Structure "integer(1)" -> "integer(1)" 
                 |Structure "file" -> "integer"
                 |Structure sname -> "type("+sname+")"
@@ -51,7 +51,7 @@ namespace Aqualis
                 |It _ -> "int" 
                 |Dt -> "double" 
                 |Zt -> "double complex"
-                |Structure "string" -> "string" 
+                |Structure "string" -> "char*"
                 |Structure "char" -> "char" 
                 |Structure "file" -> "FILE*" 
                 |Structure sname -> sname 

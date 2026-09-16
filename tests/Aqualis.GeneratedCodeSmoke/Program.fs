@@ -24,6 +24,13 @@ module Program =
             let value = context.var.i0 "value"
             value <== 40
             value <== value + 2
+
+            if language = C99 || language = Fortran || language = Python then
+                let fileNamePrefix =
+                    String.replicate 120 "a" + "-%-'quoted'-"
+                context.io.fileOutput (fileNamePrefix ++ value ++ ".txt") <| fun writer ->
+                    writer.t value
+
             context.print.t value
 
     let private generatePythonSciPy outputRoot =
