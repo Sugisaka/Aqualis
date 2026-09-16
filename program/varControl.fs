@@ -181,6 +181,8 @@ namespace Aqualis
     module internal AtomicOutputFile =
         let private publishGate = obj()
 
+        let synchronize action = lock publishGate action
+
         let create (targetPath:string) =
             if String.IsNullOrWhiteSpace targetPath then
                 invalidArg (nameof targetPath) "An atomic output target path is required."
@@ -199,7 +201,7 @@ namespace Aqualis
             }
 
         let publish output =
-            lock publishGate (fun () ->
+            synchronize (fun () ->
                 File.Move(output.StagingPath, output.TargetPath, true))
 
         let discard output =

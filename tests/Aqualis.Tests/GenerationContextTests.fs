@@ -10,6 +10,93 @@ module GenerationContextTests =
     let private createContext path name language =
         new Aqualis(Some path, Some name, language)
 
+    let private transactionDirectories path =
+        Directory.EnumerateDirectories(path, ".aqualis-*", SearchOption.TopDirectoryOnly)
+
+    [<Fact>]
+    let ``Compile publishes no files when a later language fails`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-new"
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            Compile [C99; Python] output.Path projectName "1" <| fun context ->
+                context.writein "generated"
+                if context.Language = Python then
+                    invalidOp "expected")
+        |> ignore
+
+        Assert.False(File.Exists(Path.Combine(output.Path, projectName + ".c")))
+        Assert.False(File.Exists(Path.Combine(output.Path, projectName + ".py")))
+        Assert.False(File.Exists(Path.Combine(output.Path, "proc_" + projectName + "_C.sh")))
+        Assert.False(File.Exists(Path.Combine(output.Path, "proc_" + projectName + "_P.sh")))
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile preserves existing files when a later language fails`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-existing"
+        let existingFiles =
+            [ projectName + ".c", "existing C source"
+              projectName + ".py", "existing Python source"
+              "proc_" + projectName + "_C.sh", "existing C script"
+              "proc_" + projectName + "_P.sh", "existing Python script" ]
+
+        for fileName, contents in existingFiles do
+            File.WriteAllText(Path.Combine(output.Path, fileName), contents)
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            Compile [C99; Python] output.Path projectName "1" <| fun context ->
+                context.writein "replacement"
+                if context.Language = Python then
+                    invalidOp "expected")
+        |> ignore
+
+        for fileName, contents in existingFiles do
+            Assert.Equal(contents, File.ReadAllText(Path.Combine(output.Path, fileName)))
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile publishes every generated file after all languages succeed`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-success"
+        let observedCodeFiles = ResizeArray<string>()
+
+        Compile [C99; Python] output.Path projectName "1" <| fun context ->
+            observedCodeFiles.Add(context.CodeFile.Value)
+            context.writein "generated"
+
+        Assert.Equal<string>(
+            [ Path.Combine(output.Path, projectName)
+              Path.Combine(output.Path, projectName) ],
+            observedCodeFiles)
+        for fileName in
+            [ projectName + ".c"
+              projectName + ".py"
+              "proc_" + projectName + "_C.sh"
+              "proc_" + projectName + "_P.sh" ] do
+            Assert.True(File.Exists(Path.Combine(output.Path, fileName)), fileName)
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile restores files when publication fails partway through commit`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-commit-failure"
+        let cPath = Path.Combine(output.Path, projectName + ".c")
+        let pythonPath = Path.Combine(output.Path, projectName + ".py")
+        File.WriteAllText(cPath, "existing C source")
+        Directory.CreateDirectory(pythonPath) |> ignore
+
+        Assert.ThrowsAny<IOException>(fun () ->
+            Compile [C99; Python] output.Path projectName "1" <| fun context ->
+                context.writein "replacement")
+        |> ignore
+
+        Assert.Equal("existing C source", File.ReadAllText(cPath))
+        Assert.True(Directory.Exists(pythonPath))
+        Assert.False(File.Exists(Path.Combine(output.Path, "proc_" + projectName + "_C.sh")))
+        Assert.False(File.Exists(Path.Combine(output.Path, "proc_" + projectName + "_P.sh")))
+        Assert.Empty(transactionDirectories output.Path)
+
     [<Fact>]
     let ``Public version matches the assembly version`` () =
         let assemblyVersion = typeof<Aqualis>.Assembly.GetName().Version

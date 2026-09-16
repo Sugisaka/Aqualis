@@ -358,10 +358,24 @@ namespace Aqualis
             (programInfo: string * string * Language)
             (code: Aqualis -> 'T)
             : 'T =
+            let dir,_,_ = programInfo
+            Aqualis.makeAtomicProgramInDirectoryWithContext programInfo dir code
+
+        static member internal makeAtomicProgramInDirectoryWithContext
+            (programInfo: string * string * Language)
+            (writerDirectory:string)
+            (code: Aqualis -> 'T)
+            : 'T =
             Aqualis.runWithOwnedAtomicContext
                 (fun () ->
                     let dir, name, language = programInfo
-                    new Aqualis(Some dir, Some name, language, false, true, None))
+                    new Aqualis(
+                        Some dir,
+                        Some name,
+                        language,
+                        false,
+                        true,
+                        Some writerDirectory))
                 code
 
         static member internal makeIntermediateProgramWithContext

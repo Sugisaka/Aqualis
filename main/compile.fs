@@ -113,21 +113,105 @@ namespace Aqualis
                 |character -> result.Append(character) |> ignore
             result.ToString()
 
+        type private CompilationOutputTransaction(outputDirectory:string) =
+            let outputDirectory = Path.GetFullPath outputDirectory
+            let transactionId = Guid.NewGuid().ToString("N")
+            let stagingDirectory =
+                Path.Combine(outputDirectory, ".aqualis-transaction-" + transactionId)
+            let rollbackDirectory =
+                Path.Combine(outputDirectory, ".aqualis-rollback-" + transactionId)
+            let mutable committed = false
+
+            let removeDirectory path =
+                if Directory.Exists path then
+                    Directory.Delete(path, true)
+
+            let relativeFiles root =
+                if Directory.Exists root then
+                    Directory.GetFiles(root, "*", SearchOption.AllDirectories)
+                    |> Array.map (fun path -> Path.GetRelativePath(root, path))
+                    |> Array.sort
+                else
+                    [||]
+
+            do
+                if not (Directory.Exists outputDirectory) then
+                    raise (DirectoryNotFoundException($"The output directory '{outputDirectory}' does not exist."))
+                Directory.CreateDirectory(stagingDirectory) |> ignore
+
+            member _.StagingDirectory = stagingDirectory
+
+            member _.Commit() =
+                let files = relativeFiles stagingDirectory
+                let published = ResizeArray<string * bool>()
+                let mutable currentBackup : (string * string) option = None
+
+                AtomicOutputFile.synchronize (fun () ->
+                    try
+                        for relativePath in files do
+                            let stagedPath = Path.Combine(stagingDirectory, relativePath)
+                            let targetPath = Path.Combine(outputDirectory, relativePath)
+                            let targetParent = Path.GetDirectoryName targetPath
+                            Directory.CreateDirectory(targetParent) |> ignore
+
+                            let hadExistingFile = File.Exists targetPath
+                            if hadExistingFile then
+                                let backupPath = Path.Combine(rollbackDirectory, relativePath)
+                                Directory.CreateDirectory(Path.GetDirectoryName backupPath) |> ignore
+                                File.Move(targetPath, backupPath)
+                                currentBackup <- Some(targetPath, backupPath)
+
+                            File.Move(stagedPath, targetPath)
+                            published.Add(relativePath, hadExistingFile)
+                            currentBackup <- None
+
+                        committed <- true
+                    with _ ->
+                        match currentBackup with
+                        |Some(targetPath, backupPath) when File.Exists backupPath ->
+                            File.Move(backupPath, targetPath)
+                        |_ -> ()
+
+                        for relativePath,hadExistingFile in published |> Seq.rev do
+                            let targetPath = Path.Combine(outputDirectory, relativePath)
+                            if File.Exists targetPath then
+                                File.Delete targetPath
+                            if hadExistingFile then
+                                let backupPath = Path.Combine(rollbackDirectory, relativePath)
+                                if File.Exists backupPath then
+                                    Directory.CreateDirectory(Path.GetDirectoryName targetPath) |> ignore
+                                    File.Move(backupPath, targetPath)
+                        reraise())
+
+                removeDirectory rollbackDirectory
+                removeDirectory stagingDirectory
+
+            interface IDisposable with
+                member _.Dispose() =
+                    if not committed then
+                        removeDirectory stagingDirectory
+                        removeDirectory rollbackDirectory
+
         ///<summary>コンパイル</summary>
         let Compile langgList dir projectname (codever:string) code =
             let projectname = validateProjectName projectname
             let languages = langgList |> Seq.toList
             let codever = singleLineMetadata (nameof codever) codever
             let fortranProgramName = fortranProgramIdentifier projectname
+            use transaction = new CompilationOutputTransaction(dir)
+            let outputDirectory = transaction.StagingDirectory
             for lang in languages do
                 match lang with
                 |Fortran ->
-                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,Fortran) <| fun context ->
+                    Aqualis.makeIntermediateProgramInDirectoryWithContext
+                        (dir, projectname, Fortran)
+                        outputDirectory
+                    <| fun context ->
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".f90"), 2, Fortran)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(outputDirectory, projectname + ".f90"), 2, Fortran)
                         writer.codewritein "!=============================================================================================\n"
                         writer.codewritein("! Project name: " + projectname + "\n")
                         writer.codewritein("! Project version: " + codever + "\n")
@@ -163,7 +247,7 @@ namespace Aqualis
                         context.delete()
                         writer.publish()
                         //コンパイル・実行用スクリプト生成
-                        use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_F.sh"))
+                        use wr = ShellScriptWriter.create(Path.Combine(outputDirectory, "proc_" + projectname + "_F.sh"))
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
                         let sources = context.slist.list
@@ -195,7 +279,10 @@ namespace Aqualis
                             ("./" + projectname + ".exe")
                             []
                 |C99 ->
-                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,C99) <| fun context ->
+                    Aqualis.makeIntermediateProgramInDirectoryWithContext
+                        (dir, projectname, C99)
+                        outputDirectory
+                    <| fun context ->
                         //メインコード生成
                         context.indentInc()
                         code context
@@ -203,7 +290,7 @@ namespace Aqualis
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".c"), 2, C99)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(outputDirectory, projectname + ".c"), 2, C99)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("// Project version: " + codever + "\n")
@@ -243,7 +330,7 @@ namespace Aqualis
                         context.delete()
                         writer.publish()
                         //コンパイル・実行用スクリプト生成
-                        use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_C.sh"))
+                        use wr = ShellScriptWriter.create(Path.Combine(outputDirectory, "proc_" + projectname + "_C.sh"))
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
                         let sources = context.slist.list
@@ -269,12 +356,15 @@ namespace Aqualis
                             ("./" + projectname + ".exe")
                             []
                 |LaTeX ->
-                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,LaTeX) <| fun context ->
+                    Aqualis.makeIntermediateProgramInDirectoryWithContext
+                        (dir, projectname, LaTeX)
+                        outputDirectory
+                    <| fun context ->
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".tex"), 2, LaTeX)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(outputDirectory, projectname + ".tex"), 2, LaTeX)
                         writer.codewritein "\\documentclass[a4paper,fleqn]{ltjsarticle}\n"
                         writer.codewritein "\\usepackage{amsmath}\n"
                         List.iter (fun (s:string) -> writer.codewritein(s + "\n")) <| context.hlist.list
@@ -314,13 +404,16 @@ namespace Aqualis
                         context.delete()
                         writer.publish()
                 |HTML ->
-                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,HTML) <| fun context ->
+                    Aqualis.makeIntermediateProgramInDirectoryWithContext
+                        (dir, projectname, HTML)
+                        outputDirectory
+                    <| fun context ->
                         let encodedProjectName = HtmlEncoding.textContent projectname
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".html"), 2, HTML)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(outputDirectory, projectname + ".html"), 2, HTML)
                         writer.codewritein "<!DOCTYPE html>\n"
                         writer.codewritein "<html lang='ja'>\n"
                         writer.codewritein "\t<head>\n"
@@ -483,55 +576,56 @@ namespace Aqualis
                         writer.publish()
                 |HTMLSequenceDiagram ->
                     // 出力レイアウト作成
-                    let layout = WebOutputLayout.create dir projectname
+                    let layout = WebOutputLayout.create outputDirectory projectname
                     // HTML本体の一時出力
-                    use body = new Aqualis(
-                        Some layout.OutputDirectory,
-                        Some layout.BodyTemporaryFileName,
-                        HTMLSequenceDiagram)
-                    use bodyCleanup =
-                        { new IDisposable with
-                            member _.Dispose() = body.delete() }
-                    code body
-                    let bodyCode = body.allCodes |> Option.defaultValue ""
-                    Aqualis.makeAtomicProgramWithContext
-                        (layout.OutputDirectory, layout.MainFileName, HTMLSequenceDiagram)
-                    <| fun main ->
-                        // html書き込みストリーム作成
-                        main.writein "<!DOCTYPE html>"
-                        // html要素
-                        main.html.tagb ("html", [Atr("lang", "ja")]) <| fun () ->
-                            // head要素
-                            main.html.tagb "head" <| fun () ->
-                                // metaタグ
-                                main.writein "<meta charset=\"UTF-8\">"
-                                //追加（5/29）viewportタブ
-                                main.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
-                                // titleタグ
-                                main.html.tagb "title" <| fun () ->
-                                    main.html.text projectname
-                                // MathJax
-                                main.html.tagb (
-                                    "script",
-                                    [Atr("type", "text/javascript")
-                                     Atr("id", "MathJax-script")
-                                     Atr("async")
-                                     Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
-                                // webフォント取得
-                                main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                                main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                                main.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
-                            // body要素
-                            let s0 = Style [area.backGroundColor "#ffffff"]
-                            main.html.tagb ("body", [s0.atr]) <| fun () ->
-                                main.writein bodyCode
+                    Aqualis.makeIntermediateProgramInDirectoryWithContext
+                        (dir, layout.BodyTemporaryFileName, HTMLSequenceDiagram)
+                        outputDirectory
+                    <| fun body ->
+                        code body
+                        let bodyCode = body.allCodes |> Option.defaultValue ""
+                        Aqualis.makeAtomicProgramInDirectoryWithContext
+                            (dir, layout.MainFileName, HTMLSequenceDiagram)
+                            outputDirectory
+                        <| fun main ->
+                            // html書き込みストリーム作成
+                            main.writein "<!DOCTYPE html>"
+                            // html要素
+                            main.html.tagb ("html", [Atr("lang", "ja")]) <| fun () ->
+                                // head要素
+                                main.html.tagb "head" <| fun () ->
+                                    // metaタグ
+                                    main.writein "<meta charset=\"UTF-8\">"
+                                    //追加（5/29）viewportタブ
+                                    main.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
+                                    // titleタグ
+                                    main.html.tagb "title" <| fun () ->
+                                        main.html.text projectname
+                                    // MathJax
+                                    main.html.tagb (
+                                        "script",
+                                        [Atr("type", "text/javascript")
+                                         Atr("id", "MathJax-script")
+                                         Atr("async")
+                                         Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
+                                    // webフォント取得
+                                    main.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
+                                    main.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
+                                    main.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
+                                // body要素
+                                let s0 = Style [area.backGroundColor "#ffffff"]
+                                main.html.tagb ("body", [s0.atr]) <| fun () ->
+                                    main.writein bodyCode
                 |Python ->
-                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,Python) <| fun context ->
+                    Aqualis.makeIntermediateProgramInDirectoryWithContext
+                        (dir, projectname, Python)
+                        outputDirectory
+                    <| fun context ->
                         //メインコード生成
                         code context
                         context.close()
                         //ソースファイル出力
-                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".py"), 2, Python)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(outputDirectory, projectname + ".py"), 2, Python)
                         writer.codewritein "#=============================================================================================\n"
                         writer.codewritein("# Project name: " + projectname + "\n")
                         writer.codewritein("# Project version: " + codever + "\n")
@@ -568,7 +662,7 @@ namespace Aqualis
                         //beeファイル削除
                         context.delete()
                         writer.publish()
-                        use wr = ShellScriptWriter.create(Path.Combine(dir, "proc_" + projectname + "_P.sh"))
+                        use wr = ShellScriptWriter.create(Path.Combine(outputDirectory, "proc_" + projectname + "_P.sh"))
                         wr.WriteLine "#!/bin/bash"
                         wr.WriteLine()
                         ShellScriptWriter.writeExec
@@ -576,14 +670,17 @@ namespace Aqualis
                             "python3"
                             ["--"; projectname + ".py"]
                 |JavaScript ->
-                    Aqualis.makeIntermediateProgramWithContext (dir,projectname,JavaScript) <| fun context ->
+                    Aqualis.makeIntermediateProgramInDirectoryWithContext
+                        (dir, projectname, JavaScript)
+                        outputDirectory
+                    <| fun context ->
                         //メインコード生成
                         context.indentInc()
                         code context
                         context.indentDec()
                         context.close()
                         //ソースファイル出力
-                        use writer = codeWriter.CreateAtomic(Path.Combine(dir, projectname + ".js"), 2, JavaScript)
+                        use writer = codeWriter.CreateAtomic(Path.Combine(outputDirectory, projectname + ".js"), 2, JavaScript)
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein("/* Project name: " + projectname + " */\n")
                         writer.codewritein("// Project version: " + codever + "\n")
@@ -606,7 +703,11 @@ namespace Aqualis
                         context.delete()
                         writer.publish()
                 |PHP ->
-                    Aqualis.makeProgramWithContext (dir,projectname + ".php",PHP) <| fun context ->
+                    Aqualis.makeAtomicProgramInDirectoryWithContext
+                        (dir, projectname + ".php", PHP)
+                        outputDirectory
+                    <| fun context ->
                         code context
                         context.close()
                 |Numeric -> Aqualis.runWithWriterlessContext Numeric code
+            transaction.Commit()
