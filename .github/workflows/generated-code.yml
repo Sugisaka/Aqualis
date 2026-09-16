@@ -31,7 +31,7 @@ jobs:
       - name: Install generated-code runtimes
         run: |
           sudo apt-get update
-          sudo apt-get install --yes gcc gfortran nodejs php-cli python3-venv
+          sudo apt-get install --yes curl gcc gfortran nodejs php-cli python3-venv
           python3 -m venv "$RUNNER_TEMP/aqualis-python-core"
           "$RUNNER_TEMP/aqualis-python-core/bin/python" -m pip install --disable-pip-version-check numpy
           python3 -m venv "$RUNNER_TEMP/aqualis-python-scipy"
