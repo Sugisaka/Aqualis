@@ -196,6 +196,19 @@ module NumericFormattingTests =
             Assert.Equal("a*(b/c)", render (Mul(It 4, a, Div(It 4, b, c))) target)
 
     [<Fact>]
+    let ``complex base ten logarithm and casts produce valid target expressions`` () =
+        let complexValue = Var(Zt, "z", NaN)
+        let remainder = Mod(It 4, Var(It 4, "a", NaN), Var(It 4, "b", NaN))
+        use cTarget = Aqualis.BlankWriter C99
+        use fortranTarget = Aqualis.BlankWriter Fortran
+        use phpTarget = Aqualis.BlankWriter PHP
+
+        Assert.Equal("clog(z)/log(10.0)", Log10(Zt, complexValue).evalC cTarget)
+        Assert.Equal("log(z)/log(10.0d0)", Log10(Zt, complexValue).evalF fortranTarget)
+        Assert.Equal("(double)(a%b)", ToDbl(remainder).evalC cTarget)
+        Assert.Equal("(float)(a%b)", ToDbl(remainder).evalPh phpTarget)
+
+    [<Fact>]
     let ``normal random generation uses unit-variance Box-Muller scaling`` () =
         for language, extension, randomCall in
             [

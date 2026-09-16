@@ -443,8 +443,8 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpAbs(Dbl -x)
                 |Int x -> Dbl (abs x)
                 |Dbl x -> Dbl (abs x)
-                |Cpx (re,im) -> 
-                    (expr.simpPow(Dbl re,Int 2)+expr.simpPow(Dbl im,Int 2)).simp
+                |Cpx (re,im) ->
+                    Dbl (System.Numerics.Complex.Abs(System.Numerics.Complex(re, im)))
                 |_ -> Abs(Dt,x)
                 
             static member simpLog(x:expr) =

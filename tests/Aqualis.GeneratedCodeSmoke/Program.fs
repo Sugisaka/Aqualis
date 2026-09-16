@@ -108,6 +108,28 @@ module Program =
             printResult (int0(Mod(It 4, ten.Expr, Mod(It 4, a.Expr, b.Expr))))
             printResult (int0(Mod(It 4, a.Expr, Mul(It 4, b.Expr, c.Expr))))
 
+    let private generateComplexMathRegression outputRoot (directoryName,language) =
+        let outputDirectory = Path.Combine(outputRoot, "complex-math-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            let literal = complex0(Cpx(3.0, 4.0))
+            let value = context.var.z0 "value"
+            value <== literal
+            let logarithm = asm.log literal
+            let baseTenLogarithm = asm.log10 value
+            context.print.t (asm.abs literal)
+            context.print.t logarithm.re
+            context.print.t logarithm.im
+            context.print.t baseTenLogarithm.re
+            context.print.t baseTenLogarithm.im
+
+            if language = C99 then
+                let dividend = context.var.i0 "dividend"
+                let divisor = context.var.i0 "divisor"
+                dividend <== 5
+                divisor <== 3
+                context.print.t (asm.todouble(dividend % divisor))
+
     let private generateCArrayCase outputRoot caseName debugMode (code:Aqualis -> unit) =
         let outputDirectory = Path.Combine(outputRoot, "c-array-" + caseName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1379,6 +1401,8 @@ module Program =
             generateJavaScriptIntegerDivision outputRoot
             ["c", C99; "fortran", Fortran; "javascript", JavaScript; "php", PHP]
             |> List.iter (generateArithmeticPrecedence outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python]
+            |> List.iter (generateComplexMathRegression outputRoot)
             generatePythonSciPy outputRoot
             generateCBessel outputRoot
             generateDistributedC outputRoot

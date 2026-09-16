@@ -195,6 +195,35 @@ verify_arithmetic_precedence 'JavaScript' "$output_root/precedence-javascript" "
 php -l "$output_root/precedence-php/smoke.php" >/dev/null
 verify_arithmetic_precedence 'PHP' "$output_root/precedence-php" php smoke.php
 
+verify_complex_math() {
+  local label="$1"
+  local working_directory="$2"
+  shift 2
+  local actual
+  actual="$(cd "$working_directory" && "$@")"
+  python3 - "$label" "$actual" <<'PY'
+import math
+import sys
+
+label, output = sys.argv[1:]
+values = [float(value) for value in output.split()]
+expected = [5.0, math.log(5.0), math.atan2(4.0, 3.0),
+            math.log10(5.0), math.atan2(4.0, 3.0) / math.log(10.0)]
+if label == 'C99':
+    expected.append(2.0)
+if len(values) != len(expected) or any(
+    not math.isclose(value, wanted, rel_tol=1e-9, abs_tol=1e-9)
+    for value, wanted in zip(values, expected)
+):
+    sys.exit(f'{label} complex math: expected {expected}, received {values}')
+print(f'{label} complex math: passed')
+PY
+}
+
+verify_complex_math 'C99' "$output_root/complex-math-c" bash proc_smoke_C.sh
+verify_complex_math 'Fortran' "$output_root/complex-math-fortran" bash proc_smoke_F.sh
+verify_complex_math 'Python' "$output_root/complex-math-python" bash proc_smoke_P.sh
+
 run_and_verify 'PHP UTF-8 text validation' "$output_root/php-text-validation" '1000' php validation.php
 run_and_verify 'C99 distributed script' "$output_root/c-distributed" '42' bash shell_distributed_01.sh
 run_and_verify 'C99 leading-hyphen project' "$output_root/c-leading-hyphen" '42' bash proc_-leading_C.sh

@@ -194,6 +194,7 @@ namespace Aqualis
                 |Atan2(x,y) -> "atan2(" + x.evalF c + "," + y.evalF c + ")"
                 |Abs(_,x) -> "abs(" + x.evalF c + ")"
                 |Log(_,x) -> "log(" + x.evalF c + ")"
+                |Log10(Zt,x) -> "log(" + x.evalF c + ")/log(10.0d0)"
                 |Log10(_,x) -> "log10(" + x.evalF c + ")"
                 |Sqrt(_,x) -> "sqrt(" + x.evalF c + ")"
                 |ToInt x -> "int(" + x.evalF c + ")"

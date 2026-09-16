@@ -228,13 +228,13 @@ namespace Aqualis
                 |Sqrt(_,x) -> "sqrt(" + x.evalPh c + ")"
                 |ToInt x ->
                     match x with
-                    |Add _|Sub _ |Mul _ |Div _ ->
+                    |Add _|Sub _ |Mul _ |Div _ |Mod _ ->
                         "(int)(" + x.evalPh c + ")"
                     |_ ->
                         "(int)" + x.evalPh c
                 |ToDbl x ->
                     match x with
-                    |Add _|Sub _ |Mul _ |Div _ ->
+                    |Add _|Sub _ |Mul _ |Div _ |Mod _ ->
                         "(float)(" + x.evalPh c + ")"
                     |_ ->
                         "(float)" + x.evalPh c

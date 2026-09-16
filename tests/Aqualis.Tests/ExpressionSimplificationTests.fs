@@ -4,6 +4,24 @@ open Xunit
 open Aqualis
 
 module ExpressionSimplificationTests =
+    [<Fact>]
+    let ``complex literal magnitude and logarithm use the true magnitude`` () =
+        let value = complex0(Cpx(3.0, 4.0))
+
+        match (asm.abs value).Expr.simp with
+        |Dbl magnitude -> Assert.Equal(5.0, magnitude, 12)
+        |actual -> Assert.Fail($"Expected a real magnitude, but got {actual}.")
+
+        match (asm.log value).Expr.simp with
+        |Cpx(real, imaginary) ->
+            Assert.Equal(System.Math.Log(5.0), real, 12)
+            Assert.Equal(System.Math.Atan2(4.0, 3.0), imaginary, 12)
+        |actual -> Assert.Fail($"Expected a complex logarithm, but got {actual}.")
+
+        match (asm.abs (complex0(Cpx(1.0e308, 1.0e308)))).Expr.simp with
+        |Dbl magnitude -> Assert.True(System.Double.IsFinite(magnitude))
+        |actual -> Assert.Fail($"Expected a finite magnitude, but got {actual}.")
+
     let private namedInteger name =
         int0(Var(It 4, name, Int 0))
 
