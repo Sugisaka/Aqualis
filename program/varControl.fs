@@ -99,6 +99,71 @@ namespace Aqualis
                     true)
         ///<summary>リスト</summary>
         member _.list with get() = lock gate (fun () -> ulist)
+
+    /// <summary>Python生成コードが必要とするimportを重複なく収集する。</summary>
+    type internal PythonImportController() =
+        let gate = obj()
+        let mutable modules : Set<string> = Set.empty
+        let mutable symbols : Map<string, Set<string>> = Map.empty
+
+        member _.RequireModule(moduleName:string) =
+            lock gate (fun () -> modules <- Set.add moduleName modules)
+
+        member _.RequireSymbol(moduleName:string, symbol:string) =
+            lock gate (fun () ->
+                let current = symbols |> Map.tryFind moduleName |> Option.defaultValue Set.empty
+                symbols <- symbols |> Map.add moduleName (Set.add symbol current))
+
+        member _.Snapshot =
+            lock gate (fun () -> modules, symbols)
+
+        member this.Merge(source:PythonImportController) =
+            let sourceModules,sourceSymbols = source.Snapshot
+            lock gate (fun () ->
+                modules <- Set.union modules sourceModules
+                for moduleName,sourceModuleSymbols in Map.toSeq sourceSymbols do
+                    let current = symbols |> Map.tryFind moduleName |> Option.defaultValue Set.empty
+                    symbols <- symbols |> Map.add moduleName (Set.union current sourceModuleSymbols))
+
+        member _.Lines =
+            lock gate (fun () ->
+                let moduleLines =
+                    modules
+                    |> Set.toList
+                    |> List.map (fun moduleName -> "import " + moduleName)
+                let symbolLines =
+                    symbols
+                    |> Map.toList
+                    |> List.map (fun (moduleName,moduleSymbols) ->
+                        "from " + moduleName + " import " + String.concat ", " (Set.toList moduleSymbols))
+                moduleLines @ symbolLines)
+
+    /// <summary>HTML生成コードへ明示的に追加する外部資産を保持する。</summary>
+    type internal HtmlAssetController() =
+        let gate = obj()
+        let mutable mathJaxScript : string option = None
+        let mutable fontStylesheet : string option = None
+
+        member _.SetMathJaxScript(url:string) =
+            lock gate (fun () -> mathJaxScript <- Some url)
+
+        member _.DisableMathJax() =
+            lock gate (fun () -> mathJaxScript <- None)
+
+        member _.SetFontStylesheet(url:string) =
+            lock gate (fun () -> fontStylesheet <- Some url)
+
+        member _.UseSystemFonts() =
+            lock gate (fun () -> fontStylesheet <- None)
+
+        member _.Snapshot =
+            lock gate (fun () -> mathJaxScript, fontStylesheet)
+
+        member this.Merge(source:HtmlAssetController) =
+            let sourceMathJaxScript,sourceFontStylesheet = source.Snapshot
+            lock gate (fun () ->
+                mathJaxScript <- sourceMathJaxScript |> Option.orElse mathJaxScript
+                fontStylesheet <- sourceFontStylesheet |> Option.orElse fontStylesheet)
         
     ///<summary>インデントの設定</summary>
     type IndentController(indentsize:int) =

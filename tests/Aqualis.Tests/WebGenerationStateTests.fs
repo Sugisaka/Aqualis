@@ -126,6 +126,71 @@ module WebGenerationStateTests =
         Assert.Contains("src=\"application.js?x=1&amp;y=2\"", generated)
 
     [<Fact>]
+    let ``HTML head has no implicit external assets`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "head-offline.html"
+
+        use context = new Aqualis(Some output.Path, Some fileName, HTML)
+        context.html.head "Offline" ignore
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.DoesNotContain("MathJax-script", generated)
+        Assert.DoesNotContain("https://", generated)
+        Assert.DoesNotContain("http://", generated)
+
+    [<Fact>]
+    let ``HTML head emits only explicitly configured optional assets`` () =
+        use output = new TemporaryDirectory()
+        let fileName = "head-explicit-assets.html"
+
+        use context = new Aqualis(Some output.Path, Some fileName, HTML)
+        context.HtmlAssets.UseMathJax(Url.relative "vendor/mathjax/tex-chtml.js?x=1&y=2")
+        context.HtmlAssets.UseFontStylesheet(
+            Url.https "https://assets.example.com/fonts.css?x=1&y=2")
+        context.html.head "Explicit assets" ignore
+        context.close()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, fileName))
+        Assert.Contains("id=\"MathJax-script\"", generated)
+        Assert.Contains("src=\"vendor/mathjax/tex-chtml.js?x=1&amp;y=2\"", generated)
+        Assert.Contains("href=\"https://assets.example.com/fonts.css?x=1&amp;y=2\"", generated)
+        Assert.DoesNotContain("cdn.jsdelivr.net", generated)
+        Assert.DoesNotContain("fonts.googleapis.com", generated)
+
+    [<Fact>]
+    let ``HTML compilers honor explicit asset settings`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [HTML] output.Path "explicit-html-assets" "1" <| fun context ->
+            context.HtmlAssets.UseMathJax(Url.relative "assets/mathjax.js")
+            context.HtmlAssets.UseFontStylesheet(Url.relative "assets/fonts.css")
+
+        let html = File.ReadAllText(Path.Combine(output.Path, "explicit-html-assets.html"))
+        Assert.Contains("src=\"assets/mathjax.js\"", html)
+        Assert.Contains("href=\"assets/fonts.css\"", html)
+
+        Compile [HTMLSequenceDiagram] output.Path "explicit-sequence-assets" "1" <| fun context ->
+            context.HtmlAssets.UseMathJax(Url.relative "assets/mathjax.js")
+
+        let sequence = File.ReadAllText(Path.Combine(output.Path, "explicit-sequence-assets.html"))
+        Assert.Contains("src=\"assets/mathjax.js\"", sequence)
+        Assert.DoesNotContain("fonts.googleapis.com", sequence)
+
+    [<Fact>]
+    let ``HTML presentation honors explicit asset settings`` () =
+        use output = new TemporaryDirectory()
+
+        freePage output.Path "explicit-presentation-assets" "Assets" None <| fun context ->
+            context.HtmlAssets.UseMathJax(Url.relative "assets/mathjax.js")
+            context.HtmlAssets.UseFontStylesheet(Url.relative "assets/fonts.css")
+
+        let generated =
+            File.ReadAllText(Path.Combine(output.Path, "explicit-presentation-assets.html"))
+        Assert.Contains("src=\"assets/mathjax.js\"", generated)
+        Assert.Contains("href=\"assets/fonts.css\"", generated)
+
+    [<Fact>]
     let ``all HTML head overloads keep metadata inside the head element`` () =
         use output = new TemporaryDirectory()
 
@@ -341,9 +406,9 @@ module WebGenerationStateTests =
         Assert.Contains("<h1>A&amp;B</h1>", generated)
         Assert.Contains("Project version: 1&lt;/li&gt;&lt;script&gt;alert(1)&lt;/script&gt;", generated)
         Assert.DoesNotContain("</li><script>alert(1)</script>", generated)
-        Assert.Contains(
-            "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap",
-            generated)
+        Assert.DoesNotContain("fonts.googleapis.com", generated)
+        Assert.DoesNotContain("cdn.jsdelivr.net", generated)
+        Assert.Contains("'Yu Gothic'", generated)
         Assert.DoesNotContain("family=Noto + Sans + JP", generated)
 
         let sequenceProjectName = "sequence&A"

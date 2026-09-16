@@ -26,6 +26,15 @@ module Program =
             value <== value + 2
             context.print.t value
 
+    let private generatePythonSciPy outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "python-scipy")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+
+        Compile [Python] outputDirectory "smoke" "1.0" <| fun context ->
+            let argument = context.var.d0 "argument"
+            argument <== 0.0
+            asm.besselj0 argument <| fun result -> context.print.t result
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -33,6 +42,7 @@ module Program =
             let outputRoot = Path.GetFullPath(outputRoot)
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
+            generatePythonSciPy outputRoot
             printfn "Generated runtime smoke programs in %s" outputRoot
             0
         |_ ->

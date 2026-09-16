@@ -25,6 +25,7 @@
     <Compile Include="GenerationContextTests.fs" />
     <Compile Include="OpenMpGenerationTests.fs" />
     <Compile Include="PythonFunctionGenerationTests.fs" />
+    <Compile Include="PythonImportTests.fs" />
     <Compile Include="StructureDependencyTests.fs" />
     <Compile Include="AssignmentTests.fs" />
     <Compile Include="ExpressionSimplificationTests.fs" />

@@ -7,6 +7,8 @@
 namespace Aqualis
 
     type ContextLa internal (context:Aqualis) =
+        let requirePythonLinalg symbol =
+            context.pythonImports.RequireSymbol("scipy.linalg", symbol)
 
         /// <summary>
         /// 行列×ベクトルの計算
@@ -319,6 +321,7 @@ namespace Aqualis
                 |HTML ->
                     context.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                 |Python ->
+                    requirePythonLinalg "solve"
                     context.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                 |_ -> ()
                 
@@ -348,6 +351,7 @@ namespace Aqualis
                 |HTML ->
                     context.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                 |Python ->
+                    requirePythonLinalg "solve"
                     context.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                 |_ -> ()
                 
@@ -377,6 +381,7 @@ namespace Aqualis
                 |HTML ->
                     context.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                 |Python ->
+                    requirePythonLinalg "solve"
                     context.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                 |_ -> ()
                 
@@ -406,6 +411,7 @@ namespace Aqualis
                 |HTML ->
                     context.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                 |Python ->
+                    requirePythonLinalg "solve"
                     context.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
                 |_ -> ()
                 
@@ -558,6 +564,7 @@ namespace Aqualis
                     |HTML ->
                         context.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                     |Python ->
+                        requirePythonLinalg "svd"
                         context.codewritein("_,"+s.code+",_ = svd("+mat.code+")"+"\n")
                         context.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.code+")"+"\n")
                     |_ -> ()
@@ -645,6 +652,7 @@ namespace Aqualis
                     |HTML ->
                         context.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                     |Python ->
+                        requirePythonLinalg "svd"
                         context.codewritein("_,"+s.code+",_ = svd("+mat.code+")"+"\n")
                         context.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.code+")"+"\n")
                     |_ -> ()
@@ -783,6 +791,7 @@ namespace Aqualis
                 |HTML ->
                     context.codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
                 |Python ->
+                    requirePythonLinalg "eig"
                     context.codewritein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
                 |_ -> ()
                 
@@ -867,6 +876,7 @@ namespace Aqualis
                                         //ちなみに一般化固有ベクトルは二つも出す必要はないので、二行目で出しているeigenvectors.code_dasokuはおまけだと思っていい。理由は以下。
                                         //一般化固有値問題 Ax=λBx の形式では、行列 B に対して左固有ベクトルが計算されることはない。したがって、一般化固有ベクトルは一意に定まることが多い。
                                         |Python ->
+                                            requirePythonLinalg "eig"
                                             context.codewritein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
                                             context.codewritein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
                                         |_ -> ()
@@ -1150,6 +1160,7 @@ namespace Aqualis
             |HTML ->
                 context.codewritein("\\("+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"\\)<br/>\n")
             |Python ->
+                requirePythonLinalg "svd"
                 //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
                 context.codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
             |_ ->
@@ -1268,6 +1279,7 @@ namespace Aqualis
                                         work.deallocate()
                                     |_ -> ()
                     |Python ->
+                        requirePythonLinalg "svd"
                         //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
                         context.codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
                     |_ ->
@@ -1289,6 +1301,7 @@ namespace Aqualis
             |HTML ->
                 context.codewritein("\\("+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"\\)<br/>\n")
             |Python ->
+                requirePythonLinalg "svd"
                 //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
                 context.codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
             |_ ->
@@ -1398,6 +1411,7 @@ namespace Aqualis
                                         work.deallocate()
                                     |_ -> ()
                     |Python ->
+                        requirePythonLinalg "svd"
                         //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
                         context.codewritein(u.code+","+s.code+","+vt.code+" = svd("+mat1.code+")"+"\n")
                     |_ ->

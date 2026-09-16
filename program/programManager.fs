@@ -6,6 +6,7 @@
 //
 namespace Aqualis
 
+    open System
     open System.IO
     open System.Threading
    
@@ -92,6 +93,12 @@ namespace Aqualis
       
         ///<summary>ライブラリの使用時に必要なヘッダーファイル</summary>
         member val internal hlist = new UniqueList()
+
+        ///<summary>Python出力で必要なimport</summary>
+        member val internal pythonImports = new PythonImportController()
+
+        ///<summary>HTML出力へ明示的に追加する外部資産</summary>
+        member val internal htmlAssets = new HtmlAssetController()
 
         ///<summary>ライブラリの使用時に必要なモジュールファイル</summary>
         member val internal mlist = new UniqueList()
@@ -424,6 +431,50 @@ namespace Aqualis
 
     [<AutoOpen>]
     module SettingExtensions =
+        let private pythonKeywords =
+            set [
+                "False"; "None"; "True"; "and"; "as"; "assert"; "async"
+                "await"; "break"; "class"; "continue"; "def"; "del"
+                "elif"; "else"; "except"; "finally"; "for"; "from"
+                "global"; "if"; "import"; "in"; "is"; "lambda"
+                "nonlocal"; "not"; "or"; "pass"; "raise"; "return"
+                "try"; "while"; "with"; "yield" ]
+
+        let private isPythonIdentifier (value:string) =
+            not (String.IsNullOrWhiteSpace value) &&
+            (Char.IsLetter(value[0]) || value[0] = '_') &&
+            (value |> Seq.skip 1 |> Seq.forall (fun character -> Char.IsLetterOrDigit character || character = '_')) &&
+            not (Set.contains value pythonKeywords)
+
+        let private validatePythonModuleName (moduleName:string) =
+            if isNull moduleName then nullArg (nameof moduleName)
+            if not (
+                moduleName.Split('.')
+                |> Array.forall isPythonIdentifier) then
+                invalidArg (nameof moduleName) "A Python module name must contain valid dot-separated identifiers."
+            moduleName
+
+        let private validatePythonSymbol (symbol:string) =
+            if isNull symbol then nullArg (nameof symbol)
+            if not (isPythonIdentifier symbol) then
+                invalidArg (nameof symbol) "A Python import symbol must be a valid identifier."
+            symbol
+
+        type PythonImportSettings internal (c:Aqualis) =
+            let ensurePython() =
+                if c.language <> Python then
+                    raise (NotSupportedException("Python imports are only supported by Python generation contexts."))
+
+            member _.ImportModule(moduleName:string) =
+                ensurePython()
+                c.pythonImports.RequireModule(validatePythonModuleName moduleName)
+
+            member _.ImportFrom(moduleName:string, symbol:string) =
+                ensurePython()
+                c.pythonImports.RequireSymbol(
+                    validatePythonModuleName moduleName,
+                    validatePythonSymbol symbol)
+
         type AqualisSetting(c:Aqualis) =
             ///<summary>デバッグモード設定</summary>
             member _.DebugMode (x:Switch) =
@@ -440,3 +491,5 @@ namespace Aqualis
         type Aqualis with
             ///<summary>Aqualis設定</summary>
             member this.Setting = AqualisSetting this
+            ///<summary>Python生成コードの明示的なimport設定</summary>
+            member this.Python = PythonImportSettings this

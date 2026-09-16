@@ -103,6 +103,8 @@ namespace Aqualis
         ///<summary>関数定義</summary>
         let private inheritDependencies (parent:Aqualis) (child:Aqualis) =
             child.hlist.list |> List.iter parent.hlist.add
+            parent.pythonImports.Merge child.pythonImports
+            parent.htmlAssets.Merge child.htmlAssets
             child.mlist.list |> List.iter parent.mlist.add
             child.elist.list |> List.iter parent.elist.add
             child.slist.list |> List.iter parent.slist.add

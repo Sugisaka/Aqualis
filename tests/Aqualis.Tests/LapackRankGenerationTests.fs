@@ -65,4 +65,7 @@ module LapackRankGenerationTests =
 
         Assert.Contains("numpy.sum(", source)
         Assert.Contains(" > condition)", source)
+        Assert.Contains("from scipy.linalg import svd", source)
+        Assert.DoesNotContain("from scipy.linalg import solve", source)
+        Assert.DoesNotContain("from scipy.special", source)
         Assert.DoesNotContain("threshold = 1e-10", source)

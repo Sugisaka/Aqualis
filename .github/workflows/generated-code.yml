@@ -32,9 +32,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes gcc gfortran nodejs php-cli python3-venv
-          python3 -m venv "$RUNNER_TEMP/aqualis-python"
-          "$RUNNER_TEMP/aqualis-python/bin/python" -m pip install --disable-pip-version-check numpy scipy
-          echo "$RUNNER_TEMP/aqualis-python/bin" >> "$GITHUB_PATH"
+          python3 -m venv "$RUNNER_TEMP/aqualis-python-core"
+          "$RUNNER_TEMP/aqualis-python-core/bin/python" -m pip install --disable-pip-version-check numpy
+          python3 -m venv "$RUNNER_TEMP/aqualis-python-scipy"
+          "$RUNNER_TEMP/aqualis-python-scipy/bin/python" -m pip install --disable-pip-version-check numpy scipy
+          echo "$RUNNER_TEMP/aqualis-python-core/bin" >> "$GITHUB_PATH"
 
       - name: Restore solution
         run: dotnet restore Aqualis.slnx
@@ -55,6 +57,8 @@ jobs:
             "$RUNNER_TEMP/aqualis-generated"
 
       - name: Compile and execute generated programs
+        env:
+          AQUALIS_SCIPY_PYTHON: ${{ runner.temp }}/aqualis-python-scipy/bin/python
         run: bash scripts/verify-generated-code.sh "$RUNNER_TEMP/aqualis-generated"
 
       - name: Preserve failed generated programs

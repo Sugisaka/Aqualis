@@ -1437,13 +1437,7 @@ module dochtml =
                         ctx.writein "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">"
                     |Some width ->
                         ctx.writein ("<meta name=\"viewport\" content=\"width=" + InvariantFormat.integer width + "\">")
-                    // MathJax
-                    ctx.html.tagb (
-                        "script",
-                        [Atr("type", "text/javascript")
-                         Atr("id", "MathJax-script")
-                         Atr("async")
-                         Atr("src", "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js")]) ignore
+                    HtmlAssetRendering.write "" ctx.writein context.BodyContext.htmlAssets
                     for asset in
                         ["animationSeq.js"; "animationSeqReset.js"; "animationStart.js"; "animationReset.js"; "autoAnimation.js"] do
                         ctx.html.tagb (
@@ -1452,10 +1446,6 @@ module dochtml =
                     // scriptタグ
                     ctx.html.tagb "script" <| fun () ->
                         match codeDraw with |Some s -> ctx.writein s |None -> ()
-                    // webフォント取得
-                    ctx.writein "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                    ctx.writein "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                    ctx.writein "<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap\" rel=\"stylesheet\">"
                     match cssfile with
                     | Some stylesheet -> ctx.html.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value stylesheet)])
                     | None -> ()

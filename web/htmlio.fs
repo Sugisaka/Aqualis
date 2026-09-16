@@ -271,6 +271,9 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
     /// <summary>Gets the asset context used by this HTML generation context.</summary>
     member _.Assets = assets
 
+    /// <summary>Configures optional scripts and stylesheets referenced by the generated HTML.</summary>
+    member _.HtmlAssets = HtmlAssetSettings body
+
     /// <summary>Builds a relative URL for a generated web asset.</summary>
     member _.AssetUrl(fileName:string) = assets.AssetUrl(fileName)
 

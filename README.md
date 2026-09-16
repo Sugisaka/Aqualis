@@ -13,6 +13,19 @@ Run the script file `sample1.fsx` to generate C, Fortran, and Python source file
 
 See also the [Japanese manual](docs/doc-jp.md) or [English manual](docs/doc-en.md).
 
+## Optional HTML assets
+
+Generated HTML does not reference external CDNs by default. Applications that need MathJax or a web-font stylesheet must provide and reference those assets explicitly. A relative URL can point to files deployed alongside the generated output; an HTTPS URL is an explicit CDN opt-in.
+
+```fsharp
+Compile [HTML] outputdir projectname version <| fun context ->
+    context.HtmlAssets.UseMathJax(Url.relative "assets/mathjax/tex-chtml.js")
+    context.HtmlAssets.UseFontStylesheet(Url.relative "assets/fonts.css")
+    // Generate the document body here.
+```
+
+Aqualis does not include or download MathJax, fonts, or other third-party web assets.
+
 ## License
 [MIT License](LICENSE.txt)
 

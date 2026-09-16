@@ -346,8 +346,8 @@ module GenerationContextTests =
         Assert.False(File.Exists bodyTemporaryPath)
         Assert.Contains("id=\"sequence-body\"", generated)
         Assert.Equal(1, generated.Split("<title>").Length - 1)
-        Assert.Contains("id=\"MathJax-script\"", generated)
-        Assert.Contains("https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js", generated)
+        Assert.DoesNotContain("id=\"MathJax-script\"", generated)
+        Assert.DoesNotContain("https://", generated)
 
         [ "animationSeq.js"
           "animationSeqReset.js"

@@ -617,7 +617,6 @@ namespace Aqualis
                         writein "<html lang='ja'>"
                         writein "    <head>"
                         writein "        <meta charset='utf-8'>"
-                        writein "        <script type=\"text/javascript\" id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js\"></script>"
                         writein "        <script src=\"animation.js\"></script>"
                         writein "        <script>"
                         writein "        function switchCheck(chkid,txtid)"
@@ -651,9 +650,6 @@ namespace Aqualis
                         writein "        </script>"
                         writein("        <title>" + HtmlEncoding.textContent title + "</title>")
                         writein "        <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
-                        writein "        <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">"
-                        writein "        <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>"
-                        writein "        <link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap\" rel=\"stylesheet\">"
                         writein "        <link rel='stylesheet' href='style.css' />"
                         writein "    </head>"
                         writein "    <body>"

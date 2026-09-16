@@ -193,11 +193,68 @@ namespace Aqualis
         static member (+) (p1:position,p2:position) = position(p1.x+p2.x, p1.y+p2.y)
         static member (-) (p1:position,p2:position) = position(p1.x-p2.x, p1.y-p2.y)
 
+    type HtmlAssetSettings internal (context:Aqualis) =
+        let ensureHtml() =
+            match context.language with
+            | HTML | HTMLSequenceDiagram | PHP -> ()
+            | _ ->
+                raise (NotSupportedException(
+                    "HTML assets are only supported by HTML, HTML sequence diagram, and PHP generation contexts."))
+
+        /// <summary>Uses the specified local or HTTPS MathJax script. No script is configured by default.</summary>
+        member _.UseMathJax(scriptUrl:Url) =
+            ensureHtml()
+            context.htmlAssets.SetMathJaxScript(Url.value scriptUrl)
+
+        /// <summary>Stops emitting a MathJax script reference.</summary>
+        member _.DisableMathJax() =
+            ensureHtml()
+            context.htmlAssets.DisableMathJax()
+
+        /// <summary>Uses the specified local or HTTPS font stylesheet. System fonts are used by default.</summary>
+        member _.UseFontStylesheet(stylesheetUrl:Url) =
+            ensureHtml()
+            context.htmlAssets.SetFontStylesheet(Url.value stylesheetUrl)
+
+        /// <summary>Stops emitting a font stylesheet reference.</summary>
+        member _.UseSystemFonts() =
+            ensureHtml()
+            context.htmlAssets.UseSystemFonts()
+
+    [<AutoOpen>]
+    module HtmlAssetSettingsExtensions =
+        type Aqualis with
+            /// <summary>Configures optional assets referenced by generated HTML.</summary>
+            member this.HtmlAssets = HtmlAssetSettings this
+
+    [<RequireQualifiedAccess>]
+    module internal HtmlAssetRendering =
+        let write indent (writeLine:string -> unit) (assets:HtmlAssetController) =
+            let mathJaxScript,fontStylesheet = assets.Snapshot
+            match mathJaxScript with
+            | Some scriptUrl ->
+                writeLine (indent + "<script>MathJax = { chtml: { displayAlign: \"left\" } };</script>")
+                writeLine (
+                    indent +
+                    "<script type=\"text/javascript\" id=\"MathJax-script\" async src=\"" +
+                    HtmlEncoding.attributeValue scriptUrl +
+                    "\"></script>")
+            | None -> ()
+            match fontStylesheet with
+            | Some stylesheetUrl ->
+                writeLine (
+                    indent +
+                    "<link rel=\"stylesheet\" href=\"" +
+                    HtmlEncoding.attributeValue stylesheetUrl +
+                    "\">")
+            | None -> ()
+
     type html internal (c:Aqualis) =
         let write(s:string) = c.codewrite s
         let writei(s:string) = c.codewritei s
         let writen(s:string) = c.codewriten s
         let writein(s:string) = c.codewritein s
+        let writeConfiguredAssets() = HtmlAssetRendering.write "    " writein c.htmlAssets
         member _.Context with get() = c
         /// Writes a value as an HTML text node.
         member _.text(value:string) = writein(HtmlEncoding.textContent value)
@@ -209,10 +266,7 @@ namespace Aqualis
             writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein("    <title>" + HtmlEncoding.textContent title + "</title>")
-            writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            writeConfiguredAssets()
             writein "    <link rel='stylesheet' href='style.css' />"
             writein "</head>"
             writein "<body>"
@@ -227,10 +281,7 @@ namespace Aqualis
             writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein("    <title>" + HtmlEncoding.textContent title + "</title>")
-            writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            writeConfiguredAssets()
             writein "    <link rel='stylesheet' href='style.css' />"
             writein("    <meta http-equiv=\"refresh\" content=\""+InvariantFormat.integer refresh+"\">")
             writein "</head>"
@@ -246,10 +297,7 @@ namespace Aqualis
             writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein("    <title>" + HtmlEncoding.textContent title + "</title>")
-            writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            writeConfiguredAssets()
             this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value cssfile)])
             this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", Url.value jsfile)]) ignore
             writein("    <meta http-equiv=\"refresh\" content=\""+InvariantFormat.integer refresh+"\">")
@@ -266,10 +314,7 @@ namespace Aqualis
             writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein("    <title>" + HtmlEncoding.textContent title + "</title>")
-            writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            writeConfiguredAssets()
             this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value cssfile)])
             this.tagb ("script", [Atr("type", "text/javascript"); Atr("src", Url.value jsfile)]) ignore
             writein "</head>"
@@ -285,10 +330,7 @@ namespace Aqualis
             writein "    <meta http-equiv=\"content-language\" content=\"ja\">"
             writein "    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>"
             writein("    <title>" + HtmlEncoding.textContent title + "</title>")
-            writein "    <script type='text/javascript' id='MathJax-script' async src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>"
-            writein "    <link rel='preconnect' href='https://fonts.googleapis.com'>"
-            writein "    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>"
-            writein "    <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;600;700&display=swap' rel='stylesheet'>"
+            writeConfiguredAssets()
             this.taga ("link", [Atr("rel", "stylesheet"); Atr("href", Url.value cssfile)])
             writein "</head>"
             writein "<body>"

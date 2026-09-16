@@ -8,9 +8,14 @@ namespace Aqualis
 
     [<AutoOpen>]
     module asm_bessel =
+        let private requirePythonSpecial (context:Aqualis) symbol =
+            if context.language = Python then
+                context.pythonImports.RequireSymbol("scipy.special", symbol)
+
         type asm with
             static member besselj0 (x:double0) = fun code ->
                 let context = x.Context
+                requirePythonSpecial context "jv"
                 let besselj0_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
@@ -27,6 +32,7 @@ namespace Aqualis
                     code bes
             static member bessely0 (x:double0) = fun code ->
                 let context = x.Context
+                requirePythonSpecial context "yn"
                 let bessely0_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesy0("+v.code+")",NaN)
@@ -43,6 +49,8 @@ namespace Aqualis
                     code bes
             static member besselh0 (x:double0) = fun code ->
                 let context = x.Context
+                requirePythonSpecial context "jv"
+                requirePythonSpecial context "yn"
                 let besselj0_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
@@ -70,6 +78,7 @@ namespace Aqualis
                     code bes
             static member besselj1 (x:double0) = fun code ->
                 let context = x.Context
+                requirePythonSpecial context "jv"
                 let besselj1_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)
@@ -86,6 +95,7 @@ namespace Aqualis
                     code bes
             static member bessely1 (x:double0) = fun code ->
                 let context = x.Context
+                requirePythonSpecial context "yn"
                 let bessely1_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesy1("+v.code+")",NaN)
@@ -102,6 +112,8 @@ namespace Aqualis
                     code bes
             static member besselh1 (x:double0) = fun code ->
                 let context = x.Context
+                requirePythonSpecial context "jv"
+                requirePythonSpecial context "yn"
                 let besselj1_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)
