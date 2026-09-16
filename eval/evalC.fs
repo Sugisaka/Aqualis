@@ -171,17 +171,26 @@ namespace Aqualis
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _) -> "(" + x.evalC c + ")*(" + y.evalC c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalC c + ")*" + y.evalC c
-                    |_,(Add _|Sub _) -> x.evalC c + "*(" + y.evalC c + ")"
+                    |_,(Add _|Sub _|Div _|Mod _) -> x.evalC c + "*(" + y.evalC c + ")"
                     |_ -> x.evalC c + "*" + y.evalC c
                 |Div(Dt,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     (ToDbl x/ToDbl y).evalC c
                 |Div(_,x,y) ->
                     match x,y with
-                    |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalC c + ")/(" + y.evalC c + ")"
+                    |(Add _|Sub _),(Add _|Sub _|Mul _|Div _|Mod _) -> "(" + x.evalC c + ")/(" + y.evalC c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalC c + ")/" + y.evalC c
-                    |_,(Add _|Sub _|Mul _|Div _) -> x.evalC c + "/(" + y.evalC c + ")"
+                    |_,(Add _|Sub _|Mul _|Div _|Mod _) -> x.evalC c + "/(" + y.evalC c + ")"
                     |_ -> x.evalC c + "/" + y.evalC c
-                |Mod(_,x,y) -> x.evalC c + "%" + y.evalC c
+                |Mod(_,x,y) ->
+                    let left =
+                        match x with
+                        |Add _|Sub _ -> "(" + x.evalC c + ")"
+                        |_ -> x.evalC c
+                    let right =
+                        match y with
+                        |Add _|Sub _|Mul _|Div _|Mod _ -> "(" + y.evalC c + ")"
+                        |_ -> y.evalC c
+                    left + "%" + right
                 |Pow(Zt,x,y) -> "cpow(" + x.evalC c + "," + y.evalC c + ")"
                 |Pow(_,x,y) -> "pow(" + x.evalC c + "," + y.evalC c + ")"
                 |Exp(Zt,x) -> "cexp(" + x.evalC c + ")"

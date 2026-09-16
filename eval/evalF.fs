@@ -160,7 +160,7 @@ namespace Aqualis
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _) -> "(" + x.evalF c + ")*(" + y.evalF c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalF c + ")*" + y.evalF c
-                    |_,(Add _|Sub _) -> x.evalF c + "*(" + y.evalF c + ")"
+                    |_,(Add _|Sub _|Div _) -> x.evalF c + "*(" + y.evalF c + ")"
                     |_ -> x.evalF c + "*" + y.evalF c
                 |Div(Dt,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     (ToDbl x/ToDbl y).evalF c

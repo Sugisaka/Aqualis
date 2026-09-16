@@ -171,6 +171,31 @@ module NumericFormattingTests =
         Assert.Equal("mod(dividend,divisor)", modulo.evalF fortranTarget)
 
     [<Fact>]
+    let ``generated arithmetic preserves multiplication division and remainder grouping`` () =
+        let a = Var(It 4, "a", NaN)
+        let b = Var(It 4, "b", NaN)
+        let c = Var(It 4, "c", NaN)
+        let real = Var(Dt, "real", NaN)
+
+        for language,render in
+            [ C99, fun (value:expr) (target:Aqualis) -> value.evalC target
+              JavaScript, fun value target -> value.evalJ target
+              PHP, fun value target -> value.evalPh target ] do
+            use target = Aqualis.BlankWriter language
+            Assert.Equal("a*(b%c)", render (Mul(It 4, a, Mod(It 4, b, c))) target)
+            Assert.Equal("(a+b)%c", render (Mod(It 4, Add(It 4, a, b), c)) target)
+            Assert.Equal("a%(b+c)", render (Mod(It 4, a, Add(It 4, b, c))) target)
+            Assert.Equal("a%(b*c)", render (Mod(It 4, a, Mul(It 4, b, c))) target)
+            Assert.Equal("a%(b%c)", render (Mod(It 4, a, Mod(It 4, b, c))) target)
+            Assert.Equal("real/(b%c)", render (Div(Dt, real, Mod(It 4, b, c))) target)
+
+        for language,render in
+            [ C99, fun (value:expr) (target:Aqualis) -> value.evalC target
+              Fortran, fun value target -> value.evalF target ] do
+            use target = Aqualis.BlankWriter language
+            Assert.Equal("a*(b/c)", render (Mul(It 4, a, Div(It 4, b, c))) target)
+
+    [<Fact>]
     let ``normal random generation uses unit-variance Box-Muller scaling`` () =
         for language, extension, randomCall in
             [

@@ -81,6 +81,33 @@ module Program =
             context.print.t (int0(Div(It 4, Var(It 4, "negative", NaN), divisor)))
             context.print.t (double0(Div(Dt, dividend, divisor)))
 
+    let private generateArithmeticPrecedence outputRoot (directoryName,language) =
+        let outputDirectory = Path.Combine(outputRoot, "precedence-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            if language = JavaScript then
+                context.writein "globalThis.print = console.log;"
+            let a = context.var.i0 "a"
+            let b = context.var.i0 "b"
+            let c = context.var.i0 "c"
+            let ten = context.var.i0 "ten"
+            let real = context.var.d0 "real"
+            a <== 5
+            b <== 3
+            c <== 2
+            ten <== 10
+            real <== 8.0
+            let printResult (value:int0) =
+                context.print.t value
+                if language = PHP then context.writein "<?php echo ' '; ?>"
+            printResult (int0(Mul(It 4, a.Expr, Div(It 4, b.Expr, c.Expr))))
+            printResult (int0(Mul(It 4, a.Expr, Mod(It 4, b.Expr, c.Expr))))
+            printResult (int0(Mod(It 4, ten.Expr, Add(It 4, b.Expr, c.Expr))))
+            printResult (int0(Mod(It 4, Add(It 4, b.Expr, c.Expr), Int 4)))
+            printResult (int0(ToInt(Div(Dt, real.Expr, Mod(It 4, a.Expr, b.Expr)))))
+            printResult (int0(Mod(It 4, ten.Expr, Mod(It 4, a.Expr, b.Expr))))
+            printResult (int0(Mod(It 4, a.Expr, Mul(It 4, b.Expr, c.Expr))))
+
     let private generateCArrayCase outputRoot caseName debugMode (code:Aqualis -> unit) =
         let outputDirectory = Path.Combine(outputRoot, "c-array-" + caseName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1350,6 +1377,8 @@ module Program =
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
             generateJavaScriptIntegerDivision outputRoot
+            ["c", C99; "fortran", Fortran; "javascript", JavaScript; "php", PHP]
+            |> List.iter (generateArithmeticPrecedence outputRoot)
             generatePythonSciPy outputRoot
             generateCBessel outputRoot
             generateDistributedC outputRoot

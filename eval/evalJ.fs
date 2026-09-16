@@ -198,7 +198,7 @@ namespace Aqualis
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _) -> "(" + x.evalJ c + ")*(" + y.evalJ c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalJ c + ")*" + y.evalJ c
-                    |_,(Add _|Sub _) -> x.evalJ c + "*(" + y.evalJ c + ")"
+                    |_,(Add _|Sub _|Div _|Mod _) -> x.evalJ c + "*(" + y.evalJ c + ")"
                     |_ -> x.evalJ c + "*" + y.evalJ c
                 |Div(Dt,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     (ToDbl x/ToDbl y).evalJ c
@@ -206,11 +206,20 @@ namespace Aqualis
                     "Math.trunc((" + x.evalJ c + ")/(" + y.evalJ c + "))"
                 |Div(_,x,y) ->
                     match x,y with
-                    |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalJ c + ")/(" + y.evalJ c + ")"
+                    |(Add _|Sub _),(Add _|Sub _|Mul _|Div _|Mod _) -> "(" + x.evalJ c + ")/(" + y.evalJ c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalJ c + ")/" + y.evalJ c
-                    |_,(Add _|Sub _|Mul _|Div _) -> x.evalJ c + "/(" + y.evalJ c + ")"
+                    |_,(Add _|Sub _|Mul _|Div _|Mod _) -> x.evalJ c + "/(" + y.evalJ c + ")"
                     |_ -> x.evalJ c + "/" + y.evalJ c
-                |Mod(_,x,y) -> x.evalJ c + "%" + y.evalJ c
+                |Mod(_,x,y) ->
+                    let left =
+                        match x with
+                        |Add _|Sub _ -> "(" + x.evalJ c + ")"
+                        |_ -> x.evalJ c
+                    let right =
+                        match y with
+                        |Add _|Sub _|Mul _|Div _|Mod _ -> "(" + y.evalJ c + ")"
+                        |_ -> y.evalJ c
+                    left + "%" + right
                 |Pow(_,x,y) -> "Math.pow(" + x.evalJ c + "," + y.evalJ c + ")"
                 |Exp(_,x) -> "Math.exp(" + x.evalJ c + ")"
                 |Sin(_,x) -> "Math.sin(" + x.evalJ c + ")"

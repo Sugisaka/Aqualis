@@ -193,17 +193,26 @@ namespace Aqualis
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _) -> "(" + x.evalPh c + ")*(" + y.evalPh c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalPh c + ")*" + y.evalPh c
-                    |_,(Add _|Sub _) -> x.evalPh c + "*(" + y.evalPh c + ")"
+                    |_,(Add _|Sub _|Div _|Mod _) -> x.evalPh c + "*(" + y.evalPh c + ")"
                     |_ -> x.evalPh c + "*" + y.evalPh c
                 |Div(It 4,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     "intdiv(" + x.evalPh c + ", " + y.evalPh c + ")"
                 |Div(_,x,y) ->
                     match x,y with
-                    |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalPh c + ")/(" + y.evalPh c + ")"
+                    |(Add _|Sub _),(Add _|Sub _|Mul _|Div _|Mod _) -> "(" + x.evalPh c + ")/(" + y.evalPh c + ")"
                     |(Add _|Sub _),_ -> "(" + x.evalPh c + ")/" + y.evalPh c
-                    |_,(Add _|Sub _|Mul _|Div _) -> x.evalPh c + "/(" + y.evalPh c + ")"
+                    |_,(Add _|Sub _|Mul _|Div _|Mod _) -> x.evalPh c + "/(" + y.evalPh c + ")"
                     |_ -> x.evalPh c + "/" + y.evalPh c
-                |Mod(_,x,y) -> x.evalPh c + "%" + y.evalPh c
+                |Mod(_,x,y) ->
+                    let left =
+                        match x with
+                        |Add _|Sub _ -> "(" + x.evalPh c + ")"
+                        |_ -> x.evalPh c
+                    let right =
+                        match y with
+                        |Add _|Sub _|Mul _|Div _|Mod _ -> "(" + y.evalPh c + ")"
+                        |_ -> y.evalPh c
+                    left + "%" + right
                 |Pow(_,x,y) -> "pow(" + x.evalPh c + "," + y.evalPh c + ")"
                 |Exp(_,x) -> "exp(" + x.evalPh c + ")"
                 |Sin(_,x) -> "sin(" + x.evalPh c + ")"

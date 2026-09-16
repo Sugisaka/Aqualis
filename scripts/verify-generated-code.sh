@@ -24,12 +24,14 @@ if command -v node >/dev/null 2>&1; then
   node_command="node"
   javascript_path="$output_root/javascript/smoke.js"
   javascript_division_path="$output_root/javascript-integer-division/smoke.js"
+  javascript_precedence_path="$output_root/precedence-javascript/smoke.js"
   javascript_dot_path="$output_root/dot-length-mismatch-javascript/smoke.js"
 elif command -v node.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
   # WSL can use the Windows Node.js runtime when a Linux node binary is absent.
   node_command="node.exe"
   javascript_path="$(wslpath -w "$output_root/javascript/smoke.js")"
   javascript_division_path="$(wslpath -w "$output_root/javascript-integer-division/smoke.js")"
+  javascript_precedence_path="$(wslpath -w "$output_root/precedence-javascript/smoke.js")"
   javascript_dot_path="$(wslpath -w "$output_root/dot-length-mismatch-javascript/smoke.js")"
 else
   printf '%s\n' 'Required runtime is missing: node or node.exe' >&2
@@ -167,6 +169,32 @@ run_and_verify 'JavaScript integer division' "$output_root/javascript-integer-di
 
 php -l "$output_root/php/smoke.php" >/dev/null
 run_and_verify 'PHP' "$output_root/php" '42' php smoke.php
+
+verify_arithmetic_precedence() {
+  local label="$1"
+  local working_directory="$2"
+  shift 2
+  local actual
+  actual="$(cd "$working_directory" && "$@")"
+  python3 - "$label" "$actual" <<'PY'
+import sys
+
+label, output = sys.argv[1:]
+values = output.split()
+expected = ['5', '5', '0', '1', '4', '0', '5']
+if values != expected:
+    sys.exit(f'{label} arithmetic precedence: expected {expected}, received {values}')
+print(f'{label} arithmetic precedence: passed')
+PY
+}
+
+verify_arithmetic_precedence 'C99' "$output_root/precedence-c" bash proc_smoke_C.sh
+verify_arithmetic_precedence 'Fortran' "$output_root/precedence-fortran" bash proc_smoke_F.sh
+"$node_command" --check "$javascript_precedence_path"
+verify_arithmetic_precedence 'JavaScript' "$output_root/precedence-javascript" "$node_command" "$javascript_precedence_path"
+php -l "$output_root/precedence-php/smoke.php" >/dev/null
+verify_arithmetic_precedence 'PHP' "$output_root/precedence-php" php smoke.php
+
 run_and_verify 'PHP UTF-8 text validation' "$output_root/php-text-validation" '1000' php validation.php
 run_and_verify 'C99 distributed script' "$output_root/c-distributed" '42' bash shell_distributed_01.sh
 run_and_verify 'C99 leading-hyphen project' "$output_root/c-leading-hyphen" '42' bash proc_-leading_C.sh
