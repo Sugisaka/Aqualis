@@ -34,6 +34,23 @@ namespace Aqualis
                 "if (" + condition + ") { fprintf(stderr, \"Aqualis runtime error: "
                 + escapeCString message + "\\n\"); exit(EXIT_FAILURE); }\n")
 
+    [<RequireQualifiedAccess>]
+    module internal NumericArrayValidation =
+        let require (context:Aqualis) (condition:bool0) message =
+            let fail () =
+                let message = "Aqualis: " + message
+                match context.Language with
+                | C99 -> context.codewritein("fprintf(stderr, " + OutputTextLiteral.c (message + "\n") + "); exit(EXIT_FAILURE);\n")
+                | Fortran -> context.codewritein("error stop " + OutputTextLiteral.fortran message + "\n")
+                | Python -> context.codewritein("raise ValueError(" + OutputTextLiteral.python message + ")\n")
+                | JavaScript -> context.codewritein("throw new Error(" + OutputTextLiteral.javaScript message + ");\n")
+                | PHP -> context.codewritein("<?php throw new \\RuntimeException(" + PhpEncoding.stringLiteral message + "); ?>\n")
+                | Numeric -> invalidArg "array" message
+                | _ -> ()
+            match context.Language with
+            | C99 | Fortran | Python | JavaScript | PHP | Numeric -> context.br.if1 condition fail
+            | _ -> ()
+
     ///<summary>1次元配列</summary>
     type base1 (typ:Etype,x:Expr1, c:Aqualis) =
         let writein text = c.codewritein text
@@ -314,13 +331,7 @@ namespace Aqualis
 
         static member sizeMismatchError(x:base1,y:base1) =
             let ctx = Aqualis.merge x.Aqualis y.Aqualis
-            if ctx.Debug.debugMode then
-                ctx.Errors.inc()
-                ctx.comment ("***debug array1 access check: "+ctx.Errors.ID+"*****************************")
-                ctx.br.branch <| fun b ->
-                    b.IF (x.size1 .=/ y.size1) <| fun () ->
-                        ctx.print.s ("ERROR"+ctx.Errors.ID+" array size (first index) mismatch")
-                ctx.comment "****************************************************"
+            NumericArrayValidation.require ctx (x.size1 .=/ y.size1) "Array size (first dimension) mismatch."
 
     /// Shared implementation for one-dimensional numeric arrays.
     /// The self type preserves the public int1/double1/complex1 result type.

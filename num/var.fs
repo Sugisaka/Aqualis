@@ -73,21 +73,28 @@ namespace Aqualis
         member _.ip1(name:string, values:int list) =
             let name = nameFor ctx name
             let items = values |> List.map ctx.numFormat.ItoS |> String.concat ","
-            let initial = if ctx.language = Fortran then "(/"+items+"/)" else "["+items+"]"
+            let initial = if ctx.language = Fortran then "(/"+items+"/)" elif ctx.language = C99 then "{"+items+"}" else "["+items+"]"
             ctx.cvar.setUniqVarWarning(It 4,A1 values.Length,name,initial)
             int1(It 4,Var1(A1 values.Length,name),context=ctx)
             
         member _.dp1(name:string, values:double list) =
             let name = nameFor ctx name
             let items = values |> List.map ctx.numFormat.DtoS |> String.concat ","
-            let initial = if ctx.language = Fortran then "(/"+items+"/)" else "["+items+"]"
+            let initial = if ctx.language = Fortran then "(/"+items+"/)" elif ctx.language = C99 then "{"+items+"}" else "["+items+"]"
             ctx.cvar.setUniqVarWarning(Dt,A1 values.Length,name,initial)
             double1(Dt,Var1(A1 values.Length,name),context=ctx)
 
         member _.zp1(name:string, values:(double*double) list) =
             let name = nameFor ctx name
-            let items = values |> List.map (fun (re,im) -> complex0(Cpx(re,im)).Expr.eval ctx) |> String.concat ","
-            let initial = if ctx.language = Fortran then "(/"+items+"/)" else "["+items+"]"
+            let items =
+                values
+                |> List.map (fun (re,im) ->
+                    if ctx.language = Fortran then
+                        "(" + ctx.numFormat.DtoS re + "," + ctx.numFormat.DtoS im + ")"
+                    else
+                        complex0(Cpx(re,im)).Expr.eval ctx)
+                |> String.concat ","
+            let initial = if ctx.language = Fortran then "(/"+items+"/)" elif ctx.language = C99 then "{"+items+"}" else "["+items+"]"
             ctx.cvar.setUniqVarWarning(Zt,A1 values.Length,name,initial)
             complex1(Zt,Var1(A1 values.Length,name),context=ctx)
 

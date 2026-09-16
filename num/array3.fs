@@ -738,16 +738,9 @@ namespace Aqualis
 
         static member sizeMismatchError(v1:base3,v2:base3) =
             let ctx = Aqualis.merge v1.Aqualis v2.Aqualis
-            if ctx.Debug.debugMode then
-                ctx.Errors.inc()
-                ctx.comment ("***debug array3 access check: "+ctx.Errors.ID+"*****************************")
-                ctx.br.if1 (v1.size1 .=/ v2.size1) <| fun () ->
-                    ctx.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size1 mismatch"
-                ctx.br.if1 (v1.size2 .=/ v2.size2) <| fun () ->
-                    ctx.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size2 mismatch"
-                ctx.br.if1 (v1.size3 .=/ v2.size3) <| fun () ->
-                    ctx.print.s <| "ERROR"+ctx.Errors.ID+" operator '<==' array size3 mismatch"
-                ctx.comment "****************************************************"
+            NumericArrayValidation.require ctx (v1.size1 .=/ v2.size1) "Array size (first dimension) mismatch."
+            NumericArrayValidation.require ctx (v1.size2 .=/ v2.size2) "Array size (second dimension) mismatch."
+            NumericArrayValidation.require ctx (v1.size3 .=/ v2.size3) "Array size (third dimension) mismatch."
                 
     /// Shared implementation for three-dimensional numeric arrays.
     [<AbstractClass>]

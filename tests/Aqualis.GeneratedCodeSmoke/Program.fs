@@ -322,6 +322,69 @@ module Program =
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
 
+        generate "array-shape-vector" <| fun context ->
+            let target = context.var.i1 "target"
+            let source = context.var.i1 "source"
+            target.allocate 2
+            source.allocate 1
+            target <== source
+
+        generate "array-shape-matrix" <| fun context ->
+            let target = context.var.i2 "target"
+            let source = context.var.i2 "source"
+            target.allocate(2, 2)
+            source.allocate(2, 1)
+            target <== source
+
+        generate "array-shape-tensor" <| fun context ->
+            let target = context.var.i3 "target"
+            let source = context.var.i3 "source"
+            target.allocate(2, 2, 2)
+            source.allocate(2, 2, 1)
+            target <== source
+
+        generate "array-shape-expression" <| fun context ->
+            let target = context.var.i1 "target"
+            let source = context.var.i1 "source"
+            target.allocate 2
+            source.allocate 1
+            let result = target + source
+            target <== result
+
+        generate "minmax-empty-vector" <| fun context ->
+            let source = context.var.i1 "source"
+            let result = context.var.i0 "result"
+            asm.max(source, result, None)
+
+        generate "minmax-empty-matrix" <| fun context ->
+            let source = context.var.d2 "source"
+            let result = context.var.d0 "result"
+            asm.min(source, result, None, None)
+
+        generate "minmax-empty-tensor" <| fun context ->
+            let source = context.var.i3 "source"
+            let result = context.var.i0 "result"
+            asm.max(source, result, None, None, None)
+
+        generate "linear-range-real" <| fun context ->
+            let result = context.var.d0 "result"
+            result <== 99.0
+            let interpolation = context.interpolate.linearDouble("sample", [0.0; 1.0], [0.0; 10.0])
+            interpolation.y (double0(Dbl 2.0)) (fun value -> result <== value)
+            context.print.t result
+
+        generate "linear-valid-real" <| fun context ->
+            let result = context.var.d0 "result"
+            let interpolation = context.interpolate.linearDouble("sample", [0.0; 1.0], [0.0; 10.0])
+            interpolation.y (double0(Dbl 0.5)) (fun value -> result <== value)
+            context.print.t result
+
+        generate "linear-range-complex" <| fun context ->
+            let result = context.var.z0 "result"
+            let interpolation = context.interpolate.linearComplex("sample", [0.0; 1.0], [(0.0, 0.0); (10.0, 1.0)])
+            interpolation.y (double0(Dbl 2.0)) (fun value -> result <== value)
+            context.print.t result
+
         generate "read-byte" <| fun context ->
             let value = context.var.i0 "value"
             let sum = context.var.i0 "sum"
@@ -1033,6 +1096,16 @@ module Program =
             right.allocate 1
             context.la.dot(output, left, right)
 
+    let private generateWebArrayValidation outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "array-shape-vector-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            let target = context.var.i1 "target"
+            let source = context.var.i1 "source"
+            target.allocate 2
+            source.allocate 1
+            target <== source
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -1056,6 +1129,8 @@ module Program =
                     generateSplineValidation outputRoot target caseName
             ["javascript", JavaScript; "php", PHP]
             |> List.iter (generateWebProductValidation outputRoot)
+            ["javascript", JavaScript; "php", PHP]
+            |> List.iter (generateWebArrayValidation outputRoot)
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot
             generateCArrayCases outputRoot

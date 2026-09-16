@@ -297,6 +297,23 @@ for language in c fortran python; do
     python) run_command=(bash proc_smoke_P.sh) ;;
   esac
 
+  for rank in vector matrix tensor; do
+    case "$rank" in
+      vector) dimension=first ;;
+      matrix) dimension=second ;;
+      tensor) dimension=third ;;
+    esac
+    expect_generated_failure "$language $rank assignment shape" "$output_root/array-shape-$rank-$language" "Array size ($dimension dimension) mismatch." "${run_command[@]}"
+  done
+  expect_generated_failure "$language array expression shape" "$output_root/array-shape-expression-$language" 'Array size (first dimension) mismatch.' "${run_command[@]}"
+  for rank in vector matrix tensor; do
+    expect_generated_failure "$language empty $rank min/max" "$output_root/minmax-empty-$rank-$language" 'Min/max requires a nonempty array.' "${run_command[@]}"
+  done
+  for kind in real complex; do
+    expect_generated_failure "$language $kind linear interpolation range" "$output_root/linear-range-$kind-$language" 'Linear interpolation query is out of range.' "${run_command[@]}"
+  done
+  run_and_verify_number "$language valid linear interpolation" "$output_root/linear-valid-real-$language" '5' "${run_command[@]}"
+
   byte_directory="$output_root/read-byte-$language"
   printf '\000\177\200\377\012' > "$byte_directory/bytes.dat"
   run_and_verify "$language byte values" "$byte_directory" '520' "${run_command[@]}"
@@ -492,6 +509,19 @@ expect_generated_failure 'JavaScript mismatched dot vectors' \
 expect_generated_failure 'PHP mismatched dot vectors' \
   "$output_root/dot-length-mismatch-php" \
   'Aqualis: LAPACK dot product vector lengths must match.' \
+  php smoke.php
+if [[ "$node_command" == 'node.exe' ]]; then
+  javascript_array_path="$(wslpath -w "$output_root/array-shape-vector-javascript/smoke.js")"
+else
+  javascript_array_path="$output_root/array-shape-vector-javascript/smoke.js"
+fi
+expect_generated_failure 'JavaScript mismatched array shape' \
+  "$output_root/array-shape-vector-javascript" \
+  'Aqualis: Array size (first dimension) mismatch.' \
+  "$node_command" "$javascript_array_path"
+expect_generated_failure 'PHP mismatched array shape' \
+  "$output_root/array-shape-vector-php" \
+  'Aqualis: Array size (first dimension) mismatch.' \
   php smoke.php
 
 cat > "$output_root/eigen-info-wrapper.c" <<'EOF'

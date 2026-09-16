@@ -95,7 +95,7 @@ namespace Aqualis
                     context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                         flag<==1
                         code(Y.[lastIndex])
-                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[0]++X.[lastIndex]
+                    NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
 
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
         type LinearInterpolate1z(context:Aqualis,id:string,data_x:double list,data_y:(double*double) list) =
@@ -116,7 +116,7 @@ namespace Aqualis
                     context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                         flag<==1
                         code(Y.[lastIndex])
-                    context.br.if1(flag.=0) <| fun () -> context.print.tt <| x++"is out of range:"++X.[0]++X.[lastIndex]
+                    NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
 
         type splineInterpolateDouble(context:Aqualis) =
 

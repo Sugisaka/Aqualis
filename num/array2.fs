@@ -394,16 +394,8 @@ namespace Aqualis
 
         static member sizeMismatchError(x:base2,y:base2) =
             let ctx = Aqualis.merge x.Aqualis y.Aqualis
-            if ctx.Debug.debugMode then
-                ctx.Errors.inc()
-                ctx.comment ("***debug array2 access check: "+ctx.Errors.ID+"*****************************")
-                ctx.br.branch <| fun b ->
-                    b.IF (x.size1 .=/ y.size1) <| fun () ->
-                        ctx.print.s ("ERROR"+ctx.Errors.ID+" array size (first index) mismatch")
-                ctx.br.branch <| fun b ->
-                    b.IF (x.size2 .=/ y.size2) <| fun () ->
-                        ctx.print.s ("ERROR"+ctx.Errors.ID+" array size (second index) mismatch")
-                ctx.comment "****************************************************"
+            NumericArrayValidation.require ctx (x.size1 .=/ y.size1) "Array size (first dimension) mismatch."
+            NumericArrayValidation.require ctx (x.size2 .=/ y.size2) "Array size (second dimension) mismatch."
 
     /// Shared implementation for two-dimensional numeric arrays.
     [<AbstractClass>]
