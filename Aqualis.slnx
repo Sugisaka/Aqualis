@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Aqualis.fsproj" />
+  <Project Path="tests/Aqualis.Tests/Aqualis.Tests.fsproj" />
+</Solution>
