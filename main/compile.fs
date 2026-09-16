@@ -20,6 +20,12 @@ namespace Aqualis
         let private validateProjectName (projectName:string) =
             PortableFileNameSegment.validate "projectname" "project" projectName
 
+        let private validateLanguageSelection languages =
+            if List.contains HTML languages && List.contains HTMLSequenceDiagram languages then
+                invalidArg
+                    "langgList"
+                    "HTML and HTMLSequenceDiagram cannot be requested together because they produce the same output file."
+
         let private fortranProgramIdentifier (projectName:string) =
             let asciiLetter character =
                 ('A' <= character && character <= 'Z') ||
@@ -160,8 +166,9 @@ namespace Aqualis
                         removeDirectory rollbackDirectory
 
         let private compileCore (policy:DiagnosticPolicy) (diagnostics:DiagnosticBag) langgList dir projectname (codever:string) code =
-            let projectname = validateProjectName projectname
             let languages = langgList |> Seq.toList
+            validateLanguageSelection languages
+            let projectname = validateProjectName projectname
             let codever = singleLineMetadata (nameof codever) codever
             let fortranProgramName = fortranProgramIdentifier projectname
             use transaction = new CompilationOutputTransaction(dir)

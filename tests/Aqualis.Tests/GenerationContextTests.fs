@@ -78,6 +78,31 @@ module GenerationContextTests =
         Assert.Empty(transactionDirectories output.Path)
 
     [<Fact>]
+    let ``Compile rejects colliding HTML targets before generation`` () =
+        for languages in
+            [ [HTML; HTMLSequenceDiagram]
+              [HTMLSequenceDiagram; HTML] ] do
+            use output = new TemporaryDirectory()
+            let projectName = "colliding-html-targets"
+            let targetPath = Path.Combine(output.Path, projectName + ".html")
+            let existingContents = "existing HTML"
+            let mutable callbackInvoked = false
+            File.WriteAllText(targetPath, existingContents)
+
+            let error =
+                Assert.Throws<ArgumentException>(fun () ->
+                    Compile languages output.Path projectName "1" <| fun context ->
+                        callbackInvoked <- true
+                        context.writein "replacement")
+
+            Assert.Equal("langgList", error.ParamName)
+            Assert.Contains("produce the same output file", error.Message)
+            Assert.False(callbackInvoked)
+            Assert.Equal(existingContents, File.ReadAllText(targetPath))
+            Assert.False(Directory.Exists(Path.Combine(output.Path, "contents_" + projectName)))
+            Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
     let ``Compile restores files when publication fails partway through commit`` () =
         use output = new TemporaryDirectory()
         let projectName = "transaction-commit-failure"
