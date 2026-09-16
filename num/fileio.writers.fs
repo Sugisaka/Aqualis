@@ -233,7 +233,7 @@ namespace Aqualis
                                 yield double0string_format_C
                                 yield double0string_format_C
                             |RStr v,_ ->
-                                yield v.Replace("\"","\\\"")
+                                yield v.Replace("%", "%%")
                             |_ -> ()
                         ])
                     |> fun s -> String.Join("",s)
@@ -253,7 +253,8 @@ namespace Aqualis
                             yield v.eval ctx
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
-                writein("fprintf("+fp+",\""+format+"\\n\""+(if code ="" then "" else ",")+code+");\n")
+                writein("fprintf(" + fp + "," + OutputTextLiteral.c (format + "\n") +
+                        (if code = "" then "" else "," + code) + ");\n")
             |LaTeX ->
                 let code =
                     lst.data
@@ -283,6 +284,7 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 writein("Write(text): \\("+fp+" \\leftarrow "+code+"\\)<br/>")
             |Python ->
+                let hasNumeric = lst.data |> List.exists (function RNvr _ -> true | _ -> false)
                 let int0string_format_P = "%d"
                 let double0string_format_P = "%.17g"
                 let format =
@@ -298,13 +300,13 @@ namespace Aqualis
                                 yield double0string_format_P
                                 yield double0string_format_P
                             |RStr v,_ ->
-                                yield v.Replace("\"","\\\"")
+                                yield (if hasNumeric then v.Replace("%", "%%") else v)
                             |_ -> ()
                         ])
                     |> (fun b ->
                           [for n in 0..(b.Length-1) do
                               yield b.[n]
-                              if n<(b.Length-1) then yield "\\t"
+                              if n<(b.Length-1) then yield "\t"
                           ])
                     |> fun s -> String.Join("",s)
                 let code =
@@ -319,7 +321,10 @@ namespace Aqualis
                         |(It _|Dt),RNvr(v,_) -> yield v.eval ctx
                         |_ -> ()]
                     |> fun s -> String.Join(",",s)
-                writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
+                let literal = OutputTextLiteral.python (format + "\n")
+                writein(fp + ".write(" +
+                        (if code = "" then literal else literal + " %(" + code + ")") +
+                        ")\n")
             |_ -> ()
 
     type BinWriter internal (ctx:Aqualis,fp:string) =

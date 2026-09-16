@@ -9,6 +9,50 @@ namespace Aqualis
     ///<summary>データ補間</summary>
     module interpolate =
 
+        [<RequireQualifiedAccess>]
+        module private SplineValidation =
+            let private fail (context:Aqualis) message =
+                match context.Language with
+                | C99 ->
+                    context.codewritein("fprintf(stderr, " + OutputTextLiteral.c ("Aqualis: " + message + "\n") + "); exit(EXIT_FAILURE);\n")
+                | Fortran ->
+                    context.codewritein("error stop " + OutputTextLiteral.fortran ("Aqualis: " + message) + "\n")
+                | Python ->
+                    context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n")
+                | _ -> ()
+
+            let require (context:Aqualis) (condition:bool0) message =
+                match context.Language with
+                | C99 | Fortran | Python ->
+                    context.br.if1 condition (fun () -> fail context message)
+                | _ -> ()
+
+            let requireFinite (context:Aqualis) (value:double0) message =
+                let condition =
+                    match context.Language with
+                    | C99 -> Some("!isfinite(" + value.code + ")")
+                    | Fortran -> Some(".not. ieee_is_finite(" + value.code + ")")
+                    | Python -> Some("not numpy.isfinite(" + value.code + ")")
+                    | _ -> None
+                condition |> Option.iter (fun expression ->
+                    require context (bool0(Var(Nt, expression, NaN), context)) message)
+
+            let data (context:Aqualis) (x:double1) (ySize:int0) =
+                require context (x.size1 .< 2) "Spline interpolation requires at least two points."
+                require context (x.size1 .< ySize) "Spline x and y lengths must match."
+                require context (x.size1 .> ySize) "Spline x and y lengths must match."
+                context.iter.num x.size1 <| fun (i:int0) ->
+                    requireFinite context x[i] "Spline x values must be finite."
+                context.iter.range (0, x.size1-2) <| fun (i:int0) ->
+                    require context (x[i+1] .<= x[i]) "Spline x values must be strictly increasing."
+
+            let query (context:Aqualis) (x:double1) (coefficientSize:int0) (value:double0) =
+                require context (x.size1 .< 2) "Spline interpolation has not been initialized."
+                require context (coefficientSize .< 3*x.size1-3) "Spline interpolation has not been initialized."
+                requireFinite context value "Spline query must be finite."
+                require context (value .< x[0]) "Spline query is out of range."
+                require context (value .> x[x.size1-1]) "Spline query is out of range."
+
         let private validateLinearData (dataX:double list) dataYCount =
             if dataX.Length < 2 then
                 invalidArg "data_x" "Linear interpolation requires at least two data points."
@@ -88,6 +132,7 @@ namespace Aqualis
             /// 補間を実行
             /// </summary>
             member __.set() =
+                SplineValidation.data context x y.size1
                 context.ch.i <| fun N ->
                     N <== x.size1
                     f.allocate(3*N-3,3*N-3)
@@ -184,6 +229,7 @@ namespace Aqualis
             /// <param name="yy"></param>
             /// <param name="xx"></param>
             member __.p (yy:double0) (xx:double0) =
+                SplineValidation.query context x g.size1 xx
                 yy.clear()
                 let evaluate (i:int0) =
                     let t = xx-x.[i]
@@ -201,6 +247,7 @@ namespace Aqualis
             /// <param name="yy"></param>
             /// <param name="xx"></param>
             member __.dp (yy:double0) (xx:double0) =
+                SplineValidation.query context x g.size1 xx
                 yy.clear()
                 let evaluate (i:int0) =
                     let t = xx-x.[i]
@@ -239,6 +286,7 @@ namespace Aqualis
             /// 補間を実行
             /// </summary>
             member __.set() =
+                SplineValidation.data context x y.size1
                 context.ch.i <| fun N ->
                     N <== x.size1
                     f.allocate(3*N-3,3*N-3)
@@ -358,6 +406,7 @@ namespace Aqualis
             /// <param name="yy"></param>
             /// <param name="xx"></param>
             member __.p (yy:complex0) (xx:double0) =
+                SplineValidation.query context x g.size1 xx
                 yy.clear()
                 let evaluate (i:int0) =
                     let t = xx-x.[i]
@@ -375,6 +424,7 @@ namespace Aqualis
             /// <param name="yy"></param>
             /// <param name="xx"></param>
             member __.dp (yy:complex0) (xx:double0) =
+                SplineValidation.query context x g.size1 xx
                 yy.clear()
                 let evaluate (i:int0) =
                     let t = xx-x.[i]

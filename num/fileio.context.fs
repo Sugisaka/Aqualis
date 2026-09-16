@@ -82,7 +82,7 @@ namespace Aqualis
                             |RStr _ ->
                                 "A"
                             |RNvr(x,_) when x.etype = It 4 ->
-                                "I" + integerWidth.ToString()
+                                "I0." + integerWidth.ToString()
                             |_ ->
                                 "")
                         |> List.filter (String.IsNullOrEmpty >> not)
@@ -103,7 +103,7 @@ namespace Aqualis
                         filename.data
                         |> List.choose (function
                             |RStr value -> Some("len(" + FileNameCode.fortranStringLiteral value + ")")
-                            |RNvr(value,_) when value.etype = It 4 -> Some(integerWidth.ToString())
+                            |RNvr(value,_) when value.etype = It 4 -> Some((max integerWidth 11).ToString())
                             |_ -> None)
                         |> function
                             |[] -> "0"
@@ -114,11 +114,6 @@ namespace Aqualis
                         ctx.cvar.setUniqVar(Structure "integer(1)",A0,btname,"")
                         writein("allocate(character(len=" + requiredLength + ") :: " + id + ")\n")
                         writein("write("+id+",\"("+f+")\") "+s+"\n")
-                        ctx.ch.i <| fun counter ->
-                            let c = counter.Expr.eval ctx
-                            writein("do "+c+" = 1, len_trim("+id+")"+"\n")
-                            writein("  if ( "+id+"( "+c+":"+c+" ).EQ.\" \" ) "+id+"( "+c+":"+c+" ) = \"0\""+"\n")
-                            writein("end do"+"\n")
                         if isbinary then
                             writein("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
                         else
@@ -657,6 +652,8 @@ namespace Aqualis
             |_ -> ()
 
         member private this.Read (fp:string) (iostat:int0) (lst:exprString) =
+            if List.isEmpty lst.data then
+                invalidArg (nameof lst) "A file-read record must contain at least one target."
             let rec cpxvarlist list (s:list<reduceExprString>) counter =
                 match s with
                 |a::b ->
@@ -715,15 +712,16 @@ namespace Aqualis
                                   ])
                             |> fun s -> String.Join(",",s)
                         writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ctx+") "+code+"\n")
-                        for t,m,b in varlist do
-                            match t,b with
-                            |Zt,target ->
-                                let value,targetContext =
-                                    FileIoReadTarget.require ctx target
-                                complex0(value,context=targetContext)
-                                    <== tmp[2*m]+asm.uj*tmp[2*m+1]
-                            |_ ->
-                                ()
+                        if Nz > 0 then
+                            ctx.br.if1 (iostat .= 0) <| fun () ->
+                                for t,m,b in varlist do
+                                    match t,b with
+                                    |Zt,target ->
+                                        let value,targetContext =
+                                            FileIoReadTarget.require ctx target
+                                        complex0(value,context=targetContext)
+                                            <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                                    |_ -> ()
             |C99 ->
                 ctx.ch.dx (2*Nz) <| fun tmp ->
                     let format =
@@ -755,16 +753,19 @@ namespace Aqualis
                                     yield FileIoReadTarget.reject()
                             ])
                       |> fun s -> String.Join(",",s)
-                    writein("fscanf("+fp+",\""+format+"\","+code+");\n")
-                    for t,m,b in varlist do
-                        match t,b with
-                        |Zt,target ->
-                            let value,targetContext =
-                                FileIoReadTarget.require ctx target
-                            complex0(value,context=targetContext)
-                                <== tmp[2*m]+asm.uj*tmp[2*m+1]
-                        |_ ->
-                            ()
+                    let expectedCount = varlist.Length + Nz
+                    writein(iostat.code + " = fscanf("+fp+",\""+format+"\","+code+");\n")
+                    writein("if (" + iostat.code + " != EOF && " + iostat.code + " != " +
+                            string expectedCount + ") { fprintf(stderr, \"Aqualis: invalid text input record.\\n\"); exit(EXIT_FAILURE); }\n")
+                    ctx.br.if1 (iostat .= expectedCount) <| fun () ->
+                        for t,m,b in varlist do
+                            match t,b with
+                            |Zt,target ->
+                                let value,targetContext =
+                                    FileIoReadTarget.require ctx target
+                                complex0(value,context=targetContext)
+                                    <== tmp[2*m]+asm.uj*tmp[2*m+1]
+                            |_ -> ()
             |LaTeX ->
                 let double0string_format_F =
                     let a,b = ctx.numFormat.dFormat
@@ -836,12 +837,19 @@ namespace Aqualis
                                     yield FileIoReadTarget.reject()
                             ])
                       |> fun s -> String.Join(",",s)
-                    //書式指定をしてファイルから値を読み込み。まだ、完成してない
                     writein("lines = " + fp + ".readline()\n")
-                    writein "word_list = re.split(r\'[\\t\\n]\', lines)\n"
+                    writein("if lines == '':\n")
+                    ctx.indentInc()
+                    writein(iostat.code + " = -1\n")
+                    ctx.indentDec()
+                    writein("else:\n")
+                    ctx.indentInc()
+                    writein("word_list = lines.split()\n")
+                    writein("if len(word_list) != " + string (varlist.Length + Nz) +
+                            ": raise ValueError('Aqualis: invalid text input record.')\n")
+                    iostat <== 0
                     let mutable cnt = 0
                     for t,_,a in varlist do
-                        //let a_string = string a
                         match t,a with
                         |It _,RNvr(v,_) ->
                             writein(v.eval ctx+" = int(word_list["+cnt.ToString()+"])")
@@ -853,6 +861,7 @@ namespace Aqualis
                             writein(v.eval ctx+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
                             cnt <- cnt + 2
                         |_ -> ()
+                    ctx.indentDec()
             |_ -> ()
 
         member private this.Read_bin (fp:string) (iostat:int0) (v:expr) =
@@ -988,6 +997,8 @@ namespace Aqualis
                 this.fileAccess (filename,None) true false <| fun fp ->
                     ctx.iter.loop <| fun (ext,i) ->
                         this.Read fp iostat varlist
+                        if ctx.language = Fortran then
+                            writein("if (" + iostat.code + " > 0) error stop 'Aqualis: invalid text input record.'\n")
                         ctx.br.branch <| fun b ->
                             b.IF (iostat .< 0) <| fun () ->
                                 ext()
@@ -1000,6 +1011,8 @@ namespace Aqualis
                 this.fileAccess (filename,Some intDigit) true false <| fun fp ->
                     ctx.iter.loop <| fun (ext,i) ->
                         this.Read fp iostat varlist
+                        if ctx.language = Fortran then
+                            writein("if (" + iostat.code + " > 0) error stop 'Aqualis: invalid text input record.'\n")
                         ctx.br.branch <| fun b ->
                             b.IF (iostat .< 0) <| fun () ->
                                 ext()

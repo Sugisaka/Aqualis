@@ -190,6 +190,51 @@ module Program =
                     context.writein assignment
                     context.writein ("echo (" + value.IsValid.code + ") ? '1' : '0';")
 
+    let private generateOutputEscaping outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "output-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            if language = JavaScript then
+                context.writein "globalThis.print = console.log;"
+            let value = context.var.i0 "value"
+            value <== 7
+            context.print.s "a\"b\\c%"
+            context.print.tt (st "x%=" ++ value)
+            context.print.tt (st "only%text")
+            if language = C99 || language = Python then
+                context.io.fileOutput "literal.txt" <| fun writer ->
+                    writer.cc (st "file\"\\%")
+                    writer.cc (st "mix%=" ++ value)
+
+    let private generateTextRead outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "read-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            let value = context.var.i0 "value"
+            let sum = context.var.i0 "sum"
+            sum <== 0
+            context.io.file_Read (st "data file.txt") (iv value) <| fun _ ->
+                sum <== sum + value
+            context.print.t sum
+
+    let private generateSplineValidation outputRoot (directoryName, language) caseName =
+        let outputDirectory = Path.Combine(outputRoot, "spline-" + directoryName + "-" + caseName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            let spline = context.interpolate.splineDouble()
+            spline.X.allocate 2
+            spline.Y.allocate 2
+            spline.X[0] <== 0.0
+            spline.X[1] <== (if caseName = "unordered" then 0.0 else 1.0)
+            spline.Y[0] <== 0.0
+            spline.Y[1] <== 10.0
+            spline.set()
+            let result = context.var.d0 "result"
+            let query = context.var.d0 "query"
+            query <== (if caseName = "out-of-range" then -1.0 else 0.5)
+            spline.p result query
+            context.print.t result
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -202,6 +247,12 @@ module Program =
             generateLeadingHyphenC outputRoot
             generateLeadingHyphenFortran outputRoot
             generatePhpTextValidation outputRoot
+            generationTargets |> List.iter (generateOutputEscaping outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python]
+            |> List.iter (generateTextRead outputRoot)
+            for target in ["c", C99; "fortran", Fortran; "python", Python] do
+                for caseName in ["valid"; "unordered"; "out-of-range"] do
+                    generateSplineValidation outputRoot target caseName
             generateCArrayCases outputRoot
             generatePhpUploads outputRoot
             printfn "Generated runtime smoke programs in %s" outputRoot

@@ -7,6 +7,48 @@
 namespace Aqualis
 
     open System
+    open System.Text
+
+    [<RequireQualifiedAccess>]
+    module internal OutputTextLiteral =
+        let private quoted (cStyle:bool) (value:string) =
+            if isNull value then nullArg (nameof value)
+            let builder = StringBuilder(value.Length + 2)
+            builder.Append('"') |> ignore
+            for character in value do
+                match character with
+                | '\\' -> builder.Append("\\\\") |> ignore
+                | '"' -> builder.Append("\\\"") |> ignore
+                | '\n' -> builder.Append("\\n") |> ignore
+                | '\r' -> builder.Append("\\r") |> ignore
+                | '\t' -> builder.Append("\\t") |> ignore
+                | c when Char.IsControl c && cStyle && int c <= 255 ->
+                    builder.Append('\\').Append(Convert.ToString(int c, 8).PadLeft(3, '0')) |> ignore
+                | c when Char.IsControl c ->
+                    builder.Append("\\u").Append((int c).ToString("X4")) |> ignore
+                | c -> builder.Append(c) |> ignore
+            builder.Append('"').ToString()
+
+        let c value = quoted true value
+        let python value = quoted false value
+        let javaScript value = quoted false value
+
+        let fortran (value:string) =
+            if isNull value then nullArg (nameof value)
+            let parts = ResizeArray<string>()
+            let text = StringBuilder()
+            let flush () =
+                if text.Length > 0 then
+                    parts.Add("'" + text.ToString().Replace("'", "''") + "'")
+                    text.Clear() |> ignore
+            for character in value do
+                if Char.IsControl character then
+                    flush()
+                    parts.Add("achar(" + string (int character) + ")")
+                else
+                    text.Append(character) |> ignore
+            flush()
+            if parts.Count = 0 then "''" else String.Join("//", parts)
 
     ///<summary>画面表示</summary>
     type internal PrintEmitter () =
@@ -18,7 +60,7 @@ namespace Aqualis
                     [for q in lst.data do
                         match q with
                         |RStr x ->
-                            yield "\""+x+"\""
+                            yield OutputTextLiteral.fortran x
                         |RNvr (x,_) when x.etype = Zt ->
                             yield (Re x).eval (program)
                             yield (Im x).eval (program)
@@ -35,7 +77,7 @@ namespace Aqualis
                     lst.data
                     |> List.map( fun (q:reduceExprString) ->
                         match q with
-                        |RStr x -> x
+                        |RStr x -> x.Replace("%", "%%")
                         |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
                         |RNvr (x,_) when x.etype = Dt -> double0string_format_C
                         |RNvr (x,_) when x.etype = Zt -> double0string_format_C + double0string_format_C
@@ -51,7 +93,8 @@ namespace Aqualis
                         |RNvr (x,_) -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                program.codewritein("printf(\""+format+"\\n\","+code+");\n")
+                program.codewritein("printf(" + OutputTextLiteral.c (format + "\n") +
+                                    (if code = "" then "" else "," + code) + ");\n")
             |LaTeX ->
                 let code =
                     lst.data
@@ -67,7 +110,7 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RStr x -> x
+                        |RStr x -> HtmlEncoding.textContent x
                         |RNvr (x,_) -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
@@ -78,13 +121,14 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RStr x -> x
+                        |RStr x -> HtmlEncoding.textContent x
                         |RNvr (x,_) -> x.eval (program))
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
                 program.codewritein("Print \\("+code+"\\)\n")
                 program.codewritein "<br/>\n"
             |Python ->
+                let hasNumeric = lst.data |> List.exists (function RNvr _ -> true | _ -> false)
                 let int0string_format_C =
                     "%"+program.numFormat.iFormat.ToString()+"d"
                 let double0string_format_C =
@@ -94,7 +138,7 @@ namespace Aqualis
                     lst.data
                     |> List.map (fun (q:reduceExprString) ->
                         match q with
-                        |RStr x -> x
+                        |RStr x -> if hasNumeric then x.Replace("%", "%%") else x
                         |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
                         |RNvr (x,_) when x.etype = Dt  -> double0string_format_C
                         |RNvr (x,_) when x.etype = Zt  -> double0string_format_C + double0string_format_C
@@ -110,61 +154,34 @@ namespace Aqualis
                         |_ -> "")
                     |> List.filter (fun s -> s <> "")
                     |> fun s -> String.Join(",",s)
-                program.codewritein("print(\"" + format + "\" %(" + code + "))\n")
+                let literal = OutputTextLiteral.python format
+                program.codewritein("print(" +
+                                    (if code = "" then literal else literal + " %(" + code + ")") +
+                                    ")\n")
             |JavaScript ->
-                let int0string_format_C =
-                    "%"+program.numFormat.iFormat.ToString()+"d"
-                let double0string_format_C =
-                    let a,b = program.numFormat.dFormat
-                    "%"+a.ToString()+"."+b.ToString()+"e"
-                let format =
+                let parts =
                     lst.data
-                    |> List.map (fun (q:reduceExprString) ->
-                        match q with
-                        |RStr x -> x
-                        |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
-                        |RNvr (x,_) when x.etype = Dt  -> double0string_format_C
-                        |RNvr (x,_) when x.etype = Zt  -> double0string_format_C + double0string_format_C
-                        |_ -> "")
-                    |> List.filter (fun s -> s <> "")
-                    |> fun s -> String.Join("",s)
-                let code =
-                    lst.data
-                    |> List.map (fun (q:reduceExprString) ->
-                        match q with
-                        |RNvr (x,_) when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
-                        |RNvr (x,_) -> x.eval (program)
-                        |_ -> "")
-                    |> List.filter (fun s -> s <> "")
-                    |> fun s -> String.Join(",",s)
-                program.codewritein("print(" + code + ");\n")
+                    |> List.collect (function
+                        |RStr value -> [OutputTextLiteral.javaScript value]
+                        |RNvr (value,_) when value.etype = Zt ->
+                            ["String(" + (Re value).eval program + ")";
+                             "String(" + (Im value).eval program + ")"]
+                        |RNvr (value,_) -> ["String(" + value.eval program + ")"])
+                program.codewritein("print(" +
+                                    (if List.isEmpty parts then "\"\"" else String.concat " + " parts) +
+                                    ");\n")
             |PHP ->
-                let int0string_format_C =
-                    "%"+program.numFormat.iFormat.ToString()+"d"
-                let double0string_format_C =
-                    let a,b = program.numFormat.dFormat
-                    "%"+a.ToString()+"."+b.ToString()+"e"
-                let format =
+                let parts =
                     lst.data
-                    |> List.map (fun (q:reduceExprString) ->
-                        match q with
-                        |RStr x -> x
-                        |RNvr (x,_) when x.etype = It 4 -> int0string_format_C
-                        |RNvr (x,_) when x.etype = Dt  -> double0string_format_C
-                        |RNvr (x,_) when x.etype = Zt  -> double0string_format_C + double0string_format_C
-                        |_ -> "")
-                    |> List.filter (fun s -> s <> "")
-                    |> fun s -> String.Join("",s)
-                let code =
-                    lst.data
-                    |> List.map (fun (q:reduceExprString) ->
-                        match q with
-                        |RNvr (x,_) when x.etype = Zt -> (Re x).eval (program) + "," + (Im x).eval (program)
-                        |RNvr (x,_) -> x.eval (program)
-                        |_ -> "")
-                    |> List.filter (fun s -> s <> "")
-                    |> fun s -> String.Join(",",s)
-                program.writePhpStatement("print(" + code + ");")
+                    |> List.collect (function
+                        |RStr value -> [PhpEncoding.stringLiteral value]
+                        |RNvr (value,_) when value.etype = Zt ->
+                            ["(" + (Re value).eval program + ")";
+                             "(" + (Im value).eval program + ")"]
+                        |RNvr (value,_) -> [value.eval program])
+                program.writePhpStatement("print(" +
+                                          (if List.isEmpty parts then "\"\"" else String.concat " . " parts) +
+                                          ");")
             |Numeric ->
                 for v in lst.data do
                     match v with
@@ -176,9 +193,9 @@ namespace Aqualis
         static member internal sWith (program:Aqualis) (str:string) =
             match program.language with
             |Fortran ->
-                program.codewritein("print *, "+"\""+str+"\""+"\n")
+                program.codewritein("print *, " + OutputTextLiteral.fortran str + "\n")
             |C99 ->
-                program.codewritein("printf(\""+str+"\""+");\n")
+                program.codewritein("fputs(" + OutputTextLiteral.c str + ", stdout);\n")
             |LaTeX ->
                 program.codewritein("print, \""+str+"\"\n")
             |HTML ->
@@ -188,9 +205,9 @@ namespace Aqualis
                 program.codewritein(HtmlEncoding.textContent ("Print \\(" + str + "\\)") + "\n")
                 program.codewritein "<br/>\n"
             |Python ->
-                program.codewritein("print(\""+str+"\")\n")
+                program.codewritein("print(" + OutputTextLiteral.python str + ")\n")
             |JavaScript ->
-                program.codewritein("print(\""+str+"\")\n")
+                program.codewritein("print(" + OutputTextLiteral.javaScript str + ")\n")
             |PHP ->
                 program.writePhpStatement("print(" + PhpEncoding.stringLiteral str + ");")
             |Numeric ->

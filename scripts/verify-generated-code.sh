@@ -76,6 +76,90 @@ run_and_verify 'C99 distributed script' "$output_root/c-distributed" '42' bash s
 run_and_verify 'C99 leading-hyphen project' "$output_root/c-leading-hyphen" '42' bash proc_-leading_C.sh
 run_and_verify 'Fortran leading-hyphen project' "$output_root/fortran-leading-hyphen" '42' bash proc_-leading_F.sh
 
+verify_output_case() {
+  local language="$1"
+  local directory="$2"
+  shift 2
+  local actual
+  actual="$(cd "$directory" && "$@")"
+  if ! grep -Fq 'a"b\c%' <<< "$actual" ||
+     ! grep -Eq 'x%=[[:space:]]*7' <<< "$actual" ||
+     ! grep -Fq 'only%text' <<< "$actual"; then
+    printf '%s escaped output was incorrect: %s\n' "$language" "$actual" >&2
+    exit 1
+  fi
+  printf '%s escaped output: passed\n' "$language"
+}
+
+gcc -std=c99 -Werror=format "$output_root/output-c/smoke.c" -lm -o "$output_root/output-c/smoke.exe"
+verify_output_case C99 "$output_root/output-c" ./smoke.exe
+verify_output_case Fortran "$output_root/output-fortran" bash proc_smoke_F.sh
+verify_output_case Python "$output_root/output-python" bash proc_smoke_P.sh
+if [[ "$node_command" == 'node.exe' ]]; then
+  output_javascript_path="$(wslpath -w "$output_root/output-javascript/smoke.js")"
+else
+  output_javascript_path="$output_root/output-javascript/smoke.js"
+fi
+"$node_command" --check "$output_javascript_path"
+verify_output_case JavaScript "$output_root/output-javascript" "$node_command" "$output_javascript_path"
+php -l "$output_root/output-php/smoke.php" >/dev/null
+verify_output_case PHP "$output_root/output-php" php smoke.php
+
+for language in c python; do
+  actual="$(cat "$output_root/output-$language/literal.txt")"
+  if ! grep -Fxq 'file"\%' <<< "$actual" ||
+     ! grep -Eq '^mix%=[[:space:]]*7$' <<< "$actual"; then
+    printf '%s escaped file output was incorrect: %s\n' "$language" "$actual" >&2
+    exit 1
+  fi
+done
+
+for language in c fortran python; do
+  case_directory="$output_root/read-$language"
+  case "$language" in
+    c) run_command=(bash proc_smoke_C.sh) ;;
+    fortran) run_command=(bash proc_smoke_F.sh) ;;
+    python) run_command=(bash proc_smoke_P.sh) ;;
+  esac
+  printf '3\n4\n' > "$case_directory/data file.txt"
+  run_and_verify "$language text read" "$case_directory" '7' "${run_command[@]}"
+  : > "$case_directory/data file.txt"
+  run_and_verify "$language text EOF" "$case_directory" '0' "${run_command[@]}"
+  printf 'oops\n' > "$case_directory/data file.txt"
+  if (cd "$case_directory" && "${run_command[@]}" >malformed-output.txt 2>malformed-error.txt); then
+    printf '%s accepted malformed text input.\n' "$language" >&2
+    exit 1
+  fi
+  printf '%s malformed text input: stopped as expected\n' "$language"
+done
+
+for language in c fortran python; do
+  case "$language" in
+    c) run_command=(bash proc_smoke_C.sh) ;;
+    fortran) run_command=(bash proc_smoke_F.sh) ;;
+    python) run_command=(bash proc_smoke_P.sh) ;;
+  esac
+  valid_directory="$output_root/spline-$language-valid"
+  actual="$(cd "$valid_directory" && "${run_command[@]}")"
+  if ! awk -v value="$actual" 'BEGIN { exit !(value + 0 > 4.999 && value + 0 < 5.001) }'; then
+    printf '%s spline returned an unexpected result: %s\n' "$language" "$actual" >&2
+    exit 1
+  fi
+  for case_name in unordered out-of-range; do
+    case_directory="$output_root/spline-$language-$case_name"
+    if (cd "$case_directory" && "${run_command[@]}" >actual.txt 2>error.txt); then
+      printf '%s spline accepted %s input.\n' "$language" "$case_name" >&2
+      exit 1
+    fi
+    if ! grep -Fq 'Aqualis: Spline' "$case_directory/error.txt"; then
+      printf '%s spline %s failed without the expected diagnostic.\n' "$language" "$case_name" >&2
+      cat "$case_directory/error.txt" >&2
+      exit 1
+    fi
+  done
+  printf '%s spline bounds and data validation: passed\n' "$language"
+done
+
 for case_name in success double-allocate unallocated-access double-free invalid-size overflow out-of-bounds malloc-failure; do
   case_directory="$output_root/c-array-$case_name"
   if [[ "$case_name" == 'malloc-failure' ]]; then
