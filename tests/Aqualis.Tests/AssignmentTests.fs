@@ -155,15 +155,17 @@ module AssignmentTests =
             complexes2.allocate(2,3)
 
         let generated = File.ReadAllText(Path.Combine(output.Path, "dynamic-arrays.c"))
-        Assert.Contains("int *integers1;", generated)
+        Assert.Contains("int *integers1 = NULL;", generated)
         Assert.Contains("int integers1_size[1] = { -1 };", generated)
-        Assert.Contains("double *doubles1;", generated)
-        Assert.Contains("double complex *complexes1;", generated)
-        Assert.Contains("int *integers2;", generated)
+        Assert.Contains("double *doubles1 = NULL;", generated)
+        Assert.Contains("double complex *complexes1 = NULL;", generated)
+        Assert.Contains("int *integers2 = NULL;", generated)
         Assert.Contains("int integers2_size[2] = { -1, -1 };", generated)
-        Assert.Contains("double *doubles2;", generated)
-        Assert.Contains("double complex *complexes2;", generated)
-        Assert.Contains("integers1 = (int *)malloc(sizeof(int)*integers1_size[0]);", generated)
+        Assert.Contains("double *doubles2 = NULL;", generated)
+        Assert.Contains("double complex *complexes2 = NULL;", generated)
+        Assert.Contains("integers1 = (int *)malloc(sizeof(int) * (size_t)integers1_size[0]);", generated)
+
+        Assert.DoesNotContain("SIZE_MAX /", generated)
 
         let fortran = File.ReadAllText(Path.Combine(output.Path, "dynamic-arrays.f90"))
         Assert.Contains("integer,allocatable :: integers1(:)", fortran)
@@ -174,6 +176,77 @@ module AssignmentTests =
         Assert.Contains("integer :: integers2_size(1:2) = (/ -1,-1 /)", fortran)
         Assert.Contains("double precision,allocatable :: doubles2(:,:)", fortran)
         Assert.Contains("complex(kind(0d0)),allocatable :: complexes2(:,:)", fortran)
+
+    [<Fact>]
+    let ``C dynamic arrays validate allocation access and deallocation in debug mode`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [C99] output.Path "checked-arrays" "1.0" <| fun context ->
+            context.Debug.debugMode <- true
+            let vector = context.var.i1 "vector"
+            let matrix = context.var.d2 "matrix"
+            let tensor = context.var.z3 "tensor"
+            vector.allocate 2
+            matrix.allocate(2,3)
+            tensor.allocate(2,3,4)
+            vector[0] <== 1
+            matrix[1,2] <== 2.0
+            tensor[1,2,3] <== 3.0
+            vector.deallocate()
+            matrix.deallocate()
+            tensor.deallocate()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, "checked-arrays.c"))
+        Assert.Contains("#include <stdint.h>", generated)
+        Assert.Contains("int *vector = NULL;", generated)
+        Assert.Contains("double *matrix = NULL;", generated)
+        Assert.Contains("double complex *tensor = NULL;", generated)
+        Assert.Contains("if (vector != NULL)", generated)
+        Assert.Contains("if (matrix != NULL)", generated)
+        Assert.Contains("if (tensor != NULL)", generated)
+        Assert.Contains("vector_size[0] <= 0", generated)
+        Assert.Contains("matrix_size[0] <= 0 || matrix_size[1] <= 0", generated)
+        Assert.Contains("tensor_size[0] <= 0 || tensor_size[1] <= 0 || tensor_size[2] <= 0", generated)
+        Assert.Contains("(size_t)vector_size[0] > SIZE_MAX / sizeof(int)", generated)
+        Assert.Contains("(size_t)matrix_size[0] > SIZE_MAX / (size_t)matrix_size[1]", generated)
+        Assert.Contains("(size_t)matrix_size[0] * (size_t)matrix_size[1] > SIZE_MAX / sizeof(double)", generated)
+        Assert.Contains("(size_t)tensor_size[0] * (size_t)tensor_size[1] > SIZE_MAX / (size_t)tensor_size[2]", generated)
+        Assert.Contains("(size_t)tensor_size[0] * (size_t)tensor_size[1] * (size_t)tensor_size[2] > SIZE_MAX / sizeof(double complex)", generated)
+        Assert.Contains("memory allocation failed for array vector", generated)
+        Assert.Contains("memory allocation failed for array matrix", generated)
+        Assert.Contains("memory allocation failed for array tensor", generated)
+        Assert.Contains("array vector is not allocated", generated)
+        Assert.Contains("array matrix is not allocated", generated)
+        Assert.Contains("array tensor is not allocated", generated)
+        Assert.Contains("array vector is not allocated or was already freed", generated)
+        Assert.Contains("array matrix is not allocated or was already freed", generated)
+        Assert.Contains("array tensor is not allocated or was already freed", generated)
+        Assert.Contains("index is out of range", generated)
+        Assert.Contains("exit(EXIT_FAILURE);", generated)
+        Assert.Matches(@"free\(vector\);\s+vector = NULL;", generated)
+        Assert.Matches(@"free\(matrix\);\s+matrix = NULL;", generated)
+        Assert.Matches(@"free\(tensor\);\s+tensor = NULL;", generated)
+
+    [<Fact>]
+    let ``C dynamic arrays clear their pointers after free without debug mode`` () =
+        use output = new TemporaryDirectory()
+
+        Compile [C99] output.Path "unchecked-arrays" "1.0" <| fun context ->
+            let vector = context.var.i1 "vector"
+            let matrix = context.var.d2 "matrix"
+            let tensor = context.var.z3 "tensor"
+            vector.allocate 2
+            matrix.allocate(2,3)
+            tensor.allocate(2,3,4)
+            vector.deallocate()
+            matrix.deallocate()
+            tensor.deallocate()
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, "unchecked-arrays.c"))
+        Assert.Matches(@"free\(vector\);\s+vector = NULL;", generated)
+        Assert.Matches(@"free\(matrix\);\s+matrix = NULL;", generated)
+        Assert.Matches(@"free\(tensor\);\s+tensor = NULL;", generated)
+        Assert.DoesNotContain("SIZE_MAX /", generated)
 
     [<Fact>]
     let ``widening array assignments reject scalars from different contexts`` () =

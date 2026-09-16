@@ -24,6 +24,16 @@ namespace Aqualis
     type IReal1 =
         inherit INum1
 
+    /// C99 の動的配列に対するデバッグ時の実行時検証を生成する。
+    module internal CArraySafety =
+        let private escapeCString (text:string) =
+            text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n")
+
+        let guard (context:Aqualis) condition message =
+            context.codewritein(
+                "if (" + condition + ") { fprintf(stderr, \"Aqualis runtime error: "
+                + escapeCString message + "\\n\"); exit(EXIT_FAILURE); }\n")
+
     ///<summary>1次元配列</summary>
     type base1 (typ:Etype,x:Expr1, c:Aqualis) =
         let writein text = c.codewritein text
@@ -74,15 +84,24 @@ namespace Aqualis
             Aqualis.merge c i.Context |> ignore
             if c.Debug.debugMode then
                 match x with
-                |Var1(_,name) ->
-                    c.Errors.inc()
-                    comment ("***debug array1 access check: "+c.Errors.ID+"*****************************")
-                    c.br.branch <| fun b ->
-                        b.IF (this.size1 .= -1) <| fun () ->
-                            c.print.s <| "ERROR" + c.Errors.ID + " array " + name + " is not allocated"
-                        b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                            c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
-                    comment "****************************************************"
+                |Var1(size,name) ->
+                    if c.language = C99 then
+                        match size with
+                        |A1 0 -> CArraySafety.guard c (name + " == NULL") ("array " + name + " is not allocated")
+                        |_ -> ()
+                        let index = i.Expr.eval c
+                        let length = this.size1.Expr.eval c
+                        CArraySafety.guard c ("(" + index + ") < 0 || (" + index + ") >= " + length)
+                            ("array " + name + " index is out of range")
+                    else
+                        c.Errors.inc()
+                        comment ("***debug array1 access check: "+c.Errors.ID+"*****************************")
+                        c.br.branch <| fun b ->
+                            b.IF (this.size1 .= -1) <| fun () ->
+                                c.print.s <| "ERROR" + c.Errors.ID + " array " + name + " is not allocated"
+                            b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
+                                c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                        comment "****************************************************"
                 |_ -> ()
             match x,c.language with
             |Var1(_,name),Fortran -> Idx1(typ,name,(i+1).Expr)
@@ -106,7 +125,7 @@ namespace Aqualis
         member this.allocate(n1:int0) =
                 match x with
                 |Var1(size1,name) ->
-                    if c.Debug.debugMode then
+                    if c.Debug.debugMode && c.language <> C99 then
                         c.Errors.inc()
                         comment ("***debug array1 allocate check: "+c.Errors.ID+"*****************************")
                         c.br.branch <| fun b ->
@@ -124,8 +143,18 @@ namespace Aqualis
                     |C99 ->
                         match size1 with
                         |A1 0 ->
+                            if c.Debug.debugMode then
+                                CArraySafety.guard c (name + " != NULL") ("array " + name + " is already allocated")
                             this.size1 <== n1
-                            writein(name+" = "+"("+typ.tostring c.language+" *)"+"malloc("+"sizeof("+typ.tostring c.language+")*"+this.size1.Expr.eval c+");\n")
+                            let length = this.size1.Expr.eval c
+                            let elementType = typ.tostring c.language
+                            if c.Debug.debugMode then
+                                CArraySafety.guard c (length + " <= 0") ("array " + name + " size must be positive")
+                                CArraySafety.guard c ("(size_t)" + length + " > SIZE_MAX / sizeof(" + elementType + ")")
+                                    ("array " + name + " allocation size overflows size_t")
+                            writein(name+" = "+"("+elementType+" *)"+"malloc("+"sizeof("+elementType+") * (size_t)"+length+");\n")
+                            if c.Debug.debugMode then
+                                CArraySafety.guard c (name + " == NULL") ("memory allocation failed for array " + name)
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |LaTeX ->
@@ -190,7 +219,7 @@ namespace Aqualis
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
-            if c.Debug.debugMode then
+            if c.Debug.debugMode && c.language <> C99 then
                 match x with
                 |Var1(_,name) ->
                     c.Errors.inc()
@@ -212,8 +241,11 @@ namespace Aqualis
                 |C99 ->
                     match size with
                     |A1 0 ->
+                        if c.Debug.debugMode then
+                            CArraySafety.guard c (name + " == NULL") ("array " + name + " is not allocated or was already freed")
                         this.size1 <== -1
                         writein("free("+name+");"+"\n")
+                        writein(name+" = NULL;\n")
                     |_ -> ()
                 |LaTeX ->
                     match size with

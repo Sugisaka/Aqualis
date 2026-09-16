@@ -99,17 +99,30 @@ namespace Aqualis
             Aqualis.mergeMany [c;i.Context;j.Context] |> ignore
             if c.Debug.debugMode then
                 match x with
-                |Var2(_,name) ->
-                    c.Errors.inc()
-                    comment ("***debug array2 access check: "+c.Errors.ID+"*****************************")
-                    c.br.branch <| fun b ->
-                        b.IF (Or [this.size1 .= -1; this.size2 .= -1]) <| fun () ->
-                            c.print.s <| "ERROR" + c.Errors.ID + " array " + name + " is not allocated"
-                        b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
-                            c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
-                        b.IF (Or [j .< _0; this.size2 .<= j]) <| fun () ->
-                            c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
-                    comment "****************************************************"
+                |Var2(size,name) ->
+                    if c.language = C99 then
+                        match size with
+                        |A2(0,0) -> CArraySafety.guard c (name + " == NULL") ("array " + name + " is not allocated")
+                        |_ -> ()
+                        let index1 = i.Expr.eval c
+                        let index2 = j.Expr.eval c
+                        let length1 = this.size1.Expr.eval c
+                        let length2 = this.size2.Expr.eval c
+                        CArraySafety.guard c ("(" + index1 + ") < 0 || (" + index1 + ") >= " + length1)
+                            ("array " + name + " first index is out of range")
+                        CArraySafety.guard c ("(" + index2 + ") < 0 || (" + index2 + ") >= " + length2)
+                            ("array " + name + " second index is out of range")
+                    else
+                        c.Errors.inc()
+                        comment ("***debug array2 access check: "+c.Errors.ID+"*****************************")
+                        c.br.branch <| fun b ->
+                            b.IF (Or [this.size1 .= -1; this.size2 .= -1]) <| fun () ->
+                                c.print.s <| "ERROR" + c.Errors.ID + " array " + name + " is not allocated"
+                            b.IF (Or [i .< _0; this.size1 .<= i]) <| fun () ->
+                                c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ i ++ " is out of range (1:" ++ this.size1 ++ ")"
+                            b.IF (Or [j .< _0; this.size2 .<= j]) <| fun () ->
+                                c.print.tt <| "ERROR" + c.Errors.ID + " array " + name + " illegal access. index " ++ j ++ " is out of range (1:" ++ this.size2 ++ ")"
+                        comment "****************************************************"
                 |_ -> ()
             let targetLanguage = c.language
             match x,targetLanguage with
@@ -170,7 +183,7 @@ namespace Aqualis
         member this.allocate(n1:int0,n2:int0) =
                 match x with
                 |Var2(size,name) ->
-                    if c.Debug.debugMode then
+                    if c.Debug.debugMode && c.language <> C99 then
                         c.Errors.inc()
                         comment ("***debug array1 allocate check: "+c.Errors.ID+"*****************************")
                         c.br.branch <| fun b ->
@@ -189,9 +202,23 @@ namespace Aqualis
                     |C99 ->
                         match size with
                         |A2(0,0) ->
+                            if c.Debug.debugMode then
+                                CArraySafety.guard c (name + " != NULL") ("array " + name + " is already allocated")
                             this.size1 <== n1
                             this.size2 <== n2
-                            writein(name+" = "+"("+typ.tostring(c.language)+" *)"+"malloc("+"sizeof("+typ.tostring(c.language)+")*"+this.size1.Expr.eval (c)+"*"+this.size2.Expr.eval (c)+");\n")
+                            let length1 = this.size1.Expr.eval c
+                            let length2 = this.size2.Expr.eval c
+                            let elementType = typ.tostring c.language
+                            if c.Debug.debugMode then
+                                CArraySafety.guard c (length1 + " <= 0 || " + length2 + " <= 0")
+                                    ("array " + name + " sizes must be positive")
+                                CArraySafety.guard c ("(size_t)" + length1 + " > SIZE_MAX / (size_t)" + length2)
+                                    ("array " + name + " element count overflows size_t")
+                                CArraySafety.guard c ("(size_t)" + length1 + " * (size_t)" + length2 + " > SIZE_MAX / sizeof(" + elementType + ")")
+                                    ("array " + name + " allocation size overflows size_t")
+                            writein(name+" = "+"("+elementType+" *)"+"malloc("+"sizeof("+elementType+") * (size_t)"+length1+" * (size_t)"+length2+");\n")
+                            if c.Debug.debugMode then
+                                CArraySafety.guard c (name + " == NULL") ("memory allocation failed for array " + name)
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |LaTeX ->
@@ -262,7 +289,7 @@ namespace Aqualis
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
-            if c.Debug.debugMode then
+            if c.Debug.debugMode && c.language <> C99 then
                 match x with
                 |Var2(_,name) ->
                     c.Errors.inc()
@@ -285,9 +312,12 @@ namespace Aqualis
                 |C99 ->
                     match size with
                     |A2(0,0) ->
+                        if c.Debug.debugMode then
+                            CArraySafety.guard c (name + " == NULL") ("array " + name + " is not allocated or was already freed")
                         this.size1 <== -1
                         this.size2 <== -1
                         writein("free("+name+");"+"\n")
+                        writein(name+" = NULL;\n")
                     |_ -> ()
                 |LaTeX ->
                     match size with

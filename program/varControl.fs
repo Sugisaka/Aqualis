@@ -621,9 +621,9 @@ namespace Aqualis
                 match vtp, this.Stype typ with 
                 |A0,"char*"               -> "char *" + name + (if param<>"" then " = " + param else " = NULL") + ";"
                 |A0,st                    -> st + " " + name + (if param<>"" then " = " + param else "") + ";"
-                |A1 0,st                  -> st + " *" + name + (if param<>"" then " = " + param else "") + ";"
-                |A2(0,0),st               -> st + " *" + name + (if param<>"" then " = " + param else "") + ";"
-                |A3(0,0,0),st             -> st + " *" + name + (if param<>"" then " = " + param else "") + ";"
+                |A1 0,st                  -> st + " *" + name + (if param<>"" then " = " + param else " = NULL") + ";"
+                |A2(0,0),st               -> st + " *" + name + (if param<>"" then " = " + param else " = NULL") + ";"
+                |A3(0,0,0),st             -> st + " *" + name + (if param<>"" then " = " + param else " = NULL") + ";"
                 |A1 size1,st              -> st + " " + name + "[" + fmt.ItoS size1 + "]" + (if param<>"" then " = " + param else "") + ";"
                 |A2(size1,size2),st       -> st + " " + name + "[" + fmt.ItoS (size1*size2) + "]" + (if param<>"" then " = " + param else "") + ";"
                 |A3(size1,size2,size3),st -> st + " " + name + "[" + fmt.ItoS (size1*size2*size3) + "]" + (if param<>"" then " = " + param else "") + ";"

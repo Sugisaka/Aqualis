@@ -273,6 +273,7 @@ namespace Aqualis
                         writer.codewritein "/*=============================================================================================*/\n"
                         writer.codewritein "#include <stdio.h>\n"
                         writer.codewritein "#include <stdlib.h>\n"
+                        writer.codewritein "#include <stdint.h>\n"
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
                         //ヘッダファイルのインクルード
