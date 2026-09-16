@@ -65,6 +65,31 @@ namespace Aqualis
                 PixelBytes = pixelBytes
                 FileSize = 54L + pixelBytes
             }
+
+    type private AtomicBinaryOutput(targetPath:string) =
+        let output = AtomicOutputFile.create targetPath
+        let stream =
+            new FileStream(
+                output.StagingPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None)
+        let mutable completed = false
+
+        member _.Stream = stream
+
+        member _.Complete(writer:BinaryWriter) =
+            if not completed then
+                writer.Dispose()
+                stream.Dispose()
+                AtomicOutputFile.publish output
+                completed <- true
+
+        interface IDisposable with
+            member _.Dispose() =
+                stream.Dispose()
+                if not completed then
+                    AtomicOutputFile.discard output
         
     module colorMap  =
         /// 黒→白
@@ -653,8 +678,8 @@ namespace Aqualis
                 min_ <- min
                 max_ <- max
                 //---ビットマップファイル生成---------------------------------------------
-                use f_strm = new FileStream(filename, FileMode.Create)
-                use bw = new BinaryWriter(f_strm)
+                use output = new AtomicBinaryOutput(filename)
+                use bw = new BinaryWriter(output.Stream)
                 //---BMPFILEHEADER構造体--------------------------------------------------
                 let bfSize = int32 layout.FileSize     //ファイル全体のバイト数
                 let bfReserved1:int16 = 0s          //常に0
@@ -707,6 +732,7 @@ namespace Aqualis
                         bw.Write(byte <| floor (255.0*r+0.5))    //赤
                     for _ = 0 to rest-1 do
                         bw.Write(byte 0)
+                output.Complete(bw)
                 
         /// <summary>
         /// カラーバー出力
@@ -737,8 +763,8 @@ namespace Aqualis
                 let min,max = this.ResolveColorRange(autoscale, eval)
                         
                 //---ビットマップファイル生成---------------------------------------------
-                use f_strm = new FileStream(filename, FileMode.Create)
-                use bw = new BinaryWriter(f_strm)
+                use output = new AtomicBinaryOutput(filename)
+                use bw = new BinaryWriter(output.Stream)
                 //---BMPFILEHEADER構造体--------------------------------------------------
                 let bfSize = int32 layout.FileSize     //ファイル全体のバイト数
                 let bfReserved1:int16 = 0s          //常に0
@@ -786,6 +812,7 @@ namespace Aqualis
                         bw.Write(byte <| floor (255.0*r+0.5)) //赤
                     for _ = 0 to rest-1 do
                         bw.Write(byte 0)
+                output.Complete(bw)
                 
         /// 複素数→実部
         static member getRe (re:double,_:double) = re

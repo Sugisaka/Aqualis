@@ -526,6 +526,51 @@ module Plot2dTests =
         Assert.Equal<byte>(original, File.ReadAllBytes target)
 
     [<Fact>]
+    let ``bitmap outputs preserve existing files when rendering fails`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let original = [| 1uy; 2uy; 3uy; 4uy |]
+
+        let failingGradation() =
+            let mutable invocationCount = 0
+            Gradation.Rx(fun _ ->
+                invocationCount <- invocationCount + 1
+                if invocationCount = 2 then
+                    invalidOp "expected rendering failure"
+                0.0, 0.0, 0.0)
+
+        let cases : (string * (string -> unit)) list =
+            [ "bitmap", fun target ->
+                plot.writeBMP24(
+                    target,
+                    failingGradation(),
+                    PlotColorRange.Auto,
+                    plot2d.getRe,
+                    None,
+                    1)
+              "colorbar", fun target ->
+                plot.writeColorBar(
+                    target,
+                    2,
+                    2,
+                    failingGradation(),
+                    PlotColorRange.Auto,
+                    plot2d.getRe) ]
+
+        for name,render in cases do
+            let target = Path.Combine(output.Path, name + ".bmp")
+            File.WriteAllBytes(target, original)
+
+            let error = Assert.Throws<InvalidOperationException>(fun () -> render target)
+
+            Assert.Equal("expected rendering failure", error.Message)
+            Assert.Equal<byte>(original, File.ReadAllBytes target)
+            Assert.Empty(
+                Directory.GetFiles(
+                    output.Path,
+                    "." + name + ".bmp.aqualis-*.tmp"))
+
+    [<Fact>]
     let ``enlarged bitmap header dimensions and sizes match the file`` () =
         use output = new TemporaryDirectory()
         let plot = createLoadedPlot output
