@@ -218,6 +218,55 @@ for language in c fortran python; do
   printf '%s spline bounds and data validation: passed\n' "$language"
 done
 
+for language in c fortran python; do
+  case "$language" in
+    c) run_command=(bash proc_smoke_C.sh) ;;
+    fortran) run_command=(bash proc_smoke_F.sh) ;;
+    python) run_command=(bash proc_smoke_P.sh) ;;
+  esac
+
+  byte_directory="$output_root/read-byte-$language"
+  printf '\000\177\200\377\012' > "$byte_directory/bytes.dat"
+  run_and_verify "$language byte values" "$byte_directory" '520' "${run_command[@]}"
+  : > "$byte_directory/bytes.dat"
+  expect_generated_failure "$language byte EOF" "$byte_directory" 'Aqualis: invalid byte input record.' "${run_command[@]}"
+
+  for matrix_type in real complex; do
+    matrix_directory="$output_root/inverse-$matrix_type-$language"
+    matrix_result="$(cd "$matrix_directory" && "${run_command[@]}")"
+    if ! awk -v value="$matrix_result" 'BEGIN { exit !(value + 0 > 0.749999 && value + 0 < 0.750001) }'; then
+      printf '%s %s inverse was incorrect: %s\n' "$language" "$matrix_type" "$matrix_result" >&2
+      exit 1
+    fi
+  done
+  if [[ "$language" == python ]]; then
+    inverse_error='Singular matrix'
+  else
+    inverse_error='Aqualis: LAPACK solve failed'
+  fi
+  expect_generated_failure "$language singular inverse" "$output_root/inverse-singular-$language" "$inverse_error" "${run_command[@]}"
+
+  spline_directory="$output_root/spline-load-$language"
+  printf '2\n0.00000000000000000E+000\n1.00000000000000000E+000\n' > "$spline_directory/data_x.dat"
+  printf '2\n0.00000000000000000E+000\n1.00000000000000000E+001\n' > "$spline_directory/data_y.dat"
+  printf '3\n0.00000000000000000E+000\n0.00000000000000000E+000\n1.00000000000000000E+001\n' > "$spline_directory/data_g.dat"
+  spline_result="$(cd "$spline_directory" && "${run_command[@]}")"
+  if ! awk -v value="$spline_result" 'BEGIN { exit !(value + 0 > 4.999 && value + 0 < 5.001) }'; then
+    printf '%s loaded spline was incorrect: %s\n' "$language" "$spline_result" >&2
+    exit 1
+  fi
+  printf '1\n0\n' > "$spline_directory/data_y.dat"
+  expect_generated_failure "$language mismatched spline data" "$spline_directory" 'Spline x and y lengths must match.' "${run_command[@]}"
+
+  persistence_directory="$output_root/persistence-invalid-version-$language"
+  printf '\002\000\000\000' > "$persistence_directory/data.bin"
+  expect_generated_failure "$language invalid persistence version" "$persistence_directory" 'Aqualis: invalid data format' "${run_command[@]}"
+  printf '\001\000\000\000\320\007\000\000' > "$persistence_directory/data.bin"
+  expect_generated_failure "$language invalid persistence type" "$persistence_directory" 'Aqualis: invalid data type' "${run_command[@]}"
+  printf '\001\000\000\000\354\003\000\000\001\000\000\000' > "$persistence_directory/data.bin"
+  expect_generated_failure "$language invalid persistence dimension" "$persistence_directory" 'Aqualis: invalid data dimension' "${run_command[@]}"
+done
+
 expect_generated_failure 'C99 non-finite spline y' "$output_root/spline-c-non-finite-y" \
   'Aqualis: Spline y values must be finite.' bash proc_smoke_C.sh
 expect_generated_failure 'C99 non-finite complex spline y' "$output_root/spline-c-complex-non-finite-y" \

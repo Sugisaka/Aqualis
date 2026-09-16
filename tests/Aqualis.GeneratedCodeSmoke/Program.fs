@@ -301,6 +301,65 @@ module Program =
             spline.Y[1] <== complex0(Cpx(1.0, Double.NaN))
             spline.set()
 
+    let private generateRegressionCases outputRoot (directoryName, language) =
+        let generate caseName code =
+            let outputDirectory = Path.Combine(outputRoot, caseName + "-" + directoryName)
+            Directory.CreateDirectory(outputDirectory) |> ignore
+            Compile [language] outputDirectory "smoke" "1.0" code
+
+        generate "read-byte" <| fun context ->
+            let value = context.var.i0 "value"
+            let sum = context.var.i0 "sum"
+            sum <== 0
+            context.io.fileInput "bytes.dat" <| fun reader ->
+                for _ in 1..5 do
+                    reader.b value
+                    sum <== sum + value
+            context.print.t sum
+
+        generate "inverse-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let inverse = context.var.d2 "inverse"
+            matrix.allocate(2, 2)
+            inverse.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 4.0
+            context.la.inverse_matrix(inverse,matrix)
+            context.print.t (inverse[0,0] + inverse[1,1])
+
+        generate "inverse-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let inverse = context.var.z2 "inverse"
+            matrix.allocate(2, 2)
+            inverse.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+            context.la.inverse_matrix(inverse,matrix)
+            context.print.t (inverse[0,0].re + inverse[1,1].re)
+
+        generate "inverse-singular" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let inverse = context.var.d2 "inverse"
+            matrix.allocate(2, 2)
+            inverse.allocate(2, 2)
+            matrix.clear()
+            context.la.inverse_matrix(inverse,matrix)
+
+        generate "spline-load" <| fun context ->
+            let spline = context.interpolate.splineDouble()
+            spline.load "data"
+            let result = context.var.d0 "result"
+            spline.p result (double0(Dbl 0.5))
+            context.print.t result
+
+        generate "persistence-invalid-version" <| fun context ->
+            let value = context.var.i0 "value"
+            value <== 9
+            context.io.load(value,"data.bin")
+            context.print.t value
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -319,6 +378,7 @@ module Program =
             for target in ["c", C99; "fortran", Fortran; "python", Python] do
                 generateFixedFileIo outputRoot target
                 generateSingularSolve outputRoot target
+                generateRegressionCases outputRoot target
                 for caseName in ["valid"; "literal"; "unordered"; "out-of-range"] do
                     generateSplineValidation outputRoot target caseName
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"

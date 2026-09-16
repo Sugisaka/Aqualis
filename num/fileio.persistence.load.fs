@@ -8,6 +8,19 @@ namespace Aqualis
 
     [<AutoOpen>]
     module ContextIoLoadExtensions =
+        let private failInvalidPersistenceData (context:Aqualis) message =
+            match context.language with
+            | C99 ->
+                context.codewritein("fprintf(stderr, " + OutputTextLiteral.c ("Aqualis: " + message + "\n") + "); exit(EXIT_FAILURE);\n")
+            | Fortran ->
+                context.codewritein("error stop " + OutputTextLiteral.fortran ("Aqualis: " + message) + "\n")
+            | Python ->
+                context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n")
+            | _ -> context.print.s message
+
+        let private requireFormatVersion (context:Aqualis) (version:int0) =
+            context.br.if1 (version .=/ 1) (fun () -> failInvalidPersistenceData context "invalid data format")
+
         type ContextIo with
             ///<summary>数値をファイルから読み込み</summary>
             member this.load (f:int0,filename:exprString) =
@@ -27,13 +40,14 @@ namespace Aqualis
                                             //データ本体
                                             r.b f
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f.etype with
@@ -44,7 +58,7 @@ namespace Aqualis
                             |Zt    ->
                                 reader r (3000,f.etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>数値をファイルから読み込み</summary>
             member this.load (f:double0,filename:exprString) =
@@ -64,13 +78,14 @@ namespace Aqualis
                                             //データ本体
                                             r.b f
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f.etype with
@@ -81,7 +96,7 @@ namespace Aqualis
                             |Zt    ->
                                 reader r (3000,f.etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>数値をファイルから読み込み</summary>
             member this.load (f:complex0,filename:exprString) =
@@ -104,13 +119,14 @@ namespace Aqualis
                                                 r.b im
                                                 f <== re + asm.uj*im
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f.etype with
@@ -121,7 +137,7 @@ namespace Aqualis
                             |Zt    ->
                                 reader r (3000,f.etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>1次元データをファイルから読み込み</summary>
             member this.load (f:int1,filename:exprString) =
@@ -145,13 +161,14 @@ namespace Aqualis
                                                     r.b u
                                                     f[i] <== u
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s ": invalid data type"
+                                failInvalidPersistenceData this.GenerationContext ": invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[0].etype with
@@ -162,7 +179,7 @@ namespace Aqualis
                             |Etype.Zt    ->
                                 reader r (3000,f[0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>1次元データをファイルから読み込み</summary>
             member this.load (f:double1,filename:exprString) =
@@ -186,13 +203,14 @@ namespace Aqualis
                                                     r.b u
                                                     f[i] <== u
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s ": invalid data type"
+                                failInvalidPersistenceData this.GenerationContext ": invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[0].etype with
@@ -203,7 +221,7 @@ namespace Aqualis
                             |Etype.Zt    ->
                                 reader r (3000,f[0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>1次元データをファイルから読み込み</summary>
             member this.load (f:complex1,filename:exprString) =
@@ -242,13 +260,14 @@ namespace Aqualis
                                             |_ ->
                                                 ()
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s ": invalid data type"
+                                failInvalidPersistenceData this.GenerationContext ": invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[0].etype with
@@ -259,7 +278,7 @@ namespace Aqualis
                             |Etype.Zt    ->
                                 reader r (3000,f[0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>2次元データをファイルから読み込み</summary>
             member this.load (f:int2,filename:exprString) =
@@ -285,14 +304,15 @@ namespace Aqualis
                                                         r.b u
                                                         f[i,j] <== u
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s ": invalid data type"
+                                failInvalidPersistenceData this.GenerationContext ": invalid data type"
                                 this.GenerationContext.print.tt <| n++(I nt)
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[0,0].etype with
@@ -303,7 +323,7 @@ namespace Aqualis
                             |Zt   ->
                                 reader r (3000,f[0,0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>2次元データをファイルから読み込み</summary>
             member this.load (f:double2,filename:exprString) =
@@ -329,14 +349,15 @@ namespace Aqualis
                                                         r.b u
                                                         f[i,j] <== u
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s ": invalid data type"
+                                failInvalidPersistenceData this.GenerationContext ": invalid data type"
                                 this.GenerationContext.print.tt <| n++(I nt)
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[0,0].etype with
@@ -347,7 +368,7 @@ namespace Aqualis
                             |Zt   ->
                                 reader r (3000,f[0,0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>2次元データをファイルから読み込み</summary>
             member this.load (f:complex2,filename:exprString) =
@@ -390,14 +411,15 @@ namespace Aqualis
                                             |_ ->
                                                 ()
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s ": invalid data type"
+                                failInvalidPersistenceData this.GenerationContext ": invalid data type"
                                 this.GenerationContext.print.tt <| n++(I nt)
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[0,0].etype with
@@ -408,7 +430,7 @@ namespace Aqualis
                             |Zt   ->
                                 reader r (3000,f[0,0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             ///<summary>3次元データをファイルから読み込み</summary>
             member this.load (f:int3,filename:exprString) =
@@ -436,13 +458,14 @@ namespace Aqualis
                                                             r.b u
                                                             f[i,j,k] <== u
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[_0,_0,_0].etype with
@@ -453,7 +476,7 @@ namespace Aqualis
                             |Etype.Zt    ->
                                 reader r (3000,f[_0,_0,_0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             member this.load (f:int3,filename:string) = this.load(f,st filename)
             member this.load (f:int2,filename:string) = this.load(f,st filename)
@@ -486,13 +509,14 @@ namespace Aqualis
                                                             r.b u
                                                             f[i,j,k] <== u
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[_0,_0,_0].etype with
@@ -503,7 +527,7 @@ namespace Aqualis
                             |Etype.Zt    ->
                                 reader r (3000,f[_0,_0,_0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             member this.load (f:double3,filename:string) = this.load(f,st filename)
             member this.load (f:double2,filename:string) = this.load(f,st filename)
@@ -537,13 +561,14 @@ namespace Aqualis
                                                             r.b im
                                                             f[i,j,k] <== re + asm.uj*im
                                     <| fun () ->
-                                        this.GenerationContext.print.s "invalid data dimension"
+                                        failInvalidPersistenceData this.GenerationContext "invalid data dimension"
                             <| fun () ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
                 this.binfileInput filename <| fun r ->
                 this.GenerationContext.ch.i <| fun n ->
                     //データフォーマット
                     r.b n
+                    requireFormatVersion this.GenerationContext n
                     this.GenerationContext.br.branch <| fun b ->
                         b.IF (n.=1) <| fun () ->
                             match f[_0,_0,_0].etype with
@@ -554,7 +579,7 @@ namespace Aqualis
                             |Etype.Zt    ->
                                 reader r (3000,f[_0,_0,_0].etype)
                             |_ ->
-                                this.GenerationContext.print.s "invalid data type"
+                                failInvalidPersistenceData this.GenerationContext "invalid data type"
     
             member this.load (f:complex3,filename:string) = this.load(f,st filename)
             member this.load (f:complex2,filename:string) = this.load(f,st filename)

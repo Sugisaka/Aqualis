@@ -24,11 +24,17 @@ namespace Aqualis
             |RStr _ ->
                 reject()
 
-    type TextReader internal (ctx:Aqualis,fp:string,iostat:int0) =
+    type TextReader internal (ctx:Aqualis,fp:string,iostat:int0,fortranByteFile:option<string*string>) =
         // let context() = ctx.RequireGenerationContext()
         // let program() = (context()).CurrentProgram
         let writein text = ctx.codewritein(text + "\n")
+        let mutable byteStreamOpened = false
+        let mutable formattedStreamUsed = false
         member _.tt (lst:exprString) =
+            if ctx.language = Fortran then
+                if byteStreamOpened then
+                    invalidOp "Fortran text and byte reads cannot share a file cursor."
+                formattedStreamUsed <- true
             if List.isEmpty lst.data then
                 invalidArg (nameof lst) "A file-read record must contain at least one target."
             let rec cpxvarlist list (s:list<reduceExprString>) counter =
@@ -161,7 +167,7 @@ namespace Aqualis
                         |RNvr(Var(_,n,_),_) -> n
                         |_ -> "")
                     |> fun s -> String.Join(",",s)
-                writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ctx+") "+code+"\n")
+                writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)\n")
             |HTML ->
                 let double0string_format_F =
                     let a,b = ctx.numFormat.dFormat
@@ -201,19 +207,51 @@ namespace Aqualis
                     |_ -> ()
             |_ -> ()
 
+        member _.CloseByteStream() =
+            match fortranByteFile with
+            |Some(_,byteFp) when byteStreamOpened ->
+                writein("close(" + byteFp + ")")
+            |_ -> ()
+
         member private _.ReadByte target =
             let e,_ = FileIoReadTarget.require ctx target
-            writein("read("+fp+", iostat="+iostat.Expr.eval ctx+") byte_tmp\n")
-            let ee =
-                match e.etype,e with
-                |It _,Var(_,n,_) -> n
-                |_ -> "byte値を整数型以外の変数に格納できません"
-            writein(ee + "=" + "byte_tmp\n")
+            match e.etype,e with
+            |It _,Var(_,name,_) ->
+                match ctx.language with
+                |Fortran ->
+                    if formattedStreamUsed then
+                        invalidOp "Fortran text and byte reads cannot share a file cursor."
+                    match fortranByteFile with
+                    |Some(path,byteFp) ->
+                        if not byteStreamOpened then
+                            writein("open(" + byteFp + ",file=trim(" + path + "),access='stream',form='unformatted',status='old',action='read',iostat=" + iostat.code + ")")
+                            writein("if (" + iostat.code + " /= 0) error stop 'Aqualis: failed to open byte input.'")
+                            byteStreamOpened <- true
+                        writein("read(" + byteFp + ",iostat=" + iostat.code + ") byte_tmp")
+                        writein("if (" + iostat.code + " /= 0) error stop 'Aqualis: invalid byte input record.'")
+                        writein(name + " = iand(int(byte_tmp),255)")
+                    |None -> invalidOp "Fortran byte input requires a file stream."
+                |C99 ->
+                    ctx.ch.i <| fun byteValue ->
+                        writein(byteValue.code + " = fgetc(" + fp + ");")
+                        writein("if (" + byteValue.code + " == EOF) { fprintf(stderr, \"Aqualis: invalid byte input record.\\n\"); exit(EXIT_FAILURE); }")
+                        writein(name + " = " + byteValue.code + ";")
+                |Python ->
+                    ctx.ch.t <| A0 <| fun byteValue ->
+                        writein(byteValue + " = " + fp + ".read(1)")
+                        writein("if len(" + byteValue + ") != 1: raise ValueError('Aqualis: invalid byte input record.')")
+                        writein(name + " = " + byteValue + "[0]")
+                |_ -> ()
+            |_ -> FileIoReadTarget.reject()
 
         member this.t (x:int0) = this.tt (iv x)
         member this.t (x:double0) = this.tt (dv x)
         member this.t (x:complex0) = this.tt (zv x)
-        member this.b (x:int0) = this.ReadByte(RNvr(x.Expr,x.Context))
+        member this.b (x:int0) =
+            match ctx.language with
+            |LaTeX |HTML -> this.tt (iv x)
+            |PHP -> raise (NotSupportedException("TextReader.b is not supported for PHP."))
+            |_ -> this.ReadByte(RNvr(x.Expr,x.Context))
 
     type BinReader internal (ctx:Aqualis,fp:string,iostat:int0) =
         // let context() = ctx.RequireGenerationContext()

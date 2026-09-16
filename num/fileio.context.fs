@@ -118,7 +118,7 @@ namespace Aqualis
                             writein("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
                         else
                             writein("open("+fp+", file=trim("+id+"))"+"\n")
-                        code fp
+                        code fp id
                         writein("close("+fp+")"+"\n")
                         writein("deallocate(" + id + ")\n")
             |C99 ->
@@ -165,9 +165,9 @@ namespace Aqualis
                         if isbinary then
                             writein(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
                         else
-                            writein(fp+" = "+"fopen("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
+                            writein(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "w")+"\");"+"\n")
                         writein("if (" + fp + " == NULL) { fprintf(stderr, \"Aqualis: failed to open file %s.\\n\", " + id + "); free(" + id + "); " + id + " = NULL; exit(EXIT_FAILURE); }\n")
-                        code fp
+                        code fp id
                         writein("if (fclose(" + fp + ") != 0) { fprintf(stderr, \"Aqualis: failed to close file %s.\\n\", " + id + "); free(" + id + "); " + id + " = NULL; exit(EXIT_FAILURE); }\n")
                         writein("free(" + id + ");\n")
                         writein(id + " = NULL;\n")
@@ -191,7 +191,7 @@ namespace Aqualis
                             writein(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
                         else
                             writein(fp+" = "+"open text file("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                        code fp
+                        code fp id
                         writein("close("+fp+")"+";\n")
             |HTML ->
                 ctx.ch.f <| fun fp ->
@@ -213,7 +213,7 @@ namespace Aqualis
                             writein(fp+" = "+"open binary file("+id+",\""+(if readmode then "rb" else "wb")+"\");"+"\n")
                         else
                             writein(fp+" = "+"open text file("+id+",\""+(if readmode then "r" else "w")+"\");"+"\n")
-                        code fp
+                        code fp id
                         writein("close("+fp+")"+";\n")
             |Python ->
                 ctx.ch.f <| fun fp ->
@@ -240,8 +240,8 @@ namespace Aqualis
                         if isbinary then
                             writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
                         else
-                            writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "r" else "w")+"\")"+"\n")
-                        code(fp)
+                            writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "w")+"\")"+"\n")
+                        code fp id
                         writein(fp+".close()"+"\n")
             |_ -> ()
 
@@ -838,7 +838,7 @@ namespace Aqualis
                             ])
                       |> fun s -> String.Join(",",s)
                     writein("lines = " + fp + ".readline()\n")
-                    writein("if lines == '':\n")
+                    writein("if lines == b'':\n")
                     ctx.indentInc()
                     writein(iostat.code + " = -1\n")
                     ctx.indentDec()
@@ -930,12 +930,12 @@ namespace Aqualis
 
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
         member this.fileOutput (filename:exprString) = fun code ->
-            this.fileAccess (filename,None) false false <| fun fp ->
+            this.fileAccess (filename,None) false false <| fun fp _ ->
                 let writer = TextWriter(ctx,fp)
                 code writer
         ///<summary>ファイル出力（タブ区切りデータ）</summary>
         member this.fileOutput (filename:exprString,intDigit:int) = fun code ->
-            this.fileAccess (filename,Some intDigit) false false <| fun fp ->
+            this.fileAccess (filename,Some intDigit) false false <| fun fp _ ->
                 let writer = TextWriter(ctx,fp)
                 code writer
 
@@ -944,12 +944,12 @@ namespace Aqualis
 
         ///<summary>バイナリファイル出力</summary>
         member this.binfileOutput (filename:exprString) = fun code ->
-            this.fileAccess (filename,None) false true <| fun fp ->
+            this.fileAccess (filename,None) false true <| fun fp _ ->
                 let writer = BinWriter(ctx,fp)
                 code writer
         ///<summary>バイナリファイル出力</summary>
         member this.binfileOutput (filename:exprString,intDigit:int) = fun code ->
-            this.fileAccess (filename,Some intDigit) false true <| fun fp ->
+            this.fileAccess (filename,Some intDigit) false true <| fun fp _ ->
                 let writer = BinWriter(ctx,fp)
                 code writer
 
@@ -959,16 +959,28 @@ namespace Aqualis
         ///<summary>ファイル読み込み</summary>
         member this.fileInput (filename:exprString) = fun code ->
             ctx.ch.i <| fun iostat ->
-                this.fileAccess (filename,None) true false <| fun fp ->
-                    let reader = TextReader(ctx,fp,iostat)
-                    code reader
+                if ctx.language = PHP then
+                    code (TextReader(ctx,"",iostat,None))
+                else
+                    this.fileAccess (filename,None) true false <| fun fp path ->
+                        ctx.ch.f <| fun byteFp ->
+                            let byteFile = if ctx.language = Fortran then Some(path,byteFp) else None
+                            let reader = TextReader(ctx,fp,iostat,byteFile)
+                            code reader
+                            reader.CloseByteStream()
 
         ///<summary>ファイル読み込み</summary>
         member this.fileInput (filename:exprString,intDigit:int) = fun code ->
             ctx.ch.i <| fun iostat ->
-                this.fileAccess (filename,Some intDigit) true false <| fun fp ->
-                    let reader = TextReader(ctx,fp,iostat)
-                    code reader
+                if ctx.language = PHP then
+                    code (TextReader(ctx,"",iostat,None))
+                else
+                    this.fileAccess (filename,Some intDigit) true false <| fun fp path ->
+                        ctx.ch.f <| fun byteFp ->
+                            let byteFile = if ctx.language = Fortran then Some(path,byteFp) else None
+                            let reader = TextReader(ctx,fp,iostat,byteFile)
+                            code reader
+                            reader.CloseByteStream()
 
         ///<summary>ファイル読み込み</summary>
         member this.fileInput (filename:string) = fun code ->
@@ -977,14 +989,14 @@ namespace Aqualis
         ///<summary>バイナリファイルの読み込み</summary>
         member this.binfileInput (filename:exprString) = fun code ->
             ctx.ch.i <| fun iostat ->
-                this.fileAccess (filename,None) true true <| fun fp ->
+                this.fileAccess (filename,None) true true <| fun fp _ ->
                     let reader = BinReader(ctx,fp,iostat)
                     code reader
 
         ///<summary>バイナリファイルの読み込み</summary>
         member this.binfileInput (filename:exprString,intDigit:int) = fun code ->
             ctx.ch.i <| fun iostat ->
-                this.fileAccess (filename,Some intDigit) true true <| fun fp ->
+                this.fileAccess (filename,Some intDigit) true true <| fun fp _ ->
                     let reader = BinReader(ctx,fp,iostat)
                     code reader
 
@@ -994,7 +1006,7 @@ namespace Aqualis
         ///<summary>ファイルの読み込み</summary>
         member this.file_Read (filename:exprString) = fun varlist code ->
             ctx.ch.i <| fun iostat ->
-                this.fileAccess (filename,None) true false <| fun fp ->
+                this.fileAccess (filename,None) true false <| fun fp _ ->
                     ctx.iter.loop <| fun (ext,i) ->
                         this.Read fp iostat varlist
                         if ctx.language = Fortran then
@@ -1008,7 +1020,7 @@ namespace Aqualis
         ///<summary>ファイルの読み込み</summary>
         member this.file_Read (filename:exprString,intDigit:int) = fun varlist code ->
             ctx.ch.i <| fun iostat ->
-                this.fileAccess (filename,Some intDigit) true false <| fun fp ->
+                this.fileAccess (filename,Some intDigit) true false <| fun fp _ ->
                     ctx.iter.loop <| fun (ext,i) ->
                         this.Read fp iostat varlist
                         if ctx.language = Fortran then

@@ -42,6 +42,45 @@ module FileResourceTests =
 
             Assert.Contains("target =", generated)
 
+    [<Theory>]
+    [<InlineData("html")>]
+    [<InlineData("latex")>]
+    let ``byte input generates the same markup as text input`` (target:string) =
+        let language,extension =
+            if target = "html" then HTML,"html" else LaTeX,"tex"
+        let generate useByte =
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "read" "1" <| fun context ->
+                let value = context.var.i0 "value"
+                context.io.fileInput "input.dat" <| fun reader ->
+                    if useByte then reader.b value else reader.tt (iv value)
+            File.ReadAllText(Path.Combine(output.Path,"read." + extension))
+            |> TestHelpers.normalizeGeneratedCode
+
+        Assert.Equal(generate false,generate true)
+
+    [<Fact>]
+    let ``PHP byte input reports unsupported operation`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path,Some "read.php",PHP)
+        let value = context.var.i0 "value"
+        let error =
+            Assert.Throws<NotSupportedException>(fun () ->
+                context.io.fileInput "input.dat" <| fun reader -> reader.b value)
+        Assert.Contains("TextReader.b",error.Message)
+
+    [<Fact>]
+    let ``Fortran mixed text and byte reads reject separate cursors`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path,Some "read.f90",Fortran)
+        let value = context.var.i0 "value"
+        let error =
+            Assert.Throws<InvalidOperationException>(fun () ->
+                context.io.fileInput "input.dat" <| fun reader ->
+                    reader.t value
+                    reader.b value)
+        Assert.Contains("cannot share a file cursor",error.Message)
+
     [<Fact>]
     let ``sequential Fortran file outputs declare reused temporaries once`` () =
         use output = new TemporaryDirectory()

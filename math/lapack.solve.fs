@@ -161,14 +161,16 @@ namespace Aqualis
                             npre<==mat1.size1
                             this.GenerationContext.ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
-                                this.GenerationContext.codewritein("call zgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
+                                this.GenerationContext.codewritein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")\n")
+                                checkSolveInfo this.GenerationContext info
                     |C99 ->
                         this.GenerationContext.ch.ii <| fun (npre,info) ->
                             npre<==mat1.size1
                             this.GenerationContext.ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
-                                this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
-                                this.GenerationContext.codewritein("zgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
+                                this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", "+mat2.code+", &"+npre.code+", &"+info.code+");\n")
+                                checkSolveInfo this.GenerationContext info
                     |LaTeX ->
                         this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                     |HTML ->
@@ -192,16 +194,16 @@ namespace Aqualis
                             npre<==mat1.size1
                             this.GenerationContext.ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
-                                this.GenerationContext.codewritein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
-                                this.GenerationContext.br.if1 (info .=/ 0) <| fun () -> this.GenerationContext.print.tt <| "InvMatrix Info: "++info
+                                this.GenerationContext.codewritein("call zgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")\n")
+                                checkSolveInfo this.GenerationContext info
                     |C99 ->
                         this.GenerationContext.ch.ii <| fun (npre,info) ->
                             npre<==mat1.size1
                             this.GenerationContext.ch.i1 npre <| fun ipiv ->
                                 ipiv.clear()
-                                this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
-                                this.GenerationContext.codewritein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
-                                this.GenerationContext.br.if1 (info .=/ 0) <| fun () -> this.GenerationContext.print.tt <| "InvMatrix Info: "++info
+                                this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("zgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", "+mat2.code+", &"+npre.code+", &"+info.code+");\n")
+                                checkSolveInfo this.GenerationContext info
                     |LaTeX ->
                         this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
                     |HTML ->
