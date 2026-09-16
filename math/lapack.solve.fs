@@ -8,6 +8,15 @@ namespace Aqualis
 
     [<AutoOpen>]
     module ContextLaSolveExtensions =
+        let private checkSolveInfo (context:Aqualis) (info:int0) =
+            match context.language with
+            |Fortran ->
+                context.codewritein("if (" + info.code + " /= 0) error stop 'Aqualis: LAPACK solve failed.'\n")
+            |C99 ->
+                context.codewritein("if (" + info.code +
+                                    " != 0) { fprintf(stderr, \"Aqualis: LAPACK solve failed (INFO=%d).\\n\", " +
+                                    info.code + "); exit(EXIT_FAILURE); }\n")
+            |_ -> ()
         type ContextLa with
             ///<summary>連立方程式の求解</summary>
             ///<param name="matrix">係数行列</param>
@@ -23,6 +32,7 @@ namespace Aqualis
                             b <== 1
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.codewritein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                checkSolveInfo this.GenerationContext info
                     |C99 ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
@@ -30,6 +40,7 @@ namespace Aqualis
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
                                 this.GenerationContext.codewritein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                checkSolveInfo this.GenerationContext info
                     |LaTeX ->
                         this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$$\\\\\n")
                     |HTML ->
@@ -53,6 +64,7 @@ namespace Aqualis
                             b <== 1
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.codewritein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                checkSolveInfo this.GenerationContext info
                     |C99 ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
@@ -60,6 +72,7 @@ namespace Aqualis
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
                                 this.GenerationContext.codewritein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                checkSolveInfo this.GenerationContext info
                     |LaTeX ->
                         this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                     |HTML ->
@@ -83,6 +96,7 @@ namespace Aqualis
                             b <== y.size2
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.codewritein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                checkSolveInfo this.GenerationContext info
                     |C99 ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
@@ -90,6 +104,7 @@ namespace Aqualis
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
                                 this.GenerationContext.codewritein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                checkSolveInfo this.GenerationContext info
                     |LaTeX ->
                         this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                     |HTML ->
@@ -113,6 +128,7 @@ namespace Aqualis
                             b <== y.size2
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.codewritein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                                checkSolveInfo this.GenerationContext info
                     |C99 ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
                             N <== matrix.size1
@@ -120,6 +136,7 @@ namespace Aqualis
                             this.GenerationContext.ch.i1 N <| fun ipiv ->
                                 this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
                                 this.GenerationContext.codewritein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                                checkSolveInfo this.GenerationContext info
                     |LaTeX ->
                         this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
                     |HTML ->

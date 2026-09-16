@@ -28,11 +28,12 @@ namespace Aqualis
                 | _ -> ()
 
             let requireFinite (context:Aqualis) (value:double0) message =
+                let valueExpression = value.Expr.eval context
                 let condition =
                     match context.Language with
-                    | C99 -> Some("!isfinite(" + value.code + ")")
-                    | Fortran -> Some(".not. ieee_is_finite(" + value.code + ")")
-                    | Python -> Some("not numpy.isfinite(" + value.code + ")")
+                    | C99 -> Some("!isfinite(" + valueExpression + ")")
+                    | Fortran -> Some(".not. ieee_is_finite(" + valueExpression + ")")
+                    | Python -> Some("not numpy.isfinite(" + valueExpression + ")")
                     | _ -> None
                 condition |> Option.iter (fun expression ->
                     require context (bool0(Var(Nt, expression, NaN), context)) message)
@@ -133,6 +134,8 @@ namespace Aqualis
             /// </summary>
             member __.set() =
                 SplineValidation.data context x y.size1
+                context.iter.num y.size1 <| fun (i:int0) ->
+                    SplineValidation.requireFinite context y[i] "Spline y values must be finite."
                 context.ch.i <| fun N ->
                     N <== x.size1
                     f.allocate(3*N-3,3*N-3)
@@ -287,6 +290,9 @@ namespace Aqualis
             /// </summary>
             member __.set() =
                 SplineValidation.data context x y.size1
+                context.iter.num y.size1 <| fun (i:int0) ->
+                    SplineValidation.requireFinite context y[i].re "Spline y values must be finite."
+                    SplineValidation.requireFinite context y[i].im "Spline y values must be finite."
                 context.ch.i <| fun N ->
                     N <== x.size1
                     f.allocate(3*N-3,3*N-3)

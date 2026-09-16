@@ -133,18 +133,76 @@ for language in c fortran python; do
   printf '%s malformed text input: stopped as expected\n' "$language"
 done
 
+expect_generated_failure() {
+  local label="$1"
+  local directory="$2"
+  local expected_message="$3"
+  shift 3
+  if (cd "$directory" && "$@" >failure-output.txt 2>failure-error.txt); then
+    printf '%s unexpectedly succeeded.\n' "$label" >&2
+    exit 1
+  fi
+  if ! grep -Fq "$expected_message" "$directory/failure-error.txt"; then
+    printf '%s failed without the expected diagnostic.\n' "$label" >&2
+    cat "$directory/failure-error.txt" >&2
+    exit 1
+  fi
+  printf '%s: stopped as expected\n' "$label"
+}
+
 for language in c fortran python; do
   case "$language" in
     c) run_command=(bash proc_smoke_C.sh) ;;
     fortran) run_command=(bash proc_smoke_F.sh) ;;
     python) run_command=(bash proc_smoke_P.sh) ;;
   esac
-  valid_directory="$output_root/spline-$language-valid"
-  actual="$(cd "$valid_directory" && "${run_command[@]}")"
-  if ! awk -v value="$actual" 'BEGIN { exit !(value + 0 > 4.999 && value + 0 < 5.001) }'; then
-    printf '%s spline returned an unexpected result: %s\n' "$language" "$actual" >&2
+  writer_directory="$output_root/text-writer-$language"
+  (cd "$writer_directory" && "${run_command[@]}")
+  if ! grep -Fxq 'hello"\%' "$writer_directory/result.txt" ||
+     ! grep -Eq '^value=[[:space:]]*7$' "$writer_directory/result.txt"; then
+    printf '%s text writer lost string content.\n' "$language" >&2
+    cat "$writer_directory/result.txt" >&2
     exit 1
   fi
+  run_and_verify "$language text pair round trip" "$output_root/text-pair-$language" '7' "${run_command[@]}"
+  reader_directory="$output_root/text-reader-$language"
+  printf '7\n' > "$reader_directory/input.txt"
+  run_and_verify "$language fixed text read" "$reader_directory" '7' "${run_command[@]}"
+  printf 'oops\n' > "$reader_directory/input.txt"
+  expect_generated_failure "$language malformed fixed text read" "$reader_directory" 'invalid' "${run_command[@]}"
+  : > "$reader_directory/input.txt"
+  expect_generated_failure "$language empty fixed text read" "$reader_directory" 'invalid' "${run_command[@]}"
+  binary_directory="$output_root/binary-reader-$language"
+  : > "$binary_directory/input.bin"
+  if [[ "$language" == python ]]; then
+    expected_binary_message='unpack requires'
+  else
+    expected_binary_message='Aqualis: invalid binary input record.'
+  fi
+  expect_generated_failure "$language empty binary read" "$binary_directory" "$expected_binary_message" "${run_command[@]}"
+  solve_directory="$output_root/singular-solve-$language"
+  if [[ "$language" == python ]]; then
+    expected_solve_message='singular'
+  else
+    expected_solve_message='Aqualis: LAPACK solve failed'
+  fi
+  expect_generated_failure "$language singular solve" "$solve_directory" "$expected_solve_message" "${run_command[@]}"
+done
+
+for language in c fortran python; do
+  case "$language" in
+    c) run_command=(bash proc_smoke_C.sh) ;;
+    fortran) run_command=(bash proc_smoke_F.sh) ;;
+    python) run_command=(bash proc_smoke_P.sh) ;;
+  esac
+  for case_name in valid literal; do
+    valid_directory="$output_root/spline-$language-$case_name"
+    actual="$(cd "$valid_directory" && "${run_command[@]}")"
+    if ! awk -v value="$actual" 'BEGIN { exit !(value + 0 > 4.999 && value + 0 < 5.001) }'; then
+      printf '%s spline %s returned an unexpected result: %s\n' "$language" "$case_name" "$actual" >&2
+      exit 1
+    fi
+  done
   for case_name in unordered out-of-range; do
     case_directory="$output_root/spline-$language-$case_name"
     if (cd "$case_directory" && "${run_command[@]}" >actual.txt 2>error.txt); then
@@ -159,6 +217,11 @@ for language in c fortran python; do
   done
   printf '%s spline bounds and data validation: passed\n' "$language"
 done
+
+expect_generated_failure 'C99 non-finite spline y' "$output_root/spline-c-non-finite-y" \
+  'Aqualis: Spline y values must be finite.' bash proc_smoke_C.sh
+expect_generated_failure 'C99 non-finite complex spline y' "$output_root/spline-c-complex-non-finite-y" \
+  'Aqualis: Spline y values must be finite.' bash proc_smoke_C.sh
 
 for case_name in success double-allocate unallocated-access double-free invalid-size overflow out-of-bounds malloc-failure; do
   case_directory="$output_root/c-array-$case_name"

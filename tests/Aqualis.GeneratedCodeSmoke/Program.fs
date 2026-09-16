@@ -227,13 +227,79 @@ module Program =
             spline.X[0] <== 0.0
             spline.X[1] <== (if caseName = "unordered" then 0.0 else 1.0)
             spline.Y[0] <== 0.0
-            spline.Y[1] <== 10.0
+            spline.Y[1] <== (if caseName = "non-finite-y" then Double.NaN else 10.0)
             spline.set()
             let result = context.var.d0 "result"
             let query = context.var.d0 "query"
             query <== (if caseName = "out-of-range" then -1.0 else 0.5)
-            spline.p result query
+            if caseName = "literal" then
+                spline.p result (double0(Dbl 0.5))
+            else
+                spline.p result query
             context.print.t result
+
+    let private generateFixedFileIo outputRoot (directoryName, language) =
+        let generate caseName code =
+            let outputDirectory = Path.Combine(outputRoot, caseName + "-" + directoryName)
+            Directory.CreateDirectory(outputDirectory) |> ignore
+            Compile [language] outputDirectory "smoke" "1.0" code
+
+        generate "text-writer" <| fun context ->
+            context.io.fileOutput "result.txt" <| fun writer ->
+                writer.t "hello\"\\%"
+                writer.tt (st "value=" ++ int0(Int 7))
+
+        generate "text-reader" <| fun context ->
+            let value = context.var.i0 "value"
+            value <== 9
+            context.io.fileInput "input.txt" <| fun reader -> reader.t value
+            context.print.t value
+
+        generate "text-pair" <| fun context ->
+            let first = context.var.i0 "first"
+            let second = context.var.i0 "second"
+            first <== 3
+            second <== 4
+            context.io.fileOutput "pair.txt" <| fun writer ->
+                writer.tt (iv first ++ second)
+            first <== 0
+            second <== 0
+            context.io.fileInput "pair.txt" <| fun reader ->
+                reader.tt (iv first ++ second)
+            context.print.t (first + second)
+
+        generate "binary-reader" <| fun context ->
+            let value = context.var.i0 "value"
+            value <== 9
+            context.io.binfileInput "input.bin" <| fun reader -> reader.b value
+            context.print.t value
+
+    let private generateSingularSolve outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "singular-solve-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let rhs = context.var.d1 "rhs"
+            matrix.allocate(2, 2)
+            rhs.allocate 2
+            for i in 0..1 do
+                for j in 0..1 do matrix[i,j] <== 0.0
+                rhs[i] <== 1.0
+            context.la.solve_simuleq(matrix, rhs)
+            context.print.t rhs[0]
+
+    let private generateComplexSplineNonFinite outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "spline-c-complex-non-finite-y")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [C99] outputDirectory "smoke" "1.0" <| fun context ->
+            let spline = context.interpolate.splineComplex(true)
+            spline.X.allocate 2
+            spline.Y.allocate 2
+            spline.X[0] <== 0.0
+            spline.X[1] <== 1.0
+            spline.Y[0] <== complex0(Cpx(0.0, 0.0))
+            spline.Y[1] <== complex0(Cpx(1.0, Double.NaN))
+            spline.set()
 
     [<EntryPoint>]
     let main arguments =
@@ -251,8 +317,12 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateTextRead outputRoot)
             for target in ["c", C99; "fortran", Fortran; "python", Python] do
-                for caseName in ["valid"; "unordered"; "out-of-range"] do
+                generateFixedFileIo outputRoot target
+                generateSingularSolve outputRoot target
+                for caseName in ["valid"; "literal"; "unordered"; "out-of-range"] do
                     generateSplineValidation outputRoot target caseName
+            generateSplineValidation outputRoot ("c", C99) "non-finite-y"
+            generateComplexSplineNonFinite outputRoot
             generateCArrayCases outputRoot
             generatePhpUploads outputRoot
             printfn "Generated runtime smoke programs in %s" outputRoot

@@ -29,6 +29,8 @@ namespace Aqualis
         // let program() = (context()).CurrentProgram
         let writein text = ctx.codewritein(text + "\n")
         member _.tt (lst:exprString) =
+            if List.isEmpty lst.data then
+                invalidArg (nameof lst) "A file-read record must contain at least one target."
             let rec cpxvarlist list (s:list<reduceExprString>) counter =
                 match s with
                 |a::b ->
@@ -87,6 +89,7 @@ namespace Aqualis
                                   ])
                             |> fun s -> String.Join(",",s)
                         writein("read("+fp+",\"("+format+")\",iostat="+iostat.Expr.eval ctx+") "+code+"\n")
+                        writein("if (" + iostat.code + " /= 0) error stop 'Aqualis: invalid text input record.'\n")
                         for t,m,b in varlist do
                             match t,b with
                             |Zt,target ->
@@ -127,7 +130,9 @@ namespace Aqualis
                                     yield FileIoReadTarget.reject()
                             ])
                       |> fun s -> String.Join(",",s)
-                    writein("fscanf("+fp+",\""+format+"\","+code+");\n")
+                    writein("if (fscanf("+fp+",\""+format+"\","+code+") != " +
+                            string (varlist.Length + Nz) +
+                            ") { fprintf(stderr, \"Aqualis: invalid text input record.\\n\"); exit(EXIT_FAILURE); }\n")
                     for t,m,b in varlist do
                         match t,b with
                         |Zt,target ->
@@ -178,53 +183,22 @@ namespace Aqualis
                     |> fun s -> String.Join("<mo>,</mo>",s)
                 writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)<br/>\n")
             |Python ->
-                ctx.ch.dx (2*Nz) <| fun tmp ->
-                    let format =
-                        varlist
-                        |> (fun b ->
-                              [for (t,_,_) in b do
-                                match t with
-                                |It _ ->
-                                    yield "%d"
-                                |Dt ->
-                                    yield "%f"
-                                |Zt ->
-                                    yield "%f"
-                                    yield "%f"
-                                |_ -> ()
-                              ])
-                        |> (fun s -> String.Join("",s))
-                    let code =
-                      varlist
-                      |> (fun b ->
-                            [for t,m,a in b do
-                                match t,a with
-                                |Zt,RNvr(Var _,_) ->
-                                    yield tmp[2*m  ].Expr.eval ctx
-                                    yield tmp[2*m+1].Expr.eval ctx
-                                |_,RNvr(Var(_,n,_),_) ->
-                                    yield n
-                                |_ ->
-                                    yield FileIoReadTarget.reject()
-                            ])
-                      |> fun s -> String.Join(",",s)
-                    //書式指定をしてファイルから値を読み込み。まだ、完成してない
-                    writein("lines = " + fp + ".readline()\n")
-                    writein "word_list = re.split(r\'[\\t\\n]\', lines)\n"
-                    let mutable cnt = 0
-                    for t,_,a in varlist do
-                        //let a_string = string a
-                        match t,a with
-                        |It _,RNvr(v,_) ->
-                            writein(v.eval ctx+" = int(word_list["+cnt.ToString()+"])")
-                            cnt <- cnt + 1
-                        |Dt,RNvr(v,_) ->
-                            writein(v.eval ctx+"= float(word_list["+cnt.ToString()+"])")
-                            cnt <- cnt + 1
-                        |Zt,RNvr(v,_) ->
-                            writein(v.eval ctx+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
-                            cnt <- cnt + 2
-                        |_ -> ()
+                writein("word_list = " + fp + ".readline().split()")
+                writein("if len(word_list) != " + string (varlist.Length + Nz) +
+                        ": raise ValueError('Aqualis: invalid text input record.')")
+                let mutable cnt = 0
+                for t,_,a in varlist do
+                    match t,a with
+                    |It _,RNvr(v,_) ->
+                        writein(v.eval ctx+" = int(word_list["+cnt.ToString()+"])")
+                        cnt <- cnt + 1
+                    |Dt,RNvr(v,_) ->
+                        writein(v.eval ctx+" = float(word_list["+cnt.ToString()+"])")
+                        cnt <- cnt + 1
+                    |Zt,RNvr(v,_) ->
+                        writein(v.eval ctx+" = complex(float(word_list["+cnt.ToString()+"]),float(word_list["+(cnt+1).ToString()+"]))")
+                        cnt <- cnt + 2
+                    |_ -> ()
             |_ -> ()
 
         member private _.ReadByte target =
@@ -245,6 +219,12 @@ namespace Aqualis
         // let context() = ctx.RequireGenerationContext()
         // let program() = (context()).CurrentProgram
         let writein text = ctx.codewritein(text + "\n")
+        let readFortran target =
+            writein("read(" + fp + ",iostat=" + iostat.code + ") " + target)
+            writein("if (" + iostat.code + " /= 0) error stop 'Aqualis: invalid binary input record.'")
+        let readC target =
+            writein("if (fread(&" + target + ",sizeof(" + target + "),1," + fp +
+                    ") != 1) { fprintf(stderr, \"Aqualis: invalid binary input record.\\n\"); exit(EXIT_FAILURE); }")
         member private _.ReadBin target =
             let v,targetContext =
                 FileIoReadTarget.require ctx target
@@ -253,22 +233,22 @@ namespace Aqualis
                 match v.etype,v with
                 |Zt,Var _ ->
                     ctx.ch.dd <| fun (re,im) ->
-                        writein("read("+fp+",iostat="+iostat.Expr.eval ctx+") "+re.Expr.eval ctx+"\n")
-                        writein("read("+fp+",iostat="+iostat.Expr.eval ctx+") "+im.Expr.eval ctx+"\n")
+                        readFortran (re.Expr.eval ctx)
+                        readFortran (im.Expr.eval ctx)
                         complex0(v,context=targetContext) <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    writein("read("+fp+",iostat="+iostat.Expr.eval ctx+") "+n+"\n")
+                    readFortran n
                 |_ ->
                     FileIoReadTarget.reject()
             |C99 ->
                 match v.etype,v with
                 |Zt,Var _ ->
                     ctx.ch.dd <| fun (re,im) ->
-                        writein("fread(&"+re.Expr.eval ctx+",sizeof("+re.Expr.eval ctx+"),1,"+fp+");"+"\n")
-                        writein("fread(&"+im.Expr.eval ctx+",sizeof("+im.Expr.eval ctx+"),1,"+fp+");"+"\n")
+                        readC (re.Expr.eval ctx)
+                        readC (im.Expr.eval ctx)
                         complex0(v,context=targetContext) <== re+asm.uj*im
                 |_,Var(_,n,_) ->
-                    writein("fread(&"+n+",sizeof("+n+"),1,"+fp+");"+"\n")
+                    readC n
                 |_ ->
                     FileIoReadTarget.reject()
             |LaTeX ->
@@ -305,4 +285,3 @@ namespace Aqualis
         member this.b (x:int0) = this.ReadBin(RNvr(x.Expr,x.Context))
         member this.b (x:double0) = this.ReadBin(RNvr(x.Expr,x.Context))
         member this.b (x:complex0) = this.ReadBin(RNvr(x.Expr,x.Context))
-
