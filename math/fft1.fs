@@ -74,6 +74,12 @@ namespace Aqualis
                     ifftshift_odd context x
 
         let private transform (context:Aqualis) (planname:string,data1:complex1,data2:complex1,fftdir:int) =
+            match context.Language with
+            |Fortran|C99|LaTeX|HTML|Python -> ()
+            |language ->
+                UnsupportedOperation.codeGeneration
+                    (string language)
+                    "one-dimensional FFT"
             context.olist.add "-lfftw3"
             context.olist.add "-I/usr/include"
             context.ch.ii <| fun (N,N2) ->
@@ -139,7 +145,9 @@ namespace Aqualis
                         context.codewritein(data2.code+" = "+plan.code+"(normalise_idft=False)")
                         ifftshift1 context data2
                         context.codewritein("del "+plan.code+"")
-                |_ -> ()
+                |_ ->
+                    // Unsupported targets are rejected before generation starts.
+                    invalidOp "Unreachable FFT backend."
                 if fftdir=1 then
                     context.group.comment "normalize"
                     context.iter.num N <| fun i ->

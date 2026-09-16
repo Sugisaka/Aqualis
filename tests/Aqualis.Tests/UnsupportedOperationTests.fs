@@ -55,6 +55,35 @@ module UnsupportedOperationTests =
             (fun () -> expr.diff (Abs(Zt, Var(Zt, "z", NaN))) x context |> ignore)
 
     [<Fact>]
+    let ``unsupported FFT backends stop generation`` () =
+        let cases =
+            [ JavaScript, "JavaScript"
+              PHP, "PHP"
+              HTMLSequenceDiagram, "HTMLSequenceDiagram"
+              Numeric, "Numeric" ]
+
+        for language,targetName in cases do
+            use context = new Aqualis(None, None, language)
+            let input1 = context.var.z1("input1", 4)
+            let output1 = context.var.z1("output1", 4)
+            let input2 = context.var.z2("input2", 2, 2)
+            let output2 = context.var.z2("output2", 2, 2)
+
+            for operation in
+                [ fun () -> context.fft1.fft("forward1", input1, output1)
+                  fun () -> context.fft1.ifft("inverse1", input1, output1) ] do
+                assertNotSupported
+                    $"{targetName} code generation does not support one-dimensional FFT."
+                    operation
+
+            for operation in
+                [ fun () -> context.fft2.fft("forward2", input2, output2)
+                  fun () -> context.fft2.ifft("inverse2", input2, output2) ] do
+                assertNotSupported
+                    $"{targetName} code generation does not support two-dimensional FFT."
+                    operation
+
+    [<Fact>]
     let ``unsupported numeric execution does not silently skip work`` () =
         assertNotSupported
             "Numeric evaluation does not support a loop whose bounds are not integers ('1.5' to '2')."
