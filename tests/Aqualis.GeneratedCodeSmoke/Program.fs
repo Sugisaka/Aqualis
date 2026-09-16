@@ -403,6 +403,79 @@ module Program =
             right.allocate 1
             context.la.dot(output, left, right)
 
+        generate "dot-alias-real" <| fun context ->
+            let left = context.var.d1 "left"
+            let right = context.var.d1 "right"
+            left.allocate 2
+            right.allocate 2
+            left[0] <== 2.0
+            left[1] <== 3.0
+            right[0] <== 4.0
+            right[1] <== 5.0
+            context.la.dot(left[0], left, right)
+            context.print.t left[0]
+
+        generate "dot-alias-complex" <| fun context ->
+            let left = context.var.z1 "left"
+            let right = context.var.z1 "right"
+            left.allocate 2
+            right.allocate 2
+            left[0] <== complex0(Cpx(2.0, 0.0))
+            left[1] <== complex0(Cpx(3.0, 0.0))
+            right[0] <== complex0(Cpx(4.0, 0.0))
+            right[1] <== complex0(Cpx(5.0, 0.0))
+            context.la.dot(left[0], left, right)
+            context.print.t left[0].re
+
+        generate "norm-large" <| fun context ->
+            let vector = context.var.d1 "vector"
+            vector.allocate 2
+            vector[0] <== 1e200
+            vector[1] <== 1e200
+            context.la.norm vector <| fun value -> context.print.t (value / 1e200)
+
+        generate "norm-small" <| fun context ->
+            let vector = context.var.d1 "vector"
+            vector.allocate 2
+            vector[0] <== 1e-200
+            vector[1] <== 1e-200
+            context.la.norm vector <| fun value -> context.print.t (value / 1e-200)
+
+        generate "normalize-large" <| fun context ->
+            let vector = context.var.d1 "vector"
+            vector.allocate 2
+            vector[0] <== 1e308
+            vector[1] <== 1e308
+            context.la.normalize vector
+            context.print.t vector[0]
+
+        generate "normalize-small-complex" <| fun context ->
+            let vector = context.var.z1 "vector"
+            vector.allocate 1
+            vector[0] <== complex0(Cpx(1e-200, 1e-200))
+            context.la.normalize vector
+            context.print.t vector[0].re
+
+        generate "findmin-short-direction" <| fun context ->
+            let initial = context.var.d1 "initial"
+            let direction = context.var.d1 "direction"
+            let output = context.var.d1 "output"
+            initial.allocate 2
+            direction.allocate 1
+            output.allocate 2
+            context.optimization.findmin 1 (initial, direction) (D 1.0)
+                (fun value point -> value <== point[0] * point[0]) output
+
+        generate "findmin-short-output" <| fun context ->
+            let initial = context.var.d1 "initial"
+            let direction = context.var.d1 "direction"
+            let output = context.var.d1 "output"
+            initial.allocate 2
+            direction.allocate 2
+            output.allocate 1
+            context.optimization.findmin 1 (initial, direction) (D 1.0)
+                (fun value point -> value <== point[0] * point[0]) output
+
         generate "normalize-zero" <| fun context ->
             let vector = context.var.d1 "vector"
             vector.allocate 2
@@ -443,6 +516,24 @@ module Program =
             matrix[1,1] <== 4.0
             context.la.inverse_matrix(inverse,matrix)
             context.print.t (inverse[0,0] + inverse[1,1])
+
+        generate "inverse-alias-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 4.0
+            context.la.inverse_matrix(matrix,matrix)
+            context.print.t (matrix[0,0] + matrix[1,1])
+
+        generate "inverse-alias-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+            context.la.inverse_matrix(matrix,matrix)
+            context.print.t (matrix[0,0].re + matrix[1,1].re)
 
         generate "inverse-complex" <| fun context ->
             let matrix = context.var.z2 "matrix"

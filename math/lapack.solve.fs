@@ -182,32 +182,38 @@ namespace Aqualis
                     requireSquareMatrix this.GenerationContext mat1.size1 mat1.size2
                     requireSolveShape this.GenerationContext (mat2.size1 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
                     requireSolveShape this.GenerationContext (mat2.size2 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
-                    mat2.clear()
-                    this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
-                    match this.GenerationContext.language with
-                    |Fortran ->
-                        this.GenerationContext.ch.ii <| fun (npre,info) ->
-                            npre<==mat1.size1
-                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
-                                ipiv.clear()
-                                this.GenerationContext.codewritein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")\n")
-                                checkSolveInfo this.GenerationContext info
-                    |C99 ->
-                        this.GenerationContext.ch.ii <| fun (npre,info) ->
-                            npre<==mat1.size1
-                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
-                                ipiv.clear()
-                                this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
-                                this.GenerationContext.codewritein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", "+mat2.code+", &"+npre.code+", &"+info.code+");\n")
-                                checkSolveInfo this.GenerationContext info
-                    |LaTeX ->
-                        this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
-                    |HTML ->
-                        this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
-                    |Python ->
-                        this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
-                    |_ -> ()
+                    let calculate (source:double2) =
+                        mat2.clear()
+                        this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
+                        match this.GenerationContext.language with
+                        |Fortran ->
+                            this.GenerationContext.ch.ii <| fun (npre,info) ->
+                                npre<==mat1.size1
+                                this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                    ipiv.clear()
+                                    this.GenerationContext.codewritein("call dgesv("+npre.code+", "+npre.code+","+source.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")\n")
+                                    checkSolveInfo this.GenerationContext info
+                        |C99 ->
+                            this.GenerationContext.ch.ii <| fun (npre,info) ->
+                                npre<==mat1.size1
+                                this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                    ipiv.clear()
+                                    this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
+                                    this.GenerationContext.codewritein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+source.code+", &"+npre.code+", "+ipiv.code+", "+mat2.code+", &"+npre.code+", &"+info.code+");\n")
+                                    checkSolveInfo this.GenerationContext info
+                        |LaTeX ->
+                            this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+source.code+"^{-1}"+"$"+"\\\\\n")
+                        |HTML ->
+                            this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+source.code+"^{-1}"+"\\)"+"<br/>\n")
+                        |Python ->
+                            this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+source.code+")"+"\n")
+                        |_ -> ()
                         
+                    if mat2.code = mat1.code then
+                        this.GenerationContext.ch.d2 (mat1.size1, mat1.size2) <| fun source ->
+                            source <== mat1
+                            calculate source
+                    else calculate mat1
             ///<summary>逆行列の計算</summary>
             ///<param name="mat1">元の行列</param>
             ///<param name="mat2">mat1の逆行列</param>
@@ -218,28 +224,34 @@ namespace Aqualis
                     requireSquareMatrix this.GenerationContext mat1.size1 mat1.size2
                     requireSolveShape this.GenerationContext (mat2.size1 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
                     requireSolveShape this.GenerationContext (mat2.size2 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
-                    mat2.clear()
-                    this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
-                    match this.GenerationContext.language with
-                    |Fortran ->
-                        this.GenerationContext.ch.ii <| fun (npre,info) ->
-                            npre<==mat1.size1
-                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
-                                ipiv.clear()
-                                this.GenerationContext.codewritein("call zgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")\n")
-                                checkSolveInfo this.GenerationContext info
-                    |C99 ->
-                        this.GenerationContext.ch.ii <| fun (npre,info) ->
-                            npre<==mat1.size1
-                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
-                                ipiv.clear()
-                                this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
-                                this.GenerationContext.codewritein("zgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", "+mat2.code+", &"+npre.code+", &"+info.code+");\n")
-                                checkSolveInfo this.GenerationContext info
-                    |LaTeX ->
-                        this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
-                    |HTML ->
-                        this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
-                    |Python ->
-                        this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
-                    |_ -> ()
+                    let calculate (source:complex2) =
+                        mat2.clear()
+                        this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
+                        match this.GenerationContext.language with
+                        |Fortran ->
+                            this.GenerationContext.ch.ii <| fun (npre,info) ->
+                                npre<==mat1.size1
+                                this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                    ipiv.clear()
+                                    this.GenerationContext.codewritein("call zgesv("+npre.code+", "+npre.code+","+source.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")\n")
+                                    checkSolveInfo this.GenerationContext info
+                        |C99 ->
+                            this.GenerationContext.ch.ii <| fun (npre,info) ->
+                                npre<==mat1.size1
+                                this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                    ipiv.clear()
+                                    this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
+                                    this.GenerationContext.codewritein("zgesv_(&"+npre.code+","+"&"+npre.code+", "+source.code+", &"+npre.code+", "+ipiv.code+", "+mat2.code+", &"+npre.code+", &"+info.code+");\n")
+                                    checkSolveInfo this.GenerationContext info
+                        |LaTeX ->
+                            this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+source.code+"^{-1}"+"$"+"\\\\\n")
+                        |HTML ->
+                            this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+source.code+"^{-1}"+"\\)"+"<br/>\n")
+                        |Python ->
+                            this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+source.code+")"+"\n")
+                        |_ -> ()
+                    if mat2.code = mat1.code then
+                        this.GenerationContext.ch.z2 (mat1.size1, mat1.size2) <| fun source ->
+                            source <== mat1
+                            calculate source
+                    else calculate mat1

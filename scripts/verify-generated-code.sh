@@ -255,8 +255,16 @@ for language in c fortran python; do
   expect_generated_failure "$language matrix product inner mismatch" "$output_root/matmul-inner-mismatch-$language" 'Aqualis: LAPACK matrix multiplication inner dimensions must match.' "${run_command[@]}"
   expect_generated_failure "$language small matrix product output" "$output_root/matmul-small-output-$language" 'Aqualis: LAPACK matrix multiplication output shape must match result.' "${run_command[@]}"
   expect_generated_failure "$language mismatched dot vectors" "$output_root/dot-length-mismatch-$language" 'Aqualis: LAPACK dot product vector lengths must match.' "${run_command[@]}"
+  run_and_verify_number "$language aliased real dot output" "$output_root/dot-alias-real-$language" '23' "${run_command[@]}"
+  run_and_verify_number "$language aliased complex dot output" "$output_root/dot-alias-complex-$language" '23' "${run_command[@]}"
+  run_and_verify_number "$language large vector norm" "$output_root/norm-large-$language" '1.4142135623730951' "${run_command[@]}"
+  run_and_verify_number "$language small vector norm" "$output_root/norm-small-$language" '1.4142135623730951' "${run_command[@]}"
+  run_and_verify_number "$language large vector normalization" "$output_root/normalize-large-$language" '0.7071067811865476' "${run_command[@]}"
+  run_and_verify_number "$language small complex vector normalization" "$output_root/normalize-small-complex-$language" '0.7071067811865476' "${run_command[@]}"
   expect_generated_failure "$language zero vector normalization" "$output_root/normalize-zero-$language" 'Aqualis: LAPACK normalization requires a nonzero vector.' "${run_command[@]}"
   expect_generated_failure "$language zero complex vector normalization" "$output_root/normalize-complex-zero-$language" 'Aqualis: LAPACK normalization requires a nonzero vector.' "${run_command[@]}"
+  expect_generated_failure "$language short line-search direction" "$output_root/findmin-short-direction-$language" 'Aqualis: Line-search direction length must match the initial point.' "${run_command[@]}"
+  expect_generated_failure "$language short line-search output" "$output_root/findmin-short-output-$language" 'Aqualis: Line-search output length must match the initial point.' "${run_command[@]}"
   run_and_verify_number "$language zero real pseudoinverse" "$output_root/pseudoinverse-zero-real-$language" '0' "${run_command[@]}"
   run_and_verify_number "$language zero complex pseudoinverse" "$output_root/pseudoinverse-zero-complex-$language" '0' "${run_command[@]}"
   if [[ "$language" == fortran ]]; then
@@ -277,6 +285,8 @@ for language in c fortran python; do
       exit 1
     fi
   done
+  run_and_verify_number "$language aliased real inverse" "$output_root/inverse-alias-real-$language" '0.75' "${run_command[@]}"
+  run_and_verify_number "$language aliased complex inverse" "$output_root/inverse-alias-complex-$language" '0.75' "${run_command[@]}"
   if [[ "$language" == python ]]; then
     inverse_error='Singular matrix'
   else

@@ -50,6 +50,37 @@ namespace Aqualis
             LapackValidation.require context (outputRows .=/ rows) "LAPACK matrix multiplication output shape must match result."
             LapackValidation.require context (outputColumns .=/ columns) "LAPACK matrix multiplication output shape must match result."
 
+        let withScaledRealNorm (a:double1) code =
+            context.ch.dd <| fun (scale,sumSquares) ->
+                scale.clear()
+                a.foreach <| fun i ->
+                    let magnitude = asm.abs a[i]
+                    context.br.if1 (Or [magnitude .> scale; magnitude .=/ magnitude]) <| fun () -> scale <== magnitude
+                sumSquares.clear()
+                context.br.if1 (scale .= D Double.PositiveInfinity) <| fun () -> sumSquares <== 1.0
+                context.br.if1 (And [scale .> 0.0; scale .< D Double.PositiveInfinity]) <| fun () ->
+                    a.foreach <| fun i ->
+                        let ratio = a[i] / scale
+                        sumSquares <== sumSquares + ratio * ratio
+                code scale sumSquares
+
+        let withScaledComplexNorm (a:complex1) code =
+            context.ch.dd <| fun (scale,sumSquares) ->
+                scale.clear()
+                a.foreach <| fun i ->
+                    let realMagnitude = asm.abs a[i].re
+                    let imaginaryMagnitude = asm.abs a[i].im
+                    context.br.if1 (Or [realMagnitude .> scale; realMagnitude .=/ realMagnitude]) <| fun () -> scale <== realMagnitude
+                    context.br.if1 (Or [imaginaryMagnitude .> scale; imaginaryMagnitude .=/ imaginaryMagnitude]) <| fun () -> scale <== imaginaryMagnitude
+                sumSquares.clear()
+                context.br.if1 (scale .= D Double.PositiveInfinity) <| fun () -> sumSquares <== 1.0
+                context.br.if1 (And [scale .> 0.0; scale .< D Double.PositiveInfinity]) <| fun () ->
+                    a.foreach <| fun i ->
+                        let realRatio = a[i].re / scale
+                        let imaginaryRatio = a[i].im / scale
+                        sumSquares <== sumSquares + realRatio * realRatio + imaginaryRatio * imaginaryRatio
+                code scale sumSquares
+
         member internal _.GenerationContext = context
         member internal _.RequirePythonLinalg symbol = requirePythonLinalg symbol
 
@@ -295,9 +326,11 @@ namespace Aqualis
         /// <param name="b">b</param>
         member this.dot (x:double0,a:double1,b:double1) =
             LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
-            x.clear()
-            context.iter.num a.size1 <| fun j ->
-                x <== x + a[j] * b[j]
+            context.ch.d <| fun result ->
+                result.clear()
+                context.iter.num a.size1 <| fun j ->
+                    result <== result + a[j] * b[j]
+                x <== result
         /// <summary>
         /// ベクトルの内積計算
         /// </summary>
@@ -306,9 +339,11 @@ namespace Aqualis
         /// <param name="b">b</param>
         member this.dot (x:complex0,a:complex1,b:double1) =
             LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
-            x.clear()
-            context.iter.num a.size1 <| fun j ->
-                x <== x + asm.conj(a[j]) * b[j]
+            context.ch.z <| fun result ->
+                result.clear()
+                context.iter.num a.size1 <| fun j ->
+                    result <== result + asm.conj(a[j]) * b[j]
+                x <== result
         /// <summary>
         /// ベクトルの内積計算
         /// </summary>
@@ -317,9 +352,11 @@ namespace Aqualis
         /// <param name="b">b</param>
         member this.dot (x:complex0,a:double1,b:complex1) =
             LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
-            x.clear()
-            context.iter.num a.size1 <| fun j ->
-                x <== x + a[j] * b[j]
+            context.ch.z <| fun result ->
+                result.clear()
+                context.iter.num a.size1 <| fun j ->
+                    result <== result + a[j] * b[j]
+                x <== result
         /// <summary>
         /// ベクトルの内積計算
         /// </summary>
@@ -328,9 +365,11 @@ namespace Aqualis
         /// <param name="b">b</param>
         member this.dot (x:complex0,a:complex1,b:complex1) =
             LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
-            x.clear()
-            context.iter.num a.size1 <| fun j ->
-                x <== x + asm.conj(a[j]) * b[j]
+            context.ch.z <| fun result ->
+                result.clear()
+                context.iter.num a.size1 <| fun j ->
+                    result <== result + asm.conj(a[j]) * b[j]
+                x <== result
 
         /// <summary>
         /// ベクトルの内積計算
@@ -379,7 +418,8 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="code">ノルムaに対する処理</param>
         member this.norm (a:double1) = fun code ->
-            this.dot (a,a) <| fun b -> code(asm.sqrt b)
+            withScaledRealNorm a <| fun scale sumSquares ->
+                code(scale * asm.sqrt sumSquares)
             
         /// <summary>
         /// ベクトルのノルム(L2ノルム)計算
@@ -387,21 +427,22 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="code">ノルムaに対する処理</param>
         member this.norm (a:complex1) = fun code ->
-            this.dot (a,a) <| fun b -> code(asm.sqrt b.re)
+            withScaledComplexNorm a <| fun scale sumSquares ->
+                code(scale * asm.sqrt sumSquares)
 
         /// <summary>
         /// ベクトルの規格化
         /// </summary>
         /// <param name="a"></param>
         member this.normalize (a:double1) =
-            this.norm a <| fun c ->
-                LapackValidation.require context (c .<= 0.0) "LAPACK normalization requires a nonzero vector."
-                a <== a/c
+            withScaledRealNorm a <| fun scale sumSquares ->
+                LapackValidation.require context (scale .<= 0.0) "LAPACK normalization requires a nonzero vector."
+                a.foreach <| fun i -> a[i] <== (a[i] / scale) / asm.sqrt sumSquares
         /// <summary>
         /// ベクトルの規格化
         /// </summary>
         /// <param name="a"></param>
         member this.normalize (a:complex1) =
-            this.norm a <| fun c ->
-                LapackValidation.require context (c .<= 0.0) "LAPACK normalization requires a nonzero vector."
-                a <== a/c
+            withScaledComplexNorm a <| fun scale sumSquares ->
+                LapackValidation.require context (scale .<= 0.0) "LAPACK normalization requires a nonzero vector."
+                a.foreach <| fun i -> a[i] <== (a[i] / scale) / asm.sqrt sumSquares
