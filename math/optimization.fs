@@ -45,6 +45,9 @@ type ContextOptimization internal (context:Aqualis) =
         LapackValidation.require context (x0_.size1 .<= 0) "Line-search vector length must be positive."
         LapackValidation.require context (df.size1 .=/ x0_.size1) "Line-search direction length must match the initial point."
         LapackValidation.require context (xx.size1 .=/ x0_.size1) "Line-search output length must match the initial point."
+        x0_.foreach <| fun i -> NumericArrayValidation.requireFinite context x0_[i] "Line-search initial point must be finite."
+        df.foreach <| fun i -> NumericArrayValidation.requireFinite context df[i] "Line-search direction must be finite."
+        NumericArrayValidation.requireFinite context dd "Line-search step width must be finite."
         let r = 0.5*(1.0+sqrt(5.0))
         context.ch.d1 x0_.size1 <| fun xa ->
         context.ch.d1 x0_.size1 <| fun x1 ->
@@ -56,6 +59,7 @@ type ContextOptimization internal (context:Aqualis) =
         context.ch.d1 df.size1 <| fun unitDirection ->
         context.ch.iii <| fun (counter,expansionCounter,expansionLimitReached) ->
             context.la.norm df <| fun stableNorm -> norm_df <== stableNorm
+            NumericArrayValidation.requireFinite context norm_df "Line-search direction norm must be finite."
             context.br.if2 (norm_df.>0.0)
             <| fun () ->
                 unitDirection <== df

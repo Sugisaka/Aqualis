@@ -34,12 +34,21 @@ namespace Aqualis
 
                 context.ch.z1 b.size1 <| fun r -> context.ch.z1 b.size1 <| fun t -> context.ch.z1 b.size1 <| fun p -> context.ch.z1 b.size1 <| fun v -> context.ch.z1 b.size1 <| fun s -> context.ch.z1 b.size1 <| fun p_hat -> context.ch.z1 b.size1 <| fun s_hat -> context.ch.z1 b.size1 <| fun r_tld ->
                     context.ch.d <| fun bnrm2 ->
+                        let updateSolution (j:int0) (correction:complex0) =
+                            context.br.if2 (bnrm2 .>= 1.0)
+                                (fun () -> x[j] <== bnrm2*(x[j]/bnrm2 + correction))
+                                (fun () -> x[j] <== x[j] + bnrm2*correction)
+                            NumericArrayValidation.requireFinite context x[j].re "BiCGSTAB solution must be finite."
+                            NumericArrayValidation.requireFinite context x[j].im "BiCGSTAB solution must be finite."
                         norm(bnrm2,b)
                         NumericArrayValidation.requireFinite context bnrm2 "BiCGSTAB right-hand side norm must be finite."
                         context.br.if1 (bnrm2 .= 0.0) <| fun () -> bnrm2 <== 1.0
                         integralequation_matmul1(t,x)
                         context.iter.num r.size1 <| fun i ->
-                            r[i] <== (b[i] - t[i]) / bnrm2
+                            context.ch.zz <| fun (scaledRightHandSide,scaledProduct) ->
+                                scaledRightHandSide <== b[i]/bnrm2
+                                scaledProduct <== t[i]/bnrm2
+                                r[i] <== scaledRightHandSide - scaledProduct
                         context.ch.d <| fun err ->
                             context.ch.d <| fun norm_ ->
                                 norm(norm_,r)
@@ -79,7 +88,7 @@ namespace Aqualis
                                                     norm(norm_,s)
                                                     NumericArrayValidation.requireFinite context norm_ "BiCGSTAB residual norm must be finite."
                                                     context.br.if1 (norm_ .<= tol) <| fun () ->
-                                                        context.iter.num r.size1 <| fun j -> x.[j] <== x.[j] + bnrm2*(alpha*p_hat.[j])
+                                                        context.iter.num r.size1 <| fun j -> updateSolution j (alpha*p_hat.[j])
                                                         converged <== 1
                                                         context.print.s "converged"
                                                         exit()
@@ -95,7 +104,7 @@ namespace Aqualis
                                                     NumericArrayValidation.require context (asm.abs z2 .= 0.0) "BiCGSTAB broke down: correction norm is zero."
                                                     omega <== z1/z2
                                                 context.iter.num r.size1 <| fun j ->
-                                                    x.[j] <== x.[j] + bnrm2*(alpha*p_hat.[j] + omega*s_hat.[j])
+                                                    updateSolution j (alpha*p_hat.[j] + omega*s_hat.[j])
                                                 context.iter.num r.size1 <| fun j ->
                                                     r.[j] <== s.[j] - omega * t.[j]
                                                 context.ch.d <| fun norm_ ->

@@ -300,6 +300,27 @@ PY
     fi
     printf '%s BiCGSTAB %s scale: passed\n' "$language" "$scale"
   done
+  cancellation_directory="$output_root/bicgstab-residual-cancellation-$language"
+  actual="$(cd "$cancellation_directory" && "${run_command[@]}")"
+  if ! python3 - "$actual" <<'PY'
+import math
+import sys
+
+output = sys.argv[1]
+if 'converged' not in output:
+    sys.exit('BiCGSTAB did not report convergence.')
+observed = float(output.splitlines()[-1].replace('converged', '').strip())
+if not math.isclose(observed, 1e308, rel_tol=1e-9, abs_tol=0.0):
+    sys.exit(f'Expected 1e308, received {observed}.')
+PY
+  then
+    printf '%s BiCGSTAB residual cancellation returned an unexpected result: %s\n' "$language" "$actual" >&2
+    exit 1
+  fi
+  printf '%s BiCGSTAB residual cancellation: passed\n' "$language"
+  expect_generated_failure "$language BiCGSTAB solution overflow" \
+    "$output_root/bicgstab-solution-overflow-$language" \
+    'Aqualis: BiCGSTAB solution must be finite.' "${run_command[@]}"
   diagonal_directory="$output_root/bicgstab-diagonal-$language"
   actual="$(cd "$diagonal_directory" && "${run_command[@]}")"
   final_value="$(printf '%s\n' "$actual" | tail -n1 | sed 's/converged//g')"
@@ -403,6 +424,15 @@ for language in c fortran python; do
     expect_generated_failure "$language $case_name line-search objective" \
       "$output_root/findmin-$case_name-objective-$language" \
       'Aqualis: Line-search objective value must be finite.' "${run_command[@]}"
+  done
+  for case_name in initial direction step; do
+    case "$case_name" in
+      initial) expected_message='Aqualis: Line-search initial point must be finite.' ;;
+      direction) expected_message='Aqualis: Line-search direction must be finite.' ;;
+      step) expected_message='Aqualis: Line-search step width must be finite.' ;;
+    esac
+    expect_generated_failure "$language NaN line-search $case_name" \
+      "$output_root/findmin-nan-$case_name-$language" "$expected_message" "${run_command[@]}"
   done
   run_and_verify_number "$language zero real pseudoinverse" "$output_root/pseudoinverse-zero-real-$language" '0' "${run_command[@]}"
   run_and_verify_number "$language zero complex pseudoinverse" "$output_root/pseudoinverse-zero-complex-$language" '0' "${run_command[@]}"
