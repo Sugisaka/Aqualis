@@ -32,6 +32,23 @@ module PhpArrayGenerationTests =
         |> ignore
 
     [<Fact>]
+    let ``PHP duplicate initialized arrays initialize unvisited branches without resetting existing values`` () =
+        use output = new TemporaryDirectory()
+        let project = "php-initialized-branches"
+
+        Compile [PHP] output.Path project "1.0" <| fun context ->
+            let flag = context.var.i0 "flag"
+            flag <== 0
+            context.br.if2 (flag .= 1)
+                (fun () -> context.var.ip1("values", [7]) |> ignore)
+                (fun () ->
+                    let values = context.var.ip1("values", [7])
+                    context.print.t values[0])
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, project + ".php"))
+        Assert.Contains("if (!isset($values)) { $values = [7]; $values_size = [1]; }", generated)
+
+    [<Fact>]
     let ``PHP dynamic arrays allocate and deallocate inside PHP blocks`` () =
         use output = new TemporaryDirectory()
         let project = "php-dynamic-arrays"

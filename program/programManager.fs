@@ -168,7 +168,9 @@ namespace Aqualis
         member _.indentInc() = withWriter (fun writer -> writer.indent.inc())
         member _.indentDec() = withWriter (fun writer -> writer.indent.dec())
         member _.appendOpen() = withWriter (fun writer -> writer.appendOpen())
-        member _.close() = withWriter (fun writer -> writer.close())
+        member this.close() =
+            this.validateGeneratedVariableNames()
+            withWriter (fun writer -> writer.close())
         member internal _.publish() =
             ensureActive()
             match cwriter with
@@ -360,6 +362,27 @@ namespace Aqualis
 
         ///<summary>定義された変数リスト</summary>
         member val cvar = varCollector(lang, diagnosticBag) with get
+
+        member private this.validateGeneratedVariableNames() =
+            if lang <> Numeric && lang <> LaTeX && lang <> HTML && lang <> HTMLSequenceDiagram then
+                let comparer =
+                    if lang = Fortran then StringComparer.OrdinalIgnoreCase
+                    else StringComparer.Ordinal
+                let names = System.Collections.Generic.HashSet<string>(comparer)
+                let add name =
+                    if not (names.Add name) then
+                        invalidArg "name" ("Variable '" + name + "' conflicts with a generated variable name.")
+                let addArray name =
+                    add name
+                    add (name + "_size")
+                for _,shape,name,_ in this.cvar.list do
+                    match shape with
+                    |A0 -> add name
+                    |_ -> addArray name
+                for generator in [this.i0; this.d0; this.z0; this.c0] do
+                    for name in generator.varList do add name
+                for generator in [this.i1; this.d1; this.z1; this.i2; this.d2; this.z2; this.i3; this.d3; this.z3] do
+                    for name in generator.varList do addArray name
 
         member val varPrivate = varCollector(lang, diagnosticBag) with get
 

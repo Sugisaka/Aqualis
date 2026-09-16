@@ -116,6 +116,37 @@ module DiagnosticsTests =
         Assert.Empty(context.cvar.list)
 
     [<Fact>]
+    let ``direct variable registration rejects a duplicate initialized declaration`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "duplicate.c", C99)
+
+        context.cvar.setVar(It 4, A0, "value", "1")
+        Assert.Throws<ArgumentException>(fun () -> context.cvar.setVar(It 4, A0, "value", "1")) |> ignore
+        Assert.Single(context.cvar.list) |> ignore
+
+    [<Fact>]
+    let ``generated variable names cannot alias user variables or array sizes`` () =
+        use output = new TemporaryDirectory()
+
+        Assert.Throws<ArgumentException>(fun () ->
+            Compile [C99] output.Path "cache-name" "1" <| fun context ->
+                context.var.i0 "i0001" |> ignore
+                context.ch.i <| fun scratch -> scratch <== 4)
+        |> ignore
+
+        Assert.Throws<ArgumentException>(fun () ->
+            Compile [C99] output.Path "cache-size" "1" <| fun context ->
+                context.var.i0 "i1001_size" |> ignore
+                context.ch.i1 2 <| fun scratch -> scratch[0] <== 4)
+        |> ignore
+
+        Assert.Throws<ArgumentException>(fun () ->
+            Compile [Fortran] output.Path "cache-fortran" "1" <| fun context ->
+                context.ch.i <| fun scratch -> scratch <== 4
+                context.var.i0 "I0001" |> ignore)
+        |> ignore
+
+    [<Fact>]
     let ``diagnostic policy can treat warnings as transaction failures`` () =
         use output = new TemporaryDirectory()
         let projectName = "warning-as-error"

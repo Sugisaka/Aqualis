@@ -552,10 +552,12 @@ namespace Aqualis
         member _.exists(etyp_,atyp_,name_,cst_) =
             lock gate (fun () ->
                 List.exists (fun (etyp,atyp,name,cst) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist)
-        ///<summary>重複に関係なく変数を登録</summary>
+        ///<summary>変数を登録（同名の再登録は拒否）</summary>
         member _.setVar(etyp,atyp,name,cst) =
             lock gate (fun () ->
                 requireCompatibleName etyp atyp name cst
+                if vlist |> List.exists (fun (_,_,existingName,_) -> sameName existingName name) then
+                    invalidArg "name" ("Variable '" + name + "' is already defined.")
                 vlist <- (etyp,atyp,name,cst)::vlist)
         ///<summary>同名の変数が登録済みの場合は変数を登録しない</summary>
         member this.setUniqVar(etyp,atyp,name,cst) =

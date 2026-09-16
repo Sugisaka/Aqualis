@@ -1126,6 +1126,24 @@ module Program =
             let duplicate = context.var.ip1("values", [1])
             context.print.t duplicate[0]
 
+        generate "integer-branch" <| fun context ->
+            let flag = context.var.i0 "flag"
+            flag <== 0
+            context.br.if2 (flag .= 1)
+                (fun () -> context.var.ip1("values", [7]) |> ignore)
+                (fun () ->
+                    let values = context.var.ip1("values", [7])
+                    context.print.t values[0])
+
+        generate "real-branch" <| fun context ->
+            let flag = context.var.i0 "flag"
+            flag <== 0
+            context.br.if2 (flag .= 1)
+                (fun () -> context.var.dp1("values", [2.5]) |> ignore)
+                (fun () ->
+                    let values = context.var.dp1("values", [2.5])
+                    context.print.t values[0])
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
