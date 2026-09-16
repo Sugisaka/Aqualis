@@ -69,3 +69,21 @@ module LapackRankGenerationTests =
         Assert.DoesNotContain("from scipy.linalg import solve", source)
         Assert.DoesNotContain("from scipy.special", source)
         Assert.DoesNotContain("threshold = 1e-10", source)
+
+    [<Fact>]
+    let ``LaTeX rank generation uses matching math delimiters`` () =
+        let realSource =
+            generate LaTeX ".tex" "real_rank_latex" (fun context ->
+                let rank = context.var.i0 "rank"
+                let matrix = context.var.d2("matrix", 2, 3)
+                context.la.rank(rank, matrix, double0(Dbl 1.0e-10)))
+
+        let complexSource =
+            generate LaTeX ".tex" "complex_rank_latex" (fun context ->
+                let rank = context.var.d0 "rank"
+                let matrix = context.var.z2("matrix", 3, 2)
+                context.la.rank(rank, matrix, double0(Dbl 1.0e-10)))
+
+        for source in [realSource; complexSource] do
+            Assert.Contains("$rank \\leftarrow \\mathrm{rank}\\left[matrix\\right]$\\\\", source)
+            Assert.DoesNotContain("\\(rank \\leftarrow", source)

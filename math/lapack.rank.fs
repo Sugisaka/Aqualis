@@ -90,7 +90,7 @@ namespace Aqualis
                                         this.GenerationContext.print.tt <| "rank Info: "++info
                                 |_ -> ()
                         |LaTeX ->
-                            this.GenerationContext.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
+                            this.GenerationContext.codewritein("$"+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                         |HTML ->
                             this.GenerationContext.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                         |Python ->
@@ -178,7 +178,7 @@ namespace Aqualis
                                         this.GenerationContext.print.tt <| "rank Info: "++info
                                 |_ -> ()
                         |LaTeX ->
-                            this.GenerationContext.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
+                            this.GenerationContext.codewritein("$"+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
                         |HTML ->
                             this.GenerationContext.codewritein("\\("+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"\\)<br/>\n")
                         |Python ->
