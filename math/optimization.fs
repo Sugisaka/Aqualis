@@ -39,6 +39,9 @@ type ContextOptimization internal (context:Aqualis) =
             invalidArg (nameof m) "The line-search iteration count cannot be negative."
         if maxBracketExpansions < 0 then
             invalidArg (nameof maxBracketExpansions) "The bracket-expansion limit cannot be negative."
+        let evaluate (value:double0) (point:double1) =
+            f value point
+            NumericArrayValidation.requireFinite context value "Line-search objective value must be finite."
         LapackValidation.require context (x0_.size1 .<= 0) "Line-search vector length must be positive."
         LapackValidation.require context (df.size1 .=/ x0_.size1) "Line-search direction length must match the initial point."
         LapackValidation.require context (xx.size1 .=/ x0_.size1) "Line-search output length must match the initial point."
@@ -58,13 +61,13 @@ type ContextOptimization internal (context:Aqualis) =
                 unitDirection <== df
                 context.la.normalize unitDirection
                 xa.foreach <| fun i -> xa.[i] <== x0_.[i]
-                f fa xa
+                evaluate fa xa
                 xb.foreach <| fun i -> xb.[i] <== x0_.[i] + dd * unitDirection.[i]
-                f fb xb
+                evaluate fb xb
                 x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
-                f f1 x1
+                evaluate f1 x1
                 x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
-                f f2 x2
+                evaluate f2 x2
                 counter.clear()
                 expansionCounter.clear()
                 expansionLimitReached.clear()
@@ -82,7 +85,7 @@ type ContextOptimization internal (context:Aqualis) =
                                 f2 <== fb
                                 //xb: 新規計算
                                 xb.foreach <| fun i -> xb.[i] <== xa.[i] + (x1.[i]-xa.[i])*(1.0+r)
-                                f fb xb
+                                evaluate fb xb
                             <| fun () ->
                                 expansionLimitReached <== 1
                         b.IF (And [f1.>f2; fa.>f2;]) <| fun () ->
@@ -94,7 +97,7 @@ type ContextOptimization internal (context:Aqualis) =
                             //xb: そのまま
                             //x2: 新規計算
                             x2.foreach <| fun i -> x2.[i] <== xa.[i] + (xb.[i]-xa.[i])/r
-                            f f2 x2
+                            evaluate f2 x2
                         b.IF (Or [And [f1.>f2; fa.<f2;]; f1.<=f2;]) <| fun () ->
                             counter.inc()
                             //xa: そのまま
@@ -104,9 +107,9 @@ type ContextOptimization internal (context:Aqualis) =
                             f2 <== f1
                             //x1: 新規計算
                             x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
-                            f f1 x1
+                            evaluate f1 x1
                         b.EL <| fun () ->
-                            context.print.s "error: findmin"
+                            NumericArrayValidation.fail context "Line search could not advance."
                 context.br.if2 (expansionLimitReached.=0)
                 <| fun () ->
                     xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])

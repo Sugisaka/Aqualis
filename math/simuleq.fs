@@ -25,9 +25,7 @@ namespace Aqualis
             context.group.Section "Bi-CGSTAB法" <| fun () ->
                 //ベクトルのノルム
                 let norm(norm_:double0,b:complex1) =
-                  norm_ <== 0.0
-                  context.iter.num b.size1 <| fun i -> norm_ <== norm_+asm.pow(asm.abs(b.[i]),2)
-                  norm_ <== asm.sqrt(norm_)
+                  context.la.norm b <| fun stableNorm -> norm_ <== stableNorm
                 //ベクトルの内積
                 let dot_product2(dot_product2_:complex0,a:complex1,b:complex1) =
                   dot_product2_ <== 0
@@ -37,14 +35,16 @@ namespace Aqualis
                 context.ch.z1 b.size1 <| fun r -> context.ch.z1 b.size1 <| fun t -> context.ch.z1 b.size1 <| fun p -> context.ch.z1 b.size1 <| fun v -> context.ch.z1 b.size1 <| fun s -> context.ch.z1 b.size1 <| fun p_hat -> context.ch.z1 b.size1 <| fun s_hat -> context.ch.z1 b.size1 <| fun r_tld ->
                     context.ch.d <| fun bnrm2 ->
                         norm(bnrm2,b)
+                        NumericArrayValidation.requireFinite context bnrm2 "BiCGSTAB right-hand side norm must be finite."
                         context.br.if1 (bnrm2 .= 0.0) <| fun () -> bnrm2 <== 1.0
                         integralequation_matmul1(t,x)
                         context.iter.num r.size1 <| fun i ->
-                            r[i] <== b[i] - t[i]
+                            r[i] <== (b[i] - t[i]) / bnrm2
                         context.ch.d <| fun err ->
                             context.ch.d <| fun norm_ ->
                                 norm(norm_,r)
-                                err <== norm_/bnrm2
+                                err <== norm_
+                                NumericArrayValidation.requireFinite context err "BiCGSTAB residual norm must be finite."
                                 context.print.tt <| _0++err
                             context.br.if1 (err .> tol) <| fun () ->
                                 context.ch.z <| fun omega ->
@@ -77,8 +77,9 @@ namespace Aqualis
                                                     s.[j] <== r.[j] - alpha*v.[j]
                                                 context.ch.d <| fun norm_ ->
                                                     norm(norm_,s)
-                                                    context.br.if1 (norm_/bnrm2 .<= tol) <| fun () ->
-                                                        context.iter.num r.size1 <| fun j -> x.[j] <== x.[j] + alpha*p_hat.[j]
+                                                    NumericArrayValidation.requireFinite context norm_ "BiCGSTAB residual norm must be finite."
+                                                    context.br.if1 (norm_ .<= tol) <| fun () ->
+                                                        context.iter.num r.size1 <| fun j -> x.[j] <== x.[j] + bnrm2*(alpha*p_hat.[j])
                                                         converged <== 1
                                                         context.print.s "converged"
                                                         exit()
@@ -94,12 +95,13 @@ namespace Aqualis
                                                     NumericArrayValidation.require context (asm.abs z2 .= 0.0) "BiCGSTAB broke down: correction norm is zero."
                                                     omega <== z1/z2
                                                 context.iter.num r.size1 <| fun j ->
-                                                    x.[j] <== x.[j] + alpha*p_hat.[j] + omega*s_hat.[j]
+                                                    x.[j] <== x.[j] + bnrm2*(alpha*p_hat.[j] + omega*s_hat.[j])
                                                 context.iter.num r.size1 <| fun j ->
                                                     r.[j] <== s.[j] - omega * t.[j]
                                                 context.ch.d <| fun norm_ ->
                                                     norm(norm_,r)
-                                                    err <== norm_/bnrm2
+                                                    err <== norm_
+                                                    NumericArrayValidation.requireFinite context err "BiCGSTAB residual norm must be finite."
                                                 context.print.tt <| i++err
                                                 //収束判定
                                                 context.br.if1 (err .<= tol) <| fun () ->

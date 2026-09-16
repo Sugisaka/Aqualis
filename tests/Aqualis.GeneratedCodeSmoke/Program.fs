@@ -318,6 +318,16 @@ module Program =
                 (fun (result,input) -> result[0] <== input[0]) None
             context.print.t (asm.abs solution[0])
 
+        for caseName, magnitude in ["large", 1e200; "small", 1e-200] do
+            generate caseName <| fun context ->
+                let rhs = context.var.z1("rhs", 1)
+                let solution = context.var.z1("solution", 1)
+                rhs[0] <== magnitude
+                solution[0] <== 0
+                simuleq.BiCGSTAB context rhs solution 1e-8 10
+                    (fun (result,input) -> result[0] <== input[0]) None
+                context.print.t (asm.abs solution[0])
+
         generate "breakdown" <| fun context ->
             let rhs = context.var.z1("rhs", 1)
             let solution = context.var.z1("solution", 1)
@@ -626,6 +636,16 @@ module Program =
             context.optimization.findmin 0 (initial, direction) (D 1.0)
                 (fun value point -> value <== (point[0] - 1.0) * (point[0] - 1.0)) output
             context.print.t output[0]
+
+        for caseName, nonfinite in ["findmin-nan-objective", Double.NaN; "findmin-infinite-objective", Double.PositiveInfinity] do
+            generate caseName <| fun context ->
+                let initial = context.var.d1("initial", 1)
+                let direction = context.var.d1("direction", 1)
+                let output = context.var.d1("output", 1)
+                initial[0] <== 0.0
+                direction[0] <== 1.0
+                context.optimization.findmin 1 (initial,direction) (D 1.0)
+                    (fun value _ -> value <== nonfinite) output
 
         generate "normalize-zero" <| fun context ->
             let vector = context.var.d1 "vector"

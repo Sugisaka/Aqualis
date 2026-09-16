@@ -276,6 +276,30 @@ for language in c fortran python; do
     exit 1
   fi
   printf '%s BiCGSTAB identity: generated program returned %s\n' "$language" "$final_value"
+  for scale in large small; do
+    case "$scale" in
+      large) expected='1e200' ;;
+      small) expected='1e-200' ;;
+    esac
+    scaled_directory="$output_root/bicgstab-$scale-$language"
+    actual="$(cd "$scaled_directory" && "${run_command[@]}")"
+    if ! python3 - "$actual" "$expected" <<'PY'
+import math
+import sys
+
+output, expected_text = sys.argv[1:]
+if 'converged' not in output:
+    sys.exit('BiCGSTAB did not report convergence.')
+observed = float(output.splitlines()[-1].replace('converged', '').strip())
+if not math.isclose(observed, float(expected_text), rel_tol=1e-9, abs_tol=0.0):
+    sys.exit(f'Expected {expected_text}, received {observed}.')
+PY
+    then
+      printf '%s BiCGSTAB %s scale returned an unexpected result: %s\n' "$language" "$scale" "$actual" >&2
+      exit 1
+    fi
+    printf '%s BiCGSTAB %s scale: passed\n' "$language" "$scale"
+  done
   diagonal_directory="$output_root/bicgstab-diagonal-$language"
   actual="$(cd "$diagonal_directory" && "${run_command[@]}")"
   final_value="$(printf '%s\n' "$actual" | tail -n1 | sed 's/converged//g')"
@@ -375,6 +399,11 @@ for language in c fortran python; do
   run_and_verify_number "$language large line-search direction" "$output_root/findmin-large-direction-$language" '0.5' "${run_command[@]}"
   run_and_verify_number "$language small line-search direction" "$output_root/findmin-small-direction-$language" '0.5' "${run_command[@]}"
   run_and_verify_number "$language huge line-search direction" "$output_root/findmin-huge-direction-$language" '0.3535533905932738' "${run_command[@]}"
+  for case_name in nan infinite; do
+    expect_generated_failure "$language $case_name line-search objective" \
+      "$output_root/findmin-$case_name-objective-$language" \
+      'Aqualis: Line-search objective value must be finite.' "${run_command[@]}"
+  done
   run_and_verify_number "$language zero real pseudoinverse" "$output_root/pseudoinverse-zero-real-$language" '0' "${run_command[@]}"
   run_and_verify_number "$language zero complex pseudoinverse" "$output_root/pseudoinverse-zero-complex-$language" '0' "${run_command[@]}"
   if [[ "$language" == fortran ]]; then

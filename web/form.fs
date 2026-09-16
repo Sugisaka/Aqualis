@@ -63,6 +63,12 @@ type ButtonVar(context:Aqualis) =
     /// <param name="id">ボタンID</param>
     /// <param name="text">ボタンに表示するテキスト</param>
     member _.show_disabled(id:PHPdata,text:string) = context.html.submit_disabled(id,text)
+    /// <summary>
+    /// ボタンの表示
+    /// </summary>
+    /// <param name="id">ボタンID</param>
+    /// <param name="text">ボタンに表示するテキスト</param>
+    member _.show_disabled(id:string,text:string) = context.html.submit_disabled(PHPdata id,text)
     
 type TextBox(context:Aqualis,name:PHPdata) =
     let t = post(context,name)

@@ -36,20 +36,32 @@ namespace Aqualis
 
     [<RequireQualifiedAccess>]
     module internal NumericArrayValidation =
-        let require (context:Aqualis) (condition:bool0) message =
-            let fail () =
-                let message = "Aqualis: " + message
-                match context.Language with
-                | C99 -> context.codewritein("fprintf(stderr, " + OutputTextLiteral.c (message + "\n") + "); exit(EXIT_FAILURE);\n")
-                | Fortran -> context.codewritein("error stop " + OutputTextLiteral.fortran message + "\n")
-                | Python -> context.codewritein("raise ValueError(" + OutputTextLiteral.python message + ")\n")
-                | JavaScript -> context.codewritein("throw new Error(" + OutputTextLiteral.javaScript message + ");\n")
-                | PHP -> context.codewritein("<?php throw new \\RuntimeException(" + PhpEncoding.stringLiteral message + "); ?>\n")
-                | Numeric -> invalidArg "array" message
-                | _ -> ()
+        let fail (context:Aqualis) message =
+            let message = "Aqualis: " + message
             match context.Language with
-            | C99 | Fortran | Python | JavaScript | PHP | Numeric -> context.br.if1 condition fail
+            | C99 -> context.codewritein("fprintf(stderr, " + OutputTextLiteral.c (message + "\n") + "); exit(EXIT_FAILURE);\n")
+            | Fortran -> context.codewritein("error stop " + OutputTextLiteral.fortran message + "\n")
+            | Python -> context.codewritein("raise ValueError(" + OutputTextLiteral.python message + ")\n")
+            | JavaScript -> context.codewritein("throw new Error(" + OutputTextLiteral.javaScript message + ");\n")
+            | PHP -> context.codewritein("<?php throw new \\RuntimeException(" + PhpEncoding.stringLiteral message + "); ?>\n")
+            | Numeric -> invalidArg "array" message
             | _ -> ()
+        let require (context:Aqualis) (condition:bool0) message =
+            match context.Language with
+            | C99 | Fortran | Python | JavaScript | PHP | Numeric -> context.br.if1 condition (fun () -> fail context message)
+            | _ -> ()
+        let requireFinite (context:Aqualis) (value:double0) message =
+            let expression = value.Expr.eval context
+            let condition =
+                match context.Language with
+                | C99 -> Some("!isfinite(" + expression + ")")
+                | Fortran -> Some(".not. ieee_is_finite(" + expression + ")")
+                | Python -> Some("not numpy.isfinite(" + expression + ")")
+                | JavaScript -> Some("!Number.isFinite(" + expression + ")")
+                | PHP -> Some("!is_finite(" + expression + ")")
+                | _ -> None
+            condition |> Option.iter (fun expression ->
+                require context (bool0(Var(Nt, expression, NaN), context)) message)
 
     ///<summary>1次元配列</summary>
     type base1 (typ:Etype,x:Expr1, c:Aqualis) =
