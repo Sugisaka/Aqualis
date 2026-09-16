@@ -1,0 +1,67 @@
+name: Generated code runtime verification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: generated-code-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generated-code:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install generated-code runtimes
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gcc gfortran nodejs php-cli python3-venv
+          python3 -m venv "$RUNNER_TEMP/aqualis-python"
+          "$RUNNER_TEMP/aqualis-python/bin/python" -m pip install --disable-pip-version-check numpy scipy
+          echo "$RUNNER_TEMP/aqualis-python/bin" >> "$GITHUB_PATH"
+
+      - name: Restore solution
+        run: dotnet restore Aqualis.slnx
+
+      - name: Build solution
+        run: dotnet build Aqualis.slnx --configuration Release --no-restore
+
+      - name: Run Aqualis tests
+        run: dotnet test Aqualis.slnx --configuration Release --no-build --no-restore
+
+      - name: Generate smoke programs
+        run: |
+          dotnet run \
+            --project tests/Aqualis.GeneratedCodeSmoke/Aqualis.GeneratedCodeSmoke.fsproj \
+            --configuration Release \
+            --no-build \
+            -- \
+            "$RUNNER_TEMP/aqualis-generated"
+
+      - name: Compile and execute generated programs
+        run: bash scripts/verify-generated-code.sh "$RUNNER_TEMP/aqualis-generated"
+
+      - name: Preserve failed generated programs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: generated-code-failure
+          path: ${{ runner.temp }}/aqualis-generated
+          if-no-files-found: ignore
+          retention-days: 7
