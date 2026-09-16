@@ -246,22 +246,23 @@ module NumericFormattingTests =
         Assert.Contains("z3001 = numpy.array([[[]]], dtype=numpy.complex128)", generated)
 
     [<Fact>]
-    let ``Python FFT uses scalar modulo for its even-size branch`` () =
+    let ``Python FFT uses NumPy without a pyFFTW dependency`` () =
         use output = new TemporaryDirectory()
 
-        Compile [Python] output.Path "python-fft-modulo" "1.0" <| fun context ->
+        Compile [Python] output.Path "python-fft-numpy" "1.0" <| fun context ->
             context.ch.z1 4 <| fun input ->
                 context.ch.z1 4 <| fun transformed ->
                     context.fft1.fft("plan", input, transformed)
 
         let generated =
-            File.ReadAllText(Path.Combine(output.Path, "python-fft-modulo.py"))
+            File.ReadAllText(Path.Combine(output.Path, "python-fft-numpy.py"))
 
-        Assert.Contains("abs(_aqualis_dividend) // abs(_aqualis_divisor)", generated)
-        Assert.Contains(", 2) == 0", generated)
+        Assert.Contains("numpy.fft.fftshift(", generated)
+        Assert.Contains("numpy.fft.fft(", generated)
+        Assert.DoesNotContain("pyfftw", generated)
 
     [<Fact>]
-    let ``Python inverse FFT disables pyFFTW inverse normalization`` () =
+    let ``Python inverse FFT cancels NumPy inverse normalization`` () =
         use output = new TemporaryDirectory()
 
         Compile [Python] output.Path "python-fft-scaling" "1.0" <| fun context ->
@@ -277,12 +278,10 @@ module NumericFormattingTests =
         let generated =
             File.ReadAllText(Path.Combine(output.Path, "python-fft-scaling.py"))
 
-        Assert.Contains("forwardPlan1()", generated)
-        Assert.Contains("inversePlan1(normalise_idft=False)", generated)
-        Assert.Contains("forwardPlan2()", generated)
-        Assert.Contains("inversePlan2(normalise_idft=False)", generated)
-        Assert.DoesNotContain("forwardPlan1(normalise_idft=False)", generated)
-        Assert.DoesNotContain("forwardPlan2(normalise_idft=False)", generated)
+        Assert.Contains("numpy.fft.ifft(", generated)
+        Assert.Contains("numpy.fft.ifft2(", generated)
+        Assert.Contains("numpy.fft.ifftshift(", generated)
+        Assert.DoesNotContain("pyfftw", generated)
         Assert.Equal(
             2,
             System.Text.RegularExpressions.Regex.Matches(generated, "#normalize").Count)

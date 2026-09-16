@@ -789,6 +789,24 @@ module Program =
             rhs.allocate(2, 2)
             context.la.solve_simuleq_tt2(matrix, rhs, double0(Dbl 1e-6)) ignore
 
+        generate "tikhonov-overflow-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let rhs = context.var.d1 "rhs"
+            matrix.allocate(1, 1)
+            rhs.allocate 1
+            matrix[0,0] <== 1e200
+            rhs[0] <== 1.0
+            context.la.solve_simuleq_tt(matrix, rhs, 1.0) ignore
+
+        generate "tikhonov-overflow-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let rhs = context.var.z1 "rhs"
+            matrix.allocate(1, 1)
+            rhs.allocate 1
+            matrix[0,0] <== complex0(Cpx(1e200, 0.0))
+            rhs[0] <== complex0(Cpx(1.0, 0.0))
+            context.la.solve_simuleq_tt(matrix, rhs, 1.0) ignore
+
         let generateEigenStandard caseName (rows:int) (columns:int) (valueCount:int) (vectorOrder:int) =
             generate caseName <| fun context ->
                 let matrix = context.var.z2 "matrix"
@@ -829,7 +847,7 @@ module Program =
         generateEigenGeneralized "eigen-generalized" 2 2
         generateEigenGeneralized "eigen-generalized-mismatch" 3 2
 
-        if language = C99 || language = Fortran then
+        if language = C99 || language = Fortran || language = Python then
             generate "fft1-short-output" <| fun context ->
                 let input = context.var.z1 "input"
                 let output = context.var.z1 "output"
@@ -858,6 +876,38 @@ module Program =
                 matrix[0,1] <== complex0(Cpx(2.0, 0.0))
                 fft2.ifftshift2 context matrix
                 context.print.t (10.0 * matrix[0,0].re + matrix[0,1].re)
+
+            generate "fft1-roundtrip" <| fun context ->
+                let input = context.var.z1 "input"
+                let transformed = context.var.z1 "transformed"
+                let recovered = context.var.z1 "recovered"
+                let forwardValue = context.var.d0 "forwardValue"
+                input.allocate 4
+                transformed.allocate 4
+                recovered.allocate 4
+                input.clear()
+                input[2] <== complex0(Cpx(4.0, 0.0))
+                context.fft1.fft("forwardPlan",input,transformed)
+                forwardValue <== transformed[0].re
+                context.fft1.ifft("inversePlan",transformed,recovered)
+                context.print.t (forwardValue + recovered[2].re)
+
+            generate "fft2-roundtrip" <| fun context ->
+                let input = context.var.z2 "input"
+                let transformed = context.var.z2 "transformed"
+                let recovered = context.var.z2 "recovered"
+                let forwardMagnitude = context.var.d0 "forwardMagnitude"
+                input.allocate(2, 3)
+                transformed.allocate(2, 3)
+                recovered.allocate(2, 3)
+                input.clear()
+                input[1,1] <== complex0(Cpx(6.0, 0.0))
+                context.fft2.fft("forwardPlan",input,transformed)
+                forwardMagnitude <== asm.abs(transformed[0,0])
+                context.fft2.ifft("inversePlan",transformed,recovered)
+                context.print.t (forwardMagnitude + recovered[1,1].re)
+
+        if language = C99 || language = Fortran then
 
             generateEigenStandard "eigen-standard-short-values" 2 2 1 2
             generateEigenStandard "eigen-standard-small-vectors" 2 2 2 1

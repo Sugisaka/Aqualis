@@ -18,6 +18,50 @@ namespace Aqualis
             requireTikhonovVectorShapes context rows columns rhsRows
             LapackValidation.require context (rhsColumns .=/ 1) "LAPACK Tikhonov right-hand side must have one column."
 
+        let private requireFiniteTikhonovValue (context:Aqualis) (value:double0) =
+            let expression = value.Expr.eval context
+            let condition =
+                match context.Language with
+                | C99 -> Some("!isfinite(" + expression + ")")
+                | Fortran -> Some(".not. ieee_is_finite(" + expression + ")")
+                | Python -> Some("not numpy.isfinite(" + expression + ")")
+                | _ -> None
+            condition |> Option.iter (fun expression ->
+                LapackValidation.require context
+                    (bool0(Var(Nt, expression, NaN), context))
+                    "LAPACK Tikhonov calculation overflowed or produced a non-finite value.")
+
+        let private checkRealTikhonovIntermediates (context:Aqualis) (matrix:double2) (vector:double1) =
+            match context.Language with
+            | C99 | Fortran | Python ->
+                matrix.foreach <| fun (i,j) -> requireFiniteTikhonovValue context matrix[i,j]
+                vector.foreach <| fun i -> requireFiniteTikhonovValue context vector[i]
+            | _ -> ()
+
+        let private checkComplexTikhonovIntermediates (context:Aqualis) (matrix:complex2) (vector:complex1) =
+            match context.Language with
+            | C99 | Fortran | Python ->
+                matrix.foreach <| fun (i,j) ->
+                    requireFiniteTikhonovValue context matrix[i,j].re
+                    requireFiniteTikhonovValue context matrix[i,j].im
+                vector.foreach <| fun i ->
+                    requireFiniteTikhonovValue context vector[i].re
+                    requireFiniteTikhonovValue context vector[i].im
+            | _ -> ()
+
+        let private checkRealTikhonovSolution (context:Aqualis) (vector:double1) =
+            match context.Language with
+            | C99 | Fortran | Python -> vector.foreach <| fun i -> requireFiniteTikhonovValue context vector[i]
+            | _ -> ()
+
+        let private checkComplexTikhonovSolution (context:Aqualis) (vector:complex1) =
+            match context.Language with
+            | C99 | Fortran | Python ->
+                vector.foreach <| fun i ->
+                    requireFiniteTikhonovValue context vector[i].re
+                    requireFiniteTikhonovValue context vector[i].im
+            | _ -> ()
+
         type ContextLa with
             /// <summary>
             /// 連立方程式の求解(Tikhonovの正則化法)
@@ -52,7 +96,9 @@ namespace Aqualis
                                 this.GenerationContext.iter.num fu_cst.size1 <| fun k ->
                                     tmp <== tmp + fu_mat[k,i]*fu_cst[k]
                                 bb[i] <== tmp
+                        checkRealTikhonovIntermediates this.GenerationContext FF bb
                         this.solve_simuleq(FF,bb)
+                        checkRealTikhonovSolution this.GenerationContext bb
                         code bb
     
             /// <summary>
@@ -88,7 +134,9 @@ namespace Aqualis
                                 this.GenerationContext.iter.num fu_cst.size1 <| fun k ->
                                     tmp <== tmp + asm.conj(fu_mat[k,i])*fu_cst[k]
                                 bb[i] <== tmp
+                        checkComplexTikhonovIntermediates this.GenerationContext FF bb
                         this.solve_simuleq(FF,bb)
+                        checkComplexTikhonovSolution this.GenerationContext bb
                         code bb
     
             /// <summary>
@@ -124,7 +172,9 @@ namespace Aqualis
                                 this.GenerationContext.iter.num fu_cst.size1 <| fun k ->
                                     tmp <== tmp + asm.conj(fu_mat[k,i])*fu_cst[k]
                                 bb[i] <== tmp
+                        checkComplexTikhonovIntermediates this.GenerationContext FF bb
                         this.solve_simuleq(FF,bb)
+                        checkComplexTikhonovSolution this.GenerationContext bb
                         code(bb)
     
             /// <summary>
@@ -160,7 +210,9 @@ namespace Aqualis
                                 this.GenerationContext.iter.num fu_cst.size1 <| fun k ->
                                     tmp <== tmp + fu_mat[k,i]*fu_cst[k]
                                 bb[i] <== tmp
+                        checkRealTikhonovIntermediates this.GenerationContext FF bb
                         this.solve_simuleq(FF,bb)
+                        checkRealTikhonovSolution this.GenerationContext bb
                         code bb
     
             /// <summary>
@@ -195,5 +247,7 @@ namespace Aqualis
                                 this.GenerationContext.iter.num fu_cst.size1 <| fun k ->
                                     tmp <== tmp + asm.conj(fu_mat[k,i])*fu_cst[k,0]
                                 bb[i] <== tmp
+                        checkComplexTikhonovIntermediates this.GenerationContext FF bb
                         this.solve_simuleq(FF,bb)
+                        checkComplexTikhonovSolution this.GenerationContext bb
                         code bb

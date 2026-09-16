@@ -128,26 +128,16 @@ namespace Aqualis
                 |HTML ->
                     context.codewritein(data2.code + " = \\mathcal{F}\\left[" + data1.code + "\\right]")
                 |Python ->
-                    context.hlist.add "pyfftw"
-                    let plan = context.var.i1(planname, 8)
                     if fftdir=1 then
-                        context.codewritein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
-                        context.codewritein(plan.code+" = pyfftw.builders.fft("+data1.code+"_empty)")
-                        fftshift1 context data1
-                        context.codewritein(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        context.codewritein(data1.code+"[:] = numpy.fft.fftshift("+data1.code+")")
                         context.group.comment "FFT"
-                        context.codewritein(data2.code+" = "+plan.code+"()")
-                        fftshift1 context data2
-                        context.codewritein("del "+plan.code+"")
+                        context.codewritein(data2.code+"[:] = numpy.fft.fft("+data1.code+")")
+                        context.codewritein(data2.code+"[:] = numpy.fft.fftshift("+data2.code+")")
                     else
-                        context.codewritein(data1.code+"_empty = pyfftw.empty_aligned("+data1.code+".size, dtype='complex128')")
-                        context.codewritein(plan.code+" = pyfftw.builders.ifft("+data1.code+"_empty)")
-                        ifftshift1 context data1
-                        context.codewritein(data1.code+"_empty[:] = "+data1.code+"[:]")
+                        context.codewritein(data1.code+"[:] = numpy.fft.ifftshift("+data1.code+")")
                         context.group.comment "FFT"
-                        context.codewritein(data2.code+" = "+plan.code+"(normalise_idft=False)")
-                        ifftshift1 context data2
-                        context.codewritein("del "+plan.code+"")
+                        context.codewritein(data2.code+"[:] = numpy.fft.ifft("+data1.code+") * "+N.code)
+                        context.codewritein(data2.code+"[:] = numpy.fft.ifftshift("+data2.code+")")
                 |_ ->
                     // Unsupported targets are rejected before generation starts.
                     invalidOp "Unreachable FFT backend."

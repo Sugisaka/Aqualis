@@ -355,15 +355,19 @@ for language in c fortran python; do
   fi
   expect_generated_failure "$language short Tikhonov RHS" "$output_root/tikhonov-short-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side length must match matrix rows.' "${run_command[@]}"
   expect_generated_failure "$language wide Tikhonov RHS" "$output_root/tikhonov-wide-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side must have one column.' "${run_command[@]}"
+  expect_generated_failure "$language real Tikhonov overflow" "$output_root/tikhonov-overflow-real-$language" 'Aqualis: LAPACK Tikhonov calculation overflowed or produced a non-finite value.' "${run_command[@]}"
+  expect_generated_failure "$language complex Tikhonov overflow" "$output_root/tikhonov-overflow-complex-$language" 'Aqualis: LAPACK Tikhonov calculation overflowed or produced a non-finite value.' "${run_command[@]}"
   run_and_verify_number "$language aliased real SVD" "$output_root/svd-alias-real-$language" '4' "${run_command[@]}"
   run_and_verify_number "$language aliased complex SVD" "$output_root/svd-alias-complex-$language" '4' "${run_command[@]}"
   run_and_verify_number "$language aliased real SVD VT" "$output_root/svd-alias-vt-real-$language" '4' "${run_command[@]}"
   run_and_verify_number "$language aliased complex SVD VT" "$output_root/svd-alias-vt-complex-$language" '4' "${run_command[@]}"
+  expect_generated_failure "$language short FFT 1D output" "$output_root/fft1-short-output-$language" 'Aqualis: FFT output length must match input length.' "${run_command[@]}"
+  expect_generated_failure "$language short FFT 2D output" "$output_root/fft2-short-output-$language" 'Aqualis: FFT output shape must match input shape.' "${run_command[@]}"
+  expect_generated_failure "$language empty FFT 1D input" "$output_root/fft1-empty-input-$language" 'Aqualis: FFT input length must be positive.' "${run_command[@]}"
+  run_and_verify_number "$language singleton-axis inverse FFT shift" "$output_root/ifftshift2-single-row-$language" '21' "${run_command[@]}"
+  run_and_verify_number "$language FFT 1D round trip" "$output_root/fft1-roundtrip-$language" '5' "${run_command[@]}"
+  run_and_verify_number "$language FFT 2D round trip" "$output_root/fft2-roundtrip-$language" '7' "${run_command[@]}"
   if [[ "$language" != python ]]; then
-    expect_generated_failure "$language short FFT 1D output" "$output_root/fft1-short-output-$language" 'Aqualis: FFT output length must match input length.' "${run_command[@]}"
-    expect_generated_failure "$language short FFT 2D output" "$output_root/fft2-short-output-$language" 'Aqualis: FFT output shape must match input shape.' "${run_command[@]}"
-    expect_generated_failure "$language empty FFT 1D input" "$output_root/fft1-empty-input-$language" 'Aqualis: FFT input length must be positive.' "${run_command[@]}"
-    run_and_verify_number "$language singleton-axis inverse FFT shift" "$output_root/ifftshift2-single-row-$language" '21' "${run_command[@]}"
     for matrix_type in real complex; do
       svd_directory="$output_root/svd-$matrix_type-$language"
       svd_result="$(cd "$svd_directory" && "${run_command[@]}")"
