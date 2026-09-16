@@ -142,6 +142,24 @@ PY
 run_and_verify 'C99' "$output_root/c" '42' bash proc_smoke_C.sh
 run_and_verify 'Fortran' "$output_root/fortran" '42' bash proc_smoke_F.sh
 run_and_verify 'Python without SciPy' "$output_root/python" '42' bash proc_smoke_P.sh
+for target in 'c C' 'fortran F' 'python P'; do
+  read -r language suffix <<< "$target"
+  case_directory="$output_root/real-negative-sqrt-$language"
+  output="$(cd "$case_directory" && bash "proc_smoke_$suffix.sh")"
+  if ! python3 - "$output" <<'PY'
+import math
+import sys
+
+values = sys.argv[1].splitlines()
+if len(values) != 2 or not all(math.isnan(float(value)) for value in values):
+    sys.exit(f"Expected two real NaN values, received {values!r}.")
+PY
+  then
+    printf '%s real negative square root returned an unexpected result.\n' "$language" >&2
+    exit 1
+  fi
+  printf '%s real negative square root: passed\n' "$language"
+done
 run_and_verify 'Python with SciPy' "$output_root/python-scipy" '1.00000000000000000e+00' "$scipy_python" smoke.py
 gcc -std=c99 -Werror=implicit-function-declaration "$output_root/c-bessel/smoke.c" -lm -o "$output_root/c-bessel/smoke.exe"
 bessel_output="$(cd "$output_root/c-bessel" && ./smoke.exe)"

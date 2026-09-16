@@ -12,6 +12,13 @@ module Program =
           "javascript", JavaScript
           "php", PHP ]
 
+    let private generateNegativeRealSqrt outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "real-negative-sqrt-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            context.print.t (asm.sqrt (D -4.0))
+            context.print.t (asm.sqrt (-(D 4.0)))
+
     let private generate outputRoot (directoryName, language) =
         let outputDirectory = Path.Combine(outputRoot, directoryName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1423,6 +1430,8 @@ module Program =
             let outputRoot = Path.GetFullPath(outputRoot)
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python]
+            |> List.iter (generateNegativeRealSqrt outputRoot)
             generateJavaScriptIntegerDivision outputRoot
             ["c", C99; "fortran", Fortran; "javascript", JavaScript; "php", PHP]
             |> List.iter (generateArithmeticPrecedence outputRoot)

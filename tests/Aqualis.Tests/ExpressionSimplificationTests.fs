@@ -5,6 +5,19 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``real negative square root remains real and complex square root remains complex`` () =
+        for value in [asm.sqrt (D -4.0); asm.sqrt (-(D 4.0))] do
+            match value.Expr.simp with
+            |Dbl result -> Assert.True(System.Double.IsNaN(result))
+            |actual -> Assert.Fail($"Expected a real NaN, but got {actual}.")
+
+        match (asm.sqrt (complex0(Cpx(-4.0, 0.0)))).Expr.simp with
+        |Cpx(real, imaginary) ->
+            Assert.Equal(0.0, real, 12)
+            Assert.Equal(2.0, imaginary, 12)
+        |actual -> Assert.Fail($"Expected a complex square root, but got {actual}.")
+
+    [<Fact>]
     let ``complex literal magnitude and logarithm use the true magnitude`` () =
         let value = complex0(Cpx(3.0, 4.0))
 

@@ -480,14 +480,16 @@ namespace Aqualis
                 match x with
                 |Int x ->
                     Dbl (sqrt (double x))
-                |Dbl x when x>=0.0 ->
-                    Dbl (sqrt x)
                 |Dbl x ->
-                    (Dbl (sqrt -x)*Cpx(0.0,1.0)).simp
+                    Dbl (sqrt x)
+                |Inv(_,Int x) ->
+                    Dbl (sqrt -(double x))
+                |Inv(_,Dbl x) ->
+                    Dbl (sqrt -x)
                 |Cpx (re,im) -> 
                     let a = expr.simpAbs x
                     (expr.simpSqrt(((a+Dbl re).simp/Int 2).simp)+
-                     (Cpx(0.0,1.0)*(Int(if im>0.0 then 1 else -1)*expr.simpSqrt(((a-Dbl re).simp/Int 2).simp)).simp).simp).simp
+                     (Cpx(0.0,1.0)*(Int(if im>=0.0 then 1 else -1)*expr.simpSqrt(((a-Dbl re).simp/Int 2).simp)).simp).simp).simp
                 |_ when x.etype=It 4 -> expr.simpSqrt(ToDbl x)
                 |_ -> Sqrt(x.etype,x)
                 
@@ -695,9 +697,14 @@ namespace Aqualis
                 |Log10(_, x) ->
                     let x = x.simp
                     expr.simpLog10 x
-                |Sqrt(_, x)  ->
+                |Sqrt(t, x)  ->
                     let x = x.simp
-                    expr.simpSqrt x
+                    match t,x with
+                    |Zt,Inv(_,Int n) when n>0 -> expr.simpSqrt(Cpx(-double n,0.0))
+                    |Zt,Inv(_,Dbl n) when n>0.0 -> expr.simpSqrt(Cpx(-n,0.0))
+                    |Zt,Int n when n<0 -> expr.simpSqrt(Cpx(double n,0.0))
+                    |Zt,Dbl n when n<0.0 -> expr.simpSqrt(Cpx(n,0.0))
+                    |_ -> expr.simpSqrt x
                 |ToInt x ->
                     let x = x.simp
                     expr.simpToInt x
