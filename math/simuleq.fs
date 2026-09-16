@@ -16,6 +16,12 @@ namespace Aqualis
         /// <param name="integralequation_matmul">行列－ベクトル積実行関数</param>
         /// <param name="prec">前処理行列</param>
         let BiCGSTAB (context:Aqualis) (b:complex1) (x:complex1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(complex1->complex1->unit)option) =
+            if not (System.Double.IsFinite tol) || tol <= 0.0 then
+                invalidArg (nameof tol) "BiCGSTAB tolerance must be finite and positive."
+            if max_iteration <= 0 then
+                invalidArg (nameof max_iteration) "BiCGSTAB maximum iteration count must be positive."
+            NumericArrayValidation.require context (b.size1 .<= 0) "BiCGSTAB vector length must be positive."
+            NumericArrayValidation.require context (x.size1 .=/ b.size1) "BiCGSTAB solution length must match the right-hand side."
             context.group.Section "Bi-CGSTAB法" <| fun () ->
                 //ベクトルのノルム
                 let norm(norm_:double0,b:complex1) =
@@ -45,51 +51,61 @@ namespace Aqualis
                                     omega <== 1
                                     context.iter.num r.size1 <| fun i -> r_tld.[i] <== r.[i]
                                     context.ch.zzzz <| fun (rho,rho_1,alpha,beta) ->
-                                        //反復処理
-                                        context.iter.num_exit (I max_iteration) <| fun (exit,i) ->
-                                            dot_product2(rho,r_tld,r)
-                                            context.br.if1 (asm.abs rho .= 0.0) <| fun () -> exit()
-                                            context.br.if2 (i .> 0)
-                                              (fun () ->
-                                                beta <== rho/rho_1*( alpha/omega )
-                                                context.iter.num r.size1 <| fun j -> p.[j] <== r.[j] + beta*( p.[j] - omega*v.[j]))
-                                              (fun () ->
-                                                context.iter.num r.size1 <| fun j -> p.[j] <== r.[j])
-                                            //前処理
-                                            match prec with
-                                                |Some(pr)  ->
-                                                    pr p_hat p
-                                                |None -> context.iter.num r.size1 <| fun j -> p_hat.[j] <== p.[j]
-                                            //インピーダンス行列×電磁流ベクトル
-                                            integralequation_matmul1(v,p_hat)
-                                            context.ch.z <| fun z ->
-                                                dot_product2(z,r_tld,v)
-                                                alpha <== rho / z
-                                            context.iter.num r.size1 <| fun j ->
-                                                s.[j] <== r.[j] - alpha*v.[j]
-                                            //前処理
-                                            match prec with
-                                                |Some(pr)  -> pr s_hat s
-                                                |None -> context.iter.num r.size1 <| fun j -> s_hat.[j] <== s.[j]
-                                            //インピーダンス行列×電磁流ベクトル
-                                            integralequation_matmul1(t,s_hat)
-                                            context.ch.zz <| fun (z1,z2) ->
-                                                dot_product2(z1,t,s)
-                                                dot_product2(z2,t,t)
-                                                omega <== z1/z2
-                                            context.iter.num r.size1 <| fun j ->
-                                                x.[j] <== x.[j] + alpha*p_hat.[j] + omega*s_hat.[j]
-                                            context.iter.num r.size1 <| fun j ->
-                                                r.[j] <== s.[j] - omega * t.[j]
-                                            context.ch.d <| fun norm_ ->
-                                                norm(norm_,r)
-                                                err <== norm_/bnrm2
-                                            context.print.tt <| i++err
-                                            //収束判定
-                                            context.br.if1 (err .<= tol) <| fun () ->
-                                                context.print.s "converged"
-                                                exit()
-                                            context.br.if1 (asm.abs omega .= 0.0) <| fun () ->
-                                                context.print.s "error_BiCGSTAB"
-                                                exit()
-                                            rho_1 <== rho
+                                        context.ch.i <| fun converged ->
+                                            converged <== 0
+                                            //反復処理
+                                            context.iter.num_exit (I max_iteration) <| fun (exit,i) ->
+                                                dot_product2(rho,r_tld,r)
+                                                NumericArrayValidation.require context (asm.abs rho .= 0.0) "BiCGSTAB broke down: residual inner product is zero."
+                                                context.br.if2 (i .> 0)
+                                                  (fun () ->
+                                                    beta <== rho/rho_1*( alpha/omega )
+                                                    context.iter.num r.size1 <| fun j -> p.[j] <== r.[j] + beta*( p.[j] - omega*v.[j]))
+                                                  (fun () ->
+                                                    context.iter.num r.size1 <| fun j -> p.[j] <== r.[j])
+                                                //前処理
+                                                match prec with
+                                                    |Some(pr)  -> pr p_hat p
+                                                    |None -> context.iter.num r.size1 <| fun j -> p_hat.[j] <== p.[j]
+                                                //インピーダンス行列×電磁流ベクトル
+                                                integralequation_matmul1(v,p_hat)
+                                                context.ch.z <| fun z ->
+                                                    dot_product2(z,r_tld,v)
+                                                    NumericArrayValidation.require context (asm.abs z .= 0.0) "BiCGSTAB broke down: matrix inner product is zero."
+                                                    alpha <== rho / z
+                                                context.iter.num r.size1 <| fun j ->
+                                                    s.[j] <== r.[j] - alpha*v.[j]
+                                                context.ch.d <| fun norm_ ->
+                                                    norm(norm_,s)
+                                                    context.br.if1 (norm_/bnrm2 .<= tol) <| fun () ->
+                                                        context.iter.num r.size1 <| fun j -> x.[j] <== x.[j] + alpha*p_hat.[j]
+                                                        converged <== 1
+                                                        context.print.s "converged"
+                                                        exit()
+                                                //前処理
+                                                match prec with
+                                                    |Some(pr)  -> pr s_hat s
+                                                    |None -> context.iter.num r.size1 <| fun j -> s_hat.[j] <== s.[j]
+                                                //インピーダンス行列×電磁流ベクトル
+                                                integralequation_matmul1(t,s_hat)
+                                                context.ch.zz <| fun (z1,z2) ->
+                                                    dot_product2(z1,t,s)
+                                                    dot_product2(z2,t,t)
+                                                    NumericArrayValidation.require context (asm.abs z2 .= 0.0) "BiCGSTAB broke down: correction norm is zero."
+                                                    omega <== z1/z2
+                                                context.iter.num r.size1 <| fun j ->
+                                                    x.[j] <== x.[j] + alpha*p_hat.[j] + omega*s_hat.[j]
+                                                context.iter.num r.size1 <| fun j ->
+                                                    r.[j] <== s.[j] - omega * t.[j]
+                                                context.ch.d <| fun norm_ ->
+                                                    norm(norm_,r)
+                                                    err <== norm_/bnrm2
+                                                context.print.tt <| i++err
+                                                //収束判定
+                                                context.br.if1 (err .<= tol) <| fun () ->
+                                                    converged <== 1
+                                                    context.print.s "converged"
+                                                    exit()
+                                                NumericArrayValidation.require context (asm.abs omega .= 0.0) "BiCGSTAB broke down: correction factor is zero."
+                                                rho_1 <== rho
+                                            NumericArrayValidation.require context (converged .= 0) "BiCGSTAB failed to converge within the maximum iteration count."

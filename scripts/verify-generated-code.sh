@@ -267,6 +267,41 @@ for language in c fortran python; do
     fortran) run_command=(bash proc_smoke_F.sh) ;;
     python) run_command=(bash proc_smoke_P.sh) ;;
   esac
+  identity_directory="$output_root/bicgstab-identity-$language"
+  actual="$(cd "$identity_directory" && "${run_command[@]}")"
+  final_value="$(printf '%s\n' "$actual" | tail -n1 | sed 's/converged//g')"
+  if ! printf '%s\n' "$actual" | grep -Fq 'converged' ||
+     ! awk -v value="$final_value" 'BEGIN { difference = value - 1; if (difference < 0) difference = -difference; exit !(difference < 0.000001) }'; then
+    printf '%s BiCGSTAB identity returned an unexpected result: %s\n' "$language" "$actual" >&2
+    exit 1
+  fi
+  printf '%s BiCGSTAB identity: generated program returned %s\n' "$language" "$final_value"
+  diagonal_directory="$output_root/bicgstab-diagonal-$language"
+  actual="$(cd "$diagonal_directory" && "${run_command[@]}")"
+  final_value="$(printf '%s\n' "$actual" | tail -n1 | sed 's/converged//g')"
+  if ! printf '%s\n' "$actual" | grep -Fq 'converged' ||
+     ! awk -v value="$final_value" 'BEGIN { difference = value - 0.5; if (difference < 0) difference = -difference; exit !(difference < 0.000001) }'; then
+    printf '%s BiCGSTAB diagonal system returned an unexpected result: %s\n' "$language" "$actual" >&2
+    exit 1
+  fi
+  printf '%s BiCGSTAB diagonal system: generated program returned %s\n' "$language" "$final_value"
+  expect_generated_failure "$language BiCGSTAB breakdown" "$output_root/bicgstab-breakdown-$language" \
+    'Aqualis: BiCGSTAB broke down: matrix inner product is zero.' "${run_command[@]}"
+  expect_generated_failure "$language BiCGSTAB iteration limit" "$output_root/bicgstab-limit-$language" \
+    'Aqualis: BiCGSTAB failed to converge within the maximum iteration count.' "${run_command[@]}"
+  run_and_verify_number "$language valid associated Legendre polynomial" \
+    "$output_root/legendre-valid-$language" '-0.125' "${run_command[@]}"
+  expect_generated_failure "$language invalid associated Legendre arguments" \
+    "$output_root/legendre-invalid-$language" \
+    'Aqualis: Associated Legendre polynomial requires 0 <= m <= l and |x| <= 1.' "${run_command[@]}"
+done
+
+for language in c fortran python; do
+  case "$language" in
+    c) run_command=(bash proc_smoke_C.sh) ;;
+    fortran) run_command=(bash proc_smoke_F.sh) ;;
+    python) run_command=(bash proc_smoke_P.sh) ;;
+  esac
   for case_name in valid literal; do
     valid_directory="$output_root/spline-$language-$case_name"
     actual="$(cd "$valid_directory" && "${run_command[@]}")"

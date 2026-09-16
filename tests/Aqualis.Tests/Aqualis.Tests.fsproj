@@ -36,6 +36,7 @@
     <Compile Include="GeometryCrtpTests.fs" />
     <Compile Include="InterpolationTests.fs" />
     <Compile Include="OptimizationTests.fs" />
+    <Compile Include="IterativeSolverTests.fs" />
     <Compile Include="Graph1dTests.fs" />
     <Compile Include="LapackRankGenerationTests.fs" />
     <Compile Include="LapackSvdGenerationTests.fs" />

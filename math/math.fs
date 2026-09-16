@@ -160,8 +160,9 @@ namespace Aqualis
         member _.aplgndr (pl:double0) (l:int0, m:int0, x:double0) =
             context.ch.dd <| fun (fact,pll) ->
             context.ch.ddd <| fun (pmm,pmmp1,somx2) ->
-                context.br.if1 (Or [m .< 0; m .> l; asm.abs(x) .> 1.0]) <| fun () ->
-                    context.print.s "Bad arguments in routine plgndr"
+                NumericArrayValidation.require context
+                    (Or [m .< 0; m .> l; asm.abs(x) .> 1.0; x .=/ x])
+                    "Associated Legendre polynomial requires 0 <= m <= l and |x| <= 1."
                 pmm <== 1.0
                 context.br.if1 (m .> 0) <| fun () ->
                     somx2 <== asm.sqrt((1.0-x)*(1.0+x))

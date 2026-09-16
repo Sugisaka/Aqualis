@@ -303,6 +303,66 @@ module Program =
             context.la.solve_simuleq(matrix, rhs)
             context.print.t rhs[0]
 
+    let private generateBiCgStabCases outputRoot (directoryName, language) =
+        let generate caseName code =
+            let outputDirectory = Path.Combine(outputRoot, "bicgstab-" + caseName + "-" + directoryName)
+            Directory.CreateDirectory(outputDirectory) |> ignore
+            Compile [language] outputDirectory "smoke" "1.0" code
+
+        generate "identity" <| fun context ->
+            let rhs = context.var.z1("rhs", 1)
+            let solution = context.var.z1("solution", 1)
+            rhs[0] <== 1
+            solution[0] <== 0
+            simuleq.BiCGSTAB context rhs solution 1e-8 10
+                (fun (result,input) -> result[0] <== input[0]) None
+            context.print.t (asm.abs solution[0])
+
+        generate "breakdown" <| fun context ->
+            let rhs = context.var.z1("rhs", 1)
+            let solution = context.var.z1("solution", 1)
+            rhs[0] <== 1
+            solution[0] <== 0
+            simuleq.BiCGSTAB context rhs solution 1e-8 10
+                (fun (result,_) -> result[0] <== 0) None
+
+        generate "diagonal" <| fun context ->
+            let rhs = context.var.z1("rhs", 2)
+            let solution = context.var.z1("solution", 2)
+            rhs[0] <== 1
+            rhs[1] <== 1
+            solution[0] <== 0
+            solution[1] <== 0
+            simuleq.BiCGSTAB context rhs solution 1e-12 10
+                (fun (result,input) ->
+                    result[0] <== input[0]
+                    result[1] <== 2 * input[1]) None
+            context.print.t (asm.abs solution[1])
+
+        generate "limit" <| fun context ->
+            let rhs = context.var.z1("rhs", 2)
+            let solution = context.var.z1("solution", 2)
+            rhs[0] <== 1
+            rhs[1] <== 1
+            solution[0] <== 0
+            solution[1] <== 0
+            simuleq.BiCGSTAB context rhs solution 1e-12 1
+                (fun (result,input) ->
+                    result[0] <== input[0]
+                    result[1] <== 2 * input[1]) None
+
+    let private generateAssociatedLegendreCases outputRoot (directoryName, language) =
+        let generate caseName l m code =
+            let outputDirectory = Path.Combine(outputRoot, "legendre-" + caseName + "-" + directoryName)
+            Directory.CreateDirectory(outputDirectory) |> ignore
+            Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+                let result = context.var.d0 "result"
+                context.math.aplgndr result (I l, I m, D 0.5)
+                code context result
+
+        generate "valid" 2 0 (fun context result -> context.print.t result)
+        generate "invalid" 0 1 (fun _ _ -> ())
+
     let private generateComplexSplineNonFinite outputRoot =
         let outputDirectory = Path.Combine(outputRoot, "spline-c-complex-non-finite-y")
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1162,6 +1222,8 @@ module Program =
             for target in ["c", C99; "fortran", Fortran; "python", Python] do
                 generateFixedFileIo outputRoot target
                 generateSingularSolve outputRoot target
+                generateBiCgStabCases outputRoot target
+                generateAssociatedLegendreCases outputRoot target
                 generateRegressionCases outputRoot target
                 for caseName in ["valid"; "literal"; "unordered"; "out-of-range"] do
                     generateSplineValidation outputRoot target caseName
