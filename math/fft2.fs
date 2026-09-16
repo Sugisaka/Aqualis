@@ -86,15 +86,16 @@ namespace Aqualis
                 |C99 ->
                     context.hlist.add "<fftw3.h>"
                     let plan = fftw_plan2(planname,context)
+                    // Aqualis stores matrices with the first index contiguous; FFTW's C API expects row-major dimensions.
                     if fftdir=1 then
-                        context.codewritein(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
+                        context.codewritein(plan.code + " = fftw_plan_dft_2d(" + ny.code + ", "+ nx.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
                         fftshift2 context data1
                         context.group.comment "FFT"
                         context.codewritein("fftw_execute(" + plan.code + ");")
                         fftshift2 context data2
                         context.codewritein("fftw_destroy_plan(" + plan.code + ");")
                     else
-                        context.codewritein(plan.code + " = fftw_plan_dft_2d(" + nx.code + ", "+ ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
+                        context.codewritein(plan.code + " = fftw_plan_dft_2d(" + ny.code + ", "+ nx.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
                         ifftshift2 context data1
                         context.group.comment "FFT"
                         context.codewritein("fftw_execute(" + plan.code + ");")

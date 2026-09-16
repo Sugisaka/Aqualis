@@ -907,6 +907,20 @@ module Program =
                 context.fft2.ifft("inversePlan",transformed,recovered)
                 context.print.t (forwardMagnitude + recovered[1,1].re)
 
+            generate "fft2-coefficients" <| fun context ->
+                let input = context.var.z2 "input"
+                let transformed = context.var.z2 "transformed"
+                input.allocate(2, 3)
+                transformed.allocate(2, 3)
+                for i in 0..1 do
+                    for j in 0..2 do
+                        input[i,j] <== complex0(Cpx(float (1+i*3+j), float (i-j)))
+                context.fft2.fft("forwardPlan",input,transformed)
+                for i in 0..1 do
+                    for j in 0..2 do
+                        context.print.t transformed[i,j].re
+                        context.print.t transformed[i,j].im
+
         if language = C99 || language = Fortran then
 
             generateEigenStandard "eigen-standard-short-values" 2 2 1 2

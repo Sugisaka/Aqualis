@@ -78,6 +78,39 @@ run_and_verify_number() {
   printf '%s: generated program returned %s\n' "$label" "$actual"
 }
 
+verify_fft2_coefficients() {
+  local language="$1"
+  local working_directory="$2"
+  shift 2
+
+  local actual
+  actual="$(cd "$working_directory" && "$@")"
+  if ! python3 - "$actual" <<'PY'
+import sys
+import numpy
+
+matrix = numpy.array(
+    [[1 + 0j, 2 - 1j, 3 - 2j], [4 + 1j, 5 + 0j, 6 - 1j]],
+    dtype=numpy.complex128,
+)
+transformed = numpy.fft.fftshift(
+    numpy.fft.fft2(numpy.fft.fftshift(matrix))
+) / matrix.size
+expected = [component for value in transformed.flat for component in (value.real, value.imag)]
+actual = [float(value) for value in sys.argv[1].split()]
+if len(actual) != len(expected):
+    sys.exit(f"Expected {len(expected)} FFT components, received {len(actual)}.")
+for index, (observed, wanted) in enumerate(zip(actual, expected)):
+    if not numpy.isfinite(observed) or abs(observed - wanted) > 1e-10:
+        sys.exit(f"FFT component {index}: expected {wanted}, received {observed}.")
+PY
+  then
+    printf '%s non-square FFT 2D coefficients were incorrect.\n' "$language" >&2
+    exit 1
+  fi
+  printf '%s non-square FFT 2D coefficients: passed\n' "$language"
+}
+
 run_and_verify 'C99' "$output_root/c" '42' bash proc_smoke_C.sh
 run_and_verify 'Fortran' "$output_root/fortran" '42' bash proc_smoke_F.sh
 run_and_verify 'Python without SciPy' "$output_root/python" '42' bash proc_smoke_P.sh
@@ -367,6 +400,7 @@ for language in c fortran python; do
   run_and_verify_number "$language singleton-axis inverse FFT shift" "$output_root/ifftshift2-single-row-$language" '21' "${run_command[@]}"
   run_and_verify_number "$language FFT 1D round trip" "$output_root/fft1-roundtrip-$language" '5' "${run_command[@]}"
   run_and_verify_number "$language FFT 2D round trip" "$output_root/fft2-roundtrip-$language" '7' "${run_command[@]}"
+  verify_fft2_coefficients "$language" "$output_root/fft2-coefficients-$language" "${run_command[@]}"
   if [[ "$language" != python ]]; then
     for matrix_type in real complex; do
       svd_directory="$output_root/svd-$matrix_type-$language"
