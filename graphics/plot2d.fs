@@ -238,6 +238,29 @@ namespace Aqualis
                         if max < value then max <- value
                         if min > value then min <- value
                 min,max
+
+        member private this.ResolveColorRange(autoscale:PlotColorRange, eval:(double*double)->double) =
+            let minimum,maximum =
+                match autoscale with
+                |Auto ->
+                    this.MinMax eval
+                |AbsAuto ->
+                    let minimum,maximum = this.MinMax eval
+                    if abs minimum < abs maximum then
+                        -abs maximum, abs maximum
+                    else
+                        -abs minimum, abs minimum
+                |MinMax (minimum,maximum) ->
+                    minimum,maximum
+                |AbsMax maximum ->
+                    -abs maximum, abs maximum
+
+            if not (Double.IsFinite minimum) || not (Double.IsFinite maximum) then
+                invalidArg
+                    (nameof autoscale)
+                    "The color range must contain only finite values."
+
+            minimum,maximum
                 
         /// <summary>
         /// ファイルからデータ読み込み(テキストデータ)
@@ -626,17 +649,7 @@ namespace Aqualis
                     a*cos p,a*sin p
                 let rest = layout.Padding
                 //---データの規格化------------------------------------------------------
-                let min,max =
-                    match autoscale with
-                    |Auto ->
-                        this.MinMax eval
-                    |AbsAuto ->
-                        let min,max = this.MinMax eval
-                        if abs min < abs max then -abs max, abs max else -abs min, abs min
-                    |MinMax (min,max) ->
-                        min,max
-                    |AbsMax max ->
-                        -abs max, abs max
+                let min,max = this.ResolveColorRange(autoscale, eval)
                 min_ <- min
                 max_ <- max
                 //---ビットマップファイル生成---------------------------------------------
@@ -721,17 +734,7 @@ namespace Aqualis
                 let ny = layout.Height
                 let rest = layout.Padding
                 //---データの規格化------------------------------------------------------
-                let min,max =
-                    match autoscale with
-                    |Auto ->
-                        this.MinMax eval
-                    |AbsAuto ->
-                        let min,max = this.MinMax eval
-                        if abs min < abs max then -abs max, abs max else -abs min, abs min
-                    |MinMax (min,max) ->
-                        min,max
-                    |AbsMax max ->
-                        -abs max, abs max
+                let min,max = this.ResolveColorRange(autoscale, eval)
                         
                 //---ビットマップファイル生成---------------------------------------------
                 use f_strm = new FileStream(filename, FileMode.Create)

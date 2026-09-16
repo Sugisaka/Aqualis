@@ -383,6 +383,69 @@ module Plot2dTests =
         Assert.True(bytes[54..] |> Array.exists ((<>) 0uy))
 
     [<Fact>]
+    let ``bitmap outputs reject explicit non-finite color ranges before creating files`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let ranges =
+            [ PlotColorRange.MinMax(Double.NaN, 1.0)
+              PlotColorRange.MinMax(0.0, Double.PositiveInfinity)
+              PlotColorRange.AbsMax(Double.NegativeInfinity) ]
+
+        for index,colorRange in ranges |> List.indexed do
+            let bitmapTarget = Path.Combine(output.Path, $"invalid-range-bitmap-{index}.bmp")
+            let colorBarTarget = Path.Combine(output.Path, $"invalid-range-colorbar-{index}.bmp")
+
+            let bitmapError =
+                Assert.Throws<ArgumentException>(fun () ->
+                    plot.writeBMP24(
+                        bitmapTarget,
+                        colorMap.Gray,
+                        colorRange,
+                        plot2d.getRe,
+                        None,
+                        1))
+            let colorBarError =
+                Assert.Throws<ArgumentException>(fun () ->
+                    plot.writeColorBar(
+                        colorBarTarget,
+                        2,
+                        2,
+                        colorMap.Gray,
+                        colorRange,
+                        plot2d.getRe))
+
+            Assert.Equal("autoscale", bitmapError.ParamName)
+            Assert.Equal("autoscale", colorBarError.ParamName)
+            Assert.False(File.Exists bitmapTarget)
+            Assert.False(File.Exists colorBarTarget)
+
+    [<Fact>]
+    let ``automatic color ranges reject non-finite evaluated data`` () =
+        use output = new TemporaryDirectory()
+        let plot = createLoadedPlot output
+        let evaluators : ((double * double) -> double) list =
+            [ fun _ -> Double.NaN
+              fun _ -> Double.PositiveInfinity ]
+
+        for index,evaluate in evaluators |> List.indexed do
+            let target = Path.Combine(output.Path, $"invalid-auto-range-{index}.bmp")
+            let original = [| 1uy; 2uy; 3uy |]
+            File.WriteAllBytes(target, original)
+
+            let error =
+                Assert.Throws<ArgumentException>(fun () ->
+                    plot.writeBMP24(
+                        target,
+                        colorMap.Gray,
+                        PlotColorRange.Auto,
+                        evaluate,
+                        None,
+                        1))
+
+            Assert.Equal("autoscale", error.ParamName)
+            Assert.Equal<byte>(original, File.ReadAllBytes target)
+
+    [<Fact>]
     let ``oversized color bar is rejected before creating a file`` () =
         use output = new TemporaryDirectory()
         let plot = createLoadedPlot output
