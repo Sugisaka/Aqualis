@@ -21,6 +21,7 @@ namespace Aqualis
             ///<param name="mat">行列</param>
             ///<param name="cond">0とみなす上限値</param>
             member this.rank (rank:double0,mat:complex2,cond:double0) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK rank"
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列の階数" <| fun () ->
@@ -115,6 +116,7 @@ namespace Aqualis
             ///<param name="mat">行列</param>
             ///<param name="cond">0とみなす上限値</param>
             member this.rank (rank:int0,mat:double2,cond:double0) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK rank"
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列の階数" <| fun () ->
@@ -207,6 +209,7 @@ namespace Aqualis
             ///<param name="mat">行列</param>
             ///<param name="cond">特異値を0とみなす上限値</param>
             member this.inverse_matrix2 (mat2:complex2,mat:complex2,cond:double0) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK pseudoinverse"
                 this.GenerationContext.group.section "疑似逆行列" <| fun () ->
                     requirePseudoInverseShapes this.GenerationContext mat.size1 mat.size2 mat2.size1 mat2.size2
                     this.GenerationContext.ch.i <| fun ns ->
@@ -240,6 +243,7 @@ namespace Aqualis
             ///<param name="mat">行列</param>
             ///<param name="cond">特異値を0とみなす上限値</param>
             member this.inverse_matrix2 (mat2:double2,mat:double2,cond:double0) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK pseudoinverse"
                 this.GenerationContext.group.section "疑似逆行列" <| fun () ->
                     requirePseudoInverseShapes this.GenerationContext mat.size1 mat.size2 mat2.size1 mat2.size2
                     this.GenerationContext.ch.i <| fun ns ->

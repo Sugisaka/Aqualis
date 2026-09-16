@@ -20,6 +20,7 @@ namespace Aqualis
             /// <param name="mat">複素係数行列</param>
             /// <param name="f">連立方程式の解</param>
             member this.solve_homogeneq (mat:double2,f:double1) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK homogeneous solve"
                 requireHomogeneousShapes this.GenerationContext mat.size1 mat.size2 f.size1
                 this.GenerationContext.ch.i <| fun singularCount ->
                     this.GenerationContext.br.if2 (mat.size1 .< mat.size2)
@@ -40,6 +41,7 @@ namespace Aqualis
             /// <param name="mat">複素係数行列</param>
             /// <param name="f">連立方程式の解</param>
             member this.solve_homogeneq (mat:complex2,f:complex1) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK homogeneous solve"
                 requireHomogeneousShapes this.GenerationContext mat.size1 mat.size2 f.size1
                 this.GenerationContext.ch.i <| fun singularCount ->
                     this.GenerationContext.br.if2 (mat.size1 .< mat.size2)

@@ -371,11 +371,9 @@ for language in c fortran python; do
   done
   expect_generated_failure "$language non-square eigen matrix" "$output_root/eigen-standard-non-square-$language" 'Aqualis: LAPACK eigen matrix must be square.' "${run_command[@]}"
   expect_generated_failure "$language mismatched generalized eigen matrix" "$output_root/eigen-generalized-mismatch-$language" 'Aqualis: LAPACK eigen matrix orders must match.' "${run_command[@]}"
-  if [[ "$language" != python ]]; then
-    expect_generated_failure "$language short eigenvalue output" "$output_root/eigen-standard-short-values-$language" 'Aqualis: LAPACK eigenvalue count must match matrix order.' "${run_command[@]}"
-    expect_generated_failure "$language small eigenvector output" "$output_root/eigen-standard-small-vectors-$language" 'Aqualis: LAPACK eigenvector shape must match matrix order.' "${run_command[@]}"
-    expect_generated_failure "$language short generalized beta output" "$output_root/eigen-generalized-short-beta-$language" 'Aqualis: LAPACK second eigenvalue count must match matrix order.' "${run_command[@]}"
-  fi
+  expect_generated_failure "$language short eigenvalue output" "$output_root/eigen-standard-short-values-$language" 'Aqualis: LAPACK eigenvalue count must match matrix order.' "${run_command[@]}"
+  expect_generated_failure "$language small eigenvector output" "$output_root/eigen-standard-small-vectors-$language" 'Aqualis: LAPACK eigenvector shape must match matrix order.' "${run_command[@]}"
+  expect_generated_failure "$language short generalized beta output" "$output_root/eigen-generalized-short-beta-$language" 'Aqualis: LAPACK second eigenvalue count must match matrix order.' "${run_command[@]}"
   run_and_verify "$language real rank" "$output_root/rank-real-$language" '2' "${run_command[@]}"
   complex_rank="$(cd "$output_root/rank-complex-$language" && "${run_command[@]}")"
   if ! awk -v value="$complex_rank" 'BEGIN { exit !(value + 0 > 1.999999 && value + 0 < 2.000001) }'; then
@@ -427,18 +425,17 @@ for language in c fortran python; do
   run_and_verify_number "$language FFT 1D round trip" "$output_root/fft1-roundtrip-$language" '5' "${run_command[@]}"
   run_and_verify_number "$language FFT 2D round trip" "$output_root/fft2-roundtrip-$language" '7' "${run_command[@]}"
   verify_fft2_coefficients "$language" "$output_root/fft2-coefficients-$language" "${run_command[@]}"
-  if [[ "$language" != python ]]; then
-    for matrix_type in real complex; do
-      svd_directory="$output_root/svd-$matrix_type-$language"
-      svd_result="$(cd "$svd_directory" && "${run_command[@]}")"
-      if ! awk -v value="$svd_result" 'BEGIN { exit !(value + 0 > 3.999999 && value + 0 < 4.000001) }'; then
-        printf '%s %s SVD returned an unexpected singular value: %s\n' "$language" "$matrix_type" "$svd_result" >&2
-        exit 1
-      fi
-    done
-    expect_generated_failure "$language short SVD singular values" "$output_root/svd-short-singular-$language" 'Aqualis: LAPACK SVD singular-value count is invalid.' "${run_command[@]}"
-    expect_generated_failure "$language small SVD VT" "$output_root/svd-small-vt-$language" 'Aqualis: LAPACK SVD VT shape is invalid.' "${run_command[@]}"
-  fi
+  for matrix_type in real complex; do
+    svd_directory="$output_root/svd-$matrix_type-$language"
+    svd_result="$(cd "$svd_directory" && "${run_command[@]}")"
+    if ! awk -v value="$svd_result" 'BEGIN { exit !(value + 0 > 3.999999 && value + 0 < 4.000001) }'; then
+      printf '%s %s SVD returned an unexpected singular value: %s\n' "$language" "$matrix_type" "$svd_result" >&2
+      exit 1
+    fi
+  done
+  expect_generated_failure "$language small SVD U" "$output_root/svd-small-u-$language" 'Aqualis: LAPACK SVD U shape is invalid.' "${run_command[@]}"
+  expect_generated_failure "$language short SVD singular values" "$output_root/svd-short-singular-$language" 'Aqualis: LAPACK SVD singular-value count is invalid.' "${run_command[@]}"
+  expect_generated_failure "$language small SVD VT" "$output_root/svd-small-vt-$language" 'Aqualis: LAPACK SVD VT shape is invalid.' "${run_command[@]}"
 
   spline_directory="$output_root/spline-load-$language"
   printf '2\n0.00000000000000000E+000\n1.00000000000000000E+000\n' > "$spline_directory/data_x.dat"

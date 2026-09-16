@@ -951,49 +951,48 @@ module Program =
                         context.print.t transformed[i,j].re
                         context.print.t transformed[i,j].im
 
+        generateEigenStandard "eigen-standard-short-values" 2 2 1 2
+        generateEigenStandard "eigen-standard-small-vectors" 2 2 2 1
+        generateEigenGeneralized "eigen-generalized-short-beta" 2 1
+
         if language = C99 || language = Fortran then
-
-            generateEigenStandard "eigen-standard-short-values" 2 2 1 2
-            generateEigenStandard "eigen-standard-small-vectors" 2 2 2 1
-            generateEigenGeneralized "eigen-generalized-short-beta" 2 1
-
             generateEigenStandard "eigen-standard-info" 2 2 2 2
             generateEigenGeneralized "eigen-generalized-info" 2 2
 
-        if language = C99 || language = Fortran then
-            let generateSvd caseName (singularLength:int) (vtOrder:int) =
-                generate caseName <| fun context ->
-                    let matrix = context.var.d2 "matrix"
-                    let u = context.var.d2 "u"
-                    let singular = context.var.d1 "singular"
-                    let vt = context.var.d2 "vt"
-                    matrix.allocate(2, 2)
-                    u.allocate(2, 2)
-                    singular.allocate singularLength
-                    vt.allocate(vtOrder, vtOrder)
-                    matrix.clear()
-                    matrix[0,0] <== 2.0
-                    matrix[1,1] <== 4.0
-                    context.la.svd matrix (u, singular, vt)
-                    context.print.t singular[0]
-            generateSvd "svd-real" 2 2
-            generateSvd "svd-short-singular" 1 2
-            generateSvd "svd-small-vt" 2 1
-
-            generate "svd-complex" <| fun context ->
-                let matrix = context.var.z2 "matrix"
-                let u = context.var.z2 "u"
+        let generateSvd caseName (uOrder:int) (singularLength:int) (vtOrder:int) =
+            generate caseName <| fun context ->
+                let matrix = context.var.d2 "matrix"
+                let u = context.var.d2 "u"
                 let singular = context.var.d1 "singular"
-                let vt = context.var.z2 "vt"
+                let vt = context.var.d2 "vt"
                 matrix.allocate(2, 2)
-                u.allocate(2, 2)
-                singular.allocate 2
-                vt.allocate(2, 2)
+                u.allocate(uOrder, uOrder)
+                singular.allocate singularLength
+                vt.allocate(vtOrder, vtOrder)
                 matrix.clear()
-                matrix[0,0] <== complex0(Cpx(2.0, 0.0))
-                matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+                matrix[0,0] <== 2.0
+                matrix[1,1] <== 4.0
                 context.la.svd matrix (u, singular, vt)
                 context.print.t singular[0]
+        generateSvd "svd-real" 2 2 2
+        generateSvd "svd-small-u" 1 2 2
+        generateSvd "svd-short-singular" 2 1 2
+        generateSvd "svd-small-vt" 2 2 1
+
+        generate "svd-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let u = context.var.z2 "u"
+            let singular = context.var.d1 "singular"
+            let vt = context.var.z2 "vt"
+            matrix.allocate(2, 2)
+            u.allocate(2, 2)
+            singular.allocate 2
+            vt.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+            context.la.svd matrix (u, singular, vt)
+            context.print.t singular[0]
 
         generate "spline-load" <| fun context ->
             let spline = context.interpolate.splineDouble()

@@ -14,10 +14,9 @@ namespace Aqualis
             | C99 | Fortran | Python ->
                 LapackValidation.require context (matrix.size1 .<= 0) "LAPACK eigen matrix order must be positive."
                 LapackValidation.require context (matrix.size1 .=/ matrix.size2) "LAPACK eigen matrix must be square."
-                if context.language = C99 || context.language = Fortran then
-                    LapackValidation.require context (eigenvalues.size1 .=/ matrix.size1) "LAPACK eigenvalue count must match matrix order."
-                    LapackValidation.require context (eigenvectors.size1 .=/ matrix.size1) "LAPACK eigenvector shape must match matrix order."
-                    LapackValidation.require context (eigenvectors.size2 .=/ matrix.size1) "LAPACK eigenvector shape must match matrix order."
+                LapackValidation.require context (eigenvalues.size1 .=/ matrix.size1) "LAPACK eigenvalue count must match matrix order."
+                LapackValidation.require context (eigenvectors.size1 .=/ matrix.size1) "LAPACK eigenvector shape must match matrix order."
+                LapackValidation.require context (eigenvectors.size2 .=/ matrix.size1) "LAPACK eigenvector shape must match matrix order."
             | _ -> ()
 
         type ContextLa with
@@ -28,6 +27,7 @@ namespace Aqualis
             /// <param name="eigenvectors">固有ベクトル</param>
             /// <param name="mat1">複素非対称行列</param>
             member this.eigen_matrix (eigenvalues:complex1,eigenvectors:complex2) (mat1:complex2) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK eigenvalue calculation"
                 if eigenvectors.code = mat1.code then
                     invalidArg (nameof eigenvectors) "LAPACK eigenvector output must be different from input matrices."
                 this.GenerationContext.olist.add "-llapack"
@@ -112,6 +112,7 @@ namespace Aqualis
             /// <param name="mat1">行列A</param>
             /// <param name="mat2">行列B</param>
             member this.eigen_matrix2 (eigenvalues1:complex1,eigenvalues2:complex1,eigenvectors:complex2) (mat1:complex2) (mat2:complex2) =
+                    LapackValidation.requireBackend this.GenerationContext "LAPACK eigenvalue calculation"
                     if eigenvalues1.code = eigenvalues2.code then
                         invalidArg (nameof eigenvalues2) "LAPACK generalized eigenvalue outputs must be different vectors."
                     if eigenvectors.code = mat1.code || eigenvectors.code = mat2.code then
@@ -121,7 +122,7 @@ namespace Aqualis
                         this.GenerationContext.olist.add "-lblas"
                         requireEigenShapes this.GenerationContext mat1 eigenvalues1 eigenvectors
                         match this.GenerationContext.language with
-                        | C99 | Fortran ->
+                        | C99 | Fortran | Python ->
                             LapackValidation.require this.GenerationContext (eigenvalues2.size1 .=/ mat1.size1) "LAPACK second eigenvalue count must match matrix order."
                         | _ -> ()
                         LapackValidation.require this.GenerationContext (mat2.size1 .=/ mat1.size1) "LAPACK eigen matrix orders must match."

@@ -70,6 +70,7 @@ namespace Aqualis
             /// <param name="fu_cst">定数項ベクトル</param>
             /// <param name="code">解に対して行う処理</param>
             member this.solve_simuleq_t(fu_mat:double2,fu_cst:double1) = fun code ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK Tikhonov solve"
                 this.GenerationContext.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                     requireTikhonovVectorShapes this.GenerationContext fu_mat.size1 fu_mat.size2 fu_cst.size1
                     this.GenerationContext.ch.d2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
@@ -108,6 +109,7 @@ namespace Aqualis
             /// <param name="fu_cst">定数項ベクトル</param>
             /// <param name="code">解に対して行う処理</param>
             member this.solve_simuleq_t(fu_mat:complex2,fu_cst:complex1) = fun code ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK Tikhonov solve"
                 this.GenerationContext.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                     requireTikhonovVectorShapes this.GenerationContext fu_mat.size1 fu_mat.size2 fu_cst.size1
                     this.GenerationContext.ch.z2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
@@ -147,6 +149,7 @@ namespace Aqualis
             /// <param name="lambda">正則化パラメータ</param>
             /// <param name="code">解に対して行う処理</param>
             member this.solve_simuleq_tt(fu_mat:complex2,fu_cst:complex1,lambda:double) = fun code ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK Tikhonov solve"
                 this.GenerationContext.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                     requireTikhonovVectorShapes this.GenerationContext fu_mat.size1 fu_mat.size2 fu_cst.size1
                     this.GenerationContext.ch.z2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
@@ -185,6 +188,7 @@ namespace Aqualis
             /// <param name="lambda">正則化パラメータ</param>
             /// <param name="code">解に対して行う処理</param>
             member this.solve_simuleq_tt(fu_mat:double2,fu_cst:double1,lambda:double) = fun code ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK Tikhonov solve"
                 this.GenerationContext.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                     requireTikhonovVectorShapes this.GenerationContext fu_mat.size1 fu_mat.size2 fu_cst.size1
                     this.GenerationContext.ch.d2 (fu_mat.size2, fu_mat.size2) <| fun FF ->
@@ -223,6 +227,7 @@ namespace Aqualis
             /// <param name="lambda">正則化パラメータ</param>
             /// <param name="code">解に対して行う処理</param>
             member this.solve_simuleq_tt2(fu_mat:complex2,fu_cst:complex2,lambda:double0) code =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK Tikhonov solve"
                 this.GenerationContext.group.h2 "連立方程式の求解(Tikhonovの正則化法)" <| fun () ->
                     requireTikhonovColumnShapes this.GenerationContext fu_mat.size1 fu_mat.size2 fu_cst.size1 fu_cst.size2
                     this.GenerationContext.ch.z2 (fu_mat.size2, fu_mat.size2) <| fun FF ->

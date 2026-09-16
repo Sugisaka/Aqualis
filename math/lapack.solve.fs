@@ -9,9 +9,7 @@ namespace Aqualis
     [<AutoOpen>]
     module ContextLaSolveExtensions =
         let private requireSolveBackend (context:Aqualis) =
-            match context.Language with
-            | C99 | Fortran | Python | LaTeX | HTML -> ()
-            | language -> UnsupportedOperation.codeGeneration (string language) "LAPACK linear solve"
+            LapackValidation.requireBackend context "LAPACK linear solve"
 
         let private checkSolveInfo (context:Aqualis) (info:int0) =
             match context.language with
@@ -189,6 +187,7 @@ namespace Aqualis
             ///<param name="mat1">元の行列</param>
             ///<param name="mat2">mat1の逆行列</param>
             member this.inverse_matrix (mat2:double2,mat1:double2) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK matrix inversion"
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "逆行列の計算" <| fun () ->
@@ -231,6 +230,7 @@ namespace Aqualis
             ///<param name="mat1">元の行列</param>
             ///<param name="mat2">mat1の逆行列</param>
             member this.inverse_matrix (mat2:complex2,mat1:complex2) =
+                LapackValidation.requireBackend this.GenerationContext "LAPACK matrix inversion"
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "逆行列の計算" <| fun () ->

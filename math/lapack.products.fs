@@ -10,6 +10,11 @@ namespace Aqualis
 
     [<RequireQualifiedAccess>]
     module internal LapackValidation =
+        let requireBackend (context:Aqualis) operation =
+            match context.Language with
+            | C99 | Fortran | Python | LaTeX | HTML -> ()
+            | language -> UnsupportedOperation.codeGeneration (string language) operation
+
         let require (context:Aqualis) (condition:bool0) message =
             match context.language with
             | C99 ->

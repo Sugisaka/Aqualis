@@ -12,7 +12,7 @@ namespace Aqualis
                                      (uRows:int0) (uColumns:int0) (singularCount:int0)
                                      (vtRows:int0) (vtColumns:int0) =
             match context.language with
-            | C99 | Fortran ->
+            | C99 | Fortran | Python ->
                 LapackValidation.require context (rows .<= 0) "LAPACK SVD matrix rows must be positive."
                 LapackValidation.require context (columns .<= 0) "LAPACK SVD matrix columns must be positive."
                 LapackValidation.require context (uRows .=/ rows) "LAPACK SVD U shape is invalid."
@@ -33,6 +33,7 @@ namespace Aqualis
             /// <param name="s">正方行列sの対角成分</param>
             /// <param name="vt">複素行列vの転置</param>
             member this.svd (mat1:complex2) = fun (u:complex2,s:double1,vt:complex2) ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK SVD"
                 if u.code = vt.code then
                     invalidArg (nameof vt) "LAPACK SVD U and VT must be different matrices."
                 this.GenerationContext.olist.add "-llapack"
@@ -188,6 +189,7 @@ namespace Aqualis
             /// <param name="s">正方行列sの対角成分</param>
             /// <param name="vt">複素行列vの転置</param>
             member this.svd (mat1:double2) = fun (u:double2,s:double1,vt:double2) ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK SVD"
                 if u.code = vt.code then
                     invalidArg (nameof vt) "LAPACK SVD U and VT must be different matrices."
                 this.GenerationContext.olist.add "-llapack"

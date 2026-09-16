@@ -41,6 +41,7 @@
     <Compile Include="LapackSvdGenerationTests.fs" />
     <Compile Include="LapackAliasGenerationTests.fs" />
     <Compile Include="LapackSolveGenerationTests.fs" />
+    <Compile Include="LapackBackendGenerationTests.fs" />
     <Compile Include="LapackDeterminantGenerationTests.fs" />
     <Compile Include="PhpUploadGenerationTests.fs" />
     <Compile Include="PhpCommunicationGenerationTests.fs" />

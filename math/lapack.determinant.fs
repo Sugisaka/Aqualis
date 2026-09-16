@@ -28,6 +28,7 @@ namespace Aqualis
             /// <param name="matrix">行列</param>
             /// <param name="code">行列式の値を用いて実行するコード</param>
             member this.determinant (matrix:complex2) = fun code ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK determinant"
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列式の常用対数を計算" <| fun () ->
@@ -79,6 +80,7 @@ namespace Aqualis
             /// <param name="matrix">行列</param>
             /// <param name="code">行列式の値を用いて実行するコード</param>
             member this.determinant (matrix:double2) = fun code ->
+                LapackValidation.requireBackend this.GenerationContext "LAPACK determinant"
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列式の常用対数を計算" <| fun () ->
