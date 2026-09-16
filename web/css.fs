@@ -66,15 +66,17 @@ type CSSFile(outputdir:string,filename:string) =
             wr.Dispose()
 
     static member make (outputdir:string) (filename:string) code =
-        let outputPath = Path.Combine(outputdir, filename)
-        let temporaryName = filename + ".tmp"
-        let temporaryPath = Path.Combine(outputdir, temporaryName)
+        let output =
+            Path.Combine(outputdir, filename)
+            |> AtomicOutputFile.create
         try
             do
-                use c = new CSSFile(outputdir, temporaryName)
+                use c =
+                    new CSSFile(
+                        Path.GetDirectoryName(output.StagingPath),
+                        Path.GetFileName(output.StagingPath))
                 code c
-            File.Move(temporaryPath, outputPath, true)
+            AtomicOutputFile.publish output
         with _ ->
-            if File.Exists temporaryPath then
-                File.Delete temporaryPath
+            AtomicOutputFile.discard output
             reraise()

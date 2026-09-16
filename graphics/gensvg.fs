@@ -1074,17 +1074,16 @@ module CompilationEnvironmentGenSvgExtensions =
         /// </summary>
         /// <param name="dir">出力先ディレクトリ</param>
         static member make (filename:string) = fun (cvx,cvy) (scale:double) code ->
-            let temporaryPath = filename + ".tmp"
+            let output = AtomicOutputFile.create filename
             try
                 do
-                    use wr = new StreamWriter(temporaryPath,false,Encoding.Default)
+                    use wr = new StreamWriter(output.StagingPath,false,Encoding.Default)
                     let sv = svgfilemaker(Aqualis.BlankWriter Numeric,cvx,cvy,wr,scale)
                     sv.header <| fun sv ->
                         code sv
-                File.Move(temporaryPath, filename, true)
+                AtomicOutputFile.publish output
             with _ ->
-                if File.Exists temporaryPath then
-                    File.Delete temporaryPath
+                AtomicOutputFile.discard output
                 reraise()
                 
     type Aqualis with

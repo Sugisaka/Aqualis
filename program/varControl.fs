@@ -173,6 +173,43 @@ namespace Aqualis
         member _.inc() =
             System.Threading.Interlocked.Increment(&errorid) |> ignore
         
+    type internal AtomicOutputFile = {
+        TargetPath : string
+        StagingPath : string }
+
+    [<RequireQualifiedAccess>]
+    module internal AtomicOutputFile =
+        let private publishGate = obj()
+
+        let create (targetPath:string) =
+            if String.IsNullOrWhiteSpace targetPath then
+                invalidArg (nameof targetPath) "An atomic output target path is required."
+
+            let fullTargetPath = Path.GetFullPath targetPath
+            let targetFileName = Path.GetFileName fullTargetPath
+            if String.IsNullOrWhiteSpace targetFileName then
+                invalidArg (nameof targetPath) "An atomic output target must identify a file."
+
+            let targetDirectory = Path.GetDirectoryName fullTargetPath
+            let stagingFileName =
+                "." + targetFileName + ".aqualis-" + Guid.NewGuid().ToString("N") + ".tmp"
+            {
+                TargetPath = fullTargetPath
+                StagingPath = Path.Combine(targetDirectory, stagingFileName)
+            }
+
+        let publish output =
+            lock publishGate (fun () ->
+                File.Move(output.StagingPath, output.TargetPath, true))
+
+        let discard output =
+            if File.Exists output.StagingPath then
+                try
+                    File.Delete output.StagingPath
+                with
+                | :? IOException
+                | :? UnauthorizedAccessException -> ()
+
     ///<summary>コード書き込み管理</summary>
     type codeWriter private (filename:string,indentsize:int,lan:Language,publishTarget:string option) =
         
@@ -218,17 +255,8 @@ namespace Aqualis
             new codeWriter(filename,indentsize,lan,None)
 
         static member internal CreateAtomic(targetPath:string,indentsize:int,lan:Language) =
-            if String.IsNullOrWhiteSpace targetPath then
-                invalidArg (nameof targetPath) "An atomic output target path is required."
-            let fullTargetPath = Path.GetFullPath targetPath
-            let targetFileName = Path.GetFileName fullTargetPath
-            if String.IsNullOrWhiteSpace targetFileName then
-                invalidArg (nameof targetPath) "An atomic output target must identify a file."
-            let targetDirectory = Path.GetDirectoryName fullTargetPath
-            let stagingFileName =
-                "." + targetFileName + ".aqualis-" + Guid.NewGuid().ToString("N") + ".tmp"
-            let stagingPath = Path.Combine(targetDirectory, stagingFileName)
-            new codeWriter(stagingPath,indentsize,lan,Some fullTargetPath)
+            let output = AtomicOutputFile.create targetPath
+            new codeWriter(output.StagingPath,indentsize,lan,Some output.TargetPath)
         
         member _.FilePath with get() = filename
         member val indent = IndentController indentsize with get
@@ -328,7 +356,10 @@ namespace Aqualis
                 |None -> invalidOp "Only an atomic code writer can publish its output."
                 |Some targetPath when not published ->
                     disposeWriter()
-                    File.Move(filename, targetPath, true)
+                    AtomicOutputFile.publish {
+                        TargetPath = targetPath
+                        StagingPath = filename
+                    }
                     published <- true
                 |Some _ -> ())
             

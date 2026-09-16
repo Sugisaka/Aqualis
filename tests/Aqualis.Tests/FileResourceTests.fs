@@ -2,6 +2,8 @@ namespace Aqualis.Tests
 
 open System
 open System.IO
+open System.Threading
+open System.Threading.Tasks
 open Xunit
 open Aqualis
 
@@ -136,7 +138,32 @@ module FileResourceTests =
         |> ignore
 
         Assert.Equal("original", File.ReadAllText(path))
-        Assert.False(File.Exists(path + ".tmp"))
+        Assert.Empty(Directory.GetFiles(output.Path, ".style.css.aqualis-*.tmp"))
+        assertUnlocked path
+
+    [<Fact>]
+    let ``parallel CSS generation uses independent staging files`` () =
+        use output = new TemporaryDirectory()
+        use ready = new Barrier(2)
+        let path = Path.Combine(output.Path, "parallel.css")
+
+        let generate color =
+            Task.Run(fun () ->
+                CSSFile.make output.Path "parallel.css" <| fun css ->
+                    css.add(
+                        CSSdata(
+                            CSSClass "marker",
+                            Style [{ Key = "color"; Value = color }]))
+                    Assert.True(ready.SignalAndWait(TimeSpan.FromSeconds(10.0))))
+
+        Task.WaitAll [| generate "red"; generate "blue" |]
+
+        let generated = File.ReadAllText(path)
+        let hasRed = generated.Contains("color: red;")
+        let hasBlue = generated.Contains("color: blue;")
+        Assert.True(hasRed <> hasBlue)
+        Assert.Contains(".marker {", generated)
+        Assert.Empty(Directory.GetFiles(output.Path, ".parallel.css.aqualis-*.tmp"))
         assertUnlocked path
 
     [<Fact>]
@@ -172,10 +199,33 @@ module FileResourceTests =
 
         Assert.Equal("old-svg", File.ReadAllText(svgPath))
         Assert.Equal("old-ai", File.ReadAllText(aiPath))
-        Assert.False(File.Exists(svgPath + ".tmp"))
-        Assert.False(File.Exists(aiPath + ".tmp"))
+        Assert.Empty(Directory.GetFiles(output.Path, ".image.svg.aqualis-*.tmp"))
+        Assert.Empty(Directory.GetFiles(output.Path, ".image.jsx.aqualis-*.tmp"))
         assertUnlocked svgPath
         assertUnlocked aiPath
+
+    [<Fact>]
+    let ``parallel SVG generation uses independent staging files`` () =
+        use output = new TemporaryDirectory()
+        use ready = new Barrier(2)
+        let path = Path.Combine(output.Path, "parallel.svg")
+
+        let generate width height =
+            Task.Run(fun () ->
+                svgfile.make path (width, height) 1.0 <| fun _ ->
+                    Assert.True(ready.SignalAndWait(TimeSpan.FromSeconds(10.0))))
+
+        Task.WaitAll
+            [| generate 120.0 80.0
+               generate 240.0 160.0 |]
+
+        let generated = File.ReadAllText(path)
+        let hasSmall = generated.Contains("viewBox=\"0 0 120.000 80.000\"")
+        let hasLarge = generated.Contains("viewBox=\"0 0 240.000 160.000\"")
+        Assert.True(hasSmall <> hasLarge)
+        Assert.Contains("</svg>", generated)
+        Assert.Empty(Directory.GetFiles(output.Path, ".parallel.svg.aqualis-*.tmp"))
+        assertUnlocked path
 
     [<Fact>]
     let ``shell writer arrays are released when generation throws`` () =
