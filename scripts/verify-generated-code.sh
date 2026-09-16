@@ -265,6 +265,9 @@ for language in c fortran python; do
   expect_generated_failure "$language zero complex vector normalization" "$output_root/normalize-complex-zero-$language" 'Aqualis: LAPACK normalization requires a nonzero vector.' "${run_command[@]}"
   expect_generated_failure "$language short line-search direction" "$output_root/findmin-short-direction-$language" 'Aqualis: Line-search direction length must match the initial point.' "${run_command[@]}"
   expect_generated_failure "$language short line-search output" "$output_root/findmin-short-output-$language" 'Aqualis: Line-search output length must match the initial point.' "${run_command[@]}"
+  run_and_verify_number "$language large line-search direction" "$output_root/findmin-large-direction-$language" '0.5' "${run_command[@]}"
+  run_and_verify_number "$language small line-search direction" "$output_root/findmin-small-direction-$language" '0.5' "${run_command[@]}"
+  run_and_verify_number "$language huge line-search direction" "$output_root/findmin-huge-direction-$language" '0.3535533905932738' "${run_command[@]}"
   run_and_verify_number "$language zero real pseudoinverse" "$output_root/pseudoinverse-zero-real-$language" '0' "${run_command[@]}"
   run_and_verify_number "$language zero complex pseudoinverse" "$output_root/pseudoinverse-zero-complex-$language" '0' "${run_command[@]}"
   if [[ "$language" == fortran ]]; then
@@ -352,7 +355,15 @@ for language in c fortran python; do
   fi
   expect_generated_failure "$language short Tikhonov RHS" "$output_root/tikhonov-short-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side length must match matrix rows.' "${run_command[@]}"
   expect_generated_failure "$language wide Tikhonov RHS" "$output_root/tikhonov-wide-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side must have one column.' "${run_command[@]}"
+  run_and_verify_number "$language aliased real SVD" "$output_root/svd-alias-real-$language" '4' "${run_command[@]}"
+  run_and_verify_number "$language aliased complex SVD" "$output_root/svd-alias-complex-$language" '4' "${run_command[@]}"
+  run_and_verify_number "$language aliased real SVD VT" "$output_root/svd-alias-vt-real-$language" '4' "${run_command[@]}"
+  run_and_verify_number "$language aliased complex SVD VT" "$output_root/svd-alias-vt-complex-$language" '4' "${run_command[@]}"
   if [[ "$language" != python ]]; then
+    expect_generated_failure "$language short FFT 1D output" "$output_root/fft1-short-output-$language" 'Aqualis: FFT output length must match input length.' "${run_command[@]}"
+    expect_generated_failure "$language short FFT 2D output" "$output_root/fft2-short-output-$language" 'Aqualis: FFT output shape must match input shape.' "${run_command[@]}"
+    expect_generated_failure "$language empty FFT 1D input" "$output_root/fft1-empty-input-$language" 'Aqualis: FFT input length must be positive.' "${run_command[@]}"
+    run_and_verify_number "$language singleton-axis inverse FFT shift" "$output_root/ifftshift2-single-row-$language" '21' "${run_command[@]}"
     for matrix_type in real complex; do
       svd_directory="$output_root/svd-$matrix_type-$language"
       svd_result="$(cd "$svd_directory" && "${run_command[@]}")"

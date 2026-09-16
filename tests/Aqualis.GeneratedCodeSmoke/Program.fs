@@ -476,6 +476,34 @@ module Program =
             context.optimization.findmin 1 (initial, direction) (D 1.0)
                 (fun value point -> value <== point[0] * point[0]) output
 
+        for caseName, directionValue in ["findmin-large-direction", 1e200; "findmin-small-direction", 1e-200] do
+            generate caseName <| fun context ->
+                let initial = context.var.d1 "initial"
+                let direction = context.var.d1 "direction"
+                let output = context.var.d1 "output"
+                initial.allocate 1
+                direction.allocate 1
+                output.allocate 1
+                initial[0] <== 0.0
+                direction[0] <== directionValue
+                context.optimization.findmin 0 (initial, direction) (D 1.0)
+                    (fun value point -> value <== (point[0] - 1.0) * (point[0] - 1.0)) output
+                context.print.t output[0]
+
+        generate "findmin-huge-direction" <| fun context ->
+            let initial = context.var.d1 "initial"
+            let direction = context.var.d1 "direction"
+            let output = context.var.d1 "output"
+            initial.allocate 2
+            direction.allocate 2
+            output.allocate 2
+            initial.clear()
+            direction[0] <== 1e308
+            direction[1] <== 1e308
+            context.optimization.findmin 0 (initial, direction) (D 1.0)
+                (fun value point -> value <== (point[0] - 1.0) * (point[0] - 1.0)) output
+            context.print.t output[0]
+
         generate "normalize-zero" <| fun context ->
             let vector = context.var.d1 "vector"
             vector.allocate 2
@@ -545,6 +573,58 @@ module Program =
             matrix[1,1] <== complex0(Cpx(4.0, 0.0))
             context.la.inverse_matrix(inverse,matrix)
             context.print.t (inverse[0,0].re + inverse[1,1].re)
+
+        generate "svd-alias-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let singular = context.var.d1 "singular"
+            let vt = context.var.d2 "vt"
+            matrix.allocate(2, 2)
+            singular.allocate 2
+            vt.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 4.0
+            context.la.svd matrix (matrix,singular,vt)
+            context.print.t singular[0]
+
+        generate "svd-alias-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let singular = context.var.d1 "singular"
+            let vt = context.var.z2 "vt"
+            matrix.allocate(2, 2)
+            singular.allocate 2
+            vt.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+            context.la.svd matrix (matrix,singular,vt)
+            context.print.t singular[0]
+
+        generate "svd-alias-vt-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let u = context.var.d2 "u"
+            let singular = context.var.d1 "singular"
+            matrix.allocate(2, 2)
+            u.allocate(2, 2)
+            singular.allocate 2
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 4.0
+            context.la.svd matrix (u,singular,matrix)
+            context.print.t singular[0]
+
+        generate "svd-alias-vt-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let u = context.var.z2 "u"
+            let singular = context.var.d1 "singular"
+            matrix.allocate(2, 2)
+            u.allocate(2, 2)
+            singular.allocate 2
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+            context.la.svd matrix (u,singular,matrix)
+            context.print.t singular[0]
 
         generate "inverse-singular" <| fun context ->
             let matrix = context.var.d2 "matrix"
@@ -750,6 +830,35 @@ module Program =
         generateEigenGeneralized "eigen-generalized-mismatch" 3 2
 
         if language = C99 || language = Fortran then
+            generate "fft1-short-output" <| fun context ->
+                let input = context.var.z1 "input"
+                let output = context.var.z1 "output"
+                input.allocate 4
+                output.allocate 2
+                context.fft1.fft("forwardPlan",input,output)
+
+            generate "fft2-short-output" <| fun context ->
+                let input = context.var.z2 "input"
+                let output = context.var.z2 "output"
+                input.allocate(2, 2)
+                output.allocate(2, 1)
+                context.fft2.fft("forwardPlan",input,output)
+
+            generate "fft1-empty-input" <| fun context ->
+                let input = context.var.z1 "input"
+                let output = context.var.z1 "output"
+                input.allocate 0
+                output.allocate 0
+                context.fft1.fft("forwardPlan",input,output)
+
+            generate "ifftshift2-single-row" <| fun context ->
+                let matrix = context.var.z2 "matrix"
+                matrix.allocate(1, 2)
+                matrix[0,0] <== complex0(Cpx(1.0, 0.0))
+                matrix[0,1] <== complex0(Cpx(2.0, 0.0))
+                fft2.ifftshift2 context matrix
+                context.print.t (10.0 * matrix[0,0].re + matrix[0,1].re)
+
             generateEigenStandard "eigen-standard-short-values" 2 2 1 2
             generateEigenStandard "eigen-standard-small-vectors" 2 2 2 1
             generateEigenGeneralized "eigen-generalized-short-beta" 2 1

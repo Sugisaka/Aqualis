@@ -54,6 +54,10 @@ namespace Aqualis
                 UnsupportedOperation.codeGeneration
                     (string language)
                     "two-dimensional FFT"
+            LapackValidation.require context (data1.size1 .<= 0) "FFT input rows must be positive."
+            LapackValidation.require context (data1.size2 .<= 0) "FFT input columns must be positive."
+            LapackValidation.require context (data2.size1 .=/ data1.size1) "FFT output shape must match input shape."
+            LapackValidation.require context (data2.size2 .=/ data1.size2) "FFT output shape must match input shape."
             context.olist.add "-lfftw3"
             context.olist.add "-I/usr/include"
             context.ch.iiii <| fun (nx,ny,nx2,ny2) ->

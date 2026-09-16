@@ -37,17 +37,18 @@ namespace Aqualis
                     a[i] <== tmp
 
         let ifftshift_odd (context:Aqualis) (a:complex1) =
-            let n2 = a.size1./2
-            context.ch.iiz <| fun (c1,c2,tmp) ->
-                c1 <== 0
-                tmp <== a[c1]
-                context.iter.num a.size1 <| fun i ->
-                    context.br.if2 (c1+n2 .>= a.size1)
-                    <| fun () -> c2 <== c1+n2-a.size1
-                    <| fun () -> c2 <== c1+n2
-                    a[c1] <== a[c2]
-                    c1 <== c2
-                a[c1+n2+1] <== tmp
+            context.br.if1 (a.size1 .> 1) <| fun () ->
+                let n2 = a.size1./2
+                context.ch.iiz <| fun (c1,c2,tmp) ->
+                    c1 <== 0
+                    tmp <== a[c1]
+                    context.iter.num a.size1 <| fun i ->
+                        context.br.if2 (c1+n2 .>= a.size1)
+                        <| fun () -> c2 <== c1+n2-a.size1
+                        <| fun () -> c2 <== c1+n2
+                        a[c1] <== a[c2]
+                        c1 <== c2
+                    a[c1+n2+1] <== tmp
 
         let ifftshift_even (context:Aqualis) (a:complex1) =
             let n2 = a.size1./2
@@ -80,6 +81,8 @@ namespace Aqualis
                 UnsupportedOperation.codeGeneration
                     (string language)
                     "one-dimensional FFT"
+            LapackValidation.require context (data1.size1 .<= 0) "FFT input length must be positive."
+            LapackValidation.require context (data2.size1 .=/ data1.size1) "FFT output length must match input length."
             context.olist.add "-lfftw3"
             context.olist.add "-I/usr/include"
             context.ch.ii <| fun (N,N2) ->

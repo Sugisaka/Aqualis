@@ -50,16 +50,16 @@ type ContextOptimization internal (context:Aqualis) =
         context.ch.dddd <| fun (fa,f1,f2,fb) ->
         context.ch.d <| fun fa_ ->
         context.ch.d <| fun norm_df ->
+        context.ch.d1 df.size1 <| fun unitDirection ->
         context.ch.iii <| fun (counter,expansionCounter,expansionLimitReached) ->
-            norm_df.clear()
-            context.iter.num df.size1 <| fun i ->
-                norm_df <== norm_df + df.[i]*df.[i]
-            norm_df <== asm.sqrt(norm_df)
+            context.la.norm df <| fun stableNorm -> norm_df <== stableNorm
             context.br.if2 (norm_df.>0.0)
             <| fun () ->
+                unitDirection <== df
+                context.la.normalize unitDirection
                 xa.foreach <| fun i -> xa.[i] <== x0_.[i]
                 f fa xa
-                xb.foreach <| fun i -> xb.[i] <== x0_.[i] + dd * df.[i]/norm_df
+                xb.foreach <| fun i -> xb.[i] <== x0_.[i] + dd * unitDirection.[i]
                 f fb xb
                 x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
                 f f1 x1
