@@ -175,7 +175,7 @@ namespace Aqualis
                 |Pow(_,x,y) ->
                     let baseValue =
                         match x with
-                        |Add _|Sub _|Mul _|Div _ -> "(" + x.evalF c + ")"
+                        |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + x.evalF c + ")"
                         |_ -> x.evalF c
                     let exponentValue =
                         match y with

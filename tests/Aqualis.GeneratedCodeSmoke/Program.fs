@@ -656,6 +656,18 @@ module Program =
                 input <== value
                 context.print.t input.round
 
+        generate "negated-base-power" <| fun context ->
+            let input = context.var.d0 "input"
+            input <== 3.0
+            context.print.t (asm.pow(-input, 2))
+
+        generate "conjugate-sum" <| fun context ->
+            let left = context.var.z0 "left"
+            let right = context.var.z0 "right"
+            left <== complex0(Cpx(1.0, 2.0))
+            right <== complex0(Cpx(3.0, 4.0))
+            context.print.t ((asm.conj(left + right)).im)
+
         generate "findmin-short-output" <| fun context ->
             let initial = context.var.d1 "initial"
             let direction = context.var.d1 "direction"

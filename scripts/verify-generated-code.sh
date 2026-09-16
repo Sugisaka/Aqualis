@@ -442,6 +442,8 @@ for language in c fortran python; do
   expect_generated_failure "$language short line-search direction" "$output_root/findmin-short-direction-$language" 'Aqualis: Line-search direction length must match the initial point.' "${run_command[@]}"
   run_and_verify_number "$language positive rounding" "$output_root/round-positive-$language" '2' "${run_command[@]}"
   run_and_verify_number "$language negative rounding" "$output_root/round-negative-$language" '-2' "${run_command[@]}"
+  run_and_verify_number "$language negated power base" "$output_root/negated-base-power-$language" '9' "${run_command[@]}"
+  run_and_verify_number "$language conjugate sum" "$output_root/conjugate-sum-$language" '-6' "${run_command[@]}"
   expect_generated_failure "$language short line-search output" "$output_root/findmin-short-output-$language" 'Aqualis: Line-search output length must match the initial point.' "${run_command[@]}"
   run_and_verify_number "$language large line-search direction" "$output_root/findmin-large-direction-$language" '0.5' "${run_command[@]}"
   run_and_verify_number "$language small line-search direction" "$output_root/findmin-small-direction-$language" '0.5' "${run_command[@]}"
