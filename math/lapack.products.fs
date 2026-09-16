@@ -8,9 +8,47 @@ namespace Aqualis
 
     open System
 
+    [<RequireQualifiedAccess>]
+    module internal LapackValidation =
+        let require (context:Aqualis) (condition:bool0) message =
+            match context.language with
+            | C99 ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("fprintf(stderr, " + OutputTextLiteral.c ("Aqualis: " + message + "\n") + "); exit(EXIT_FAILURE);\n"))
+            | Fortran ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("error stop " + OutputTextLiteral.fortran ("Aqualis: " + message) + "\n"))
+            | Python ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n"))
+            | JavaScript ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("throw new Error(" + OutputTextLiteral.javaScript ("Aqualis: " + message) + ");\n"))
+            | PHP ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("<?php throw new Exception(" + OutputTextLiteral.c ("Aqualis: " + message) + "); ?>\n"))
+            | _ -> ()
+
+        let checkInfo (context:Aqualis) (info:int0) operation =
+            match context.language with
+            | C99 ->
+                context.codewritein("if (" + info.code + " != 0) { fprintf(stderr, \"Aqualis: LAPACK " + operation + " failed (INFO=%d).\\n\", " + info.code + "); exit(EXIT_FAILURE); }\n")
+            | Fortran ->
+                context.codewritein("if (" + info.code + " /= 0) error stop 'Aqualis: LAPACK " + operation + " failed.'\n")
+            | _ -> ()
+
     type ContextLa internal (context:Aqualis) =
         let requirePythonLinalg symbol =
             context.pythonImports.RequireSymbol("scipy.linalg", symbol)
+
+        let requireMatvec rows columns vectorLength outputLength =
+            LapackValidation.require context (columns .=/ vectorLength) "LAPACK matrix-vector inner dimensions must match."
+            LapackValidation.require context (outputLength .=/ rows) "LAPACK matrix-vector output length must match matrix rows."
+
+        let requireMatmul rows inner rightRows columns outputRows outputColumns =
+            LapackValidation.require context (inner .=/ rightRows) "LAPACK matrix multiplication inner dimensions must match."
+            LapackValidation.require context (outputRows .=/ rows) "LAPACK matrix multiplication output shape must match result."
+            LapackValidation.require context (outputColumns .=/ columns) "LAPACK matrix multiplication output shape must match result."
 
         member internal _.GenerationContext = context
         member internal _.RequirePythonLinalg symbol = requirePythonLinalg symbol
@@ -22,10 +60,17 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.matmul (x:double1,a:double2,b:double1) =
-            x.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num a.size2 <| fun j ->
-                    x[i] <== x[i] + a[i,j] * b[j]
+            requireMatvec a.size1 a.size2 b.size1 x.size1
+            let calculate (target:double1) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num a.size2 <| fun j ->
+                        target[i] <== target[i] + a[i,j] * b[j]
+            if x.code = b.code then
+                context.ch.d1 x.size1 <| fun temporary ->
+                    calculate temporary
+                    context.iter.num x.size1 <| fun i -> x[i] <== temporary[i]
+            else calculate x
         /// <summary>
         /// 行列×ベクトルの計算
         /// </summary>
@@ -33,6 +78,7 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.matmul (x:complex1,a:complex2,b:double1) =
+            requireMatvec a.size1 a.size2 b.size1 x.size1
             x.clear()
             context.iter.num a.size1 <| fun i ->
                 context.iter.num a.size2 <| fun j ->
@@ -44,10 +90,17 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.matmul (x:complex1,a:double2,b:complex1) =
-            x.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num a.size2 <| fun j ->
-                    x[i] <== x[i] + a[i,j] * b[j]
+            requireMatvec a.size1 a.size2 b.size1 x.size1
+            let calculate (target:complex1) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num a.size2 <| fun j ->
+                        target[i] <== target[i] + a[i,j] * b[j]
+            if x.code = b.code then
+                context.ch.z1 x.size1 <| fun temporary ->
+                    calculate temporary
+                    context.iter.num x.size1 <| fun i -> x[i] <== temporary[i]
+            else calculate x
         /// <summary>
         /// 行列×ベクトルの計算
         /// </summary>
@@ -55,10 +108,17 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.matmul (x:complex1,a:complex2,b:complex1) =
-            x.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num a.size2 <| fun j ->
-                    x[i] <== x[i] + a[i,j] * b[j]
+            requireMatvec a.size1 a.size2 b.size1 x.size1
+            let calculate (target:complex1) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num a.size2 <| fun j ->
+                        target[i] <== target[i] + a[i,j] * b[j]
+            if x.code = b.code then
+                context.ch.z1 x.size1 <| fun temporary ->
+                    calculate temporary
+                    context.iter.num x.size1 <| fun i -> x[i] <== temporary[i]
+            else calculate x
 
         /// <summary>
         /// 行列×ベクトルの計算
@@ -102,49 +162,89 @@ namespace Aqualis
         /// </summary>
         /// <param name="u">計算結果</param>
         member this.matmul (u:double2,a:double2,b:double2) =
-            u.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num b.size2 <| fun j ->
-                    context.iter.num a.size2 <| fun k ->
-                        u[i,j] <== u[i,j] + a[i,k] * b[k,j]
+            requireMatmul a.size1 a.size2 b.size1 b.size2 u.size1 u.size2
+            let calculate (target:double2) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num b.size2 <| fun j ->
+                        context.iter.num a.size2 <| fun k ->
+                            target[i,j] <== target[i,j] + a[i,k] * b[k,j]
+            if u.code = a.code || u.code = b.code then
+                context.ch.d2 (u.size1,u.size2) <| fun temporary ->
+                    calculate temporary
+                    context.iter.num u.size1 <| fun i ->
+                        context.iter.num u.size2 <| fun j -> u[i,j] <== temporary[i,j]
+            else calculate u
 
         /// <summary>Calculates u = transpose(a) * b.</summary>
         member internal _.matmulTransposeLeft (u:double2,a:double2,b:double2) =
-            u.clear()
-            context.iter.num a.size2 <| fun i ->
-                context.iter.num b.size2 <| fun j ->
-                    context.iter.num a.size1 <| fun k ->
-                        u[i,j] <== u[i,j] + a[k,i] * b[k,j]
+            requireMatmul a.size2 a.size1 b.size1 b.size2 u.size1 u.size2
+            let calculate (target:double2) =
+                target.clear()
+                context.iter.num a.size2 <| fun i ->
+                    context.iter.num b.size2 <| fun j ->
+                        context.iter.num a.size1 <| fun k ->
+                            target[i,j] <== target[i,j] + a[k,i] * b[k,j]
+            if u.code = a.code || u.code = b.code then
+                context.ch.d2 (u.size1,u.size2) <| fun temporary ->
+                    calculate temporary
+                    context.iter.num u.size1 <| fun i ->
+                        context.iter.num u.size2 <| fun j -> u[i,j] <== temporary[i,j]
+            else calculate u
         /// <summary>
         /// 行列×行列の計算
         /// </summary>
         /// <param name="u">計算結果</param>
         member this.matmul (u:complex2,a:complex2,b:double2) =
-            u.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num b.size2 <| fun j ->
-                    context.iter.num a.size2 <| fun k ->
-                        u[i,j] <== u[i,j] + a[i,k] * b[k,j]
+            requireMatmul a.size1 a.size2 b.size1 b.size2 u.size1 u.size2
+            let calculate (target:complex2) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num b.size2 <| fun j ->
+                        context.iter.num a.size2 <| fun k ->
+                            target[i,j] <== target[i,j] + a[i,k] * b[k,j]
+            if u.code = a.code then
+                context.ch.z2 (u.size1,u.size2) <| fun temporary ->
+                    calculate temporary
+                    context.iter.num u.size1 <| fun i ->
+                        context.iter.num u.size2 <| fun j -> u[i,j] <== temporary[i,j]
+            else calculate u
         /// <summary>
         /// 行列×行列の計算
         /// </summary>
         /// <param name="u">計算結果</param>
         member this.matmul (u:complex2,a:double2,b:complex2) =
-            u.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num b.size2 <| fun j ->
-                    context.iter.num a.size2 <| fun k ->
-                        u[i,j] <== u[i,j] + a[i,k] * b[k,j]
+            requireMatmul a.size1 a.size2 b.size1 b.size2 u.size1 u.size2
+            let calculate (target:complex2) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num b.size2 <| fun j ->
+                        context.iter.num a.size2 <| fun k ->
+                            target[i,j] <== target[i,j] + a[i,k] * b[k,j]
+            if u.code = b.code then
+                context.ch.z2 (u.size1,u.size2) <| fun temporary ->
+                    calculate temporary
+                    context.iter.num u.size1 <| fun i ->
+                        context.iter.num u.size2 <| fun j -> u[i,j] <== temporary[i,j]
+            else calculate u
         /// <summary>
         /// 行列×行列の計算
         /// </summary>
         /// <param name="u">計算結果</param>
         member this.matmul (u:complex2,a:complex2,b:complex2) =
-            u.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num b.size2 <| fun j ->
-                    context.iter.num a.size2 <| fun k ->
-                        u[i,j] <== u[i,j] + a[i,k] * b[k,j]
+            requireMatmul a.size1 a.size2 b.size1 b.size2 u.size1 u.size2
+            let calculate (target:complex2) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num b.size2 <| fun j ->
+                        context.iter.num a.size2 <| fun k ->
+                            target[i,j] <== target[i,j] + a[i,k] * b[k,j]
+            if u.code = a.code || u.code = b.code then
+                context.ch.z2 (u.size1,u.size2) <| fun temporary ->
+                    calculate temporary
+                    context.iter.num u.size1 <| fun i ->
+                        context.iter.num u.size2 <| fun j -> u[i,j] <== temporary[i,j]
+            else calculate u
 
         /// <summary>
         /// 行列a×行列bの計算
@@ -194,6 +294,7 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.dot (x:double0,a:double1,b:double1) =
+            LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
             x.clear()
             context.iter.num a.size1 <| fun j ->
                 x <== x + a[j] * b[j]
@@ -204,6 +305,7 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.dot (x:complex0,a:complex1,b:double1) =
+            LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
             x.clear()
             context.iter.num a.size1 <| fun j ->
                 x <== x + asm.conj(a[j]) * b[j]
@@ -214,6 +316,7 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.dot (x:complex0,a:double1,b:complex1) =
+            LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
             x.clear()
             context.iter.num a.size1 <| fun j ->
                 x <== x + a[j] * b[j]
@@ -224,6 +327,7 @@ namespace Aqualis
         /// <param name="a">a</param>
         /// <param name="b">b</param>
         member this.dot (x:complex0,a:complex1,b:complex1) =
+            LapackValidation.require context (a.size1 .=/ b.size1) "LAPACK dot product vector lengths must match."
             x.clear()
             context.iter.num a.size1 <| fun j ->
                 x <== x + asm.conj(a[j]) * b[j]
@@ -291,6 +395,7 @@ namespace Aqualis
         /// <param name="a"></param>
         member this.normalize (a:double1) =
             this.norm a <| fun c ->
+                LapackValidation.require context (c .<= 0.0) "LAPACK normalization requires a nonzero vector."
                 a <== a/c
         /// <summary>
         /// ベクトルの規格化
@@ -298,5 +403,5 @@ namespace Aqualis
         /// <param name="a"></param>
         member this.normalize (a:complex1) =
             this.norm a <| fun c ->
+                LapackValidation.require context (c .<= 0.0) "LAPACK normalization requires a nonzero vector."
                 a <== a/c
-

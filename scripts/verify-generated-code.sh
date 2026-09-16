@@ -23,10 +23,12 @@ done
 if command -v node >/dev/null 2>&1; then
   node_command="node"
   javascript_path="$output_root/javascript/smoke.js"
+  javascript_dot_path="$output_root/dot-length-mismatch-javascript/smoke.js"
 elif command -v node.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
   # WSL can use the Windows Node.js runtime when a Linux node binary is absent.
   node_command="node.exe"
   javascript_path="$(wslpath -w "$output_root/javascript/smoke.js")"
+  javascript_dot_path="$(wslpath -w "$output_root/dot-length-mismatch-javascript/smoke.js")"
 else
   printf '%s\n' 'Required runtime is missing: node or node.exe' >&2
   exit 1
@@ -59,6 +61,21 @@ run_and_verify() {
   fi
 
   printf '%s: generated program returned %s\n' "$language" "$expected"
+}
+
+run_and_verify_number() {
+  local label="$1"
+  local working_directory="$2"
+  local expected="$3"
+  shift 3
+
+  local actual
+  actual="$(cd "$working_directory" && "$@")"
+  if ! awk -v value="$actual" -v expected="$expected" 'BEGIN { difference = value - expected; if (difference < 0) difference = -difference; exit !(difference < 0.000001) }'; then
+    printf '%s returned an unexpected result: %s (expected %s)\n' "$label" "$actual" "$expected" >&2
+    exit 1
+  fi
+  printf '%s: generated program returned %s\n' "$label" "$actual"
 }
 
 run_and_verify 'C99' "$output_root/c" '42' bash proc_smoke_C.sh
@@ -231,6 +248,27 @@ for language in c fortran python; do
   : > "$byte_directory/bytes.dat"
   expect_generated_failure "$language byte EOF" "$byte_directory" 'Aqualis: invalid byte input record.' "${run_command[@]}"
 
+  run_and_verify_number "$language aliased matrix-vector product" "$output_root/matvec-alias-$language" '18' "${run_command[@]}"
+  run_and_verify_number "$language aliased matrix product" "$output_root/matmul-alias-$language" '23' "${run_command[@]}"
+  expect_generated_failure "$language short matrix-vector input" "$output_root/matvec-short-input-$language" 'Aqualis: LAPACK matrix-vector inner dimensions must match.' "${run_command[@]}"
+  expect_generated_failure "$language short matrix-vector output" "$output_root/matvec-short-output-$language" 'Aqualis: LAPACK matrix-vector output length must match matrix rows.' "${run_command[@]}"
+  expect_generated_failure "$language matrix product inner mismatch" "$output_root/matmul-inner-mismatch-$language" 'Aqualis: LAPACK matrix multiplication inner dimensions must match.' "${run_command[@]}"
+  expect_generated_failure "$language small matrix product output" "$output_root/matmul-small-output-$language" 'Aqualis: LAPACK matrix multiplication output shape must match result.' "${run_command[@]}"
+  expect_generated_failure "$language mismatched dot vectors" "$output_root/dot-length-mismatch-$language" 'Aqualis: LAPACK dot product vector lengths must match.' "${run_command[@]}"
+  expect_generated_failure "$language zero vector normalization" "$output_root/normalize-zero-$language" 'Aqualis: LAPACK normalization requires a nonzero vector.' "${run_command[@]}"
+  expect_generated_failure "$language zero complex vector normalization" "$output_root/normalize-complex-zero-$language" 'Aqualis: LAPACK normalization requires a nonzero vector.' "${run_command[@]}"
+  run_and_verify_number "$language zero real pseudoinverse" "$output_root/pseudoinverse-zero-real-$language" '0' "${run_command[@]}"
+  run_and_verify_number "$language zero complex pseudoinverse" "$output_root/pseudoinverse-zero-complex-$language" '0' "${run_command[@]}"
+  if [[ "$language" == fortran ]]; then
+    for matrix_type in real complex; do
+      case_directory="$output_root/pseudoinverse-zero-$matrix_type-fortran"
+      gfortran -ffree-line-length-none -ffpe-trap=invalid,zero "$case_directory/smoke.f90" \
+        -llapack -lblas -o "$case_directory/trapped.exe"
+      run_and_verify_number "Fortran zero $matrix_type pseudoinverse with floating-point traps" \
+        "$case_directory" '0' ./trapped.exe
+    done
+  fi
+
   for matrix_type in real complex; do
     matrix_directory="$output_root/inverse-$matrix_type-$language"
     matrix_result="$(cd "$matrix_directory" && "${run_command[@]}")"
@@ -364,6 +402,15 @@ for language in c fortran python; do
   fi
   expect_generated_failure "$language overflowing persistence tensor" "$tensor_directory" "$tensor_error" "${run_command[@]}"
 done
+
+expect_generated_failure 'JavaScript mismatched dot vectors' \
+  "$output_root/dot-length-mismatch-javascript" \
+  'Aqualis: LAPACK dot product vector lengths must match.' \
+  "$node_command" "$javascript_dot_path"
+expect_generated_failure 'PHP mismatched dot vectors' \
+  "$output_root/dot-length-mismatch-php" \
+  'Aqualis: LAPACK dot product vector lengths must match.' \
+  php smoke.php
 
 cat > "$output_root/eigen-info-wrapper.c" <<'EOF'
 #include <complex.h>

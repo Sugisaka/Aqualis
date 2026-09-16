@@ -332,6 +332,107 @@ module Program =
                     sum <== sum + value
             context.print.t sum
 
+        generate "matvec-alias" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let vector = context.var.d1 "vector"
+            matrix.allocate(2, 2)
+            vector.allocate 2
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 3.0
+            vector[0] <== 3.0
+            vector[1] <== 4.0
+            context.la.matmul(vector, matrix, vector)
+            context.print.t (vector[0] + vector[1])
+
+        generate "matmul-alias" <| fun context ->
+            let left = context.var.d2 "left"
+            let right = context.var.d2 "right"
+            left.allocate(2, 2)
+            right.allocate(2, 2)
+            left.clear()
+            right.clear()
+            left[0,0] <== 2.0
+            left[1,1] <== 3.0
+            right[0,0] <== 4.0
+            right[1,1] <== 5.0
+            context.la.matmul(left, left, right)
+            context.print.t (left[0,0] + left[1,1])
+
+        generate "matvec-short-input" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let vector = context.var.d1 "vector"
+            let output = context.var.d1 "output"
+            matrix.allocate(2, 3)
+            vector.allocate 2
+            output.allocate 2
+            context.la.matmul(output, matrix, vector)
+
+        generate "matvec-short-output" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let vector = context.var.d1 "vector"
+            let output = context.var.d1 "output"
+            matrix.allocate(2, 2)
+            vector.allocate 2
+            output.allocate 1
+            context.la.matmul(output, matrix, vector)
+
+        generate "matmul-inner-mismatch" <| fun context ->
+            let left = context.var.d2 "left"
+            let right = context.var.d2 "right"
+            let output = context.var.d2 "output"
+            left.allocate(2, 3)
+            right.allocate(2, 2)
+            output.allocate(2, 2)
+            context.la.matmul(output, left, right)
+
+        generate "matmul-small-output" <| fun context ->
+            let left = context.var.d2 "left"
+            let right = context.var.d2 "right"
+            let output = context.var.d2 "output"
+            left.allocate(2, 2)
+            right.allocate(2, 2)
+            output.allocate(1, 2)
+            context.la.matmul(output, left, right)
+
+        generate "dot-length-mismatch" <| fun context ->
+            let left = context.var.d1 "left"
+            let right = context.var.d1 "right"
+            let output = context.var.d0 "output"
+            left.allocate 2
+            right.allocate 1
+            context.la.dot(output, left, right)
+
+        generate "normalize-zero" <| fun context ->
+            let vector = context.var.d1 "vector"
+            vector.allocate 2
+            vector.clear()
+            context.la.normalize vector
+
+        generate "normalize-complex-zero" <| fun context ->
+            let vector = context.var.z1 "vector"
+            vector.allocate 2
+            vector.clear()
+            context.la.normalize vector
+
+        generate "pseudoinverse-zero-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let inverse = context.var.d2 "inverse"
+            matrix.allocate(2, 2)
+            inverse.allocate(2, 2)
+            matrix.clear()
+            context.la.inverse_matrix2(inverse, matrix, double0(Dbl 1e-10))
+            context.print.t (inverse[0,0] + inverse[1,1])
+
+        generate "pseudoinverse-zero-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let inverse = context.var.z2 "inverse"
+            matrix.allocate(2, 2)
+            inverse.allocate(2, 2)
+            matrix.clear()
+            context.la.inverse_matrix2(inverse, matrix, double0(Dbl 1e-10))
+            context.print.t (inverse[0,0].re + inverse[1,1].re)
+
         generate "inverse-real" <| fun context ->
             let matrix = context.var.d2 "matrix"
             let inverse = context.var.d2 "inverse"
@@ -628,6 +729,17 @@ module Program =
             context.io.load(value,"data.bin")
             context.print.t value[0,0,0]
 
+    let private generateWebProductValidation outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "dot-length-mismatch-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            let left = context.var.d1 "left"
+            let right = context.var.d1 "right"
+            let output = context.var.d0 "output"
+            left.allocate 2
+            right.allocate 1
+            context.la.dot(output, left, right)
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -649,6 +761,8 @@ module Program =
                 generateRegressionCases outputRoot target
                 for caseName in ["valid"; "literal"; "unordered"; "out-of-range"] do
                     generateSplineValidation outputRoot target caseName
+            ["javascript", JavaScript; "php", PHP]
+            |> List.iter (generateWebProductValidation outputRoot)
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot
             generateCArrayCases outputRoot

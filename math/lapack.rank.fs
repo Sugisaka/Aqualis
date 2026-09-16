@@ -225,8 +225,10 @@ namespace Aqualis
                             this.GenerationContext.iter.num ns <| fun i ->
                                 this.GenerationContext.iter.num u.size1 <| fun j ->
                                     //condより小さい特異値は無視
-                                    this.GenerationContext.br.if1 (s[i]/s[0] .> cond) <| fun () ->
-                                        u2[i,j] <== asm.conj(u[j,i]) / s[i]
+                                    this.GenerationContext.br.if1 (s[0] .> 0.0) <| fun () ->
+                                        this.GenerationContext.br.if1 (s[i] .> 0.0) <| fun () ->
+                                            this.GenerationContext.br.if1 (s[i]/s[0] .> cond) <| fun () ->
+                                                u2[i,j] <== asm.conj(u[j,i]) / s[i]
                             mat2.clear()
                             this.GenerationContext.iter.num vt.size2 <| fun i ->
                                 this.GenerationContext.iter.num u2.size2  <| fun j ->
@@ -255,8 +257,10 @@ namespace Aqualis
                             u2.clear()
                             this.GenerationContext.iter.num ns <| fun i ->
                                 this.GenerationContext.iter.num u.size1 <| fun j ->
-                                    this.GenerationContext.br.if1 (s[i]/s[0] .> cond) <| fun () ->
-                                        u2[i,j] <== u[j,i] / s[i]
+                                    this.GenerationContext.br.if1 (s[0] .> 0.0) <| fun () ->
+                                        this.GenerationContext.br.if1 (s[i] .> 0.0) <| fun () ->
+                                            this.GenerationContext.br.if1 (s[i]/s[0] .> cond) <| fun () ->
+                                                u2[i,j] <== u[j,i] / s[i]
                             mat2.clear()
                             this.GenerationContext.iter.num vt.size2 <| fun i ->
                                 this.GenerationContext.iter.num u2.size2  <| fun j ->
