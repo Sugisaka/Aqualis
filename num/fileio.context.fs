@@ -243,6 +243,8 @@ namespace Aqualis
                             writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "w")+"\")"+"\n")
                         code fp id
                         writein(fp+".close()"+"\n")
+            |JavaScript |PHP ->
+                raise (NotSupportedException("File I/O is not supported for " + string ctx.language + "."))
             |_ -> ()
 
         member private this.Write1 (fp:string) (lst:exprString) =

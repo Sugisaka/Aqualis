@@ -165,7 +165,7 @@ module AssignmentTests =
         Assert.Contains("double complex *complexes2 = NULL;", generated)
         Assert.Contains("integers1 = (int *)malloc(sizeof(int) * (size_t)integers1_size[0]);", generated)
 
-        Assert.DoesNotContain("SIZE_MAX /", generated)
+        Assert.Contains("SIZE_MAX /", generated)
 
         let fortran = File.ReadAllText(Path.Combine(output.Path, "dynamic-arrays.f90"))
         Assert.Contains("integer,allocatable :: integers1(:)", fortran)
@@ -228,7 +228,7 @@ module AssignmentTests =
         Assert.Matches(@"free\(tensor\);\s+tensor = NULL;", generated)
 
     [<Fact>]
-    let ``C dynamic arrays clear their pointers after free without debug mode`` () =
+    let ``C dynamic arrays guard allocation and clear pointers without debug mode`` () =
         use output = new TemporaryDirectory()
 
         Compile [C99] output.Path "unchecked-arrays" "1.0" <| fun context ->
@@ -246,7 +246,10 @@ module AssignmentTests =
         Assert.Matches(@"free\(vector\);\s+vector = NULL;", generated)
         Assert.Matches(@"free\(matrix\);\s+matrix = NULL;", generated)
         Assert.Matches(@"free\(tensor\);\s+tensor = NULL;", generated)
-        Assert.DoesNotContain("SIZE_MAX /", generated)
+        Assert.Contains("SIZE_MAX /", generated)
+        Assert.Contains("memory allocation failed for array vector", generated)
+        Assert.Contains("memory allocation failed for array matrix", generated)
+        Assert.Contains("memory allocation failed for array tensor", generated)
 
     [<Fact>]
     let ``widening array assignments reject scalars from different contexts`` () =

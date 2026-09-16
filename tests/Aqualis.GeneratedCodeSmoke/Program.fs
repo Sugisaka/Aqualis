@@ -64,15 +64,15 @@ module Program =
             else
                 context.print.t value
 
-    let private generateCArrayCase outputRoot caseName (code:Aqualis -> unit) =
+    let private generateCArrayCase outputRoot caseName debugMode (code:Aqualis -> unit) =
         let outputDirectory = Path.Combine(outputRoot, "c-array-" + caseName)
         Directory.CreateDirectory(outputDirectory) |> ignore
         Compile [C99] outputDirectory "smoke" "1.0" <| fun context ->
-            context.Setting.DebugMode ON
+            if debugMode then context.Setting.DebugMode ON
             code context
 
     let private generateCArrayCases outputRoot =
-        generateCArrayCase outputRoot "success" <| fun context ->
+        generateCArrayCase outputRoot "success" true <| fun context ->
             let vector = context.var.i1 "vector"
             let matrix = context.var.i2 "matrix"
             let tensor = context.var.i3 "tensor"
@@ -89,39 +89,54 @@ module Program =
             tensor.deallocate()
             context.print.t result
 
-        generateCArrayCase outputRoot "double-allocate" <| fun context ->
+        generateCArrayCase outputRoot "double-allocate" true <| fun context ->
             let vector = context.var.i1 "vector"
             vector.allocate 2
             vector.allocate 2
 
-        generateCArrayCase outputRoot "unallocated-access" <| fun context ->
+        generateCArrayCase outputRoot "unallocated-access" true <| fun context ->
             let vector = context.var.i1 "vector"
             vector[0] <== 1
 
-        generateCArrayCase outputRoot "double-free" <| fun context ->
+        generateCArrayCase outputRoot "double-free" true <| fun context ->
             let vector = context.var.i1 "vector"
             vector.allocate 2
             vector.deallocate()
             vector.deallocate()
 
-        generateCArrayCase outputRoot "invalid-size" <| fun context ->
+        generateCArrayCase outputRoot "invalid-size" true <| fun context ->
             let vector = context.var.i1 "vector"
             vector.allocate 0
 
-        generateCArrayCase outputRoot "overflow" <| fun context ->
+        generateCArrayCase outputRoot "overflow" true <| fun context ->
             let tensor = context.var.i3 "tensor"
             tensor.allocate(Int32.MaxValue, Int32.MaxValue, Int32.MaxValue)
 
-        generateCArrayCase outputRoot "out-of-bounds" <| fun context ->
+        generateCArrayCase outputRoot "out-of-bounds" true <| fun context ->
             let matrix = context.var.i2 "matrix"
             matrix.allocate(2, 3)
             matrix[2, 0] <== 1
 
-        generateCArrayCase outputRoot "malloc-failure" <| fun context ->
+        generateCArrayCase outputRoot "malloc-failure" true <| fun context ->
             let vector = context.var.i1 "vector"
             vector.allocate 2
         File.WriteAllText(
             Path.Combine(outputRoot, "c-array-malloc-failure", "malloc-fail.c"),
+            "#include <stddef.h>\nvoid *__wrap_malloc(size_t size) { (void)size; return NULL; }\n")
+
+        generateCArrayCase outputRoot "release-negative" false <| fun context ->
+            let vector = context.var.i1 "vector"
+            vector.allocate -1
+
+        generateCArrayCase outputRoot "release-overflow" false <| fun context ->
+            let tensor = context.var.i3 "tensor"
+            tensor.allocate(Int32.MaxValue, Int32.MaxValue, Int32.MaxValue)
+
+        generateCArrayCase outputRoot "release-malloc-failure" false <| fun context ->
+            let vector = context.var.i1 "vector"
+            vector.allocate 2
+        File.WriteAllText(
+            Path.Combine(outputRoot, "c-array-release-malloc-failure", "malloc-fail.c"),
             "#include <stddef.h>\nvoid *__wrap_malloc(size_t size) { (void)size; return NULL; }\n")
 
     let private generatePhpUpload outputRoot directoryName destinationDirectory additionalPublicDirectories =
@@ -374,6 +389,71 @@ module Program =
             matrix.allocate(2, 2)
             rhs.allocate(1, 2)
             context.la.solve_simuleqs(matrix,rhs)
+
+        generate "determinant-non-square" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            matrix.allocate(2, 3)
+            context.la.determinant matrix <| fun result -> context.print.t result
+
+        generate "determinant-complex-non-square" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            matrix.allocate(2, 3)
+            context.la.determinant matrix <| fun result -> context.print.t result
+
+        generate "rank-real" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let rank = context.var.i0 "rank"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 4.0
+            context.la.rank(rank, matrix, double0(Dbl 1e-10))
+            context.print.t rank
+
+        generate "rank-complex" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let rank = context.var.d0 "rank"
+            matrix.allocate(2, 2)
+            matrix.clear()
+            matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+            matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+            context.la.rank(rank, matrix, double0(Dbl 1e-10))
+            context.print.t rank
+
+        if language = C99 || language = Fortran then
+            let generateSvd caseName (singularLength:int) (vtOrder:int) =
+                generate caseName <| fun context ->
+                    let matrix = context.var.d2 "matrix"
+                    let u = context.var.d2 "u"
+                    let singular = context.var.d1 "singular"
+                    let vt = context.var.d2 "vt"
+                    matrix.allocate(2, 2)
+                    u.allocate(2, 2)
+                    singular.allocate singularLength
+                    vt.allocate(vtOrder, vtOrder)
+                    matrix.clear()
+                    matrix[0,0] <== 2.0
+                    matrix[1,1] <== 4.0
+                    context.la.svd matrix (u, singular, vt)
+                    context.print.t singular[0]
+            generateSvd "svd-real" 2 2
+            generateSvd "svd-short-singular" 1 2
+            generateSvd "svd-small-vt" 2 1
+
+            generate "svd-complex" <| fun context ->
+                let matrix = context.var.z2 "matrix"
+                let u = context.var.z2 "u"
+                let singular = context.var.d1 "singular"
+                let vt = context.var.z2 "vt"
+                matrix.allocate(2, 2)
+                u.allocate(2, 2)
+                singular.allocate 2
+                vt.allocate(2, 2)
+                matrix.clear()
+                matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+                matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+                context.la.svd matrix (u, singular, vt)
+                context.print.t singular[0]
 
         generate "spline-load" <| fun context ->
             let spline = context.interpolate.splineDouble()

@@ -24,7 +24,7 @@ namespace Aqualis
     type IReal1 =
         inherit INum1
 
-    /// C99 の動的配列に対するデバッグ時の実行時検証を生成する。
+    /// C99 の動的配列に対する実行時検証を生成する。
     module internal CArraySafety =
         let private escapeCString (text:string) =
             text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n")
@@ -143,18 +143,16 @@ namespace Aqualis
                     |C99 ->
                         match size1 with
                         |A1 0 ->
-                            if c.Debug.debugMode then
-                                CArraySafety.guard c (name + " != NULL") ("array " + name + " is already allocated")
+                            CArraySafety.guard c (name + " != NULL") ("array " + name + " is already allocated")
                             this.size1 <== n1
                             let length = this.size1.Expr.eval c
                             let elementType = typ.tostring c.language
-                            if c.Debug.debugMode then
-                                CArraySafety.guard c (length + " <= 0") ("array " + name + " size must be positive")
-                                CArraySafety.guard c ("(size_t)" + length + " > SIZE_MAX / sizeof(" + elementType + ")")
-                                    ("array " + name + " allocation size overflows size_t")
+                            CArraySafety.guard c (length + (if c.Debug.debugMode then " <= 0" else " < 0"))
+                                ("array " + name + if c.Debug.debugMode then " size must be positive" else " size must be nonnegative")
+                            CArraySafety.guard c ("(size_t)" + length + " > SIZE_MAX / sizeof(" + elementType + ")")
+                                ("array " + name + " allocation size overflows size_t")
                             writein(name+" = "+"("+elementType+" *)"+"malloc("+"sizeof("+elementType+") * (size_t)"+length+");\n")
-                            if c.Debug.debugMode then
-                                CArraySafety.guard c (name + " == NULL") ("memory allocation failed for array " + name)
+                            CArraySafety.guard c (length + " > 0 && " + name + " == NULL") ("memory allocation failed for array " + name)
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長1次元配列ではありません")
                     |LaTeX ->

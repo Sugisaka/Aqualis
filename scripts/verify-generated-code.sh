@@ -249,6 +249,26 @@ for language in c fortran python; do
   expect_generated_failure "$language undersized inverse output" "$output_root/inverse-small-output-$language" 'Aqualis: LAPACK inverse output shape must match matrix order.' "${run_command[@]}"
   expect_generated_failure "$language short solve RHS" "$output_root/solve-short-rhs-$language" 'Aqualis: LAPACK right-hand side length must match matrix order.' "${run_command[@]}"
   expect_generated_failure "$language wrong solve RHS rows" "$output_root/solve-wrong-rhs-rows-$language" 'Aqualis: LAPACK right-hand side rows must match matrix order.' "${run_command[@]}"
+  expect_generated_failure "$language non-square determinant" "$output_root/determinant-non-square-$language" 'Aqualis: LAPACK determinant matrix must be square.' "${run_command[@]}"
+  expect_generated_failure "$language non-square complex determinant" "$output_root/determinant-complex-non-square-$language" 'Aqualis: LAPACK determinant matrix must be square.' "${run_command[@]}"
+  run_and_verify "$language real rank" "$output_root/rank-real-$language" '2' "${run_command[@]}"
+  complex_rank="$(cd "$output_root/rank-complex-$language" && "${run_command[@]}")"
+  if ! awk -v value="$complex_rank" 'BEGIN { exit !(value + 0 > 1.999999 && value + 0 < 2.000001) }'; then
+    printf '%s complex rank returned an unexpected result: %s\n' "$language" "$complex_rank" >&2
+    exit 1
+  fi
+  if [[ "$language" != python ]]; then
+    for matrix_type in real complex; do
+      svd_directory="$output_root/svd-$matrix_type-$language"
+      svd_result="$(cd "$svd_directory" && "${run_command[@]}")"
+      if ! awk -v value="$svd_result" 'BEGIN { exit !(value + 0 > 3.999999 && value + 0 < 4.000001) }'; then
+        printf '%s %s SVD returned an unexpected singular value: %s\n' "$language" "$matrix_type" "$svd_result" >&2
+        exit 1
+      fi
+    done
+    expect_generated_failure "$language short SVD singular values" "$output_root/svd-short-singular-$language" 'Aqualis: LAPACK SVD singular-value count is invalid.' "${run_command[@]}"
+    expect_generated_failure "$language small SVD VT" "$output_root/svd-small-vt-$language" 'Aqualis: LAPACK SVD VT shape is invalid.' "${run_command[@]}"
+  fi
 
   spline_directory="$output_root/spline-load-$language"
   printf '2\n0.00000000000000000E+000\n1.00000000000000000E+000\n' > "$spline_directory/data_x.dat"
@@ -303,9 +323,9 @@ expect_generated_failure 'C99 non-finite spline y' "$output_root/spline-c-non-fi
 expect_generated_failure 'C99 non-finite complex spline y' "$output_root/spline-c-complex-non-finite-y" \
   'Aqualis: Spline y values must be finite.' bash proc_smoke_C.sh
 
-for case_name in success double-allocate unallocated-access double-free invalid-size overflow out-of-bounds malloc-failure; do
+for case_name in success double-allocate unallocated-access double-free invalid-size overflow out-of-bounds malloc-failure release-negative release-overflow release-malloc-failure; do
   case_directory="$output_root/c-array-$case_name"
-  if [[ "$case_name" == 'malloc-failure' ]]; then
+  if [[ "$case_name" == 'malloc-failure' || "$case_name" == 'release-malloc-failure' ]]; then
     gcc -std=c99 -O0 "$case_directory/smoke.c" "$case_directory/malloc-fail.c" \
       -Wl,--wrap=malloc -lm -o "$case_directory/smoke.exe"
   else
@@ -342,6 +362,9 @@ expect_c_array_failure 'invalid-size' 'size must be positive'
 expect_c_array_failure 'overflow' 'element count overflows size_t'
 expect_c_array_failure 'out-of-bounds' 'index is out of range'
 expect_c_array_failure 'malloc-failure' 'memory allocation failed'
+expect_c_array_failure 'release-negative' 'size must be nonnegative'
+expect_c_array_failure 'release-overflow' 'element count overflows size_t'
+expect_c_array_failure 'release-malloc-failure' 'memory allocation failed'
 
 bash "$(dirname "$0")/verify-php-upload.sh" "$output_root"
 

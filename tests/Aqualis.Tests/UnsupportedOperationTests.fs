@@ -11,6 +11,14 @@ module UnsupportedOperationTests =
         Assert.Equal(expectedMessage, error.Message)
 
     [<Fact>]
+    let ``JavaScript and PHP file output is rejected`` () =
+        for language,targetName in [JavaScript,"JavaScript"; PHP,"PHP"] do
+            use context = new Aqualis(None, None, language)
+            assertNotSupported
+                $"File I/O is not supported for {targetName}."
+                (fun () -> context.io.fileOutput "output.txt" (fun _ -> ()))
+
+    [<Fact>]
     let ``executable backends reject equation display consistently`` () =
         let cases =
             [ Fortran, "Fortran"

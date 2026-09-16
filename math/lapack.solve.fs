@@ -6,6 +6,29 @@
 //
 namespace Aqualis
 
+    [<RequireQualifiedAccess>]
+    module internal LapackValidation =
+        let require (context:Aqualis) (condition:bool0) message =
+            match context.language with
+            | C99 ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("fprintf(stderr, " + OutputTextLiteral.c ("Aqualis: " + message + "\n") + "); exit(EXIT_FAILURE);\n"))
+            | Fortran ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("error stop " + OutputTextLiteral.fortran ("Aqualis: " + message) + "\n"))
+            | Python ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n"))
+            | _ -> ()
+
+        let checkInfo (context:Aqualis) (info:int0) operation =
+            match context.language with
+            | C99 ->
+                context.codewritein("if (" + info.code + " != 0) { fprintf(stderr, \"Aqualis: LAPACK " + operation + " failed (INFO=%d).\\n\", " + info.code + "); exit(EXIT_FAILURE); }\n")
+            | Fortran ->
+                context.codewritein("if (" + info.code + " /= 0) error stop 'Aqualis: LAPACK " + operation + " failed.'\n")
+            | _ -> ()
+
     [<AutoOpen>]
     module ContextLaSolveExtensions =
         let private checkSolveInfo (context:Aqualis) (info:int0) =

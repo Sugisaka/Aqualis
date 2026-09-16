@@ -202,23 +202,22 @@ namespace Aqualis
                     |C99 ->
                         match size with
                         |A2(0,0) ->
-                            if c.Debug.debugMode then
-                                CArraySafety.guard c (name + " != NULL") ("array " + name + " is already allocated")
+                            CArraySafety.guard c (name + " != NULL") ("array " + name + " is already allocated")
                             this.size1 <== n1
                             this.size2 <== n2
                             let length1 = this.size1.Expr.eval c
                             let length2 = this.size2.Expr.eval c
                             let elementType = typ.tostring c.language
-                            if c.Debug.debugMode then
-                                CArraySafety.guard c (length1 + " <= 0 || " + length2 + " <= 0")
-                                    ("array " + name + " sizes must be positive")
-                                CArraySafety.guard c ("(size_t)" + length1 + " > SIZE_MAX / (size_t)" + length2)
-                                    ("array " + name + " element count overflows size_t")
-                                CArraySafety.guard c ("(size_t)" + length1 + " * (size_t)" + length2 + " > SIZE_MAX / sizeof(" + elementType + ")")
-                                    ("array " + name + " allocation size overflows size_t")
+                            let invalidLength = if c.Debug.debugMode then " <= 0" else " < 0"
+                            CArraySafety.guard c (length1 + invalidLength + " || " + length2 + invalidLength)
+                                ("array " + name + if c.Debug.debugMode then " sizes must be positive" else " sizes must be nonnegative")
+                            CArraySafety.guard c (length1 + " > 0 && " + length2 + " > 0 && (size_t)" + length1 + " > SIZE_MAX / (size_t)" + length2)
+                                ("array " + name + " element count overflows size_t")
+                            CArraySafety.guard c (length1 + " > 0 && " + length2 + " > 0 && (size_t)" + length1 + " * (size_t)" + length2 + " > SIZE_MAX / sizeof(" + elementType + ")")
+                                ("array " + name + " allocation size overflows size_t")
                             writein(name+" = "+"("+elementType+" *)"+"malloc("+"sizeof("+elementType+") * (size_t)"+length1+" * (size_t)"+length2+");\n")
-                            if c.Debug.debugMode then
-                                CArraySafety.guard c (name + " == NULL") ("memory allocation failed for array " + name)
+                            CArraySafety.guard c (length1 + " > 0 && " + length2 + " > 0 && " + name + " == NULL")
+                                ("memory allocation failed for array " + name)
                         |_ ->
                             writein("(Error:055-001 「"+name+"」は可変長2次元配列ではありません")
                     |LaTeX ->

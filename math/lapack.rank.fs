@@ -17,6 +17,8 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列の階数" <| fun () ->
+                    LapackValidation.require this.GenerationContext (mat.size1 .<= 0) "LAPACK rank matrix rows must be positive."
+                    LapackValidation.require this.GenerationContext (mat.size2 .<= 0) "LAPACK rank matrix columns must be positive."
                     this.GenerationContext.ch.iii <| fun (m,n,ns) ->
                         m <== mat.size1
                         n <== mat.size2
@@ -48,13 +50,14 @@ namespace Aqualis
                                         work.code + ", " + lwork.code + ", " + rwork.code + ", " +
                                         iwork.code + ", " + info.code + ")")
                                 callZgesdd()
+                                LapackValidation.checkInfo this.GenerationContext info "rank workspace query"
                                 lwork <== asm.toint work[0].re
                                 work.deallocate()
                                 work.allocate lwork
                                 callZgesdd()
                                 work.deallocate()
-                                this.GenerationContext.br.if2 (info .= 0) countRank <| fun () ->
-                                    this.GenerationContext.print.tt <| "rank Info: "++info
+                                LapackValidation.checkInfo this.GenerationContext info "rank"
+                                countRank()
                         |C99 ->
                             this.GenerationContext.ch.iii <| fun (lda,info,lwork) ->
                             this.GenerationContext.ch.ii <| fun (ldu,ldvt) ->
@@ -81,13 +84,14 @@ namespace Aqualis
                                             ldvt.code + ", " + work.code + ", &" + lwork.code + ", " +
                                             rwork.code + ", " + iwork.code + ", &" + info.code + ");")
                                     callZgesdd()
+                                    LapackValidation.checkInfo this.GenerationContext info "rank workspace query"
                                     lwork <== asm.toint work[0].re
                                     work.deallocate()
                                     work.allocate lwork
                                     callZgesdd()
                                     work.deallocate()
-                                    this.GenerationContext.br.if2 (info .= 0) countRank <| fun () ->
-                                        this.GenerationContext.print.tt <| "rank Info: "++info
+                                    LapackValidation.checkInfo this.GenerationContext info "rank"
+                                    countRank()
                                 |_ -> ()
                         |LaTeX ->
                             this.GenerationContext.codewritein("$"+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
@@ -96,7 +100,7 @@ namespace Aqualis
                         |Python ->
                             this.RequirePythonLinalg "svd"
                             this.GenerationContext.codewritein("_,"+s.code+",_ = svd("+mat.code+")"+"\n")
-                            this.GenerationContext.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.code+")"+"\n")
+                            this.GenerationContext.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.Expr.eval this.GenerationContext+")"+"\n")
                         |_ -> ()
     
             ///<summary>行列の階数</summary>
@@ -107,6 +111,8 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列の階数" <| fun () ->
+                    LapackValidation.require this.GenerationContext (mat.size1 .<= 0) "LAPACK rank matrix rows must be positive."
+                    LapackValidation.require this.GenerationContext (mat.size2 .<= 0) "LAPACK rank matrix columns must be positive."
                     this.GenerationContext.ch.iii <| fun (m,n,ns) ->
                         m <== mat.size1
                         n <== mat.size2
@@ -137,13 +143,14 @@ namespace Aqualis
                                         work.code + ", " + lwork.code + ", " + iwork.code + ", " +
                                         info.code + ")")
                                 callDgesdd()
+                                LapackValidation.checkInfo this.GenerationContext info "rank workspace query"
                                 lwork <== asm.toint work[0]
                                 work.deallocate()
                                 work.allocate lwork
                                 callDgesdd()
                                 work.deallocate()
-                                this.GenerationContext.br.if2 (info .= 0) countRank <| fun () ->
-                                    this.GenerationContext.print.tt <| "rank Info: "++info
+                                LapackValidation.checkInfo this.GenerationContext info "rank"
+                                countRank()
                         |C99 ->
                             this.GenerationContext.ch.iii <| fun (lda,info,lwork) ->
                             this.GenerationContext.ch.ii <| fun (ldu,ldvt) ->
@@ -169,13 +176,14 @@ namespace Aqualis
                                             ldvt.code + ", " + work.code + ", &" + lwork.code + ", " +
                                             iwork.code + ", &" + info.code + ");")
                                     callDgesdd()
+                                    LapackValidation.checkInfo this.GenerationContext info "rank workspace query"
                                     lwork <== asm.toint work[0]
                                     work.deallocate()
                                     work.allocate lwork
                                     callDgesdd()
                                     work.deallocate()
-                                    this.GenerationContext.br.if2 (info .= 0) countRank <| fun () ->
-                                        this.GenerationContext.print.tt <| "rank Info: "++info
+                                    LapackValidation.checkInfo this.GenerationContext info "rank"
+                                    countRank()
                                 |_ -> ()
                         |LaTeX ->
                             this.GenerationContext.codewritein("$"+rank.code+" \\leftarrow "+"\\mathrm{rank}\\left["+mat.code+"\\right]"+"$\\\\\n")
@@ -184,7 +192,7 @@ namespace Aqualis
                         |Python ->
                             this.RequirePythonLinalg "svd"
                             this.GenerationContext.codewritein("_,"+s.code+",_ = svd("+mat.code+")"+"\n")
-                            this.GenerationContext.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.code+")"+"\n")
+                            this.GenerationContext.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.Expr.eval this.GenerationContext+")"+"\n")
                         |_ -> ()
     
             ///<summary>疑似逆行列の計算</summary>

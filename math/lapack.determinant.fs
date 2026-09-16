@@ -18,6 +18,8 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列式の常用対数を計算" <| fun () ->
+                    LapackValidation.require this.GenerationContext (matrix.size1 .<= 0) "LAPACK determinant matrix order must be positive."
+                    LapackValidation.require this.GenerationContext (matrix.size1 .=/ matrix.size2) "LAPACK determinant matrix must be square."
                     this.GenerationContext.ch.d <| fun d ->
                         let calculateFromFactorizedDiagonal () =
                             d.clear()
@@ -30,16 +32,16 @@ namespace Aqualis
                                 N <== matrix.size1
                                 this.GenerationContext.ch.i1 N <| fun ipiv ->
                                     this.GenerationContext.codewritein("call zgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
-                                    this.GenerationContext.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
-                                        this.GenerationContext.print.tt <| "determinant Info: "++info
+                                    LapackValidation.checkInfo this.GenerationContext info "determinant"
+                                    calculateFromFactorizedDiagonal()
                         |C99 ->
                             this.GenerationContext.ch.ii <| fun (N,info) ->
                                 N <== matrix.size1
                                 this.GenerationContext.ch.i1 N <| fun ipiv ->
                                     this.GenerationContext.elist.add "void zgetrf_(int *, int *, double complex *, int *, int *, int *)"
                                     this.GenerationContext.codewritein("zgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
-                                    this.GenerationContext.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
-                                        this.GenerationContext.print.tt <| "determinant Info: "++info
+                                    LapackValidation.checkInfo this.GenerationContext info "determinant"
+                                    calculateFromFactorizedDiagonal()
                         |LaTeX ->
                             this.GenerationContext.codewritein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
                             calculateFromFactorizedDiagonal()
@@ -62,6 +64,8 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "行列式の常用対数を計算" <| fun () ->
+                    LapackValidation.require this.GenerationContext (matrix.size1 .<= 0) "LAPACK determinant matrix order must be positive."
+                    LapackValidation.require this.GenerationContext (matrix.size1 .=/ matrix.size2) "LAPACK determinant matrix must be square."
                     this.GenerationContext.ch.d <| fun d ->
                         let calculateFromFactorizedDiagonal () =
                             d.clear()
@@ -74,16 +78,16 @@ namespace Aqualis
                                 N <== matrix.size1
                                 this.GenerationContext.ch.i1 N <| fun ipiv ->
                                     this.GenerationContext.codewritein("call dgetrf("+N.code+","+N.code+","+matrix.code+","+N.code+","+ipiv.code+","+info.code+")"+"\n")
-                                    this.GenerationContext.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
-                                        this.GenerationContext.print.tt <| "determinant Info: "++info
+                                    LapackValidation.checkInfo this.GenerationContext info "determinant"
+                                    calculateFromFactorizedDiagonal()
                         |C99 ->
                             this.GenerationContext.ch.ii <| fun (N,info) ->
                                 N <== matrix.size1
                                 this.GenerationContext.ch.i1 N <| fun ipiv ->
                                     this.GenerationContext.elist.add "void dgetrf_(int *, int *, double *, int *, int *, int *)"
                                     this.GenerationContext.codewritein("dgetrf_(&"+N.code+","+"&"+N.code+","+matrix.code+",&"+N.code+","+ipiv.code+",&"+info.code+")"+";\n")
-                                    this.GenerationContext.br.if2 (info .= 0) calculateFromFactorizedDiagonal <| fun () ->
-                                        this.GenerationContext.print.tt <| "determinant Info: "++info
+                                    LapackValidation.checkInfo this.GenerationContext info "determinant"
+                                    calculateFromFactorizedDiagonal()
                         |LaTeX ->
                             this.GenerationContext.codewritein("$"+d.code+" = "+"\\left|"+matrix.code+"\\right|"+"$"+"\\\\\n")
                             calculateFromFactorizedDiagonal()

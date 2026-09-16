@@ -8,6 +8,22 @@ namespace Aqualis
 
     [<AutoOpen>]
     module ContextLaSvdExtensions =
+        let private requireSvdShapes (context:Aqualis) (rows:int0) (columns:int0)
+                                     (uRows:int0) (uColumns:int0) (singularCount:int0)
+                                     (vtRows:int0) (vtColumns:int0) =
+            match context.language with
+            | C99 | Fortran ->
+                LapackValidation.require context (rows .<= 0) "LAPACK SVD matrix rows must be positive."
+                LapackValidation.require context (columns .<= 0) "LAPACK SVD matrix columns must be positive."
+                LapackValidation.require context (uRows .=/ rows) "LAPACK SVD U shape is invalid."
+                LapackValidation.require context (uColumns .=/ rows) "LAPACK SVD U shape is invalid."
+                LapackValidation.require context (vtRows .=/ columns) "LAPACK SVD VT shape is invalid."
+                LapackValidation.require context (vtColumns .=/ columns) "LAPACK SVD VT shape is invalid."
+                context.ch.i <| fun expected ->
+                    context.br.if2 (rows .< columns) (fun () -> expected <== rows) (fun () -> expected <== columns)
+                    LapackValidation.require context (singularCount .=/ expected) "LAPACK SVD singular-value count is invalid."
+            | _ -> ()
+
         type ContextLa with
             /// <summary>
             /// mat = u * s * v に特異値分解
@@ -19,6 +35,7 @@ namespace Aqualis
             member this.svd (mat1:complex2) = fun (u:complex2,s:double1,vt:complex2) ->
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
+                requireSvdShapes this.GenerationContext mat1.size1 mat1.size2 u.size1 u.size2 s.size1 vt.size1 vt.size2
                 match this.GenerationContext.language with
                 |LaTeX ->
                     this.GenerationContext.codewritein("$"+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"$\\\\\n")
@@ -65,6 +82,7 @@ namespace Aqualis
                                             lwork.code + ", " +
                                             rwork.code + ", " +
                                             info.code + ")")
+                                        LapackValidation.checkInfo this.GenerationContext info "SVD workspace query"
                                         lwork <== asm.toint work[0].re
                                         work.deallocate()
                                         work.allocate lwork
@@ -84,6 +102,7 @@ namespace Aqualis
                                             lwork.code + ", " +
                                             rwork.code + ", " +
                                             info.code + ")")
+                                        LapackValidation.checkInfo this.GenerationContext info "SVD"
                                         work.deallocate()
                         |C99 ->
                             this.GenerationContext.ch.iiii <| fun (m,n,lda,info) ->
@@ -123,6 +142,7 @@ namespace Aqualis
                                                 "&" + lwork.code + ", " +
                                                 rwork.code + ", " +
                                                 "&" + info.code + ");")
+                                            LapackValidation.checkInfo this.GenerationContext info "SVD workspace query"
                                             lwork <== asm.toint wkopt.re
                                             work.allocate lwork
                                             this.GenerationContext.codewritein("zgesvd_(" +
@@ -141,6 +161,7 @@ namespace Aqualis
                                                 "&" + lwork.code + ", " +
                                                 rwork.code + ", " +
                                                 "&" + info.code + ");")
+                                            LapackValidation.checkInfo this.GenerationContext info "SVD"
                                             work.deallocate()
                                         |_ -> ()
                         |Python ->
@@ -160,6 +181,7 @@ namespace Aqualis
             member this.svd (mat1:double2) = fun (u:double2,s:double1,vt:double2) ->
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
+                requireSvdShapes this.GenerationContext mat1.size1 mat1.size2 u.size1 u.size2 s.size1 vt.size1 vt.size2
                 match this.GenerationContext.language with
                 |LaTeX ->
                     this.GenerationContext.codewritein("$"+mat1.code+" = "+u.code+s.code+vt.code+"^{\\mathrm{T}}"+"$\\\\\n")
@@ -202,6 +224,7 @@ namespace Aqualis
                                             work.code + ", " +
                                             lwork.code + ", " +
                                             info.code + ")")
+                                        LapackValidation.checkInfo this.GenerationContext info "SVD workspace query"
                                         lwork <== asm.toint work[0]
                                         work.deallocate()
                                         work.allocate lwork
@@ -220,6 +243,7 @@ namespace Aqualis
                                             work.code + ", " +
                                             lwork.code + ", " +
                                             info.code + ")")
+                                        LapackValidation.checkInfo this.GenerationContext info "SVD"
                                         work.deallocate()
                         |C99 ->
                             this.GenerationContext.ch.iiii <| fun (m,n,lda,info) ->
@@ -255,6 +279,7 @@ namespace Aqualis
                                                 work.code + ", " +
                                                 "&" + lwork.code + ", " +
                                                 "&" + info.code + ");")
+                                            LapackValidation.checkInfo this.GenerationContext info "SVD workspace query"
                                             lwork <== asm.toint work[0]
                                             work.deallocate()
                                             work.allocate lwork
@@ -273,6 +298,7 @@ namespace Aqualis
                                                 work.code + ", " +
                                                 "&" + lwork.code + ", " +
                                                 "&" + info.code + ");")
+                                            LapackValidation.checkInfo this.GenerationContext info "SVD"
                                             work.deallocate()
                                         |_ -> ()
                         |Python ->
