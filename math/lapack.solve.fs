@@ -17,6 +17,22 @@ namespace Aqualis
                                     " != 0) { fprintf(stderr, \"Aqualis: LAPACK solve failed (INFO=%d).\\n\", " +
                                     info.code + "); exit(EXIT_FAILURE); }\n")
             |_ -> ()
+        let private requireSolveShape (context:Aqualis) (condition:bool0) message =
+            match context.language with
+            | C99 ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("fprintf(stderr, " + OutputTextLiteral.c ("Aqualis: " + message + "\n") + "); exit(EXIT_FAILURE);\n"))
+            | Fortran ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("error stop " + OutputTextLiteral.fortran ("Aqualis: " + message) + "\n"))
+            | Python ->
+                context.br.if1 condition (fun () ->
+                    context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n"))
+            | _ -> ()
+
+        let private requireSquareMatrix context (matrixSize1:int0) (matrixSize2:int0) =
+            requireSolveShape context (matrixSize1 .<= 0) "LAPACK matrix order must be positive."
+            requireSolveShape context (matrixSize1 .=/ matrixSize2) "LAPACK matrix must be square."
         type ContextLa with
             ///<summary>連立方程式の求解</summary>
             ///<param name="matrix">係数行列</param>
@@ -25,6 +41,8 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    requireSquareMatrix this.GenerationContext matrix.size1 matrix.size2
+                    requireSolveShape this.GenerationContext (y.size1 .=/ matrix.size1) "LAPACK right-hand side length must match matrix order."
                     match this.GenerationContext.language with
                     |Fortran ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
@@ -57,6 +75,8 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    requireSquareMatrix this.GenerationContext matrix.size1 matrix.size2
+                    requireSolveShape this.GenerationContext (y.size1 .=/ matrix.size1) "LAPACK right-hand side length must match matrix order."
                     match this.GenerationContext.language with
                     |Fortran ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
@@ -89,6 +109,9 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    requireSquareMatrix this.GenerationContext matrix.size1 matrix.size2
+                    requireSolveShape this.GenerationContext (y.size1 .=/ matrix.size1) "LAPACK right-hand side rows must match matrix order."
+                    requireSolveShape this.GenerationContext (y.size2 .<= 0) "LAPACK right-hand side must have at least one column."
                     match this.GenerationContext.language with
                     |Fortran ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
@@ -121,6 +144,9 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    requireSquareMatrix this.GenerationContext matrix.size1 matrix.size2
+                    requireSolveShape this.GenerationContext (y.size1 .=/ matrix.size1) "LAPACK right-hand side rows must match matrix order."
+                    requireSolveShape this.GenerationContext (y.size2 .<= 0) "LAPACK right-hand side must have at least one column."
                     match this.GenerationContext.language with
                     |Fortran ->
                         this.GenerationContext.ch.iii <| fun (N,b,info) ->
@@ -153,6 +179,9 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "逆行列の計算" <| fun () ->
+                    requireSquareMatrix this.GenerationContext mat1.size1 mat1.size2
+                    requireSolveShape this.GenerationContext (mat2.size1 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
+                    requireSolveShape this.GenerationContext (mat2.size2 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
                     mat2.clear()
                     this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
                     match this.GenerationContext.language with
@@ -186,6 +215,9 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "逆行列の計算" <| fun () ->
+                    requireSquareMatrix this.GenerationContext mat1.size1 mat1.size2
+                    requireSolveShape this.GenerationContext (mat2.size1 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
+                    requireSolveShape this.GenerationContext (mat2.size2 .=/ mat1.size1) "LAPACK inverse output shape must match matrix order."
                     mat2.clear()
                     this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
                     match this.GenerationContext.language with

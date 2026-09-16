@@ -245,6 +245,10 @@ for language in c fortran python; do
     inverse_error='Aqualis: LAPACK solve failed'
   fi
   expect_generated_failure "$language singular inverse" "$output_root/inverse-singular-$language" "$inverse_error" "${run_command[@]}"
+  expect_generated_failure "$language non-square inverse" "$output_root/inverse-non-square-$language" 'Aqualis: LAPACK matrix must be square.' "${run_command[@]}"
+  expect_generated_failure "$language undersized inverse output" "$output_root/inverse-small-output-$language" 'Aqualis: LAPACK inverse output shape must match matrix order.' "${run_command[@]}"
+  expect_generated_failure "$language short solve RHS" "$output_root/solve-short-rhs-$language" 'Aqualis: LAPACK right-hand side length must match matrix order.' "${run_command[@]}"
+  expect_generated_failure "$language wrong solve RHS rows" "$output_root/solve-wrong-rhs-rows-$language" 'Aqualis: LAPACK right-hand side rows must match matrix order.' "${run_command[@]}"
 
   spline_directory="$output_root/spline-load-$language"
   printf '2\n0.00000000000000000E+000\n1.00000000000000000E+000\n' > "$spline_directory/data_x.dat"
@@ -257,6 +261,8 @@ for language in c fortran python; do
   fi
   printf '1\n0\n' > "$spline_directory/data_y.dat"
   expect_generated_failure "$language mismatched spline data" "$spline_directory" 'Spline x and y lengths must match.' "${run_command[@]}"
+  printf '999999\n' > "$spline_directory/data_x.dat"
+  expect_generated_failure "$language truncated spline points" "$spline_directory" 'Aqualis: truncated text data.' "${run_command[@]}"
 
   persistence_directory="$output_root/persistence-invalid-version-$language"
   printf '\002\000\000\000' > "$persistence_directory/data.bin"
@@ -265,6 +271,31 @@ for language in c fortran python; do
   expect_generated_failure "$language invalid persistence type" "$persistence_directory" 'Aqualis: invalid data type' "${run_command[@]}"
   printf '\001\000\000\000\354\003\000\000\001\000\000\000' > "$persistence_directory/data.bin"
   expect_generated_failure "$language invalid persistence dimension" "$persistence_directory" 'Aqualis: invalid data dimension' "${run_command[@]}"
+  printf '\001\000\000\000\354\003\000\000\000\000\000\000\000\000\000\000\011\000\000\000' > "$persistence_directory/data.bin"
+  expect_generated_failure "$language invalid scalar size" "$persistence_directory" 'Aqualis: invalid scalar data size' "${run_command[@]}"
+
+  array_directory="$output_root/persistence-array-$language"
+  printf '\001\000\000\000\354\003\000\000\001\000\000\000\002\000\000\000\007\000\000\000\010\000\000\000' > "$array_directory/data.bin"
+  run_and_verify "$language persistence array" "$array_directory" '7' "${run_command[@]}"
+  printf '\001\000\000\000\354\003\000\000\001\000\000\000\350\003\000\000\007\000\000\000' > "$array_directory/data.bin"
+  expect_generated_failure "$language oversized persistence array" "$array_directory" 'Aqualis: truncated array data.' "${run_command[@]}"
+  printf '\001\000\000\000\354\003\000\000\001\000\000\000\377\377\377\377' > "$array_directory/data.bin"
+  expect_generated_failure "$language negative persistence array size" "$array_directory" 'Aqualis: invalid array data size.' "${run_command[@]}"
+
+  empty_array_directory="$output_root/persistence-empty-array-$language"
+  printf '\001\000\000\000\354\003\000\000\001\000\000\000\000\000\000\000' > "$empty_array_directory/data.bin"
+  run_and_verify "$language empty persistence array" "$empty_array_directory" '0' "${run_command[@]}"
+
+  tensor_directory="$output_root/persistence-tensor-$language"
+  printf '\001\000\000\000\354\003\000\000\003\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\007\000\000\000' > "$tensor_directory/data.bin"
+  run_and_verify "$language persistence tensor" "$tensor_directory" '7' "${run_command[@]}"
+  printf '\001\000\000\000\354\003\000\000\003\000\000\000\377\377\377\177\377\377\377\177\377\377\377\177' > "$tensor_directory/data.bin"
+  if [[ "$language" == python ]]; then
+    tensor_error='Aqualis: truncated array data.'
+  else
+    tensor_error='Aqualis: invalid array data size.'
+  fi
+  expect_generated_failure "$language overflowing persistence tensor" "$tensor_directory" "$tensor_error" "${run_command[@]}"
 done
 
 expect_generated_failure 'C99 non-finite spline y' "$output_root/spline-c-non-finite-y" \

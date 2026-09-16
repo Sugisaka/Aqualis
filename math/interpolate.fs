@@ -57,6 +57,15 @@ namespace Aqualis
                 require context (value .< x[0]) "Spline query is out of range."
                 require context (value .> x[x.size1-1]) "Spline query is out of range."
 
+            let loadedXCount (context:Aqualis) (reader:TextReader) (count:int0) =
+                require context (count .< 2) "Spline interpolation requires at least two points."
+                require context (count .> 715827883) "Spline point count is too large."
+                reader.RequireRecordCapacity count
+
+            let loadedCount (context:Aqualis) (reader:TextReader) (count:int0) (expected:int0) message =
+                require context (count .=/ expected) message
+                reader.RequireRecordCapacity count
+
         let private validateLinearData (dataX:double list) dataYCount =
             if dataX.Length < 2 then
                 invalidArg "data_x" "Linear interpolation requires at least two data points."
@@ -210,6 +219,7 @@ namespace Aqualis
                 context.io.fileInput (filename+"_x.dat") <| fun wr ->
                     context.ch.id <| fun (n,t) ->
                         wr.t n
+                        SplineValidation.loadedXCount context wr n
                         x.allocate n
                         context.iter.num x.size1 <| fun i ->
                             wr.t t
@@ -217,6 +227,7 @@ namespace Aqualis
                 context.io.fileInput (filename+"_y.dat") <| fun wr ->
                     context.ch.id <| fun (n,t) ->
                         wr.t n
+                        SplineValidation.loadedCount context wr n x.size1 "Spline x and y lengths must match."
                         y.allocate n
                         context.iter.num y.size1 <| fun i ->
                             wr.t t
@@ -224,6 +235,7 @@ namespace Aqualis
                 context.io.fileInput (filename+"_g.dat") <| fun wr ->
                     context.ch.id <| fun (n,t) ->
                         wr.t n
+                        SplineValidation.loadedCount context wr n (3*x.size1-3) "Spline coefficient count is invalid."
                         g.allocate n
                         context.iter.num g.size1 <| fun i ->
                             wr.t t
@@ -375,6 +387,7 @@ namespace Aqualis
                     context.io.fileInput (filename+"_x.dat") <| fun rd ->
                         context.ch.id <| fun (n,t) ->
                             rd.t n
+                            SplineValidation.loadedXCount context rd n
                             x.allocate n
                             context.iter.num x.size1 <| fun i ->
                                 rd.t t
@@ -382,6 +395,7 @@ namespace Aqualis
                     context.io.fileInput (filename+"_y.dat") <| fun rd ->
                         context.ch.idd <| fun (n,s,t) ->
                             rd.t n
+                            SplineValidation.loadedCount context rd n x.size1 "Spline x and y lengths must match."
                             y.allocate n
                             context.iter.num y.size1 <| fun i ->
                                 rd.tt <| s++t
@@ -389,6 +403,7 @@ namespace Aqualis
                     context.io.fileInput (filename+"_g.dat") <| fun rd ->
                         context.ch.idd <| fun (n,s,t) ->
                             rd.t n
+                            SplineValidation.loadedCount context rd n (3*x.size1-3) "Spline coefficient count is invalid."
                             g.allocate n
                             context.iter.num g.size1 <| fun i ->
                                 rd.tt <| s++t
@@ -397,6 +412,7 @@ namespace Aqualis
                     context.io.fileInput (filename+"_x.dat") <| fun rd ->
                         context.ch.id <| fun (n,t) ->
                             rd.t n
+                            SplineValidation.loadedXCount context rd n
                             x.allocate n
                             context.iter.num x.size1 <| fun i ->
                                 rd.t t
@@ -404,6 +420,7 @@ namespace Aqualis
                     context.io.fileInput (filename+"_y.dat") <| fun rd ->
                         context.ch.id <| fun (n,t) ->
                             rd.t n
+                            SplineValidation.loadedCount context rd n x.size1 "Spline x and y lengths must match."
                             y.allocate n
                             context.iter.num y.size1 <| fun i ->
                                 rd.t t
@@ -411,6 +428,7 @@ namespace Aqualis
                     context.io.fileInput (filename+"_g.dat") <| fun rd ->
                         context.ch.id <| fun (n,t) ->
                             rd.t n
+                            SplineValidation.loadedCount context rd n (3*x.size1-3) "Spline coefficient count is invalid."
                             g.allocate n
                             context.iter.num g.size1 <| fun i ->
                                 rd.t t

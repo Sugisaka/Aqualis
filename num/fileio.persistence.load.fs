@@ -21,6 +21,23 @@ namespace Aqualis
         let private requireFormatVersion (context:Aqualis) (version:int0) =
             context.br.if1 (version .=/ 1) (fun () -> failInvalidPersistenceData context "invalid data format")
 
+        let private requireScalarSize (context:Aqualis) (size:int0) =
+            context.br.if1 (size .=/ 1) (fun () -> failInvalidPersistenceData context "invalid scalar data size")
+
+        let private requireArrayPayload (reader:BinReader) (typeCode:int) (dimensions:int0 list) =
+            let bytesPerElement =
+                match typeCode with
+                | 1004 -> 4
+                | 2000 -> 8
+                | 3000 -> 16
+                | _ -> invalidArg (nameof typeCode) "Unsupported persistence element type."
+            reader.RequireArrayPayload(dimensions,bytesPerElement)
+
+        let private requireArrayAllocation (context:Aqualis) (arrayCode:string) (dimensions:int0 list) =
+            if context.language = C99 then
+                let nonEmpty = dimensions |> List.map (fun size -> "(" + size.Expr.eval context + " > 0)") |> String.concat " && "
+                context.codewritein("if (" + nonEmpty + " && " + arrayCode + " == NULL) { fprintf(stderr, \"Aqualis: failed to allocate array data.\\n\"); exit(EXIT_FAILURE); }\n")
+
         type ContextIo with
             ///<summary>数値をファイルから読み込み</summary>
             member this.load (f:int0,filename:exprString) =
@@ -37,6 +54,7 @@ namespace Aqualis
                                         this.GenerationContext.ch.i <| fun n1 ->
                                             //データサイズ
                                             r.b n1
+                                            requireScalarSize this.GenerationContext n1
                                             //データ本体
                                             r.b f
                                     <| fun () ->
@@ -75,6 +93,7 @@ namespace Aqualis
                                         this.GenerationContext.ch.i <| fun n1 ->
                                             //データサイズ
                                             r.b n1
+                                            requireScalarSize this.GenerationContext n1
                                             //データ本体
                                             r.b f
                                     <| fun () ->
@@ -113,6 +132,7 @@ namespace Aqualis
                                         this.GenerationContext.ch.i <| fun n1 ->
                                             //データサイズ
                                             r.b n1
+                                            requireScalarSize this.GenerationContext n1
                                             //データ本体
                                             this.GenerationContext.ch.dd <| fun (re,im) ->
                                                 r.b re
@@ -154,7 +174,9 @@ namespace Aqualis
                                         this.GenerationContext.ch.i <| fun n1 ->
                                             //データサイズ
                                             r.b n1
+                                            requireArrayPayload r nt [n1]
                                             f.allocate n1
+                                            requireArrayAllocation this.GenerationContext f.code [n1]
                                             //データ本体
                                             this.GenerationContext.iter.num f.size1 <| fun i ->
                                                 this.GenerationContext.ch.i <| fun u ->
@@ -196,7 +218,9 @@ namespace Aqualis
                                         this.GenerationContext.ch.i <| fun n1 ->
                                             //データサイズ
                                             r.b n1
+                                            requireArrayPayload r nt [n1]
                                             f.allocate n1
+                                            requireArrayAllocation this.GenerationContext f.code [n1]
                                             //データ本体
                                             this.GenerationContext.iter.num f.size1 <| fun i ->
                                                 this.GenerationContext.ch.d <| fun u ->
@@ -238,7 +262,9 @@ namespace Aqualis
                                         this.GenerationContext.ch.i <| fun n1 ->
                                             //データサイズ
                                             r.b n1
+                                            requireArrayPayload r nt [n1]
                                             f.allocate n1
+                                            requireArrayAllocation this.GenerationContext f.code [n1]
                                             //データ本体
                                             match t with
                                             |It _ ->
@@ -296,7 +322,9 @@ namespace Aqualis
                                             //データサイズ
                                             r.b n1
                                             r.b n2
+                                            requireArrayPayload r nt [n1;n2]
                                             f.allocate(n1,n2)
+                                            requireArrayAllocation this.GenerationContext f.code [n1;n2]
                                             //データ本体
                                             this.GenerationContext.iter.num f.size2 <| fun j ->
                                                 this.GenerationContext.iter.num f.size1 <| fun i ->
@@ -341,7 +369,9 @@ namespace Aqualis
                                             //データサイズ
                                             r.b n1
                                             r.b n2
+                                            requireArrayPayload r nt [n1;n2]
                                             f.allocate(n1,n2)
+                                            requireArrayAllocation this.GenerationContext f.code [n1;n2]
                                             //データ本体
                                             this.GenerationContext.iter.num f.size2 <| fun j ->
                                                 this.GenerationContext.iter.num f.size1 <| fun i ->
@@ -386,7 +416,9 @@ namespace Aqualis
                                             //データサイズ
                                             r.b n1
                                             r.b n2
+                                            requireArrayPayload r nt [n1;n2]
                                             f.allocate(n1,n2)
+                                            requireArrayAllocation this.GenerationContext f.code [n1;n2]
                                             //データ本体
                                             match t with
                                             |It _ ->
@@ -449,7 +481,9 @@ namespace Aqualis
                                             r.b n1
                                             r.b n2
                                             r.b n3
+                                            requireArrayPayload r nt [n1;n2;n3]
                                             f.allocate(n1,n2,n3)
+                                            requireArrayAllocation this.GenerationContext f.code [n1;n2;n3]
                                             //データ本体
                                             this.GenerationContext.iter.num f.size3 <| fun k ->
                                                 this.GenerationContext.iter.num f.size2 <| fun j ->
@@ -500,7 +534,9 @@ namespace Aqualis
                                             r.b n1
                                             r.b n2
                                             r.b n3
+                                            requireArrayPayload r nt [n1;n2;n3]
                                             f.allocate(n1,n2,n3)
+                                            requireArrayAllocation this.GenerationContext f.code [n1;n2;n3]
                                             //データ本体
                                             this.GenerationContext.iter.num f.size3 <| fun k ->
                                                 this.GenerationContext.iter.num f.size2 <| fun j ->
@@ -551,7 +587,9 @@ namespace Aqualis
                                             r.b n1
                                             r.b n2
                                             r.b n3
+                                            requireArrayPayload r nt [n1;n2;n3]
                                             f.allocate(n1,n2,n3)
+                                            requireArrayAllocation this.GenerationContext f.code [n1;n2;n3]
                                             //データ本体
                                             this.GenerationContext.iter.num f.size3 <| fun k ->
                                                 this.GenerationContext.iter.num f.size2 <| fun j ->

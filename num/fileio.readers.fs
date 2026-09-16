@@ -30,7 +30,35 @@ namespace Aqualis
         let writein text = ctx.codewritein(text + "\n")
         let mutable byteStreamOpened = false
         let mutable formattedStreamUsed = false
+        member _.RequireRecordCapacity(count:int0) =
+            let size = count.Expr.eval ctx
+            match ctx.language with
+            |C99 ->
+                writein("{")
+                writein("long aqualis_position = ftell(" + fp + ");")
+                writein("if (aqualis_position < 0 || fseek(" + fp + ",0,SEEK_END) != 0) { fprintf(stderr, \"Aqualis: failed to inspect text data.\\n\"); exit(EXIT_FAILURE); }")
+                writein("long aqualis_size = ftell(" + fp + ");")
+                writein("if (aqualis_size < aqualis_position || fseek(" + fp + ",aqualis_position,SEEK_SET) != 0) { fprintf(stderr, \"Aqualis: failed to inspect text data.\\n\"); exit(EXIT_FAILURE); }")
+                writein("if (" + size + " > aqualis_size - aqualis_position) { fprintf(stderr, \"Aqualis: truncated text data.\\n\"); exit(EXIT_FAILURE); }")
+                writein("}")
+            |Fortran ->
+                writein("block")
+                writein("integer(kind=8) :: aqualis_size")
+                writein("integer :: aqualis_status")
+                writein("inquire(unit=" + fp + ",size=aqualis_size,iostat=aqualis_status)")
+                writein("if (aqualis_status /= 0 .or. aqualis_size < int(" + size + ",kind=8)) error stop 'Aqualis: truncated text data.'")
+                writein("end block")
+            |Python ->
+                ctx.ch.ii <| fun (position,remaining) ->
+                    writein(position.code + " = " + fp + ".tell()")
+                    writein(fp + ".seek(0,2)")
+                    writein(remaining.code + " = " + fp + ".tell() - " + position.code)
+                    writein(fp + ".seek(" + position.code + ")")
+                    writein("if " + size + " > " + remaining.code + ": raise ValueError('Aqualis: truncated text data.')")
+            |_ -> ()
         member _.tt (lst:exprString) =
+            if ctx.language = PHP then
+                raise (NotSupportedException("TextReader.tt is not supported for PHP."))
             if ctx.language = Fortran then
                 if byteStreamOpened then
                     invalidOp "Fortran text and byte reads cannot share a file cursor."
@@ -263,6 +291,58 @@ namespace Aqualis
         let readC target =
             writein("if (fread(&" + target + ",sizeof(" + target + "),1," + fp +
                     ") != 1) { fprintf(stderr, \"Aqualis: invalid binary input record.\\n\"); exit(EXIT_FAILURE); }")
+        member _.RequireArrayPayload(dimensions:int0 list,bytesPerElement:int) =
+            if List.isEmpty dimensions || bytesPerElement <= 0 then
+                invalidArg (nameof dimensions) "Array dimensions are required and element size must be positive."
+            let sizes = dimensions |> List.map (fun size -> size.Expr.eval ctx)
+            match ctx.language with
+            |C99 ->
+                let fail message =
+                    writein("fprintf(stderr, " + OutputTextLiteral.c ("Aqualis: " + message + "\n") + "); exit(EXIT_FAILURE);")
+                writein("{")
+                writein("size_t aqualis_count = 1;")
+                for size in sizes do
+                    writein("if (" + size + " < 0 || (aqualis_count != 0 && (size_t)" + size + " > SIZE_MAX / aqualis_count)) {")
+                    fail "invalid array data size."
+                    writein("}")
+                    writein("aqualis_count *= (size_t)" + size + ";")
+                writein("long aqualis_position = ftell(" + fp + ");")
+                writein("if (aqualis_position < 0 || fseek(" + fp + ",0,SEEK_END) != 0) {")
+                fail "failed to inspect array data."
+                writein("}")
+                writein("long aqualis_end = ftell(" + fp + ");")
+                writein("if (aqualis_end < aqualis_position || fseek(" + fp + ",aqualis_position,SEEK_SET) != 0) {")
+                fail "failed to inspect array data."
+                writein("}")
+                writein("if (aqualis_count > (size_t)(aqualis_end - aqualis_position) / " + string bytesPerElement + "U) {")
+                fail "truncated array data."
+                writein("}")
+                writein("}")
+            |Fortran ->
+                writein("block")
+                writein("integer(kind=8) :: aqualis_count, aqualis_size, aqualis_position")
+                writein("integer :: aqualis_status")
+                writein("aqualis_count = 1_8")
+                for size in sizes do
+                    writein("if (" + size + " < 0) error stop 'Aqualis: invalid array data size.'")
+                    writein("if (aqualis_count /= 0_8) then")
+                    writein("if (int(" + size + ",kind=8) > huge(aqualis_count) / aqualis_count) error stop 'Aqualis: invalid array data size.'")
+                    writein("endif")
+                    writein("aqualis_count = aqualis_count * int(" + size + ",kind=8)")
+                writein("inquire(unit=" + fp + ",size=aqualis_size,pos=aqualis_position,iostat=aqualis_status)")
+                writein("if (aqualis_status /= 0 .or. aqualis_size < aqualis_position - 1_8) error stop 'Aqualis: failed to inspect array data.'")
+                writein("if (aqualis_count > (aqualis_size - aqualis_position + 1_8) / " + string bytesPerElement + "_8) error stop 'Aqualis: truncated array data.'")
+                writein("end block")
+            |Python ->
+                for size in sizes do
+                    writein("if " + size + " < 0: raise ValueError('Aqualis: invalid array data size.')")
+                ctx.ch.ii <| fun (position,remaining) ->
+                    writein(position.code + " = " + fp + ".tell()")
+                    writein(fp + ".seek(0,2)")
+                    writein(remaining.code + " = " + fp + ".tell() - " + position.code)
+                    writein(fp + ".seek(" + position.code + ")")
+                    writein("if (" + String.Join(" * ",sizes) + ") * " + string bytesPerElement + " > " + remaining.code + ": raise ValueError('Aqualis: truncated array data.')")
+            |_ -> ()
         member private _.ReadBin target =
             let v,targetContext =
                 FileIoReadTarget.require ctx target

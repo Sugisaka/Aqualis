@@ -70,6 +70,16 @@ module FileResourceTests =
         Assert.Contains("TextReader.b",error.Message)
 
     [<Fact>]
+    let ``PHP text input reports unsupported operation`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path,Some "read.php",PHP)
+        let value = context.var.i0 "value"
+        let error =
+            Assert.Throws<NotSupportedException>(fun () ->
+                context.io.fileInput "input.dat" <| fun reader -> reader.t value)
+        Assert.Contains("TextReader.tt",error.Message)
+
+    [<Fact>]
     let ``Fortran mixed text and byte reads reject separate cursors`` () =
         use output = new TemporaryDirectory()
         use context = new Aqualis(Some output.Path,Some "read.f90",Fortran)

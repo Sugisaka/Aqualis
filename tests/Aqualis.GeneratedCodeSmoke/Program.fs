@@ -347,6 +347,34 @@ module Program =
             matrix.clear()
             context.la.inverse_matrix(inverse,matrix)
 
+        generate "inverse-non-square" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let inverse = context.var.d2 "inverse"
+            matrix.allocate(2, 3)
+            inverse.allocate(2, 2)
+            context.la.inverse_matrix(inverse,matrix)
+
+        generate "inverse-small-output" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let inverse = context.var.z2 "inverse"
+            matrix.allocate(2, 2)
+            inverse.allocate(1, 1)
+            context.la.inverse_matrix(inverse,matrix)
+
+        generate "solve-short-rhs" <| fun context ->
+            let matrix = context.var.d2 "matrix"
+            let rhs = context.var.d1 "rhs"
+            matrix.allocate(2, 2)
+            rhs.allocate 1
+            context.la.solve_simuleq(matrix,rhs)
+
+        generate "solve-wrong-rhs-rows" <| fun context ->
+            let matrix = context.var.z2 "matrix"
+            let rhs = context.var.z2 "rhs"
+            matrix.allocate(2, 2)
+            rhs.allocate(1, 2)
+            context.la.solve_simuleqs(matrix,rhs)
+
         generate "spline-load" <| fun context ->
             let spline = context.interpolate.splineDouble()
             spline.load "data"
@@ -359,6 +387,21 @@ module Program =
             value <== 9
             context.io.load(value,"data.bin")
             context.print.t value
+
+        generate "persistence-array" <| fun context ->
+            let value = context.var.i1 "value"
+            context.io.load(value,"data.bin")
+            context.print.t value[0]
+
+        generate "persistence-empty-array" <| fun context ->
+            let value = context.var.i1 "value"
+            context.io.load(value,"data.bin")
+            context.print.t value.size1
+
+        generate "persistence-tensor" <| fun context ->
+            let value = context.var.i3 "value"
+            context.io.load(value,"data.bin")
+            context.print.t value[0,0,0]
 
     [<EntryPoint>]
     let main arguments =
