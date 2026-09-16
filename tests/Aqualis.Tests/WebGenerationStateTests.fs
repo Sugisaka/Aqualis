@@ -14,6 +14,13 @@ type private TestCharacter(context:HtmlGenerationContext, directory:string, name
         Path.Combine(directory, name + "_" + string number + ".txt")
     override _.scriptColor = "#000000"
 
+type private FailingScriptCharacter(context:HtmlGenerationContext, directory:string, name:string) =
+    inherit Character(context, directory, name)
+    override _.audioFile _ = None
+    override _.scriptFile number =
+        Path.Combine(directory, "missing", name + "_" + string number + ".txt")
+    override _.scriptColor = "#000000"
+
 module WebGenerationStateTests =
     [<Theory>]
     [<InlineData(null)>]
@@ -76,6 +83,55 @@ module WebGenerationStateTests =
         Assert.Equal("テール右", character.Name)
         Assert.True(File.Exists(Path.Combine(output.Path, "テール右.json")))
         Assert.True(File.Exists(Path.Combine(output.Path, "テール右_0.txt")))
+
+    [<Fact>]
+    let ``Character reuses only an existing matching subtitle and script pair`` () =
+        use output = new TemporaryDirectory()
+        use context = new HtmlGenerationContext(output.Path, "character-duplicate-test")
+        let name = "speaker"
+        let firstCharacter = TestCharacter(context, output.Path, name)
+        let original, _, _ = firstCharacter.script("字幕A", "同じ読み上げ")
+        firstCharacter.saveScriptData()
+
+        let reloadedCharacter = TestCharacter(context, output.Path, name)
+        let reused, _, _ = reloadedCharacter.script("字幕A", "同じ読み上げ")
+        let distinct, _, _ = reloadedCharacter.script("字幕B", "同じ読み上げ")
+        reloadedCharacter.saveScriptData()
+
+        Assert.Equal(original, reused)
+        Assert.Equal(Some 0, reused.AudioFileNumber)
+        Assert.Equal(Some 1, distinct.AudioFileNumber)
+        Assert.Equal(Some 0, distinct.AudioSourceNumber)
+
+        let saved =
+            File.ReadAllText(Path.Combine(output.Path, name + ".json"))
+            |> JsonSerializer.Deserialize<Audio list>
+        Assert.Equal<Audio list>([original; distinct], saved)
+        Assert.Equal<string array>(
+            [|"同じ読み上げ"|],
+            File.ReadAllLines(Path.Combine(output.Path, name + "_1.txt")))
+
+    [<Fact>]
+    let ``Character save preserves existing JSON when staging another output fails`` () =
+        use output = new TemporaryDirectory()
+        use context = new HtmlGenerationContext(output.Path, "character-atomic-save-test")
+        let name = "speaker"
+        let jsonPath = Path.Combine(output.Path, name + ".json")
+        let originalJson =
+            JsonSerializer.Serialize<Audio list>(
+                [{ Subtitle = "既存字幕"
+                   Script = "既存読み上げ"
+                   AudioFileNumber = Some 0
+                   AudioSourceNumber = Some 0 }])
+        File.WriteAllText(jsonPath, originalJson)
+
+        let character = FailingScriptCharacter(context, output.Path, name)
+        character.script("新規字幕", "新規読み上げ") |> ignore
+
+        Assert.Throws<DirectoryNotFoundException>(fun () -> character.saveScriptData())
+        |> ignore
+        Assert.Equal(originalJson, File.ReadAllText(jsonPath))
+        Assert.Empty(Directory.GetFiles(output.Path, ".speaker.json.aqualis-*.tmp"))
 
     [<Fact>]
     let ``HTML attributes encode markup characters exactly once`` () =

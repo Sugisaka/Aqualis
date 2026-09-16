@@ -44,6 +44,25 @@ type AnimationSetting = {
     /// アニメーションのフレーム数（時間は0からFrameNumber-1まで進む）
     FrameNumber:int}
 
+[<RequireQualifiedAccess>]
+module private CharacterOutputFile =
+    let private stage (targetPath:string) (write:string -> unit) =
+        let output = AtomicOutputFile.create targetPath
+        try
+            write output.StagingPath
+            output
+        with _ ->
+            AtomicOutputFile.discard output
+            reraise()
+
+    let stageText (targetPath:string) (text:string) =
+        stage targetPath (fun stagingPath -> File.WriteAllText(stagingPath, text))
+
+    let stageLines (targetPath:string) (lines:string list) =
+        stage targetPath (fun stagingPath ->
+            use writer = new StreamWriter(stagingPath, false)
+            lines |> List.iter writer.WriteLine)
+
 [<AbstractClass>]
 type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
     let name =
@@ -77,21 +96,32 @@ type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
         |[] ->
             ()
         |_ ->
-            // jsonファイル出力
-            let json = JsonSerializer.Serialize(serif, jsonOptions)
-            File.WriteAllText(scriptDataFileName, json)
-            // 音声スクリプトファイル出力（読み上げ用音声合成ソフト入力用）
-            serif
-            |> List.filter (fun audio -> audio.AudioFileNumber = Some(audioFileCounter+1))
-            |> List.sortBy (fun audio -> audio.AudioSourceNumber)
-            |> fun lst ->
-                match lst with
+            let stagedOutputs = ResizeArray<AtomicOutputFile>()
+            try
+                // すべての出力を一時ファイルに準備してから、完成したファイルだけを公開する。
+                let json = JsonSerializer.Serialize(serif, jsonOptions)
+                stagedOutputs.Add(CharacterOutputFile.stageText scriptDataFileName json)
+
+                // 音声スクリプトファイル出力（読み上げ用音声合成ソフト入力用）
+                let newScripts =
+                    serif
+                    |> List.filter (fun audio -> audio.AudioFileNumber = Some(audioFileCounter+1))
+                    |> List.sortBy (fun audio -> audio.AudioSourceNumber)
+                    |> List.map (fun audio -> audio.Script)
+                match newScripts with
                 |[] -> ()
                 |_ ->
-                    use wr = new StreamWriter(this.scriptFile (audioFileCounter+1), false)
-                    lst |> List.iter (fun audio -> wr.WriteLine audio.Script)
+                    stagedOutputs.Add(
+                        CharacterOutputFile.stageLines
+                            (this.scriptFile (audioFileCounter+1))
+                            newScripts)
+
+                stagedOutputs |> Seq.iter AtomicOutputFile.publish
+            with _ ->
+                stagedOutputs |> Seq.iter AtomicOutputFile.discard
+                reraise()
     member this.script(subtitle:string,script:string) =
-        match serif |> List.tryFind (fun a -> a.Script=script) with
+        match serif |> List.tryFind (fun a -> a.Subtitle=subtitle && a.Script=script) with
         |None ->
             let a = {Subtitle=subtitle; Script=script; AudioFileNumber=Some(audioFileCounter+1); AudioSourceNumber=Some newScriptCounter}
             serif <- serif@[a]
