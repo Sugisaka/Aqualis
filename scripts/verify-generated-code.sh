@@ -523,11 +523,12 @@ expect_generated_failure 'PHP mismatched array shape' \
   "$output_root/array-shape-vector-php" \
   'Aqualis: Array size (first dimension) mismatch.' \
   php smoke.php
-for case_name in integer real; do
+for case_name in integer real duplicate; do
   php -l "$output_root/php-initialized-$case_name/smoke.php" >/dev/null
 done
 run_and_verify_number 'PHP initialized integer array' "$output_root/php-initialized-integer" '7' php smoke.php
 run_and_verify_number 'PHP initialized real array' "$output_root/php-initialized-real" '2.5' php smoke.php
+run_and_verify_number 'PHP duplicate initialized array' "$output_root/php-initialized-duplicate" '5' php smoke.php
 
 cat > "$output_root/eigen-info-wrapper.c" <<'EOF'
 #include <complex.h>

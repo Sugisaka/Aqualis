@@ -94,6 +94,28 @@ module DiagnosticsTests =
         Assert.Empty(context.cvar.list)
 
     [<Fact>]
+    let ``array size names are reserved regardless of declaration order`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "sizes.c", C99)
+
+        context.var.i1 "vector" |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.i0 "vector_size" |> ignore) |> ignore
+
+        context.var.i0 "other_size" |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.i2 "other" |> ignore) |> ignore
+
+    [<Fact>]
+    let ``fixed array dimensions reject invalid values and overflowing products`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "dimensions.c", C99)
+
+        Assert.Throws<ArgumentException>(fun () -> context.var.i1("negative", -1) |> ignore) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.i2("partial", 0, 2) |> ignore) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.i2("overflow2", 50000, 50000) |> ignore) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.i3("overflow3", 2000, 2000, 2000) |> ignore) |> ignore
+        Assert.Empty(context.cvar.list)
+
+    [<Fact>]
     let ``diagnostic policy can treat warnings as transaction failures`` () =
         use output = new TemporaryDirectory()
         let projectName = "warning-as-error"

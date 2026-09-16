@@ -75,8 +75,8 @@ namespace Aqualis
             let name = nameFor ctx name
             let items = values |> List.map ctx.numFormat.ItoS |> String.concat ","
             let initial = if ctx.language = Fortran then "(/"+items+"/)" elif ctx.language = C99 then "{"+items+"}" else "["+items+"]"
-            ctx.cvar.setUniqVarWarning(It 4,A1 values.Length,name,initial)
-            if ctx.language = PHP then
+            let isNew = ctx.cvar.trySetUniqVarWarning(It 4,A1 values.Length,name,initial)
+            if ctx.language = PHP && isNew then
                 ctx.writePhpStatement(name + " = " + initial + ";")
                 ctx.writePhpStatement(name + "_size = [" + string values.Length + "];")
             int1(It 4,Var1(A1 values.Length,name),context=ctx)
@@ -86,8 +86,8 @@ namespace Aqualis
             let name = nameFor ctx name
             let items = values |> List.map ctx.numFormat.DtoS |> String.concat ","
             let initial = if ctx.language = Fortran then "(/"+items+"/)" elif ctx.language = C99 then "{"+items+"}" else "["+items+"]"
-            ctx.cvar.setUniqVarWarning(Dt,A1 values.Length,name,initial)
-            if ctx.language = PHP then
+            let isNew = ctx.cvar.trySetUniqVarWarning(Dt,A1 values.Length,name,initial)
+            if ctx.language = PHP && isNew then
                 ctx.writePhpStatement(name + " = " + initial + ";")
                 ctx.writePhpStatement(name + "_size = [" + string values.Length + "];")
             double1(Dt,Var1(A1 values.Length,name),context=ctx)

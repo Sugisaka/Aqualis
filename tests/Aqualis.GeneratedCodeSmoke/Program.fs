@@ -1120,6 +1120,12 @@ module Program =
             let values = context.var.dp1("values", [1.25; 2.5])
             context.print.t values[1]
 
+        generate "duplicate" <| fun context ->
+            let values = context.var.ip1("values", [1])
+            values[0] <== 5
+            let duplicate = context.var.ip1("values", [1])
+            context.print.t duplicate[0]
+
     [<EntryPoint>]
     let main arguments =
         match arguments with

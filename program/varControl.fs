@@ -512,8 +512,30 @@ namespace Aqualis
         let gate = obj()
         ///<summary>型名,変数名,定数</summary>
         let mutable vlist:list<Etype*VarType*string*string> = []
+        let sameName (left:string) (right:string) =
+            String.Equals(left, right, if lang = Fortran then StringComparison.OrdinalIgnoreCase else StringComparison.Ordinal)
+        let isArray = function A0 -> false | A1 _ | A2 _ | A3 _ -> true
+        let requireValidShape (shape:VarType) =
+            let invalidShape() = invalidArg "atyp" "Fixed array dimensions must be positive and their product must fit in a 32-bit integer."
+            let withinLimit dimensions =
+                dimensions |> List.forall (fun dimension -> dimension > 0)
+                && (dimensions |> List.map bigint |> List.fold (*) 1I) <= bigint Int32.MaxValue
+            match shape with
+            |A0 | A1 0 | A2(0,0) | A3(0,0,0) -> ()
+            |A1 n when withinLimit [n] -> ()
+            |A2(n1,n2) when withinLimit [n1;n2] -> ()
+            |A3(n1,n2,n3) when withinLimit [n1;n2;n3] -> ()
+            |_ -> invalidShape()
         let requireCompatibleName etyp atyp name cst =
-            match vlist |> List.tryFind (fun (_,_,existingName,_) -> existingName = name) with
+            requireValidShape atyp
+            if
+                vlist
+                |> List.exists (fun (_,existingShape,existingName,_) ->
+                    (isArray existingShape && sameName (existingName + "_size") name)
+                    || (isArray atyp && sameName existingName (name + "_size")))
+            then
+                invalidArg "name" ("Variable '" + name + "' conflicts with an array size variable.")
+            match vlist |> List.tryFind (fun (_,_,existingName,_) -> sameName existingName name) with
             |Some(existingType,existingShape,_,existingInitial)
                 when existingType <> etyp || existingShape <> atyp || existingInitial <> cst ->
                 invalidArg "name" ("Variable '" + name + "' is already defined with a different type, shape, or initial value.")
@@ -539,13 +561,13 @@ namespace Aqualis
         member this.setUniqVar(etyp,atyp,name,cst) =
             lock gate (fun () ->
                 requireCompatibleName etyp atyp name cst
-                if not (List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist) then
+                if not (List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && sameName name_ name && cst_=cst) vlist) then
                     vlist <- (etyp,atyp,name,cst)::vlist) //(etyp,atyp,name,cst)をvlistの先頭部分に追加する。
         ///<summary>同名の変数が登録済みの場合は変数を登録せずに警告を表示</summary>
-        member this.setUniqVarWarning(etyp,atyp,name,cst) =
+        member _.trySetUniqVarWarning(etyp,atyp,name,cst) =
             lock gate (fun () ->
                 requireCompatibleName etyp atyp name cst
-                if List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist then
+                if List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && sameName name_ name && cst_=cst) vlist then
                     diagnostics.Report {
                         Code = "AQL1002"
                         Severity = Warning
@@ -553,8 +575,12 @@ namespace Aqualis
                         Location = Some(Generation(lang, None, Some "variable declaration"))
                         Properties = Map ["variable", name]
                     }
+                    false
                 else
-                    vlist <- (etyp,atyp,name,cst)::vlist)
+                    vlist <- (etyp,atyp,name,cst)::vlist
+                    true)
+        member this.setUniqVarWarning(etyp,atyp,name,cst) =
+            this.trySetUniqVarWarning(etyp,atyp,name,cst) |> ignore
                 
         ///<summary>変数の型名を文字列に変換</summary>
         member __.Stype typ = 
