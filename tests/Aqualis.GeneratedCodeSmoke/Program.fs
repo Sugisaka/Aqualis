@@ -420,6 +420,54 @@ module Program =
             context.la.rank(rank, matrix, double0(Dbl 1e-10))
             context.print.t rank
 
+        let generateEigenStandard caseName (rows:int) (columns:int) (valueCount:int) (vectorOrder:int) =
+            generate caseName <| fun context ->
+                let matrix = context.var.z2 "matrix"
+                let values = context.var.z1 "values"
+                let vectors = context.var.z2 "vectors"
+                matrix.allocate(rows, columns)
+                values.allocate valueCount
+                vectors.allocate(vectorOrder, vectorOrder)
+                matrix.clear()
+                matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+                matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+                context.la.eigen_matrix (values, vectors) matrix
+                context.print.t values[0].re
+
+        let generateEigenGeneralized caseName (secondOrder:int) (secondValueCount:int) =
+            generate caseName <| fun context ->
+                let matrix = context.var.z2 "matrix"
+                let second = context.var.z2 "second"
+                let alpha = context.var.z1 "alpha"
+                let beta = context.var.z1 "beta"
+                let vectors = context.var.z2 "vectors"
+                matrix.allocate(2, 2)
+                second.allocate(secondOrder, secondOrder)
+                alpha.allocate 2
+                beta.allocate secondValueCount
+                vectors.allocate(2, 2)
+                matrix.clear()
+                second.clear()
+                matrix[0,0] <== complex0(Cpx(2.0, 0.0))
+                matrix[1,1] <== complex0(Cpx(4.0, 0.0))
+                second[0,0] <== complex0(Cpx(1.0, 0.0))
+                second[1,1] <== complex0(Cpx(1.0, 0.0))
+                context.la.eigen_matrix2 (alpha, beta, vectors) matrix second
+                context.print.t (alpha[0].re / beta[0].re)
+
+        generateEigenStandard "eigen-standard" 2 2 2 2
+        generateEigenStandard "eigen-standard-non-square" 2 3 2 2
+        generateEigenGeneralized "eigen-generalized" 2 2
+        generateEigenGeneralized "eigen-generalized-mismatch" 3 2
+
+        if language = C99 || language = Fortran then
+            generateEigenStandard "eigen-standard-short-values" 2 2 1 2
+            generateEigenStandard "eigen-standard-small-vectors" 2 2 2 1
+            generateEigenGeneralized "eigen-generalized-short-beta" 2 1
+
+            generateEigenStandard "eigen-standard-info" 2 2 2 2
+            generateEigenGeneralized "eigen-generalized-info" 2 2
+
         if language = C99 || language = Fortran then
             let generateSvd caseName (singularLength:int) (vtOrder:int) =
                 generate caseName <| fun context ->

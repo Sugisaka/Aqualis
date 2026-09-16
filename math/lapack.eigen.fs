@@ -8,6 +8,18 @@ namespace Aqualis
 
     [<AutoOpen>]
     module ContextLaEigenExtensions =
+        let private requireEigenShapes (context:Aqualis) (matrix:complex2)
+                                       (eigenvalues:complex1) (eigenvectors:complex2) =
+            match context.language with
+            | C99 | Fortran | Python ->
+                LapackValidation.require context (matrix.size1 .<= 0) "LAPACK eigen matrix order must be positive."
+                LapackValidation.require context (matrix.size1 .=/ matrix.size2) "LAPACK eigen matrix must be square."
+                if context.language = C99 || context.language = Fortran then
+                    LapackValidation.require context (eigenvalues.size1 .=/ matrix.size1) "LAPACK eigenvalue count must match matrix order."
+                    LapackValidation.require context (eigenvectors.size1 .=/ matrix.size1) "LAPACK eigenvector shape must match matrix order."
+                    LapackValidation.require context (eigenvectors.size2 .=/ matrix.size1) "LAPACK eigenvector shape must match matrix order."
+            | _ -> ()
+
         type ContextLa with
             /// <summary>
             /// Ax=λxの固有値λと固有ベクトルxを計算
@@ -19,6 +31,7 @@ namespace Aqualis
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
                 this.GenerationContext.group.section "非対称複素行列の固有値" <| fun () ->
+                    requireEigenShapes this.GenerationContext mat1 eigenvalues eigenvectors
                     eigenvectors.clear()
                     match this.GenerationContext.language with
                     |Fortran ->
@@ -44,7 +57,7 @@ namespace Aqualis
                                                     lwork.code + ", "  +
                                                     rwork.code + ", "  +
                                                     info.code + ")")
-                                                this.GenerationContext.br.if1 (info .=/ 0) <| fun () -> this.GenerationContext.print.tt <| "Eigenvalue Info: "++info
+                                                LapackValidation.checkInfo this.GenerationContext info "eigenvalue"
                     |C99 ->
                         this.GenerationContext.ch.iii <| fun (npre,ldvldummy,info) ->
                                 npre<==mat1.size1
@@ -77,7 +90,7 @@ namespace Aqualis
                                                         "&" + lwork.code + ", " +
                                                         rwork.code + ", " +
                                                         "&" + info.code + ");")
-                                                    this.GenerationContext.br.if1 (info .=/ 0) <| fun () -> this.GenerationContext.print.tt <| "Eigenvalue Info: "++info
+                                                    LapackValidation.checkInfo this.GenerationContext info "eigenvalue"
                                                 |_ -> ()
                     |LaTeX ->
                         this.GenerationContext.codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"$"+"<br/>\n")
@@ -100,6 +113,13 @@ namespace Aqualis
                     this.GenerationContext.group.section "非対称複素行列の一般化固有値" <| fun () ->
                         this.GenerationContext.olist.add "-llapack"
                         this.GenerationContext.olist.add "-lblas"
+                        requireEigenShapes this.GenerationContext mat1 eigenvalues1 eigenvectors
+                        match this.GenerationContext.language with
+                        | C99 | Fortran ->
+                            LapackValidation.require this.GenerationContext (eigenvalues2.size1 .=/ mat1.size1) "LAPACK second eigenvalue count must match matrix order."
+                        | _ -> ()
+                        LapackValidation.require this.GenerationContext (mat2.size1 .=/ mat1.size1) "LAPACK eigen matrix orders must match."
+                        LapackValidation.require this.GenerationContext (mat2.size2 .=/ mat1.size1) "LAPACK eigen matrix orders must match."
                         eigenvectors.clear()
                         this.GenerationContext.ch.iii <| fun (npre,ldvldummy,info) ->
                             npre<==mat1.size1
@@ -131,6 +151,7 @@ namespace Aqualis
                                                     lwork.code + ", "  +
                                                     rwork.code + ", "  +
                                                     info.code + ")")
+                                                LapackValidation.checkInfo this.GenerationContext info "generalized eigenvalue"
                                             |C99 ->
                                                 this.GenerationContext.ch.c <| fun jobvl ->
                                                 this.GenerationContext.ch.c <| fun jobvr ->
@@ -157,20 +178,13 @@ namespace Aqualis
                                                             "&" + lwork.code + ", " +
                                                             rwork.code + ", " +
                                                             "&" + info.code + ");")
+                                                        LapackValidation.checkInfo this.GenerationContext info "generalized eigenvalue"
                                                     |_ -> ()
                                             |LaTeX ->
                                                 this.GenerationContext.codewritein("Solve: $"+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"$\\\\\n")
                                             |HTML ->
                                                 this.GenerationContext.codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
-                                            //Pythonのscipy.linalg.eigは、一般化固有値問題を単独の出力で処理することが可能
-                                            //Pythonでは、一般化固有値の計算が単一の出力で提供されるため、ユーザーは結果を手軽に利用できる。これにより、計算過程や出力の管理がシンプルになる。
-                                            //Fortranでは、二つの固有値配列を出力することで、行列 AとB の関係性を明示的に示している。この設計は、行列間の相互作用をより詳細に理解するためのもの
-                                            //このコードでは、周囲と合わせるため、行列を入れ替えてeigenvalues2.codeを出している。
-                                            //ちなみに一般化固有ベクトルは二つも出す必要はないので、二行目で出しているeigenvectors.code_dasokuはおまけだと思っていい。理由は以下。
-                                            //一般化固有値問題 Ax=λBx の形式では、行列 B に対して左固有ベクトルが計算されることはない。したがって、一般化固有ベクトルは一意に定まることが多い。
                                             |Python ->
                                                 this.RequirePythonLinalg "eig"
-                                                this.GenerationContext.codewritein(eigenvalues1.code+","+eigenvectors.code+" = eig("+mat1.code+","+mat2.code+")"+"\n")
-                                                this.GenerationContext.codewritein(eigenvalues2.code+", "+eigenvectors.code+"_dasoku = eig("+mat2.code+","+mat1.code+")"+"\n")
+                                                this.GenerationContext.codewritein("("+eigenvalues1.code+", "+eigenvalues2.code+"), "+eigenvectors.code+" = eig("+mat1.code+", "+mat2.code+", homogeneous_eigvals=True)\n")
                                             |_ -> ()
-                                            this.GenerationContext.br.if1 (info .=/ 0) <| fun () -> this.GenerationContext.print.tt <| "Eigenvalue Info: "++info

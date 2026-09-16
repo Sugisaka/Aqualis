@@ -251,6 +251,21 @@ for language in c fortran python; do
   expect_generated_failure "$language wrong solve RHS rows" "$output_root/solve-wrong-rhs-rows-$language" 'Aqualis: LAPACK right-hand side rows must match matrix order.' "${run_command[@]}"
   expect_generated_failure "$language non-square determinant" "$output_root/determinant-non-square-$language" 'Aqualis: LAPACK determinant matrix must be square.' "${run_command[@]}"
   expect_generated_failure "$language non-square complex determinant" "$output_root/determinant-complex-non-square-$language" 'Aqualis: LAPACK determinant matrix must be square.' "${run_command[@]}"
+  for eigen_case in standard generalized; do
+    eigen_directory="$output_root/eigen-$eigen_case-$language"
+    eigen_result="$(cd "$eigen_directory" && "${run_command[@]}")"
+    if ! awk -v value="$eigen_result" 'BEGIN { exit !(value + 0 > 1.999999 && value + 0 < 2.000001) }'; then
+      printf '%s %s eigenvalue was incorrect: %s\n' "$language" "$eigen_case" "$eigen_result" >&2
+      exit 1
+    fi
+  done
+  expect_generated_failure "$language non-square eigen matrix" "$output_root/eigen-standard-non-square-$language" 'Aqualis: LAPACK eigen matrix must be square.' "${run_command[@]}"
+  expect_generated_failure "$language mismatched generalized eigen matrix" "$output_root/eigen-generalized-mismatch-$language" 'Aqualis: LAPACK eigen matrix orders must match.' "${run_command[@]}"
+  if [[ "$language" != python ]]; then
+    expect_generated_failure "$language short eigenvalue output" "$output_root/eigen-standard-short-values-$language" 'Aqualis: LAPACK eigenvalue count must match matrix order.' "${run_command[@]}"
+    expect_generated_failure "$language small eigenvector output" "$output_root/eigen-standard-small-vectors-$language" 'Aqualis: LAPACK eigenvector shape must match matrix order.' "${run_command[@]}"
+    expect_generated_failure "$language short generalized beta output" "$output_root/eigen-generalized-short-beta-$language" 'Aqualis: LAPACK second eigenvalue count must match matrix order.' "${run_command[@]}"
+  fi
   run_and_verify "$language real rank" "$output_root/rank-real-$language" '2' "${run_command[@]}"
   complex_rank="$(cd "$output_root/rank-complex-$language" && "${run_command[@]}")"
   if ! awk -v value="$complex_rank" 'BEGIN { exit !(value + 0 > 1.999999 && value + 0 < 2.000001) }'; then
@@ -316,6 +331,47 @@ for language in c fortran python; do
     tensor_error='Aqualis: invalid array data size.'
   fi
   expect_generated_failure "$language overflowing persistence tensor" "$tensor_directory" "$tensor_error" "${run_command[@]}"
+done
+
+cat > "$output_root/eigen-info-wrapper.c" <<'EOF'
+#include <complex.h>
+
+void __wrap_zgeev_(char *jobvl, char *jobvr, int *n, double complex *a, int *lda,
+                   double complex *w, double complex *vl, int *ldvl,
+                   double complex *vr, int *ldvr, double complex *work, int *lwork,
+                   double *rwork, int *info) { *info = 1; }
+
+void __wrap_zggev_(char *jobvl, char *jobvr, int *n, double complex *a, int *lda,
+                   double complex *b, int *ldb, double complex *alpha,
+                   double complex *beta, double complex *vl, int *ldvl,
+                   double complex *vr, int *ldvr, double complex *work, int *lwork,
+                   double *rwork, int *info) { *info = 1; }
+EOF
+gcc -std=c99 -c "$output_root/eigen-info-wrapper.c" -o "$output_root/eigen-info-wrapper.o"
+
+for language in c fortran; do
+  for eigen_case in standard generalized; do
+    case_directory="$output_root/eigen-$eigen_case-info-$language"
+    if [[ "$language" == c ]]; then
+      compiler=gcc
+      source_file="$case_directory/smoke.c"
+      compiler_options=(-std=c99)
+    else
+      compiler=gfortran
+      source_file="$case_directory/smoke.f90"
+      compiler_options=(-ffree-line-length-none)
+    fi
+    if [[ "$eigen_case" == standard ]]; then
+      info_error='Aqualis: LAPACK eigenvalue failed'
+    else
+      info_error='Aqualis: LAPACK generalized eigenvalue failed'
+    fi
+    "$compiler" "${compiler_options[@]}" "$source_file" "$output_root/eigen-info-wrapper.o" \
+      -Wl,--wrap=zgeev_ -Wl,--wrap=zggev_ -llapack -lblas -lm -o "$case_directory/info.exe"
+    expect_generated_failure "$language $eigen_case eigen LAPACK INFO" "$case_directory" \
+      "$info_error" \
+      ./info.exe
+  done
 done
 
 expect_generated_failure 'C99 non-finite spline y' "$output_root/spline-c-non-finite-y" \
