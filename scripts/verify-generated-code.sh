@@ -137,6 +137,26 @@ run_and_verify 'C99' "$output_root/c" '42' bash proc_smoke_C.sh
 run_and_verify 'Fortran' "$output_root/fortran" '42' bash proc_smoke_F.sh
 run_and_verify 'Python without SciPy' "$output_root/python" '42' bash proc_smoke_P.sh
 run_and_verify 'Python with SciPy' "$output_root/python-scipy" '1.00000000000000000e+00' "$scipy_python" smoke.py
+gcc -std=c99 -Werror=implicit-function-declaration "$output_root/c-bessel/smoke.c" -lm -o "$output_root/c-bessel/smoke.exe"
+bessel_output="$(cd "$output_root/c-bessel" && ./smoke.exe)"
+python3 - "$bessel_output" <<'PY'
+import math
+import sys
+
+actual = [float(line) for line in sys.argv[1].splitlines()]
+expected = [
+    0.7651976865579666, 0.08825696421567697,
+    0.4400505857449335, -0.7812128213002887,
+    0.7651976865579666, -0.08825696421567697,
+    0.4400505857449335, 0.7812128213002887,
+]
+if len(actual) != len(expected) or any(
+    not math.isclose(observed, wanted, rel_tol=1e-12, abs_tol=1e-12)
+    for observed, wanted in zip(actual, expected)
+):
+    sys.exit(f'C99 Bessel functions returned unexpected values: {actual!r}')
+PY
+printf 'C99 Bessel functions: passed\n'
 
 "$node_command" --check "$javascript_path"
 run_and_verify 'JavaScript' "$output_root/javascript" '42' "$node_command" "$javascript_path"
@@ -420,6 +440,8 @@ for language in c fortran python; do
   expect_generated_failure "$language zero vector normalization" "$output_root/normalize-zero-$language" 'Aqualis: LAPACK normalization requires a nonzero vector.' "${run_command[@]}"
   expect_generated_failure "$language zero complex vector normalization" "$output_root/normalize-complex-zero-$language" 'Aqualis: LAPACK normalization requires a nonzero vector.' "${run_command[@]}"
   expect_generated_failure "$language short line-search direction" "$output_root/findmin-short-direction-$language" 'Aqualis: Line-search direction length must match the initial point.' "${run_command[@]}"
+  run_and_verify_number "$language positive rounding" "$output_root/round-positive-$language" '2' "${run_command[@]}"
+  run_and_verify_number "$language negative rounding" "$output_root/round-negative-$language" '-2' "${run_command[@]}"
   expect_generated_failure "$language short line-search output" "$output_root/findmin-short-output-$language" 'Aqualis: Line-search output length must match the initial point.' "${run_command[@]}"
   run_and_verify_number "$language large line-search direction" "$output_root/findmin-large-direction-$language" '0.5' "${run_command[@]}"
   run_and_verify_number "$language small line-search direction" "$output_root/findmin-small-direction-$language" '0.5' "${run_command[@]}"

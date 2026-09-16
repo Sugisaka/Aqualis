@@ -166,6 +166,24 @@ module Program =
             argument <== 0.0
             asm.besselj0 argument <| fun result -> context.print.t result
 
+    let private generateCBessel outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "c-bessel")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+
+        Compile [C99] outputDirectory "smoke" "1.0" <| fun context ->
+            let argument = context.var.d0 "argument"
+            argument <== 1.0
+            asm.besselj0 argument <| fun result -> context.print.t result
+            asm.bessely0 argument <| fun result -> context.print.t result
+            asm.besselj1 argument <| fun result -> context.print.t result
+            asm.bessely1 argument <| fun result -> context.print.t result
+            asm.besselh0 argument <| fun result ->
+                context.print.t result.re
+                context.print.t result.im
+            asm.besselh1 argument <| fun result ->
+                context.print.t result.re
+                context.print.t result.im
+
     let private generateDistributedC outputRoot =
         let outputDirectory = Path.Combine(outputRoot, "c-distributed")
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -631,6 +649,12 @@ module Program =
             output.allocate 2
             context.optimization.findmin 1 (initial, direction) (D 1.0)
                 (fun value point -> value <== point[0] * point[0]) output
+
+        for caseName, value in ["round-positive", 1.8; "round-negative", -1.8] do
+            generate caseName <| fun context ->
+                let input = context.var.d0 "input"
+                input <== value
+                context.print.t input.round
 
         generate "findmin-short-output" <| fun context ->
             let initial = context.var.d1 "initial"
@@ -1297,6 +1321,7 @@ module Program =
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
             generatePythonSciPy outputRoot
+            generateCBessel outputRoot
             generateDistributedC outputRoot
             generateLeadingHyphenC outputRoot
             generateLeadingHyphenFortran outputRoot

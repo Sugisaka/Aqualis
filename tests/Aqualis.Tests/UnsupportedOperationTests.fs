@@ -92,6 +92,22 @@ module UnsupportedOperationTests =
                     operation
 
     [<Fact>]
+    let ``unsupported Bessel backends stop generation`` () =
+        for language,targetName in [JavaScript,"JavaScript"; PHP,"PHP"; Numeric,"Numeric"] do
+            use context = new Aqualis(None, None, language)
+            let argument = context.var.d0 "argument"
+            for operation in
+                [ fun () -> asm.besselj0 argument ignore
+                  fun () -> asm.bessely0 argument ignore
+                  fun () -> asm.besselh0 argument ignore
+                  fun () -> asm.besselj1 argument ignore
+                  fun () -> asm.bessely1 argument ignore
+                  fun () -> asm.besselh1 argument ignore ] do
+                assertNotSupported
+                    $"{targetName} code generation does not support Bessel functions."
+                    operation
+
+    [<Fact>]
     let ``unsupported numeric execution does not silently skip work`` () =
         assertNotSupported
             "Numeric evaluation does not support a loop whose bounds are not integers ('1.5' to '2')."

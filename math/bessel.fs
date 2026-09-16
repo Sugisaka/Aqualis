@@ -8,14 +8,18 @@ namespace Aqualis
 
     [<AutoOpen>]
     module asm_bessel =
-        let private requirePythonSpecial (context:Aqualis) symbol =
-            if context.language = Python then
-                context.pythonImports.RequireSymbol("scipy.special", symbol)
+        let private requireBesselBackend (context:Aqualis) cSymbol pythonSymbol =
+            match context.Language with
+            | C99 -> context.elist.add ("double " + cSymbol + "(double)")
+            | Python -> context.pythonImports.RequireSymbol("scipy.special", pythonSymbol)
+            | JavaScript | PHP | Numeric ->
+                UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
+            | Fortran | LaTeX | HTML | HTMLSequenceDiagram -> ()
 
         type asm with
             static member besselj0 (x:double0) = fun code ->
                 let context = x.Context
-                requirePythonSpecial context "jv"
+                requireBesselBackend context "j0" "jv"
                 let besselj0_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
@@ -24,15 +28,14 @@ namespace Aqualis
                     |HTML -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(0, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 context.ch.d <| fun bes ->
                     bes <== double0(besselj0_ x, x.Context)
                     code bes
             static member bessely0 (x:double0) = fun code ->
                 let context = x.Context
-                requirePythonSpecial context "yn"
+                requireBesselBackend context "y0" "yn"
                 let bessely0_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesy0("+v.code+")",NaN)
@@ -41,16 +44,15 @@ namespace Aqualis
                     |HTML -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(0, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 context.ch.d <| fun bes ->
                     bes <== double0(bessely0_(x), x.Context)
                     code bes
             static member besselh0 (x:double0) = fun code ->
                 let context = x.Context
-                requirePythonSpecial context "jv"
-                requirePythonSpecial context "yn"
+                requireBesselBackend context "j0" "jv"
+                requireBesselBackend context "y0" "yn"
                 let besselj0_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj0("+v.code+")",NaN)
@@ -59,9 +61,8 @@ namespace Aqualis
                     |HTML -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"J_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(0, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 let bessely0_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesy0("+v.code+")",NaN)
@@ -70,15 +71,14 @@ namespace Aqualis
                     |HTML -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"Y_0\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(0, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 context.ch.z <| fun bes ->
                     bes <== double0(besselj0_ x, x.Context)-double0(bessely0_ x, x.Context)*asm.uj
                     code bes
             static member besselj1 (x:double0) = fun code ->
                 let context = x.Context
-                requirePythonSpecial context "jv"
+                requireBesselBackend context "j1" "jv"
                 let besselj1_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)
@@ -87,15 +87,14 @@ namespace Aqualis
                     |HTML -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(1, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 context.ch.d <| fun bes ->
                     bes <== double0(besselj1_(x), x.Context)
                     code bes
             static member bessely1 (x:double0) = fun code ->
                 let context = x.Context
-                requirePythonSpecial context "yn"
+                requireBesselBackend context "y1" "yn"
                 let bessely1_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesy1("+v.code+")",NaN)
@@ -104,16 +103,15 @@ namespace Aqualis
                     |HTML -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(1, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 context.ch.d <| fun bes ->
                     bes <== double0(bessely1_ x, x.Context)
                     code bes
             static member besselh1 (x:double0) = fun code ->
                 let context = x.Context
-                requirePythonSpecial context "jv"
-                requirePythonSpecial context "yn"
+                requireBesselBackend context "j1" "jv"
+                requireBesselBackend context "y1" "yn"
                 let besselj1_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesj1("+v.code+")",NaN)
@@ -122,9 +120,8 @@ namespace Aqualis
                     |HTML -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"J_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"jv(1, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 let bessely1_ (v:double0) =
                     match context.language with
                     |Fortran -> Var(Dt,"dbesy1("+v.code+")",NaN)
@@ -133,9 +130,8 @@ namespace Aqualis
                     |HTML -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |HTMLSequenceDiagram -> Var(Dt,"Y_1\\left("+v.code+"\\right)",NaN)
                     |Python -> Var(Dt,"yn(1, "+v.code+")",NaN)
-                    |JavaScript -> NaN
-                    |PHP -> NaN
-                    |Numeric -> NaN
+                    |JavaScript | PHP | Numeric ->
+                        UnsupportedOperation.codeGeneration (string context.Language) "Bessel functions"
                 context.ch.z <| fun bes ->
                     bes <== double0(besselj1_ x, x.Context)-double0(bessely1_ x, x.Context)*asm.uj
                     code bes
