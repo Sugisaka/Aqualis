@@ -71,6 +71,7 @@ namespace Aqualis
         static member Version = typeof<Aqualis>.Assembly.GetName().Version.ToString(3)
         static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true,false,None,None)
         member _.Dir with get() = outputdir
+        member internal _.GeneratedOutputDirectory = writerDirectory |> Option.orElse outputdir
         member _.ProjectName with get() = pjname
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(Path.Combine(dir, src)) |_ -> None
         member _.ContextId with get() = contextId

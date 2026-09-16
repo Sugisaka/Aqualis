@@ -151,6 +151,45 @@ module Program =
             argument <== 0.0
             asm.besselj0 argument <| fun result -> context.print.t result
 
+    let private generateDistributedC outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "c-distributed")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [C99] outputDirectory "distributed" "1.0" <| fun context ->
+            use scripts = new shellscript.Shell(context, outputDirectory, "distributed", 1)
+            scripts.AddProcess()
+            context.print.t (int0(Int 42))
+
+    let private generateLeadingHyphenC outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "c-leading-hyphen")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [C99] outputDirectory "-leading" "1.0" <| fun context ->
+            context.print.t (int0(Int 42))
+
+    let private generateLeadingHyphenFortran outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "fortran-leading-hyphen")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [Fortran] outputDirectory "-leading" "1.0" <| fun context ->
+            context.print.t (int0(Int 42))
+
+    let private generatePhpTextValidation outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "php-text-validation")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [PHP] outputDirectory "validation" "1.0" <| fun context ->
+            let value =
+                context.request.post.RequiredText(
+                    FieldName.create "value",
+                    minLength = 2,
+                    maxLength = 2,
+                    maxUtf8Bytes = 6)
+            context.php.phpcode <| fun () ->
+                for assignment in
+                    [ "$_POST['value'] = 'あい';"
+                      "$_POST['value'] = 'abc';"
+                      "$_POST['value'] = chr(255);"
+                      "$_POST['value'] = 'あいえ';" ] do
+                    context.writein assignment
+                    context.writein ("echo (" + value.IsValid.code + ") ? '1' : '0';")
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -159,6 +198,10 @@ module Program =
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
             generatePythonSciPy outputRoot
+            generateDistributedC outputRoot
+            generateLeadingHyphenC outputRoot
+            generateLeadingHyphenFortran outputRoot
+            generatePhpTextValidation outputRoot
             generateCArrayCases outputRoot
             generatePhpUploads outputRoot
             printfn "Generated runtime smoke programs in %s" outputRoot

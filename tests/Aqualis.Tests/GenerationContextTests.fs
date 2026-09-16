@@ -254,6 +254,24 @@ module GenerationContextTests =
         Assert.Empty(transactionDirectories output.Path)
 
     [<Fact>]
+    let ``Compile refuses to replace a modified old output`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-user-edit-replacement"
+        Compile [C99] output.Path projectName "1" ignore
+        let sourcePath = Path.Combine(output.Path, projectName + ".c")
+        let manifestPath = generatedManifest output.Path projectName
+        let originalManifest = File.ReadAllText manifestPath
+        File.WriteAllText(sourcePath, "user-edited source")
+
+        Assert.ThrowsAny<IOException>(fun () ->
+            Compile [C99] output.Path projectName "2" ignore)
+        |> ignore
+
+        Assert.Equal("user-edited source", File.ReadAllText sourcePath)
+        Assert.Equal(originalManifest, File.ReadAllText manifestPath)
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
     let ``Compile rejects a manifest path outside the output directory`` () =
         use output = new TemporaryDirectory()
         let projectName = "transaction-bad-manifest"

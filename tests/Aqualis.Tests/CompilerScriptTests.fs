@@ -258,6 +258,31 @@ module CompilerScriptTests =
             |> assertLfOnlyWithoutBom)
 
     [<Fact>]
+    let ``distributed scripts are rolled back when compilation fails`` () =
+        use output = new TemporaryDirectory()
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            Compile [C99] output.Path "distributed-rollback" "1" <| fun context ->
+                use scripts = new shellscript.Shell(context, output.Path, "distributed-rollback", 1)
+                scripts.AddProcess()
+                invalidOp "expected")
+        |> ignore
+
+        Assert.False(File.Exists(Path.Combine(output.Path, "shell_distributed-rollback_01.sh")))
+
+    [<Fact>]
+    let ``leading hyphen project names compile as source paths`` () =
+        use output = new TemporaryDirectory()
+
+        let cScript = generateCScript output.Path "-leading-c" ignore
+        let fortranScript = generateFortranScript output.Path "-leading-f" ignore
+
+        Assert.Contains("./-leading-c.c", cScript)
+        Assert.Contains("./-leading-f.f90", fortranScript)
+        Assert.Contains("-o ./-leading-c.exe", cScript)
+        Assert.Contains("-o ./-leading-f.exe", fortranScript)
+
+    [<Fact>]
     let ``mail notified processes are distributed round robin`` () =
         use output = new TemporaryDirectory()
 

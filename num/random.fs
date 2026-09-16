@@ -9,8 +9,9 @@ module asm_random =
             let runWithSeed (seed:int1) initialize setSeedText randomText =
                 initialize()
                 let setseed seedCode =
+                    let statement = setSeedText seed
                     seedCode seed
-                    write (setSeedText seed)
+                    write statement
                 let getrand (value:double0) =
                     match value.Expr with
                     |Var(_,name,_) -> write (randomText name)
@@ -46,10 +47,13 @@ module asm_random =
                         (fun name -> name + " = random_seed.uniform(0.0, 1.0)"))
             |JavaScript ->
                 context.ch.i1 (int0(Int 1)) (fun seed ->
-                    runWithSeed seed ignore (fun _ -> "") (fun name -> name + " = Math.random();"))
+                    runWithSeed seed ignore
+                        (fun _ -> invalidOp "Explicit random seeds are not supported for JavaScript.")
+                        (fun name -> name + " = Math.random();"))
             |PHP ->
                 context.ch.i1 (int0(Int 1)) (fun seed ->
-                    runWithSeed seed ignore (fun _ -> "")
+                    runWithSeed seed ignore
+                        (fun _ -> invalidOp "Explicit random seeds are not supported for PHP.")
                         (fun name -> name + " = random_int(0, PHP_INT_MAX) / PHP_INT_MAX;"))
             |LaTeX|HTML|HTMLSequenceDiagram ->
                 context.ch.i1 (int0(Int 1)) (fun seed ->

@@ -193,8 +193,8 @@ namespace Aqualis
                     removedManagedContents <-
                         staleFiles |> Array.exists (fun path -> path.StartsWith(contentsPrefix, pathComparison))
 
-                    // A modified old output may belong to the user now; refuse to remove it.
-                    for relativePath in staleFiles do
+                    // A modified old output may belong to the user now; refuse to remove or replace it.
+                    for relativePath in previous.Keys do
                         let targetPath = checkedPath outputDirectory relativePath
                         if Directory.Exists targetPath then
                             raise (IOException($"A previous generated file is now a directory: '{targetPath}'."))
@@ -332,9 +332,9 @@ namespace Aqualis
                                 compiler
                                 fixedArguments
                                 sources
-                                (projectname + ".f90")
+                                ((if projectname.StartsWith("-", StringComparison.Ordinal) then "./" else "") + projectname + ".f90")
                                 options
-                                (projectname + ".exe")
+                                ((if projectname.StartsWith("-", StringComparison.Ordinal) then "./" else "") + projectname + ".exe")
                         let compileCommand =
                             if context.IsOpenAccUsed then
                                 buildCompileCommand
@@ -416,9 +416,9 @@ namespace Aqualis
                                 compiler
                                 fixedArguments
                                 sources
-                                (projectname + ".c")
+                                ((if projectname.StartsWith("-", StringComparison.Ordinal) then "./" else "") + projectname + ".c")
                                 options
-                                (projectname + ".exe")
+                                ((if projectname.StartsWith("-", StringComparison.Ordinal) then "./" else "") + projectname + ".exe")
                         let compileCommand =
                             if context.IsOpenMpUsed then
                                 buildCompileCommand "gcc" ["-fopenmp"]

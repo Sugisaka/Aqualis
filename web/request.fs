@@ -50,10 +50,11 @@ type PostRequest internal (context:Aqualis) =
         | _ -> ()
 
         let expression = RequestCode.postExpression fieldName
-        let length = "mb_strlen(" + expression + ", 'UTF-8')"
+        let length = "preg_match_all('/./us', " + expression + ")"
         let present = RequestCode.boolean context ("isset(" + expression + ")")
         let validExpression =
             "isset(" + expression + ") && is_string(" + expression + ")" +
+            " && preg_match('//u', " + expression + ") === 1" +
             " && " + length + " >= " + string minimum +
             (match maxLength with
              | Some maximum -> " && " + length + " <= " + string maximum

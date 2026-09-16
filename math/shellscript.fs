@@ -13,6 +13,15 @@ namespace Aqualis
 
         type Shell(context:Aqualis,dir:string,project:string,nproc:int) =
             let language = context.language
+            let outputDirectory =
+                match context.Dir, context.GeneratedOutputDirectory with
+                | Some publicDirectory, Some generatedDirectory
+                    when String.Equals(
+                        Path.GetFullPath dir,
+                        Path.GetFullPath publicDirectory,
+                        if OperatingSystem.IsWindows() then StringComparison.OrdinalIgnoreCase
+                        else StringComparison.Ordinal) -> generatedDirectory
+                | _ -> dir
             let mutable id = 0
             let mutable disposed = false
             let processScriptName =
@@ -30,7 +39,7 @@ namespace Aqualis
                     for i in 1..nproc do
                         created.Add(
                             ShellScriptWriter.create(
-                                dir+"\\shell_"+project+"_"+i.ToString("00")+".sh"))
+                                Path.Combine(outputDirectory, "shell_"+project+"_"+i.ToString("00")+".sh")))
                     created.ToArray()
                 with _ ->
                     created |> Seq.iter _.Dispose()

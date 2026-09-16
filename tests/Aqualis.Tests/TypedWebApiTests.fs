@@ -118,8 +118,9 @@ module TypedWebApiTests =
                 context.br.if1 (scoreValue .>= 0) ignore
                 context.br.if1 (ratioValue .<= 1.0) ignore
 
-        Assert.Contains("mb_strlen($_POST[\"userid\"], 'UTF-8') >= 3", generated)
-        Assert.Contains("mb_strlen($_POST[\"userid\"], 'UTF-8') <= 32", generated)
+        Assert.Contains("preg_match('//u', $_POST[\"userid\"]) === 1", generated)
+        Assert.Contains("preg_match_all('/./us', $_POST[\"userid\"]) >= 3", generated)
+        Assert.Contains("preg_match_all('/./us', $_POST[\"userid\"]) <= 32", generated)
         Assert.Contains("strlen($_POST[\"userid\"]) <= 72", generated)
         Assert.Contains("filter_var($_POST[\"score\"], FILTER_VALIDATE_INT) !== false", generated)
         Assert.Contains("(int)($_POST[\"score\"]) >= 0", generated)

@@ -46,7 +46,7 @@ for diagnostic in result.Diagnostics do
 
 ## Generated output ownership
 
-Successful `Compile` runs create a per-project `.aqualis-generated-<project>.json` manifest in the output directory. On later runs for the same project, files listed in the previous manifest but not generated again are removed transactionally. Unrelated files are left alone; if an obsolete generated file was edited after the previous run, compilation stops rather than deleting that edit. Existing outputs from before a manifest is first created are not automatically claimed or removed. Do not run multiple generator processes against the same output directory concurrently.
+Successful `Compile` runs create a per-project `.aqualis-generated-<project>.json` manifest in the output directory. On later runs for the same project, files listed in the previous manifest but not generated again are removed transactionally. Unrelated files are left alone; if a previously generated file was edited after the previous run, compilation stops rather than deleting or replacing that edit. Existing outputs from before a manifest is first created are not automatically claimed or removed. Do not run multiple generator processes against the same output directory concurrently.
 
 ## License
 [MIT License](LICENSE.txt)

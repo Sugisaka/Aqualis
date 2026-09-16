@@ -195,6 +195,16 @@ module NumericFormattingTests =
             Assert.Matches(Regex(@"while\([^\r\n]+\s<=\s[^\r\n]+\)"), generated)
 
     [<Fact>]
+    let ``JavaScript and PHP reject unsupported explicit random seeds`` () =
+        for language in [JavaScript; PHP] do
+            use output = new TemporaryDirectory()
+            Assert.Throws<InvalidOperationException>(fun () ->
+                Compile [language] output.Path "unsupported-random-seed" "1" <| fun context ->
+                    context.asm.random <| fun (setSeed, _) ->
+                        setSeed (fun seed -> seed[0] <== 42))
+            |> ignore
+
+    [<Fact>]
     let ``Python while loop includes the required colon`` () =
         use output = new TemporaryDirectory()
         let project = "normal-random-python-loop"

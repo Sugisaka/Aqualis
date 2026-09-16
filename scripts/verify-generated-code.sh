@@ -71,6 +71,10 @@ run_and_verify 'JavaScript' "$output_root/javascript" '42' "$node_command" "$jav
 
 php -l "$output_root/php/smoke.php" >/dev/null
 run_and_verify 'PHP' "$output_root/php" '42' php smoke.php
+run_and_verify 'PHP UTF-8 text validation' "$output_root/php-text-validation" '1000' php validation.php
+run_and_verify 'C99 distributed script' "$output_root/c-distributed" '42' bash shell_distributed_01.sh
+run_and_verify 'C99 leading-hyphen project' "$output_root/c-leading-hyphen" '42' bash proc_-leading_C.sh
+run_and_verify 'Fortran leading-hyphen project' "$output_root/fortran-leading-hyphen" '42' bash proc_-leading_F.sh
 
 for case_name in success double-allocate unallocated-access double-free invalid-size overflow out-of-bounds malloc-failure; do
   case_directory="$output_root/c-array-$case_name"
