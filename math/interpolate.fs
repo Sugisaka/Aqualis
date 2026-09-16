@@ -76,9 +76,25 @@ namespace Aqualis
             if dataX |> List.pairwise |> List.exists (fun (left, right) -> right <= left) then
                 invalidArg "data_x" "The x data must be strictly increasing."
 
+        let private linearWeight (context:Aqualis) (x:double0) (left:double0) (right:double0) code =
+            context.ch.dd <| fun (span,weight) ->
+                context.br.if2 (And [left .< 0.0; right .> 0.0; Or [left .< -1e300; right .> 1e300]])
+                    (fun () ->
+                        context.ch.ddd <| fun (halfX,halfLeft,halfRight) ->
+                            halfX <== x/2.0
+                            halfLeft <== left/2.0
+                            halfRight <== right/2.0
+                            weight <== (halfX-halfLeft)/(halfRight-halfLeft))
+                    (fun () ->
+                        span <== right-left
+                        weight <== (x-left)/span)
+                code weight
+
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
         type LinearInterpolate1d(context:Aqualis,id:string,data_x:double list,data_y:double list) =
             do validateLinearData data_x data_y.Length
+            do if data_y |> List.exists (System.Double.IsFinite >> not) then
+                   invalidArg "data_y" "The y data must contain only finite values."
             let X = context.var.dp1(id+"_x",data_x)
             let Y = context.var.dp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
@@ -90,8 +106,10 @@ namespace Aqualis
                         context.br.if1 (X.[i] .<= x .< X.[i+1]) <| fun () ->
                             flag<==1
                             context.ch.d <| fun z ->
-                                z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
-                                code(z)
+                                linearWeight context x X.[i] X.[i+1] <| fun weight ->
+                                    z <== Y.[i]*(1.0-weight)+Y.[i+1]*weight
+                                    NumericArrayValidation.requireFinite context z "Linear interpolation result must be finite."
+                                    code(z)
                     context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                         flag<==1
                         code(Y.[lastIndex])
@@ -100,6 +118,8 @@ namespace Aqualis
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
         type LinearInterpolate1z(context:Aqualis,id:string,data_x:double list,data_y:(double*double) list) =
             do validateLinearData data_x data_y.Length
+            do if data_y |> List.exists (fun (re, im) -> not (System.Double.IsFinite re && System.Double.IsFinite im)) then
+                   invalidArg "data_y" "The y data must contain only finite values."
             let X = context.var.dp1(id+"_x",data_x)
             let Y = context.var.zp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
@@ -111,8 +131,11 @@ namespace Aqualis
                         context.br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
                             flag<==1
                             context.ch.z <| fun z ->
-                                z <== Y.[i] + (Y.[i+1]-Y.[i])*(x-X.[i])/(X.[i+1]-X.[i])
-                                code(z)
+                                linearWeight context x X.[i] X.[i+1] <| fun weight ->
+                                    z <== Y.[i]*(1.0-weight)+Y.[i+1]*weight
+                                    NumericArrayValidation.requireFinite context z.re "Linear interpolation result must be finite."
+                                    NumericArrayValidation.requireFinite context z.im "Linear interpolation result must be finite."
+                                    code(z)
                     context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                         flag<==1
                         code(Y.[lastIndex])

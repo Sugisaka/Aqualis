@@ -40,6 +40,7 @@ type ContextOptimization internal (context:Aqualis) =
         if maxBracketExpansions < 0 then
             invalidArg (nameof maxBracketExpansions) "The bracket-expansion limit cannot be negative."
         let evaluate (value:double0) (point:double1) =
+            point.foreach <| fun i -> NumericArrayValidation.requireFinite context point[i] "Line-search point must be finite."
             f value point
             NumericArrayValidation.requireFinite context value "Line-search objective value must be finite."
         LapackValidation.require context (x0_.size1 .<= 0) "Line-search vector length must be positive."
@@ -116,10 +117,21 @@ type ContextOptimization internal (context:Aqualis) =
                             NumericArrayValidation.fail context "Line search could not advance."
                 context.br.if2 (expansionLimitReached.=0)
                 <| fun () ->
-                    xx.foreach <| fun i -> xx.[i] <== 0.5*(xa.[i]+xb.[i])
+                    xx.foreach <| fun i ->
+                        context.ch.d <| fun span ->
+                            context.br.if2 (Or [asm.abs xa.[i] .> 1e300; asm.abs xb.[i] .> 1e300])
+                                (fun () ->
+                                    context.ch.dd <| fun (halfLeft,halfRight) ->
+                                        halfLeft <== 0.5*xa.[i]
+                                        halfRight <== 0.5*xb.[i]
+                                        xx.[i] <== halfLeft+halfRight)
+                                (fun () ->
+                                    span <== xb.[i]-xa.[i]
+                                    xx.[i] <== xa.[i]+0.5*span)
                 <| fun () ->
                     xx <== xb
                     context.print.s "Aqualis: line-search bracket expansion limit reached."
+                xx.foreach <| fun i -> NumericArrayValidation.requireFinite context xx[i] "Line-search result must be finite."
             <| fun () ->
                 xx <== x0_
                 context.print.s "Aqualis: line-search direction is zero; initial point retained."

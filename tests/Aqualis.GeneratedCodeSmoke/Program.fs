@@ -466,6 +466,22 @@ module Program =
             interpolation.y (double0(Dbl 0.5)) (fun value -> result <== value)
             context.print.t result
 
+        generate "linear-wide-x-real" <| fun context ->
+            let interpolation = context.interpolate.linearDouble("sample", [-1e308; 1e308], [0.0; 1.0])
+            interpolation.y (double0(Dbl 0.0)) context.print.t
+
+        generate "linear-wide-y-real" <| fun context ->
+            let interpolation = context.interpolate.linearDouble("sample", [0.0; 1.0], [1e308; -1e308])
+            interpolation.y (double0(Dbl 0.5)) context.print.t
+
+        generate "linear-wide-x-complex" <| fun context ->
+            let interpolation = context.interpolate.linearComplex("sample", [-1e308; 1e308], [(0.0, 0.0); (1.0, 2.0)])
+            interpolation.y (double0(Dbl 0.0)) (fun value -> context.print.t value.im)
+
+        generate "linear-wide-y-complex" <| fun context ->
+            let interpolation = context.interpolate.linearComplex("sample", [0.0; 1.0], [(1e308, 1e308); (-1e308, -1e308)])
+            interpolation.y (double0(Dbl 0.5)) (fun value -> context.print.t value.re)
+
         generate "linear-range-complex" <| fun context ->
             let result = context.var.z0 "result"
             let interpolation = context.interpolate.linearComplex("sample", [0.0; 1.0], [(0.0, 0.0); (10.0, 1.0)])
@@ -676,6 +692,25 @@ module Program =
                 direction[0] <== directionValue
                 context.optimization.findmin 0 (initial,direction) (D stepWidth)
                     (fun value _ -> value <== 0.0) output
+
+        generate "findmin-midpoint-large" <| fun context ->
+            let initial = context.var.d1("initial", 1)
+            let direction = context.var.d1("direction", 1)
+            let output = context.var.d1("output", 1)
+            initial[0] <== 1e308
+            direction[0] <== 1.0
+            context.optimization.findmin 0 (initial,direction) (D 1e307)
+                (fun value _ -> value <== 0.0) output
+            context.print.t (output[0]/1e308)
+
+        generate "findmin-point-overflow" <| fun context ->
+            let initial = context.var.d1("initial", 1)
+            let direction = context.var.d1("direction", 1)
+            let output = context.var.d1("output", 1)
+            initial[0] <== 1e308
+            direction[0] <== 1.0
+            context.optimization.findmin 0 (initial,direction) (D 1e308)
+                (fun value _ -> value <== 0.0) output
 
         generate "normalize-zero" <| fun context ->
             let vector = context.var.d1 "vector"

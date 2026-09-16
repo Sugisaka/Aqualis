@@ -393,6 +393,10 @@ for language in c fortran python; do
     expect_generated_failure "$language $kind linear interpolation range" "$output_root/linear-range-$kind-$language" 'Linear interpolation query is out of range.' "${run_command[@]}"
   done
   run_and_verify_number "$language valid linear interpolation" "$output_root/linear-valid-real-$language" '5' "${run_command[@]}"
+  run_and_verify_number "$language wide x linear interpolation" "$output_root/linear-wide-x-real-$language" '0.5' "${run_command[@]}"
+  run_and_verify_number "$language wide y linear interpolation" "$output_root/linear-wide-y-real-$language" '0' "${run_command[@]}"
+  run_and_verify_number "$language wide x complex linear interpolation" "$output_root/linear-wide-x-complex-$language" '1' "${run_command[@]}"
+  run_and_verify_number "$language wide y complex linear interpolation" "$output_root/linear-wide-y-complex-$language" '0' "${run_command[@]}"
 
   byte_directory="$output_root/read-byte-$language"
   printf '\000\177\200\377\012' > "$byte_directory/bytes.dat"
@@ -420,6 +424,9 @@ for language in c fortran python; do
   run_and_verify_number "$language large line-search direction" "$output_root/findmin-large-direction-$language" '0.5' "${run_command[@]}"
   run_and_verify_number "$language small line-search direction" "$output_root/findmin-small-direction-$language" '0.5' "${run_command[@]}"
   run_and_verify_number "$language huge line-search direction" "$output_root/findmin-huge-direction-$language" '0.3535533905932738' "${run_command[@]}"
+  run_and_verify_number "$language large line-search midpoint" "$output_root/findmin-midpoint-large-$language" '1.05' "${run_command[@]}"
+  expect_generated_failure "$language overflowing line-search point" \
+    "$output_root/findmin-point-overflow-$language" 'Aqualis: Line-search point must be finite.' "${run_command[@]}"
   for case_name in nan infinite; do
     expect_generated_failure "$language $case_name line-search objective" \
       "$output_root/findmin-$case_name-objective-$language" \

@@ -137,3 +137,21 @@ module InterpolationTests =
                 [1.0; 2.0])
             |> ignore)
         |> ignore
+
+        Assert.Throws<ArgumentException>(fun () ->
+            interpolate.LinearInterpolate1d(
+                context,
+                "non_finite_real_y",
+                [0.0; 1.0],
+                [1.0; Double.NaN])
+            |> ignore)
+        |> ignore
+
+        Assert.Throws<ArgumentException>(fun () ->
+            interpolate.LinearInterpolate1z(
+                context,
+                "non_finite_complex_y",
+                [0.0; 1.0],
+                [(1.0, 0.0); (2.0, Double.PositiveInfinity)])
+            |> ignore)
+        |> ignore
