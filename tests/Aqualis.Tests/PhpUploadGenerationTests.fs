@@ -38,6 +38,16 @@ module PhpUploadGenerationTests =
         Assert.Contains(
             "realpath(__DIR__.DIRECTORY_SEPARATOR.'../private-uploads')",
             source)
+        Assert.Contains("$publicPaths = [__DIR__, $_SERVER['DOCUMENT_ROOT']]", source)
+        Assert.Contains("($uploadRootMode & 0077) !== 0", source)
+        Assert.Contains("$uploadRoot === $publicRoot || strncmp($uploadRoot, $publicPrefix, strlen($publicPrefix)) === 0", source)
+        Assert.Contains("if (!@chmod($destination, 0600))", source)
+        Assert.Contains("if (!@unlink($destination))", source)
+        let preflight = source.IndexOf("$publicPaths =", StringComparison.Ordinal)
+        let store = source.IndexOf("move_uploaded_file(", StringComparison.Ordinal)
+        let protect = source.IndexOf("@chmod($destination, 0600)", StringComparison.Ordinal)
+        Assert.True(preflight >= 0 && preflight < store)
+        Assert.True(store >= 0 && store < protect)
         Assert.Contains("basename((string)($upload['name'] ?? ''))", source)
 
         let storage = storageLines source
@@ -175,6 +185,26 @@ module PhpUploadGenerationTests =
         assertInvalid { policy with MaxFiles = 0 }
         assertInvalid { policy with RandomNameBytes = 8 }
         assertInvalid { policy with AllowedMimeTypes = [] }
+        assertInvalid { policy with AllowedMimeTypes = ["application/x-httpd-php", "php"] }
+        assertInvalid { policy with AllowedMimeTypes = ["text/html", "html"] }
+        assertInvalid { policy with AdditionalPublicDirectories = [""] }
         assertInvalid {
             policy with
                 AllowedMimeTypes = ["application/x-httpd-php", "php/../"] }
+
+    [<Fact>]
+    let ``additional public directories are checked before storing an upload`` () =
+        let guardedPolicy =
+            { policy with AdditionalPublicDirectories = ["../public-assets"; "/srv/legacy-files"] }
+        let source =
+            generate (fun context ->
+                postFile.single(context, "file").save(guardedPolicy) |> ignore)
+
+        Assert.Contains(
+            "$publicPaths = [__DIR__, $_SERVER['DOCUMENT_ROOT'], __DIR__.DIRECTORY_SEPARATOR.'../public-assets', '/srv/legacy-files']",
+            source)
+        Assert.Contains("$publicRoot = realpath($publicPath)", source)
+        Assert.Contains("$publicPrefix = rtrim($publicRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR", source)
+        let publicRootCheck = source.IndexOf("$publicRoot = realpath($publicPath)", StringComparison.Ordinal)
+        let store = source.IndexOf("move_uploaded_file(", StringComparison.Ordinal)
+        Assert.True(publicRootCheck >= 0 && publicRootCheck < store)

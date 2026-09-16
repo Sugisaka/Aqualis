@@ -495,6 +495,8 @@ type post(context:Aqualis,id:PHPdata) =
 type UploadPolicy = {
     /// Directory relative to the generated PHP script's directory.
     DestinationDirectory:string
+    /// Additional public directories (including web-server aliases). Relative paths use the generated PHP script's directory.
+    AdditionalPublicDirectories:string list
     /// Maximum accepted file size in bytes.
     MaxBytes:int64
     /// Maximum number of files accepted by a multiple-file upload.
@@ -506,9 +508,10 @@ type UploadPolicy = {
 
 [<RequireQualifiedAccess>]
 module UploadPolicy =
-    /// Creates a policy for private, non-executable uploads.
+    /// Creates a policy whose private destination is verified by the generated PHP before storage.
     let create destinationDirectory maxBytes allowedMimeTypes = {
         DestinationDirectory = destinationDirectory
+        AdditionalPublicDirectories = []
         MaxBytes = maxBytes
         MaxFiles = 10
         AllowedMimeTypes = allowedMimeTypes
@@ -530,6 +533,11 @@ type UploadedFiles = {
     AllSucceeded:bool0 }
 
 module private UploadGeneration =
+    // Stored extensions are deliberately limited to inert server-side file formats.
+    // Every upload must also remain outside all publicly served directories.
+    let allowedStoredExtensions =
+        set ["bin"; "csv"; "docx"; "gif"; "jpeg"; "jpg"; "pdf"; "png"; "pptx"; "txt"; "webp"; "xlsx"; "zip"]
+
     let phpString (value:string) =
         if isNull value then nullArg (nameof value)
         if value.IndexOf '\u0000' >= 0 then
@@ -545,6 +553,13 @@ module private UploadGeneration =
     let validatePolicy policy =
         if String.IsNullOrWhiteSpace policy.DestinationDirectory then
             invalidArg "policy" "The upload destination directory cannot be empty."
+        if policy.DestinationDirectory.IndexOf '\u0000' >= 0 then
+            invalidArg "policy" "The upload destination directory cannot contain NUL."
+        if isNull (box policy.AdditionalPublicDirectories) then
+            invalidArg "policy" "Additional public directories cannot be null."
+        for publicDirectory in policy.AdditionalPublicDirectories do
+            if String.IsNullOrWhiteSpace publicDirectory || publicDirectory.IndexOf '\u0000' >= 0 then
+                invalidArg "policy" "Additional public directories must be nonempty paths without NUL."
         if policy.MaxBytes <= 0L then
             invalidArg "policy" "The maximum upload size must be positive."
         if policy.MaxFiles <= 0 then
@@ -562,6 +577,8 @@ module private UploadGeneration =
                 extension |> Seq.exists (Char.IsLetterOrDigit >> not)
             then
                 invalidArg "policy" "Stored file extensions must contain only letters and digits."
+            if not (Set.contains (extension.ToLowerInvariant()) allowedStoredExtensions) then
+                invalidArg "policy" "The stored file extension is not permitted for private uploads."
         let mimeTypes = policy.AllowedMimeTypes |> List.map fst
         if mimeTypes.Length <> (mimeTypes |> List.distinct).Length then
             invalidArg "policy" "Allowed MIME types must be unique."
@@ -580,6 +597,16 @@ module private UploadGeneration =
             phpString mimeType + " => " + phpString (extension.ToLowerInvariant()))
         |> String.concat ", "
         |> fun values -> "[" + values + "]"
+
+    let publicDirectories policy =
+        policy.AdditionalPublicDirectories
+        |> List.map (fun directory ->
+            if directory.StartsWith("/", StringComparison.Ordinal) then
+                phpString directory
+            else
+                "__DIR__.DIRECTORY_SEPARATOR." + phpString directory)
+        |> fun paths -> String.concat ", " (["__DIR__"; "$_SERVER['DOCUMENT_ROOT']"] @ paths)
+        |> fun paths -> "[" + paths + "]"
 
     let emitSaveFunction (context:Aqualis) functionName policy =
         validatePolicy policy
@@ -607,12 +634,37 @@ module private UploadGeneration =
             "if ($uploadRoot === false || !is_dir($uploadRoot) || !is_writable($uploadRoot)) {"
             "throw new \\RuntimeException('The upload directory is unavailable.');"
             "}"
+            "if (DIRECTORY_SEPARATOR !== '/') {"
+            "throw new \\RuntimeException('Private upload storage requires POSIX filesystem permissions.');"
+            "}"
+            "$uploadRootMode = fileperms($uploadRoot);"
+            "if ($uploadRootMode === false || ($uploadRootMode & 0077) !== 0) {"
+            "throw new \\RuntimeException('The upload directory must not be accessible to group or other users.');"
+            "}"
+            "if (!isset($_SERVER['DOCUMENT_ROOT']) || !is_string($_SERVER['DOCUMENT_ROOT']) || $_SERVER['DOCUMENT_ROOT'] === '') {"
+            "throw new \\RuntimeException('The public document root is unavailable.');"
+            "}"
+            "$publicPaths = " + publicDirectories policy + ";"
+            "foreach ($publicPaths as $publicPath) {"
+            "$publicRoot = realpath($publicPath);"
+            "if ($publicRoot === false || !is_dir($publicRoot)) {"
+            "throw new \\RuntimeException('A public directory is unavailable.');"
+            "}"
+            "$publicPrefix = rtrim($publicRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;"
+            "if ($uploadRoot === $publicRoot || strncmp($uploadRoot, $publicPrefix, strlen($publicPrefix)) === 0) {"
+            "throw new \\RuntimeException('The upload directory is publicly accessible.');"
+            "}"
+            "}"
             "do {"
             "$storedName = bin2hex(random_bytes(" + string policy.RandomNameBytes + ")).'.'.$allowedTypes[$mimeType];"
             "$destination = $uploadRoot.DIRECTORY_SEPARATOR.$storedName;"
             "} while (file_exists($destination));"
             "if (!move_uploaded_file($upload['tmp_name'], $destination)) {"
             "throw new \\RuntimeException('Failed to store the uploaded file.');"
+            "}"
+            "if (!@chmod($destination, 0600)) {"
+            "if (!@unlink($destination)) { error_log('Aqualis: could not remove an uploaded file after chmod failure.'); }"
+            "throw new \\RuntimeException('Failed to protect the uploaded file.');"
             "}"
             "return ["
             "'stored_name' => $storedName,"

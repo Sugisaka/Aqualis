@@ -13,6 +13,8 @@ Run the script file `sample1.fsx` to generate C, Fortran, and Python source file
 
 See also the [Japanese manual](docs/doc-jp.md) or [English manual](docs/doc-en.md).
 
+For PHP file uploads, follow the [private upload storage deployment requirements](docs/php-upload-storage-jp.md). Generated PHP rejects public or overly permissive storage directories before saving files.
+
 ## Optional HTML assets
 
 Generated HTML does not reference external CDNs by default. Applications that need MathJax or a web-font stylesheet must provide and reference those assets explicitly. A relative URL can point to files deployed alongside the generated output; an HTTPS URL is an explicit CDN opt-in.
