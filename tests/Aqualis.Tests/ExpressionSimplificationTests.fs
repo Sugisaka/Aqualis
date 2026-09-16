@@ -97,6 +97,31 @@ module ExpressionSimplificationTests =
         assertRemainsModulo (Mod(It 4, Int 0, value))
 
     [<Fact>]
+    let ``algebraic simplification preserves integer quotient boundaries`` () =
+        let a = namedInteger "a"
+        let b = namedInteger "b"
+
+        match ((a ./ 3) + (b ./ 3)).Expr.simp with
+        |Add(It 4, Div(It 4,_,_), Div(It 4,_,_)) -> ()
+        |actual -> Assert.Fail($"Integer quotient sum was changed: {actual}.")
+
+        match ((a ./ 3) - (b ./ 3)).Expr.simp with
+        |Sub(It 4, Div(It 4,_,_), Div(It 4,_,_)) -> ()
+        |actual -> Assert.Fail($"Integer quotient difference was changed: {actual}.")
+
+        match ((a ./ 3) * 2).Expr.simp with
+        |Mul(It 4, Div(It 4,_,_), Int 2) -> ()
+        |actual -> Assert.Fail($"Integer quotient product was changed: {actual}.")
+
+        match (2 * (a ./ 3)).Expr.simp with
+        |Mul(It 4, Int 2, Div(It 4,_,_)) -> ()
+        |actual -> Assert.Fail($"Reversed integer quotient product was changed: {actual}.")
+
+        match ((a ./ 3) / 2).Expr.simp with
+        |Div(Dt, Div(It 4,_,_), _) -> ()
+        |actual -> Assert.Fail($"Integer quotient before real division was changed: {actual}.")
+
+    [<Fact>]
     let ``division and modulo still fold safe constants`` () =
         match Div(Dt, Dbl 0.0, Dbl 2.0).simp with
         |Dbl value -> Assert.Equal(0.0, value)

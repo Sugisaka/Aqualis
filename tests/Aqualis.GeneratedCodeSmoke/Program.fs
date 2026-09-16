@@ -130,6 +130,31 @@ module Program =
                 divisor <== 3
                 context.print.t (asm.todouble(dividend % divisor))
 
+    let private generateIntegerQuotientRegression outputRoot (directoryName,language) =
+        let outputDirectory = Path.Combine(outputRoot, "integer-quotient-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            if language = JavaScript then
+                context.writein "globalThis.print = console.log;"
+            let a = context.var.i0 "a"
+            let b = context.var.i0 "b"
+            let negative = context.var.i0 "negative"
+            a <== 5
+            b <== 2
+            negative <== -1
+            let quotient = a ./ 3
+            let separator() =
+                if language = PHP then context.writein "<?php echo ' '; ?>"
+            context.print.t (quotient + (b ./ 3))
+            separator()
+            context.print.t (quotient - (negative ./ 3))
+            separator()
+            context.print.t (quotient * 2)
+            separator()
+            context.print.t (2 * quotient)
+            separator()
+            context.print.t (quotient / 2)
+
     let private generateCArrayCase outputRoot caseName debugMode (code:Aqualis -> unit) =
         let outputDirectory = Path.Combine(outputRoot, "c-array-" + caseName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1403,6 +1428,7 @@ module Program =
             |> List.iter (generateArithmeticPrecedence outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateComplexMathRegression outputRoot)
+            generationTargets |> List.iter (generateIntegerQuotientRegression outputRoot)
             generatePythonSciPy outputRoot
             generateCBessel outputRoot
             generateDistributedC outputRoot

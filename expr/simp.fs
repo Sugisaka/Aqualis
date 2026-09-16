@@ -12,6 +12,10 @@ namespace Aqualis
     module exprSimp =
         let private reportExpressionError code message operation =
             Diagnostic.report code Error message (Some(Expression operation)) Map.empty
+
+        let private isTruncatingDivision = function
+            |Div(It _,_,_) -> true
+            |_ -> false
         
         type expr with
             
@@ -58,7 +62,8 @@ namespace Aqualis
                     ((a+d).simp*b).simp
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(b,d) ->
                     ((a+c).simp*b).simp
-                |Div(_,a,b),Div(_,c,d) when expr.equal(b,d) ->
+                |Div(_,a,b),Div(_,c,d) when expr.equal(b,d) &&
+                                               not (isTruncatingDivision x || isTruncatingDivision y) ->
                     ((a+c).simp/b).simp
                 |Add(_,a,b),c ->
                     let a = a.simp
@@ -128,7 +133,9 @@ namespace Aqualis
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,d) -> ((b-c).simp*a).simp
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(b,c) -> ((a-d).simp*b).simp
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(b,d) -> ((a-c).simp*b).simp
-                |Div(_,a,b),Div(_,c,d) when expr.equal(b,d) -> ((a-c).simp/b).simp
+                |Div(_,a,b),Div(_,c,d) when expr.equal(b,d) &&
+                                               not (isTruncatingDivision x || isTruncatingDivision y) ->
+                    ((a-c).simp/b).simp
                 |Add(_,a,b),c ->
                     let a = a.simp
                     let b = b.simp
@@ -210,7 +217,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a*c).simp*b).simp
                     |_, (Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _) -> ((b*c).simp*a).simp
                     |_ -> Mul(x%%y,x,y)
-                |Div(_,a,b),c ->
+                |Div(_,a,b),c when not (isTruncatingDivision x) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -219,7 +226,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a*c).simp/b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a/b).simp*c).simp
                     |_ -> Mul(x%%y,x,y)
-                |a,Div(_,b,c) ->
+                |a,Div(_,b,c) when not (isTruncatingDivision y) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -279,7 +286,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a/c).simp/b).simp
                     |_, (Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _) -> (Dbl 1.0/(b*c).simp).simp*a
                     |_ -> Div(Dt%%x%%y,x,y)
-                |Div(_,a,b),c ->
+                |Div(_,a,b),c when not (isTruncatingDivision x) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -288,7 +295,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a/c).simp/b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a/b).simp/c).simp
                     |_ -> Div(Dt%%x%%y,x,y)
-                |a,Div(_,b,c) ->
+                |a,Div(_,b,c) when not (isTruncatingDivision y) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp

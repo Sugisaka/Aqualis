@@ -25,6 +25,7 @@ if command -v node >/dev/null 2>&1; then
   javascript_path="$output_root/javascript/smoke.js"
   javascript_division_path="$output_root/javascript-integer-division/smoke.js"
   javascript_precedence_path="$output_root/precedence-javascript/smoke.js"
+  javascript_quotient_path="$output_root/integer-quotient-javascript/smoke.js"
   javascript_dot_path="$output_root/dot-length-mismatch-javascript/smoke.js"
 elif command -v node.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
   # WSL can use the Windows Node.js runtime when a Linux node binary is absent.
@@ -32,6 +33,7 @@ elif command -v node.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; 
   javascript_path="$(wslpath -w "$output_root/javascript/smoke.js")"
   javascript_division_path="$(wslpath -w "$output_root/javascript-integer-division/smoke.js")"
   javascript_precedence_path="$(wslpath -w "$output_root/precedence-javascript/smoke.js")"
+  javascript_quotient_path="$(wslpath -w "$output_root/integer-quotient-javascript/smoke.js")"
   javascript_dot_path="$(wslpath -w "$output_root/dot-length-mismatch-javascript/smoke.js")"
 else
   printf '%s\n' 'Required runtime is missing: node or node.exe' >&2
@@ -223,6 +225,36 @@ PY
 verify_complex_math 'C99' "$output_root/complex-math-c" bash proc_smoke_C.sh
 verify_complex_math 'Fortran' "$output_root/complex-math-fortran" bash proc_smoke_F.sh
 verify_complex_math 'Python' "$output_root/complex-math-python" bash proc_smoke_P.sh
+
+verify_integer_quotient() {
+  local label="$1"
+  local working_directory="$2"
+  shift 2
+  local actual
+  actual="$(cd "$working_directory" && "$@")"
+  python3 - "$label" "$actual" <<'PY'
+import math
+import sys
+
+label, output = sys.argv[1:]
+values = [float(value) for value in output.split()]
+expected = [1.0, 1.0, 2.0, 2.0, 0.5]
+if len(values) != len(expected) or any(
+    not math.isclose(value, wanted, rel_tol=1e-12, abs_tol=1e-12)
+    for value, wanted in zip(values, expected)
+):
+    sys.exit(f'{label} integer quotient: expected {expected}, received {values}')
+print(f'{label} integer quotient: passed')
+PY
+}
+
+verify_integer_quotient 'C99' "$output_root/integer-quotient-c" bash proc_smoke_C.sh
+verify_integer_quotient 'Fortran' "$output_root/integer-quotient-fortran" bash proc_smoke_F.sh
+verify_integer_quotient 'Python' "$output_root/integer-quotient-python" bash proc_smoke_P.sh
+"$node_command" --check "$javascript_quotient_path"
+verify_integer_quotient 'JavaScript' "$output_root/integer-quotient-javascript" "$node_command" "$javascript_quotient_path"
+php -l "$output_root/integer-quotient-php/smoke.php" >/dev/null
+verify_integer_quotient 'PHP' "$output_root/integer-quotient-php" php smoke.php
 
 run_and_verify 'PHP UTF-8 text validation' "$output_root/php-text-validation" '1000' php validation.php
 run_and_verify 'C99 distributed script' "$output_root/c-distributed" '42' bash shell_distributed_01.sh
