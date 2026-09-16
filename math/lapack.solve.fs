@@ -1,0 +1,194 @@
+//
+// Copyright (c) 2026 Jun-ichiro Sugisaka
+//
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+//
+namespace Aqualis
+
+    [<AutoOpen>]
+    module ContextLaSolveExtensions =
+        type ContextLa with
+            ///<summary>連立方程式の求解</summary>
+            ///<param name="matrix">係数行列</param>
+            ///<param name="y">定数項ベクトル→解ベクトル</param>
+            member this.solve_simuleq (matrix:complex2,y:complex1) =
+                this.GenerationContext.olist.add "-llapack"
+                this.GenerationContext.olist.add "-lblas"
+                this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    match this.GenerationContext.language with
+                    |Fortran ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== 1
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.codewritein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                    |C99 ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== 1
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                    |LaTeX ->
+                        this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$$\\\\\n")
+                    |HTML ->
+                        this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                    |Python ->
+                        this.RequirePythonLinalg "solve"
+                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                    |_ -> ()
+                    
+            ///<summary>連立方程式の求解</summary>
+            ///<param name="matrix">係数行列</param>
+            ///<param name="y">定数項ベクトル→解ベクトル</param>
+            member this.solve_simuleq (matrix:double2,y:double1) =
+                this.GenerationContext.olist.add "-llapack"
+                this.GenerationContext.olist.add "-lblas"
+                this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    match this.GenerationContext.language with
+                    |Fortran ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== 1
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.codewritein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                    |C99 ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== 1
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                    |LaTeX ->
+                        this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
+                    |HTML ->
+                        this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                    |Python ->
+                        this.RequirePythonLinalg "solve"
+                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                    |_ -> ()
+                    
+            ///<summary>連立方程式の求解</summary>
+            ///<param name="matrix">係数行列</param>
+            ///<param name="y">定数項ベクトルを列方向に並べた配列→解ベクトルを列方向に並べた配列</param>
+            member this.solve_simuleqs (matrix:complex2,y:complex2) =
+                this.GenerationContext.olist.add "-llapack"
+                this.GenerationContext.olist.add "-lblas"
+                this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    match this.GenerationContext.language with
+                    |Fortran ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== y.size2
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.codewritein("call zgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                    |C99 ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== y.size2
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("zgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                    |LaTeX ->
+                        this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
+                    |HTML ->
+                        this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                    |Python ->
+                        this.RequirePythonLinalg "solve"
+                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                    |_ -> ()
+                    
+            ///<summary>連立方程式の求解</summary>
+            ///<param name="matrix">係数行列</param>
+            ///<param name="y">定数項ベクトルを列方向に並べた配列→解ベクトルを列方向に並べた配列</param>
+            member this.solve_simuleqs (matrix:double2,y:double2) =
+                this.GenerationContext.olist.add "-llapack"
+                this.GenerationContext.olist.add "-lblas"
+                this.GenerationContext.group.section "連立方程式の求解" <| fun () ->
+                    match this.GenerationContext.language with
+                    |Fortran ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== y.size2
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.codewritein("call dgesv("+N.code+","+b.code+","+matrix.code+","+N.code+","+ipiv.code+","+y.code+","+N.code+","+info.code+")"+"\n")
+                    |C99 ->
+                        this.GenerationContext.ch.iii <| fun (N,b,info) ->
+                            N <== matrix.size1
+                            b <== y.size2
+                            this.GenerationContext.ch.i1 N <| fun ipiv ->
+                                this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("dgesv_(&"+N.code+","+"&"+b.code+","+matrix.code+",&"+N.code+","+ipiv.code+","+y.code+",&"+N.code+",&"+info.code+")"+";\n")
+                    |LaTeX ->
+                        this.GenerationContext.codewritein("$"+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"$\\\\\n")
+                    |HTML ->
+                        this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
+                    |Python ->
+                        this.RequirePythonLinalg "solve"
+                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                    |_ -> ()
+                    
+            ///<summary>逆行列の計算</summary>
+            ///<param name="mat1">元の行列</param>
+            ///<param name="mat2">mat1の逆行列</param>
+            member this.inverse_matrix (mat2:double2,mat1:double2) =
+                this.GenerationContext.olist.add "-llapack"
+                this.GenerationContext.olist.add "-lblas"
+                this.GenerationContext.group.section "逆行列の計算" <| fun () ->
+                    mat2.clear()
+                    this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
+                    match this.GenerationContext.language with
+                    |Fortran ->
+                        this.GenerationContext.ch.ii <| fun (npre,info) ->
+                            npre<==mat1.size1
+                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                ipiv.clear()
+                                this.GenerationContext.codewritein("call zgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
+                    |C99 ->
+                        this.GenerationContext.ch.ii <| fun (npre,info) ->
+                            npre<==mat1.size1
+                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                ipiv.clear()
+                                this.GenerationContext.elist.add "void zgesv_(int *n, int *nrhs, double complex *a, int *lda, int *ipiv, double complex *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("zgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
+                    |LaTeX ->
+                        this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
+                    |HTML ->
+                        this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
+                    |Python ->
+                        this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
+                    |_ -> ()
+                        
+            ///<summary>逆行列の計算</summary>
+            ///<param name="mat1">元の行列</param>
+            ///<param name="mat2">mat1の逆行列</param>
+            member this.inverse_matrix (mat2:complex2,mat1:complex2) =
+                this.GenerationContext.olist.add "-llapack"
+                this.GenerationContext.olist.add "-lblas"
+                this.GenerationContext.group.section "逆行列の計算" <| fun () ->
+                    mat2.clear()
+                    this.GenerationContext.iter.num mat1.size1 <| fun i -> mat2[i,i] <== 1.0
+                    match this.GenerationContext.language with
+                    |Fortran ->
+                        this.GenerationContext.ch.ii <| fun (npre,info) ->
+                            npre<==mat1.size1
+                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                ipiv.clear()
+                                this.GenerationContext.codewritein("call dgesv("+npre.code+", "+npre.code+","+mat1.code+", "+npre.code+", "+ipiv.code+","+mat2.code+", "+npre.code+", "+info.code+")")
+                                this.GenerationContext.br.if1 (info .=/ 0) <| fun () -> this.GenerationContext.print.tt <| "InvMatrix Info: "++info
+                    |C99 ->
+                        this.GenerationContext.ch.ii <| fun (npre,info) ->
+                            npre<==mat1.size1
+                            this.GenerationContext.ch.i1 npre <| fun ipiv ->
+                                ipiv.clear()
+                                this.GenerationContext.elist.add "void dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)"
+                                this.GenerationContext.codewritein("dgesv_(&"+npre.code+","+"&"+npre.code+", "+mat1.code+", &"+npre.code+", "+ipiv.code+", *"+mat2.code+", &"+npre.code+", &"+info.code+");")
+                                this.GenerationContext.br.if1 (info .=/ 0) <| fun () -> this.GenerationContext.print.tt <| "InvMatrix Info: "++info
+                    |LaTeX ->
+                        this.GenerationContext.codewritein("$"+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"$"+"\\\\\n")
+                    |HTML ->
+                        this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+mat1.code+"^{-1}"+"\\)"+"<br/>\n")
+                    |Python ->
+                        this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+mat1.code+")"+"\n")
+                    |_ -> ()
