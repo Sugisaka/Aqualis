@@ -89,19 +89,31 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
         match x with
         |[RNvr (c,valueContext)] -> int0(c, valueContext)
         |_ ->
-            printfn "%s" (this.toString(".",StrQuotation))
+            context.ReportDiagnostic(
+                "AQL2001", Error,
+                "PHP data cannot be converted to a single integer expression.",
+                Some "PHP numeric conversion",
+                Map ["targetType", "integer"])
             int0 NaN
     member this.double0 with get() =
         match x with
         |[RNvr (c,valueContext)] -> double0(c, valueContext)
         |_ ->
-            printfn "%s" (this.toString(".",StrQuotation))
+            context.ReportDiagnostic(
+                "AQL2001", Error,
+                "PHP data cannot be converted to a single real expression.",
+                Some "PHP numeric conversion",
+                Map ["targetType", "real"])
             double0 NaN
     member this.complex0 with get() =
         match x with
         |[RNvr (c,valueContext)] -> complex0(c, valueContext)
         |_ ->
-            printfn "%s" (this.toString(".",StrQuotation))
+            context.ReportDiagnostic(
+                "AQL2001", Error,
+                "PHP data cannot be converted to a single complex expression.",
+                Some "PHP numeric conversion",
+                Map ["targetType", "complex"])
             complex0 NaN
 
     /// Creates an empty PHP array expression associated with the generation context.

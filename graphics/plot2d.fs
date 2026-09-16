@@ -165,6 +165,7 @@ namespace Aqualis
                     r+(1.0-r)*(a-0.5)/0.5, g+(1.0-g)*(a-0.5)/0.5, b+(1.0-b)*(a-0.5)/0.5)
                     
     type plot2d() =
+        let diagnostics = DiagnosticBag()
         
         let mutable data : array<double> = [||]
         let mutable isCPXdata : bool = false
@@ -181,6 +182,19 @@ namespace Aqualis
                     message
                 else
                     error + Environment.NewLine + message
+
+        member _.Diagnostics = diagnostics
+        member private _.ReportErrorDiagnostic(inputFilename:string, outputFilename:string) =
+            if not (String.IsNullOrEmpty error) then
+                let diagnostic = {
+                    Code = "AQL3004"
+                    Severity = Error
+                    Message = error
+                    Location = Some(InputFile(inputFilename, None, None))
+                    Properties = Map ["outputFile", outputFilename]
+                }
+                diagnostics.Report diagnostic
+                DiagnosticScope.report diagnostic
         
         /// データのx方向サンプリング点数
         member _.Nx with get() = nx
@@ -805,7 +819,7 @@ namespace Aqualis
             let x = plot2d()
             x.FileRead(inputFilename,ix,iy,izre,izim)
             x.writeBMP24(outputFilename, gradation, autoscale, eval, phaseshift,enlarge)
-            if x.Error <> "" then printfn "%s" x.Error
+            x.ReportErrorDiagnostic(inputFilename, outputFilename)
             x
             
         /// <summary>
@@ -825,7 +839,7 @@ namespace Aqualis
             let x = plot2d()
             x.FileRead(inputFilename,ix,iy,izre,0)
             x.writeBMP24(outputFilename, gradation, autoscale, eval, phaseshift,enlarge)
-            if x.Error <> "" then printfn "%s" x.Error
+            x.ReportErrorDiagnostic(inputFilename, outputFilename)
             x
             
         /// <summary>
@@ -842,5 +856,5 @@ namespace Aqualis
             let x = plot2d()
             x.FileRead inputFilename
             x.writeBMP24(outputFilename, gradation, autoscale, eval, phaseshift,enlarge)
-            if x.Error <> "" then printfn "%s" x.Error
+            x.ReportErrorDiagnostic(inputFilename, outputFilename)
             x

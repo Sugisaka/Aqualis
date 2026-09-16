@@ -10,6 +10,8 @@ namespace Aqualis
     
     [<AutoOpen>]
     module exprSimp =
+        let private reportExpressionError code message operation =
+            Diagnostic.report code Error message (Some(Expression operation)) Map.empty
         
         type expr with
             
@@ -231,7 +233,7 @@ namespace Aqualis
             static member simpDiv(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0 |_,Dbl 0.0 |_,Cpx (0.0,0.0) ->
-                    Console.WriteLine "Error: ゼロ割りを検出しました"
+                    reportExpressionError "AQL4001" "Division by zero was detected during expression simplification." "division"
                     NaN
                 |_,Int 1 -> x
                 |_,Dbl 1.0 -> x
@@ -300,7 +302,7 @@ namespace Aqualis
             static member simpIntDiv(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0 -> 
-                    Console.WriteLine "Error: ゼロ割りを検出しました"
+                    reportExpressionError "AQL4001" "Division by zero was detected during integer expression simplification." "integer division"
                     NaN
                 |_,Int 1 -> x
                 |Int x,Int y -> Int (x/y)
@@ -314,7 +316,7 @@ namespace Aqualis
             static member simpMod(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0 -> 
-                    Console.WriteLine "Error: ゼロ割りを検出しました"
+                    reportExpressionError "AQL4001" "Division by zero was detected during modulo simplification." "modulo"
                     NaN
                 |_,Int 1 -> Int 0
                 |Int v1,Int v2 -> Int(v1 % v2)
@@ -323,7 +325,7 @@ namespace Aqualis
             static member simpPow(x:expr,y:expr) =
                 match x,y with
                 |(Int 0|Dbl 0.0),(Int 0|Dbl 0.0) -> 
-                    Console.WriteLine "Error: 0の0乗は未定義です"
+                    reportExpressionError "AQL4002" "Zero raised to the power zero is undefined." "power"
                     NaN
                 |Int x,Int y when y>0 -> Int (List.fold (fun acc _ -> acc*x) 1 [1..y])
                 |Int x, Int y -> Dbl (double x ** double y)

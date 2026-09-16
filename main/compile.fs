@@ -192,8 +192,7 @@ namespace Aqualis
                         removeDirectory stagingDirectory
                         removeDirectory rollbackDirectory
 
-        ///<summary>コンパイル</summary>
-        let Compile langgList dir projectname (codever:string) code =
+        let private compileCore (policy:DiagnosticPolicy) (diagnostics:DiagnosticBag) langgList dir projectname (codever:string) code =
             let projectname = validateProjectName projectname
             let languages = langgList |> Seq.toList
             let codever = singleLineMetadata (nameof codever) codever
@@ -684,4 +683,45 @@ namespace Aqualis
                         code context
                         context.close()
                 |Numeric -> Aqualis.runWithWriterlessContext Numeric code
+            let outputFiles =
+                Directory.GetFiles(outputDirectory, "*", SearchOption.AllDirectories)
+                |> Array.map (fun path ->
+                    Path.Combine(dir, Path.GetRelativePath(outputDirectory, path)))
+                |> Array.toList
+            let collectedDiagnostics = diagnostics.Snapshot()
+            let hasFatalDiagnostics =
+                collectedDiagnostics
+                |> List.exists (fun item ->
+                    item.Severity = Error ||
+                    (policy.TreatWarningsAsErrors && item.Severity = Warning))
+            if hasFatalDiagnostics then
+                raise (AqualisCompilationException(
+                    "Compilation produced one or more fatal diagnostics.",
+                    collectedDiagnostics))
             transaction.Commit()
+            outputFiles
+
+        ///<summary>Compiles sources and returns generated files and structured diagnostics without writing diagnostics to the console.</summary>
+        let CompileWithDiagnosticPolicy policy langgList dir projectname (codever:string) code =
+            let diagnostics = DiagnosticBag(maxDiagnostics = policy.MaxDiagnostics)
+            use _scope = DiagnosticScope.push diagnostics
+            let outputFiles = compileCore policy diagnostics langgList dir projectname codever code
+            {
+                OutputFiles = outputFiles
+                Diagnostics = diagnostics.Snapshot()
+            }
+
+        ///<summary>Compiles sources and returns generated files and structured diagnostics without writing diagnostics to the console.</summary>
+        let CompileWithDiagnostics langgList dir projectname (codever:string) code =
+            CompileWithDiagnosticPolicy
+                DiagnosticPolicy.defaults
+                langgList dir projectname codever code
+
+        ///<summary>コンパイル</summary>
+        let Compile langgList dir projectname (codever:string) code =
+            try
+                let result = CompileWithDiagnostics langgList dir projectname codever code
+                result.Diagnostics |> DiagnosticConsoleRenderer.write
+            with :? AqualisCompilationException as error ->
+                error.Diagnostics |> DiagnosticConsoleRenderer.write
+                reraise()

@@ -28,10 +28,19 @@ module varControl2 =
                 |_ -> true)
             |> fun exists -> exists || program.cvar.exists name
 
-        member private this.getNamedVar(name:string, collision:bool) =
+        member private this.getNamedVar(name:string, collision:bool, program:Aqualis option) =
             if collision then
                 let replacement,release = this.getVar()
-                printfn "Variable %s is already in use; using %s instead." name replacement
+                let message = "Variable '" + name + "' is already in use; using '" + replacement + "' instead."
+                let properties = Map ["variable", name; "replacement", replacement]
+                match program with
+                | Some context ->
+                    context.ReportDiagnostic(
+                        "AQL1001", Warning, message,
+                        Some "variable allocation", properties)
+                | None ->
+                    Diagnostic.report
+                        "AQL1001" Warning message None properties
                 replacement,release
             else
                 match
@@ -56,11 +65,11 @@ module varControl2 =
                 name,release
 
         member this.getVar(program:Aqualis, name:string, typ:Etype, shape:VarType) =
-            this.getNamedVar(name, varGenerator.isVarExist(program,name,typ,shape))
+            this.getNamedVar(name, varGenerator.isVarExist(program,name,typ,shape), Some program)
 
         member this.getVar(name:string, _typ:Etype, _shape:VarType) =
             let collision =
                 match this.isVarExist name with
                 |None,None,None,None -> false
                 |_ -> true
-            this.getNamedVar(name, collision)
+            this.getNamedVar(name, collision, None)

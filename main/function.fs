@@ -143,6 +143,7 @@ namespace Aqualis
                     |A3(_,_,_) -> typ.tostring language + " :: " + name + "(:,:,:)"
             let dir = match context.dir with |Some d -> d |None -> ""
             let intermediateDirectory = context.IntermediateDirectory
+            use _diagnosticScope = DiagnosticScope.push context.Diagnostics
             match context.language with
             |Fortran ->
                 let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,Fortran) intermediateDirectory <| fun childContext ->

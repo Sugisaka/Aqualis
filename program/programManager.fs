@@ -10,8 +10,12 @@ namespace Aqualis
     open System.IO
     open System.Threading
    
-    type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool,writerDirectory:string option) =
+    type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool,writerDirectory:string option,diagnostics:DiagnosticBag option) =
         let contextId = System.Guid.NewGuid()
+        let diagnosticBag =
+            diagnostics
+            |> Option.orElseWith DiagnosticScope.tryCurrent
+            |> Option.defaultWith DiagnosticBag
         let intermediateDirectory =
             lazy
                 let path =
@@ -61,13 +65,24 @@ namespace Aqualis
         /// 条件分岐枠スタックリスト
         member _.BranchStack with get() = sequenceBranches and set(v) = sequenceBranches <- v 
         new(outputdir:string option,pjname:string option,lang:Language) =
-            new Aqualis(outputdir,pjname,lang,false,false,None)
+            new Aqualis(outputdir,pjname,lang,false,false,None,None)
+        static member internal CreateWithDiagnostics(outputdir,pjname,lang,diagnostics) =
+            new Aqualis(outputdir,pjname,lang,false,false,None,Some diagnostics)
         static member Version = typeof<Aqualis>.Assembly.GetName().Version.ToString(3)
-        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true,false,None)
+        static member BlankWriter(lang:Language) = new Aqualis(None,None,lang,true,false,None,None)
         member _.Dir with get() = outputdir
         member _.ProjectName with get() = pjname
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(Path.Combine(dir, src)) |_ -> None
         member _.ContextId with get() = contextId
+        member _.Diagnostics = diagnosticBag
+        member internal _.ReportDiagnostic(code,severity,message,operation,properties) =
+            diagnosticBag.Report {
+                Code = code
+                Severity = severity
+                Message = message
+                Location = Some(Generation(lang, pjname, operation))
+                Properties = properties
+            }
         member internal _.IntermediateDirectory = intermediateDirectory.Value
         member internal _.IsNeutral = isNeutral
         member internal _.ParallelMode with get() = parallelMode and set v = parallelMode <- v
@@ -338,13 +353,13 @@ namespace Aqualis
             ) with get
 
         ///<summary>定義された変数リスト</summary>
-        member val cvar = varCollector lang with get
+        member val cvar = varCollector(lang, diagnosticBag) with get
 
-        member val varPrivate = varCollector lang with get
+        member val varPrivate = varCollector(lang, diagnosticBag) with get
 
-        member val varCopyIn = varCollector lang with get
+        member val varCopyIn = varCollector(lang, diagnosticBag) with get
 
-        member val varCopyOut = varCollector lang with get
+        member val varCopyOut = varCollector(lang, diagnosticBag) with get
         static member internal runWithOwnedContext
             (createContext: unit -> Aqualis)
             (code: Aqualis -> 'T)
@@ -382,7 +397,8 @@ namespace Aqualis
                         language,
                         false,
                         true,
-                        Some writerDirectory))
+                        Some writerDirectory,
+                        None))
                 code
 
         static member internal makeIntermediateProgramWithContext
@@ -409,7 +425,8 @@ namespace Aqualis
                     language,
                     false,
                     false,
-                    Some writerDirectory)
+                    Some writerDirectory,
+                    None)
             try
                 code context
             finally

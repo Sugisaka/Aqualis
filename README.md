@@ -26,6 +26,22 @@ Compile [HTML] outputdir projectname version <| fun context ->
 
 Aqualis does not include or download MathJax, fonts, or other third-party web assets.
 
+## Structured diagnostics
+
+Use `CompileWithDiagnostics` when warnings need to be inspected programmatically without console output.
+
+```fsharp
+let result =
+    CompileWithDiagnostics [C99] outputdir projectname version <| fun context ->
+        // Generate the program here.
+        ()
+
+for diagnostic in result.Diagnostics do
+    printfn "%s: %s" diagnostic.Code diagnostic.Message
+```
+
+`Compile` remains available for compatibility and renders collected diagnostics to standard error. Error diagnostics abort the output transaction. `CompileWithDiagnosticPolicy` can additionally treat warnings as errors or limit the number of collected diagnostics. Context-free operations can be inspected with `Diagnostics.Capture`.
+
 ## License
 [MIT License](LICENSE.txt)
 

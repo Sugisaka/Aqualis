@@ -464,7 +464,7 @@ namespace Aqualis
         member _.add x = lock gate (fun () -> arguments <- arguments@[x])
         
     ///<summary>変数管理</summary>
-    type varCollector(lang:Language) =
+    type varCollector(lang:Language, diagnostics:DiagnosticBag) =
         let gate = obj()
         ///<summary>型名,変数名,定数</summary>
         let mutable vlist:list<Etype*VarType*string*string> = []
@@ -492,7 +492,13 @@ namespace Aqualis
         member this.setUniqVarWarning(etyp,atyp,name,cst) =
             lock gate (fun () ->
                 if List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist then
-                    printfn "%s" ("変数「" + name + "」が複数定義されています")
+                    diagnostics.Report {
+                        Code = "AQL1002"
+                        Severity = Warning
+                        Message = "Variable '" + name + "' is already defined; the duplicate definition was ignored."
+                        Location = Some(Generation(lang, None, Some "variable declaration"))
+                        Properties = Map ["variable", name]
+                    }
                 else
                     vlist <- (etyp,atyp,name,cst)::vlist)
                 

@@ -29,6 +29,7 @@
     <Compile Include="StructureDependencyTests.fs" />
     <Compile Include="AssignmentTests.fs" />
     <Compile Include="ExpressionSimplificationTests.fs" />
+    <Compile Include="DiagnosticsTests.fs" />
     <Compile Include="NumericFormattingTests.fs" />
     <Compile Include="ControlFlowGenerationTests.fs" />
     <Compile Include="NumericArrayGenericTests.fs" />

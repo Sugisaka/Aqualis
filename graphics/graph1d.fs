@@ -255,6 +255,14 @@ type graph1d =
         }
     ///<summary>グラフ生成(ダミー)</summary>
     static member dummy_makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code = ()
+    static member readdataWithDiagnostics (filename:string) columns =
+        let value,diagnostics =
+            Diagnostics.Capture(fun () -> graph1d.readdata filename columns)
+        { Value = value; Diagnostics = diagnostics }
+    static member makeGraphWithDiagnostics (outputdir:string) (filename:string) (setting:GraphSetting) code =
+        let value,diagnostics =
+            Diagnostics.Capture(fun () -> graph1d.makeGraph outputdir filename setting code)
+        { Value = value; Diagnostics = diagnostics }
     ///<summary>カルチャに依存しない形式（小数点はピリオド）でデータファイルを読み込みます。</summary>
     static member readdata (filename:string) (colx:(int->double)->double,coly:(int->double)->double) =
         //データファイルの行数
@@ -277,18 +285,28 @@ type graph1d =
                 if t.Contains "," then sep <- [|','|]
                 elif t.Contains "\t" then sep <- [|'\t'|]
             let k = t.Split(sep,StringSplitOptions.RemoveEmptyEntries)
-            let pd i = 
-                if i<=0 || i>k.Length then
-                    printfn "column index over: %d %d" i k.Length
+            let pd column =
+                if column<=0 || column>k.Length then
+                    Diagnostic.report
+                        "AQL3001"
+                        Warning
+                        ("Data column " + string column + " is outside the available range.")
+                        (Some(InputFile(filename, Some(i + 1), Some column)))
+                        (Map ["column", string column; "columnCount", string k.Length])
                     nan
                 else
                     let (r,v) =
                         Double.TryParse(
-                            k[i-1],
+                            k[column-1],
                             NumberStyles.Float,
                             CultureInfo.InvariantCulture)
                     if not r then 
-                        printfn "Not a number: %s" k[i-1]
+                        Diagnostic.report
+                            "AQL3002"
+                            Warning
+                            ("The input value is not a valid invariant-culture number.")
+                            (Some(InputFile(filename, Some(i + 1), Some column)))
+                            (Map ["value", k[column-1]])
                         nan
                     else
                         v
@@ -442,12 +460,9 @@ type graph1d =
             /// 1mmのポイント値
             let scale = 2.83466798951172844
             scale*x
-        printfn "-----------------------------------------"
-        printfn "Plot %s" (Path.Combine(outputdir, filename))
         //SVGファイル生成
         svgfile.make (Path.Combine(outputdir, filename)) (mmtopt cLx,mmtopt cLy) 1.0 <| fun sv ->
             let addGraph (ix:int,iy:int) (subcaption:option<string>) (gstyle:GraphStyle) (data:list<Plot>) =
-                printfn "Subplot: (%d,%d)" ix iy
                 let gLx0,gLy0 = match subcaption with |None -> gLx,gLy |Some _ -> gLx,gLy-setting.SubCaptionShiftY
                 /// データファイルが存在するかチェック
                 let rec filecheck (lst:list<Plot>) =
@@ -455,10 +470,14 @@ type graph1d =
                     |Datafile f :: lst0 ->
                         let sourcePath = Path.Combine(outputdir, f.FileName)
                         if File.Exists sourcePath then
-                            printfn "source: %s" sourcePath
                             filecheck lst0
                         else
-                            printfn "Error: %s not found" sourcePath
+                            Diagnostic.report
+                                "AQL3003"
+                                Error
+                                ("Graph input file was not found: " + sourcePath)
+                                (Some(InputFile(sourcePath, None, None)))
+                                Map.empty
                             false
                     |a::lst0 ->
                         filecheck lst0
@@ -579,18 +598,6 @@ type graph1d =
                                 let r2 = 10.0**ceil(log10 x2)
                                 if r1=r2 then r1/10.0,r2*10.0 else r1,r2
                         let dataxr,datayr = mergeRange data
-                        // データの範囲表示(x)
-                        match dataxr with
-                        |None ->
-                            printfn "Data range (x): none"
-                        |Some(_X1,_X2) ->
-                            printfn "Data range (x): %e %e" _X1 _X2
-                        // データの範囲表示(y)
-                        match datayr with
-                        |None ->
-                            printfn "Data range (y): none"
-                        |Some(_Y1,_Y2) ->
-                            printfn "Data range (y): %e %e" _Y1 _Y2
                         // 目盛り間隔に合わせて範囲を更新(x)
                         let xr1,xr2 =
                             match gstyle.Xaxis.Range, dataxr with
@@ -609,8 +616,6 @@ type graph1d =
                                 autoRange (gstyle.Yaxis,_Y1,_Y2)
                             |MinMax(y1,y2),_ ->
                                 autoRange (gstyle.Yaxis,y1,y2)
-                        printfn "Plot range (x): %e %e" xr1 xr2    
-                        printfn "Plot range (y): %e %e" yr1 yr2    
                         (xr1,xr2),(yr1,yr2)
                     // データ座標→描画座標[mm]
                     let fx x = 

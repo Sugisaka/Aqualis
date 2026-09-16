@@ -184,6 +184,7 @@ type WebAssetContext(outputDirectory:string, contentsName:string) =
 
 type HtmlGenerationContext internal (dir:string,projectName:string) =
     let gate = obj()
+    let diagnostics = DiagnosticBag()
     let layout = WebOutputLayout.create dir projectName
     let assets = WebAssetContext(layout.OutputDirectory, layout.ContentsName)
     let mutable contentsCounter = -1
@@ -197,45 +198,53 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
     let animationButtons = ResizeArray<string * string * int * int>()
     let audioFiles = ResizeArray<string>()
     // メインファイル
-    let main = new Aqualis(
+    let main = Aqualis.CreateWithDiagnostics(
         Some layout.OutputDirectory,
         Some layout.MainFileName,
-        HTML)
+        HTML,
+        diagnostics)
     // HTML本体のコード
-    let body = new Aqualis(
+    let body = Aqualis.CreateWithDiagnostics(
         Some layout.OutputDirectory,
         Some layout.BodyTemporaryFileName,
-        HTML)
+        HTML,
+        diagnostics)
     // JavaScriptのコード
-    let jsMain = new Aqualis(
+    let jsMain = Aqualis.CreateWithDiagnostics(
         Some layout.OutputDirectory,
         Some (projectName + "_js"),
-        JavaScript)
+        JavaScript,
+        diagnostics)
     // スライドアニメーション用javascriptファイル名
-    let animationSeq = new Aqualis(
+    let animationSeq = Aqualis.CreateWithDiagnostics(
         Some layout.ContentsDirectory,
         Some "animationSeq.js",
-        JavaScript)
+        JavaScript,
+        diagnostics)
     // スライドアニメーション(アニメーション開始)用javascript
-    let jsAnimationStart = new Aqualis(
+    let jsAnimationStart = Aqualis.CreateWithDiagnostics(
         Some layout.ContentsDirectory,
         Some "animationStart.js",
-        JavaScript)
+        JavaScript,
+        diagnostics)
     // スライドアニメーション(アニメーションリセット)用javascript
-    let jsAnimationSeqReset = new Aqualis(
+    let jsAnimationSeqReset = Aqualis.CreateWithDiagnostics(
         Some layout.ContentsDirectory,
         Some "animationSeqReset.js",
-        JavaScript)
+        JavaScript,
+        diagnostics)
     // スライドアニメーション(アニメーションリセット)用javascript
-    let jsAnimationReset = new Aqualis(
+    let jsAnimationReset = Aqualis.CreateWithDiagnostics(
         Some layout.ContentsDirectory,
         Some "animationReset.js",
-        JavaScript)
+        JavaScript,
+        diagnostics)
     // オートアニメーション実行用javascript
-    let autoAnimation = new Aqualis(
+    let autoAnimation = Aqualis.CreateWithDiagnostics(
         Some layout.ContentsDirectory,
         Some "autoAnimation.js",
-        JavaScript)
+        JavaScript,
+        diagnostics)
 
     let ownedContexts =
         [| main
@@ -248,6 +257,7 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
            autoAnimation |]
 
     member _.BodyContext with get() = body
+    member _.Diagnostics = diagnostics
 
     member this.switchMain code = code main
     member this.switchBody code = code body
