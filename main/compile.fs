@@ -7,9 +7,11 @@
 namespace Aqualis
 
     open System
+    open System.Collections.Generic
     open System.IO
     open System.Security.Cryptography
     open System.Text
+    open System.Text.Json
 
     [<AutoOpen>]
     module Aqualis_main =
@@ -86,14 +88,23 @@ namespace Aqualis
                 |character -> result.Append(character) |> ignore
             result.ToString()
 
-        type private CompilationOutputTransaction(outputDirectory:string) =
+        type private CompilationOutputTransaction(outputDirectory:string,projectName:string) =
             let outputDirectory = Path.GetFullPath outputDirectory
             let transactionId = Guid.NewGuid().ToString("N")
+            let manifestName = ".aqualis-generated-" + projectName + ".json"
+            let manifestPath = Path.Combine(outputDirectory, manifestName)
             let stagingDirectory =
                 Path.Combine(outputDirectory, ".aqualis-transaction-" + transactionId)
             let rollbackDirectory =
                 Path.Combine(outputDirectory, ".aqualis-rollback-" + transactionId)
             let mutable committed = false
+            let mutable preserveRollback = false
+            let pathComparer =
+                if OperatingSystem.IsWindows() then StringComparer.OrdinalIgnoreCase
+                else StringComparer.Ordinal
+            let pathComparison =
+                if OperatingSystem.IsWindows() then StringComparison.OrdinalIgnoreCase
+                else StringComparison.Ordinal
 
             let removeDirectory path =
                 if Directory.Exists path then
@@ -102,10 +113,51 @@ namespace Aqualis
             let relativeFiles root =
                 if Directory.Exists root then
                     Directory.GetFiles(root, "*", SearchOption.AllDirectories)
-                    |> Array.map (fun path -> Path.GetRelativePath(root, path))
+                    |> Array.map (fun path -> Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/'))
                     |> Array.sort
                 else
                     [||]
+
+            let checkedPath root relativePath =
+                if String.IsNullOrWhiteSpace relativePath || Path.IsPathRooted relativePath || relativePath.Contains('\\') then
+                    raise (InvalidDataException("The generated-file manifest contains an invalid relative path."))
+                let segments = relativePath.Split('/')
+                if segments |> Array.exists (fun segment ->
+                    String.IsNullOrWhiteSpace segment || segment = "." || segment = ".." ||
+                    segment.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) then
+                    raise (InvalidDataException("The generated-file manifest contains an invalid path segment."))
+                let mutable path = root
+                for segment in segments do
+                    path <- Path.Combine(path, segment)
+                    if (File.Exists path || Directory.Exists path) &&
+                       (File.GetAttributes(path) &&& FileAttributes.ReparsePoint) <> enum<FileAttributes> 0 then
+                        raise (InvalidDataException("Generated-file paths cannot traverse symbolic links."))
+                let fullPath = Path.GetFullPath path
+                let rootPrefix = root.TrimEnd(Path.DirectorySeparatorChar) + string Path.DirectorySeparatorChar
+                if not (fullPath.StartsWith(rootPrefix, pathComparison)) then
+                    raise (InvalidDataException("A generated-file path escapes the output directory."))
+                fullPath
+
+            let fileHash path =
+                use stream = File.OpenRead path
+                SHA256.HashData(stream) |> Convert.ToHexString
+
+            let previousFiles () =
+                let previous = Dictionary<string,string>(pathComparer)
+                if File.Exists manifestPath then
+                    let stored = JsonSerializer.Deserialize<Dictionary<string,string>>(File.ReadAllText manifestPath)
+                    if isNull stored then
+                        raise (InvalidDataException("The generated-file manifest is invalid."))
+                    for KeyValue(relativePath,hash) in stored do
+                        if pathComparer.Equals(relativePath, manifestName) ||
+                           String.IsNullOrWhiteSpace hash ||
+                           hash.Length <> 64 ||
+                           hash |> Seq.exists (fun character -> not (Uri.IsHexDigit character)) then
+                            raise (InvalidDataException("The generated-file manifest contains an invalid entry."))
+                        checkedPath outputDirectory relativePath |> ignore
+                        if not (previous.TryAdd(relativePath, hash)) then
+                            raise (InvalidDataException("The generated-file manifest contains duplicate paths."))
+                previous
 
             do
                 if not (Directory.Exists outputDirectory) then
@@ -115,55 +167,105 @@ namespace Aqualis
             member _.StagingDirectory = stagingDirectory
 
             member _.Commit() =
-                let files = relativeFiles stagingDirectory
-                let published = ResizeArray<string * bool>()
-                let mutable currentBackup : (string * string) option = None
+                let generatedFiles = relativeFiles stagingDirectory
+                let current = Dictionary<string,string>(pathComparer)
+                for relativePath in generatedFiles do
+                    if pathComparer.Equals(relativePath, manifestName) then
+                        raise (InvalidOperationException("Generated output conflicts with its ownership manifest."))
+                    let stagedPath = checkedPath stagingDirectory relativePath
+                    checkedPath outputDirectory relativePath |> ignore
+                    if not (current.TryAdd(relativePath, fileHash stagedPath)) then
+                        raise (InvalidOperationException("Generated output contains duplicate paths."))
+                File.WriteAllText(Path.Combine(stagingDirectory, manifestName), JsonSerializer.Serialize(current))
+                let files = Array.append generatedFiles [|manifestName|]
+                let published = ResizeArray<string>()
+                let backedUp = ResizeArray<string>()
+                let mutable removedManagedContents = false
 
                 AtomicOutputFile.synchronize (fun () ->
+                    let previous = previousFiles ()
+                    let staleFiles =
+                        previous.Keys
+                        |> Seq.filter (fun relativePath -> not (current.ContainsKey relativePath))
+                        |> Seq.sort
+                        |> Seq.toArray
+                    let contentsPrefix = "contents_" + projectName + "/"
+                    removedManagedContents <-
+                        staleFiles |> Array.exists (fun path -> path.StartsWith(contentsPrefix, pathComparison))
+
+                    // A modified old output may belong to the user now; refuse to remove it.
+                    for relativePath in staleFiles do
+                        let targetPath = checkedPath outputDirectory relativePath
+                        if Directory.Exists targetPath then
+                            raise (IOException($"A previous generated file is now a directory: '{targetPath}'."))
+                        if File.Exists targetPath &&
+                           not (String.Equals(fileHash targetPath, previous[relativePath], StringComparison.OrdinalIgnoreCase)) then
+                            raise (IOException($"A previous generated file was modified: '{targetPath}'."))
+
                     try
+                        for relativePath in staleFiles do
+                            let targetPath = checkedPath outputDirectory relativePath
+                            if File.Exists targetPath then
+                                let backupPath = checkedPath rollbackDirectory relativePath
+                                Directory.CreateDirectory(Path.GetDirectoryName backupPath) |> ignore
+                                File.Move(targetPath, backupPath)
+                                backedUp.Add(relativePath)
+
                         for relativePath in files do
-                            let stagedPath = Path.Combine(stagingDirectory, relativePath)
-                            let targetPath = Path.Combine(outputDirectory, relativePath)
+                            let stagedPath = checkedPath stagingDirectory relativePath
+                            let targetPath = checkedPath outputDirectory relativePath
                             let targetParent = Path.GetDirectoryName targetPath
                             Directory.CreateDirectory(targetParent) |> ignore
 
-                            let hadExistingFile = File.Exists targetPath
-                            if hadExistingFile then
-                                let backupPath = Path.Combine(rollbackDirectory, relativePath)
+                            if File.Exists targetPath then
+                                let backupPath = checkedPath rollbackDirectory relativePath
                                 Directory.CreateDirectory(Path.GetDirectoryName backupPath) |> ignore
                                 File.Move(targetPath, backupPath)
-                                currentBackup <- Some(targetPath, backupPath)
+                                backedUp.Add(relativePath)
 
                             File.Move(stagedPath, targetPath)
-                            published.Add(relativePath, hadExistingFile)
-                            currentBackup <- None
+                            published.Add(relativePath)
 
                         committed <- true
-                    with _ ->
-                        match currentBackup with
-                        |Some(targetPath, backupPath) when File.Exists backupPath ->
-                            File.Move(backupPath, targetPath)
-                        |_ -> ()
-
-                        for relativePath,hadExistingFile in published |> Seq.rev do
-                            let targetPath = Path.Combine(outputDirectory, relativePath)
-                            if File.Exists targetPath then
-                                File.Delete targetPath
-                            if hadExistingFile then
-                                let backupPath = Path.Combine(rollbackDirectory, relativePath)
-                                if File.Exists backupPath then
-                                    Directory.CreateDirectory(Path.GetDirectoryName targetPath) |> ignore
-                                    File.Move(backupPath, targetPath)
+                    with publicationError ->
+                        let rollbackErrors = ResizeArray<exn>()
+                        for relativePath in published |> Seq.rev do
+                            try
+                                let targetPath = checkedPath outputDirectory relativePath
+                                if File.Exists targetPath then File.Delete targetPath
+                            with error -> rollbackErrors.Add(error)
+                        for relativePath in backedUp |> Seq.rev do
+                            try
+                                let targetPath = checkedPath outputDirectory relativePath
+                                let backupPath = checkedPath rollbackDirectory relativePath
+                                Directory.CreateDirectory(Path.GetDirectoryName targetPath) |> ignore
+                                File.Move(backupPath, targetPath)
+                            with error -> rollbackErrors.Add(error)
+                        if rollbackErrors.Count > 0 then
+                            preserveRollback <- true
+                            raise (AggregateException("Output publication and rollback both failed; backups were preserved.",
+                                                      publicationError :: List.ofSeq rollbackErrors))
                         reraise())
 
                 removeDirectory rollbackDirectory
                 removeDirectory stagingDirectory
 
+                let managedContents = Path.Combine(outputDirectory, "contents_" + projectName)
+                if removedManagedContents then
+                    try
+                        if Directory.Exists managedContents &&
+                           (File.GetAttributes(managedContents) &&& FileAttributes.ReparsePoint) = enum<FileAttributes> 0 &&
+                           (Directory.EnumerateFileSystemEntries(managedContents) |> Seq.isEmpty) then
+                            Directory.Delete managedContents
+                    with
+                    | :? IOException
+                    | :? UnauthorizedAccessException -> ()
+
             interface IDisposable with
                 member _.Dispose() =
                     if not committed then
                         removeDirectory stagingDirectory
-                        removeDirectory rollbackDirectory
+                        if not preserveRollback then removeDirectory rollbackDirectory
 
         let private compileCore (policy:DiagnosticPolicy) (diagnostics:DiagnosticBag) langgList dir projectname (codever:string) code =
             let languages = langgList |> Seq.toList
@@ -171,7 +273,7 @@ namespace Aqualis
             let projectname = validateProjectName projectname
             let codever = singleLineMetadata (nameof codever) codever
             let fortranProgramName = fortranProgramIdentifier projectname
-            use transaction = new CompilationOutputTransaction(dir)
+            use transaction = new CompilationOutputTransaction(dir, projectname)
             let outputDirectory = transaction.StagingDirectory
             for lang in languages do
                 match lang with

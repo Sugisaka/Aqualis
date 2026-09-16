@@ -13,6 +13,9 @@ module GenerationContextTests =
     let private transactionDirectories path =
         Directory.EnumerateDirectories(path, ".aqualis-*", SearchOption.TopDirectoryOnly)
 
+    let private generatedManifest path projectName =
+        Path.Combine(path, ".aqualis-generated-" + projectName + ".json")
+
     [<Fact>]
     let ``Compile publishes no files when a later language fails`` () =
         use output = new TemporaryDirectory()
@@ -120,6 +123,148 @@ module GenerationContextTests =
         Assert.True(Directory.Exists(pythonPath))
         Assert.False(File.Exists(Path.Combine(output.Path, "proc_" + projectName + "_C.sh")))
         Assert.False(File.Exists(Path.Combine(output.Path, "proc_" + projectName + "_P.sh")))
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile removes only stale files owned by the same project`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-stale"
+        let cPath = Path.Combine(output.Path, projectName + ".c")
+        let pythonPath = Path.Combine(output.Path, projectName + ".py")
+        let pythonScript = Path.Combine(output.Path, "proc_" + projectName + "_P.sh")
+        let userPath = Path.Combine(output.Path, projectName + ".notes")
+        let otherProjectPath = Path.Combine(output.Path, "other-project.py")
+
+        Compile [C99; Python] output.Path projectName "1" <| fun context ->
+            context.writein "first version"
+        File.WriteAllText(userPath, "user-owned notes")
+        Compile [Python] output.Path "other-project" "1" ignore
+        let originalOtherProject = File.ReadAllText otherProjectPath
+
+        Compile [C99] output.Path projectName "2" <| fun context ->
+            context.writein "second version"
+
+        Assert.True(File.Exists cPath)
+        Assert.False(File.Exists pythonPath)
+        Assert.False(File.Exists pythonScript)
+        Assert.Equal("user-owned notes", File.ReadAllText userPath)
+        Assert.Equal(originalOtherProject, File.ReadAllText otherProjectPath)
+        Assert.True(File.Exists(generatedManifest output.Path "other-project"))
+        Assert.True(File.Exists(generatedManifest output.Path projectName))
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile removes stale nested assets and their empty managed directory`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-stale-assets"
+        let contentsPath = Path.Combine(output.Path, "contents_" + projectName)
+        let assetPath = Path.Combine(contentsPath, "old-asset.txt")
+
+        Compile [C99] output.Path projectName "1" <| fun context ->
+            context.writein "first version"
+            let staging = transactionDirectories output.Path |> Seq.exactlyOne
+            let stagedContents = Path.Combine(staging, "contents_" + projectName)
+            Directory.CreateDirectory(stagedContents) |> ignore
+            File.WriteAllText(Path.Combine(stagedContents, "old-asset.txt"), "generated asset")
+
+        Assert.True(File.Exists assetPath)
+        Compile [C99] output.Path projectName "2" ignore
+
+        Assert.False(File.Exists assetPath)
+        Assert.False(Directory.Exists contentsPath)
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile does not claim preexisting files without an ownership manifest`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-unmanaged"
+        let oldPythonPath = Path.Combine(output.Path, projectName + ".py")
+        File.WriteAllText(oldPythonPath, "user-owned file")
+
+        Compile [C99] output.Path projectName "1" ignore
+
+        Assert.Equal("user-owned file", File.ReadAllText oldPythonPath)
+        Assert.True(File.Exists(generatedManifest output.Path projectName))
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile leaves old output untouched when a later language fails`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-stale-failure"
+        Compile [C99; Python] output.Path projectName "1" <| fun context ->
+            context.writein "first version"
+        let pythonPath = Path.Combine(output.Path, projectName + ".py")
+        let manifestPath = generatedManifest output.Path projectName
+        let originalPython = File.ReadAllText pythonPath
+        let originalManifest = File.ReadAllText manifestPath
+
+        Assert.Throws<InvalidOperationException>(fun () ->
+            Compile [C99; JavaScript] output.Path projectName "2" <| fun context ->
+                if context.Language = JavaScript then invalidOp "expected"
+                context.writein "second version")
+        |> ignore
+
+        Assert.Equal(originalPython, File.ReadAllText pythonPath)
+        Assert.Equal(originalManifest, File.ReadAllText manifestPath)
+        Assert.False(File.Exists(Path.Combine(output.Path, projectName + ".js")))
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile restores stale files when publication fails`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-stale-rollback"
+        Compile [C99; Python] output.Path projectName "1" <| fun context ->
+            context.writein "first version"
+        let pythonPath = Path.Combine(output.Path, projectName + ".py")
+        let cPath = Path.Combine(output.Path, projectName + ".c")
+        let manifestPath = generatedManifest output.Path projectName
+        let originalPython = File.ReadAllText pythonPath
+        let originalC = File.ReadAllText cPath
+        let originalManifest = File.ReadAllText manifestPath
+        let blockedJavaScriptPath = Path.Combine(output.Path, projectName + ".js")
+        Directory.CreateDirectory(blockedJavaScriptPath) |> ignore
+
+        Assert.ThrowsAny<IOException>(fun () ->
+            Compile [C99; JavaScript] output.Path projectName "2" <| fun context ->
+                context.writein "replacement")
+        |> ignore
+
+        Assert.Equal(originalPython, File.ReadAllText pythonPath)
+        Assert.Equal(originalC, File.ReadAllText cPath)
+        Assert.Equal(originalManifest, File.ReadAllText manifestPath)
+        Assert.True(Directory.Exists blockedJavaScriptPath)
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile refuses to delete a modified old output`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-user-edit"
+        Compile [C99; Python] output.Path projectName "1" ignore
+        let pythonPath = Path.Combine(output.Path, projectName + ".py")
+        let manifestPath = generatedManifest output.Path projectName
+        let originalManifest = File.ReadAllText manifestPath
+        File.WriteAllText(pythonPath, "user-edited source")
+
+        Assert.ThrowsAny<IOException>(fun () ->
+            Compile [C99] output.Path projectName "2" ignore)
+        |> ignore
+
+        Assert.Equal("user-edited source", File.ReadAllText pythonPath)
+        Assert.Equal(originalManifest, File.ReadAllText manifestPath)
+        Assert.Empty(transactionDirectories output.Path)
+
+    [<Fact>]
+    let ``Compile rejects a manifest path outside the output directory`` () =
+        use output = new TemporaryDirectory()
+        let projectName = "transaction-bad-manifest"
+        let manifestPath = generatedManifest output.Path projectName
+        File.WriteAllText(manifestPath, "{\"../user-file.txt\":\"" + String.replicate 64 "0" + "\"}")
+
+        Assert.Throws<InvalidDataException>(fun () ->
+            Compile [C99] output.Path projectName "1" ignore)
+        |> ignore
+
+        Assert.False(File.Exists(Path.Combine(output.Path, projectName + ".c")))
         Assert.Empty(transactionDirectories output.Path)
 
     [<Fact>]
