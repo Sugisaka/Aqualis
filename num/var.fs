@@ -71,20 +71,30 @@ namespace Aqualis
             complex1(Zt,Var1(A1 0,name),context=ctx)
 
         member _.ip1(name:string, values:int list) =
+            if List.isEmpty values then invalidArg "values" "Initialized arrays require at least one element."
             let name = nameFor ctx name
             let items = values |> List.map ctx.numFormat.ItoS |> String.concat ","
             let initial = if ctx.language = Fortran then "(/"+items+"/)" elif ctx.language = C99 then "{"+items+"}" else "["+items+"]"
             ctx.cvar.setUniqVarWarning(It 4,A1 values.Length,name,initial)
+            if ctx.language = PHP then
+                ctx.writePhpStatement(name + " = " + initial + ";")
+                ctx.writePhpStatement(name + "_size = [" + string values.Length + "];")
             int1(It 4,Var1(A1 values.Length,name),context=ctx)
             
         member _.dp1(name:string, values:double list) =
+            if List.isEmpty values then invalidArg "values" "Initialized arrays require at least one element."
             let name = nameFor ctx name
             let items = values |> List.map ctx.numFormat.DtoS |> String.concat ","
             let initial = if ctx.language = Fortran then "(/"+items+"/)" elif ctx.language = C99 then "{"+items+"}" else "["+items+"]"
             ctx.cvar.setUniqVarWarning(Dt,A1 values.Length,name,initial)
+            if ctx.language = PHP then
+                ctx.writePhpStatement(name + " = " + initial + ";")
+                ctx.writePhpStatement(name + "_size = [" + string values.Length + "];")
             double1(Dt,Var1(A1 values.Length,name),context=ctx)
 
         member _.zp1(name:string, values:(double*double) list) =
+            if List.isEmpty values then invalidArg "values" "Initialized arrays require at least one element."
+            if ctx.language = PHP then UnsupportedOperation.codeGeneration "PHP" "initialized complex arrays"
             let name = nameFor ctx name
             let items =
                 values

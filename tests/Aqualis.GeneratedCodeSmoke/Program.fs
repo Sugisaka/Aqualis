@@ -1106,6 +1106,20 @@ module Program =
             source.allocate 1
             target <== source
 
+    let private generatePhpInitializedArrays outputRoot =
+        let generate caseName code =
+            let outputDirectory = Path.Combine(outputRoot, "php-initialized-" + caseName)
+            Directory.CreateDirectory(outputDirectory) |> ignore
+            Compile [PHP] outputDirectory "smoke" "1.0" code
+
+        generate "integer" <| fun context ->
+            let values = context.var.ip1("values", [3; 7])
+            context.print.t values[1]
+
+        generate "real" <| fun context ->
+            let values = context.var.dp1("values", [1.25; 2.5])
+            context.print.t values[1]
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -1131,6 +1145,7 @@ module Program =
             |> List.iter (generateWebProductValidation outputRoot)
             ["javascript", JavaScript; "php", PHP]
             |> List.iter (generateWebArrayValidation outputRoot)
+            generatePhpInitializedArrays outputRoot
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot
             generateCArrayCases outputRoot

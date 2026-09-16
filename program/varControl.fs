@@ -512,6 +512,12 @@ namespace Aqualis
         let gate = obj()
         ///<summary>型名,変数名,定数</summary>
         let mutable vlist:list<Etype*VarType*string*string> = []
+        let requireCompatibleName etyp atyp name cst =
+            match vlist |> List.tryFind (fun (_,_,existingName,_) -> existingName = name) with
+            |Some(existingType,existingShape,_,existingInitial)
+                when existingType <> etyp || existingShape <> atyp || existingInitial <> cst ->
+                invalidArg "name" ("Variable '" + name + "' is already defined with a different type, shape, or initial value.")
+            |_ -> ()
         ///<summary>リスト</summary>
         member _.list with get() = lock gate (fun () -> vlist)
         member _.clear() =
@@ -526,15 +532,19 @@ namespace Aqualis
                 List.exists (fun (etyp,atyp,name,cst) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist)
         ///<summary>重複に関係なく変数を登録</summary>
         member _.setVar(etyp,atyp,name,cst) =
-            lock gate (fun () -> vlist <- (etyp,atyp,name,cst)::vlist)
+            lock gate (fun () ->
+                requireCompatibleName etyp atyp name cst
+                vlist <- (etyp,atyp,name,cst)::vlist)
         ///<summary>同名の変数が登録済みの場合は変数を登録しない</summary>
         member this.setUniqVar(etyp,atyp,name,cst) =
             lock gate (fun () ->
+                requireCompatibleName etyp atyp name cst
                 if not (List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist) then
                     vlist <- (etyp,atyp,name,cst)::vlist) //(etyp,atyp,name,cst)をvlistの先頭部分に追加する。
         ///<summary>同名の変数が登録済みの場合は変数を登録せずに警告を表示</summary>
         member this.setUniqVarWarning(etyp,atyp,name,cst) =
             lock gate (fun () ->
+                requireCompatibleName etyp atyp name cst
                 if List.exists (fun (etyp_,atyp_,name_,cst_) -> etyp_=etyp && atyp_=atyp && name_=name && cst_=cst) vlist then
                     diagnostics.Report {
                         Code = "AQL1002"

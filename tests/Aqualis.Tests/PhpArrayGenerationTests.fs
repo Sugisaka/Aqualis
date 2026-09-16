@@ -1,10 +1,36 @@
 namespace Aqualis.Tests
 
+open System
 open System.IO
 open Xunit
 open Aqualis
 
 module PhpArrayGenerationTests =
+    [<Fact>]
+    let ``PHP initialized numeric arrays emit their values and sizes`` () =
+        use output = new TemporaryDirectory()
+        let project = "php-initialized-arrays"
+
+        Compile [PHP] output.Path project "1.0" <| fun context ->
+            let integers = context.var.ip1("integers", [7; 8])
+            let reals = context.var.dp1("reals", [2.5])
+            context.print.t integers[1]
+            context.print.t reals[0]
+
+        let generated = File.ReadAllText(Path.Combine(output.Path, project + ".php"))
+        Assert.Contains("<?php $integers = [7,8]; ?>", generated)
+        Assert.Contains("<?php $integers_size = [2]; ?>", generated)
+        Assert.Contains("<?php $reals = [", generated)
+        Assert.Contains("<?php $reals_size = [1]; ?>", generated)
+
+    [<Fact>]
+    let ``PHP initialized complex arrays fail explicitly`` () =
+        use output = new TemporaryDirectory()
+        Assert.Throws<NotSupportedException>(fun () ->
+            Compile [PHP] output.Path "php-complex-array" "1.0" <| fun context ->
+                context.var.zp1("values", [(1.0, 2.0)]) |> ignore)
+        |> ignore
+
     [<Fact>]
     let ``PHP dynamic arrays allocate and deallocate inside PHP blocks`` () =
         use output = new TemporaryDirectory()

@@ -70,6 +70,30 @@ module DiagnosticsTests =
         Assert.Contains(Path.Combine(output.Path, projectName + ".c"), result.OutputFiles)
 
     [<Fact>]
+    let ``variable declarations reject conflicting types shapes and initial values`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "conflicts.c", C99)
+
+        context.var.i0 "sameType" |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.d0 "sameType" |> ignore) |> ignore
+
+        context.var.i1("sameShape", 2) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.i2("sameShape", 2, 2) |> ignore) |> ignore
+
+        context.var.ip1("sameInitial", [1]) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.ip1("sameInitial", [2]) |> ignore) |> ignore
+
+    [<Fact>]
+    let ``initialized arrays reject empty values before declaration`` () =
+        use output = new TemporaryDirectory()
+        use context = new Aqualis(Some output.Path, Some "empty.c", C99)
+
+        Assert.Throws<ArgumentException>(fun () -> context.var.ip1("integers", []) |> ignore) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.dp1("reals", []) |> ignore) |> ignore
+        Assert.Throws<ArgumentException>(fun () -> context.var.zp1("complexes", []) |> ignore) |> ignore
+        Assert.Empty(context.cvar.list)
+
+    [<Fact>]
     let ``diagnostic policy can treat warnings as transaction failures`` () =
         use output = new TemporaryDirectory()
         let projectName = "warning-as-error"
