@@ -15,43 +15,10 @@ namespace Aqualis
     module Aqualis_main =
 
         [<Literal>]
-        let private MaximumProjectNameUtf8Bytes = 200
-
-        [<Literal>]
         let private MaximumFortranIdentifierLength = 63
 
-        let private isWindowsDeviceName (projectName:string) =
-            let components = projectName.Split('.')
-            let stem = components[0].ToUpperInvariant()
-            match stem with
-            | "CON" | "PRN" | "AUX" | "NUL" -> true
-            |_ when stem.Length = 4 &&
-                    (stem.StartsWith("COM", StringComparison.Ordinal) ||
-                     stem.StartsWith("LPT", StringComparison.Ordinal)) &&
-                    stem[3] >= '1' && stem[3] <= '9' -> true
-            |_ -> false
-
         let private validateProjectName (projectName:string) =
-            if String.IsNullOrWhiteSpace projectName then
-                invalidArg "projectname" "A project name is required."
-            if not (String.Equals(projectName, projectName.Trim(), StringComparison.Ordinal)) then
-                invalidArg "projectname" "A project name cannot start or end with whitespace."
-            if projectName = "." || projectName = ".." || Path.IsPathRooted projectName then
-                invalidArg "projectname" "A project name must be one relative file-name segment."
-            if projectName.IndexOfAny([| '/'; '\\' |]) >= 0 then
-                invalidArg "projectname" "A project name cannot contain directory separators."
-            if projectName |> Seq.exists Char.IsControl then
-                invalidArg "projectname" "A project name cannot contain control characters."
-            if projectName.IndexOfAny([| '<'; '>'; ':'; '"'; '|'; '?'; '*' |]) >= 0 ||
-               projectName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 then
-                invalidArg "projectname" "A project name contains characters that are not portable in file names."
-            if projectName.EndsWith(".", StringComparison.Ordinal) then
-                invalidArg "projectname" "A project name cannot end with a period."
-            if isWindowsDeviceName projectName then
-                invalidArg "projectname" "A project name cannot use a reserved device name."
-            if Encoding.UTF8.GetByteCount(projectName) > MaximumProjectNameUtf8Bytes then
-                invalidArg "projectname" "A project name cannot exceed 200 bytes in UTF-8."
-            projectName
+            PortableFileNameSegment.validate "projectname" "project" projectName
 
         let private fortranProgramIdentifier (projectName:string) =
             let asciiLetter character =

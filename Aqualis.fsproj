@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Compile Include="expr\language.fs" />
+    <Compile Include="program\portableFileName.fs" />
     <Compile Include="program\diagnostics.fs" />
     <Compile Include="expr\phpEncoding.fs" />
     <Compile Include="expr\etype.fs" />
