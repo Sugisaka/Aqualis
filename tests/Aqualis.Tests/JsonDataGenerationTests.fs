@@ -69,3 +69,28 @@ module JsonDataGenerationTests =
                 schema
                 JsonFailurePolicy.defaults
             |> ignore) |> ignore
+
+    [<Fact>]
+    let ``sameAs groups an alternative schema before comparing the expected value`` () =
+        let generated =
+            generate <| fun ctx ->
+                let schema = JsonSchema.sameAs (ctx.php.var "expected") (JsonSchema.anyOf [JsonSchema.string; JsonSchema.int])
+                JsonData.read ctx (PhpVariableName.create "read") (PHPdata "data.json") schema JsonFailurePolicy.defaults
+                |> ignore
+
+        Assert.Contains("((is_string($read[\"value\"])) || (is_int($read[\"value\"]))) && $read[\"value\"] === $expected",generated)
+
+    [<Fact>]
+    let ``schema checks the original JSON container type before update and the published type after update`` () =
+        let generated =
+            generate <| fun ctx ->
+                let schema = JsonSchema.obj ["Items",JsonSchema.list JsonSchema.string; "Map",JsonSchema.obj []]
+                JsonData.updateAtomic ctx (PhpVariableName.create "update") (PHPdata "data.json") schema JsonFailurePolicy.defaults ignore
+                |> ignore
+
+        Assert.Contains("$update_sourceShape = json_decode($update_jsonText, false",generated)
+        Assert.Contains("is_object($update_sourceShape)",generated)
+        Assert.Contains("is_array($update_sourceShape->{\"Items\"})",generated)
+        Assert.Contains("$update_publishValue = $update_rebuildShape($update_data, $update_sourceShape)",generated)
+        Assert.Contains("json_encode($update_publishValue, JSON_THROW_ON_ERROR",generated)
+        Assert.Contains("$update_schemaShape = json_decode(json_encode($update_publishValue",generated)

@@ -23,8 +23,41 @@ module JsonFailurePolicy =
 
 [<RequireQualifiedAccess>]
 module JsonData =
-    let private valid (schema:JsonSchema) (data:PHPdata) =
-        bool0(Var(Nt,JsonSchema.expression schema data,NaN),data.Context)
+    let private valid (schema:JsonSchema) (data:PHPdata) (shape:PHPdata) =
+        bool0(Var(Nt,JsonSchema.expression schema data shape,NaN),data.Context)
+
+    let private decodeShape (ctx:Aqualis) (name:string) (source:PHPdata) (maxDepth:int) =
+        let shape = PHPdata.var(ctx,name)
+        ctx.php.phpcode <| fun () ->
+            ctx.writein(shape.code + " = json_decode(" + source.code + ", false, " +
+                        InvariantFormat.integer maxDepth + ", JSON_THROW_ON_ERROR);")
+        shape
+
+    /// Keep JSON objects as objects when the public update callback edits associative arrays.
+    let private preserveObjectShapes (ctx:Aqualis) (name:string) (data:PHPdata) (originalShape:PHPdata) =
+        let rebuild = "$" + name + "_rebuildShape"
+        let published = PHPdata.var(ctx,name + "_publishValue")
+        ctx.php.phpcode <| fun () ->
+            ctx.writein(rebuild + " = function ($value, $original) use (&" + rebuild + ") {")
+            ctx.writein("if (!is_array($value)) { return $value; }")
+            ctx.writein("if (is_object($original)) {")
+            ctx.writein("$result = new \\stdClass();")
+            ctx.writein("foreach ($value as $key => $item) {")
+            ctx.writein("$property = (string)$key;")
+            ctx.writein("$previous = property_exists($original, $property) ? $original->{$property} : null;")
+            ctx.writein("$result->{$property} = " + rebuild + "($item, $previous);")
+            ctx.writein("}")
+            ctx.writein("return $result;")
+            ctx.writein("}")
+            ctx.writein("$result = [];")
+            ctx.writein("foreach ($value as $key => $item) {")
+            ctx.writein("$previous = is_array($original) && array_key_exists($key, $original) ? $original[$key] : null;")
+            ctx.writein("$result[$key] = " + rebuild + "($item, $previous);")
+            ctx.writein("}")
+            ctx.writein("return $result;")
+            ctx.writein("};")
+            ctx.writein(published.code + " = " + rebuild + "(" + data.code + ", " + originalShape.code + ");")
+        published
 
     /// Rejects an update inside the atomic transaction so cleanup and unlocking still run.
     let requireDuringUpdate (ctx:Aqualis) (condition:bool0) (diagnostic:string) =
@@ -42,8 +75,10 @@ module JsonData =
             ServiceUnavailable,
             policy.ReadPublicMessage,
             PHPdata (policy.DiagnosticPrefix + " read failed: ") ++ result.ErrorCode)
+        let shape =
+            decodeShape ctx (PhpVariableName.value resultName + "_schemaShape") result.SourceText policy.ReadOptions.MaxDepth
         ctx.response.Require(
-            valid schema result.Value,
+            valid schema result.Value shape,
             ServiceUnavailable,
             policy.SchemaPublicMessage,
             PHPdata (policy.DiagnosticPrefix + " schema validation failed."))
@@ -57,18 +92,24 @@ module JsonData =
         (policy:JsonFailurePolicy)
         (update:PHPdata -> unit) =
         JsonSchema.requireContext ctx schema
-        let assertValid (data:PHPdata) =
-            let expression = JsonSchema.expression schema data
+        let assertValid (data:PHPdata) (shape:PHPdata) =
+            let expression = JsonSchema.expression schema data shape
             ctx.php.phpcode <| fun () ->
                 ctx.writein(
                     "if (!(" + expression + ")) { throw new \\RuntimeException(" +
                     (PHPdata (policy.DiagnosticPrefix + " schema validation failed during update.")).code +
                     "); }")
         let result =
-            ctx.php.updateJsonFileAtomic(resultName,filename,policy.UpdateOptions,fun latest ->
-                assertValid latest
+            ctx.php.updateJsonFileAtomicWithSource(resultName,filename,policy.UpdateOptions,fun latest sourceText ->
+                let baseName = PhpVariableName.value resultName
+                let inputShape = decodeShape ctx (baseName + "_sourceShape") sourceText policy.UpdateOptions.MaxDepth
+                assertValid latest inputShape
                 update latest
-                assertValid latest)
+                let published = preserveObjectShapes ctx baseName latest inputShape
+                let outputText = PHPdata.f("json_encode(" + published.code + ", JSON_THROW_ON_ERROR)",ctx)
+                let outputShape = decodeShape ctx (baseName + "_schemaShape") outputText policy.UpdateOptions.MaxDepth
+                assertValid latest outputShape
+                Some published)
         ctx.response.Require(
             result.IsSuccess,
             ServiceUnavailable,

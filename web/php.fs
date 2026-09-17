@@ -245,13 +245,14 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     static member (.>=) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,GreaterEq(Var(Nt,a.code,NaN),Int b))
 
 /// Result of a checked JSON file read emitted into generated PHP.
-and JsonReadResult internal (result:PHPdata) =
+and JsonReadResult internal (result:PHPdata, sourceText:PHPdata) =
     member _.IsSuccess =
         bool0(
             Var(Nt, "(" + result["success"].code + " === true)", NaN),
             result.Context)
     member _.Value = result["value"]
     member _.ErrorCode = result["error"]
+    member internal _.SourceText = sourceText
 
 /// Result of an atomic JSON update emitted into generated PHP.
 and JsonUpdateResult internal (result:PHPdata) =
@@ -389,13 +390,13 @@ and ContextPhp internal (context:Aqualis) =
             resultCode + "['error'] = " + error "invalid_json" + "; " +
             "} } } }"
         context.codewritein("<?php ", source + " ?>")
-        JsonReadResult(result)
+        JsonReadResult(result,PHPdata.f(jsonText,context))
     /// Reads a bounded JSON file using a static path.
     member this.tryReadJsonFile(resultName:PhpVariableName, filename:string, options:JsonReadOptions) =
         this.tryReadJsonFile(resultName, PHPdata filename, options)
     /// Reads, changes, and atomically replaces a JSON file while holding one stable sidecar lock.
     /// The update is emitted in the caller's PHP variable scope so its callback can use caller variables.
-    member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:PHPdata, options:JsonUpdateOptions, update:PHPdata -> unit) =
+    member internal this.updateJsonFileAtomicWithSource(resultName:PhpVariableName, filename:PHPdata, options:JsonUpdateOptions, update:PHPdata -> PHPdata -> PHPdata option) =
         if isNull (box update) then nullArg (nameof update)
         if options.MaxInputBytes <= 0 || options.MaxInputBytes = Int32.MaxValue then
             invalidArg (nameof options) "The maximum input JSON size must be positive and leave room for a bounded read."
@@ -461,10 +462,12 @@ and ContextPhp internal (context:Aqualis) =
             context.writei ("if (strlen(" + jsonText + ") > " + inputLimit + ") { " + fail "file_too_large" "The JSON update file is too large." + " }")
             context.writei ("try { " + dataName + " = json_decode(" + jsonText + ", true, " + maxDepth + ", JSON_THROW_ON_ERROR); } catch (\\JsonException " + error + ") { " + fail "invalid_json" "The JSON update file is invalid." + " }")
 
-        update (PHPdata.f(dataName,context))
+        let publishValue = update (PHPdata.f(dataName,context)) (PHPdata.f(jsonText,context))
+        publishValue |> Option.iter (fun value -> merge [value.Context] |> ignore)
+        let encodedValue = publishValue |> Option.map (fun value -> value.code) |> Option.defaultValue dataName
 
         this.phpcode <| fun () ->
-            context.writei (encoded + " = json_encode(" + dataName + ", JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);")
+            context.writei (encoded + " = json_encode(" + encodedValue + ", JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);")
             context.writei ("if (strlen(" + encoded + ") > " + outputLimit + ") { " + fail "output_too_large" "The updated JSON data is too large." + " }")
             context.writei (temporaryPath + " = tempnam(" + directory + ", '.aqualis-json-');")
             context.writei ("if (" + temporaryPath + " === false) { " + fail "temporary_file_failed" "Failed to create a temporary JSON file." + " }")
@@ -483,6 +486,9 @@ and ContextPhp internal (context:Aqualis) =
             context.writei ("} catch (\\Throwable " + error + ") { error_log('Aqualis atomic JSON update failed: '." + error + "->getMessage()); " + result.code + " = ['success' => false, 'value' => null, 'error' => " + errorCode + "]; }")
             context.writei ("finally { if (is_resource(" + temporaryHandle + ")) { @fclose(" + temporaryHandle + "); } if (is_string(" + temporaryPath + ") && is_file(" + temporaryPath + ")) { @unlink(" + temporaryPath + "); } if (" + locked + ") { flock(" + lockHandle + ", LOCK_UN); } if (is_resource(" + lockHandle + ")) { fclose(" + lockHandle + "); } }")
         JsonUpdateResult(result)
+    member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:PHPdata, options:JsonUpdateOptions, update:PHPdata -> unit) =
+        if isNull (box update) then nullArg (nameof update)
+        this.updateJsonFileAtomicWithSource(resultName,filename,options,fun data _ -> update data; None)
     /// Reads, changes, and atomically replaces a JSON file at a static path.
     member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:string, options:JsonUpdateOptions, update:PHPdata -> unit) =
         this.updateJsonFileAtomic(resultName, PHPdata filename, options, update)

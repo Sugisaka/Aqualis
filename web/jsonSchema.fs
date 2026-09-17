@@ -3,8 +3,8 @@ namespace Aqualis
 open System
 
 /// A reusable schema for JSON values decoded as PHP associative arrays.
-type JsonSchema internal (render:string -> string, dependencies:Aqualis list) =
-    member internal _.Render(expression:string) = render expression
+type JsonSchema internal (render:string -> string -> int -> string, dependencies:Aqualis list) =
+    member internal _.Render(value:string, shape:string, depth:int) = "(" + render value shape depth + ")"
     member internal _.Dependencies = dependencies
 
 [<RequireQualifiedAccess>]
@@ -23,101 +23,112 @@ module JsonSchema =
     /// The callback receives an expression for the decoded PHP value.
     let predicate (render:string -> string) =
         if isNull (box render) then nullArg (nameof render)
-        create render
+        create (fun value _ _ -> render value)
 
-    let string = create (fun value -> "is_string(" + value + ")")
-    let int = create (fun value -> "is_int(" + value + ")")
-    let bool = create (fun value -> "is_bool(" + value + ")")
-    let finiteNumber = create (fun value -> "(is_int(" + value + ") || is_float(" + value + ")) && is_finite((float)" + value + ")")
+    let string = create (fun value _ _ -> "is_string(" + value + ")")
+    let int = create (fun value _ _ -> "is_int(" + value + ")")
+    let bool = create (fun value _ _ -> "is_bool(" + value + ")")
+    let finiteNumber = create (fun value _ _ -> "(is_int(" + value + ") || is_float(" + value + ")) && is_finite((float)" + value + ")")
     let intRange minimum maximum =
         if minimum > maximum then invalidArg (nameof minimum) "The minimum exceeds the maximum."
-        create (fun value -> "is_int(" + value + ") && " + value + " >= " + InvariantFormat.integer minimum + " && " + value + " <= " + InvariantFormat.integer maximum)
+        create (fun value _ _ -> "is_int(" + value + ") && " + value + " >= " + InvariantFormat.integer minimum + " && " + value + " <= " + InvariantFormat.integer maximum)
     let intAtLeast minimum =
-        create (fun value -> "is_int(" + value + ") && " + value + " >= " + InvariantFormat.integer minimum)
+        create (fun value _ _ -> "is_int(" + value + ") && " + value + " >= " + InvariantFormat.integer minimum)
     let literalInt expected =
-        create (fun value -> "is_int(" + value + ") && " + value + " === " + InvariantFormat.integer expected)
+        create (fun value _ _ -> "is_int(" + value + ") && " + value + " === " + InvariantFormat.integer expected)
     let literalString expected =
         if isNull expected then nullArg (nameof expected)
-        create (fun value -> "is_string(" + value + ") && " + value + " === " + literal expected)
+        create (fun value _ _ -> "is_string(" + value + ") && " + value + " === " + literal expected)
     let oneOfStrings (values:string list) =
         if values |> List.exists isNull then invalidArg (nameof values) "JSON enum values cannot be null."
         let encoded = values |> List.map literal |> String.concat ", "
-        create (fun value -> "is_string(" + value + ") && in_array(" + value + ", [" + encoded + "], true)")
+        create (fun value _ _ -> "is_string(" + value + ") && in_array(" + value + ", [" + encoded + "], true)")
     let oneOfInts (values:int list) =
         let encoded = values |> List.map InvariantFormat.integer |> String.concat ", "
-        create (fun value -> "is_int(" + value + ") && in_array(" + value + ", [" + encoded + "], true)")
+        create (fun value _ _ -> "is_int(" + value + ") && in_array(" + value + ", [" + encoded + "], true)")
     let matches (pattern:string) =
         if String.IsNullOrEmpty pattern then invalidArg (nameof pattern) "A JSON string pattern is required."
-        create (fun value -> "is_string(" + value + ") && preg_match(" + literal pattern + ", " + value + ") === 1")
+        create (fun value _ _ -> "is_string(" + value + ") && preg_match(" + literal pattern + ", " + value + ") === 1")
     let sameAs (expected:PHPdata) (schema:JsonSchema) =
         createWith (expected.Context :: schema.Dependencies)
-            (fun value -> schema.Render value + " && " + value + " === " + expected.code)
+            (fun value shape depth -> schema.Render(value,shape,depth) + " && " + value + " === " + expected.code)
 
     let list (item:JsonSchema) =
-        createWith item.Dependencies (fun value ->
-            all [ "is_array(" + value + ")"
+        createWith item.Dependencies (fun value shape depth ->
+            let itemName = if depth = 0 then "$item" else "$aqualisItem" + InvariantFormat.integer depth
+            let keyName = if depth = 0 then "$key" else "$aqualisKey" + InvariantFormat.integer depth
+            all [ "is_array(" + shape + ")"
+                  "is_array(" + value + ")"
                   "array_values(" + value + ") === " + value
-                  "count(array_filter(" + value + ", static fn($item): bool => " + item.Render "$item" + ")) === count(" + value + ")" ])
+                  "count(" + shape + ") === count(" + value + ")"
+                  "count(array_filter(" + value + ", static fn(" + itemName + ", " + keyName + "): bool => " +
+                  item.Render(itemName,shape + "[" + keyName + "]",depth + 1) +
+                  ", ARRAY_FILTER_USE_BOTH)) === count(" + value + ")" ])
     let listExactly count item =
         checkCount count
         let baseSchema = list item
-        createWith baseSchema.Dependencies (fun value -> baseSchema.Render value + " && count(" + value + ") === " + InvariantFormat.integer count)
+        createWith baseSchema.Dependencies (fun value shape depth -> baseSchema.Render(value,shape,depth) + " && count(" + value + ") === " + InvariantFormat.integer count)
 
     /// Required fields; additional fields are accepted for compatibility with existing files.
     let obj (fields:(string * JsonSchema) list) =
         if fields |> List.exists (fun (key,_) -> isNull key) then invalidArg (nameof fields) "JSON field names cannot be null."
         if (fields |> List.map fst |> List.distinct).Length <> fields.Length then invalidArg (nameof fields) "JSON field names must be unique."
-        createWith (fields |> List.collect (fun (_,schema) -> schema.Dependencies)) (fun value ->
-            "is_array(" + value + ") && " +
+        createWith (fields |> List.collect (fun (_,schema) -> schema.Dependencies)) (fun value shape depth ->
+            "is_object(" + shape + ") && is_array(" + value + ") && " +
             (fields
              |> List.map (fun (key,schema) ->
                  let encoded = literal key
-                 "array_key_exists(" + encoded + ", " + value + ") && " + schema.Render (value + "[" + encoded + "]"))
+                 "property_exists(" + shape + ", " + encoded + ") && array_key_exists(" + encoded + ", " + value + ") && " +
+                 schema.Render(value + "[" + encoded + "]",shape + "->{" + encoded + "}",depth))
              |> all))
     let withRequiredStringKeys (keys:string list) (schema:JsonSchema) =
         if keys |> List.exists isNull then invalidArg (nameof keys) "JSON field names cannot be null."
         if (List.distinct keys).Length <> keys.Length then invalidArg (nameof keys) "JSON field names must be unique."
-        createWith schema.Dependencies (fun value ->
-            all (schema.Render value ::
+        createWith schema.Dependencies (fun value shape depth ->
+            all ("is_object(" + shape + ")" :: schema.Render(value,shape,depth) ::
                  (keys |> List.map (fun key ->
                      let encoded = literal key
-                     "array_key_exists(" + encoded + ", " + value + ") && is_string(" + value + "[" + encoded + "]" + ")"))))
+                     "property_exists(" + shape + ", " + encoded + ") && array_key_exists(" + encoded + ", " + value + ") && is_string(" + value + "[" + encoded + "]" + ")"))))
     /// A map with exactly the supplied keys and no additional entries.
     let mapExactly (keys:string list) (item:JsonSchema) =
         if keys |> List.exists isNull then invalidArg (nameof keys) "JSON map keys cannot be null."
         if (List.distinct keys).Length <> keys.Length then invalidArg (nameof keys) "JSON map keys must be unique."
-        createWith item.Dependencies (fun value ->
-            all ([ "is_array(" + value + ")"
+        createWith item.Dependencies (fun value shape depth ->
+            all ([ "is_object(" + shape + ")"
+                   "is_array(" + value + ")"
                    "count(" + value + ") === " + InvariantFormat.integer keys.Length ] @
                  (keys |> List.map (fun key ->
                      let encoded = literal key
-                     "array_key_exists(" + encoded + ", " + value + ") && " + item.Render (value + "[" + encoded + "]")))))
+                     "property_exists(" + shape + ", " + encoded + ") && array_key_exists(" + encoded + ", " + value + ") && " +
+                     item.Render(value + "[" + encoded + "]",shape + "->{" + encoded + "}",depth)))))
     let optionalField key (field:JsonSchema) (schema:JsonSchema) =
         if isNull key then nullArg (nameof key)
-        createWith (schema.Dependencies @ field.Dependencies) (fun value ->
+        createWith (schema.Dependencies @ field.Dependencies) (fun value shape depth ->
             let encoded = literal key
-            all [ schema.Render value
-                  "(!array_key_exists(" + encoded + ", " + value + ") || (" + field.Render (value + "[" + encoded + "]") + "))" ])
+            all [ "is_object(" + shape + ")"
+                  schema.Render(value,shape,depth)
+                  "(!property_exists(" + shape + ", " + encoded + ") || (array_key_exists(" + encoded + ", " + value + ") && " +
+                  field.Render(value + "[" + encoded + "]",shape + "->{" + encoded + "}",depth) + "))" ])
     let andAlso (rules:JsonSchema list) =
         createWith (rules |> List.collect (fun rule -> rule.Dependencies))
-            (fun value -> rules |> List.map (fun rule -> rule.Render value) |> all)
+            (fun value shape depth -> rules |> List.map (fun rule -> rule.Render(value,shape,depth)) |> all)
     let anyOf (rules:JsonSchema list) =
-        createWith (rules |> List.collect (fun rule -> rule.Dependencies)) (fun value ->
+        createWith (rules |> List.collect (fun rule -> rule.Dependencies)) (fun value shape depth ->
             match rules with
             | [] -> "false"
-            | _ -> rules |> List.map (fun rule -> "(" + rule.Render value + ")") |> String.concat " || ")
+            | _ -> rules |> List.map (fun rule -> rule.Render(value,shape,depth)) |> String.concat " || ")
     let uniqueFieldInList listField uniqueField =
         let listKey = literal listField
         let uniqueKey = literal uniqueField
-        create (fun value ->
+        create (fun value _ _ ->
             let entries = value + "[" + listKey + "]"
             "count(array_unique(array_column(" + entries + ", " + uniqueKey + "), SORT_STRING)) === count(" + entries + ")")
     let sameLength leftField rightField =
         let left = literal leftField
         let right = literal rightField
-        create (fun value -> "count(" + value + "[" + left + "]) === count(" + value + "[" + right + "])")
+        create (fun value _ _ -> "count(" + value + "[" + left + "]) === count(" + value + "[" + right + "])")
 
-    let internal expression (schema:JsonSchema) (data:PHPdata) = schema.Render data.code
+    let internal expression (schema:JsonSchema) (data:PHPdata) (shape:PHPdata) = schema.Render(data.code,shape.code,0)
     let internal requireContext (ctx:Aqualis) (schema:JsonSchema) =
         Aqualis.mergeMany (ctx :: schema.Dependencies) |> ignore
 

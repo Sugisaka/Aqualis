@@ -1554,6 +1554,41 @@ module Program =
                     let values = context.var.dp1("values", [2.5])
                     context.print.t values[0])
 
+    let private generatePhpJsonSchema outputRoot =
+        let generate caseName code =
+            let outputDirectory = Path.Combine(outputRoot, "php-json-schema-" + caseName)
+            Directory.CreateDirectory(outputDirectory) |> ignore
+            Compile [PHP] outputDirectory "smoke" "1.0" code
+
+        let schema (context:Aqualis) =
+            JsonSchema.obj [
+                "Identity", JsonSchema.sameAs (context.php.var "expected") (JsonSchema.anyOf [JsonSchema.string; JsonSchema.int])
+                "Items", JsonSchema.list (JsonSchema.obj ["Value", JsonSchema.string])
+                "Nested", JsonSchema.list (JsonSchema.list JsonSchema.int)
+                "EmptyObject", JsonSchema.obj []
+                "Map", JsonSchema.mapExactly ["k"] JsonSchema.string
+            ]
+
+        let policy =
+            { JsonFailurePolicy.defaults with
+                ReadPublicMessage = "read-error"
+                SchemaPublicMessage = "schema-error"
+                UpdatePublicMessage = "update-error" }
+
+        generate "read" <| fun context ->
+            context.php.var "expected" <== 7
+            let path = PHPdata.f("$argv[1]",context)
+            JsonData.read context (PhpVariableName.create "jsonRead") path (schema context) policy |> ignore
+            context.php.echo "ok"
+
+        generate "update" <| fun context ->
+            context.php.var "expected" <== 7
+            let path = PHPdata.f("$argv[1]",context)
+            JsonData.updateAtomic context (PhpVariableName.create "jsonUpdate") path (schema context) policy
+                (fun latest -> latest["Items"].[0].["Value"] <== "b")
+            |> ignore
+            context.php.echo "ok"
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -1596,6 +1631,7 @@ module Program =
             ["javascript", JavaScript; "php", PHP]
             |> List.iter (generateWebArrayValidation outputRoot)
             generatePhpInitializedArrays outputRoot
+            generatePhpJsonSchema outputRoot
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot
             generateCArrayCases outputRoot

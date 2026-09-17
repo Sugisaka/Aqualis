@@ -938,5 +938,6 @@ expect_c_array_failure 'release-overflow' 'element count overflows size_t'
 expect_c_array_failure 'release-malloc-failure' 'memory allocation failed'
 
 bash "$(dirname "$0")/verify-php-upload.sh" "$output_root"
+bash "$(dirname "$0")/verify-json-schema.sh" "$output_root"
 
 printf '%s\n' 'All generated-code runtime checks passed.'
