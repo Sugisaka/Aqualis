@@ -19,6 +19,10 @@
 - [OpenACC](#OpenACC)
 - [クラス定義例](#クラス定義例)
 - [シンボリック微分](#シンボリック微分)
+- [生成結果と診断情報](#生成結果と診断情報)
+- [高度な数値計算](#高度な数値計算)
+- [データの可視化](#データの可視化)
+- [Webコンテンツの生成](#webコンテンツの生成)
 
 ## インストール
 [トップへ戻る](#aqualis)
@@ -35,11 +39,7 @@
 
 ## ソースファイルの実行
 [トップへ戻る](#aqualis)
-F#スクリプトファイル（拡張子：fsx）を編集し実行すると、以下のファイルが生成される。
-- f90ファイル または cファイル
-  - プログラムのソースファイル
-- shファイル
-  - ソースファイルのコンパイル・実行を自動処理するスクリプトファイル
+F#スクリプトファイル（拡張子：`.fsx`）を実行すると、`Compile`で選択した言語に応じてソースコードや文書が出力先フォルダに生成される。FortranとC99では、それぞれ`.f90`または`.c`のソースファイルと、コンパイル・実行用のシェルスクリプトも生成される。`Numeric`は直接計算するモードで、ソースファイルは生成しない。出力先フォルダは実行前に作成しておく。
 
 ## プリアンブル部 
 [トップへ戻る](#aqualis)
@@ -80,6 +80,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
   - JavaScript
   - PHP
   - Numeric（ソースファイルを生成せず直接計算）
+- 選択した言語で未対応の操作はエラーとなる。`HTML`と`HTMLSequenceDiagram`は同じ出力ファイルを使用するため、同時には指定できない。
 - 14行目：`ctx`はコード生成に使用するコンテキスト。他の名称に変更してもよい。
 
 以下のコードでは、「`ctx.print.s "aaa"`」と「`ctx.print.s "bbb"`」がFortranのコードに変換される。「`ctx.print.s "ccc"`」はインデントが戻っているので出力の対象外となる。
@@ -759,7 +760,7 @@ let f(a:complex0,b:double0) =
 let f(a:complex0,b:complex0) =
     a <== b + 1
 ```
-以下のように一つの関数だけ定義しておくと、引数`b`に`int0`、`double0`、`double0`のいずれも指定できる。
+以下のように一つの関数だけ定義しておくと、引数`b`に`int0`、`double0`、`complex0`のいずれも指定できる。
 ```fsharp
 let inline f(a:complex0, b:#INum0) =
     a <== b.ToComplex0 + 1
@@ -912,6 +913,17 @@ ctx.ch.id <| fun (x,y) ->
         rd <| x++y
 ```
 
+### バイナリファイルと配列の保存
+
+`ctx.io.binfileOutput`と`ctx.io.binfileInput`でバイナリファイルを開き、`wr.b`で値を書き込み、`rd.b`で読み込める。読み込む値の型と順序は書き込み側に合わせる。配列やスカラーをまとめて保存する`ctx.io.save_text`（テキスト形式）、`ctx.io.save`（バイナリ形式）と、対応する`ctx.io.load`も用意されている。
+
+```fsharp
+ctx.ch.d <| fun value ->
+    value <== 1.5
+    ctx.io.binfileOutput "value.bin" <| fun wr ->
+        wr.b value
+```
+
 ## 線形代数演算
 [トップへ戻る](#aqualis)
 
@@ -1036,9 +1048,9 @@ ctx.omp.parallelize_th 6 <| fun pctx ->    //<--6並列
 ```
 thの横の数字が指定したいスレッド数でこの場合同時に
 6並列処理することができる。
-何も指定しない場合はCPUの最大スレッド数が自動的に選ばれる。
+何も指定しない場合は、コンパイラと実行環境がスレッド数を決める。
 
-- プライベート変数
+### プライベート変数
 
 並列化した反復処理のループカウンタは、スレッドごとのプライベート変数として自動的に生成される。共有変数を作業用変数として更新するとデータ競合が起きるため、可能な限りループカウンタをそのまま使用する。
 
@@ -1205,7 +1217,7 @@ ctx.ch.d <| fun x ->
         ctx.print.tt <| x ++ (g x) ++ (6*asm.cos(3*x)/asm.sqrt(x*x+1) - 2*x*asm.sin(3*x)/asm.pow(x*x+1,1.5))
 ```
 
-級数の微分
+### 級数の微分
 
 $$
 \begin{align}
@@ -1274,7 +1286,7 @@ $$
           ctx.print.tt <| x ++ (g x)
 ```
 
-配列要素による微分
+### 配列要素による微分
 
 ```fsharp
     let N = 100
@@ -1294,3 +1306,85 @@ $$
         ctx.iter.num N <| fun j ->
             ctx.print.tt <| j ++ y[j] ++ (2*j*2*x[j])
 ```
+
+## 生成結果と診断情報
+
+[トップへ戻る](#aqualis)
+
+### 診断情報の取得
+
+`CompileWithDiagnostics`は`Compile`と同じ引数でコードを生成し、`OutputFiles`（生成ファイルのパス）と`Diagnostics`（警告など）を返す。診断情報をプログラムから処理するときに使用する。`Compile`は収集した診断情報を標準エラー出力に表示する。
+
+```fsharp
+let result =
+    CompileWithDiagnostics [C99] outputdir projectname version <| fun ctx ->
+        ctx.print.s "Hello"
+
+for diagnostic in result.Diagnostics do
+    printfn "%s: %s" diagnostic.Code diagnostic.Message
+```
+
+`CompileWithDiagnosticPolicy`では`DiagnosticPolicy.defaults`を変更し、警告をエラーとして扱うか、収集する診断情報の最大件数を指定できる。エラー診断がある場合、または警告をエラーとして扱う設定で警告がある場合は、`AqualisCompilationException`が発生し、生成結果は公開されない。
+
+### 生成ファイルの管理
+
+正常終了した`Compile`系の呼び出しは、出力先にプロジェクトごとの`.aqualis-generated-<project>.json`を作成する。次回同じプロジェクトを生成すると、前回の管理対象から今回生成されなかったファイルを削除する。管理対象外のファイルは残る。前回生成後に管理対象ファイルを手で変更した場合は、その変更を上書き・削除せずに生成を停止する。初回のマニフェスト作成以前に存在したファイルは自動で管理対象にならない。同じ出力先への複数プロセスからの同時生成は避ける。
+
+## 高度な数値計算
+
+[トップへ戻る](#aqualis)
+
+### FFTと補間
+
+`ctx.fft1`と`ctx.fft2`には、複素数配列の1次元・2次元FFTと逆FFTがある。`fft`/`ifft`にはプラン名、入力配列、出力配列を渡す。同じ配列を入出力の両方に渡すこともできる。FortranとC99の生成コードはFFTW3を使用するため、コンパイル・実行環境にFFTW3が必要である。Pythonの生成コードはNumPyのFFTを使用する。
+
+```fsharp
+ctx.ch.z1 128 <| fun signal ->
+    ctx.fft1.fft("forward_plan", signal, signal)
+    ctx.fft1.ifft("inverse_plan", signal, signal)
+```
+
+`ctx.interpolate.linearDouble(id, dataX, dataY)`と`linearComplex`は、標本点間の線形補間を行う。`dataX`は昇順で重複のない有限値を2点以上指定し、`dataY`は同じ長さにする。`splineDouble()`と`splineComplex(isComplex)`では3次スプライン補間を作成できる。補間範囲外の値はエラーとなる。
+
+### 線形代数と最適化
+
+`ctx.la`には、前述の連立方程式に加え、逆行列、行列式、階数、特異値分解、固有値、最小二乗などのLAPACKを利用する演算がある。実数・複素数版や引数の形は演算ごとに異なる。生成コードの実行には対応するLAPACK/BLASライブラリが必要となる。`ctx.optimization`には勾配降下法、共役勾配法、ニュートン法、準ニュートン法による最小化がある。目的関数に加え、手法に応じて勾配やヘッセ行列を渡す。
+
+### OpenMPの集約
+
+共有変数を並列ループ内で加算するには`ctx.omp.reduction`を使う。演算子は`"+"`、`"-"`、`"*"`に対応し、スレッド数を指定する版は`reduction_th`である。OpenMPのコード生成はFortranとC99に対応する。
+
+```fsharp
+ctx.ch.i <| fun total ->
+    total <== 0
+    ctx.omp.reduction(total, "+") <| fun pctx ->
+        pctx.iter.num 100 <| fun i ->
+            total <== total + i
+```
+
+## データの可視化
+
+[トップへ戻る](#aqualis)
+
+`graph1d.makeGraph`は数値データからSVGの1次元グラフを作成する。`plot2d.Plot`は格子状の実数・複素数データを読み、色分けした24ビットBMP画像を出力する。`plot2d`には自動・手動の色範囲、グラデーション、複素数の位相や絶対値などの表示方法がある。これらは生成した数値データを可視化するためのF#側のAPIである。
+
+## Webコンテンツの生成
+
+[トップへ戻る](#aqualis)
+
+### HTML・JavaScript・PHP
+
+`HTML`、`HTMLSequenceDiagram`、`JavaScript`、`PHP`を生成先として選択できる。`ctx.html`はHTML要素、フォーム、表、数式表示、図やアニメーションを組み立てる。`ctx.php`はPHPの変数、条件分岐、JSONの読み書きなどを扱い、フォーム入力は`ctx.form`からも利用できる。Web向けのAPIは生成先に応じて使い分ける。
+
+### 外部アセットと安全な入力処理
+
+生成HTMLは標準では外部CDNを参照しない。MathJaxまたはフォントを使う場合は、配置済みのファイルへの相対URLか、明示的に選んだHTTPS URLを指定する。Aqualisはこれらの外部アセットを同梱・ダウンロードしない。
+
+```fsharp
+Compile [HTML] outputdir projectname version <| fun ctx ->
+    ctx.HtmlAssets.UseMathJax(Url.relative "assets/mathjax/tex-chtml.js")
+    ctx.HtmlAssets.UseFontStylesheet(Url.relative "assets/fonts.css")
+    // ここにHTMLの本文を記述
+```
+
+PHP向けにはセッション管理、CSRFトークン、型付きのリクエスト/レスポンス、JSONスキーマ検証を行うAPIもある。ファイルアップロードを利用する場合は、[非公開の保存先に関する導入要件](php-upload-storage-jp.md)を確認する。

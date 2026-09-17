@@ -19,6 +19,10 @@
 - [OpenACC](#openacc)
 - [Class Definition Example](#class-definition-example)
 - [Symbolic Differentiation](#symbolic-differentiation)
+- [Generated Outputs and Diagnostics](#generated-outputs-and-diagnostics)
+- [Advanced Numerical Computation](#advanced-numerical-computation)
+- [Data Visualization](#data-visualization)
+- [Web Content Generation](#web-content-generation)
 
 ## Installation
 
@@ -43,7 +47,7 @@
 
 [Back to top](#aqualis)
 
-Edit and run an F# script file with the `.fsx` extension. Depending on the selected target, Aqualis generates a source file such as an `.f90` or `.c` file. For compiled targets it also generates a shell script that automates compilation and execution.
+Run an F# script file with the `.fsx` extension. Aqualis writes source code or documents to the output directory according to the targets selected in `Compile`. Fortran and C99 also generate a shell script for compiling and running the generated `.f90` or `.c` source file. `Numeric` evaluates directly and does not generate a source file. Create the output directory before running the script.
 
 ## Preamble
 
@@ -86,6 +90,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
   - JavaScript
   - PHP
   - Numeric (evaluates directly without generating a source file)
+- Operations unsupported by a selected target raise an error. `HTML` and `HTMLSequenceDiagram` cannot be selected together because they use the same output file.
 - Line 14: `ctx` is the context used for code generation. You may choose another name.
 
 In the following example, `ctx.print.s "aaa"` and `ctx.print.s "bbb"` are converted to Fortran. `ctx.print.s "ccc"` is outside the callback because its indentation has returned, so it is not part of the generated code.
@@ -373,12 +378,16 @@ The following mathematical functions are available.
 
 ### Hankel functions
 
+#### Zeroth-order Hankel function of the second kind
+
 Calculate $H^{(2)}_0(x)$ and receive the result as `h`:
 
 ```fsharp
 asm.besselh0 x <| fun h ->
     ctx.print.t h
 ```
+
+#### First-order Hankel function of the second kind
 
 Calculate $H^{(2)}_1(x)$:
 
@@ -784,7 +793,7 @@ let f(a:complex0, b:double0) =
 let f(a:complex0, b:complex0) =
     a <== b + 1
 ```
-If you define a single function as shown below, you can pass `int0`, `double0`, or `double0` as the argument `b`.
+If you define a single function as shown below, you can pass `int0`, `double0`, or `complex0` as the argument `b`.
 ```fsharp
 let inline f(a:complex0, b:#INum0) =
     a <== b.ToComplex0 + 1
@@ -939,6 +948,17 @@ read its two values as follows:
 ctx.ch.id <| fun (x,y) ->
     ctx.io.fileInput "test.dat" <| fun rd ->
         rd <| x++y
+```
+
+### Binary files and array persistence
+
+Open binary files with `ctx.io.binfileOutput` or `ctx.io.binfileInput`, write values with `wr.b`, and read them with `rd.b`. Read values in the same order and types used when writing. `ctx.io.save_text` (text), `ctx.io.save` (binary), and `ctx.io.load` also save and load complete arrays or scalars.
+
+```fsharp
+ctx.ch.d <| fun value ->
+    value <== 1.5
+    ctx.io.binfileOutput "value.bin" <| fun wr ->
+        wr.b value
 ```
 
 ## Linear Algebra
@@ -1305,3 +1325,85 @@ ctx.ch.d1 N <| fun y ->
     ctx.iter.num N <| fun j ->
         ctx.print.tt <| j ++ y[j] ++ (2*j*2*x[j])
 ```
+
+## Generated Outputs and Diagnostics
+
+[Back to top](#aqualis)
+
+### Inspecting diagnostics
+
+`CompileWithDiagnostics` accepts the same arguments as `Compile` and returns `OutputFiles` (generated file paths) and `Diagnostics` (including warnings). Use it to handle diagnostics in F# code. `Compile` prints collected diagnostics to standard error.
+
+```fsharp
+let result =
+    CompileWithDiagnostics [C99] outputdir projectname version <| fun ctx ->
+        ctx.print.s "Hello"
+
+for diagnostic in result.Diagnostics do
+    printfn "%s: %s" diagnostic.Code diagnostic.Message
+```
+
+With `CompileWithDiagnosticPolicy`, modify `DiagnosticPolicy.defaults` to treat warnings as errors or set the maximum number of collected diagnostics. Error diagnostics, or warnings under a warnings-as-errors policy, raise `AqualisCompilationException` and prevent publication of the generated output.
+
+### Managing generated files
+
+After a successful `Compile`-family call, Aqualis creates a per-project `.aqualis-generated-<project>.json` manifest in the output directory. A later run for the same project removes files listed in the previous manifest that are no longer generated. Unrelated files remain. If a managed file was edited after the previous run, generation stops instead of overwriting or deleting that edit. Files that existed before the first manifest was created are not automatically claimed. Avoid running multiple generator processes against the same output directory concurrently.
+
+## Advanced Numerical Computation
+
+[Back to top](#aqualis)
+
+### FFT and interpolation
+
+`ctx.fft1` and `ctx.fft2` provide forward and inverse FFTs for one- and two-dimensional complex arrays. Pass a plan name, input array, and output array to `fft` or `ifft`. The same array may be used for input and output. Generated Fortran and C99 code uses FFTW3, which must be available when compiling and running that code. Generated Python code uses NumPy's FFT.
+
+```fsharp
+ctx.ch.z1 128 <| fun signal ->
+    ctx.fft1.fft("forward_plan", signal, signal)
+    ctx.fft1.ifft("inverse_plan", signal, signal)
+```
+
+`ctx.interpolate.linearDouble(id, dataX, dataY)` and `linearComplex` interpolate linearly between samples. Provide at least two strictly increasing, distinct, finite `dataX` values and a `dataY` list of the same length. `splineDouble()` and `splineComplex(isComplex)` create cubic spline interpolators. Queries outside the sample range are errors.
+
+### Linear algebra and optimization
+
+Besides the simultaneous equation solvers described above, `ctx.la` offers LAPACK-backed inverse, determinant, rank, singular value decomposition, eigenvalue, and least-squares operations. Real and complex overloads and argument shapes vary by operation. Running the generated code requires the corresponding LAPACK/BLAS libraries. `ctx.optimization` offers gradient descent, conjugate-gradient, Newton, and quasi-Newton minimization. Supply an objective function and, as required by the method, its gradient or Hessian.
+
+### OpenMP reductions
+
+Use `ctx.omp.reduction` to accumulate a shared scalar in a parallel loop. Supported operators are `"+"`, `"-"`, and `"*"`; `reduction_th` also specifies a thread count. OpenMP generation is available for Fortran and C99.
+
+```fsharp
+ctx.ch.i <| fun total ->
+    total <== 0
+    ctx.omp.reduction(total, "+") <| fun pctx ->
+        pctx.iter.num 100 <| fun i ->
+            total <== total + i
+```
+
+## Data Visualization
+
+[Back to top](#aqualis)
+
+`graph1d.makeGraph` creates a one-dimensional SVG graph from numerical data. `plot2d.Plot` reads gridded real or complex data and produces a color-mapped 24-bit BMP image. `plot2d` supports automatic or manual color ranges, gradients, and views of complex quantities such as phase or magnitude. These are F# APIs for visualizing numerical results.
+
+## Web Content Generation
+
+[Back to top](#aqualis)
+
+### HTML, JavaScript, and PHP
+
+`HTML`, `HTMLSequenceDiagram`, `JavaScript`, and `PHP` are available generation targets. `ctx.html` builds HTML elements, forms, tables, mathematical displays, figures, and animations. `ctx.php` handles PHP variables, branches, and JSON input/output; form input is also available through `ctx.form`. Choose the Web APIs appropriate for the selected target.
+
+### External assets and safe input handling
+
+Generated HTML does not reference external CDNs by default. To use MathJax or a font stylesheet, specify a relative URL to a deployed file or an explicitly chosen HTTPS URL. Aqualis does not bundle or download these external assets.
+
+```fsharp
+Compile [HTML] outputdir projectname version <| fun ctx ->
+    ctx.HtmlAssets.UseMathJax(Url.relative "assets/mathjax/tex-chtml.js")
+    ctx.HtmlAssets.UseFontStylesheet(Url.relative "assets/fonts.css")
+    // Add the HTML body here.
+```
+
+The PHP APIs also cover session management, CSRF tokens, typed requests/responses, and JSON schema validation. For file uploads, follow the [private storage deployment requirements](php-upload-storage-jp.md).
