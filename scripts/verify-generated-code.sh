@@ -283,6 +283,11 @@ complex_results = [cmath.log(-4+0j), cmath.log10(-4+0j),
                    cmath.asin(2+0j), cmath.acos(2+0j)]
 for result in complex_results + [cmath.sqrt(1e308+1e308j)] + complex_results + [cmath.sqrt(-4+0j)]:
     expected.extend([result.real, result.imag])
+for result in [cmath.sin(1+710j), cmath.cos(1+710j),
+               cmath.tan(1+710j), cmath.tan(1+750j),
+               cmath.exp(1+0j), cmath.sin(1+0j), cmath.cos(1+0j),
+               cmath.tan(1+0j), cmath.atan(1+0j)]:
+    expected.extend([result.real, result.imag])
 if label == 'C99':
     expected.append(2.0)
 if len(values) != len(expected) or any(

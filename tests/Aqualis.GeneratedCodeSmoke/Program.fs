@@ -192,6 +192,26 @@ module Program =
                 context.print.t result.re
                 context.print.t result.im
 
+            let largeImaginary = complex0(Cpx(1.0,710.0))
+            for result in
+                [ asm.sin largeImaginary
+                  asm.cos largeImaginary
+                  asm.tan largeImaginary
+                  asm.tan (complex0(Cpx(1.0,750.0))) ] do
+                context.print.t result.re
+                context.print.t result.im
+
+            let realTrigonometricInput = context.var.d0 "realTrigonometricInput"
+            realTrigonometricInput <== 1.0
+            for result in
+                [ asm.exp realTrigonometricInput.ToComplex0
+                  asm.sin realTrigonometricInput.ToComplex0
+                  asm.cos realTrigonometricInput.ToComplex0
+                  asm.tan realTrigonometricInput.ToComplex0
+                  asm.atan realTrigonometricInput.ToComplex0 ] do
+                context.print.t result.re
+                context.print.t result.im
+
             if language = C99 then
                 let dividend = context.var.i0 "dividend"
                 let divisor = context.var.i0 "divisor"

@@ -405,10 +405,9 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpSin(Dbl -x)
                 |Int x -> if sin (double x) < 0.0 then Inv(Dt,Dbl -(sin (double x))) else Dbl (sin (double x))
                 |Dbl x -> if sin x < 0.0 then Inv(Dt,Dbl -(sin x)) else Dbl (sin x)
-                |Cpx (re,im) -> 
-                    let a1 = exp im
-                    let a2 = exp -im
-                    Cpx (sin re*(a1+a2)/2.0,cos re*(a1-a2)/2.0)
+                |Cpx (re,im) ->
+                    let result = System.Numerics.Complex.Sin(System.Numerics.Complex(re,im))
+                    Cpx(result.Real,result.Imaginary)
                 |_ when x.etype=It 4 -> expr.simpSin(ToDbl x)
                 |_ -> Sin(x.etype,x)
                     
@@ -418,10 +417,9 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpCos(Dbl -x)
                 |Int x -> if cos (double x) < 0.0 then Inv(Dt,Dbl -(cos (double x))) else Dbl (cos (double x))
                 |Dbl x -> if cos x < 0.0 then Inv(Dt,Dbl -(cos x)) else Dbl (cos x)
-                |Cpx (re,im) -> 
-                    let a1 = exp im
-                    let a2 = exp -im
-                    Cpx (cos re*(a1+a2)/2.0,-sin re*(a1-a2)/2.0)
+                |Cpx (re,im) ->
+                    let result = System.Numerics.Complex.Cos(System.Numerics.Complex(re,im))
+                    Cpx(result.Real,result.Imaginary)
                 |_ when x.etype=It 4 -> expr.simpCos(ToDbl x)
                 |_ -> Cos(x.etype,x)
                     
@@ -431,7 +429,9 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpTan(Dbl -x)
                 |Int x -> if tan (double x) < 0.0 then Inv(Dt,Dbl -(tan (double x))) else Dbl (tan (double x))
                 |Dbl x -> if tan x < 0.0 then Inv(Dt,Dbl -(tan x)) else Dbl (tan x)
-                |Cpx _ -> expr.simpDiv(expr.simpSin x, expr.simpCos x)
+                |Cpx (re,im) ->
+                    let result = System.Numerics.Complex.Tan(System.Numerics.Complex(re,im))
+                    Cpx(result.Real,result.Imaginary)
                 |_ when x.etype=It 4 -> expr.simpTan(ToDbl x)
                 |_ -> Tan(x.etype,x)
                     
@@ -718,18 +718,22 @@ namespace Aqualis
                     |Zt,Pow _ -> Pow(Zt,x,y)
                     |Dt,Pow _ -> Pow(Dt,x,y)
                     |_ -> preserveNumericType t result
-                |Exp(_, x) -> 
+                |Exp(t, x) ->
                     let x = x.simp
-                    expr.simpExp x
-                |Sin(_, x) ->
+                    if t=Zt && x.etype<>Zt && Option.isNone (realLiteralValue x) then Exp(Zt,x)
+                    else expr.simpExp x
+                |Sin(t, x) ->
                     let x = x.simp
-                    expr.simpSin x
-                |Cos(_, x) ->
+                    if t=Zt && x.etype<>Zt && Option.isNone (realLiteralValue x) then Sin(Zt,x)
+                    else expr.simpSin x
+                |Cos(t, x) ->
                     let x = x.simp
-                    expr.simpCos x
-                |Tan(_, x) ->
+                    if t=Zt && x.etype<>Zt && Option.isNone (realLiteralValue x) then Cos(Zt,x)
+                    else expr.simpCos x
+                |Tan(t, x) ->
                     let x = x.simp
-                    expr.simpTan x
+                    if t=Zt && x.etype<>Zt && Option.isNone (realLiteralValue x) then Tan(Zt,x)
+                    else expr.simpTan x
                 |Asin(t, x) ->
                     let x = x.simp
                     if t=Zt then
@@ -749,9 +753,10 @@ namespace Aqualis
                         |None when x.etype<>Zt -> Acos(Zt,x)
                         |None -> expr.simpAcos x
                     else expr.simpAcos x
-                |Atan(_, x) ->
+                |Atan(t, x) ->
                     let x = x.simp
-                    expr.simpAtan x
+                    if t=Zt && x.etype<>Zt && Option.isNone (realLiteralValue x) then Atan(Zt,x)
+                    else expr.simpAtan x
                 |Atan2(x,y) ->
                     let x = x.simp
                     let y = y.simp

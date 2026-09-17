@@ -117,6 +117,38 @@ module ExpressionSimplificationTests =
                 Assert.InRange(abs (actualImaginary / expectedImaginary - 1.0), 0.0, 1.0e-12)
             |actual -> Assert.Fail($"Expected a finite complex square root, but got {actual}.")
 
+    [<Fact>]
+    let ``complex trigonometric literals remain finite when their results are finite`` () =
+        let large = complex0(Cpx(1.0,710.0))
+        for expression,expectedReal,expectedImaginary in
+            [ (asm.sin large).Expr, 9.399208879688905e307, 6.035162617272641e307
+              (asm.cos large).Expr, 6.035162617272641e307, -9.399208879688905e307
+              (asm.tan large).Expr, 0.0, 1.0
+              (asm.tan (complex0(Cpx(1.0,750.0)))).Expr, 0.0, 1.0 ] do
+            match expression.simp with
+            |Cpx(real,imaginary) ->
+                Assert.True(System.Double.IsFinite real)
+                Assert.True(System.Double.IsFinite imaginary)
+                if expectedReal=0.0 then Assert.InRange(abs real,0.0,1.0e-12)
+                else Assert.InRange(abs (real/expectedReal-1.0),0.0,1.0e-12)
+                Assert.InRange(abs (imaginary/expectedImaginary-1.0),0.0,1.0e-12)
+            |actual -> Assert.Fail($"Expected a finite complex value, but got {actual}.")
+
+        match (asm.sin (complex0(Cpx(1.0,1.0e-308)))).Expr.simp with
+        |Cpx(_,imaginary) -> Assert.True(imaginary>0.0)
+        |actual -> Assert.Fail($"Expected a nonzero complex imaginary component, but got {actual}.")
+
+    [<Fact>]
+    let ``complex trigonometric functions retain their type for symbolic real inputs`` () =
+        let value = double0(Var(Dt,"value",NaN)).ToComplex0
+        for expression in
+            [ (asm.exp value).Expr
+              (asm.sin value).Expr
+              (asm.cos value).Expr
+              (asm.tan value).Expr
+              (asm.atan value).Expr ] do
+            Assert.Equal(Zt,expression.simp.etype)
+
     let private namedInteger name =
         int0(Var(It 4, name, Int 0))
 

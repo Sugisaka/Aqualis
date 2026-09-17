@@ -42,19 +42,19 @@ namespace Aqualis
         ///<summary>指数関数</summary>
         static member exp (v:int0) = double0(Exp(v.etype,v.Expr), v.Context)
         static member exp (v:double0) = double0(Exp(v.etype,v.Expr), v.Context)
-        static member exp (v:complex0) = complex0(Exp(v.etype,v.Expr), v.Context)
+        static member exp (v:complex0) = complex0(Exp(Zt,v.Expr), v.Context)
         ///<summary>正弦関数</summary>
         static member sin (v:int0) = double0(Sin(v.etype,v.Expr), v.Context)
         static member sin (v:double0) = double0(Sin(v.etype,v.Expr), v.Context)
-        static member sin (v:complex0) = complex0(Sin(v.etype,v.Expr), v.Context)
+        static member sin (v:complex0) = complex0(Sin(Zt,v.Expr), v.Context)
         ///<summary>余弦関数</summary>
         static member cos (v:int0) = double0(Cos(v.etype,v.Expr), v.Context)
         static member cos (v:double0) = double0(Cos(v.etype,v.Expr), v.Context)
-        static member cos (v:complex0) = complex0(Cos(v.etype,v.Expr), v.Context)
+        static member cos (v:complex0) = complex0(Cos(Zt,v.Expr), v.Context)
         ///<summary>正接関数</summary>
         static member tan (v:int0) = double0(Tan(v.etype,v.Expr), v.Context)
         static member tan (v:double0) = double0(Tan(v.etype,v.Expr), v.Context)
-        static member tan (v:complex0) = complex0(Tan(v.etype,v.Expr), v.Context)
+        static member tan (v:complex0) = complex0(Tan(Zt,v.Expr), v.Context)
         ///<summary>逆正弦関数</summary>
         static member asin (v:int0) = double0(Asin(v.etype,v.Expr), v.Context)
         static member asin (v:double0) = double0(Asin(v.etype,v.Expr), v.Context)
@@ -66,7 +66,7 @@ namespace Aqualis
         ///<summary>逆正接関数</summary>
         static member atan (v:int0) = double0(Atan(v.etype,v.Expr), v.Context)
         static member atan (v:double0) = double0(Atan(v.etype,v.Expr), v.Context)
-        static member atan (v:complex0) = complex0(Atan(v.etype,v.Expr), v.Context)
+        static member atan (v:complex0) = complex0(Atan(Zt,v.Expr), v.Context)
         ///<summary>逆正接関数</summary>
         static member atan2(x:int0, y:int0) = double0(Atan2(x.Expr,y.Expr), NumericContext.binary x y)
         static member atan2(x:double0, y:int0) = double0(Atan2(x.Expr,y.Expr), NumericContext.binary x y)
