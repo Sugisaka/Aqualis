@@ -7,8 +7,7 @@ let version = "1.0.0"
 let outputdir = @"C:\home\work"
 //#############################################################################
 
-#I @"..\bin\Debug\net10.0"
-#r "Aqualis.dll"
+#r "nuget: Aqualis, 188.0.0"
 
 open System.IO
 open System.Text.Unicode
