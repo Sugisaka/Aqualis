@@ -145,6 +145,7 @@ namespace Aqualis
                     x
                     |> List.map (fun v -> match v with |AND _ -> "(" + v.evalF c + ")" |_ -> v.evalF c)
                     |> fun lst -> String.Join(" .or. ", lst)
+                |Int x when x = Int32.MinValue -> "(-2147483647-1)"
                 |Int x -> c.numFormat.ItoS x
                 |Dbl x -> c.numFormat.DtoS x
                 |Cpx (0.0,1.0) -> "(0d0,1d0)"
@@ -218,7 +219,7 @@ namespace Aqualis
                 |ToDbl x -> "dble(" + x.evalF c + ")"
                 |Floor x -> "floor(" + x.evalF c + ")"
                 |Ceil x -> "ceiling(" + x.evalF c + ")"
-                |Re x -> "real(" + x.evalF c + ")"
+                |Re x -> "real(" + x.evalF c + ",kind=kind(0.0d0))"
                 |Im x -> "aimag(" + x.evalF c + ")"
                 |Conj x -> "conjg(" + x.evalF c + ")"
                 |Idx1 (_,name,i) -> name + "(" + i.evalF c + ")"

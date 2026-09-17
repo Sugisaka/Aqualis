@@ -36,6 +36,19 @@ module Program =
             context.print.t (double0.powr(runtimeBase, runtimeExponent))
             context.print.t (complex0.powr(runtimeBase.ToComplex0, runtimeExponent))
 
+    let private generatePythonEmptySuites outputRoot =
+        let outputDirectory = Path.Combine(outputRoot,"python-empty-suites")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [Python] outputDirectory "smoke" "1.0" <| fun context ->
+            expr.forLoopPy context (Int 0,Int 1) (fun _ -> ())
+            expr.whiledoPy context False (fun () -> ())
+            expr.rangePy context None (Int 0) (Int 1) (fun _ -> ())
+            expr.range_exitPy context None (Int 0) (Int 1) (fun _ -> ())
+            expr.branchPy context <| fun (ifCode,elifCode,elseCode) ->
+                ifCode True (fun () -> ())
+                elifCode False (fun () -> ())
+                elseCode (fun () -> ())
+
     let private generateArithmeticAndComplexRegression outputRoot (directoryName, language) =
         let outputDirectory = Path.Combine(outputRoot, "arithmetic-complex-regression-" + directoryName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -61,6 +74,8 @@ module Program =
             let roundedSum = context.var.d0 "roundedSum"
             roundedSum <== 1.0
             context.print.t ((roundedSum+D 1.0e308)-D 1.0e308)
+            context.print.t (asm.abs (I Int32.MinValue))
+            context.print.t (I Int32.MinValue)
 
     let private generate outputRoot (directoryName, language) =
         let outputDirectory = Path.Combine(outputRoot, directoryName)
@@ -227,6 +242,24 @@ module Program =
                   asm.atan realTrigonometricInput.ToComplex0 ] do
                 context.print.t result.re
                 context.print.t result.im
+
+            let realAsComplex = context.var.d0 "realAsComplex"
+            realAsComplex <== 1.234567890123456
+            context.print.t realAsComplex.ToComplex0.re
+            context.print.t realAsComplex.ToComplex0.im
+            context.print.t (asm.conj realAsComplex.ToComplex0).re
+            let integerAsComplex = context.var.i0 "integerAsComplex"
+            integerAsComplex <== 7
+            context.print.t integerAsComplex.ToComplex0.re
+
+            let factor = complex0(Cpx(1.0,2.0))
+            for result in [ value * factor; value / factor ] do
+                context.print.t result.re
+                context.print.t result.im
+
+            let preciseComplex = context.var.z0 "preciseComplex"
+            preciseComplex <== complex0(Cpx(1.234567890123456,2.345678901234567))
+            context.print.t preciseComplex.re
 
             if language = C99 then
                 let dividend = context.var.i0 "dividend"
@@ -1532,6 +1565,7 @@ module Program =
             |> List.iter (generateNegativeRealSqrt outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generatePowerAndZeroRegression outputRoot)
+            generatePythonEmptySuites outputRoot
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateArithmeticAndComplexRegression outputRoot)
             generateJavaScriptIntegerDivision outputRoot

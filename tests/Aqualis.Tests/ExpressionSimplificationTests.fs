@@ -48,6 +48,13 @@ module ExpressionSimplificationTests =
         |Pow(Zt,_,_) -> ()
         |actual -> Assert.Fail($"Expected a complex power, but got {actual}.")
 
+        let rec assertComplexPower passes (expression:expr) =
+            match expression.simp with
+            |Pow(Zt,_,_) as result when passes > 0 -> assertComplexPower (passes-1) result
+            |Pow(Zt,_,_) -> ()
+            |actual -> Assert.Fail($"Complex power became {actual} after repeated simplification.")
+        assertComplexPower 3 (complex0.powr(complex0(Dbl -4.0), D 0.5)).Expr
+
     [<Fact>]
     let ``real negative square root remains real and complex square root remains complex`` () =
         for value in [asm.sqrt (D -4.0); asm.sqrt (-(D 4.0))] do
@@ -202,6 +209,38 @@ module ExpressionSimplificationTests =
             Assert.Equal(1.0e308,added)
             Assert.Equal(1.0e308,subtracted)
         |actual -> Assert.Fail($"Addition and subtraction order changed: {actual}.")
+
+    [<Fact>]
+    let ``real expressions viewed as complex have real part and zero imaginary part`` () =
+        let expression = Var(Dt,"realValue",NaN)
+        Assert.Equal(expression,(Re expression).simp)
+        match (Im expression).simp with
+        |Dbl zero -> Assert.Equal(0.0,zero)
+        |actual -> Assert.Fail($"Expected a real zero, but got {actual}.")
+        Assert.Equal(expression,(Conj expression).simp)
+        let integerExpression = Var(It 4,"integerValue",NaN)
+        match (Re integerExpression).simp with
+        |ToDbl(Var(It 4,"integerValue",_)) -> ()
+        |actual -> Assert.Fail($"Expected an integer-to-double conversion, but got {actual}.")
+
+    [<Fact>]
+    let ``zero base with a symbolic exponent remains a power`` () =
+        let exponent = Var(Dt,"exponent",NaN)
+        match (Pow(Dt,Dbl 0.0,exponent)).simp with
+        |Pow(Dt,Dbl 0.0,Var(Dt,"exponent",_)) -> ()
+        |actual -> Assert.Fail($"Expected a symbolic power, but got {actual}.")
+        match (Pow(Dt,Dbl 0.0,Dbl 2.0)).simp with
+        |Dbl zero -> Assert.Equal(0.0,zero)
+        |actual -> Assert.Fail($"Expected zero for a positive exponent, but got {actual}.")
+        match (Pow(Dt,Dbl 0.0,Dbl -1.0)).simp with
+        |NaN -> ()
+        |actual -> Assert.Fail($"Expected an undefined negative power, but got {actual}.")
+
+    [<Fact>]
+    let ``absolute value of the smallest integer is representable as a double`` () =
+        match (asm.abs (I System.Int32.MinValue)).Expr.simp with
+        |Dbl magnitude -> Assert.Equal(2147483648.0,magnitude)
+        |actual -> Assert.Fail($"Expected 2147483648.0, but got {actual}.")
 
     let private namedInteger name =
         int0(Var(It 4, name, Int 0))

@@ -18,7 +18,7 @@ module UnsupportedOperationTests =
             (fun () -> Cpx(1.0, 2.0).evalPh context |> ignore)
         assertNotSupported
             "PHP code generation does not support the real-part operation (Re)."
-            (fun () -> Re(Cpx(1.0, 2.0)).evalPh context |> ignore)
+            (fun () -> Re(Var(Zt,"complexValue",NaN)).evalPh context |> ignore)
 
         use output = new TemporaryDirectory()
         assertNotSupported

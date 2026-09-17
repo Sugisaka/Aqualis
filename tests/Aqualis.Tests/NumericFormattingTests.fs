@@ -354,9 +354,9 @@ module NumericFormattingTests =
                     |Fortran ->
                         "(" + format.DtoS 1.0 + "," + format.DtoS 2.0 + ")"
                     |Python ->
-                        format.DtoS 1.0 + "+1j*" + format.DtoS 2.0
+                        "(" + format.DtoS 1.0 + "+1j*" + format.DtoS 2.0 + ")"
                     |_ ->
-                        format.DtoS 1.0 + "+uj*" + format.DtoS 2.0
+                        "(" + format.DtoS 1.0 + "+uj*" + format.DtoS 2.0 + ")"
 
                 Assert.Equal(expected, render value target)
             finally

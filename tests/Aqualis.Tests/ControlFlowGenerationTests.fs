@@ -73,6 +73,21 @@ module ControlFlowGenerationTests =
         Assert.DoesNotContain("flag =", generated)
 
     [<Fact>]
+    let ``Python empty suites receive pass statements`` () =
+        let generated =
+            generate Python "python-empty-suites" <| fun context ->
+                expr.forLoopPy context (Int 0,Int 1) (fun _ -> ())
+                expr.whiledoPy context False (fun () -> ())
+                expr.rangePy context None (Int 0) (Int 1) (fun _ -> ())
+                expr.range_exitPy context None (Int 0) (Int 1) (fun _ -> ())
+                expr.branchPy context <| fun (ifCode,elifCode,elseCode) ->
+                    ifCode True (fun () -> ())
+                    elifCode False (fun () -> ())
+                    elseCode (fun () -> ())
+        let passCount = generated.Split("pass").Length - 1
+        Assert.True(passCount >= 7,$"Expected seven empty Python suites to contain pass, but found {passCount}.\n{generated}")
+
+    [<Fact>]
     let ``PHP early-exit ranges keep goto and labels inside PHP tags`` () =
         let generated =
             generate PHP "php-exit-range" <| fun context ->

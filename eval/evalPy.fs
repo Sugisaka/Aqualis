@@ -31,6 +31,11 @@ namespace Aqualis
             "(lambda " + dividendName + ", " + divisorName + ": " +
             dividendName + " - " + truncatingQuotient dividendName divisorName +
             " * " + divisorName + ")(" + dividend + ", " + divisor + ")"
+
+        let private writeSuite (c:Aqualis) (code:unit -> unit) =
+            let emitted,_ = c.captureCode code
+            if String.IsNullOrWhiteSpace emitted then c.codewritein "pass"
+            else c.codewriten emitted
         
         type expr with
             
@@ -50,7 +55,7 @@ namespace Aqualis
                 let n2_ = (Add(It 4, n2, Int 1)).evalPy c
                 c.codewritein("for " + i.evalPy c + " in range(" + n1_ + ", " + n2_ + ", 1):")
                 c.indentInc()
-                code i
+                writeSuite c (fun () -> code i)
                 c.indentDec()
                 returnVar()
                 
@@ -83,7 +88,7 @@ namespace Aqualis
             static member whiledoPy (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("while(" + cond.evalPy c + "):")
                 c.indentInc()
-                code()
+                writeSuite c code
                 c.indentDec()
                 
             ///<summary>指定した範囲でループ</summary>
@@ -99,7 +104,7 @@ namespace Aqualis
                     let i = Var(It 4, iname, NaN)
                     c.codewritein("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
-                    code i
+                    writeSuite c (fun () -> code i)
                     c.indentDec()
                     returnVar()
                     
@@ -125,7 +130,7 @@ namespace Aqualis
                     c.indentInc()
                     c.codewritein("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
                     c.indentInc()
-                    code(exit,i)
+                    writeSuite c (fun () -> code(exit,i))
                     c.indentDec()
                     c.indentDec()
                     c.codewritein("except " + exitType + ":")
@@ -139,18 +144,18 @@ namespace Aqualis
                     let cond = cond.evalPy c
                     c.codewritein("if " + cond + ":")
                     c.indentInc()
-                    code()
+                    writeSuite c code
                     c.indentDec()
                 let elseifcode (cond:expr) code =
                     let cond = cond.evalPy c
                     c.codewritein("elif " + cond + ":")
                     c.indentInc()
-                    code()
+                    writeSuite c code
                     c.indentDec()
                 let elsecode code =
                     c.codewritein "else:"
                     c.indentInc()
-                    code()
+                    writeSuite c code
                     c.indentDec()
                 code(ifcode,elseifcode,elsecode)
                 
@@ -177,7 +182,7 @@ namespace Aqualis
                 |Cpx (0.0,1.0) -> "1j"
                 |Cpx (re,im) when not (Double.IsFinite re && Double.IsFinite im) ->
                     "complex(" + c.numFormat.DtoS re + "," + c.numFormat.DtoS im + ")"
-                |Cpx (re,im) -> c.numFormat.DtoS re + "+1j*" + c.numFormat.DtoS im
+                |Cpx (re,im) -> "(" + c.numFormat.DtoS re + "+1j*" + c.numFormat.DtoS im + ")"
                 |Var (_,s,x) -> s
                 |Inv(_,x) -> 
                     match x with

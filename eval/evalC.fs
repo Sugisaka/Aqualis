@@ -153,12 +153,13 @@ namespace Aqualis
                     x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalC c + ")" |_ -> v.evalC c)
                     |> fun lst -> String.Join(" || ", lst)
+                |Int x when x = Int32.MinValue -> "(-2147483647-1)"
                 |Int x -> c.numFormat.ItoS x
                 |Dbl x -> c.numFormat.DtoS x
                 |Cpx (0.0,1.0) -> "uj"
                 |Cpx (re,im) when not (Double.IsFinite re && Double.IsFinite im) ->
                     "aqualis_complex_literal(" + c.numFormat.DtoS re + "," + c.numFormat.DtoS im + ")"
-                |Cpx (re,im) -> c.numFormat.DtoS re + "+uj*" + c.numFormat.DtoS im
+                |Cpx (re,im) -> "(" + c.numFormat.DtoS re + "+uj*" + c.numFormat.DtoS im + ")"
                 |Var (_,s,x) -> s
                 |Inv(_,x) ->
                     match x with

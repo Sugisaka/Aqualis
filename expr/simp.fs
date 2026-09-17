@@ -305,8 +305,12 @@ namespace Aqualis
                 |_,Int yy when yy<0 -> (-(x/Int -yy).simp).simp
                 |_,Dbl yy when yy<0.0 -> (-(x/Dbl -yy).simp).simp
                 |_,Inv(_,y) -> (-(x/y).simp).simp
-                |Int xx,_ when xx<0 -> (-(Int -xx / y).simp).simp
-                |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx / y).simp).simp
+                |Int xx,_ when xx<0 ->
+                    let positive = (Int (-xx) / y).simp
+                    (-positive).simp
+                |Dbl xx,_ when xx<0.0 ->
+                    let positive = (Dbl (-xx) / y).simp
+                    (-positive).simp
                 |Inv(_,x),_ -> (-(x/y).simp).simp
                 |Mul(_,a,b),c when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
@@ -374,6 +378,13 @@ namespace Aqualis
                 |(Int 0|Dbl 0.0),(Int 0|Dbl 0.0) -> 
                     reportExpressionError "AQL4002" "Zero raised to the power zero is undefined." "power"
                     NaN
+                |(Int 0|Dbl 0.0),_ ->
+                    match realLiteralValue y with
+                    |Some exponent when exponent <= 0.0 ->
+                        reportExpressionError "AQL4002" "Zero raised to a non-positive power is undefined." "power"
+                        NaN
+                    |Some exponent when exponent > 0.0 -> Int 0
+                    |_ -> Pow(x%%y.etype,x,y)
                 |Int x,Int y when y>0 -> Int (List.fold (fun acc _ -> acc*x) 1 [1..y])
                 |Int x, Int y -> Dbl (double x ** double y)
                 |Int x, Dbl y -> Dbl (double x ** y)
@@ -386,7 +397,6 @@ namespace Aqualis
                 |Cpx _, Int _ -> expr.simpExp((y*expr.simpLog x).simp)
                 |Cpx _, Dbl _ -> expr.simpExp((y*expr.simpLog x).simp)
                 |Cpx _, Cpx _ -> expr.simpExp((y*expr.simpLog x).simp)
-                |(Int 0|Dbl 0.0),_ -> Int 0
                 |_,(Int 0|Dbl 0.0) -> Int 1
                 |_ -> Pow(x%%y.etype,x,y)
                 
@@ -499,7 +509,7 @@ namespace Aqualis
                 match x with
                 |Inv(_,Int x) -> expr.simpAbs(Int -x)
                 |Inv(_,Dbl x) -> expr.simpAbs(Dbl -x)
-                |Int x -> Dbl (abs x)
+                |Int x -> Dbl (abs (double x))
                 |Dbl x -> Dbl (abs x)
                 |Cpx (re,im) ->
                     Dbl (System.Numerics.Complex.Abs(System.Numerics.Complex(re, im)))
@@ -575,7 +585,9 @@ namespace Aqualis
                 match x with
                 |Cpx (xre,_) -> if xre<0.0 then Inv(Dt,Dbl -xre) else Dbl xre
                 |Dbl x -> Dbl x
-                |Int x -> Int x
+                |Int x -> Dbl (double x)
+                |_ when x.etype=It 4 -> ToDbl x
+                |_ when x.etype<>Zt -> x
                 |_ -> Re x
                 
             static member simpIm(x:expr) =
@@ -583,6 +595,7 @@ namespace Aqualis
                 |Cpx (_,xim) -> if xim<0.0 then Inv(Dt,Dbl -xim) else Dbl xim
                 |Dbl _ -> Dbl 0.0
                 |Int _ -> Int 0
+                |_ when x.etype<>Zt -> Dbl 0.0
                 |_ -> Im x
                 
             static member simpConj(x:expr) =
@@ -590,6 +603,7 @@ namespace Aqualis
                 |Cpx (xre,xim) -> Cpx (xre,-xim)
                 |Dbl x -> Dbl x
                 |Int x -> Int x
+                |_ when x.etype<>Zt -> x
                 |_ -> Conj x
                 
             static member simpEq(x:expr,y:expr) =
@@ -680,7 +694,7 @@ namespace Aqualis
                 
             member this.simp with get() =
                 match this with
-                |Int n when n < 0 ->
+                |Int n when n < 0 && n <> Int32.MinValue ->
                     Inv(It 4, Int -n)
                 |Dbl x when x < 0.0 ->
                     Inv(Dt, Dbl -x)
@@ -720,6 +734,8 @@ namespace Aqualis
                         match x,y with
                         |Inv(_,Int value),Dbl exponent -> value>0 && Double.IsFinite exponent && exponent <> truncate exponent
                         |Inv(_,Dbl value),Dbl exponent -> value>0.0 && Double.IsFinite exponent && exponent <> truncate exponent
+                        |Int value,Dbl exponent -> value<0 && Double.IsFinite exponent && exponent <> truncate exponent
+                        |Dbl value,Dbl exponent -> value<0.0 && Double.IsFinite exponent && exponent <> truncate exponent
                         |_ -> false
                     let result =
                         if t=Zt && negativeRealFractionalPower then Pow(Zt,x,y)
@@ -805,6 +821,12 @@ namespace Aqualis
                 |ToDbl x ->
                     let x = x.simp
                     expr.simpToDbl x
+                |Re x ->
+                    let x = x.simp
+                    expr.simpRe x
+                |Im x ->
+                    let x = x.simp
+                    expr.simpIm x
                 |Conj x ->
                     let x = x.simp
                     expr.simpConj x

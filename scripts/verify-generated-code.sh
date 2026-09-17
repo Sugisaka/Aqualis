@@ -196,13 +196,14 @@ import math
 import sys
 
 values = [float(value) for value in sys.argv[1].split()]
-if (len(values) != 15 or values[:3] != [2.0, 2.0, 1.0]
+if (len(values) != 17 or values[:3] != [2.0, 2.0, 1.0]
         or not all(math.isnan(value) for value in values[3:5])
         or values[5:9] != [1.0, 0.0, 1.0, 0.0]
         or values[9] != 1.0 or not (math.isinf(values[10]) and values[10] > 0)
         or not math.isnan(values[11]) or values[12] != 1.0
         or not (math.isinf(values[13]) and values[13] > 0)
-        or values[14] != 0.0):
+        or values[14] != 0.0 or values[15] != 2147483648.0
+        or values[16] != -2147483648.0):
     sys.exit(f"Unexpected arithmetic/complex output: {values!r}.")
 PY
   then
@@ -297,6 +298,8 @@ for result in [cmath.sin(1+710j), cmath.cos(1+710j),
                cmath.exp(1+0j), cmath.sin(1+0j), cmath.cos(1+0j),
                cmath.tan(1+0j), cmath.atan(1+0j)]:
     expected.extend([result.real, result.imag])
+expected.extend([1.234567890123456, 0.0, 1.234567890123456, 7.0,
+                 -5.0, 10.0, 2.2, -0.4, 1.234567890123456])
 if label == 'C99':
     expected.append(2.0)
 small_components = values[small_arctangent_offset:small_arctangent_offset+2]
@@ -317,6 +320,9 @@ PY
 verify_complex_math 'C99' "$output_root/complex-math-c" bash proc_smoke_C.sh
 verify_complex_math 'Fortran' "$output_root/complex-math-fortran" bash proc_smoke_F.sh
 verify_complex_math 'Python' "$output_root/complex-math-python" bash proc_smoke_P.sh
+python3 -m py_compile "$output_root/python-empty-suites/smoke.py"
+python3 "$output_root/python-empty-suites/smoke.py"
+printf '%s\n' 'Python empty suites: passed'
 
 verify_integer_quotient() {
   local label="$1"
