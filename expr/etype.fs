@@ -6,22 +6,23 @@
 // 
 namespace Aqualis
     
-    ///<summary>変数の型を指定</summary>
+    /// Element type used by generated variables and symbolic expressions.
     type Etype =
-        ///<summary>論理型</summary>
+        /// Boolean value.
         |Bt
-        ///<summary>整数型(バイト数)</summary>
+        /// Integer value with the requested byte width.
         |It of int
-        ///<summary>倍精度浮動小数点型</summary>
+        /// Double-precision real value.
         |Dt
-        ///<summary>複素数（倍精度）</summary>
+        /// Double-precision complex value.
         |Zt
-        ///<summary>非数値</summary>
+        /// Value with no numeric element type.
         |Nt
-        ///<summary>構造体</summary>
+        /// Named structure or language-specific object type.
         |Structure of string
         
-        ///<summary>優先度の高い型を選択</summary>
+        /// Promotes two numeric types to the wider result type, or returns <c>Nt</c>
+        /// when the combination has no defined numeric promotion.
         static member ( %% ) (x:Etype,y:Etype) = 
             match x,y with
             |Zt,(Zt|Dt|It _) -> Zt
@@ -31,7 +32,8 @@ namespace Aqualis
             |It a,It b -> It (if a>b then a else b)
             |_ -> Nt
             
-        ///<summary>言語設定に従って型名を生成</summary>
+        /// Returns the target-language name for this type. Unsupported combinations
+        /// produce an empty string.
         member this.tostring lang = 
             match lang with
             |Fortran ->

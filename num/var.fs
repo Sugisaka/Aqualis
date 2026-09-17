@@ -15,61 +15,73 @@ namespace Aqualis
             |PHP -> "$" + name
             |_ -> name
 
+        /// Registers a named Boolean scalar and returns its expression wrapper.
         member _.b0(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 1,A0,name,"")
             int0(Var(It 1,name,NaN),context=ctx)
 
+        /// Registers a named integer scalar and returns its expression wrapper.
         member _.i0(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 4,A0,name,"")
             int0(Var(It 4,name,NaN),context=ctx)
 
+        /// Registers an integer scalar with an initial value without a duplicate warning.
         member _.i0NoWarning(name:string,initial:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVar(It 4,A0,name,string initial)
             int0(Var(It 4,name,NaN),context=ctx)
 
+        /// Registers a named double-precision scalar and returns its expression wrapper.
         member _.d0(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Dt,A0,name,"")
             double0(Var(Dt,name,NaN),context=ctx)
 
+        /// Registers a named complex scalar and returns its expression wrapper.
         member _.z0(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Zt,A0,name,"")
             complex0(Var(Zt,name,NaN),context=ctx)
             
+        /// Registers a named integer 1D array with fixed dimensions and returns its expression wrapper.
         member _.i1(name:string,size:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 4,A1 size,name,"")
             int1(It 4,Var1(A1 size,name),context=ctx)
 
+        /// Registers a named double-precision 1D array with fixed dimensions and returns its expression wrapper.
         member _.d1(name:string,size:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Dt,A1 size,name,"")
             double1(Dt,Var1(A1 size,name),context=ctx)
 
+        /// Registers a named complex 1D array with fixed dimensions and returns its expression wrapper.
         member _.z1(name:string,size:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Zt,A1 size,name,"")
             complex1(Zt,Var1(A1 size,name),context=ctx)
             
+        /// Registers a named integer 1D array with dynamic dimensions and returns its expression wrapper.
         member _.i1(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 4,A1 0,name,"")
             int1(It 4,Var1(A1 0,name),context=ctx)
 
+        /// Registers a named double-precision 1D array with dynamic dimensions and returns its expression wrapper.
         member _.d1(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Dt,A1 0,name,"")
             double1(Dt,Var1(A1 0,name),context=ctx)
 
+        /// Registers a named complex 1D array with dynamic dimensions and returns its expression wrapper.
         member _.z1(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Zt,A1 0,name,"")
             complex1(Zt,Var1(A1 0,name),context=ctx)
 
+        /// Registers a named integer array initialized from a nonempty value list.
         member _.ip1(name:string, values:int list) =
             if List.isEmpty values then invalidArg "values" "Initialized arrays require at least one element."
             let name = nameFor ctx name
@@ -84,6 +96,7 @@ namespace Aqualis
                 else ctx.writePhpStatement("if (!isset(" + name + ")) { " + assignment + " }")
             int1(It 4,Var1(A1 values.Length,name),context=ctx)
             
+        /// Registers a named double-precision array initialized from a nonempty value list.
         member _.dp1(name:string, values:double list) =
             if List.isEmpty values then invalidArg "values" "Initialized arrays require at least one element."
             let name = nameFor ctx name
@@ -98,6 +111,7 @@ namespace Aqualis
                 else ctx.writePhpStatement("if (!isset(" + name + ")) { " + assignment + " }")
             double1(Dt,Var1(A1 values.Length,name),context=ctx)
 
+        /// Registers a named complex array initialized from a nonempty value list.
         member _.zp1(name:string, values:(double*double) list) =
             if List.isEmpty values then invalidArg "values" "Initialized arrays require at least one element."
             if ctx.language = PHP then UnsupportedOperation.codeGeneration "PHP" "initialized complex arrays"
@@ -114,67 +128,80 @@ namespace Aqualis
             ctx.cvar.setUniqVarWarning(Zt,A1 values.Length,name,initial)
             complex1(Zt,Var1(A1 values.Length,name),context=ctx)
 
+        /// Registers a named integer 2D array with fixed dimensions and returns its expression wrapper.
         member _.i2(name:string,size1:int,size2:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 4,A2(size1,size2),name,"")
             int2(It 4,Var2(A2(size1,size2),name),context=ctx)
 
+        /// Registers a named double-precision 2D array with fixed dimensions and returns its expression wrapper.
         member _.d2(name:string,size1:int,size2:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Dt,A2(size1,size2),name,"")
             double2(Dt,Var2(A2(size1,size2),name),context=ctx)
 
+        /// Registers a named complex 2D array with fixed dimensions and returns its expression wrapper.
         member _.z2(name:string,size1:int,size2:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Zt,A2(size1,size2),name,"")
             complex2(Zt,Var2(A2(size1,size2),name),context=ctx)
 
+        /// Registers a named integer 2D array with dynamic dimensions and returns its expression wrapper.
         member _.i2(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 4,A2(0,0),name,"")
             int2(It 4,Var2(A2(0,0),name),context=ctx)
 
+        /// Registers a named double-precision 2D array with dynamic dimensions and returns its expression wrapper.
         member _.d2(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Dt,A2(0,0),name,"")
             double2(Dt,Var2(A2(0,0),name),context=ctx)
 
+        /// Registers a named complex 2D array with dynamic dimensions and returns its expression wrapper.
         member _.z2(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Zt,A2(0,0),name,"")
             complex2(Zt,Var2(A2(0,0),name),context=ctx)
 
+        /// Registers a named integer 3D array with fixed dimensions and returns its expression wrapper.
         member _.i3(name:string,size1:int,size2:int,size3:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 4,A3(size1,size2,size3),name,"")
             int3(It 4,Var3(A3(size1,size2,size3),name),context=ctx)
 
+        /// Registers a named double-precision 3D array with fixed dimensions and returns its expression wrapper.
         member _.d3(name:string,size1:int,size2:int,size3:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Dt,A3(size1,size2,size3),name,"")
             double3(Dt,Var3(A3(size1,size2,size3),name),context=ctx)
 
+        /// Registers a named complex 3D array with fixed dimensions and returns its expression wrapper.
         member _.z3(name:string,size1:int,size2:int,size3:int) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Zt,A3(size1,size2,size3),name,"")
             complex3(Zt,Var3(A3(size1,size2,size3),name),context=ctx)
 
+        /// Registers a named integer 3D array with dynamic dimensions and returns its expression wrapper.
         member _.i3(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(It 4,A3(0,0,0),name,"")
             int3(It 4,Var3(A3(0,0,0),name),context=ctx)
 
+        /// Registers a named double-precision 3D array with dynamic dimensions and returns its expression wrapper.
         member _.d3(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Dt,A3(0,0,0),name,"")
             double3(Dt,Var3(A3(0,0,0),name),context=ctx)
 
+        /// Registers a named complex 3D array with dynamic dimensions and returns its expression wrapper.
         member _.z3(name:string) =
             let name = nameFor ctx name
             ctx.cvar.setUniqVarWarning(Zt,A3(0,0,0),name,"")
             complex3(Zt,Var3(A3(0,0,0),name),context=ctx)
             
     [<AutoOpen>]
+    /// Adds variable declarations to Aqualis.
     module CompilationEnvironmentVarExtensions =
         type Aqualis with
             ///<summary>変数生成</summary>

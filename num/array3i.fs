@@ -1,5 +1,6 @@
 namespace Aqualis
 
+    /// Three-dimensional array of symbolic integer expressions.
     type int3(typ:Etype,x:Expr3,context:Aqualis) as this=
         inherit NumericArray3<int0,int1,int2,int3>(typ,x,context)
         interface IReal3
@@ -22,28 +23,50 @@ namespace Aqualis
         override _.AssignAt(i,j,k,value)=this[i,j,k] <== int0(value,this.Context)
         override _.clear()=this.AssignScalar(I 0)
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
+        /// Builds a division expression with integer result semantics.
         static member (./)(x:int3,y:int3)=base3.sizeMismatchError(x,y);int3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->Div(It 4,x[i,j,k].Expr,y[i,j,k].Expr)),Aqualis.merge x.Context y.Context)
+        /// Builds a division expression with integer result semantics.
         static member (./)(x:int0,y:int3)=int3(x.etype%%y.etype,Arx3(y.size1,y.size2,y.size3,fun(i,j,k)->Div(It 4,x.Expr,y[i,j,k].Expr)),Aqualis.merge x.Context y.Context)
+        /// Builds a division expression with integer result semantics.
         static member (./)(x:int,y:int3)=I x ./ y
+        /// Builds a division expression with integer result semantics.
         static member (./)(x:int3,y:int0)=int3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->Div(It 4,x[i,j,k].Expr,y.Expr)),Aqualis.merge x.Context y.Context)
+        /// Builds a division expression with integer result semantics.
         static member (./)(x:int3,y:int)=x ./ I y
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:int3,y:int3)=x.AssignArray y
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:int3,y:int0)=x.AssignScalar y
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:int3,y:int)=x.AssignScalar(I y)
 
     [<AutoOpen>]
+    /// Numeric operations for integer 3D arrays.
     module asm_int3=
         type asm with
+            /// Raises the first operand to the power of the second operand.
             static member pow(x:int3,y:int0)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.pow(x[i,j,k],y).Expr),Aqualis.merge x.Context y.Context)
+            /// Computes the sine of the operand.
             static member sin(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sin(x[i,j,k]).Expr),x.Context)
+            /// Computes the cosine of the operand.
             static member cos(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.cos(x[i,j,k]).Expr),x.Context)
+            /// Computes the tangent of the operand.
             static member tan(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.tan(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse sine of the operand.
             static member asin(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.asin(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse cosine of the operand.
             static member acos(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.acos(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse tangent of the operand.
             static member atan(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan(x[i,j,k]).Expr),x.Context)
+            /// Computes the two-argument inverse tangent.
             static member atan2(x:int3,y:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan2(x[i,j,k],y[i,j,k]).Expr),Aqualis.merge x.Context y.Context)
+            /// Computes the exponential of the operand.
             static member exp(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.exp(x[i,j,k]).Expr),x.Context)
+            /// Computes the absolute value or complex magnitude of the operand.
             static member abs(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.abs(x[i,j,k]).Expr),x.Context)
+            /// Computes the natural logarithm of the operand.
             static member log(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log(x[i,j,k]).Expr),x.Context)
+            /// Computes the base-10 logarithm of the operand.
             static member log10(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log10(x[i,j,k]).Expr),x.Context)
+            /// Computes the square root of the operand.
             static member sqrt(x:int3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sqrt(x[i,j,k]).Expr),x.Context)

@@ -6,11 +6,13 @@
 //
 namespace Aqualis
 
+    /// Generates shell scripts for compiled projects.
     module shellscript =
 
         open System
         open System.IO
 
+        /// Builds execution scripts for a generated project.
         type Shell(context:Aqualis,dir:string,project:string,nproc:int) =
             let language = context.language
             let outputDirectory =
@@ -58,10 +60,12 @@ namespace Aqualis
                     w.[i-1].Write("#!/bin/bash"+"\n\n")
                     w.[i-1].WriteLine("aqualis_exit_status=0")
 
+            /// Allocates the next job identifier.
             member private this.nextid() =
                 id <- id + 1
                 if id = nproc then id <- 0
 
+            /// Appends a process launch command to the shell script.
             member private this.addProcess(writeJob:StreamWriter -> string -> unit) =
                 match processScriptName with
                 | Some scriptName ->
@@ -115,13 +119,16 @@ namespace Aqualis
                     writer.WriteLine("fi")
                     writer.WriteLine())
 
+            /// Closes the script writer.
             member __.Close() =
                 disposeWriters()
 
             interface IDisposable with
+                /// Disposes the script writer.
                 member _.Dispose() =
                     disposeWriters()
 
+        /// Creates a shell script for a generated project and runs the configuration callback.
         let makeShellScript (context:Aqualis) (dir:string) (project:string) (n:int) code =
             use proc = new Shell(context,dir,project,n)
             code proc

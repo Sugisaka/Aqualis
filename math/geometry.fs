@@ -6,24 +6,38 @@
 //
 namespace Aqualis
 
+    /// Two- and three-dimensional symbolic geometry helpers.
     module geometry =
 
-        /// 2次元ベクトル
+        /// Immutable two-dimensional vector of symbolic real coordinates.
         type Point2(x:double0,y:double0) =
+            /// Gets the horizontal coordinate.
             member public _.x with get() = x
+            /// Gets the vertical coordinate.
             member public _.y with get() = y
+            /// Gets the Euclidean length of the vector.
             member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y)
+            /// Negates every coordinate.
             static member (~-) (a:Point2) = new Point2(-a.x, -a.y)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:Point2,b:Point2) = new Point2(a.x+b.x, a.y+b.y)
+            /// Subtracts the coordinates of two vectors.
             static member ( - ) (a:Point2,b:Point2) = new Point2(a.x-b.x, a.y-b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double,b:Point2) = new Point2(a*b.x, a*b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int,b:Point2) = new Point2(a*b.x, a*b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int0,b:Point2) = new Point2(a*b.x, a*b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double0,b:Point2) = new Point2(a*b.x, a*b.y)
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:Point2,b:Point2) = a.x*b.x+a.y*b.y
 
+        /// Named two-dimensional vector stored as a generated structure.
         type point2(sname_,name,context:Aqualis) =
             inherit structureValue<point2>(sname_,name,context)
+            /// Gets the generated structure type name.
             static member sname = "point2"
             new(name,context:Aqualis) =
                 let aaa = context.str
@@ -34,38 +48,60 @@ namespace Aqualis
                 point2(point2.sname,name,context)
             override _.Rewrap(n,targetEnvironment) =
                 point2(sname_,n,targetEnvironment)
+            /// Gets the horizontal coordinate.
             member public __.x = context.str.d0(sname_,name,"x")
+            /// Gets the vertical coordinate.
             member public __.y = context.str.d0(sname_,name,"y")
+            /// Gets the Euclidean length of the vector.
             member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y)
+            /// Divides each coordinate by the current Euclidean length.
             member public this.normalize() =
                 context.ch.d <| fun norm ->
                     norm <== this.abs
                     this.x <== this.x/norm
                     this.y <== this.y/norm
+            /// Negates every coordinate.
             static member (~-) (a:point2) = new Point2(-a.x, -a.y)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:point2,b:point2) = new Point2(a.x+b.x, a.y+b.y)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:Point2,b:point2) = new Point2(a.x+b.x, a.y+b.y)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:point2,b:Point2) = new Point2(a.x+b.x, a.y+b.y)
+            /// Subtracts the coordinates of two vectors.
             static member ( - ) (a:point2,b:point2) = new Point2(a.x-b.x, a.y-b.y)
+            /// Subtracts the coordinates of two vectors.
             static member ( - ) (a:point2,b:Point2) = new Point2(a.x-b.x, a.y-b.y)
+            /// Subtracts the coordinates of two vectors.
             static member ( - ) (a:Point2,b:point2) = new Point2(a.x-b.x, a.y-b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double,b:point2) = new Point2(a*b.x, a*b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int,b:point2) = new Point2(a*b.x, a*b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int0,b:point2) = new Point2(a*b.x, a*b.y)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double0,b:point2) = new Point2(a*b.x, a*b.y)
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:point2,b:point2) = a.x*b.x+a.y*b.y
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:point2,b:Point2) = a.x*b.x+a.y*b.y
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:Point2,b:point2) = a.x*b.x+a.y*b.y
+            /// Assigns the source coordinates to a generated point structure.
             static member (<==) (a:point2,b:Point2) =
                 a.x <== b.x
                 a.y <== b.y
+            /// Assigns the source coordinates to a generated point structure.
             static member (<==) (a:point2,b:point2) =
                 a.x <== b.x
                 a.y <== b.y
+            /// Registers and returns a point member of a generated structure.
             static member str_mem(psname, vname, name, context:Aqualis) =
                 context.str.addmember(psname,(Structure point2.sname,A0,name))
                 point2(point2.sname,context.str.mem(vname,name),context)
 
+        /// One-dimensional array of generated two-dimensional point structures.
         type point2_1(sname_,name,size1,context:Aqualis) =
             inherit structureArray1<point2,point2_1>(sname_,name,size1,context)
             //変数宣言を行う場合
@@ -76,69 +112,107 @@ namespace Aqualis
             override _.Rewrap(n,v,targetEnvironment) =
                 point2_1(sname_,n,v,targetEnvironment)
             //他の構造体snameのメンバ変数がこの構造体になる場合に使用
+            /// Registers and returns a point member of a generated structure.
             static member str_mem(psname, vname, name, size1, context:Aqualis) =
                 context.str.addmember(psname,(Structure point2.sname,A1 size1,name))
                 point2_1(point2.sname,context.str.mem(vname,name),A1 size1,context)
 
-        /// 3次元ベクトル
+        /// Immutable three-dimensional vector of symbolic real coordinates.
         type Point3(x:double0,y:double0,z:double0) =
+            /// Gets the horizontal coordinate.
             member public _.x with get() = x
+            /// Gets the vertical coordinate.
             member public _.y with get() = y
+            /// Gets the depth coordinate.
             member public _.z with get() = z
+            /// Gets the Euclidean length of the vector.
             member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y+this.z*this.z)
+            /// Gets the three-dimensional zero vector.
             static member O = new Point3(D 0.0, D 0.0, D 0.0)
+            /// Negates every coordinate.
             static member (~-) (a:Point3) = new Point3(-a.x, -a.y, -a.z)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:Point3,b:Point3) = new Point3(a.x+b.x, a.y+b.y, a.z+b.z)
+            /// Subtracts the coordinates of two vectors.
             static member ( - ) (a:Point3,b:Point3) = new Point3(a.x-b.x, a.y-b.y, a.z-b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int0,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double0,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double,b:Point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:Point3,b:Point3) = a.x*b.x+a.y*b.y+a.z*b.z
+            /// Computes the three-dimensional cross product.
             static member ( % ) (a:Point3,b:Point3) = new Point3(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x)
 
+        /// Named three-dimensional vector stored as a generated structure.
         type point3(sname_,name,context:Aqualis) =
             inherit structureValue<point3>(sname_,name,context)
+            /// Gets the generated structure type name.
             static member sname = "point3"
             new(name,context:Aqualis) =
                 context.str.reg(point3.sname,name)
                 point3(point3.sname,name,context)
             override _.Rewrap(n,targetEnvironment) =
                 point3(sname_,n,targetEnvironment)
+            /// Gets the horizontal coordinate.
             member public __.x = context.str.d0(sname_,name,"x")
+            /// Gets the vertical coordinate.
             member public __.y = context.str.d0(sname_,name,"y")
+            /// Gets the depth coordinate.
             member public __.z = context.str.d0(sname_,name,"z")
+            /// Gets the Euclidean length of the vector.
             member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y+this.z*this.z)
+            /// Divides each coordinate by the current Euclidean length.
             member public this.normalize() =
                 context.ch.d <| fun norm ->
                     norm <== this.abs
                     this.x <== this.x/norm
                     this.y <== this.y/norm
                     this.z <== this.z/norm
+            /// Negates every coordinate.
             static member (~-) (a:point3) = new Point3(-a.x, -a.y, -a.z)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:point3,b:Point3) = new Point3(a.x+b.x, a.y+b.y, a.z+b.z)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:Point3,b:point3) = new Point3(a.x+b.x, a.y+b.y, a.z+b.z)
+            /// Adds the coordinates of two vectors.
             static member ( + ) (a:point3,b:point3) = new Point3(a.x+b.x, a.y+b.y, a.z+b.z)
+            /// Subtracts the coordinates of two vectors.
             static member ( - ) (a:point3,b:point3) = new Point3(a.x-b.x, a.y-b.y, a.z-b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:int0,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Scales a vector by a scalar.
             static member ( * ) (a:double0,b:point3) = new Point3(a*b.x, a*b.y, a*b.z)
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:point3,b:point3) = a.x*b.x+a.y*b.y+a.z*b.z
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:point3,b:Point3) = a.x*b.x+a.y*b.y+a.z*b.z
+            /// Computes the dot product of two vectors.
             static member ( * ) (a:Point3,b:point3) = a.x*b.x+a.y*b.y+a.z*b.z
+            /// Assigns the source coordinates to a generated point structure.
             static member (<==) (a:point3,b:Point3) =
                 a.x <== b.x
                 a.y <== b.y
                 a.z <== b.z
+            /// Assigns the source coordinates to a generated point structure.
             static member (<==) (a:point3,b:point3) =
                 a.x <== b.x
                 a.y <== b.y
                 a.z <== b.z
+            /// Registers and returns a point member of a generated structure.
             static member str_mem(psname, vname, name, context:Aqualis) =
                 context.str.addmember(psname,(Structure(point3.sname),A0,name))
                 point3(point3.sname,context.str.mem(vname,name),context)
 
+        /// One-dimensional array of generated three-dimensional point structures.
         type point3_1(sname_,name,size1,context:Aqualis) =
             inherit structureArray1<point3,point3_1>(sname_,name,size1,context=context)
             new(name,size1,context:Aqualis) =
@@ -148,10 +222,10 @@ namespace Aqualis
             override _.Rewrap(n,v,targetEnvironment) =
                 point3_1(sname_,n,v,targetEnvironment)
 
-        ///<summary>
-        ///中心(x,y)、1辺の長さdの正方形領域に、中心(center_x,center_y)、半径radiusの円が占める割合を計算
-        ///結果はfに保存（0.0≦f≦1.0）
-        ///</summary>
+        /// Computes the fraction of a square of side <c>d</c> centered at
+        /// <c>(x,y)</c> covered by a circle centered at
+        /// <c>(center_x,center_y)</c> with the supplied radius, storing the
+        /// result between zero and one in <c>f</c>.
         let circle(x:double0,y:double0,center_x:double0,center_y:double0,radius:double0,d:double0,f:double0):double0 =
             let context =
                 Aqualis.mergeMany

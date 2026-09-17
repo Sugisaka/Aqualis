@@ -1,8 +1,11 @@
 namespace Aqualis
 
 [<AutoOpen>]
+/// Adds collision-aware named-variable allocation to variable generators.
 module varControl2 =
     type varGenerator with
+        /// Checks whether a name is occupied by any scalar, array, character,
+        /// string, file, or custom variable in the generation context.
         static member isVarExist(program:Aqualis, name:string, typ:Etype, shape:VarType) =
             [
                 program.i0, It 4, A0
@@ -28,6 +31,7 @@ module varControl2 =
                 |_ -> true)
             |> fun exists -> exists || program.cvar.exists name
 
+        /// Allocates or retrieves a named variable while handling collisions.
         member private this.getNamedVar(name:string, collision:bool, program:Aqualis option) =
             if collision then
                 let replacement,release = this.getVar()
@@ -64,9 +68,13 @@ module varControl2 =
                     this.addOfflineStrList name
                 name,release
 
+        /// Allocates a named variable in a context, substituting a generated name
+        /// and reporting AQL1001 when the requested name collides.
         member this.getVar(program:Aqualis, name:string, typ:Etype, shape:VarType) =
             this.getNamedVar(name, varGenerator.isVarExist(program,name,typ,shape), Some program)
 
+        /// Allocates a named variable without a generation context, reporting
+        /// any collision through the ambient diagnostic scope.
         member this.getVar(name:string, _typ:Etype, _shape:VarType) =
             let collision =
                 match this.isVarExist name with

@@ -6,6 +6,7 @@
 //
 namespace Aqualis
 
+    /// Mathematical function generation for an Aqualis context.
     type ContextMath internal (context:Aqualis) =
         ///<summary>整数次第2種球ハンケル関数を計算</summary>
         ///<param name="hn">球ハンケル関数の値</param>
@@ -107,6 +108,7 @@ namespace Aqualis
                 code f
 
         //Legendre多項式 P_l
+        /// Generates the Legendre polynomial of degree l at x into the output variable.
         member _.plgndr (pl:double0) (l:int0,x:double0) =
             context.group.Section "Legendre多項式を計算" <| fun () ->
                 context.ch.d <| fun pll ->
@@ -131,6 +133,7 @@ namespace Aqualis
         //<summary>Legendre多項式を0次からn次まで計算</summary>
         //<param name="pl">pl[i] = i-1次のLegendre多項式を保存</param>
         //<param name="(l,x)">計算するLegendre多項式の最高次数と引数</param>
+        /// Generates Legendre polynomials of degrees zero through l into the output array.
         member _.plgndrarray (pl:double1) (l:int0,x:double0) =
             context.group.Section ("0次から"+l.code+"次までのLegendre多項式を計算") <| fun () ->
                 context.ch.d <| fun pmm ->
@@ -157,6 +160,7 @@ namespace Aqualis
         //<param name="l">整数</param>
         //<param name="m">整数</param>
         //<param name="x">実数</param>
+        /// Generates the associated Legendre polynomial of degree l and order m at x.
         member _.aplgndr (pl:double0) (l:int0, m:int0, x:double0) =
             context.ch.dd <| fun (fact,pll) ->
             context.ch.ddd <| fun (pmm,pmmp1,somx2) ->
@@ -186,6 +190,7 @@ namespace Aqualis
                                 pl <== pll
 
     [<AutoOpen>]
+    /// Adds mathematical operations to Aqualis.
     module CompilationEnvironmentMathExtensions =
         type html with
 

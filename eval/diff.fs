@@ -7,10 +7,12 @@
 namespace Aqualis
     
     [<AutoOpen>]
+    /// Adds symbolic differentiation to expressions.
     module exprDiff =
         type expr with
             
-            /// fをxで微分(gは変数生成用カウンタ)
+            /// Differentiates an expression with respect to a symbolic variable or
+            /// array element. Unsupported expressions raise <see cref="T:System.NotSupportedException"/>.
             static member diff (f:expr) = fun (x:expr) (g:Aqualis) ->
                     match f,x with
                     |Int _,_ ->

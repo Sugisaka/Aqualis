@@ -7,21 +7,26 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Expression output operations for C99.
     module exprEvalC =
 
         open System
 
         type expr with
 
+            /// Emits an assignment for C99.
             static member substC (x:expr) (y:expr) (c:Aqualis) =
                c.codewritein (x.evalC c  + " = " + y.evalC c + ";")
 
+            /// Reports that equation display is unsupported for this target language.
             static member equivC (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "C99" "equation display"
 
+            /// Reports that aligned equation display is unsupported for this target language.
             static member equivAlignC (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "C99" "aligned equation display"
 
+            /// Emits a counted loop for C99.
             static member forLoopC (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -36,7 +41,7 @@ namespace Aqualis
                 c.codewritein "}"
                 returnVar()
 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for C99.
             static member loopC (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -54,7 +59,7 @@ namespace Aqualis
                 c.codewritein(label+":;")
                 returnVar()
 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for C99.
             static member whiledoC (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("while(" + cond.evalC c + ")")
                 c.codewritein "{"
@@ -63,7 +68,7 @@ namespace Aqualis
                 c.indentDec()
                 c.codewritein "}"
 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for C99.
             static member rangeC (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -84,7 +89,7 @@ namespace Aqualis
                     c.codewritein "}"
                     returnVar()
 
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for C99.
             static member range_exitC (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -109,6 +114,7 @@ namespace Aqualis
                     c.codewritein(label+":;")
                     returnVar()
 
+            /// Emits a branch callback for C99.
             static member branchC (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalC c
@@ -135,6 +141,7 @@ namespace Aqualis
                     c.codewritein "}"
                 code(ifcode,elseifcode,elsecode)
 
+            /// Renders an expression for C99.
             member this.evalC(c:Aqualis) =
                 match this.simp with
                 |False -> "false"

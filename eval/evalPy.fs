@@ -7,10 +7,12 @@
 namespace Aqualis
     
     [<AutoOpen>]
+    /// Expression output operations for Python.
     module exprEvalPy =
         
         open System
 
+        /// Computes a quotient truncated toward zero.
         let private truncatingQuotient dividend divisor =
             let magnitude =
                 "abs(" + dividend + ") // abs(" + divisor + ")"
@@ -18,6 +20,7 @@ namespace Aqualis
                 "(" + dividend + " < 0) == (" + divisor + " < 0)"
             "(" + magnitude + " if " + sameSign + " else -(" + magnitude + "))"
 
+        /// Computes integer division truncated toward zero.
         let private truncatingIntegerDivision dividend divisor =
             let dividendName = "_aqualis_dividend"
             let divisorName = "_aqualis_divisor"
@@ -25,6 +28,7 @@ namespace Aqualis
             truncatingQuotient dividendName divisorName + ")(" +
             dividend + ", " + divisor + ")"
 
+        /// Computes the matching integer remainder.
         let private truncatingIntegerRemainder dividend divisor =
             let dividendName = "_aqualis_dividend"
             let divisorName = "_aqualis_divisor"
@@ -32,6 +36,7 @@ namespace Aqualis
             dividendName + " - " + truncatingQuotient dividendName divisorName +
             " * " + divisorName + ")(" + dividend + ", " + divisor + ")"
 
+        /// Writes a Python suite with an indented callback body.
         let private writeSuite (c:Aqualis) (code:unit -> unit) =
             let emitted,_ = c.captureCode code
             if String.IsNullOrWhiteSpace emitted then c.codewritein "pass"
@@ -39,15 +44,19 @@ namespace Aqualis
         
         type expr with
             
+            /// Emits an assignment for Python.
             static member substPy (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalPy c  + " = " + y.evalPy c)
                 
+            /// Reports that equation display is unsupported for this target language.
             static member equivPy (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "Python" "equation display"
 
+            /// Reports that aligned equation display is unsupported for this target language.
             static member equivAlignPy (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "Python" "aligned equation display"
                 
+            /// Emits a counted loop for Python.
             static member forLoopPy (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -59,7 +68,7 @@ namespace Aqualis
                 c.indentDec()
                 returnVar()
                 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for Python.
             static member loopPy (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -84,14 +93,14 @@ namespace Aqualis
                 c.indentDec()
                 returnVar()
                 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for Python.
             static member whiledoPy (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("while(" + cond.evalPy c + "):")
                 c.indentInc()
                 writeSuite c code
                 c.indentDec()
                 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for Python.
             static member rangePy (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b -> 
@@ -108,7 +117,7 @@ namespace Aqualis
                     c.indentDec()
                     returnVar()
                     
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for Python.
             static member range_exitPy (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b -> 
@@ -139,6 +148,7 @@ namespace Aqualis
                     c.indentDec()
                     returnVar()
                     
+            /// Emits a branch callback for Python.
             static member branchPy (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPy c
@@ -159,6 +169,7 @@ namespace Aqualis
                     c.indentDec()
                 code(ifcode,elseifcode,elsecode)
                 
+            /// Renders an expression for Python.
             member this.evalPy(c:Aqualis) =
                 match this.simp with
                 |False -> "False"

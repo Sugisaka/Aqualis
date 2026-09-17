@@ -10,20 +10,30 @@ open System
 
 /// Configuration for a bounded, file-backed PHP login-attempt throttle.
 type FileLoginThrottleOptions = {
+    /// Lowercase identifier used to prefix generated PHP functions and files.
     Identifier: string
+    /// Name of the writable data directory two levels above the generated PHP file.
     DataDirectoryName: string
+    /// Application name included in log messages.
     ApplicationName: string
+    /// Duration of the counting window in seconds.
     WindowSeconds: int
+    /// Maximum attempts from one source IP during the window.
     MaxIpAttempts: int
     /// Maximum attempts for one user ID from one source IP within the window.
     MaxUserAttempts: int
+    /// Maximum number of state entries retained.
     MaxEntries: int
+    /// Maximum serialized state size permitted when writing.
     StateSoftMaxBytes: int
+    /// Maximum state file size permitted when reading.
     StateHardMaxBytes: int
+    /// Maximum number of invalid state files kept in quarantine.
     MaxQuarantineFiles: int
 }
 
 [<RequireQualifiedAccess>]
+/// Default settings for file-backed login throttling.
 module FileLoginThrottleOptions =
     /// Conservative defaults for a data directory located two levels above the generated PHP file.
     let defaults identifier dataDirectoryName applicationName = {
@@ -40,13 +50,17 @@ module FileLoginThrottleOptions =
     }
 
 [<RequireQualifiedAccess>]
+/// Validates login-throttle options and identifiers.
 module private FileLoginThrottleValidation =
+    /// Checks a character in a generated PHP identifier.
     let validIdentifierCharacter character =
         ('a' <= character && character <= 'z') || ('0' <= character && character <= '9') || character = '_'
 
+    /// Checks a character in an allowed file path.
     let validPathCharacter character =
         ('A' <= character && character <= 'Z') || validIdentifierCharacter character || character = '-'
 
+    /// Validates file-backed login-throttle options.
     let validate options =
         if String.IsNullOrWhiteSpace options.Identifier
            || not ('a' <= options.Identifier[0] && options.Identifier[0] <= 'z')
@@ -73,8 +87,10 @@ type FileLoginThrottle(context:Aqualis, options:FileLoginThrottleOptions) =
     let appMessage suffix = PhpEncoding.stringLiteral (options.ApplicationName + suffix)
     let stateFile suffix = PhpEncoding.stringLiteral ("." + id + "-login-rate-limit" + suffix)
 
+    /// Gets a fixed bcrypt hash suitable for a dummy password check when the user is unknown.
     static member DummyPasswordHash = "$2a$12$KoAU7tfTo34q7Kp7ypc4ROhSCM2Eoif/iJZ5z0sLl3RsbAkrJfIde"
 
+    /// Emits the PHP constants and functions that maintain the file-backed attempt state.
     member _.EmitDefinitions() =
         let atomicWrite = fn "atomic_private_write"
         let recover = fn "recover_login_rate_state"
@@ -146,6 +162,8 @@ type FileLoginThrottle(context:Aqualis, options:FileLoginThrottleOptions) =
         ]
         context.php.phpcode <| fun () -> source |> List.iter context.writein
 
+    /// Emits a check that reserves a login attempt and terminates the request
+    /// with HTTP 429 when limited or HTTP 503 when the state is unavailable.
     member _.RequireAllowed(userId:PHPdata) =
         Aqualis.merge context userId.Context |> ignore
         context.php.phpcode <| fun () ->
@@ -153,6 +171,8 @@ type FileLoginThrottle(context:Aqualis, options:FileLoginThrottleOptions) =
             context.writein("if ($loginThrottle['ok'] !== true) { http_response_code(503); exit('ログイン機能を利用できません。しばらくしてから再試行してください。'); }")
             context.writein("if ($loginThrottle['value']['allowed'] !== true) { http_response_code(429); header('Retry-After: '.(string)$loginThrottle['value']['retry_after']); exit('ログイン試行回数が上限に達しました。しばらくしてから再試行してください。'); }")
 
+    /// Emits a call that releases the reserved attempt after successful login.
+    /// A release failure is logged without changing the generated response.
     member _.ReleaseSuccessfulAttempt(userId:PHPdata) =
         Aqualis.merge context userId.Context |> ignore
         context.php.phpcode <| fun () ->

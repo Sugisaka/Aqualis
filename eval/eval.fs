@@ -7,10 +7,12 @@
 namespace Aqualis
     
     [<AutoOpen>]
+    /// Expression output operations for the selected output language.
     module exprEval =
         
         type expr with
             
+            /// Emits an assignment for the selected output language.
             static member subst (x:expr) (y:expr) (c:Aqualis) =
                 match x.etype,y.etype,x with
                 |It _,Dt,_ ->
@@ -32,6 +34,7 @@ namespace Aqualis
                     |Numeric -> ()
                 |_ ->
                     invalidArg (x.eval c) "代入不可能な式または値が指定されています"
+            /// Writes an equation when supported by the selected output language.
             static member equiv (x:expr) (y:expr) (c:Aqualis) =
                     match c.language with
                     |Fortran -> expr.equivF x y c
@@ -45,6 +48,7 @@ namespace Aqualis
                             expr.equivHS x y c
                     |Numeric -> ()
                 
+            /// Writes an aligned equation when supported by the selected output language.
             static member equivAlign (x:expr) (y:expr) (c:Aqualis) =
                     match c.language with
                     |Fortran -> expr.equivAlignF x y c
@@ -58,6 +62,7 @@ namespace Aqualis
                             expr.equivAlignHS x y c
                     |Numeric -> ()
                 
+            /// Emits a counted loop for the selected output language.
             static member forLoop (c:Aqualis) (n1:expr,n2:expr) code =
                     match c.language with
                         |Fortran -> expr.forLoopF c (n1,n2) code
@@ -71,7 +76,7 @@ namespace Aqualis
                                 expr.forLoopHS c (n1,n2) code
                         |Numeric -> ()
                 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for the selected output language.
             static member loop (c:Aqualis) code =
                     match c.language with
                     |Fortran -> expr.loopF c code
@@ -84,7 +89,7 @@ namespace Aqualis
                     |HTMLSequenceDiagram -> expr.loopHS c code
                     |Numeric -> ()
                 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for the selected output language.
             static member whiledo (c:Aqualis) (cond:expr) = fun code ->
                     match c.language with
                     |Fortran -> expr.whiledoF c cond code
@@ -98,7 +103,7 @@ namespace Aqualis
                             expr.whiledoHS c cond code
                     |Numeric -> ()
                 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for the selected output language.
             static member range (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                     match c.language with
                     |Fortran -> expr.rangeF c counter i1 i2 code
@@ -112,7 +117,7 @@ namespace Aqualis
                             expr.rangeHS c counter i1 i2 code
                     |Numeric -> expr.rangeN i1 i2 code
                 
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for the selected output language.
             static member range_exit (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                     match c.language with
                     |Fortran -> expr.range_exitF c counter i1 i2 code
@@ -125,6 +130,7 @@ namespace Aqualis
                     |HTMLSequenceDiagram -> expr.range_exitHS c counter i1 i2 code
                     |Numeric -> ()
                 
+            /// Emits a branch callback for the selected output language.
             static member branch (c:Aqualis) code =
                     match c.language with
                     |Fortran -> expr.branchF c code
@@ -138,6 +144,7 @@ namespace Aqualis
                             expr.branchHS c code
                     |Numeric -> ()
                 
+            /// Renders an expression for the selected output language.
             member this.eval (c:Aqualis) =
                     match c.language with
                     |Fortran -> this.evalF c

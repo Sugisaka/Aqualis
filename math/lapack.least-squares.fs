@@ -7,17 +7,21 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Least-squares operations on the LAPACK context.
     module ContextLaLeastSquaresExtensions =
+        /// Validates vector dimensions for Tikhonov least squares.
         let private requireTikhonovVectorShapes (context:Aqualis) (rows:int0) (columns:int0) (rhsLength:int0) =
             LapackValidation.require context (rows .<= 0) "LAPACK Tikhonov matrix rows must be positive."
             LapackValidation.require context (columns .<= 0) "LAPACK Tikhonov matrix columns must be positive."
             LapackValidation.require context (rhsLength .=/ rows) "LAPACK Tikhonov right-hand side length must match matrix rows."
 
+        /// Validates column dimensions for Tikhonov least squares.
         let private requireTikhonovColumnShapes (context:Aqualis) (rows:int0) (columns:int0)
                                                 (rhsRows:int0) (rhsColumns:int0) =
             requireTikhonovVectorShapes context rows columns rhsRows
             LapackValidation.require context (rhsColumns .=/ 1) "LAPACK Tikhonov right-hand side must have one column."
 
+        /// Requires a finite Tikhonov regularization value.
         let private requireFiniteTikhonovValue (context:Aqualis) (value:double0) =
             let expression = value.Expr.eval context
             let condition =
@@ -31,6 +35,7 @@ namespace Aqualis
                     (bool0(Var(Nt, expression, NaN), context))
                     "LAPACK Tikhonov calculation overflowed or produced a non-finite value.")
 
+        /// Checks finite real intermediate results in Tikhonov solving.
         let private checkRealTikhonovIntermediates (context:Aqualis) (matrix:double2) (vector:double1) =
             match context.Language with
             | C99 | Fortran | Python ->
@@ -38,6 +43,7 @@ namespace Aqualis
                 vector.foreach <| fun i -> requireFiniteTikhonovValue context vector[i]
             | _ -> ()
 
+        /// Checks finite complex intermediate results in Tikhonov solving.
         let private checkComplexTikhonovIntermediates (context:Aqualis) (matrix:complex2) (vector:complex1) =
             match context.Language with
             | C99 | Fortran | Python ->
@@ -49,11 +55,13 @@ namespace Aqualis
                     requireFiniteTikhonovValue context vector[i].im
             | _ -> ()
 
+        /// Checks a finite real Tikhonov solution.
         let private checkRealTikhonovSolution (context:Aqualis) (vector:double1) =
             match context.Language with
             | C99 | Fortran | Python -> vector.foreach <| fun i -> requireFiniteTikhonovValue context vector[i]
             | _ -> ()
 
+        /// Checks a finite complex Tikhonov solution.
         let private checkComplexTikhonovSolution (context:Aqualis) (vector:complex1) =
             match context.Language with
             | C99 | Fortran | Python ->
@@ -62,6 +70,7 @@ namespace Aqualis
                     requireFiniteTikhonovValue context vector[i].im
             | _ -> ()
 
+        /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
             /// <summary>
             /// 連立方程式の求解(Tikhonovの正則化法)

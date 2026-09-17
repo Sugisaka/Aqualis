@@ -7,12 +7,15 @@
 namespace Aqualis
     
     [<AutoOpen>]
+    /// Adds a Japanese spoken-text rendering of supported expressions.
     module exprEvalT =
         
         open System
         
         type expr with
             
+            /// Renders supported arithmetic and comparisons as Japanese spoken
+            /// text; returns an empty string for unsupported expression forms.
             member this.evalT() =
                 match this with
                 |Int x -> x.ToString()

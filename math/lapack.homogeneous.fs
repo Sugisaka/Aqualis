@@ -7,18 +7,19 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Adds homogeneous-system solvers to the linear-algebra context.
     module ContextLaHomogeneousExtensions =
+        /// Validates shapes for a homogeneous eigenvalue problem.
         let private requireHomogeneousShapes (context:Aqualis) (rows:int0) (columns:int0) (resultLength:int0) =
             LapackValidation.require context (rows .<= 0) "LAPACK homogeneous matrix rows must be positive."
             LapackValidation.require context (columns .<= 0) "LAPACK homogeneous matrix columns must be positive."
             LapackValidation.require context (resultLength .=/ columns) "LAPACK homogeneous solution length must match matrix columns."
 
+        /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
-            /// <summary>
-            /// 連立同次方程式を求解
-            /// </summary>
-            /// <param name="mat">複素係数行列</param>
-            /// <param name="f">連立方程式の解</param>
+            /// <summary>Uses SVD to write an approximate null-space vector of a real matrix.</summary>
+            /// <param name="mat">Real coefficient matrix.</param>
+            /// <param name="f">Output vector, with one element per matrix column.</param>
             member this.solve_homogeneq (mat:double2,f:double1) =
                 LapackValidation.requireBackend this.GenerationContext "LAPACK homogeneous solve"
                 requireHomogeneousShapes this.GenerationContext mat.size1 mat.size2 f.size1
@@ -35,11 +36,9 @@ namespace Aqualis
                         this.GenerationContext.iter.num mat.size2 <| fun i ->
                             f[i] <== vt[mat.size2-1,i]
     
-            /// <summary>
-            /// 連立同次方程式を求解
-            /// </summary>
-            /// <param name="mat">複素係数行列</param>
-            /// <param name="f">連立方程式の解</param>
+            /// <summary>Uses SVD to write an approximate null-space vector of a complex matrix.</summary>
+            /// <param name="mat">Complex coefficient matrix.</param>
+            /// <param name="f">Output vector, with one element per matrix column.</param>
             member this.solve_homogeneq (mat:complex2,f:complex1) =
                 LapackValidation.requireBackend this.GenerationContext "LAPACK homogeneous solve"
                 requireHomogeneousShapes this.GenerationContext mat.size1 mat.size2 f.size1

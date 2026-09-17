@@ -11,7 +11,9 @@ open System.IO
 open System.Text.Json
 
 [<AutoOpen>]
+/// Adds web-specific HTML elements and attributes.
 module HtmlWebExtensions =
+    /// Builds an HTML attribute from a PHP expression.
     let private phpAttributeCode (name:string) (value:PHPdata) =
         let validName = HtmlEncoding.attributeName name
         validName + "=\"<?php echo htmlspecialchars((string)(" + value.code + "), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>\""
@@ -76,30 +78,38 @@ module HtmlWebExtensions =
             this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-2 heading from a numeric expression.
         member this.h2 (t:int0) = fun code ->
             this.tagb "h2" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-2 heading from a styled numeric expression.
         member this.h2 (t:int0,s:Style) = fun code ->
             this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-3 heading from a numeric expression.
         member this.h3 (t:int0) = fun code ->
             this.tagb "h3" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-3 heading from a styled numeric expression.
         member this.h3 (t:int0,s:Style) = fun code ->
             this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-4 heading from a numeric expression.
         member this.h4 (t:int0) = fun code ->
             this.tagb "h4" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-4 heading from a styled numeric expression.
         member this.h4 (t:int0,s:Style) = fun code ->
             this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-5 heading from a numeric expression.
         member this.h5 (t:int0) = fun code ->
             this.tagb "h5" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-5 heading from a styled numeric expression.
         member this.h5 (t:int0,s:Style) = fun code ->
             this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
@@ -119,30 +129,38 @@ module HtmlWebExtensions =
             this.tagb ("h1",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-2 heading from a numeric expression.
         member this.h2 (t:double0) = fun code ->
             this.tagb "h2" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-2 heading from a styled numeric expression.
         member this.h2 (t:double0,s:Style) = fun code ->
             this.tagb ("h2",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-3 heading from a numeric expression.
         member this.h3 (t:double0) = fun code ->
             this.tagb "h3" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-3 heading from a styled numeric expression.
         member this.h3 (t:double0,s:Style) = fun code ->
             this.tagb ("h3",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-4 heading from a numeric expression.
         member this.h4 (t:double0) = fun code ->
             this.tagb "h4" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-4 heading from a styled numeric expression.
         member this.h4 (t:double0,s:Style) = fun code ->
             this.tagb ("h4",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
 
+        /// Writes a level-5 heading from a numeric expression.
         member this.h5 (t:double0) = fun code ->
             this.tagb "h5" <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
+        /// Writes a level-5 heading from a styled numeric expression.
         member this.h5 (t:double0,s:Style) = fun code ->
             this.tagb ("h5",[s.atr]) <| fun () -> this.Context.php.echoHtmlText (PHPdata t)
             code()
@@ -154,6 +172,7 @@ module HtmlWebExtensions =
         /// </summary>
         member this.submit(name:string,value:PHPdata) =
             this.taga("input",["type",PHPdata "submit"; "name",PHPdata name; "value",value])
+        /// Writes a submit input with the supplied name and label.
         member this.submit(name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value])
         /// <summary>
         /// フォーム送信用のsubmitボタンを生成する
@@ -175,7 +194,9 @@ module HtmlWebExtensions =
         /// <param name="name">name属性に設定するPHPデータ</param>
         /// <param name="value">value属性に設定するPHPデータ</param>
         member this.submit_disabled(name:PHPdata,value:PHPdata) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",value; "disabled",PHPdata "disabled"])
+        /// Writes a disabled submit input with the supplied name and label.
         member this.submit_disabled(name:string,value:PHPdata) = this.taga("input",["type",PHPdata "submit"; "name",PHPdata name; "value",value; "disabled",PHPdata "disabled"])
+        /// Writes a disabled submit input with the supplied name and label.
         member this.submit_disabled(name:PHPdata,value:string) = this.taga("input",["type",PHPdata "submit"; "name", name; "value",PHPdata value; "disabled",PHPdata "disabled"])
         /// <summary>
         /// li要素を生成する
@@ -332,15 +353,19 @@ module HtmlWebExtensions =
                 this.tagb0 ("code",[]) <| fun () ->
                     cd()
 
+        /// Writes a code element using the supplied content and style attributes.
         member this.code (style:list<string*PHPdata>, cd:PHPdata) =
             this.tagb0 ("pre",style) <| fun () ->
                 this.tagb0 ("code",[]) <| fun () ->
                     this.Context.php.echoHtmlText cd
 
+        /// Writes a code element using the supplied content and style attributes.
         member this.code (style:list<string*string>) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b))
 
+        /// Writes a code element using the supplied content and style attributes.
         member this.code (style:list<string*string>, cd:PHPdata) = this.code (style |> List.map (fun (a,b) -> a,PHPdata b),cd)
 
+        /// Writes a code element using the supplied content and style attributes.
         member this.code (cd:PHPdata) = this.code (([] : (string * PHPdata) list),cd)
         /// <summary>
         /// 罫線指定付きの表を生成

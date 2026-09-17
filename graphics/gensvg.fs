@@ -10,40 +10,50 @@ open System
 open System.IO
 open System.Text
 
+/// Font selection for SVG text.
 type Font =
     |TimesNewRoman
     |Name of string
 
+/// Horizontal alignment of SVG text.
 type TextAnchor =
     |Left
     |Center
     |Right
 
+/// Projection angles in degrees and axis scales for drawing three-dimensional geometry.
 type Setting3D = {DirX:double; DirY:double; DirZ:double; ScaleX:double; ScaleY:double; ScaleZ:double;}
 
+/// Generates SVG markup through the supplied expression writer.
 type ContextGenSvg internal (context:Aqualis) =
+    /// Writes the XML declaration and opening SVG element with the requested view box.
     member this.headerOpen (cvx:double,cvy:double,wr:exprString->unit) =
         wr <| st "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
         let cvxText = InvariantFormat.numberWithFormat "0.000" cvx
         let cvyText = InvariantFormat.numberWithFormat "0.000" cvy
         wr <| st("<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 "+cvxText+" "+cvyText+"\" style=\"enable-background:new 0 0 "+cvxText+" "+cvyText+";\" xml:space=\"preserve\">")
+    /// Writes the closing SVG element.
     member this.headerClose (wr:exprString->unit) =
         wr <| st "</svg>"
+    /// Wraps a drawing callback in the opening and closing SVG elements.
     member this.header (cvx:double,cvy:double) = fun (wr:exprString->unit) a code ->
         this.headerOpen(cvx,cvy,wr)
         code a
         this.headerClose wr
 
+    /// Writes a named SVG group around the drawing callback.
     member this.layer(wr:exprString -> unit,layername:string) = fun code ->
         wr <| st("<g id=\"" + HtmlEncoding.attributeValue layername + "\">")
         code()
         wr <| st "</g>"
 
+    /// Writes an SVG group around the drawing callback.
     member this.group(wr:exprString -> unit) = fun code ->
         wr <| st "<g>"
         code()
         wr <| st "</g>"
 
+    /// Builds an SVG style attribute for fill and stroke colors.
     member this.style(fillcolor:color.fill,strokecolor:color.stroke) =
         let style_fill =
             match fillcolor.col with
@@ -60,6 +70,7 @@ type ContextGenSvg internal (context:Aqualis) =
               |None -> st "stroke:none;"
         "style=\""++style_fill++style_stroke++"\""
 
+    /// Builds an SVG style attribute for a stroke color.
     member this.style(strokecolor:color.stroke) =
         let style_stroke =
             match strokecolor.col with
@@ -70,6 +81,7 @@ type ContextGenSvg internal (context:Aqualis) =
               |None -> st "stroke:none;"
         "style=\""++style_stroke++"\""
 
+    /// Writes an SVG path for a two-dimensional line segment.
     member this.line(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,x2:double0,y2:double0,strokecolor) =
         let x1 = 0.5*cvx+x1
         let y1 = 0.5*cvy-y1
@@ -80,6 +92,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style strokecolor
         wr <| st "/>"
 
+    /// Projects a three-dimensional line segment and writes an SVG path.
     member this.line3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,p3D:Setting3D,strokecolor) =
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -95,6 +108,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style strokecolor
         wr <| st "/>"
 
+    /// Writes an SVG path for a polygon using the supplied vertices.
     member this.polygon(cvx,cvy,wr:exprString -> unit,px:double list,py:double list,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         for i in 0..px.Length-1 do
@@ -108,6 +122,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Writes an SVG path for a polygon using the supplied vertices.
     member this.polygon(cvx,cvy,wr:exprString -> unit,px:double1,py:double1,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         context.iter.range (_1, px.size1) <| fun i ->
@@ -122,6 +137,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Writes an SVG path for a polygon using the supplied vertices.
     member this.polygon(cvx,cvy,wr:exprString -> unit,px:double0 list,py:double0 list,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         for i in 0..px.Length-1 do
@@ -135,6 +151,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Writes an SVG path for a polygon using the supplied vertices.
     member this.polygon(cvx,cvy,wr:exprString -> unit,pxy:(double0*double0) list,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         for i in 0..pxy.Length-1 do
@@ -149,6 +166,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Writes an SVG path for a polygon using the supplied vertices.
     member this.polygon(cvx,cvy,wr:exprString -> unit,pxy:(double*double) list,fillcolor,strokecolor) =
         wr <| st "<path d=\""
         for i in 0..pxy.Length-1 do
@@ -163,6 +181,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Projects three-dimensional vertices and writes an SVG polygon path.
     member this.polygon3D(cvx,cvy,wr:exprString -> unit,px:double list,py:double list,pz:double list,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double) (y:double) (z:double) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -180,6 +199,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Projects three-dimensional vertices and writes an SVG polygon path.
     member this.polygon3D(cvx,cvy,wr:exprString -> unit,px:double1,py:double1,pz:double1,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -196,6 +216,7 @@ type ContextGenSvg internal (context:Aqualis) =
                 wr <| " L "++pxi++","++pyi
         wr <| st "\" "++this.style(fillcolor,strokecolor)++"/>"
 
+    /// Writes an SVG circle or circular arc at the specified center and radius.
     member this.circle(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,r:double0,fillcolor,strokecolor) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
@@ -206,6 +227,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Writes an SVG circle or circular arc at the specified center and radius.
     member this.circle(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,r:double0,t1:double0,t2:double0,strokecolor) =
         let pi = Math.PI
         let cx = 0.5*cvx+cx
@@ -223,6 +245,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(color.fill.none,strokecolor)
         wr <| st "/>"
 
+    /// Projects a three-dimensional circle or arc and writes its SVG path.
     member this.circle3D(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -237,6 +260,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Projects a three-dimensional circle or arc and writes its SVG path.
     member this.circle3D(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,t1:double0,t2:double0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -257,6 +281,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Projects and draws a circle in the XY plane.
     member this.circle3Dxy(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,n:int0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -276,6 +301,7 @@ type ContextGenSvg internal (context:Aqualis) =
                     wr <| " L "++pxi++","++pyi
         wr <| "\" "++this.style(fillcolor,strokecolor)++"/>"
 
+    /// Projects and draws a circle in the YZ plane.
     member this.circle3Dyz(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,n:int0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -295,6 +321,7 @@ type ContextGenSvg internal (context:Aqualis) =
                     wr <| st " L "++pxi++","++pyi
         wr <| "\" "++this.style(fillcolor,strokecolor)++"/>"
 
+    /// Projects and draws a circle in the ZX plane.
     member this.circle3Dzx(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,cz:double0,r:double0,n:int0,p3D:Setting3D,fillcolor,strokecolor) =
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
@@ -314,6 +341,7 @@ type ContextGenSvg internal (context:Aqualis) =
                     wr <| " L "++pxi++","++pyi
         wr <| "\" "++this.style(fillcolor,strokecolor)++"/>"
 
+    /// Writes an SVG ellipse with the specified center and radii.
     member this.ellipse(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,rx:double0,ry:double0,fillcolor,strokecolor) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
@@ -325,6 +353,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Writes an SVG rectangle with the specified position and dimensions.
     member this.rectangle(cvx,cvy,wr:exprString -> unit,x:double0,y:double0,width:double0,height:double0,fillcolor,strokecolor) =
         let x = 0.5*cvx+x-0.5*width
         let y = 0.5*cvy-y-0.5*height
@@ -336,6 +365,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| this.style(fillcolor,strokecolor)
         wr <| st "/>"
 
+    /// Projects and draws a three-dimensional triangle.
     member this.triangle3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3:double0,y3:double0,z3:double0,p3D:Setting3D,fillcolor,strokecolor) =
         let pi = Math.PI
         let xy3D (x:double0) (y:double0) (z:double0) =
@@ -360,6 +390,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| " L "++pxi++","++pyi
         wr <| "\" "++this.style(fillcolor,strokecolor)++"/>"
 
+    /// Projects and draws a three-dimensional quadrilateral.
     member this.quadrangle3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3:double0,y3:double0,z3:double0,x4:double0,y4:double0,z4:double0,p3D:Setting3D,fillcolor,strokecolor) =
         let pi = Math.PI
         let xy3D (x:double0) (y:double0) (z:double0) =
@@ -388,6 +419,7 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| " L "++pxi++","++pyi
         wr <| "\" "++this.style(fillcolor,strokecolor)++"/>"
 
+    /// Writes SVG text with the supplied position and styling.
     member this.text(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0,font:Font,textAnchor:TextAnchor,rotation:double option,fillcolor:color.fill,strokecolor:color.stroke) =
         let cx = 0.5*cvx+cx
         let cy = 0.5*cvy-cy
@@ -424,9 +456,11 @@ type ContextGenSvg internal (context:Aqualis) =
         wr <| text
         wr <| st "</text>"
 
+    /// Writes SVG text with the supplied position and styling.
     member this.text(cvx,cvy,wr:exprString -> unit,cx:double0,cy:double0,text:exprString,size:double0,fillcolor,strokecolor) =
         this.text(cvx,cvy,wr,cx,cy,text,size,TimesNewRoman,Left,None,fillcolor,strokecolor)
 
+/// Writes SVG graphics to a stream using the supplied canvas dimensions and scale.
 type svgfilemaker(context:Aqualis,cvx:double,cvy:double,writer:StreamWriter,scale:double) =
     let generator = ContextGenSvg(context)
     let wr (x:exprString) =
@@ -684,8 +718,10 @@ type svgfilemaker(context:Aqualis,cvx:double,cvy:double,writer:StreamWriter,scal
         let cx, cy = c
         generator.text(cvx, cvy, wr, D scale*cx, D scale*cy, st text, D size, font, textAnchor, rot, fillcolor,strokecolor)
 
+/// Generates SVG graphics through an Aqualis expression writer.
 type svgfilemaker_aq(context:Aqualis,cvx:double,cvy:double,wr:exprString -> unit,scale:double) =
     let generator = ContextGenSvg(context)
+    /// Wraps the callback in the SVG document header and footer.
     member internal this.header code = generator.header (cvx,cvy) wr this code
     /// <summary>
     /// レイヤーを追加
@@ -1043,6 +1079,7 @@ type svgfilemaker_aq(context:Aqualis,cvx:double,cvy:double,wr:exprString -> unit
         let cx, cy = c
         generator.text(cvx,cvy,wr,D scale*cx,D scale*cy,exprString text,D size, font, textAnchor, rot, fillcolor,strokecolor)
 
+/// Creates SVG output files for a generation context.
 type ContextSvgFile internal (context:Aqualis) =
     
     /// <summary>
@@ -1066,7 +1103,9 @@ type ContextSvgFile internal (context:Aqualis) =
                 code sv
 
 [<AutoOpen>]
+/// Adds SVG output to Aqualis.
 module CompilationEnvironmentGenSvgExtensions =
+    /// SVG output helpers exposed through a generation context.
     type svgfile =
         
         /// <summary>

@@ -9,14 +9,18 @@ namespace Aqualis
     open System
     
     [<AutoOpen>]
+    /// Simplification helpers for expression trees.
     module exprSimp =
+        /// Reports an invalid expression operation.
         let private reportExpressionError code message operation =
             Diagnostic.report code Error message (Some(Expression operation)) Map.empty
 
+        /// Checks whether an expression uses truncating division.
         let private isTruncatingDivision = function
             |Div(It _,_,_) -> true
             |_ -> false
 
+        /// Preserves the expected type of a simplified result.
         let private preserveNumericType resultType result =
             match resultType,result with
             |Dt,Int value -> Dbl(double value)
@@ -24,12 +28,14 @@ namespace Aqualis
             |Zt,Dbl value -> Cpx(value,0.0)
             |_ -> result
 
+        /// Checks whether a literal has a finite value.
         let private isFiniteLiteral = function
             |Int _ -> true
             |Dbl value -> Double.IsFinite value
             |Cpx(real,imaginary) -> Double.IsFinite real && Double.IsFinite imaginary
             |_ -> false
 
+        /// Extracts a real value from a numeric literal.
         let private realLiteralValue = function
             |Int value -> Some(double value)
             |Dbl value -> Some value
@@ -37,12 +43,14 @@ namespace Aqualis
             |Inv(_,Dbl value) -> Some(-value)
             |_ -> None
 
+        /// Applies a complex operation to a real literal.
         let private complexRealLiteral (operation:System.Numerics.Complex -> System.Numerics.Complex) (expression:expr) =
             realLiteralValue expression
             |> Option.map (fun real ->
                 let result = operation (System.Numerics.Complex(real,0.0))
                 Cpx(result.Real,result.Imaginary))
 
+        /// Divides two complex literal values.
         let private divideComplexLiterals xre xim yre yim =
             let numeratorScale = max (abs xre) (abs xim)
             let denominatorScale = max (abs yre) (abs yim)
@@ -59,6 +67,7 @@ namespace Aqualis
 
         type expr with
             
+            /// Simplifies negation for literal or symbolic operands.
             static member simpInv(x:expr) =
                 match x with
                 |Int v -> Int -v
@@ -68,6 +77,7 @@ namespace Aqualis
                 |Sub(_,a,b) -> expr.simpSub(b,a)
                 |_ -> Inv(x.etype,x)
                 
+            /// Simplifies addition for literal or symbolic operands.
             static member simpAdd(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0|_,Dbl 0.0|_,Cpx(0.0,0.0) -> x
@@ -144,6 +154,7 @@ namespace Aqualis
                 |_ ->
                     Add(x%%y, x, y)
                 
+            /// Simplifies subtraction for literal or symbolic operands.
             static member simpSub(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0|_,Dbl 0.0 -> x
@@ -215,6 +226,7 @@ namespace Aqualis
                     |_ -> Sub(x%%y,x,y)
                 |_ -> Sub(x%%y, x, y)
                 
+            /// Simplifies multiplication for literal or symbolic operands.
             static member simpMul(x:expr,y:expr) =
                 match x,y with
                 |(Int 0|Dbl 0.0|Cpx(0.0,0.0)),other when other.etype=It 4 || isFiniteLiteral other -> Int 0
@@ -279,6 +291,7 @@ namespace Aqualis
                     |_ -> Mul(x%%y,x,y)
                 |_ -> Mul(x%%y,x,y)
                 
+            /// Simplifies division for literal or symbolic operands.
             static member simpDiv(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0 |_,Dbl 0.0 |_,Cpx (0.0,0.0) ->
@@ -350,6 +363,7 @@ namespace Aqualis
                     |_ -> Div(Dt%%x%%y,x,y)
                 |_ -> Div(Dt%%x%%y,x,y)
                 
+            /// Simplifies truncating integer division for literal or symbolic operands.
             static member simpIntDiv(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0 -> 
@@ -364,6 +378,7 @@ namespace Aqualis
                 |Mul(_,v2,Int u2),Int v1 when u2%v1=0 -> (v2*Int(u2/v1)).simp
                 |_ -> Div(It 4,x,y)
                 
+            /// Simplifies remainder for literal or symbolic operands.
             static member simpMod(x:expr,y:expr) =
                 match x,y with
                 |_,Int 0 -> 
@@ -373,6 +388,7 @@ namespace Aqualis
                 |Int v1,Int v2 -> Int(v1 % v2)
                 |_ -> Mod(It 4, x,y)
                 
+            /// Simplifies power for literal or symbolic operands.
             static member simpPow(x:expr,y:expr) =
                 match x,y with
                 |(Int 0|Dbl 0.0),(Int 0|Dbl 0.0) -> 
@@ -400,6 +416,7 @@ namespace Aqualis
                 |_,(Int 0|Dbl 0.0) -> Int 1
                 |_ -> Pow(x%%y.etype,x,y)
                 
+            /// Simplifies exponential for literal or symbolic operands.
             static member simpExp(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpExp(Int -x)
@@ -412,6 +429,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpExp(ToDbl x)
                 |_ -> Exp(x.etype,x)
                     
+            /// Simplifies sine for literal or symbolic operands.
             static member simpSin(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpSin(Int -x)
@@ -424,6 +442,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpSin(ToDbl x)
                 |_ -> Sin(x.etype,x)
                     
+            /// Simplifies cosine for literal or symbolic operands.
             static member simpCos(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpCos(Int -x)
@@ -436,6 +455,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpCos(ToDbl x)
                 |_ -> Cos(x.etype,x)
                     
+            /// Simplifies tangent for literal or symbolic operands.
             static member simpTan(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpTan(Int -x)
@@ -448,6 +468,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpTan(ToDbl x)
                 |_ -> Tan(x.etype,x)
                     
+            /// Simplifies inverse sine for literal or symbolic operands.
             static member simpAsin(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpAsin(Int -x)
@@ -460,6 +481,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpAsin(ToDbl x)
                 |_ -> Asin(x.etype,x)
                 
+            /// Simplifies inverse cosine for literal or symbolic operands.
             static member simpAcos(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpAcos(Int -x)
@@ -472,6 +494,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpAcos(ToDbl x)
                 |_ -> Acos(x.etype,x)
                 
+            /// Simplifies inverse tangent for literal or symbolic operands.
             static member simpAtan(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpAtan(Int -x)
@@ -488,6 +511,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpAtan(ToDbl x)
                 |_ -> Atan(x.etype,x)
                 
+            /// Simplifies two-argument inverse tangent for literal or symbolic operands.
             static member simpAtan2(x:expr,y:expr) =
                 match x,y with
                 |Inv(_,Int x),_ -> expr.simpAtan2(Int -x,y)
@@ -505,6 +529,7 @@ namespace Aqualis
                 |_ when y.etype=It 4 -> expr.simpAtan2(x, ToDbl y)
                 |_ -> Atan2(x,y)
                 
+            /// Simplifies absolute value for literal or symbolic operands.
             static member simpAbs(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpAbs(Int -x)
@@ -515,6 +540,7 @@ namespace Aqualis
                     Dbl (System.Numerics.Complex.Abs(System.Numerics.Complex(re, im)))
                 |_ -> Abs(Dt,x)
                 
+            /// Simplifies natural logarithm for literal or symbolic operands.
             static member simpLog(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpLog(Int -x)
@@ -526,6 +552,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpLog(ToDbl x)
                 |_ -> Log(x.etype,x)
                 
+            /// Simplifies base-10 logarithm for literal or symbolic operands.
             static member simpLog10(x:expr) =
                 match x with
                 |Inv(_,Int x) -> expr.simpLog10(Int -x)
@@ -537,6 +564,7 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpLog10(ToDbl x)
                 |_ -> Log10(x.etype,x)
                 
+            /// Simplifies square root for literal or symbolic operands.
             static member simpSqrt(x:expr) =
                 match x with
                 |Int x ->
@@ -557,30 +585,35 @@ namespace Aqualis
                 |_ when x.etype=It 4 -> expr.simpSqrt(ToDbl x)
                 |_ -> Sqrt(x.etype,x)
                 
+            /// Simplifies integer conversion for literal or symbolic operands.
             static member simpToInt(x:expr) =
                 match x with
                 |Int x -> Int x
                 |Dbl x -> Int (int x)
                 |_ -> ToInt x
                 
+            /// Simplifies double-precision conversion for literal or symbolic operands.
             static member simpToDbl(x:expr) =
                 match x with
                 |Int x -> Dbl (double x)
                 |Dbl x -> Dbl x
                 |_ -> ToDbl x
                 
+            /// Simplifies floor for literal or symbolic operands.
             static member simpFloor(x:expr) =
                 match x with
                 |Int x -> Dbl (double x)
                 |Dbl x -> Dbl (floor x)
                 |_ -> Floor x
                 
+            /// Simplifies ceiling for literal or symbolic operands.
             static member simpCeil(x:expr) =
                 match x with
                 |Int x -> Dbl (double x)
                 |Dbl x -> Dbl (ceil x)
                 |_ -> Ceil x
                 
+            /// Simplifies real part for literal or symbolic operands.
             static member simpRe(x:expr) =
                 match x with
                 |Cpx (xre,_) -> if xre<0.0 then Inv(Dt,Dbl -xre) else Dbl xre
@@ -590,6 +623,7 @@ namespace Aqualis
                 |_ when x.etype<>Zt -> x
                 |_ -> Re x
                 
+            /// Simplifies imaginary part for literal or symbolic operands.
             static member simpIm(x:expr) =
                 match x with
                 |Cpx (_,xim) -> if xim<0.0 then Inv(Dt,Dbl -xim) else Dbl xim
@@ -598,6 +632,7 @@ namespace Aqualis
                 |_ when x.etype<>Zt -> Dbl 0.0
                 |_ -> Im x
                 
+            /// Simplifies complex conjugation for literal or symbolic operands.
             static member simpConj(x:expr) =
                 match x with
                 |Cpx (xre,xim) -> Cpx (xre,-xim)
@@ -606,6 +641,7 @@ namespace Aqualis
                 |_ when x.etype<>Zt -> x
                 |_ -> Conj x
                 
+            /// Simplifies equality comparison for literal or symbolic operands.
             static member simpEq(x:expr,y:expr) =
                 match x,y with
                 |Int x,Int y when x=y -> True
@@ -616,6 +652,7 @@ namespace Aqualis
                 |Cpx (xre,xim),Cpx (yre,yim) -> False
                 |_ -> Eq(x,y)
                 
+            /// Simplifies inequality comparison for literal or symbolic operands.
             static member simpNotEq(x:expr,y:expr) =
                 match x,y with
                 |Int x,Int y when x=y -> False
@@ -626,6 +663,7 @@ namespace Aqualis
                 |Cpx (xre,xim),Cpx (yre,yim) -> True
                 |_ -> NEq(x,y)
                 
+            /// Simplifies less-than comparison for literal or symbolic operands.
             static member simpLess(x:expr,y:expr) =
                 match x,y with
                 |Int x,Int y when x < y -> True
@@ -638,6 +676,7 @@ namespace Aqualis
                 |Dbl x,Int y -> False
                 |_ -> Less(x,y)
                 
+            /// Simplifies less-than-or-equal comparison for literal or symbolic operands.
             static member simpLessEq(x:expr,y:expr) =
                 match x,y with
                 |Int x,Int y when x <= y -> True
@@ -650,6 +689,7 @@ namespace Aqualis
                 |Dbl x,Int y -> False
                 |_ -> LessEq(x,y)
                 
+            /// Simplifies greater-than comparison for literal or symbolic operands.
             static member simpGreater(x:expr,y:expr) =
                 match x,y with
                 |Int x,Int y when x > y -> True
@@ -662,6 +702,7 @@ namespace Aqualis
                 |Dbl x,Int y -> False
                 |_ -> Greater(x,y)
                 
+            /// Simplifies greater-than-or-equal comparison for literal or symbolic operands.
             static member simpGreaterEq(x:expr,y:expr) =
                 match x,y with
                 |Int x,Int y when x >= y -> True
@@ -674,6 +715,7 @@ namespace Aqualis
                 |Dbl x,Int y -> False
                 |_ -> GreaterEq(x,y)
                 
+            /// Simplifies Boolean conjunction for literal or symbolic operands.
             static member simpAND(x:list<expr>) = 
                 let expressions = x |> List.map (fun s -> s.simp)
                 if expressions |> List.exists (function |False -> true |_ -> false) then
@@ -683,6 +725,7 @@ namespace Aqualis
                     |[] -> True
                     |remaining -> AND remaining
 
+            /// Simplifies Boolean disjunction for literal or symbolic operands.
             static member simpOR(x:list<expr>) = 
                 let expressions = x |> List.map (fun s -> s.simp)
                 if expressions |> List.exists (function |True -> true |_ -> false) then
@@ -692,6 +735,7 @@ namespace Aqualis
                     |[] -> False
                     |remaining -> OR remaining
                 
+            /// Gets a recursively simplified form of this expression.
             member this.simp with get() =
                 match this with
                 |Int n when n < 0 && n <> Int32.MinValue ->

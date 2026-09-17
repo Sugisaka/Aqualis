@@ -7,24 +7,30 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Expression output operations for JavaScript.
     module exprEvalJ =
 
         open System
 
+        /// Reports an unsupported JavaScript generation operation.
         let private notSupported operation : 'T =
             UnsupportedOperation.codeGeneration "JavaScript" operation
 
         type expr with
 
+            /// Emits an assignment for JavaScript.
             static member substJ (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalJ c  + " = " + y.evalJ c + ";")
 
+            /// Reports that equation display is unsupported for this target language.
             static member equivJ (_:expr) (_:expr) (_:Aqualis) =
                 notSupported "equation display"
 
+            /// Reports that aligned equation display is unsupported for this target language.
             static member equivAlignJ (_:expr) (_:expr) (_:Aqualis) =
                 notSupported "aligned equation display"
 
+            /// Emits a counted loop for JavaScript.
             static member forLoopJ (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -39,7 +45,7 @@ namespace Aqualis
                 c.codewritein "}"
                 returnVar()
 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for JavaScript.
             static member loopJ (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -55,7 +61,7 @@ namespace Aqualis
                 c.codewritein "}"
                 returnVar()
 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for JavaScript.
             static member whiledoJ (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("while(" + cond.evalJ c + ")")
                 c.codewritein "{"
@@ -64,7 +70,7 @@ namespace Aqualis
                 c.indentDec()
                 c.codewritein "}"
 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for JavaScript.
             static member rangeJ (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -85,7 +91,7 @@ namespace Aqualis
                     c.codewritein "}"
                     returnVar()
 
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for JavaScript.
             static member range_exitJ (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -108,6 +114,7 @@ namespace Aqualis
                     c.codewritein "}"
                     returnVar()
 
+            /// Emits a branch callback for JavaScript.
             static member branchJ (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalJ c
@@ -134,6 +141,7 @@ namespace Aqualis
                     c.codewritein "}"
                 code(ifcode,elseifcode,elsecode)
 
+            /// Renders an expression for JavaScript.
             member this.evalJ(c:Aqualis) =
                 match this.simp with
                 |False -> "false"

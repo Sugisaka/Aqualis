@@ -14,7 +14,9 @@ type HttpFailureStatus =
     | ServiceUnavailable
 
 [<RequireQualifiedAccess>]
+/// Maps failure statuses to HTTP response codes.
 module private HttpFailureStatusCode =
+    /// Maps an HTTP failure status to its numeric code.
     let value = function
         | BadRequest -> 400
         | Forbidden -> 403
@@ -45,6 +47,7 @@ type PhpResponse internal (context:Aqualis) =
         this.Require(accepted,status,publicMessage,?logMessage=logMessage)
 
 [<AutoOpen>]
+/// Adds terminal HTTP response generation to generation contexts.
 module ResponseExtensions =
     type Aqualis with
         /// Terminal HTTP response generation associated with this context.

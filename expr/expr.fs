@@ -8,55 +8,105 @@ namespace Aqualis
     
     open System
     
+    /// Symbolic expression tree used for code generation, simplification,
+    /// differentiation, and direct evaluation.
     type expr =
+        /// Boolean false literal.
         |False
+        /// Boolean true literal.
         |True
+        /// Equality comparison.
         |Eq of expr*expr
+        /// Inequality comparison.
         |NEq of expr*expr
+        /// Strict greater-than comparison.
         |Greater of expr*expr
+        /// Greater-than-or-equal comparison.
         |GreaterEq of expr*expr
+        /// Strict less-than comparison.
         |Less of expr*expr
+        /// Less-than-or-equal comparison.
         |LessEq of expr*expr
+        /// Conjunction of expressions.
         |AND of expr list
+        /// Disjunction of expressions.
         |OR of expr list
+        /// Integer literal.
         |Int of int
+        /// Double-precision real literal.
         |Dbl of double
+        /// Complex literal stored as real and imaginary parts.
         |Cpx of double*double
+        /// Named variable with element type and associated value expression.
         |Var of Etype*string*expr
+        /// Unary negation.
         |Inv of Etype*expr
+        /// Addition with its result type.
         |Add of Etype*expr*expr
+        /// Subtraction with its result type.
         |Sub of Etype*expr*expr
+        /// Multiplication with its result type.
         |Mul of Etype*expr*expr
+        /// Division with its result type.
         |Div of Etype*expr*expr
+        /// Remainder with its result type.
         |Mod of Etype*expr*expr
+        /// Exponentiation with its result type.
         |Pow of Etype*expr*expr
+        /// Exponential function.
         |Exp of Etype*expr
+        /// Sine function.
         |Sin of Etype*expr
+        /// Cosine function.
         |Cos of Etype*expr
+        /// Tangent function.
         |Tan of Etype*expr
+        /// Inverse sine function.
         |Asin of Etype*expr
+        /// Inverse cosine function.
         |Acos of Etype*expr
+        /// Inverse tangent function.
         |Atan of Etype*expr
+        /// Two-argument inverse tangent.
         |Atan2 of expr*expr
+        /// Absolute value or complex magnitude.
         |Abs of Etype*expr
+        /// Natural logarithm.
         |Log of Etype*expr
+        /// Base-10 logarithm.
         |Log10 of Etype*expr
+        /// Square root.
         |Sqrt of Etype*expr
+        /// Conversion to an integer.
         |ToInt of expr
+        /// Conversion to a double-precision real value.
         |ToDbl of expr
+        /// Floor of an expression.
         |Floor of expr
+        /// Ceiling of an expression.
         |Ceil of expr
+        /// Real component of a complex expression.
         |Re of expr
+        /// Imaginary component of a complex expression.
         |Im of expr
+        /// Complex conjugate.
         |Conj of expr
+        /// One-dimensional array element.
         |Idx1 of Etype*string*expr
+        /// Two-dimensional array element.
         |Idx2 of Etype*string*expr*expr
+        /// Three-dimensional array element.
         |Idx3 of Etype*string*expr*expr*expr
+        /// Local binding represented by its type, value, variable, and body builder.
         |Let of Etype*expr*expr*(expr->expr)
+        /// Conditional expression with true and false branches.
         |IfEl of expr*expr*expr
+        /// Symbolic sum over a range with a body builder.
         |Sum of Etype*expr*expr*(expr->expr)
+        /// Unavailable or undefined expression.
         |NaN
         
+        /// Gets the element type of the expression, promoting conditional branches.
         member this.etype with get() =
             match this with
             |False -> Bt
@@ -107,16 +157,27 @@ namespace Aqualis
             |IfEl (_,a,b) -> a.etype%%b.etype
             |NaN -> Nt
             
+        /// Promotes the element types of two expressions.
         static member ( %% ) (x:expr,y:expr) = x.etype%%y.etype
+        /// Promotes an element type with the type of an expression.
         static member ( %% ) (x:Etype,y:expr) = x%%y.etype
+        /// Promotes the type of an expression with an element type.
         static member ( %% ) (x:expr,y:Etype) = x.etype%%y
         
+        /// Builds an addition expression with a promoted result type.
         static member ( + ) (x:expr,y:expr) = Add(x%%y,x,y)
+        /// Builds a subtraction expression with a promoted result type.
         static member ( - ) (x:expr,y:expr) = Sub(x%%y,x,y)
+        /// Builds a multiplication expression with a promoted result type.
         static member ( * ) (x:expr,y:expr) = Mul(x%%y,x,y)
+        /// Builds floating-point division, promoting the result to at least double precision.
         static member ( / ) (x:expr,y:expr) = Div(Dt%%x%%y,x,y)
+        /// Builds integer division without promoting the result type.
         static member ( ./ ) (x:expr,y:expr) = Div(It 4,x,y)
+        /// Builds unary negation.
         static member ( ~- ) (x:expr) = Inv(x.etype,x)
+        /// Compares supported expression forms structurally, treating addition
+        /// and multiplication as commutative.
         static member internal equal(x:expr,y:expr) =
             match x,y with
             |Var(t1,u1,_),Var(t2,u2,_) when t1=t2 && u1=u2 -> true
@@ -153,6 +214,7 @@ namespace Aqualis
             |NaN,NaN -> true
             |_ -> false
             
+        /// Returns a readable recursive representation of the expression tree.
         override this.ToString() =
             let rec str (xx:expr,indent:int) =
                 let indentStep = 0

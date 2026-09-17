@@ -11,18 +11,24 @@ open System.IO
 open System.Text.Json
 open System.Text.Encodings.Web
 
+/// Pairs subtitle text with its spoken rendering.
 type Serif(subtitle:string,hatsuon:string) =
     new(subtitle:string) = Serif(subtitle,subtitle)
     new(subtitle:int0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
     new(subtitle:double0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
     new(subtitle:complex0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
     new(subtitle:bool0) = Serif("\\("+subtitle.Expr.eval subtitle.Context+"\\)",subtitle.Expr.evalT())
+    /// Gets text shown in subtitles.
     member _.Subtitle with get() = subtitle
+    /// Gets text passed to speech synthesis.
     member _.Hatsuon with get() = hatsuon
+    /// Concatenates subtitle and spoken text independently.
     static member (+) (a:Serif,b:Serif) = Serif(a.Subtitle+b.Subtitle,a.Hatsuon+b.Hatsuon)
 
+/// Image file and CSS style for a character.
 type CharacterImage = {CharacterImageFile:string; CharacterImageStyle:string}
 
+/// Horizontal alignment for presentation elements.
 type Align = |Center |Left
 
 /// 解説音声の設定
@@ -34,10 +40,13 @@ type Speak =
     /// 音声ファイルがあるディレクトリ指定
     |AudioDir of string
 
+/// Subtitle, narration text, and optional audio file identifiers.
 type Audio = {Subtitle:string; Script:string; AudioFileNumber:option<int>; AudioSourceNumber:option<int>}
 
+/// View box coordinates and background color for a presentation.
 type ViewBoxStyle = {sX:int; sY:int; mX:int; mY:int; backgroundColor:string}
 
+/// Animation frame duration and frame count.
 type AnimationSetting = {
     /// 1フレームの時間(ms)
     FrameTime:int;
@@ -45,7 +54,9 @@ type AnimationSetting = {
     FrameNumber:int}
 
 [<RequireQualifiedAccess>]
+/// Stages and publishes generated character script files.
 module private CharacterOutputFile =
+    /// Writes content to a staged character-script file.
     let private stage (targetPath:string) (write:string -> unit) =
         let output = AtomicOutputFile.create targetPath
         try
@@ -55,15 +66,18 @@ module private CharacterOutputFile =
             AtomicOutputFile.discard output
             reraise()
 
+    /// Stages a text file for atomic publication.
     let stageText (targetPath:string) (text:string) =
         stage targetPath (fun stagingPath -> File.WriteAllText(stagingPath, text))
 
+    /// Stages a line-oriented file for atomic publication.
     let stageLines (targetPath:string) (lines:string list) =
         stage targetPath (fun stagingPath ->
             use writer = new StreamWriter(stagingPath, false)
             lines |> List.iter writer.WriteLine)
 
 [<AbstractClass>]
+/// Stores a presentation character and its narration scripts.
 type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
     let name =
         if isNull name then nullArg "name"
@@ -87,10 +101,15 @@ type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
         serif
         |> List.map (fun audio -> match audio.AudioFileNumber with |None -> -1 |Some m -> m)
         |> fun s -> match s with |[] -> -1 |_ -> List.max s
+    /// Gets the validated character name.
     member _.Name with get() = name
+    /// Resolves an audio file for a narration entry, if one exists.
     abstract member audioFile:Audio->option<string>
+    /// Gets the output path for a numbered narration script.
     abstract member scriptFile:int->string
+    /// Gets the color used to display the character script.
     abstract member scriptColor:string
+    /// Stages and publishes the character script JSON and new narration scripts.
     member this.saveScriptData() =
         match serif with
         |[] ->
@@ -120,6 +139,7 @@ type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
             with _ ->
                 stagedOutputs |> Seq.iter AtomicOutputFile.discard
                 reraise()
+    /// Finds or records a narration entry and returns its audio file and display color.
     member this.script(subtitle:string,script:string) =
         match serif |> List.tryFind (fun a -> a.Subtitle=subtitle && a.Script=script) with
         |None ->
@@ -129,11 +149,16 @@ type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
             a, this.audioFile a, this.scriptColor
         |Some x ->
             x, this.audioFile x, this.scriptColor
+    /// Converts expression text into subtitle and spoken text for a narration entry.
     member this.script(text:exprString) =
         let subtitle = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+"\\("+x.evalH context.BodyContext+"\\)") ""
         let script = text.data |> List.fold (fun acc a -> match a with |RStr x -> acc+x |RNvr (x,_) -> acc+x.evalT()) ""
         this.script(subtitle,script)
+    /// Converts expression text into subtitle and spoken text for a narration entry.
     member this.script(text:string) = this.script (exprString text)
+    /// Converts expression text into subtitle and spoken text for a narration entry.
     member this.script(text:int0) = this.script (exprString text)
+    /// Converts expression text into subtitle and spoken text for a narration entry.
     member this.script(text:double0) = this.script (exprString text)
+    /// Converts expression text into subtitle and spoken text for a narration entry.
     member this.script(text:complex0) = this.script (exprString text)

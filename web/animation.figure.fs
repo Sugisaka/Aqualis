@@ -10,12 +10,15 @@ open System
 open System.IO
 open System.Text.Json
 
+/// Draws animated primitives inside a figure canvas.
 type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,originY:int,canvasX:int,canvasY:int) =
     let padding = 10.0
     /// アニメーションの実行順序リスト
     let mutable animeFlow:list<string*string*AnimationSetting*bool> = []
     let mutable counter = 0
+    /// Gets the padding applied around the animation canvas.
     member _.Padding with get() = padding
+    /// Gets the generated identifier for the current figure animation.
     member _.id with get() = "fa"+InvariantFormat.integer figcounter+"_"+InvariantFormat.integer counter
     /// <summary>
     /// アニメーションの実行順序を返す
@@ -56,9 +59,13 @@ type FigureAnimation(context:HtmlGenerationContext,figcounter:int,originX:int,or
     /// </summary>
     /// <param name="s">アニメーション設定</param>
     member this.animationEllipse s = AnimationEllipse(context,s,canvasX,canvasY)
+    /// Creates an animated line with the supplied style.
     member this.animationLine s = AnimationLine(context,s,canvasX,canvasY)
+    /// Creates an animated arc with the supplied style.
     member this.animationArc s = AnimationArc(context,s,canvasX,canvasY)
+    /// Creates animated text with the supplied style.
     member this.animationText s = AnimationText(context,s,originX,originY,canvasX,canvasY)
+    /// Creates an animated polygon with the supplied style.
     member this.animationPolygon s = AnimationPolygon(context,s,canvasX,canvasY)
     /// <summary>
     /// 直線を描画

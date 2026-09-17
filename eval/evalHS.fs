@@ -9,25 +9,45 @@ namespace Aqualis
     open System
     
     [<RequireQualifiedAccess>]
+    /// Layout constants and helpers for generated sequence diagrams.
     module SequenceDiagramContext =
+        /// Top margin of a sequence diagram.
         let topMargin = 40.0
+        /// Left margin of a sequence diagram.
         let leftMargin = 40.0
+        /// Horizontal spacing between lifelines.
         let variableInterval = 150.0
+        /// Length of a single-message arrow.
         let singleArrowLength = 37.5
+        /// Width of a lifeline header.
         let varHeaderWidth = 50.0
+        /// Height of a lifeline header.
         let varHeaderHeight = 20.0
+        /// Width of ordinary diagram lines.
         let lineWidth = 2.0
+        /// Width of active lifeline segments.
         let activeLineWidth = 10.0
+        /// Spacing around diagram frames.
         let frameMargin = 10.0
+        /// Vertical spacing per sequence step.
         let timeStep = 10.0
+        /// Width of frame borders.
         let frameBorder = 2.0
+        /// Color of active lifeline segments.
         let activeLineColor = "rgba(0, 191, 255, 0.5)"
+        /// Color of loop frames.
         let loopFrameColor = "rgb(255, 0, 0)"
+        /// Color of branch frames.
         let branchFrameColor = "rgb(0, 180, 0)"
+        /// Color of section frames.
         let sectionFrameColor = "rgb(127,0,255)"
+        /// Default lifeline height.
         let lifeLine = 100.0 
+        /// Computes the horizontal coordinate of a lifeline.
         let lifeLineX (n:int) = leftMargin + varHeaderWidth / 2.0 + float n * variableInterval
+        /// Origin position for the diagram.
         let p0 = position.Origin
+        /// Style used for lifeline headers.
         let styleVarHead =
             Style[
                 font.size 12;
@@ -40,6 +60,7 @@ namespace Aqualis
                 {Key="text-align"; Value="center"}]
                 
     [<AutoOpen>]
+    /// Expression output operations for HTML sequence diagrams.
     module exprEvalHS =
 
         type expr with
@@ -102,6 +123,7 @@ namespace Aqualis
                     |_ -> lst
                 makeList e []
 
+            /// Draws a figure at the specified position.
             static member fig (c:Aqualis) (p:position) code =
                 html(c).fig p code
 
@@ -128,6 +150,7 @@ namespace Aqualis
                         <| position(x2, y)
 
             //基準線
+            /// Draws a vertical line in the sequence diagram.
             static member drawVerticalLine(c:Aqualis,x:float,y1:float,y2:float) =
                 html(c).fig SequenceDiagramContext.p0 <| fun (f,p) ->
                     //基準線(縦線)：代入元の1番目から代入先まで(y軸)
@@ -333,13 +356,16 @@ namespace Aqualis
                     //実行線の下辺からさらにtimeStep分延ばす
                     c.TerminalLifeLine <- c.TerminalLifeLine+SequenceDiagramContext.timeStep*float(start.Length+goal.Length+2)
 
+            /// Emits an equation display for HTML sequence diagrams.
             static member equivHS (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalHS c  + " = " + y.evalHS c)
 
+            /// Emits an aligned equation display for HTML sequence diagrams.
             static member equivAlignHS (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalHS c  + " =& " + y.evalHS c)
 
             //破線(実行線や枠との(y座標の)隙間をつくるため)
+            /// Extends sequence-diagram lifelines by the specified gap.
             static member extendLifeLine(c:Aqualis) (gap:float) =
                 //存在する変数すべてに破線を引く
                 for _,number,_ in c.SequenceVariables do
@@ -348,6 +374,7 @@ namespace Aqualis
                 c.TerminalLifeLine <- c.TerminalLifeLine + gap
 
             //色線(枠用)
+            /// Draws a colored line between two points.
             static member colorLine(c:Aqualis,x1:float,y1:float,x2:float,y2:float,color:string) =
                 html(c).fig SequenceDiagramContext.p0 <| fun (f,_) ->
                     f.line Style[stroke.color color; stroke.width (SequenceDiagramContext.frameBorder)]
@@ -355,6 +382,7 @@ namespace Aqualis
                         <| position(x2,y2)
 
             //ループの枠
+            /// Draws a colored rectangular frame.
             static member rectangle(c:Aqualis,startPoint_x:float,startPoint_y:float,endPoint_x:float,endPoint_y:float,color:string) =
                 //上辺:左上から右上
                 expr.colorLine(c,startPoint_x,startPoint_y,endPoint_x,startPoint_y,color)
@@ -365,6 +393,7 @@ namespace Aqualis
                 //左辺:左下から左上
                 expr.colorLine(c,startPoint_x,endPoint_y,startPoint_x,startPoint_y,color)
 
+            /// Groups a labeled section of sequence-diagram output.
             static member sectionHS (c:Aqualis,label:string) = fun code ->
                 //上に20.0破線のスペースを作る
                 expr.extendLifeLine c 20.0
@@ -387,6 +416,7 @@ namespace Aqualis
                 |> List.map (fun (xmin,xmax,ymin,ymax) -> xmin,xmax,ymin,ymax+SequenceDiagramContext.frameMargin)
                 |> (fun u -> c.FrameStack <- u)
 
+            /// Emits a counted loop for HTML sequence diagrams.
             static member forLoopHS (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -400,7 +430,7 @@ namespace Aqualis
                 c.codewritein "</div>"
                 returnVar()
 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for HTML sequence diagrams.
             static member loopHS (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -417,7 +447,7 @@ namespace Aqualis
                 c.codewritein("<span class=\"continue\"><span id=\"" + HtmlEncoding.attributeValue label + "\">" + label + " continue</span></span>\n<br>")
                 returnVar()
 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for HTML sequence diagrams.
             static member whiledoHS (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("<summary><span class=\"op-loop\">while</span> \\(" + cond.evalHS c + "\\)</summary>")
                 c.codewritein "<div class=\"insidecode-loop\">"
@@ -426,7 +456,7 @@ namespace Aqualis
                 c.indentDec()
                 c.codewritein "</div>"
 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for HTML sequence diagrams.
             static member rangeHS (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 //カウンター変数の取得
                 let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -460,7 +490,7 @@ namespace Aqualis
                 // 使用済みカウンタ変数を返却し再利用可能にする
                 returnVar()
 
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for HTML sequence diagrams.
             static member range_exitHS (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b ->
@@ -492,6 +522,7 @@ namespace Aqualis
                     c.codewritein(label+" continue")
                     returnVar()
 
+            /// Emits a branch callback for HTML sequence diagrams.
             static member branchHS (c:Aqualis) code =
                 //新しい分岐処理枠を追加
                 c.SequenceBranches <- []::c.SequenceBranches
@@ -547,6 +578,7 @@ namespace Aqualis
                 //先頭の分岐処理枠を削除
                 c.SequenceBranches <- c.SequenceBranches.Tail
 
+            /// Renders an expression for HTML sequence diagrams.
             member this.evalHS(c:Aqualis) =
                 let par (s:string) (pl:int) =
                     match pl%3 with

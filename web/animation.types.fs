@@ -10,82 +10,89 @@ open System
 open System.IO
 open System.Text.Json
 
+/// Frame interval used by animation playback.
 type AnimationType =
+    /// Repeating interval between two frame indices.
     |Loop of int*int
+    /// Finite interval between two frame indices.
     |Range of int*int
 
-    /// キャラクター表示
-    /// 字幕表示
-    /// 音声再生
-
+/// Position whose coordinates depend on the current animation frame.
 type tposition = {
-    /// x座標：時間（フレーム番号）の関数
+    /// Horizontal coordinate as a function of frame number.
     X:double0->double0;
-    /// y座標：時間（フレーム番号）の関数
+    /// Vertical coordinate as a function of frame number.
     Y:double0->double0}
 
+/// Animated line segment defined by two time-dependent endpoints.
 type Line = {
-    /// 始点
+    /// Starting point.
     Start:tposition;
-    /// 終点
+    /// Ending point.
     End:tposition;}
 
+/// Animated ellipse with time-dependent center and radii.
 type Ellipse = {
-    /// 中心座標
+    /// Center position.
     center:tposition;
-    /// 半径(x)
+    /// Horizontal radius as a function of frame number.
     radiusX:double0->double0;
-    /// 半径(y)
+    /// Vertical radius as a function of frame number.
     radiusY:double0->double0;}
 
+/// Animated circular arc with angles measured in degrees.
 type Arc = {
-    /// 円弧の中心座標
+    /// Center position.
     center:tposition;
-    /// 開始角（度数法, 反時計回りに描画）
+    /// Starting angle in degrees, measured counterclockwise.
     angle1:double0->double0;
-    /// 終了角（度数法, 反時計回りに描画）
+    /// Ending angle in degrees, measured counterclockwise.
     angle2:double0->double0;
-    /// 円弧の半径
+    /// Radius as a function of frame number.
     radius:double0->double0;}
 
+/// Animated text at a time-dependent position.
 type Text = {
-    /// 中心座標
+    /// Center position.
     center:tposition;
-    /// 表示するテキスト
+    /// Text to display.
     str:string; }
 
+/// Animated mathematical expression at a time-dependent position.
 type MathText<'a when 'a :> INum0> = {
-    /// 中心座標
+    /// Center position.
     center:tposition;
-    /// 表示する数式
+    /// Expression to display.
     eq:'a; }
 
 [<AutoOpen>]
+/// Adds HTML helpers to an animation generation context.
 module HtmlGenerationExtensions1 =
+    /// Owns the contexts and assets for an HTML presentation.
     type HtmlGenerationContext with
         
+        /// Gets the HTML writer for this animation's body context.
         member this.html = html this.BodyContext
 
+/// Renders numeric expressions used by animation primitives.
 module private AnimationRendering =
+    /// Selects the generation context for animation output.
     let private target (context:Aqualis) (value:INum0) =
         Aqualis.merge context value.Context |> ignore
         context
 
+    /// Renders a numeric expression for animation output.
     let render (context:Aqualis) (value:INum0) =
         value.Expr.eval (target context value)
 
+    /// Renders a double-precision expression for animation output.
     let renderDouble context (value:double0) =
         render context (value :> INum0)
 
+    /// Wraps a numeric expression for inline MathJax.
     let inlineMath context (value:INum0) =
         "\\(" + render context value + "\\)"
 
+    /// Gets the animation time expression.
     let time (context:Aqualis) =
         double0(Var(Dt,"t",NaN), context)
-
-/// <summary>
-/// 線分アニメーションを生成するクラス
-/// </summary>
-/// <param name="s">線の太さ、色を定義するスタイル情報</param>
-/// <param name="canvasX">描画領域の横幅</param>
-/// <param name="canvasY">描画領域の縦幅</param>

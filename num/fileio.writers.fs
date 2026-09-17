@@ -8,10 +8,12 @@ namespace Aqualis
 
     open System
 
+    /// Writes formatted values to a generated file.
     type TextWriter internal (ctx:Aqualis,fp:string) =
         // let context() = ctx.RequireGenerationContext()
         // let program() = (context()).CurrentProgram
         let writein text = ctx.codewritein(text + "\n")
+        /// Writes a formatted text record containing literal and numeric segments.
         member _.tt (lst:exprString) =
             match ctx.language with
             |Fortran ->
@@ -180,13 +182,20 @@ namespace Aqualis
                         ")\n")
             |_ -> ()
 
+        /// Writes the supplied value as a formatted text record.
         member this.t (x:string) = this.tt (st x)
+        /// Writes the supplied value as a formatted text record.
         member this.t (x:int0) = this.tt (iv x)
+        /// Writes the supplied value as a formatted text record.
         member this.t (x:double0) = this.tt (dv x)
+        /// Writes the supplied value as a formatted text record.
         member this.t (x:complex0) = this.tt (zv x)
+        /// Writes the supplied value as a formatted text record.
         member this.t (x:int) = this.tt (iv (I x))
+        /// Writes the supplied value as a formatted text record.
         member this.t (x:double) = this.tt (dv (D x))
 
+        /// Writes a text record using compact numeric formats.
         member _.cc (lst:exprString) =
             match ctx.language with
             |Fortran ->
@@ -336,10 +345,12 @@ namespace Aqualis
                         ")\n")
             |_ -> ()
 
+    /// Writes binary values to a generated file.
     type BinWriter internal (ctx:Aqualis,fp:string) =
         // let context() = ctx.RequireGenerationContext()
         // let program() = (context()).CurrentProgram
         let writein text = ctx.codewritein(text + "\n")
+        /// Emits a binary write for an expression.
         member private _.WriteBin (v:expr) =
             match ctx.language with
             |Fortran ->
@@ -442,10 +453,15 @@ namespace Aqualis
                 |_ ->
                     ()
             |_ -> ()
+        /// Writes the supplied scalar value as binary data.
         member this.b (v:int) = this.WriteBin ((I v).Expr)
+        /// Writes the supplied scalar value as binary data.
         member this.b (v:int0) = this.WriteBin v.Expr
+        /// Writes the supplied scalar value as binary data.
         member this.b (v:double) = this.WriteBin ((D v).Expr)
+        /// Writes the supplied scalar value as binary data.
         member this.b (v:double0) = this.WriteBin v.Expr
+        /// Writes the supplied scalar value as binary data.
         member this.b (v:complex0) = this.WriteBin v.Expr
 
     ///<summary>ファイル入出力</summary>

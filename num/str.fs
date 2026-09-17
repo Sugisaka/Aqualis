@@ -7,8 +7,10 @@
 namespace Aqualis
 
 [<AutoOpen>]
+/// Structure declaration and member-access helpers.
 module Aqualis_str =
 
+    /// Structure declaration and member access operations.
     type ContextStr internal (ctx:Aqualis) =
 
         ///<summary>構造体定義のコードを作成</summary>
@@ -102,113 +104,136 @@ module Aqualis_str =
             |Numeric ->
                 vname+"."+name
 
+        /// Registers a member declaration on the named structure.
         member this.addmember(sname,(typ,vtp,name)) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(typ,vtp,name))
 
+        /// Registers and returns a integer scalar member expression.
         member this.i0 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(It 4,A0,name))
             int0(Var(It 4,this.mem(vname,name),NaN), ctx)
+        /// Registers and returns a double-precision scalar member expression.
         member this.d0 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Dt,A0,name))
             double0(Var(Dt,this.mem(vname,name),NaN), ctx)
+        /// Registers and returns a complex scalar member expression.
         member this.z0 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Zt,A0,name))
             complex0(Var(Zt,this.mem(vname,name),NaN), ctx)
+        /// Registers and returns a integer 1D array member expression.
         member this.i1 (sname, vname, name, size1) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(It 4,A1(size1),name))
             definitions.addmember(sname,(It 4,A1(1),name+"_size"))
             int1(It 4,Var1(A1(size1),this.mem(vname,name)), ctx)
+        /// Registers and returns a double-precision 1D array member expression.
         member this.d1 (sname, vname, name, size1) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Dt,A1(size1),name))
             definitions.addmember(sname,(It 4,A1(1),name+"_size"))
             double1(Dt,Var1(A1(size1),this.mem(vname,name)), ctx)
+        /// Registers and returns a complex 1D array member expression.
         member this.z1 (sname, vname, name, size1) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Zt,A1(size1),name))
             definitions.addmember(sname,(It 4,A1(1),name+"_size"))
             complex1(Zt,Var1(A1(size1),this.mem(vname,name)), ctx)
+        /// Registers and returns a integer 2D array member expression.
         member this.i2 (sname, vname, name, size1, size2) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(It 4,A2(size1,size2),name))
             definitions.addmember(sname,(It 4,A1(2),name+"_size"))
             int2(It 4,Var2(A2(size1,size2),this.mem(vname,name)), ctx)
+        /// Registers and returns a double-precision 2D array member expression.
         member this.d2 (sname, vname, name, size1, size2) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Dt,A2(size1,size2),name))
             definitions.addmember(sname,(It 4,A1(2),name+"_size"))
             double2(Dt,Var2(A2(size1,size2),this.mem(vname,name)), ctx)
+        /// Registers and returns a complex 2D array member expression.
         member this.z2 (sname, vname, name, size1, size2) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Zt,A2(size1,size2),name))
             definitions.addmember(sname,(It 4,A1(2),name+"_size"))
             complex2(Zt,Var2(A2(size1,size2),this.mem(vname,name)), ctx)
+        /// Registers and returns a integer 3D array member expression.
         member this.i3 (sname, vname, name, size1, size2, size3) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(It 4,A3(size1,size2,size3),name))
             definitions.addmember(sname,(It 4,A1(3),name+"_size"))
             int3(It 4,Var3(A3(size1,size2,size3),this.mem(vname,name)), ctx)
+        /// Registers and returns a double-precision 3D array member expression.
         member this.d3 (sname, vname, name, size1, size2, size3) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Dt,A3(size1,size2,size3),name))
             definitions.addmember(sname,(It 4,A1(3),name+"_size"))
             double3(Dt,Var3(A3(size1,size2,size3),this.mem(vname,name)), ctx)
+        /// Registers and returns a complex 3D array member expression.
         member this.z3 (sname, vname, name, size1, size2, size3) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Zt,A3(size1,size2,size3),name))
             definitions.addmember(sname,(It 4,A1(3),name+"_size"))
             complex3(Zt,Var3(A3(size1,size2,size3),this.mem(vname,name)), ctx)
+        /// Registers and returns a integer 1D array member expression with dynamic dimensions.
         member this.i1 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(It 4,A1(0),name))
             definitions.addmember(sname,(It 4,A1(1),name+"_size"))
             int1(It 4,Var1(A1(0),this.mem(vname,name)), ctx)
+        /// Registers and returns a double-precision 1D array member expression with dynamic dimensions.
         member this.d1 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Dt,A1(0),name))
             definitions.addmember(sname,(It 4,A1(1),name+"_size"))
             double1(Dt,Var1(A1(0),this.mem(vname,name)), ctx)
+        /// Registers and returns a complex 1D array member expression with dynamic dimensions.
         member this.z1 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Zt,A1(0),name))
             definitions.addmember(sname,(It 4,A1(1),name+"_size"))
             complex1(Zt,Var1(A1(0),this.mem(vname,name)), ctx)
+        /// Registers and returns a integer 2D array member expression with dynamic dimensions.
         member this.i2 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(It 4,A2(0,0),name))
             definitions.addmember(sname,(It 4,A1(2),name+"_size"))
             int2(It 4,Var2(A2(0,0),this.mem(vname,name)), ctx)
+        /// Registers and returns a double-precision 2D array member expression with dynamic dimensions.
         member this.d2 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Dt,A2(0,0),name))
             definitions.addmember(sname,(It 4,A1(2),name+"_size"))
             double2(Dt,Var2(A2(0,0),this.mem(vname,name)), ctx)
+        /// Registers and returns a complex 2D array member expression with dynamic dimensions.
         member this.z2 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Zt,A2(0,0),name))
             definitions.addmember(sname,(It 4,A1(2),name+"_size"))
             complex2(Zt,Var2(A2(0,0),this.mem(vname,name)), ctx)
+        /// Registers and returns a integer 3D array member expression with dynamic dimensions.
         member this.i3 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(It 4,A3(0,0,0),name))
             definitions.addmember(sname,(It 4,A1(3),name+"_size"))
             int3(It 4,Var3(A3(0,0,0),this.mem(vname,name)), ctx)
+        /// Registers and returns a double-precision 3D array member expression with dynamic dimensions.
         member this.d3 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Dt,A3(0,0,0),name))
             definitions.addmember(sname,(It 4,A1(3),name+"_size"))
             double3(Dt,Var3(A3(0,0,0),this.mem(vname,name)), ctx)
+        /// Registers and returns a complex 3D array member expression with dynamic dimensions.
         member this.z3 (sname, vname, name) =
             let definitions = ctx.cstr
             definitions.addmember(sname,(Zt,A3(0,0,0),name))
             definitions.addmember(sname,(It 4,A1(3),name+"_size"))
             complex3(Zt,Var3(A3(0,0,0),this.mem(vname,name)), ctx)
 
+        /// Registers a structure variable and its type definition.
         member this.reg(sname,name:string) =
             let definitions = ctx.cstr
             let str_ac = match ctx.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
@@ -220,6 +245,7 @@ module Aqualis_str =
                 let name_ = match ctx.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 ctx.cvar.setVar(Structure sname,A0,name_,"")
 
+        /// Registers a structure variable without adding a structure definition.
         member this.regWithoutAddStructure(sname,name:string) =
             let definitions = ctx.cstr
             let str_ac = match ctx.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
@@ -229,6 +255,7 @@ module Aqualis_str =
                 let name_ = match ctx.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 ctx.cvar.setVar(Structure sname,A0,name_,"")
 
+        /// Registers a 1D structure array and its type definition.
         member this.reg(sname,name:string,size1) =
             let definitions = ctx.cstr
             let str_ac = match ctx.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
@@ -240,6 +267,7 @@ module Aqualis_str =
                 let name_ = match ctx.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 ctx.cvar.setVar(Structure sname,A1(size1),name_,"")
 
+        /// Registers a 2D structure array and its type definition.
         member this.reg(sname,name:string,size1,size2) =
             let definitions = ctx.cstr
             let str_ac = match ctx.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
@@ -251,6 +279,7 @@ module Aqualis_str =
                 let name_ = match ctx.language with |HTML -> "<mi mathvariant=\"italic\">"+name+"</mi>" |_ -> name
                 ctx.cvar.setVar(Structure sname,A2(size1,size2),name_,"")
 
+        /// Registers a 3D structure array and its type definition.
         member this.reg(sname,name:string,size1,size2,size3) =
             let definitions = ctx.cstr
             let str_ac = match ctx.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
@@ -264,6 +293,7 @@ module Aqualis_str =
 
 
     [<AutoOpen>]
+    /// Adds structure declarations to Aqualis.
     module CompilationEnvironmentStrExtensions =
         type Aqualis with
             ///<summary>構造体定義</summary>

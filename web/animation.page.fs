@@ -11,6 +11,7 @@ open System.IO
 open System.Text.Json
 
 [<AutoOpen>]
+/// Adds presentation elements to the HTML generation context.
 module HtmlGenerationExtensions2 =
     type html with
         /// <summary>
@@ -31,6 +32,7 @@ module HtmlGenerationExtensions2 =
         member this.image (assets:WebAssetContext, filename:string) =
             this.image (assets, [], filename)
 
+    /// Owns the contexts and assets for an HTML presentation.
     type HtmlGenerationContext with
         
         /// <summary>
@@ -42,10 +44,13 @@ module HtmlGenerationExtensions2 =
         member this.image (s:Style,p:position) = fun (filename:string) ->
             let st = Style [{Key="position"; Value="absolute"}; {Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
             this.html.image (this.Assets, st, filename)
+        /// Imports and writes an image with the supplied filename and optional styling.
         member this.image (s:Style, id:string) = fun (filename:string) ->
             this.html.image (this.Assets, [Atr("id",id); s.atr], filename)
+        /// Imports and writes an image with the supplied filename and optional styling.
         member this.image (s:Style) = fun (filename:string) ->
             this.html.image (this.Assets, s, filename)
+        /// Imports and writes an image with the supplied filename and optional styling.
         member this.image (filename:string) =
             this.html.image (this.Assets, filename)
         /// <summary>
@@ -59,6 +64,7 @@ module HtmlGenerationExtensions2 =
             let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
             this.html.tagv ("video", [st.atr; Atr("src", sourceUrl); Atr("controls")])
             this.html.tage "video"
+        /// Imports and writes a video with the supplied filename and optional styling.
         member this.video (s:Style) = fun (filename:string) ->
             let sourceUrl = this.ImportAsset filename
             this.html.tagv ("video", [s.atr; Atr("src", sourceUrl); Atr("controls")])
@@ -175,6 +181,7 @@ module HtmlGenerationExtensions2 =
                 @ checkedAttribute)
             this.html.tagb ("label", [Atr("style", "position: absolute; margin-top: 0px; margin-left: 345px; z-index: 100")]) <| fun () ->
                 this.BodyContext.writein "音声"
+        /// Writes an audio player for the presentation.
         member this.audioPlayer() =
                 this.html.tagb ("audio", [Atr("id", "audioPlayer")]) ignore
         /// <summary>
@@ -195,6 +202,8 @@ module HtmlGenerationExtensions2 =
 /// <param name="canvasX, canvasY">キャンパスのサイズ</param>
 [<AutoOpen>]
 module CompilationEnvironmentAnimationExtensions =
+    /// Owns the contexts and assets for an HTML presentation.
     type HtmlGenerationContext with
+        /// Gets the slide animation helper.
         member this.slideAnimation = ContextSlideAnimation(this)
 

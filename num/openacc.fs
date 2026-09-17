@@ -2,8 +2,10 @@ namespace Aqualis
 
 open System
 
+/// Generates OpenACC kernels regions for Fortran or C99.
 type ContextOpenAcc internal (c:Aqualis) =
 
+    /// Emits an OpenACC kernels region with registered copy clauses.
     member _.parallelize code =
         c.IsOpenAccUsed <- true
         let copyIn = c.varCopyIn.list |> List.map (fun (_,_,name,_) -> name)
@@ -32,6 +34,7 @@ type ContextOpenAcc internal (c:Aqualis) =
         |_ -> invalidOp "OpenACC generation is available only for Fortran and C99."
 
 [<AutoOpen>]
+/// Exposes OpenACC generation through Aqualis.
 module CompilationEnvironmentOpenAccExtensions =
     type Aqualis with
         ///<summary>OpenACC</summary>

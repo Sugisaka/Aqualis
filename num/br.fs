@@ -29,8 +29,10 @@ namespace Aqualis
 
         ///<summary>条件分岐式(2番目以降のIFは前のIFを満たさない場合のみ評価)</summary>
     type ContextBr internal (c:Aqualis) =
+        /// Emits a conditional branch and exposes IF and ELSE callbacks.
         member _.branch code = expr.branch c (fun callbacks -> code (br callbacks))
 
+        /// Runs or emits the callback when the condition is true.
         member this.if1 (condition:bool0) code =
             match c.CodeFile with
             |None ->
@@ -46,6 +48,7 @@ namespace Aqualis
                 |_, False -> ()
                 |_, _ -> this.branch (fun branch -> branch.IF condition code)
 
+        /// Runs or emits one of two callbacks according to the condition.
         member this.if2 (condition:bool0) codeWhenTrue codeWhenFalse =
             match c.CodeFile with
             |None ->
@@ -68,6 +71,7 @@ namespace Aqualis
                         branch.EL codeWhenFalse)
 
     [<AutoOpen>]
+    /// Exposes conditional generation through Aqualis.
     module CompilationEnvironmentBrExtensions =
         type Aqualis with
             ///<summary>条件分岐</summary>

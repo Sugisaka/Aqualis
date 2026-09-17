@@ -1,8 +1,10 @@
 namespace Aqualis
 
 [<AutoOpen>]
+/// Random-number generation methods for the assembler context.
 module asm_random =
     type ContextAsm with
+        /// Provides seed-setting and uniform random-number callbacks for generated code.
         member this.random (code:(((int1 -> unit) -> unit) * (double0 -> unit) -> unit)) =
             let context = this.Environment
             let write line = context.codewritein(line + "\n")
@@ -62,6 +64,7 @@ module asm_random =
                         (fun name -> name + " = (random number: 0->1)"))
             |Numeric -> ()
 
+        /// Provides seed-setting and normally distributed random-number callbacks.
         member this.random_normaldistribution code =
             let context = this.Environment
             this.random (fun (setseed,getrand) ->

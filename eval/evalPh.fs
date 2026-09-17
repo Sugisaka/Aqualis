@@ -7,12 +7,14 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Expression output operations for PHP.
     module exprEvalPh =
 
         open System
 
         type expr with
 
+            /// Emits an assignment for PHP.
             static member substPh (x:expr) (y:expr) (c:Aqualis) =
                 let target =
                     match x with
@@ -20,12 +22,15 @@ namespace Aqualis
                     |_ -> x.evalPh c
                 c.codewritein ("<?php ", target + " = " + y.evalPh c + "; ?>")
 
+            /// Reports that equation display is unsupported for this target language.
             static member equivPh (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "PHP" "equation display"
 
+            /// Reports that aligned equation display is unsupported for this target language.
             static member equivAlignPh (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "PHP" "aligned equation display"
 
+            /// Emits a counted loop for PHP.
             static member forLoopPh (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -39,7 +44,7 @@ namespace Aqualis
                 c.codewritein("<?php ", "endfor; ?>")
                 returnVar()
 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for PHP.
             static member loopPh (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -56,7 +61,7 @@ namespace Aqualis
                 c.codewritein("<?php ", label+":; ?>")
                 returnVar()
 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for PHP.
             static member whiledoPh (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("<?php ", "while(" + cond.evalPh c + "): ?>")
                 c.indentInc()
@@ -64,7 +69,7 @@ namespace Aqualis
                 c.indentDec()
                 c.codewritein("<?php ", "endwhile; ?>")
 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for PHP.
             static member rangePh (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -84,7 +89,7 @@ namespace Aqualis
                     c.codewritein("<?php ", "endfor; ?>")
                     returnVar()
 
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for PHP.
             static member range_exitPh (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -108,6 +113,7 @@ namespace Aqualis
                     c.codewritein("<?php ", label+":; ?>")
                     returnVar()
 
+            /// Emits a branch callback for PHP.
             static member branchPh (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPh c
@@ -129,6 +135,7 @@ namespace Aqualis
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein("<?php ", "endif; ?>")
 
+            /// Renders an expression for PHP.
             member this.evalPh(c:Aqualis) =
                 match this.simp with
                 |False -> "false"

@@ -10,11 +10,14 @@ namespace Aqualis
     open System.IO
 
     [<AutoOpen>]
+    /// Generates functions and their target-language signatures.
     module Aqualis_function =
 
         [<Literal>]
+        /// Maximum portable generated function-name length.
         let private MaximumPortableFunctionNameLength = 128
 
+        /// Reserved C99 words rejected as generated function names.
         let private c99Keywords =
             set [
                 "_Bool"; "_Complex"; "_Imaginary"
@@ -25,6 +28,7 @@ namespace Aqualis
                 "sizeof"; "static"; "struct"; "switch"; "typedef"
                 "union"; "unsigned"; "void"; "volatile"; "while" ]
 
+        /// Reserved Python words rejected as generated function names.
         let private pythonKeywords =
             set [
                 "False"; "None"; "True"; "and"; "as"; "assert"; "async"
@@ -34,6 +38,7 @@ namespace Aqualis
                 "nonlocal"; "not"; "or"; "pass"; "raise"; "return"
                 "try"; "while"; "with"; "yield" ]
 
+        /// Validates a generated function name for its target language.
         let private validateFunctionName language (functionName:string) =
             if isNull functionName then
                 nullArg (nameof functionName)
@@ -76,16 +81,19 @@ namespace Aqualis
             |_ -> ()
             functionName
 
+        /// Argument metadata used to generate Python function signatures.
         type private PythonFunctionArgument = {
             ActualName:string
             FormalName:string
             Shape:VarType }
 
+        /// Checks whether an argument requires write-back after a Python call.
         let private requiresPythonWriteBack argument =
             match argument.Shape with
             |A0 -> true
             |A1 _|A2 _|A3 _ -> false
 
+        /// Normalizes a Python argument expression to a generated name.
         let private normalizePythonActualName typ shape (name:string) =
             match typ,shape,name.StartsWith "(*" with
             |(It _|Dt|Zt|Structure _),A0,true ->
@@ -93,6 +101,7 @@ namespace Aqualis
             |_ ->
                 name
 
+        /// Collects Python function argument metadata.
         let private pythonFunctionArguments arguments =
             arguments
             |> List.map (fun (actualName,(typ,shape,formalName)) -> {
@@ -112,6 +121,7 @@ namespace Aqualis
             parent.IsOpenMpUsed <- parent.IsOpenMpUsed || child.IsOpenMpUsed
             parent.IsOpenAccUsed <- parent.IsOpenAccUsed || child.IsOpenAccUsed
 
+        /// Generates a function definition for the selected language.
         let private generateFunction (context:Aqualis) (projectname:string) (code:Aqualis->unit) =
             let projectname = validateFunctionName context.language projectname
             match context.language with

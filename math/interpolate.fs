@@ -10,7 +10,9 @@ namespace Aqualis
     module interpolate =
 
         [<RequireQualifiedAccess>]
+        /// Validates spline sample dimensions and numeric values.
         module private SplineValidation =
+            /// Reports an invalid interpolation input.
             let private fail (context:Aqualis) message =
                 match context.Language with
                 | C99 ->
@@ -21,12 +23,14 @@ namespace Aqualis
                     context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n")
                 | _ -> ()
 
+            /// Reports an invalid spline condition in the generation context.
             let require (context:Aqualis) (condition:bool0) message =
                 match context.Language with
                 | C99 | Fortran | Python ->
                     context.br.if1 condition (fun () -> fail context message)
                 | _ -> ()
 
+            /// Requires a finite spline sample value.
             let requireFinite (context:Aqualis) (value:double0) message =
                 let valueExpression = value.Expr.eval context
                 let condition =
@@ -38,6 +42,7 @@ namespace Aqualis
                 condition |> Option.iter (fun expression ->
                     require context (bool0(Var(Nt, expression, NaN), context)) message)
 
+            /// Validates spline input arrays and dimensions.
             let data (context:Aqualis) (x:double1) (ySize:int0) =
                 require context (x.size1 .< 2) "Spline interpolation requires at least two points."
                 require context (x.size1 .< ySize) "Spline x and y lengths must match."
@@ -47,6 +52,7 @@ namespace Aqualis
                 context.iter.range (0, x.size1-2) <| fun (i:int0) ->
                     require context (x[i+1] .<= x[i]) "Spline x values must be strictly increasing."
 
+            /// Validates a spline query and coefficient dimensions.
             let query (context:Aqualis) (x:double1) (ySize:int0) (coefficientSize:int0) (value:double0) =
                 require context (x.size1 .< 2) "Spline interpolation has not been initialized."
                 require context (ySize .< x.size1) "Spline x and y lengths must match."
@@ -57,15 +63,18 @@ namespace Aqualis
                 require context (value .< x[0]) "Spline query is out of range."
                 require context (value .> x[x.size1-1]) "Spline query is out of range."
 
+            /// Reads and validates the number of loaded x samples.
             let loadedXCount (context:Aqualis) (reader:TextReader) (count:int0) =
                 require context (count .< 2) "Spline interpolation requires at least two points."
                 require context (count .> 715827883) "Spline point count is too large."
                 reader.RequireRecordCapacity count
 
+            /// Reads and validates an expected sample count.
             let loadedCount (context:Aqualis) (reader:TextReader) (count:int0) (expected:int0) message =
                 require context (count .=/ expected) message
                 reader.RequireRecordCapacity count
 
+        /// Validates the shape of linear interpolation samples.
         let private validateLinearData (dataX:double list) dataYCount =
             if dataX.Length < 2 then
                 invalidArg "data_x" "Linear interpolation requires at least two data points."
@@ -76,6 +85,7 @@ namespace Aqualis
             if dataX |> List.pairwise |> List.exists (fun (left, right) -> right <= left) then
                 invalidArg "data_x" "The x data must be strictly increasing."
 
+        /// Computes the interpolation weight between adjacent samples.
         let private linearWeight (context:Aqualis) (x:double0) (left:double0) (right:double0) code =
             context.ch.dd <| fun (span,weight) ->
                 context.br.if2 (And [left .< 0.0; right .> 0.0; Or [left .< -1e300; right .> 1e300]])
@@ -141,6 +151,7 @@ namespace Aqualis
                         code(Y.[lastIndex])
                     NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
 
+        /// Generates cubic spline interpolation over real-valued samples.
         type splineInterpolateDouble(context:Aqualis) =
 
             let f = context.var.d2 "f"
@@ -307,6 +318,7 @@ namespace Aqualis
                 context.br.if1 (xx.=x.[x.size1-1]) <| fun () ->
                     evaluate (x.size1-2)
 
+        /// Generates cubic spline interpolation over complex-valued samples.
         type splineInterpolateComplex(context:Aqualis,iscpx:bool) =
 
             let f = context.var.z2 "f"
@@ -502,13 +514,19 @@ namespace Aqualis
                 context.br.if1 (xx.=x.[x.size1-1]) <| fun () ->
                     evaluate (x.size1-2)
 
+    /// Interpolation operations for an Aqualis context.
     type ContextInterpolate internal (context:Aqualis) =
+        /// Creates a real-valued linear interpolator.
         member _.linearDouble(id,dataX,dataY) = interpolate.LinearInterpolate1d(context,id,dataX,dataY)
+        /// Creates a complex-valued linear interpolator.
         member _.linearComplex(id,dataX,dataY) = interpolate.LinearInterpolate1z(context,id,dataX,dataY)
+        /// Creates a real-valued cubic spline interpolator.
         member _.splineDouble() = interpolate.splineInterpolateDouble(context)
+        /// Creates a complex-valued cubic spline interpolator.
         member _.splineComplex(isComplex) = interpolate.splineInterpolateComplex(context,isComplex)
 
     [<AutoOpen>]
+    /// Adds interpolation access to Aqualis.
     module CompilationEnvironmentInterpolateExtensions =
         type Aqualis with
             ///<summary>データ補間</summary>

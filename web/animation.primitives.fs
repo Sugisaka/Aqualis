@@ -10,6 +10,7 @@ open System
 open System.IO
 open System.Text.Json
 
+/// Generates animated line segments in an HTML figure.
 type AnimationLine(context:HtmlGenerationContext,s:Style,canvasX:int,canvasY:int) =
     let id = context.nextContentsID()
     let s0 = Style ([{Key="visibility";Value="hidden"}]@s.list)

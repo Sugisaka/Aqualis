@@ -23,6 +23,7 @@ namespace Aqualis
                 
         ///<summary>構造体名</summary>
         member __.sname with get() = sname_
+        /// Gets the registered structure members.
         member __.memlist with get() = lock gate (fun () -> memlist_)
         
     ///<summary>構造体を管理</summary>
@@ -31,6 +32,7 @@ namespace Aqualis
         ///<summary>定義された構造体リスト</summary>
         let mutable strlist:structmember list = []
         
+        /// Clears the registered structure definitions.
         member this.clear() = lock gate (fun () -> strlist <- [])
         
         ///<summary>構造体を追加</summary>

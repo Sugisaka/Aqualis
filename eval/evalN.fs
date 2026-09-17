@@ -7,11 +7,12 @@
 namespace Aqualis
     
     [<AutoOpen>]
+    /// Expression output operations for numeric execution.
     module exprEvalN =
         
         type expr with
             
-            ///<summary>指定した範囲でループ</summary>
+            /// Executes an inclusive range over integer literal bounds.
             static member rangeN (i1:expr) = fun (i2:expr) -> fun code -> 
                 let ii1 = i1.simp
                 let ii2 = i2.simp
@@ -22,6 +23,7 @@ namespace Aqualis
                 |_ ->
                     UnsupportedOperation.numericEvaluation
                         $"a loop whose bounds are not integers ('{ii1}' to '{ii2}')"
+            /// Evaluates the expression as a numeric value.
             member this.eval() =
                 match this with
                 |True -> 

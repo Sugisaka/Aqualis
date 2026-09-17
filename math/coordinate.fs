@@ -6,17 +6,13 @@
 //
 namespace Aqualis
 
-    ///<summary>高速多重極法で使用する数学関数を提供</summary>
+    /// Generates two-dimensional coordinate transformations.
     module coordinate =
 
-        /// <summary>
-        /// 座標変換
-        /// </summary>
+        /// Coordinate transformations bound to a generation context.
         type ContextCoordinate internal (context:Aqualis) =
 
-            /// <summary>
-            /// 座標系を(sx,sy)だけ平行移動
-            /// </summary>
+            /// Passes <c>(x - sx, y - sy)</c> to the callback using generated temporaries.
             member this.shift (sx:double0,sy:double0) =
                 fun (x:double0,y:double0) ->
                     fun code ->
@@ -25,17 +21,14 @@ namespace Aqualis
                             y_ <== y - sy
                             code(x_,y_)
 
-            /// <summary>
-            /// 座標系を(sx,sy)だけ平行移動
-            /// </summary>
+            /// Translates coordinates by constant offsets, subtracting each offset.
             member this.shift (sx:double,sy:double) =
                 fun (x:double0,y:double0) ->
                     fun code ->
                         this.shift (D sx,D sy) (x,y) code
 
-            /// <summary>
-            /// 座標系をradianだけ回転
-            /// </summary>
+            /// Passes coordinates rotated by the specified angle in radians to the
+            /// callback: <c>(x cos a + y sin a, -x sin a + y cos a)</c>.
             member this.rotate_rad (radian:double0) =
                 fun (x:double0,y:double0) ->
                     fun code ->
@@ -44,9 +37,7 @@ namespace Aqualis
                             y_ <== -x * asm.sin radian + y * asm.cos radian
                             code(x_,y_)
 
-            /// <summary>
-            /// 座標系をdegreeだけ回転
-            /// </summary>
+            /// Rotates coordinates by an expression measured in degrees.
             member this.rotate_deg (degree:double0) =
                 fun (x:double0,y:double0) ->
                     fun code ->
@@ -54,24 +45,21 @@ namespace Aqualis
                             radian <== asm.pi*degree/180.0
                             this.rotate_rad radian (x,y) code
 
-            /// <summary>
-            /// 座標系をradianだけ回転
-            /// </summary>
+            /// Rotates coordinates by a constant angle measured in radians.
             member this.rotate_rad (radian:double) =
                 fun (x:double0,y:double0) ->
                     fun code ->
                         this.rotate_rad (D radian) (x,y) code
 
-            /// <summary>
-            /// 座標系をdegreeだけ回転
-            /// </summary>
+            /// Rotates coordinates by a constant angle measured in degrees.
             member this.rotate_deg (degree:double) =
                 fun (x:double0,y:double0) ->
                     fun code ->
                         this.rotate_deg (D degree) (x,y) code
 
     [<AutoOpen>]
+    /// Adds coordinate transformation helpers to an Aqualis context.
     module CompilationEnvironmentCoordinateExtensions =
         type Aqualis with
-            ///<summary>座標変換</summary>
+            /// Gets coordinate transformation helpers bound to this context.
             member this.coordinate = coordinate.ContextCoordinate(this)

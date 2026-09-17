@@ -7,7 +7,9 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Adds singular-value decompositions to the linear-algebra context.
     module ContextLaSvdExtensions =
+        /// Validates input and output shapes for singular-value decomposition.
         let private requireSvdShapes (context:Aqualis) (rows:int0) (columns:int0)
                                      (uRows:int0) (uColumns:int0) (singularCount:int0)
                                      (vtRows:int0) (vtColumns:int0) =
@@ -24,14 +26,13 @@ namespace Aqualis
                     LapackValidation.require context (singularCount .=/ expected) "LAPACK SVD singular-value count is invalid."
             | _ -> ()
 
+        /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
-            /// <summary>
-            /// mat = u * s * v に特異値分解
-            /// </summary>
-            /// <param name="mat1">複素行列</param>
-            /// <param name="u">複素行列u</param>
-            /// <param name="s">正方行列sの対角成分</param>
-            /// <param name="vt">複素行列vの転置</param>
+            /// <summary>Computes the full SVD of a complex matrix: A = U * S * V^H.</summary>
+            /// <param name="mat1">Complex input matrix.</param>
+            /// <param name="u">Output matrix of left singular vectors.</param>
+            /// <param name="s">Output vector of singular values.</param>
+            /// <param name="vt">Output conjugate-transpose of the right singular vectors.</param>
             member this.svd (mat1:complex2) = fun (u:complex2,s:double1,vt:complex2) ->
                 LapackValidation.requireBackend this.GenerationContext "LAPACK SVD"
                 if u.code = vt.code then
@@ -181,13 +182,11 @@ namespace Aqualis
                         source <== mat1
                         calculate source
                 | _ -> calculate mat1
-            /// <summary>
-            /// mat = u * s * v に特異値分解
-            /// </summary>
-            /// <param name="mat1">複素行列</param>
-            /// <param name="u">複素行列u</param>
-            /// <param name="s">正方行列sの対角成分</param>
-            /// <param name="vt">複素行列vの転置</param>
+            /// <summary>Computes the full SVD of a real matrix: A = U * S * V^T.</summary>
+            /// <param name="mat1">Real input matrix.</param>
+            /// <param name="u">Output matrix of left singular vectors.</param>
+            /// <param name="s">Output vector of singular values.</param>
+            /// <param name="vt">Output transpose of the right singular vectors.</param>
             member this.svd (mat1:double2) = fun (u:double2,s:double1,vt:double2) ->
                 LapackValidation.requireBackend this.GenerationContext "LAPACK SVD"
                 if u.code = vt.code then

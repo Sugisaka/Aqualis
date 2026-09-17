@@ -10,11 +10,14 @@ open System
 open System.Security.Cryptography
 open System.Text
 
+/// Reads a POST field and emits form controls with the same field name.
 type post(context:Aqualis,id:PHPdata) =
     new(ctx:Aqualis,x:string) = post(ctx,PHPdata ([RStr x],Aqualis.BlankWriter PHP))
     new(ctx:Aqualis,x:FieldName) = post(ctx,PHPdata (FieldName.value x))
     new(ctx:Aqualis,x:int0) = post(ctx,PHPdata([RNvr(x.Expr,x.Context)], x.Context))
+    /// Gets the raw submitted value of this POST field.
     member _.get with get() = PHPdata.f(context,"$_POST["+id.toString(".",StrQuotation)+"]")
+    /// Gets the submitted value escaped for HTML output.
     member this.get_html with get() = PHPdata.f(context,"htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")
     ///テキストボックス
     member _.input() =
@@ -26,6 +29,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata ""
             ]
         )
+    /// Emits a text input for this field with the supplied value and attributes.
     member _.input(a:list<Atr>) =
         context.html.taga(
             "input",
@@ -86,6 +90,7 @@ type post(context:Aqualis,id:PHPdata) =
             ]
         )
 
+    /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:PHPdata,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -95,6 +100,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", value
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
+    /// Emits a hidden text input for this field.
     member _.input_hidden(value:PHPdata,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -105,6 +111,7 @@ type post(context:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
 
+    /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:string,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -115,6 +122,7 @@ type post(context:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
 
+    /// Emits a hidden text input for this field.
     member _.input_hidden(value:string,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -125,6 +133,7 @@ type post(context:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
 
+    /// Emits a text area for this field.
     member _.textArea() =
         context.html.tagb(
             "textarea",
@@ -133,6 +142,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "name", id
             ]
         ) <| fun () -> ()
+    /// Emits a text area for this field.
     member _.textArea code =
         context.html.tagb(
             "textarea",
@@ -141,6 +151,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "name", id
             ]
         ) <| fun () -> code()
+    /// Emits a text area for this field.
     member _.textArea(a:list<Atr>) = 
         context.html.tagb0(
             "textarea",
@@ -149,6 +160,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "name", id
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) <| fun () -> ()
+    /// Emits a text area around callback content.
     member _.textArea_contents(a:list<Atr>) = fun code ->
         context.html.tagb0(
             "textarea",
@@ -157,6 +169,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "name", id
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) code
+    /// Emits a text area prefilled with the submitted value.
     member this.textArea_copy() =
         context.html.tagb(
             "textarea",
@@ -165,6 +178,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "name", id
             ]
         ) <| fun () -> context.writein this.get_html.phpcode
+    /// Emits a text area prefilled with the submitted value.
     member this.textArea_copy(a:list<Atr>) =
         context.html.tagb(
             "textarea",
@@ -173,6 +187,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "name", id
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         ) <| fun () -> context.writein this.get_html.phpcode
+    /// Emits a text area for this field.
     member _.textArea(value:string) =
         context.html.tagb(
             "textarea",
@@ -181,6 +196,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "name", id
             ]
         ) <| fun () -> context.writein value
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:PHPdata) =
         context.html.taga(
             "input",
@@ -191,6 +207,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", value
             ]
         )
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:string) =
         context.html.taga(
             "input",
@@ -201,6 +218,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:PHPdata,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -211,6 +229,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", value
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:string,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -232,6 +251,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+    /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:int0,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -252,6 +272,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+    /// Emits a hidden text input for this field.
     member _.input_hidden(value:int0,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -262,6 +283,7 @@ type post(context:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
 
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:int0) =
         context.html.taga(
             "input",
@@ -272,6 +294,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:int0,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -304,6 +327,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+    /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:double0,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -324,6 +348,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+    /// Emits a hidden text input for this field.
     member _.input_hidden(value:double0,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -334,6 +359,7 @@ type post(context:Aqualis,id:PHPdata) =
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
 
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:double0) =
         context.html.taga(
             "input",
@@ -344,6 +370,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", PHPdata value
             ]
         )
+    /// Emits a read-only text input for this field.
     member _.input_lock(value:double0,a:list<Atr>) =
         context.html.taga(
             "input",
@@ -386,6 +413,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", this.get
             ]
         )
+    /// Emits a text input prefilled with the submitted value.
     member this.input_copy(a:list<Atr>) = 
         context.html.taga(
             "input",
@@ -405,6 +433,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", this.get
             ]
         )
+    /// Emits a hidden input prefilled with the submitted value.
     member this.input_copy_hidden(a:list<Atr>) = 
         context.html.taga(
             "input",
@@ -414,6 +443,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", this.get
             ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
         )
+    /// Emits a read-only text input prefilled with the submitted value.
     member this.input_copy_lock() = 
         context.html.taga(
             "input",
@@ -424,6 +454,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", this.get
             ]
         )
+    /// Emits a read-only text input prefilled with the submitted value.
     member this.input_copy_lock(a:list<Atr>) = 
         context.html.taga(
             "input",
@@ -444,6 +475,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", this.get
             ]
         )
+    /// Emits a read-only password input prefilled with the submitted value.
     member this.password_copy_lock() =
         context.html.taga(
             "input",
@@ -454,6 +486,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value", this.get
             ]
         )
+    /// Emits a submit button for this field.
     member _.submit(value:string) =
         context.html.taga(
             "input",
@@ -463,6 +496,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "value",PHPdata value
             ]
         )
+    /// Emits a submit button for this field.
     member _.submit(url:Url,value:string) =
         context.html.taga(
             "input",
@@ -473,6 +507,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "formaction", PHPdata (Url.value url)
             ]
         )
+    /// Emits a submit button for this field.
     member _.submit(url:Url,value:string,style:string) =
         context.html.taga("input",
             [
@@ -483,6 +518,7 @@ type post(context:Aqualis,id:PHPdata) =
                 "formaction", PHPdata (Url.value url)
             ]
         )
+    /// Emits a select control around callback content.
     member _.select code = 
         context.html.tagb (
             "select",
@@ -507,6 +543,7 @@ type UploadPolicy = {
     RandomNameBytes:int }
 
 [<RequireQualifiedAccess>]
+/// Defaults for generated file-upload validation.
 module UploadPolicy =
     /// Creates a policy whose private destination is verified by the generated PHP before storage.
     let create destinationDirectory maxBytes allowedMimeTypes = {
@@ -532,12 +569,15 @@ type UploadedFiles = {
     /// True only when every submitted file was stored successfully.
     AllSucceeded:bool0 }
 
+/// Validates and emits generated upload handling.
 module private UploadGeneration =
     // Stored extensions are deliberately limited to inert server-side file formats.
     // Every upload must also remain outside all publicly served directories.
+    /// File extensions allowed for stored uploads.
     let allowedStoredExtensions =
         set ["bin"; "csv"; "docx"; "gif"; "jpeg"; "jpg"; "pdf"; "png"; "pptx"; "txt"; "webp"; "xlsx"; "zip"]
 
+    /// Encodes a string as a PHP literal.
     let phpString (value:string) =
         if isNull value then nullArg (nameof value)
         if value.IndexOf '\u0000' >= 0 then
@@ -550,6 +590,7 @@ module private UploadGeneration =
             .Replace("\n", "\\n") +
         "'"
 
+    /// Validates upload policy limits and paths.
     let validatePolicy policy =
         if String.IsNullOrWhiteSpace policy.DestinationDirectory then
             invalidArg "policy" "The upload destination directory cannot be empty."
@@ -583,6 +624,7 @@ module private UploadGeneration =
         if mimeTypes.Length <> (mimeTypes |> List.distinct).Length then
             invalidArg "policy" "Allowed MIME types must be unique."
 
+    /// Prefixes an upload field identifier.
     let prefix suffix (id:PHPdata) =
         let digest =
             id.code
@@ -591,6 +633,7 @@ module private UploadGeneration =
             |> Convert.ToHexString
         "$aqualis_upload_" + digest.Substring(0,12).ToLowerInvariant() + "_" + suffix
 
+    /// Builds the allowed MIME-type expression from an upload policy.
     let allowedTypes policy =
         policy.AllowedMimeTypes
         |> List.map (fun (mimeType,extension) ->
@@ -598,6 +641,7 @@ module private UploadGeneration =
         |> String.concat ", "
         |> fun values -> "[" + values + "]"
 
+    /// Gets the configured public upload directories.
     let publicDirectories policy =
         policy.AdditionalPublicDirectories
         |> List.map (fun directory ->
@@ -608,6 +652,7 @@ module private UploadGeneration =
         |> fun paths -> String.concat ", " (["__DIR__"; "$_SERVER['DOCUMENT_ROOT']"] @ paths)
         |> fun paths -> "[" + paths + "]"
 
+    /// Emits the generated upload-saving PHP function.
     let emitSaveFunction (context:Aqualis) functionName policy =
         validatePolicy policy
         let lines = [
@@ -677,8 +722,11 @@ module private UploadGeneration =
             lines |> List.iter context.writein
 
 [<RequireQualifiedAccess>]
+/// Selects whether an upload field accepts one or many files.
 type UploadCardinality =
+    /// One uploaded file.
     | Single
+    /// Multiple uploaded files.
     | Multiple
 
 /// A single- or multiple-file upload field with one consistent API.
@@ -693,18 +741,23 @@ type postFile private (context:Aqualis,id:PHPdata,cardinality:UploadCardinality)
         context.writein(prefix + "_results[] = $result;")
         context.writein(prefix + "_errors[] = $result['error'];")
 
+    /// Creates a single-file upload field.
     static member single(ctx:Aqualis,id:PHPdata) =
         postFile(ctx,id,UploadCardinality.Single)
 
+    /// Creates a single-file upload field from a literal field name.
     static member single(ctx:Aqualis,id:string) =
         postFile.single(ctx,PHPdata id)
 
+    /// Creates a multiple-file upload field.
     static member multiple(ctx:Aqualis,id:PHPdata) =
         postFile(ctx,id,UploadCardinality.Multiple)
 
+    /// Creates a multiple-file upload field from a literal field name.
     static member multiple(ctx:Aqualis,id:string) =
         postFile.multiple(ctx,PHPdata id)
 
+    /// Gets whether this field accepts one or multiple files.
     member _.cardinality = cardinality
 
     /// True when the request contains at least one selected file for this field.
@@ -750,6 +803,7 @@ type postFile private (context:Aqualis,id:PHPdata,cardinality:UploadCardinality)
             match cardinality with
             | UploadCardinality.Single -> "single"
             | UploadCardinality.Multiple -> "many"
+        /// Gets the generated prefix for this upload mode and field.
         let prefix = UploadGeneration.prefix mode id
         let saveFunction = prefix + "_save_one"
         let processFunction = prefix + "_process_one"

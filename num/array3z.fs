@@ -1,5 +1,6 @@
 namespace Aqualis
 
+    /// Three-dimensional array of symbolic complex expressions.
     type complex3(typ:Etype,x:Expr3,context:Aqualis) as this=
         inherit NumericArray3<complex0,complex1,complex2,complex3>(typ,x,context)
         new(typ,x) = complex3(typ,x,Aqualis.BlankWriter Numeric)
@@ -21,37 +22,59 @@ namespace Aqualis
         override _.AssignAt(i,j,k,value)=this[i,j,k] <== complex0(value,this.Context)
         override _.clear()=this.AssignScalar(complex0(Int 0))
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:complex3,y:complex3)=x.AssignArray y
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:complex3,y:complex0)=x.AssignScalar y
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:complex3,y:double0)=x.AssignScalar((y :> INum0).ToComplex0)
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:complex3,y:int0)=x.AssignScalar((y :> INum0).ToComplex0)
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:complex3,y:double)=x.AssignScalar(complex0(Dbl y))
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:complex3,y:int)=x.AssignScalar(complex0(Int y))
 
     [<AutoOpen>]
+    /// Numeric operations for complex 3D arrays.
     module asm_complex3=
         type asm with
+            /// Raises the first operand to the power of the second operand.
             static member pow(x:complex3,y:int0)=complex3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.pow(x[i,j,k],y).Expr),Aqualis.merge x.Context y.Context)
+            /// Computes the sine of the operand.
             static member sin(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sin(x[i,j,k]).Expr),x.Context)
+            /// Computes the cosine of the operand.
             static member cos(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.cos(x[i,j,k]).Expr),x.Context)
+            /// Computes the tangent of the operand.
             static member tan(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.tan(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse sine of the operand.
             static member asin(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.asin(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse cosine of the operand.
             static member acos(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.acos(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse tangent of the operand.
             static member atan(x:complex3)=complex3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan(x[i,j,k]).Expr),x.Context)
+            /// Computes the exponential of the operand.
             static member exp(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.exp(x[i,j,k]).Expr),x.Context)
+            /// Computes the absolute value or complex magnitude of the operand.
             static member abs(x:complex3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.abs(x[i,j,k]).Expr),x.Context)
+            /// Computes the natural logarithm of the operand.
             static member log(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log(x[i,j,k]).Expr),x.Context)
+            /// Computes the base-10 logarithm of the operand.
             static member log10(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log10(x[i,j,k]).Expr),x.Context)
+            /// Computes the square root of the operand.
             static member sqrt(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sqrt(x[i,j,k]).Expr),x.Context)
+            /// Computes the complex conjugate of the operand.
             static member conj(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.conj(x[i,j,k]).Expr),x.Context)
 
     [<AutoOpen>]
+    /// Conversions for three-dimensional real arrays.
     module Real3Extensions =
         type IReal3 with
             /// Views this real three-dimensional expression array as a double-precision array.
             member this.ToDouble3 = double3(this.Etype, this.Expr, this.Context)
 
     [<AutoOpen>]
+    /// Conversions for three-dimensional numeric arrays.
     module Num3Extensions =
         type INum3 with
             /// Views this three-dimensional numeric expression array as a complex array.

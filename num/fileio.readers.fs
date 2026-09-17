@@ -8,10 +8,13 @@ namespace Aqualis
 
     open System
 
+    /// Validates variable expressions used as file-read targets.
     module private FileIoReadTarget =
+        /// Rejects a file-read target that is not a variable.
         let reject() : 'T =
             invalidOp "A file-read target must be a variable."
 
+        /// Validates that a file-read target is a variable in the expected context.
         let require (ctx:Aqualis) target =
             match target with
             |RNvr(_,c) when c.CodeFile=None ->
@@ -24,12 +27,14 @@ namespace Aqualis
             |RStr _ ->
                 reject()
 
+    /// Reads formatted values from a generated file.
     type TextReader internal (ctx:Aqualis,fp:string,iostat:int0,fortranByteFile:option<string*string>) =
         // let context() = ctx.RequireGenerationContext()
         // let program() = (context()).CurrentProgram
         let writein text = ctx.codewritein(text + "\n")
         let mutable byteStreamOpened = false
         let mutable formattedStreamUsed = false
+        /// Emits a check that enough bytes remain for the requested text record.
         member _.RequireRecordCapacity(count:int0) =
             let size = count.Expr.eval ctx
             match ctx.language with
@@ -56,6 +61,7 @@ namespace Aqualis
                     writein(fp + ".seek(" + position.code + ")")
                     writein("if " + size + " > " + remaining.code + ": raise ValueError('Aqualis: truncated text data.')")
             |_ -> ()
+        /// Reads a formatted text record into the supplied variable expressions.
         member _.tt (lst:exprString) =
             if ctx.language = PHP then
                 raise (NotSupportedException("TextReader.tt is not supported for PHP."))
@@ -235,12 +241,14 @@ namespace Aqualis
                     |_ -> ()
             |_ -> ()
 
+        /// Closes the byte stream associated with the text reader.
         member _.CloseByteStream() =
             match fortranByteFile with
             |Some(_,byteFp) when byteStreamOpened ->
                 writein("close(" + byteFp + ")")
             |_ -> ()
 
+        /// Emits a byte read into a variable.
         member private _.ReadByte target =
             let e,_ = FileIoReadTarget.require ctx target
             match e.etype,e with
@@ -272,15 +280,20 @@ namespace Aqualis
                 |_ -> ()
             |_ -> FileIoReadTarget.reject()
 
+        /// Reads a text value into the supplied variable.
         member this.t (x:int0) = this.tt (iv x)
+        /// Reads a text value into the supplied variable.
         member this.t (x:double0) = this.tt (dv x)
+        /// Reads a text value into the supplied variable.
         member this.t (x:complex0) = this.tt (zv x)
+        /// Reads binary data into the supplied variable.
         member this.b (x:int0) =
             match ctx.language with
             |LaTeX |HTML -> this.tt (iv x)
             |PHP -> raise (NotSupportedException("TextReader.b is not supported for PHP."))
             |_ -> this.ReadByte(RNvr(x.Expr,x.Context))
 
+    /// Reads binary values from a generated file.
     type BinReader internal (ctx:Aqualis,fp:string,iostat:int0) =
         // let context() = ctx.RequireGenerationContext()
         // let program() = (context()).CurrentProgram
@@ -291,6 +304,7 @@ namespace Aqualis
         let readC target =
             writein("if (fread(&" + target + ",sizeof(" + target + "),1," + fp +
                     ") != 1) { fprintf(stderr, \"Aqualis: invalid binary input record.\\n\"); exit(EXIT_FAILURE); }")
+        /// Emits bounds checks for the requested binary array payload.
         member _.RequireArrayPayload(dimensions:int0 list,bytesPerElement:int) =
             if List.isEmpty dimensions || bytesPerElement <= 0 then
                 invalidArg (nameof dimensions) "Array dimensions are required and element size must be positive."
@@ -343,6 +357,7 @@ namespace Aqualis
                     writein(fp + ".seek(" + position.code + ")")
                     writein("if (" + String.Join(" * ",sizes) + ") * " + string bytesPerElement + " > " + remaining.code + ": raise ValueError('Aqualis: truncated array data.')")
             |_ -> ()
+        /// Emits a binary read into a variable.
         member private _.ReadBin target =
             let v,targetContext =
                 FileIoReadTarget.require ctx target
@@ -400,6 +415,9 @@ namespace Aqualis
                 |_ ->
                     FileIoReadTarget.reject()
             |_ -> ()
+        /// Reads binary data into the supplied variable.
         member this.b (x:int0) = this.ReadBin(RNvr(x.Expr,x.Context))
+        /// Reads binary data into the supplied variable.
         member this.b (x:double0) = this.ReadBin(RNvr(x.Expr,x.Context))
+        /// Reads binary data into the supplied variable.
         member this.b (x:complex0) = this.ReadBin(RNvr(x.Expr,x.Context))

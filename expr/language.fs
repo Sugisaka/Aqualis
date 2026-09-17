@@ -9,41 +9,47 @@ namespace Aqualis
     open System
     open System.Globalization
     
-    ///<summary>言語を指定</summary>
+    /// Target language used for generated code, markup, or direct evaluation.
     type Language =
-        ///<summary>Fortran</summary>
+        /// Fortran source code.
         |Fortran
-        ///<summary>C</summary>
+        /// C99 source code.
         |C99
-        ///<summary>LaTeX</summary>
+        /// LaTeX markup.
         |LaTeX
-        ///<summary>HTML</summary>
+        /// HTML markup.
         |HTML
-        ///<summary>HTMLシーケンス図</summary>
+        /// HTML sequence diagram markup.
         |HTMLSequenceDiagram
-        ///<summary>Python</summary>
+        /// Python source code.
         |Python
-        ///<summary>JavaScript</summary>
+        /// JavaScript source code.
         |JavaScript
-        ///<summary>PHP</summary>
+        /// PHP source code.
         |PHP
-        ///<summary>直接計算</summary>
+        /// Direct numeric evaluation without generating source code.
         |Numeric
 
     [<RequireQualifiedAccess>]
+    /// Raises consistent errors for operations unsupported by a target or evaluation mode.
     module internal UnsupportedOperation =
+        /// Raises a <see cref="T:System.NotSupportedException"/> with the supplied message.
         let raise message : 'T =
             raise (NotSupportedException message)
 
+        /// Rejects an operation unsupported by the requested code-generation target.
         let codeGeneration target operation : 'T =
             raise $"{target} code generation does not support {operation}."
 
+        /// Rejects an operation unsupported by symbolic differentiation.
         let symbolicDifferentiation operation : 'T =
             raise $"Symbolic differentiation does not support {operation}."
 
+        /// Rejects an operation unsupported by direct numeric evaluation.
         let numericEvaluation operation : 'T =
             raise $"Numeric evaluation does not support {operation}."
 
+        /// Rejects an unsupported function-argument operation.
         let functionArgument operation : 'T =
             raise $"Function arguments do not support {operation}."
 
@@ -51,17 +57,22 @@ namespace Aqualis
     /// machine-readable artifacts.
     [<RequireQualifiedAccess>]
     module InvariantFormat =
+        /// Formats an integer without locale-dependent separators or digits.
         let integer (value:int) =
             value.ToString(CultureInfo.InvariantCulture)
 
+        /// Formats a finite floating-point number with the specified invariant-culture format.
+        /// Throws for NaN or infinity.
         let numberWithFormat format (value:double) =
             if not (Double.IsFinite value) then
                 invalidArg (nameof value) "A non-finite number cannot be written to a machine-readable artifact."
             value.ToString(format, CultureInfo.InvariantCulture)
 
+        /// Formats a finite floating-point number for round-trip parsing.
         let number (value:double) =
             numberWithFormat "R" value
 
+        /// Formats a finite numeric literal for generated code.
         let private finiteLiteral language (value:double) =
             match language with
             |Fortran ->
@@ -106,7 +117,9 @@ namespace Aqualis
                 finiteLiteral language value
 
     [<RequireQualifiedAccess>]
+    /// Escapes text for HTML rendering.
     module internal HtmlTextEncoding =
+        /// Escapes text for HTML content.
         let textContent (value:string) =
             if isNull value then nullArg (nameof value)
 
@@ -115,18 +128,20 @@ namespace Aqualis
                 .Replace("<", "&lt;")
                 .Replace(">", "&gt;")
 
-    ///<summary>設定のONまたはOFFを指定</summary>
+    /// On/off setting used by generated-code options.
     type Switch =
+        /// Enables the option.
         |ON
+        /// Disables the option.
         |OFF
 
-    ///<summary>変数、配列とその次元の指定</summary>
+    /// Shape of a scalar or array variable, including array extents.
     type VarType =
-        ///<summary>変数</summary>
+        /// Scalar variable.
         |A0
-        ///<summary>1次元配列(要素数)</summary>
+        /// One-dimensional array with its element count.
         |A1 of int
-        ///<summary>2次元配列(要素数1,要素数2)</summary>
+        /// Two-dimensional array with the extent of each dimension.
         |A2 of int*int
-        ///<summary>3次元配列(要素数1,要素数2,要素数3)</summary>
+        /// Three-dimensional array with the extent of each dimension.
         |A3 of int*int*int

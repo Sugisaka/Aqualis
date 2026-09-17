@@ -10,7 +10,9 @@ namespace Aqualis
     open System.Text
 
     [<RequireQualifiedAccess>]
+    /// Encodes file names and string literals for target languages.
     module private FileNameCode =
+        /// Appends an escaped character to a target-language string literal.
         let private appendCommonEscape (builder:StringBuilder) character =
             match character with
             | '\\' -> builder.Append("\\\\") |> ignore; true
@@ -20,6 +22,7 @@ namespace Aqualis
             | '\t' -> builder.Append("\\t") |> ignore; true
             | _ -> false
 
+        /// Escapes a string as a C literal.
         let cStringLiteral (value:string) =
             if isNull value then nullArg (nameof value)
             if value.IndexOf '\u0000' >= 0 then
@@ -38,12 +41,14 @@ namespace Aqualis
                         builder.Append(character) |> ignore
             builder.Append('"').ToString()
 
+        /// Escapes a string as a Fortran literal.
         let fortranStringLiteral (value:string) =
             if isNull value then nullArg (nameof value)
             if value |> Seq.exists Char.IsControl then
                 invalidArg (nameof value) "A generated Fortran file name cannot contain control characters."
             "'" + value.Replace("'", "''") + "'"
 
+        /// Escapes a string as a Python literal.
         let pythonStringLiteral (value:string) =
             if isNull value then nullArg (nameof value)
             if value.IndexOf '\u0000' >= 0 then
@@ -59,13 +64,16 @@ namespace Aqualis
                         builder.Append(character) |> ignore
             builder.Append('"').ToString()
 
+    /// File input and output operations for an Aqualis context.
     type ContextIo internal (ctx:Aqualis) =
         // let context() = ctx.RequireGenerationContext()
         // let program() = (context()).CurrentProgram
         let writein text = ctx.codewritein(text + "\n")
 
+        /// Gets the owning generation context.
         member internal _.GenerationContext = ctx
 
+        /// Opens a generated file operation in the selected mode.
         member private this.fileAccess (filename:exprString,intDigit:option<int>) readmode isbinary code =
             match ctx.language with
             |Fortran ->
@@ -247,6 +255,7 @@ namespace Aqualis
                 raise (NotSupportedException("File I/O is not supported for " + string ctx.language + "."))
             |_ -> ()
 
+        /// Emits a formatted text write.
         member private this.Write1 (fp:string) (lst:exprString) =
             match ctx.language with
             |Fortran ->
@@ -406,6 +415,7 @@ namespace Aqualis
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
 
+        /// Emits a compact formatted text write.
         member private this.Write2 (fp:string) (lst:exprString) =
             match ctx.language with
             |Fortran ->
@@ -550,6 +560,7 @@ namespace Aqualis
                 writein(fp+".write(\""+format+"\\n\" %("+code+"))\n")
             |_ -> ()
 
+        /// Emits a binary write for an expression.
         member private this.Write_bin (fp:string) (v:expr) =
             match ctx.language with
             |Fortran ->
@@ -653,6 +664,7 @@ namespace Aqualis
                     ()
             |_ -> ()
 
+        /// Emits a formatted text read.
         member private this.Read (fp:string) (iostat:int0) (lst:exprString) =
             if List.isEmpty lst.data then
                 invalidArg (nameof lst) "A file-read record must contain at least one target."
@@ -866,6 +878,7 @@ namespace Aqualis
                     ctx.indentDec()
             |_ -> ()
 
+        /// Emits a binary read into an expression.
         member private this.Read_bin (fp:string) (iostat:int0) (v:expr) =
             match ctx.language with
             |Fortran ->
@@ -922,6 +935,7 @@ namespace Aqualis
                     FileIoReadTarget.reject()
             |_ -> ()
 
+        /// Emits a byte read into an expression.
         member private this.Read_byte (fp:string) (iostat:int0) (e:expr) =
             writein("read("+fp+", iostat="+iostat.Expr.eval ctx+") byte_tmp\n")
             let ee =

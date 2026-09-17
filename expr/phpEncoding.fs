@@ -8,8 +8,10 @@ namespace Aqualis
 
 open System.Text
 
+/// Encodes .NET strings for insertion into generated PHP source.
 module internal PhpEncoding =
-    /// Renders a .NET string as a PHP double-quoted string literal.
+    /// Renders a .NET string as a PHP double-quoted literal, escaping quotes,
+    /// backslashes, dollar signs, and control characters.
     let stringLiteral (value:string) =
         if isNull value then nullArg (nameof value)
 
@@ -27,7 +29,7 @@ module internal PhpEncoding =
 
         result.Append('"').ToString()
 
-    /// Renders a PHP string literal for inclusion in another quoted code string.
+    /// Escapes a PHP string literal again for inclusion in another quoted code string.
     let codeStringLiteral value =
         let literal = stringLiteral value
         literal.Replace("\\", "\\\\").Replace("\"", "\\\"")

@@ -6,10 +6,13 @@
 //
 namespace Aqualis
 
+/// Constants used by optimization routines.
 module private OptimizationDefaults =
     [<Literal>]
+    /// Maximum number of bracketing expansion steps.
     let MaxBracketExpansions = 64
 
+/// Optimization operations for an Aqualis context.
 type ContextOptimization internal (context:Aqualis) =
 
     /// BFGS公式により逆ヘッセ行列の近似を更新します。
@@ -414,6 +417,7 @@ type ContextOptimization internal (context:Aqualis) =
         this.findminQuasiNewtonCore (n,m,maxBracketExpansions) x0 dd0 f df stepProc
 
 [<AutoOpen>]
+/// Adds optimization operations to Aqualis.
 module CompilationEnvironmentOptimizationExtensions =
     type Aqualis with
         ///<summary>非線形最適化</summary>

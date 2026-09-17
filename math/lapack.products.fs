@@ -9,12 +9,15 @@ namespace Aqualis
     open System
 
     [<RequireQualifiedAccess>]
+    /// Validates LAPACK inputs and reports backend errors.
     module internal LapackValidation =
+        /// Requires a target language with the requested LAPACK operation.
         let requireBackend (context:Aqualis) operation =
             match context.Language with
             | C99 | Fortran | Python | LaTeX | HTML -> ()
             | language -> UnsupportedOperation.codeGeneration (string language) operation
 
+        /// Reports a failed LAPACK precondition.
         let require (context:Aqualis) (condition:bool0) message =
             match context.language with
             | C99 ->
@@ -34,6 +37,7 @@ namespace Aqualis
                     context.codewritein("<?php throw new Exception(" + OutputTextLiteral.c ("Aqualis: " + message) + "); ?>\n"))
             | _ -> ()
 
+        /// Checks the LAPACK status value and reports a failed operation.
         let checkInfo (context:Aqualis) (info:int0) operation =
             match context.language with
             | C99 ->
@@ -42,6 +46,7 @@ namespace Aqualis
                 context.codewritein("if (" + info.code + " /= 0) error stop 'Aqualis: LAPACK " + operation + " failed.'\n")
             | _ -> ()
 
+    /// LAPACK-backed linear algebra operations for an Aqualis context.
     type ContextLa internal (context:Aqualis) =
         let requirePythonLinalg symbol =
             context.pythonImports.RequireSymbol("scipy.linalg", symbol)
@@ -86,7 +91,9 @@ namespace Aqualis
                         sumSquares <== sumSquares + realRatio * realRatio + imaginaryRatio * imaginaryRatio
                 code scale sumSquares
 
+        /// Gets the owning generation context.
         member internal _.GenerationContext = context
+        /// Requires a supported Python linear algebra backend.
         member internal _.RequirePythonLinalg symbol = requirePythonLinalg symbol
 
         /// <summary>

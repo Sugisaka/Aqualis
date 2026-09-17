@@ -6,15 +6,20 @@
 //
 namespace Aqualis
 
+    /// Helpers for one-dimensional Fourier transforms.
     module fft1 =
 
+        /// Wrapper for a generated FFTW plan variable.
         type fftw_plan1(sname_,name,context:Aqualis) =
+            /// Gets the FFTW plan structure name.
             static member sname = "fftw_plan"
             new(name,context:Aqualis) =
                 context.str.regWithoutAddStructure(fftw_plan1.sname,name)
                 fftw_plan1(fftw_plan1.sname,name,context)
+            /// Gets the generated plan variable name.
             member __.code = name
 
+        /// Reorders an odd-length array in place.
         let fftshift_odd (context:Aqualis) (a:complex1) =
             let n2 = a.size1./2 + 1
             context.ch.iiz <| fun (c1,c2,tmp) ->
@@ -28,6 +33,7 @@ namespace Aqualis
                     c1 <== c2
                 a[c1+n2-1] <== tmp
 
+        /// Swaps the halves of an even-length array in place.
         let fftshift_even (context:Aqualis) (a:complex1) =
             let n2 = a.size1./2
             context.ch.z <| fun tmp ->
@@ -36,6 +42,7 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
+        /// Reorders an odd-length array in place.
         let ifftshift_odd (context:Aqualis) (a:complex1) =
             context.br.if1 (a.size1 .> 1) <| fun () ->
                 let n2 = a.size1./2
@@ -50,6 +57,7 @@ namespace Aqualis
                         c1 <== c2
                     a[c1+n2+1] <== tmp
 
+        /// Swaps the halves of an even-length array in place.
         let ifftshift_even (context:Aqualis) (a:complex1) =
             let n2 = a.size1./2
             context.ch.z <| fun tmp ->
@@ -58,6 +66,7 @@ namespace Aqualis
                     a[i+n2] <== a[i]
                     a[i] <== tmp
 
+        /// Shifts zero frequency to the center of a 1D array in place.
         let fftshift1 (context:Aqualis) (x:complex1) =
             context.br.if1 (x.size1 .> 1) <| fun () ->
                 context.br.if2 (x.size1%2 .= 0)
@@ -66,6 +75,7 @@ namespace Aqualis
                 <| fun () ->
                     fftshift_odd context x
 
+        /// Undoes a frequency-center shift on a 1D array in place.
         let ifftshift1 (context:Aqualis) (x:complex1) =
             context.br.if1 (x.size1 .> 1) <| fun () ->
                 context.br.if2 (x.size1%2 .= 0)
@@ -74,6 +84,7 @@ namespace Aqualis
                 <| fun () ->
                     ifftshift_odd context x
 
+        /// Generates a one-dimensional FFT or inverse FFT.
         let private transform (context:Aqualis) (planname:string,data1:complex1,data2:complex1,fftdir:int) =
             match context.Language with
             |Fortran|C99|LaTeX|HTML|Python -> ()
@@ -146,17 +157,23 @@ namespace Aqualis
                     context.iter.num N <| fun i ->
                         data2.[i]<==data2.[i]/N
 
+        /// Generates a forward 1D FFT from the input array to the output array.
         let fft context (planname:string,data1:complex1,data2:complex1) =
                 transform context (planname,data1,data2,1)
 
+        /// Generates an inverse 1D FFT from the input array to the output array.
         let ifft context (planname:string,data1:complex1,data2:complex1) =
                 transform context (planname,data1,data2,-1)
 
+    /// Provides 1D FFT operations for a generation context.
     type ContextFft1 internal (context:Aqualis) =
+        /// Generates a forward 1D FFT.
         member _.fft args = fft1.fft context args
+        /// Generates an inverse 1D FFT.
         member _.ifft args = fft1.ifft context args
 
     [<AutoOpen>]
+    /// Exposes 1D FFT operations through Aqualis.
     module CompilationEnvironmentFft1Extensions =
         type Aqualis with
             ///<summary>1次元フーリエ変換</summary>

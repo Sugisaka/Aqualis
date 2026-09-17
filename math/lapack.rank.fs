@@ -7,7 +7,9 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Adds rank and pseudoinverse calculations to the linear-algebra context.
     module ContextLaRankExtensions =
+        /// Validates matrix shapes for pseudoinverse generation.
         let private requirePseudoInverseShapes (context:Aqualis) (rows:int0) (columns:int0)
                                                (resultRows:int0) (resultColumns:int0) =
             LapackValidation.require context (rows .<= 0) "LAPACK pseudoinverse matrix rows must be positive."
@@ -15,11 +17,12 @@ namespace Aqualis
             LapackValidation.require context (resultRows .=/ columns) "LAPACK pseudoinverse output shape must be matrix columns by rows."
             LapackValidation.require context (resultColumns .=/ rows) "LAPACK pseudoinverse output shape must be matrix columns by rows."
 
+        /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
-            ///<summary>行列の階数</summary>
-            ///<param name="rank">行列matの階数</param>
-            ///<param name="mat">行列</param>
-            ///<param name="cond">0とみなす上限値</param>
+            /// <summary>Counts singular values of a complex matrix that exceed a cutoff.</summary>
+            /// <param name="rank">Output rank as a numeric expression.</param>
+            /// <param name="mat">Complex matrix whose rank is computed.</param>
+            /// <param name="cond">Singular values at or below this cutoff are excluded.</param>
             member this.rank (rank:double0,mat:complex2,cond:double0) =
                 LapackValidation.requireBackend this.GenerationContext "LAPACK rank"
                 this.GenerationContext.olist.add "-llapack"
@@ -111,10 +114,10 @@ namespace Aqualis
                             this.GenerationContext.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.Expr.eval this.GenerationContext+")"+"\n")
                         |_ -> ()
     
-            ///<summary>行列の階数</summary>
-            ///<param name="rank">行列matの階数</param>
-            ///<param name="mat">行列</param>
-            ///<param name="cond">0とみなす上限値</param>
+            /// <summary>Counts singular values of a real matrix that exceed a cutoff.</summary>
+            /// <param name="rank">Output integer rank.</param>
+            /// <param name="mat">Real matrix whose rank is computed.</param>
+            /// <param name="cond">Singular values at or below this cutoff are excluded.</param>
             member this.rank (rank:int0,mat:double2,cond:double0) =
                 LapackValidation.requireBackend this.GenerationContext "LAPACK rank"
                 this.GenerationContext.olist.add "-llapack"
@@ -204,10 +207,10 @@ namespace Aqualis
                             this.GenerationContext.codewritein(rank.code+" = numpy.sum("+s.code+" > "+cond.Expr.eval this.GenerationContext+")"+"\n")
                         |_ -> ()
     
-            ///<summary>疑似逆行列の計算</summary>
-            ///<param name="mat2">matの疑似逆行列</param>
-            ///<param name="mat">行列</param>
-            ///<param name="cond">特異値を0とみなす上限値</param>
+            /// <summary>Computes a complex Moore-Penrose pseudoinverse using SVD.</summary>
+            /// <param name="mat2">Output pseudoinverse, with transposed matrix dimensions.</param>
+            /// <param name="mat">Complex input matrix.</param>
+            /// <param name="cond">Singular values at or below this cutoff are treated as zero.</param>
             member this.inverse_matrix2 (mat2:complex2,mat:complex2,cond:double0) =
                 LapackValidation.requireBackend this.GenerationContext "LAPACK pseudoinverse"
                 this.GenerationContext.group.section "疑似逆行列" <| fun () ->
@@ -238,10 +241,10 @@ namespace Aqualis
                                     this.GenerationContext.iter.num u2.size1 <| fun p ->
                                         mat2[i,j] <== mat2[i,j] + asm.conj(vt[p,i])*u2[p,j]
                                         
-            ///<summary>疑似逆行列の計算</summary>
-            ///<param name="mat2">matの疑似逆行列</param>
-            ///<param name="mat">行列</param>
-            ///<param name="cond">特異値を0とみなす上限値</param>
+            /// <summary>Computes a real Moore-Penrose pseudoinverse using SVD.</summary>
+            /// <param name="mat2">Output pseudoinverse, with transposed matrix dimensions.</param>
+            /// <param name="mat">Real input matrix.</param>
+            /// <param name="cond">Singular values at or below this cutoff are treated as zero.</param>
             member this.inverse_matrix2 (mat2:double2,mat:double2,cond:double0) =
                 LapackValidation.requireBackend this.GenerationContext "LAPACK pseudoinverse"
                 this.GenerationContext.group.section "疑似逆行列" <| fun () ->

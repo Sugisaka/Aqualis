@@ -5,16 +5,20 @@ open System
 open System.Net
 open System.Text.RegularExpressions
 
+/// Compiled patterns for supported Markdown syntax.
 module private MarkdownRegex =
+    /// Timeout and culture settings for Markdown regex patterns.
     let private options =
         RegexOptions.Compiled ||| RegexOptions.CultureInvariant
 
+    /// Creates a compiled Markdown pattern with a timeout.
     let private create pattern =
         Regex(pattern, options, System.TimeSpan.FromMilliseconds 500.0)
 
     // Inline constructs are ordered from the most structurally specific to the
     // least specific. Regex.Replace walks the input once and selects the first
     // alternative that matches at each position.
+    /// Pattern for supported inline Markdown constructs.
     let inlineSyntax =
         create (
             @"(?<code>`(?<codeText>[^`]*)`)" +
@@ -27,17 +31,28 @@ module private MarkdownRegex =
             @"|(?<wikiSection>(?<!!)\[\[(?<wikiSectionUrl>[^#\|]+)#(?<wikiSectionName>[^\]]+)\]\])" +
             @"|(?<wiki>(?<!!)\[\[(?<wikiUrl>[^\]]+)\]\])"
         )
+    /// Pattern for a fenced code-block start.
     let codeBlockStart = create @"^```\s*([A-Za-z0-9_+-]+)\s*$"
+    /// Pattern for a fenced code-block end.
     let codeBlockEnd = create @"^```\s*$"
+    /// Pattern for a Markdown image.
     let markdownImage = create @"!\[([^\]]*)\]\(([^)]+)\)"
+    /// Pattern for a wiki-style image.
     let wikiImage = create @"!\[\[([^\]]+)\]\]"
+    /// Pattern for a Markdown heading.
     let heading = create @"^(?<marks>#{1,5})\s+(?<text>.+)$"
+    /// Pattern for an unordered list item.
     let unorderedList = create @"^(\s*)-\s+(.*)$"
+    /// Pattern for an ordered list item.
     let orderedList = create @"^( *)(\d+)\.\s+(.*)$"
+    /// Pattern for a Markdown table cell.
     let tableCell = create @"\|([^|]*)"
+    /// Pattern for a Markdown table separator.
     let tableSeparator = create @"^:?-{3,}:?$"
+    /// Pattern for a display-math delimiter.
     let mathBlockDelimiter = create @"^\$\$\s*$"
 
+/// Kinds of block currently open during Markdown parsing.
 type MarkDownContents =
     /// 箇条書き（インデント）
     |UL of int
@@ -50,6 +65,7 @@ type MarkDownContents =
     /// コードブロック（言語）
     |CodeBlock of string
 
+/// Parsed inline Markdown content.
 type InlineNode =
     |Text of string
     |Strong of string
@@ -88,7 +104,9 @@ type MarkDown<'a> =
     }
 
 [<AutoOpen>]
+/// Parses Markdown into callbacks for document generation.
 module markDown =
+    /// Closes all open Markdown block callbacks.
     let private closeAllStack (md:MarkDown<'a>) data stack =
         List.fold (fun d (x:MarkDownContents) ->
             match x with
@@ -98,6 +116,7 @@ module markDown =
             |Table -> md.CloseTable d
             |CodeBlock _ -> md.CloseCodeBlock d) data stack
 
+    /// Converts a regex match into an inline node.
     let private inlineNode (m:Match) =
         if m.Groups["code"].Success then
             InlineCode m.Groups["codeText"].Value
@@ -133,6 +152,7 @@ module markDown =
         else
             Text m.Value
 
+    /// Parses supported inline Markdown constructs.
     let private parseInline (value:string) =
         let nodes = ResizeArray<InlineNode>()
         let mutable position = 0
@@ -148,6 +168,7 @@ module markDown =
 
         nodes |> Seq.toList
 
+    /// Checks whether a line is a Markdown table separator.
     let private isTableSeparator (cells:string list) =
         let rec allButLastAreSeparators (remaining:string list) =
             match remaining with
@@ -158,6 +179,7 @@ module markDown =
                 allButLastAreSeparators rest
         allButLastAreSeparators cells
 
+    /// Parses Markdown from a reader, carrying open block state and callback results.
     let rec readmd (md:MarkDown<'a>) (rd:StreamReader) (stack:list<MarkDownContents>) (data:list<'a>) =
         // 閉じていないタグをすべて閉じる
         match rd.ReadLine() with
@@ -300,13 +322,16 @@ module markDown =
                 |_ ->
                     readmd md rd stack (md.Paragraph (parseInline s) data)
                     
+    /// Parses a Markdown file using the supplied rendering callbacks.
     let readMarkDown (MarkDownfilename:string) (md:MarkDown<'a>) =
         use rd = new StreamReader(MarkDownfilename)
         readmd md rd [] []
 
+    /// Encodes literal text for HTML output.
     let private encodeHtml (value:string) =
         WebUtility.HtmlEncode(value)
 
+    /// Accepts safe HTTP(S) or relative links and replaces other URLs.
     let private sanitizeUrl (value:string) =
         let value = value.Trim()
         match Uri.TryCreate(value, UriKind.Absolute) with
@@ -320,6 +345,7 @@ module markDown =
         | _ ->
             "#"
 
+    /// Renders parsed inline nodes as escaped HTML.
     let private renderInline nodes =
         nodes
         |> List.map (function
@@ -346,6 +372,7 @@ module markDown =
                 "</a>")
         |> String.concat ""
 
+    /// Converts a Markdown file into escaped HTML output.
     let convertHTML (MarkDownfilename:string) (HTMLfilename:string) =
         use wr = new StreamWriter(HTMLfilename)
         let md = {

@@ -2,6 +2,7 @@ namespace Aqualis
 
 open System
 
+/// Generates OpenMP parallel constructs for Fortran or C99.
 type ContextOmp internal (c:Aqualis) =
 
     let ensureSupportedLanguage() =
@@ -104,21 +105,26 @@ type ContextOmp internal (c:Aqualis) =
             c.writeRaw body
         |_ -> ()
 
+    /// Emits a parallel loop with the default thread count.
     member _.parallelize code = emitParallelFor None None code
+    /// Emits a parallel loop with a specified positive thread count.
     member _.parallelize_th threadCount code = emitParallelFor (Some threadCount) None code
 
+    /// Emits a parallel loop that reduces a scalar using +, -, or *.
     member _.reduction(variable:INum0, operation:string) code =
         Aqualis.merge c variable.Context |> ignore
         match operation with
         |"+"|"-"|"*" -> emitParallelFor None (Some(operation + ":" + variable.Code)) code
         |_ -> invalidArg (nameof operation) "OpenMP reduction supports +, -, and *."
 
+    /// Emits a scalar reduction using a specified positive thread count.
     member _.reduction_th(threadCount:int, variable:INum0, operation:string) code =
         Aqualis.merge c variable.Context |> ignore
         match operation with
         |"+"|"-"|"*" -> emitParallelFor (Some threadCount) (Some(operation + ":" + variable.Code)) code
         |_ -> invalidArg (nameof operation) "OpenMP reduction supports +, -, and *."
 
+    /// Emits an OpenMP parallel sections region.
     member _.sections threadCount code =
         validateRegion (Some threadCount)
         let body,names = captureParallelBody code
@@ -140,6 +146,7 @@ type ContextOmp internal (c:Aqualis) =
             c.codewritein "}"
         |_ -> ()
 
+    /// Emits one section in an OpenMP sections region.
     member _.section code =
         match c.language with
         |Fortran ->
@@ -152,17 +159,20 @@ type ContextOmp internal (c:Aqualis) =
             c.codewritein "}"
         |_ -> invalidOp "OpenMP generation is available only for Fortran and C99."
 
+    /// Gets an expression for the current OpenMP thread number.
     member _.thread_num =
         match c.language with
         |Fortran|C99 -> int0(Var(It 4,"omp_get_thread_num()",NaN), context=c)
         |_ -> invalidOp "OpenMP thread numbers are available only for Fortran and C99."
 
+    /// Gets an expression for the maximum number of OpenMP threads.
     member _.max_threads =
         match c.language with
         |Fortran|C99 -> int0(Var(It 4,"omp_get_max_threads()",NaN), context=c)
         |_ -> invalidOp "OpenMP thread counts are available only for Fortran and C99."
 
 [<AutoOpen>]
+/// Exposes OpenMP generation through Aqualis.
 module CompilationEnvironmentOmpExtensions =
     type Aqualis with
         ///<summary>OpenMP</summary>

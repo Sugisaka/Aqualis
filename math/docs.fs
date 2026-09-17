@@ -8,8 +8,9 @@ namespace Aqualis
 
     open System
 
+    /// Controls line breaks, labels, and numbering within generated equations.
     type eqmode(context:Aqualis) =
-        ///<summary>改行</summary>
+        /// Emits a LaTeX line break; has no effect for other targets.
         member _.eqReturn() =
             match context.language with
             |LaTeX ->
@@ -17,7 +18,7 @@ namespace Aqualis
             |_ ->
                 ()
 
-        ///<summary>数式番号なし</summary>
+        /// Suppresses numbering of the current LaTeX equation line.
         member _.eqNonumber() =
             match context.language with
             |LaTeX ->
@@ -25,7 +26,7 @@ namespace Aqualis
             |_ ->
                 ()
 
-        ///<summary>改行</summary>
+        /// Emits a LaTeX equation label; has no effect for other targets.
         member _.eqLabel(lb:string) =
             match context.language with
             |LaTeX ->
@@ -33,18 +34,19 @@ namespace Aqualis
             |_ ->
                 ()
 
-        ///<summary>数式番号なし改行</summary>
+        /// Suppresses numbering and then emits a LaTeX line break.
         member this.nnReturn() =
             this.eqNonumber()
             this.eqReturn()
 
-        ///<summary>空白の左辺</summary>
+        /// Gets an empty complex expression for the left side of an equation.
         member _.nl with get() = complex0(Var(Zt,"",NaN))
 
-    ///<summary>変数宣言</summary>
+    /// Emits mathematical document markup through the active generation context.
     type ContextDoc internal (context:Aqualis) =
 
-        ///<summary>段落</summary>
+        /// Emits a LaTeX paragraph marker, then invokes the content callback.
+        /// For other targets, it only invokes the callback.
         member this.para code =
             match context.language with
             |LaTeX ->
@@ -53,7 +55,7 @@ namespace Aqualis
             |_ ->
                 code()
 
-        ///<summary>テキスト</summary>
+        /// Emits text in LaTeX, or a comment for other target languages.
         member this.text (s:string) =
             match context.language with
             |LaTeX ->
@@ -61,7 +63,7 @@ namespace Aqualis
             |_ ->
                 context.group.comment s
 
-        ///<summary>図の挿入</summary>
+        /// Emits a LaTeX figure with a caption and filename-based label.
         member this.inputfigure (filename:string) (caption:string) =
             context.hlist.add "\\usepackage{graphicx}"
             match context.language with
@@ -76,7 +78,7 @@ namespace Aqualis
             |_ ->
                 context.group.comment (filename+": "+caption)
 
-        ///<summary>番号付き箇条書き</summary>
+        /// Emits a LaTeX numbered list, or invokes its items directly for other targets.
         member this.enumerate (slst:(unit->unit)list) =
             match context.language with
             |LaTeX ->
@@ -89,7 +91,7 @@ namespace Aqualis
                 for s in slst do
                     s()
 
-        ///<summary>番号なし箇条書き</summary>
+        /// Emits a LaTeX bulleted list, or invokes its items directly for other targets.
         member this.itemize (slst:(unit->unit)list) =
             match context.language with
             |LaTeX ->
@@ -102,7 +104,7 @@ namespace Aqualis
                 for s in slst do
                     s()
 
-        ///<summary>数式</summary>
+        /// Runs the callback inside an aligned equation in LaTeX or HTML.
         member this.eq code =
             let e = eqmode(context)
             match context.language with
@@ -119,27 +121,32 @@ namespace Aqualis
             |_ ->
                 code e
 
-        ///<summary>変数（変数リストに追加しない）</summary>
+        /// Creates a symbolic variable without registering it in the variable list.
         member this.var (tp,name:string) =
             Var(tp,name,NaN)
 
-        ///<summary>単独の数式</summary>
+        /// Returns the generated code of the supplied expression.
         member this.f (a:int0) = a.code
+        /// Gets the rendered double-precision expression.
         member this.f (a:double0) = a.code
+        /// Gets the rendered complex expression.
         member this.f (a:complex0) = a.code
 
-        ///<summary>単独の数式</summary>
+        /// Returns the generated code of the supplied expression.
         member this.f (a:bool0) = a.code
 
-        ///<summary>単独の数式(インライン)</summary>
+        /// Wraps the generated expression code in inline math delimiters.
         member this.fi (a:int0) = "$"+a.code+"$"
+        /// Wraps a double-precision expression in inline TeX math delimiters.
         member this.fi (a:double0) = "$"+a.code+"$"
+        /// Wraps a complex expression in inline TeX math delimiters.
         member this.fi (a:complex0) = "$"+a.code+"$"
 
-        ///<summary>単独の数式(インライン)</summary>
+        /// Wraps the generated expression code in inline math delimiters.
         member this.fi (a:bool0) = "$"+a.code+"$"
 
-        ///<summary>総和</summary>
+        /// Creates sum notation for LaTeX and HTML output; other targets receive
+        /// a placeholder expression with NaN as its numeric value.
         member this.sum (a:int0,i:int0,b:int0,c:double0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -155,7 +162,7 @@ namespace Aqualis
                 double0(Var(c.etype,"\\sum_{"+ta+"="+ti+"}^{"+tb+"} "+tc,NaN))
             |_ ->
                 double0 NaN
-        ///<summary>総和</summary>
+        /// Creates sum notation for LaTeX and HTML output.
         member this.sum (a:int0,i:int0,b:int0,c:complex0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -172,7 +179,7 @@ namespace Aqualis
             |_ ->
                 complex0 NaN
 
-        ///<summary>総和</summary>
+        /// Creates sum notation for LaTeX and HTML output.
         member this.sum (a:int0,b:int0,c:double0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -187,7 +194,7 @@ namespace Aqualis
                 double0(Var(c.etype,"\\sum_{"+ta+"}^{"+tb+"} "+tc,NaN))
             |_ ->
                 double0 NaN
-        ///<summary>総和</summary>
+        /// Creates sum notation for LaTeX and HTML output.
         member this.sum (a:int0,b:int0,c:complex0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -203,7 +210,8 @@ namespace Aqualis
             |_ ->
                 complex0 NaN
 
-        ///<summary>積分</summary>
+        /// Creates definite-integral notation for LaTeX and HTML output; other
+        /// targets receive a placeholder expression with NaN as its numeric value.
         member this.integral (a:double0,b:double0,eq:double0,x:double0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -219,7 +227,7 @@ namespace Aqualis
                 double0(Var(eq.etype,"\\int_{"+ta+"}^{"+tb+"} "+te+"\\mathrm{d}"+tx,NaN))
             |_ ->
                 double0 NaN
-        ///<summary>積分</summary>
+        /// Creates definite-integral notation for LaTeX and HTML output.
         member this.integral (a:double0,b:double0,eq:complex0,x:double0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -236,19 +244,19 @@ namespace Aqualis
             |_ ->
                 complex0 NaN
 
-        ///<summary>積分</summary>
+        /// Creates definite-integral notation for LaTeX and HTML output.
         member this.integral (a:int,b:double0,eq:double0,x:double0) =
             this.integral (D a,b,eq, x)
 
-        ///<summary>積分</summary>
+        /// Creates definite-integral notation for LaTeX and HTML output.
         member this.integral (a:double0,b:int,eq:double0,x:double0) =
             this.integral (a,D b,eq, x)
 
-        ///<summary>積分</summary>
+        /// Creates definite-integral notation for LaTeX and HTML output.
         member this.integral (a:int,b:int,eq:double0,x:double0) =
             this.integral (D a,D b,eq, x)
 
-        ///<summary>微分</summary>
+        /// Creates ordinary-derivative notation for LaTeX and HTML output.
         member this.diff (f:double0,x:double0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -258,7 +266,7 @@ namespace Aqualis
             |_ ->
                 double0 NaN
 
-        ///<summary>偏微分</summary>
+        /// Creates partial-derivative notation for LaTeX and HTML output.
         member this.pdiff (f:double0,x:double0) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -268,7 +276,7 @@ namespace Aqualis
             |_ ->
                 double0 NaN
 
-        ///<summary>場合分け</summary>
+        /// Creates a cases expression from values and their conditions.
         member this.cases (lst:(double0*string)list) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -280,7 +288,7 @@ namespace Aqualis
             |_ ->
                 double0 NaN
 
-        ///<summary>場合分け</summary>
+        /// Creates a cases expression from values and their conditions.
         member this.cases (lst:(double0*double0)list) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -292,7 +300,7 @@ namespace Aqualis
             |_ ->
                 double0 NaN
 
-        ///<summary>場合分け</summary>
+        /// Creates a cases expression from values and their conditions.
         member this.cases (lst:(double0*bool0)list) =
             match context.language with
             |LaTeX|HTML|HTMLSequenceDiagram ->
@@ -304,32 +312,33 @@ namespace Aqualis
             |_ ->
                 double0 NaN
 
-        ///<summary>括弧「()」</summary>
+        /// Wraps an expression in scalable parentheses.
         member this.par1 (v:double0) = double0(Var(v.etype,"\\left("+v.code+"\\right)",NaN))
 
-        ///<summary>括弧「[]」</summary>
+        /// Wraps an expression in scalable square brackets.
         member this.par2 (v:double0) = double0(Var(v.etype,"\\left["+v.code+"\\right]",NaN))
 
-        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        /// Wraps an expression in square brackets with subscript and superscript.
         member this.par2 (v:double0,a:double0,b:double0) = double0(Var(v.etype,"\\left["+v.code+"\\right]_{"+a.code+"}^{"+b.code+"}",NaN))
 
-        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        /// Wraps an expression in square brackets with subscript and superscript.
         member this.par2 (v:double0,a:int,b:double0) =
             this.par2 (v,D a,b)
 
-        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        /// Wraps an expression in square brackets with subscript and superscript.
         member this.par2 (v:double0,a:double0,b:int) =
             this.par2 (v,a,D b)
 
-        ///<summary>括弧「[]」+下付き・上付き文字</summary>
+        /// Wraps an expression in square brackets with subscript and superscript.
         member this.par2 (v:double0,a:int,b:int) =
             this.par2 (v,D a,D b)
 
-        ///<summary>括弧「{}」</summary>
+        /// Wraps an expression in scalable braces.
         member this.par3 (v:double0) = double0(Var(v.etype,"\\left\\{"+v.code+"\\right\\}",NaN))
 
     [<AutoOpen>]
+    /// Adds document generation access to Aqualis.
     module CompilationEnvironmentDocExtensions =
         type Aqualis with
-            ///<summary>ドキュメント生成</summary>
+            /// Gets document-markup helpers bound to this generation context.
             member this.doc = ContextDoc(this)

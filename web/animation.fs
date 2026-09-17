@@ -11,9 +11,12 @@ open System.IO
 open System.Text.Json
 
 [<AutoOpen>]
+/// HTML and animation helpers for web generation.
 module htmlexpr2 =
+    /// Owns the contexts and assets for an HTML presentation.
     type HtmlGenerationContext with
         
+        /// Gets the HTML writer for the body generation context.
         member this.html = html this.BodyContext
         
         /// <summary>

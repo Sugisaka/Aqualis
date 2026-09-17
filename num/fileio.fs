@@ -9,7 +9,8 @@ namespace Aqualis
     open System
 
     [<AutoOpen>]
+    /// Adds file input and output helpers to an Aqualis context.
     module CompilationEnvironmentIoExtensions =
         type Aqualis with
-            ///<summary>ファイル入出力</summary>
+            /// Gets file input and output helpers bound to this context.
             member this.io = ContextIo(this)

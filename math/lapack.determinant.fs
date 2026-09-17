@@ -7,7 +7,9 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Adds base-10 log-absolute-determinant calculations to the linear-algebra context.
     module ContextLaDeterminantExtensions =
+        /// Checks the LAPACK status of a determinant operation.
         let private checkDeterminantInfo (context:Aqualis) (info:int0) =
             // GETRF reports a positive INFO for a zero pivot: the determinant is zero.
             // A negative INFO is an invalid LAPACK argument and remains an error.
@@ -21,12 +23,16 @@ namespace Aqualis
                     " < 0) error stop 'Aqualis: LAPACK determinant failed.'\n")
             | _ -> ()
 
+        /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
             /// <summary>
-            /// 行列式の常用対数を計算
+            /// Computes the base-10 logarithm of the absolute determinant of a
+            /// complex square matrix and passes it to a callback. A singular
+            /// matrix yields negative infinity. The Fortran and C99 LAPACK paths
+            /// overwrite the input during factorization.
             /// </summary>
-            /// <param name="matrix">行列</param>
-            /// <param name="code">行列式の値を用いて実行するコード</param>
+            /// <param name="matrix">Square input matrix; overwritten by the Fortran and C99 paths.</param>
+            /// <param name="code">Callback receiving the logarithm.</param>
             member this.determinant (matrix:complex2) = fun code ->
                 LapackValidation.requireBackend this.GenerationContext "LAPACK determinant"
                 this.GenerationContext.olist.add "-llapack"
@@ -75,10 +81,13 @@ namespace Aqualis
                         |_ -> calculateFromFactorizedDiagonal()
     
             /// <summary>
-            /// 行列式の常用対数を計算
+            /// Computes the base-10 logarithm of the absolute determinant of a
+            /// real square matrix and passes it to a callback. A singular matrix
+            /// yields negative infinity. The Fortran and C99 LAPACK paths
+            /// overwrite the input during factorization.
             /// </summary>
-            /// <param name="matrix">行列</param>
-            /// <param name="code">行列式の値を用いて実行するコード</param>
+            /// <param name="matrix">Square input matrix; overwritten by the Fortran and C99 paths.</param>
+            /// <param name="code">Callback receiving the logarithm.</param>
             member this.determinant (matrix:double2) = fun code ->
                 LapackValidation.requireBackend this.GenerationContext "LAPACK determinant"
                 this.GenerationContext.olist.add "-llapack"

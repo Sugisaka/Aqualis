@@ -11,10 +11,13 @@ open System.IO
 open System.Text
 
 [<RequireQualifiedAccess>]
+/// Validates one portable file-name component before it is used in generated paths.
 module internal PortableFileNameSegment =
     [<Literal>]
+    /// Upper limit on the UTF-8 byte length of a file-name component.
     let MaximumUtf8Bytes = 200
 
+    /// Checks whether a segment uses a reserved Windows device name.
     let private isWindowsDeviceName (value:string) =
         let stem = (value.Split('.')[0]).ToUpperInvariant()
         match stem with
@@ -26,6 +29,9 @@ module internal PortableFileNameSegment =
                  && stem[3] <= '9' -> true
         | _ -> false
 
+    /// Returns a valid single file-name component, or raises an argument error.
+    /// Rejects rooted paths, separators, control and reserved characters,
+    /// Windows device names, trailing periods, and values over 200 UTF-8 bytes.
     let validate argumentName subjectName (value:string) =
         let description = "A " + subjectName + " name"
 

@@ -7,12 +7,14 @@
 namespace Aqualis
     
     [<AutoOpen>]
+    /// Expression output operations for HTML.
     module exprEvalH =
         
         open System
         
         type expr with
             
+            /// Emits an assignment for HTML.
             static member substH (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein "\\["
                 c.codewritein "\\begin{align}"
@@ -20,12 +22,15 @@ namespace Aqualis
                 c.codewritein "\\end{align}"
                 c.codewritein "\\]"
                 
+            /// Emits an equation display for HTML.
             static member equivH (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " = " + y.evalL c)
                 
+            /// Emits an aligned equation display for HTML.
             static member equivAlignH (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " =& " + y.evalL c)
                 
+            /// Emits a counted loop for HTML.
             static member forLoopH (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -43,7 +48,7 @@ namespace Aqualis
                 c.codewritein "</div>"
                 returnVar()
                 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for HTML.
             static member loopH (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -64,7 +69,7 @@ namespace Aqualis
                 c.codewritein "</div>"
                 returnVar()
                 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for HTML.
             static member whiledoH (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein "<div class=\"codeblock\">"
                 c.codewritein "<details open>"
@@ -77,7 +82,7 @@ namespace Aqualis
                 c.codewritein "</details>"
                 c.codewritein "</div>"
                 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for HTML.
             static member rangeH (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
@@ -109,7 +114,7 @@ namespace Aqualis
                     c.codewritein "</div>"
                     returnVar()
                     
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for HTML.
             static member range_exitH (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
@@ -149,6 +154,7 @@ namespace Aqualis
                     c.codewritein(label+" continue")
                     returnVar()
                     
+            /// Emits a branch callback for HTML.
             static member branchH (c:Aqualis) code =
                 c.codewritein "<div class=\"codeblock\">"
                 c.codewritein "<details open>"
@@ -179,6 +185,7 @@ namespace Aqualis
                 c.codewritein "</details>"
                 c.codewritein "</div>"
                 
+            /// Renders an expression for HTML.
             member this.evalH(c:Aqualis) =
                 let par (s:string) (pl:int) =
                     match pl%3 with

@@ -17,6 +17,7 @@ type JsonReadOptions = {
 }
 
 [<RequireQualifiedAccess>]
+/// Default options for generated JSON reads.
 module JsonReadOptions =
     /// Conservative defaults for small application data files.
     let defaults = {
@@ -33,6 +34,7 @@ type JsonUpdateOptions = {
 }
 
 [<RequireQualifiedAccess>]
+/// Default options for generated JSON updates.
 module JsonUpdateOptions =
     /// Conservative defaults for small private application data files.
     let defaults = {
@@ -42,60 +44,83 @@ module JsonUpdateOptions =
         FilePermissions = 0o640
     }
 
+/// Symbolic PHP Boolean variable associated with a generation context.
 type PHPbool(x:string, context:Aqualis) =
 
+    /// Gets the PHP variable name.
     member this.name with get() = x
+    /// Gets the associated generation context.
     member _.Context = context
+    /// Creates a named PHP Boolean variable.
     static member var(context:Aqualis,x) = PHPbool("$"+x, context)
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:PHPbool,b:PHPbool) =
         Aqualis.merge a.Context b.Context |> ignore
         a.Context.codewritein ("<?php ", a.name + " = " + b.name + " ?>")
 
+/// PHP expression assembled from literal and symbolic fragments.
 type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     // Explicit assignments inside JsonData.updateAtomic identify replacements whose JSON shape must be kept.
     let mutable jsonReplacementTracking : (string * string * string list) option = None
     let stableJsonKey (key:string) =
         Regex.IsMatch(key, @"^(?:\$[A-Za-z_][A-Za-z0-9_]*|-?[0-9]+|""(?:\\.|[^""\\])*""|'(?:\\.|[^'\\])*')$")
+    /// Checks whether a JSON key can be tracked without ambiguity.
     member private _.IsStableJsonKey(key:string) = stableJsonKey key
+    /// Records replacements made during an atomic JSON update.
     member internal this.TrackJsonReplacements(replacements:string) =
         jsonReplacementTracking <- Some(replacements, this.code, [])
+    /// Configures replacement tracking for JSON updates.
     member private _.SetJsonReplacementTracking(tracking) =
         jsonReplacementTracking <- tracking
+    /// Gets the current JSON replacement tracking state.
     member private _.JsonReplacementTracking = jsonReplacementTracking
     new(x:string) = PHPdata([RStr x],Aqualis.BlankWriter PHP)
     new(x:int0) = PHPdata([RNvr(x.Expr,x.Context)], x.Context)
     new(x:double0) = PHPdata([RNvr(x.Expr,x.Context)], x.Context)
     new(x:complex0) = PHPdata([RNvr(x.Expr,x.Context)], x.Context)
+    /// Gets the fragments comprising this PHP expression.
     member _.data with get() = x
+    /// Gets the associated generation context.
     member _.Context = context
+    /// Wraps the expression in a PHP echo block.
     member this.extcode(pr:Aqualis) = "<?php echo " + this.code + "; ?>"
+    /// Creates a named PHP variable, optionally with an initial value.
     static member var (context:Aqualis,x) = PHPdata([RNvr(Var(Nt,"$"+x,NaN), context)], context)
+    /// Creates a named PHP variable, optionally with an initial value.
     static member var (context:Aqualis,x,init:PHPdata) =
         let v = PHPdata.var(context,x)
         v <== init
         v
+    /// Creates a named PHP variable, optionally with an initial value.
     static member var (context:Aqualis,x,init:int0) =
         let v = PHPdata.var(context,x)
         v <== init
         v
+    /// Creates a named PHP variable, optionally with an initial value.
     static member var (context:Aqualis,x,init:double0) =
         let v = PHPdata.var(context,x)
         v <== init
         v
+    /// Creates a named PHP variable, optionally with an initial value.
     static member var (context:Aqualis,x,init:complex0) =
         let v = PHPdata.var(context,x)
         v <== init
         v
+    /// Creates a named PHP variable, optionally with an initial value.
     static member var (context:Aqualis,x,init:int) =
         let v = PHPdata.var(context,x)
         v <== I init
         v
+    /// Creates a named PHP variable, optionally with an initial value.
     static member var (context:Aqualis,x,init:double) =
         let v = PHPdata.var(context,x)
         v <== D init
         v
+    /// Wraps a PHP expression in generation-context data.
     static member f(s:string, context:Aqualis) = PHPdata([RNvr(Var(Nt,s,NaN),context)], context)
+    /// Wraps a PHP expression in generation-context data.
     static member f(context:Aqualis,s:string) = PHPdata([RNvr(Var(Nt,s,NaN), context)], context)
+    /// Converts the PHP expression to an integer expression.
     member this.int0 with get() =
         match x with
         |[RNvr (c,valueContext)] -> int0(c, valueContext)
@@ -106,6 +131,7 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
                 Some "PHP numeric conversion",
                 Map ["targetType", "integer"])
             int0 NaN
+    /// Converts the PHP expression to a real expression.
     member this.double0 with get() =
         match x with
         |[RNvr (c,valueContext)] -> double0(c, valueContext)
@@ -116,6 +142,7 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
                 Some "PHP numeric conversion",
                 Map ["targetType", "real"])
             double0 NaN
+    /// Converts the PHP expression to a complex expression.
     member this.complex0 with get() =
         match x with
         |[RNvr (c,valueContext)] -> complex0(c, valueContext)
@@ -130,11 +157,13 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     /// Creates an empty PHP array expression associated with the generation context.
     static member array(context:Aqualis) = PHPdata.f(context,"array()")
 
+    /// Creates a PHP array expression or named array variable.
     static member array(context:Aqualis,arrayname:string) =
         let c = PHPdata.var(context,arrayname)
         context.codewritein("<?php ", "$"+arrayname+" = array(); ?>")
         c
 
+    /// Creates a PHP array expression or named array variable.
     static member array(context:Aqualis,arrayname:string,data:list<string*string>) =
         let c = PHPdata.var(context,arrayname)
         context.codewritein("<?php ", "$"+arrayname+" = array(); ?>")
@@ -146,6 +175,7 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
             "); ?>")
         c
 
+    /// Creates a PHP array expression or named array variable.
     static member array(context:Aqualis,arrayname:string,data:list<string*PHPdata>) =
         let c = PHPdata.var(context,arrayname)
         data |> Seq.map (fun (_, value) -> value.Context) |> Aqualis.mergeMany |> Aqualis.merge context |> ignore
@@ -158,18 +188,29 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
             "); ?>")
         c
 
+    /// Appends a value or values to the PHP array.
     member this.push (x:list<PHPdata>) =
         x |> Seq.map _.Context |> Aqualis.mergeMany |> Aqualis.merge context |> ignore
         context.codewritein("<?php ", "array_push(" + this.code + ", " + String.Join(",",List.map(fun (q:PHPdata) -> q.code) x) + "); ?>")
+    /// Appends a value or values to the PHP array.
     member this.push (x:PHPdata) = this.push [x]
+    /// Appends a value or values to the PHP array.
     member this.push (x:list<int0>) = this.push (List.map (fun (value:int0) -> PHPdata value) x : PHPdata list)
+    /// Appends a value or values to the PHP array.
     member this.push (x:list<double0>) = this.push (List.map (fun (value:double0) -> PHPdata value) x : PHPdata list)
+    /// Appends a value or values to the PHP array.
     member this.push (x:list<complex0>) = this.push (List.map (fun (value:complex0) -> PHPdata value) x : PHPdata list)
+    /// Appends a value or values to the PHP array.
     member this.push (x:list<string>) = this.push (List.map(fun (q:string) -> PHPdata q) x)
+    /// Appends a value or values to the PHP array.
     member this.push (x:int0) = this.push [x]
+    /// Appends a value or values to the PHP array.
     member this.push (x:double0) = this.push [x]
+    /// Appends a value or values to the PHP array.
     member this.push (x:complex0) = this.push [x]
+    /// Appends a value or values to the PHP array.
     member this.push (x:string) = this.push [x]
+    /// Renders the expression fragments using the selected concatenation mode.
     member this.toString(c:string,op:ExprConcatOption) =
         x
             |> List.map (function
@@ -186,6 +227,7 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
                     |None, Cpx(real, imaginary) -> sprintf "(%g+%g*I)" real imaginary
                     |None, _ -> invalidOp "A symbolic PHP value without a GenerationContext cannot be rendered as code.")
         |> fun s -> String.Join(c,s)
+    /// Gets a PHP array element at the supplied key or index.
     member this.Item(i:PHPdata) =
         let resultContext = Aqualis.merge context i.Context
         let result = PHPdata([RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN),resultContext)], resultContext)
@@ -193,20 +235,34 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
         | Some (replacements, root, path) -> result.SetJsonReplacementTracking(Some(replacements, root, path @ [i.code]))
         | None -> ()
         result
+    /// Gets a PHP array element at the supplied key or index.
     member this.Item(i:int) = this[PHPdata ([RNvr(Int i,Aqualis.BlankWriter PHP)],Aqualis.BlankWriter PHP)]
+    /// Gets a PHP array element at the supplied key or index.
     member this.Item(i:string) = this[PHPdata ([RStr i],Aqualis.BlankWriter PHP)]
+    /// Gets a PHP array element at the supplied key or index.
     member this.Item(i:int0) = this[PHPdata i]
+    /// Gets a PHP array element at the supplied key or index.
     member this.Item(i:double0) = this[PHPdata i]
+    /// Gets a PHP array element at the supplied key or index.
     member this.Item(i:complex0) = this[PHPdata i]
+    /// Gets the rendered PHP expression.
     member this.code with get() = this.toString(".",StrQuotation)
+    /// Gets a PHP block that echoes this expression.
     member this.phpcode with get() = "<?php echo " + this.code + " ?>"
+    /// Concatenates PHP expression fragments.
     static member (++) (a:PHPdata,b:PHPdata) = PHPdata(a.data@b.data, Aqualis.merge a.Context b.Context)
+    /// Concatenates PHP expression fragments.
     static member (++) (a:string,b:PHPdata) = PHPdata a ++ b
+    /// Concatenates PHP expression fragments.
     static member (++) (a:PHPdata,b:string) = a ++ PHPdata b
+    /// Concatenates PHP expression fragments.
     static member (++) (a:PHPdata,b:int0) = a ++ PHPdata b
+    /// Concatenates PHP expression fragments.
     static member (++) (a:PHPdata,b:double0) = a ++ PHPdata b
+    /// Concatenates PHP expression fragments.
     static member (++) (a:PHPdata,b:complex0) = a ++ PHPdata b
 
+    /// Emits a PHP foreach loop over this value.
     member this.foreach code =
         context.ch.i <| fun i ->
             ContextPhp(context).phpcode <| fun () -> context.writei ("for("+i.code+"=0; "+i.code+"<count("+this.code+"); "+i.code+"++):")
@@ -214,12 +270,14 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
             code i
             context.indentDec()
             ContextPhp(context).phpcode <| fun () -> context.writei "endfor;"
+    /// Emits a PHP foreach loop over this value.
     member this.foreach (key:PHPdata,value:PHPdata) = fun code ->
         let ctx = Aqualis.mergeMany [context; key.Context; value.Context]
         ctx.ch.i <| fun _ ->
             ContextPhp(ctx).phpcode <| fun () -> ctx.writei ("foreach("+this.code+" as "+key.code+" => "+value.code+"):")
             code()
             ContextPhp(ctx).phpcode <| fun () -> ctx.writei "endforeach;"
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:PHPdata,b:PHPdata) =
         Aqualis.merge a.Context b.Context |> ignore
         match a.JsonReplacementTracking with
@@ -239,66 +297,111 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
             a.Context.codewritein("<?php ", target + " = " + b.code + "; ?>")
             a.Context.codewritein("<?php ", replacements + "[serialize([" + String.Join(", ", keys) + "])] = true; ?>")
         | None -> a.Context.codewritein("<?php ", a.code + " = " + b.code + "; ?>")
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:PHPdata,b:string) = a <== PHPdata b
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:PHPdata,b:int0) = a <== PHPdata b
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:PHPdata,b:double0) = a <== PHPdata b
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:PHPdata,b:complex0) = a <== PHPdata b
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:PHPdata,b:int) = a <== PHPdata (I b)
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:int0,b:PHPdata) = PHPdata a <== b
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:double0,b:PHPdata) = PHPdata a <== b
+    /// Assigns the right-hand PHP value to the left-hand destination.
     static member (<==) (a:complex0,b:PHPdata) = PHPdata a <== b
+    /// Builds a Boolean PHP comparison expression.
     static member private Compare(a:PHPdata,b:Aqualis, expression) = bool0(expression, Aqualis.merge a.Context b)
+    /// Builds an equality comparison.
     static member (.=) (a:PHPdata,b:PHPdata) = PHPdata.Compare(a,b.Context,Eq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    /// Builds an equality comparison.
     static member (.=) (a:PHPdata,b:int0) = PHPdata.Compare(a,b.Context,Eq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds an equality comparison.
     static member (.=) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,Eq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds an equality comparison.
     static member (.=) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,Eq(Var(Nt,a.code,NaN),Int b))
+    /// Builds an equality comparison.
     static member (.=) (a:PHPdata,b:string) = a .= PHPdata b
+    /// Builds an inequality comparison.
     static member (.=/) (a:PHPdata,b:PHPdata) = PHPdata.Compare(a,b.Context,NEq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    /// Builds an inequality comparison.
     static member (.=/) (a:PHPdata,b:int0) = PHPdata.Compare(a,b.Context,NEq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds an inequality comparison.
     static member (.=/) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,NEq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds an inequality comparison.
     static member (.=/) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,NEq(Var(Nt,a.code,NaN),Int b))
+    /// Builds an inequality comparison.
     static member (.=/) (a:PHPdata,b:string) = a .=/ PHPdata b
+    /// Builds a less-than comparison.
     static member (.<) (a:PHPdata,b:PHPdata) = PHPdata.Compare(a,b.Context,Less(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    /// Builds a less-than comparison.
     static member (.<) (a:PHPdata,b:int0) = PHPdata.Compare(a,b.Context,Less(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a less-than comparison.
     static member (.<) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,Less(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a less-than comparison.
     static member (.<) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,Less(Var(Nt,a.code,NaN),Int b))
+    /// Builds a less-than-or-equal comparison.
     static member (.<=) (a:PHPdata,b:PHPdata) = PHPdata.Compare(a,b.Context,LessEq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    /// Builds a less-than-or-equal comparison.
     static member (.<=) (a:PHPdata,b:int0) = PHPdata.Compare(a,b.Context,LessEq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a less-than-or-equal comparison.
     static member (.<=) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,LessEq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a less-than-or-equal comparison.
     static member (.<=) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,LessEq(Var(Nt,a.code,NaN),Int b))
+    /// Builds a greater-than comparison.
     static member (.>) (a:PHPdata,b:PHPdata) = PHPdata.Compare(a,b.Context,Greater(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    /// Builds a greater-than comparison.
     static member (.>) (a:PHPdata,b:int0) = PHPdata.Compare(a,b.Context,Greater(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a greater-than comparison.
     static member (.>) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,Greater(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a greater-than comparison.
     static member (.>) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,Greater(Var(Nt,a.code,NaN),Int b))
+    /// Builds a greater-than-or-equal comparison.
     static member (.>=) (a:PHPdata,b:PHPdata) = PHPdata.Compare(a,b.Context,GreaterEq(Var(Nt,a.code,NaN),Var(Nt,b.code,NaN)))
+    /// Builds a greater-than-or-equal comparison.
     static member (.>=) (a:PHPdata,b:int0) = PHPdata.Compare(a,b.Context,GreaterEq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a greater-than-or-equal comparison.
     static member (.>=) (a:PHPdata,b:double0) = PHPdata.Compare(a,b.Context,GreaterEq(Var(Nt,a.code,NaN),b.Expr))
+    /// Builds a greater-than-or-equal comparison.
     static member (.>=) (a:PHPdata,b:int) = PHPdata.Compare(a,Aqualis.BlankWriter PHP,GreaterEq(Var(Nt,a.code,NaN),Int b))
 
 /// Result of a checked JSON file read emitted into generated PHP.
 and JsonReadResult internal (result:PHPdata, sourceText:PHPdata) =
+    /// Gets whether the generated file operation succeeded.
     member _.IsSuccess =
         bool0(
             Var(Nt, "(" + result["success"].code + " === true)", NaN),
             result.Context)
+    /// Gets the value returned by the generated file operation.
     member _.Value = result["value"]
+    /// Gets the error code returned by the generated file operation.
     member _.ErrorCode = result["error"]
+    /// Gets the source JSON text read from disk.
     member internal _.SourceText = sourceText
 
 /// Result of an atomic JSON update emitted into generated PHP.
 and JsonUpdateResult internal (result:PHPdata) =
+    /// Gets whether the generated file operation succeeded.
     member _.IsSuccess =
         bool0(
             Var(Nt, "(" + result["success"].code + " === true)", NaN),
             result.Context)
+    /// Gets the value returned by the generated file operation.
     member _.Value = result["value"]
+    /// Gets the error code returned by the generated file operation.
     member _.ErrorCode = result["error"]
 
 /// A PHP stream handle that can only be created by checked Aqualis file APIs.
 and PhpFileHandle internal (value:PHPdata) =
+    /// Gets the underlying PHP stream-handle expression.
     member internal _.Value = value
+    /// Gets the associated generation context.
     member _.Context = value.Context
 
+/// Emits PHP expressions and statements into a generation context.
 and ContextPhp internal (context:Aqualis) =
     let merge contexts = Aqualis.mergeMany (context :: contexts)
     let data code contexts = PHPdata.f(code, merge contexts)
@@ -306,19 +409,29 @@ and ContextPhp internal (context:Aqualis) =
     let validateRedirectStatus statusCode =
         if not (List.contains statusCode [301; 302; 303; 307; 308]) then
             invalidArg (nameof statusCode) "Redirect status must be 301, 302, 303, 307, or 308."
+    /// Gets the associated generation context.
     member internal _.Context = context
     /// Creates a PHP variable associated with this generation context.
     member _.var(name:string) = PHPdata.var(context,name)
+    /// Creates a PHP variable, optionally assigning an initial value.
     member _.var(name:string,init:PHPdata) = PHPdata.var(context,name,init)
+    /// Creates a PHP variable, optionally assigning an initial value.
     member _.var(name:string,init:int0) = PHPdata.var(context,name,init)
+    /// Creates a PHP variable, optionally assigning an initial value.
     member _.var(name:string,init:int) = PHPdata.var(context,name,init)
+    /// Creates a PHP variable, optionally assigning an initial value.
     member _.var(name:string,init:double0) = PHPdata.var(context,name,init)
+    /// Creates a PHP variable, optionally assigning an initial value.
     member _.var(name:string,init:double) = PHPdata.var(context,name,init)
     /// Creates an empty PHP array expression associated with this generation context.
     member _.array() = PHPdata.array(context)
+    /// Creates a PHP array expression or named array variable.
     member _.array(name:string) = PHPdata.array(context,name)
+    /// Creates a PHP array expression or named array variable.
     member _.array(arrayname:string,data:list<string*string>) = PHPdata.array(context,arrayname,data)
+    /// Creates a PHP array expression or named array variable.
     member _.array(arrayname:string,data:list<string*PHPdata>) = PHPdata.array(context,arrayname,data)
+    /// Invokes a callback between PHP opening and closing tags.
     member this.phpcode (code:unit->unit) =
         context.write "<?php "
         code()
@@ -327,9 +440,13 @@ and ContextPhp internal (context:Aqualis) =
     member this.postCheck() = context.codewritein("<?php ", "print_r($_POST); ?>")
     /// POST送信されたファイルを表示
     member this.postFileCheck() = context.codewritein("<?php ", "print_r($_FILES); ?>")
+    /// Combines Boolean expressions with logical AND.
     member this.And (x:list<bool0>) = boolean ("(" + String.Join(" && ", x |> List.map (fun s -> s.code)) + ")") (x |> List.map _.Context)
+    /// Combines Boolean expressions with logical OR.
     member this.Or (x:list<bool0>) = boolean ("(" + String.Join(" || ", x |> List.map (fun s -> s.code)) + ")") (x |> List.map _.Context)
+    /// Tests whether a PHP value is set.
     member this.isset (x:PHPdata) = boolean ("isset(" + x.code + ")") [x.Context]
+    /// Tests whether a PHP value is unset.
     member this.isNotset (x:PHPdata) = boolean ("!isset(" + x.code + ")") [x.Context]
     /// Tests whether a PHP expression contains a string value.
     member this.isString (x:PHPdata) = boolean ("is_string(" + x.code + ")") [x.Context]
@@ -350,21 +467,27 @@ and ContextPhp internal (context:Aqualis) =
         boolean
             ("preg_match(" + PhpEncoding.stringLiteral pattern + ", " + value.code + ") === 1")
             [value.Context]
+    /// Emits a PHP echo statement.
     member this.echo (x:PHPdata) = this.phpcode <| fun () -> context.writei("echo " + x.code + ";")
+    /// Emits a PHP echo statement.
     member this.echo (x:string) = this.echo (PHPdata x)
     /// Produces a PHP expression whose value is safe for an HTML text-content context.
     member this.escapeHtmlText (x:PHPdata) =
         data
             ("htmlspecialchars((string)(" + x.code + "), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')")
             [x.Context]
+    /// Escapes a PHP value for insertion into HTML text.
     member this.escapeHtmlText (x:string) = this.escapeHtmlText (PHPdata x)
     /// Emits a PHP value as escaped HTML text.
     member this.echoHtmlText (x:PHPdata) =
         this.echo (this.escapeHtmlText x)
+    /// Emits HTML-escaped text from a PHP value.
     member this.echoHtmlText (x:string) = this.echoHtmlText (PHPdata x)
     /// 変数を表示
     member this.echo (x:int0) = this.echo (PHPdata x)
+    /// Emits a PHP echo statement.
     member this.echo (x:double0) = this.echo (PHPdata x)
+    /// Emits a PHP echo statement.
     member this.echo (x:complex0) = this.echo (PHPdata x)
     /// Reads an entire file and throws when PHP reports an I/O failure.
     member this.readFile(filename:PHPdata) =
@@ -373,6 +496,7 @@ and ContextPhp internal (context:Aqualis) =
              "if ($contents === false) { throw new \\RuntimeException('Failed to read the file.'); } " +
              "return $contents; })(" + filename.code + ")")
             [filename.Context]
+    /// Emits a PHP file-read expression.
     member this.readFile(filename:string) = this.readFile(PHPdata filename)
     /// Reads a bounded JSON file and reports path, I/O, and JSON syntax failures without exposing warnings.
     member this.tryReadJsonFile(resultName:PhpVariableName, filename:PHPdata, options:JsonReadOptions) =
@@ -519,12 +643,14 @@ and ContextPhp internal (context:Aqualis) =
             context.writei ("} catch (\\Throwable " + error + ") { error_log('Aqualis atomic JSON update failed: '." + error + "->getMessage()); " + result.code + " = ['success' => false, 'value' => null, 'error' => " + errorCode + "]; }")
             context.writei ("finally { if (is_resource(" + temporaryHandle + ")) { @fclose(" + temporaryHandle + "); } if (is_string(" + temporaryPath + ") && is_file(" + temporaryPath + ")) { @unlink(" + temporaryPath + "); } if (" + locked + ") { flock(" + lockHandle + ", LOCK_UN); } if (is_resource(" + lockHandle + ")) { fclose(" + lockHandle + "); } }")
         JsonUpdateResult(result)
+    /// Emits an atomic JSON file update.
     member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:PHPdata, options:JsonUpdateOptions, update:PHPdata -> unit) =
         if isNull (box update) then nullArg (nameof update)
         this.updateJsonFileAtomicWithSource(resultName,filename,options,fun data _ -> update data; None)
     /// Reads, changes, and atomically replaces a JSON file at a static path.
     member this.updateJsonFileAtomic(resultName:PhpVariableName, filename:string, options:JsonUpdateOptions, update:PHPdata -> unit) =
         this.updateJsonFileAtomic(resultName, PHPdata filename, options, update)
+    /// Emits a PHP file write.
     member this.file_put_contents (filename:PHPdata,x:PHPdata) =
         merge [filename.Context; x.Context] |> ignore
         this.phpcode <| fun () ->
@@ -533,6 +659,7 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "throw new \\RuntimeException('Failed to write the file.');"
             context.indentDec()
             context.writei "}"
+    /// Emits a PHP file write.
     member this.file_put_contents (filename:string,x:PHPdata) = this.file_put_contents(PHPdata filename, x)
     /// Decodes JSON with bounded input and depth, and throws instead of silently returning null.
     member this.json_decode(x:PHPdata, associative:bool, options:JsonReadOptions) =
@@ -554,6 +681,7 @@ and ContextPhp internal (context:Aqualis) =
     /// Decodes JSON using the conservative application-data limits.
     member this.json_decode(x:PHPdata, associative:bool) =
         this.json_decode(x, associative, JsonReadOptions.defaults)
+    /// Emits JSON encoding of a PHP value.
     member this.json_encode (x:PHPdata) =
         data
             ("json_encode(" + x.code +
@@ -578,11 +706,17 @@ and ContextPhp internal (context:Aqualis) =
     /// Encodes a value as JSON and writes it with an exclusive lock.
     member this.writeJson(filename:string,value:PHPdata) =
         this.writeJson(PHPdata filename, value)
+    /// Extracts one column from a PHP array.
     member this.array_column(value:PHPdata,id:PHPdata) = data ("array_column("+value.code+","+id.code+")") [value.Context;id.Context]
+    /// Tests array membership using strict comparison.
     member this.in_array_strict(s:PHPdata, idArray:PHPdata) = boolean ("in_array("+s.code+", "+idArray.code+", true)") [s.Context;idArray.Context]
+    /// Tests array membership using strict comparison.
     member this.in_array_strict(s:int0, idArray:PHPdata) = this.in_array_strict(PHPdata s, idArray)
+    /// Tests array membership using strict comparison.
     member this.in_array_strict(s:double0, idArray:PHPdata) = this.in_array_strict(PHPdata s, idArray)
+    /// Tests array membership using strict comparison.
     member this.in_array_strict(s:complex0, idArray:PHPdata) = this.in_array_strict(PHPdata s, idArray)
+    /// Searches a PHP array for a value.
     member this.array_search(s:PHPdata, idArray:PHPdata) = data ("array_search("+s.code+", "+idArray.code+")") [s.Context;idArray.Context]
     /// Reads a file into lines and throws when PHP reports an I/O failure.
     member this.readLines(filename:PHPdata, flags:list<FileFlag>) =
@@ -595,6 +729,7 @@ and ContextPhp internal (context:Aqualis) =
              "if ($lines === false) { throw new \\RuntimeException('Failed to read the file.'); } " +
              "return $lines; })(" + filename.code + ")")
             [filename.Context]
+    /// Reads a file as lines with the supplied flags.
     member this.readLines(filename:string, flags:list<FileFlag>) = this.readLines(PHPdata filename, flags)
 
     /// Runs generated code with a checked PHP stream in the caller's PHP variable scope.
@@ -629,6 +764,7 @@ and ContextPhp internal (context:Aqualis) =
             if mode.CanWrite then
                 context.writei ("if (!" + flushSucceededName + ") { throw new \\RuntimeException('Failed to flush the file.'); }")
             context.writei ("if (!" + closeSucceededName + ") { throw new \\RuntimeException('Failed to close the file.'); }")
+    /// Opens a file, invokes the callback, and closes the handle.
     member this.withFile(filename:string, mode:FileOpenMode, code:PhpFileHandle -> unit) =
         this.withFile(PHPdata filename, mode, code)
 
@@ -642,10 +778,15 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "if ($aqualisWritten === false || $aqualisWritten === 0) { throw new \\RuntimeException('Failed to write the complete file.'); }"
             context.writei "$aqualisRemaining = (string)substr($aqualisRemaining, $aqualisWritten);"
             context.writei "}"
+    /// Writes a complete value to an open PHP file handle.
     member this.writeAll(handle:PhpFileHandle, value:string) = this.writeAll(handle, PHPdata value)
+    /// Writes a complete value to an open PHP file handle.
     member this.writeAll(handle:PhpFileHandle, value:int0) = this.writeAll(handle, PHPdata value)
+    /// Writes a complete value to an open PHP file handle.
     member this.writeAll(handle:PhpFileHandle, value:double0) = this.writeAll(handle, PHPdata value)
+    /// Writes a complete value to an open PHP file handle.
     member this.writeAll(handle:PhpFileHandle, value:complex0) = this.writeAll(handle, PHPdata value)
+    /// Writes a complete value to an open PHP file handle.
     member this.writeAll(handle:PhpFileHandle, value:int) = this.writeAll(handle, PHPdata (I value))
 
     /// Converts text to Shift-JIS and writes every resulting byte.
@@ -653,21 +794,33 @@ and ContextPhp internal (context:Aqualis) =
         let convertedContext = merge [handle.Context; value.Context]
         let converted = PHPdata.f("mb_convert_encoding(" + value.code + ", 'SJIS-win', 'UTF-8')", convertedContext)
         this.writeAll(handle, converted)
+    /// Writes a complete value after Shift-JIS conversion.
     member this.writeAllSjis(handle:PhpFileHandle, value:string) = this.writeAllSjis(handle, PHPdata value)
+    /// Writes a complete value after Shift-JIS conversion.
     member this.writeAllSjis(handle:PhpFileHandle, value:int0) = this.writeAllSjis(handle, PHPdata value)
+    /// Writes a complete value after Shift-JIS conversion.
     member this.writeAllSjis(handle:PhpFileHandle, value:double0) = this.writeAllSjis(handle, PHPdata value)
+    /// Writes a complete value after Shift-JIS conversion.
     member this.writeAllSjis(handle:PhpFileHandle, value:complex0) = this.writeAllSjis(handle, PHPdata value)
     /// 正規表現
     member this.preg_match(p:PHPdata,text:PHPdata,mat:PHPdata) = this.phpcode <| fun () -> context.writei("preg_match("+p.code+","+text.code+","+mat.code+");")
+    /// Emits a file download.
     member this.download(filename:string) = this.file_download(PHPdata filename)
     /// 整数に変換
     member this.intval(s:PHPdata) = data ("intval("+s.code+")") [s.Context]
+    /// Sums values in a PHP array.
     member this.array_sum(value:PHPdata) = data ("array_sum("+value.code+")") [value.Context]
+    /// Gets the byte length of a PHP string.
     member this.strlen(value:PHPdata) = data ("strlen("+value.code+")") [value.Context]
+    /// Tests whether a PHP value is numeric.
     member this.is_numeric(value:PHPdata) = boolean ("is_numeric("+value.code+")") [value.Context]
+    /// Negates a Boolean expression.
     member this.nt (value:bool0) = boolean ("!"+value.code) [value.Context]
+    /// Emits a no-cache response header.
     member this.set_nocache() = this.phpcode <| fun () -> context.writei "header( 'Cache-Control: no-store, no-cache, must-revalidate' );"
+    /// Emits an HTTP response header.
     member this.header(data:PHPdata) = this.phpcode <| fun () -> context.writei("header("+data.code+");")
+    /// Emits an HTTP response header.
     member this.header(data:string) = this.header(PHPdata data)
     /// Internal sink used only after a public API has supplied a validated URL.
     member internal this.redirectValidated(location:Url,statusCode:int) =
@@ -678,24 +831,43 @@ and ContextPhp internal (context:Aqualis) =
             context.writei ("header('Location: ' . $location, true, " + string statusCode + ");")
             context.writei "exit;"
             context.writei ("})(" + locationLiteral.code + ");")
+    /// Formats the current date using a PHP format string.
     member this.date(fmt:string) = data ("date(" + PhpEncoding.stringLiteral fmt + ")") []
+    /// Rounds a PHP value.
     member this.round(x:PHPdata) = data ("round("+x.code+")") [x.Context]
+    /// Rounds a PHP value.
     member this.round(x:double0) = this.round(PHPdata x)
+    /// Extracts a substring beginning at the supplied offset.
     member this.substr(x:PHPdata,n:PHPdata) = data ("substr("+x.code+","+n.code+")") [x.Context;n.Context]
+    /// Extracts a substring beginning at the supplied offset.
     member this.substr(x:PHPdata,n:int) = data ("substr("+x.code+","+n.ToString()+")") [x.Context]
+    /// Tests whether a file exists.
     member this.file_exists(x:PHPdata) = boolean ("file_exists("+x.code+")") [x.Context]
+    /// Tests whether a file exists.
     member this.file_exists(x:string) = this.file_exists(PHPdata x)
+    /// Gets the character length of a multibyte string.
     member this.mb_strlen(x:PHPdata) = data ("mb_strlen("+x.code+")") [x.Context]
+    /// Gets the display width of a multibyte string.
     member this.mb_strwidth(x:PHPdata) = data ("mb_strwidth("+x.code+")") [x.Context]
+    /// Compares a fixed number of string bytes.
     member this.strncmp(x:PHPdata,y:PHPdata,n:int) = data ("strncmp("+x.code+","+y.code+","+n.ToString()+")") [x.Context;y.Context]
+    /// Compares a fixed number of string bytes.
     member this.strncmp(x:PHPdata,y:string,n:int) = this.strncmp(x,PHPdata y,n)
+    /// Returns paths matching a glob pattern.
     member this.glob(x:PHPdata) = data ("glob("+x.code+")") [x.Context]
+    /// Returns paths matching a glob pattern.
     member this.glob(x:string) = this.glob(PHPdata x)
+    /// Splits a string by a delimiter.
     member this.explode(x:PHPdata,y:PHPdata) = data ("explode("+x.code+","+y.code+")") [x.Context;y.Context]
+    /// Splits a string by a delimiter.
     member this.explode(x:string,y:PHPdata) = this.explode(PHPdata x,y)
+    /// Sorts a PHP array in place.
     member this.sort(data:PHPdata) = this.phpcode <| fun () -> context.writei("sort("+data.code+");")
+    /// Casts a PHP value to an integer expression.
     member this.toint(x:PHPdata) = int0(Var(It 4, "(int)"+x.code, NaN), merge [x.Context])
+    /// Counts entries in a PHP array.
     member this.count(x:PHPdata) = int0(Var(It 4, "count("+x.code+")", NaN), merge [x.Context])
+    /// Gets the filename stem from a path.
     member this.filename_withoutExtension(x:PHPdata) = data ("pathinfo("+x.code+", PATHINFO_FILENAME)") [x.Context]
     /// Deletes an existing file and throws when it is absent or cannot be removed.
     member this.deleteFile(path:PHPdata) =
@@ -704,6 +876,7 @@ and ContextPhp internal (context:Aqualis) =
             context.writei ("if ((!is_file(" + path.code + ") && !is_link(" + path.code + ")) || !@unlink(" + path.code + ")) {")
             context.writei "throw new \\RuntimeException('Failed to delete the file.');"
             context.writei "}"
+    /// Emits a file deletion.
     member this.deleteFile(path:string) = this.deleteFile(PHPdata path)
 
     /// Treats an absent path as success and reports whether an existing path was deleted.
@@ -711,12 +884,17 @@ and ContextPhp internal (context:Aqualis) =
         boolean
             ("((!file_exists(" + path.code + ") && !is_link(" + path.code + ")) || @unlink(" + path.code + "))")
             [path.Context]
+    /// Emits a guarded file deletion.
     member this.tryDeleteFile(path:string) = this.tryDeleteFile(PHPdata path)
+    /// Shuffles a PHP array in place.
     member this.shuffle(data:PHPdata) = this.phpcode <| fun () -> context.writei("shuffle("+data.code+");")
+    /// Sets the PHP default timezone.
     member this.setTimeZone(location:PHPdata) =
         merge [location.Context] |> ignore
         this.phpcode <| fun () -> context.writei("date_default_timezone_set("+location.code+");")
+    /// Sets the PHP default timezone.
     member this.setTimeZone(location:string) = this.setTimeZone(PHPdata location)
+    /// Generates validated UTF-8 email delivery using PHP mb_send_mail.
     member this.sendMail(body:PHPdata,subject:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
         merge [body.Context; subject.Context; fromAddress.Context; toAddress.Context] |> ignore
         this.phpcode <| fun () ->
@@ -739,7 +917,7 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "throw new \\RuntimeException('Failed to send the mail.');"
             context.writei "}"
             context.writei ("})("+body.code+", "+subject.code+", "+fromAddress.code+", "+toAddress.code+");")
-    /// メール送信
+    /// Generates email delivery through the mail command and specified SMTP host.
     member this.sendMail(body:PHPdata,subject:PHPdata,smtp:PHPdata,fromAddress:PHPdata,toAddress:PHPdata) =
         merge [body.Context; subject.Context; smtp.Context; fromAddress.Context; toAddress.Context] |> ignore
         this.phpcode <| fun () ->
@@ -794,6 +972,7 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "throw new \\RuntimeException('The mail command failed: ' . trim((string)$stderr));"
             context.writei "}"
             context.writei ("})("+body.code+", "+subject.code+", "+smtp.code+", "+fromAddress.code+", "+toAddress.code+");")
+    /// Generates a JSON notification sent to an allowed Discord webhook host.
     member this.sendDiscord(body:PHPdata,webhookURL:PHPdata) =
         merge [body.Context; webhookURL.Context] |> ignore
         this.phpcode <| fun () ->
@@ -831,10 +1010,13 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "curl_close($curl);"
             context.writei "}"
             context.writei ("})("+body.code+", "+webhookURL.code+");")
+    /// Replaces occurrences in a PHP string.
     member this.str_replace(strfrom:PHPdata,strto:PHPdata,str:PHPdata) =
         data ("str_replace("+strfrom.code+","+strto.code+","+str.code+")") [strfrom.Context;strto.Context;str.Context]
+    /// Replaces occurrences in a PHP string.
     member this.str_replace(strfrom:string,strto:string,str:PHPdata) =
         this.str_replace(PHPdata strfrom,PHPdata strto,str)
+    /// Pads a string on the left to the requested width.
     member this.str_pad(num:PHPdata,ndigit:int,paddingnum:int) = data ("str_pad("+num.code+","+ndigit.ToString()+","+paddingnum.ToString()+", STR_PAD_LEFT)") [num.Context]
     /// Downloads a server-side file while presenting a separate, safe client file name.
     member this.file_download(file:PHPdata,downloadName:PHPdata) =
@@ -866,38 +1048,51 @@ and ContextPhp internal (context:Aqualis) =
             context.writei "exit;"
             context.writei ("})(" + file.code + ", " + downloadName.code + ");")
 
+    /// Generates a file download response with a specified name.
     member this.file_download(file:PHPdata,downloadName:string) =
         this.file_download(file,PHPdata downloadName)
 
+    /// Generates a file download response using the source basename.
     member this.file_download(file:PHPdata) =
         let inferredDownloadName:PHPdata = this.basename(file)
         this.file_download(file,inferredDownloadName)
+    /// Gets a PHP basename expression for a file path.
     member this.basename(file:PHPdata) = data ("basename("+file.code+")") [file.Context]
+    /// Gets a newline character.
     member this.br = "\n"
+    /// Gets a tab character.
     member this.tb = "\t"
 
 [<AutoOpen>]
+/// Conversions between numeric expressions and PHP data.
 module num0ForPHP =
 
     type int0 with
+        /// Gets this numeric expression as PHP data.
         member this.phpdata with get() = PHPdata([RNvr(this.Expr,this.Context)], this.Context)
 
     type double0 with
+        /// Gets this numeric expression as PHP data.
         member this.phpdata with get() = PHPdata([RNvr(this.Expr,this.Context)], this.Context)
 
     type complex0 with
+        /// Gets this numeric expression as PHP data.
         member this.phpdata with get() = PHPdata([RNvr(this.Expr,this.Context)], this.Context)
 
     type html with
+        /// Writes an HTML heading from PHP data.
         member this.h1 (t:PHPdata) = fun code ->
             this.tagb "h1" <| fun () -> ContextPhp(this.Context).echoHtmlText t
             code()
+        /// Writes an HTML heading from PHP data.
         member this.h2 (t:PHPdata) = fun code ->
             this.tagb "h2" <| fun () -> ContextPhp(this.Context).echoHtmlText t
             code()
+        /// Writes an HTML heading from PHP data.
         member this.h3 (t:PHPdata) = fun code ->
             this.tagb "h3" <| fun () -> ContextPhp(this.Context).echoHtmlText t
             code()
+        /// Writes an HTML heading from PHP data.
         member this.h4 (t:PHPdata) = fun code ->
             this.tagb "h4" <| fun () -> ContextPhp(this.Context).echoHtmlText t
             code()

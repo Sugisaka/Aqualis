@@ -6,15 +6,20 @@
 //
 namespace Aqualis
 
+    /// Helpers for two-dimensional Fourier transforms.
     module fft2 =
 
+        /// Wrapper for a generated FFTW plan variable.
         type fftw_plan2(sname_,name,context:Aqualis) =
+            /// Gets the FFTW plan structure name.
             static member sname = "fftw_plan"
             new(name,context:Aqualis) =
                 context.str.regWithoutAddStructure(fftw_plan2.sname,name)
                 fftw_plan2 (fftw_plan2.sname,name,context)
+            /// Gets the generated plan variable name.
             member __.code = name
 
+        /// Shifts zero frequency to the center of a 2D array in place.
         let fftshift2 (context:Aqualis) (x:complex2) =
             context.br.if2 (x.size2%2 .= 0)
                 <| fun () ->
@@ -31,6 +36,7 @@ namespace Aqualis
                     context.iter.num x.size2 <| fun i ->
                         fft1.fftshift_odd context x[(),i]
 
+        /// Undoes a frequency-center shift on a 2D array in place.
         let ifftshift2 (context:Aqualis) (x:complex2) =
             context.br.if2 (x.size2%2 .= 0)
                 <| fun () ->
@@ -47,6 +53,7 @@ namespace Aqualis
                     context.iter.num x.size2 <| fun i ->
                         fft1.ifftshift_odd context x[(),i]
 
+        /// Generates a two-dimensional FFT or inverse FFT.
         let private transform (context:Aqualis) (planname:string,data1:complex2,data2:complex2,fftdir:int) =
             match context.Language with
             |Fortran|C99|LaTeX|HTML|Python -> ()
@@ -125,17 +132,23 @@ namespace Aqualis
                         context.iter.num ny <| fun j ->
                             data2.[i,j]<==data2.[i,j]/(nx*ny)
 
+        /// Generates a forward 2D FFT from the input array to the output array.
         let fft context (planname:string,data1:complex2,data2:complex2) =
                 transform context (planname,data1,data2,1)
 
+        /// Generates an inverse 2D FFT from the input array to the output array.
         let ifft context (planname:string,data1:complex2,data2:complex2) =
                 transform context (planname,data1,data2,-1)
 
+    /// Provides 2D FFT operations for a generation context.
     type ContextFft2 internal (context:Aqualis) =
+        /// Generates a forward 2D FFT.
         member _.fft args = fft2.fft context args
+        /// Generates an inverse 2D FFT.
         member _.ifft args = fft2.ifft context args
 
     [<AutoOpen>]
+    /// Exposes 2D FFT operations through Aqualis.
     module CompilationEnvironmentFft2Extensions =
         type Aqualis with
             ///<summary>2次元フーリエ変換</summary>

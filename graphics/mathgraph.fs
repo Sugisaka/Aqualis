@@ -154,6 +154,7 @@ type drawGraph(sv:svgfilemaker, q:Quadrant, x1,y1,x2,y2, marginX,marginY) =
     /// 描画範囲(グラフ内ローカル座標系)
     member _.Y2 with get() = Y2_
     
+    /// Gets the SVG writer used for this graph.
     member _.svg with get() = sv
     
     /// 矢印を描画[(x1,x1):始点,(x2,y2):終点]
@@ -325,6 +326,7 @@ type range2D(sv:svgfilemaker, x1, x2, y1, y2, mX, mY) =
         d.arrow ((0.0,d.Y1),(0.0,d.Y2),color.stroke.black(0.5))
         code d
         
+/// Graph construction and rendering helpers.
 module graph =
     
     /// 横150mm

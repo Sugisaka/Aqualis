@@ -6,15 +6,21 @@
 //
 namespace Aqualis
 
+    /// Generates iterative solvers for systems of equations.
     module simuleq =
 
-        /// <summary>前処理付きBiCGSTAB法による連立方程式の求解</summary>
-        /// <param name="b">定数項</param>
-        /// <param name="x">暫定解→近似解</param>
-        /// <param name="tol">収束判定値</param>
-        /// <param name="max_iteration">最大反復回数</param>
-        /// <param name="integralequation_matmul">行列－ベクトル積実行関数</param>
-        /// <param name="prec">前処理行列</param>
+        /// <summary>
+        /// Generates a preconditioned BiCGSTAB solve for a complex linear system.
+        /// Runtime guards reject invalid dimensions, non-finite results, breakdown,
+        /// and failure to converge within the iteration limit.
+        /// </summary>
+        /// <param name="context">Code-generation context.</param>
+        /// <param name="b">Right-hand-side vector.</param>
+        /// <param name="x">Initial solution estimate, updated with the approximate solution.</param>
+        /// <param name="tol">Positive finite residual tolerance.</param>
+        /// <param name="max_iteration">Positive maximum iteration count.</param>
+        /// <param name="integralequation_matmul1">Callback that computes a matrix-vector product.</param>
+        /// <param name="prec">Optional callback that applies a preconditioner.</param>
         let BiCGSTAB (context:Aqualis) (b:complex1) (x:complex1) (tol:double) (max_iteration:int) integralequation_matmul1 (prec:(complex1->complex1->unit)option) =
             if not (System.Double.IsFinite tol) || tol <= 0.0 then
                 invalidArg (nameof tol) "BiCGSTAB tolerance must be finite and positive."

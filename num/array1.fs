@@ -6,36 +6,44 @@
 //
 namespace Aqualis
 
-    ///<summary>1次元配列変数</summary>
+    /// Storage descriptor for a one-dimensional numeric expression array.
     type Expr1 =
-        ///<summary>変数</summary>
+        /// Named array variable with its shape.
         |Var1 of (VarType*string)
-        ///<summary>部分配列</summary>
+        /// Computed array expression with its size and element function.
         |Arx1 of (int0*(int0->expr))
 
     /// Common read-only representation of a one-dimensional numeric expression array.
     type INum1 =
+        /// Gets the generated code for a named array.
         abstract member Code : string
+        /// Gets the underlying one-dimensional array expression.
         abstract member Expr : Expr1
+        /// Gets the element type.
         abstract member Etype : Etype
+        /// Gets the generation context associated with the array.
         abstract member Context : Aqualis
 
     /// Marker for one-dimensional numeric expression arrays whose values are always real.
     type IReal1 =
         inherit INum1
 
-    /// C99 の動的配列に対する実行時検証を生成する。
+    /// Emits runtime checks for dynamically allocated C99 arrays.
     module internal CArraySafety =
+        /// Escapes text for a generated C string literal.
         let private escapeCString (text:string) =
             text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n")
 
+        /// Raises or emits an array validation failure for a condition.
         let guard (context:Aqualis) condition message =
             context.codewritein(
                 "if (" + condition + ") { fprintf(stderr, \"Aqualis runtime error: "
                 + escapeCString message + "\\n\"); exit(EXIT_FAILURE); }\n")
 
     [<RequireQualifiedAccess>]
+    /// Shared dimension and value checks for numeric arrays.
     module internal NumericArrayValidation =
+        /// Reports an array validation failure.
         let fail (context:Aqualis) message =
             let message = "Aqualis: " + message
             match context.Language with
@@ -46,10 +54,12 @@ namespace Aqualis
             | PHP -> context.codewritein("<?php throw new \\RuntimeException(" + PhpEncoding.stringLiteral message + "); ?>\n")
             | Numeric -> invalidArg "array" message
             | _ -> ()
+        /// Requires that an array validation condition is false.
         let require (context:Aqualis) (condition:bool0) message =
             match context.Language with
             | C99 | Fortran | Python | JavaScript | PHP | Numeric -> context.br.if1 condition (fun () -> fail context message)
             | _ -> ()
+        /// Requires a finite numeric array parameter.
         let requireFinite (context:Aqualis) (value:double0) message =
             let expression = value.Expr.eval context
             let condition =
@@ -63,7 +73,7 @@ namespace Aqualis
             condition |> Option.iter (fun expression ->
                 require context (bool0(Var(Nt, expression, NaN), context)) message)
 
-    ///<summary>1次元配列</summary>
+    /// Base implementation of one-dimensional symbolic arrays.
     type base1 (typ:Etype,x:Expr1, c:Aqualis) =
         let writein text = c.codewritein text
         let comment text = c.comment text
@@ -76,9 +86,13 @@ namespace Aqualis
         new(context:Aqualis,sname,size,name) =
             context.cvar.setVar(Structure sname,size,name,"")
             base1(Structure sname,Var1(size,name), context)
+        /// Gets the owning generation context.
         member internal _.Aqualis = c
+        /// Gets the array element type.
         member _.Etype with get() = typ
+        /// Gets the underlying array expression.
         member _.Expr with get() = x
+        /// Gets the rendered array expression.
         member _.code with get() =
             match x with
             |Var1(_,x) -> x
@@ -136,16 +150,21 @@ namespace Aqualis
             |Var1(_,name),Fortran -> Idx1(typ,name,(i+1).Expr)
             |Var1(_,name),_       -> Idx1(typ,name,i.Expr)
             |Arx1(_,f),_ -> f i
+        /// Constructs an expression for a one-dimensional array element or slice.
         member this.Idx1(i:int) = this.Idx1(I i)
+        /// Constructs an expression for a one-dimensional array element or slice.
         member this.Idx1(n:int0*int0) = 
             let a,b = n
             Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        /// Constructs an expression for a one-dimensional array element or slice.
         member this.Idx1(n:int0*int)  =
             let a,b = n
             Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        /// Constructs an expression for a one-dimensional array element or slice.
         member this.Idx1(n:int*int0) =
             let a,b = n
             Arx1(b-a+_1,fun i -> this.Idx1(i+a))
+        /// Constructs an expression for a one-dimensional array element or slice.
         member this.Idx1(n:int*int)  =
             let a,b = n
             Arx1(b-a+_1,fun i -> this.Idx1(i+a))
@@ -242,6 +261,7 @@ namespace Aqualis
                     |Numeric ->
                         ()
                 |_ -> ()
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int) = this.allocate(I n1)
 
         ///<summary>配列のメモリ割り当て</summary>
@@ -341,6 +361,7 @@ namespace Aqualis
             c.iter.num_exit (this.size1,counterName) <| fun (ext,i) ->
                 code(ext,i)
 
+        /// Reports that operand arrays have incompatible dimensions.
         static member sizeMismatchError(x:base1,y:base1) =
             let ctx = Aqualis.merge x.Aqualis y.Aqualis
             NumericArrayValidation.require ctx (x.size1 .=/ y.size1) "Array size (first dimension) mismatch."
@@ -360,119 +381,185 @@ namespace Aqualis
         //     |None,Arx1(size,_) -> size.Context
         //     |None,Var1 _ -> None
 
+        /// Gets the owning generation context.
         member _.Context = context
+        /// Gets the array element type.
         member _.etype = typ
 
         interface INum1 with
+            /// Gets the rendered array expression.
             member this.Code = this.code
+            /// Gets the underlying array expression.
             member this.Expr = this.Expr
+            /// Gets the array element type.
             member this.Etype = this.etype
+            /// Gets the owning generation context.
             member this.Context = this.Context
 
+        /// Wraps an element expression as a scalar value.
         abstract member WrapScalar : expr * Aqualis -> 'Scalar
+        /// Creates a typed array wrapper for an expression.
         abstract member Create : Etype * Expr1 * Aqualis -> 'Self
+        /// Assigns an expression to the element at the specified indices.
         abstract member AssignAt : int0 * expr -> unit
 
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item
             with get(i:int0) =
                 let resultContext = Aqualis.merge context i.Context
                 this.WrapScalar(this.Idx1 i, resultContext)
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item
             with get(i:int) = this.WrapScalar(this.Idx1(I i), context)
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item
             with get(n:int0*int0) =
                 let i,j = n
                 let resultContext = Aqualis.mergeMany [context;i.Context;j.Context]
                 this.Create(typ,this.Idx1 n,resultContext)
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item
             with get(n:int0*int) =
                 let i,_ = n
                 this.Create(typ,this.Idx1 n,Aqualis.merge context i.Context)
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item
             with get(n:int*int0) =
                 let _,j = n
                 this.Create(typ,this.Idx1 n,Aqualis.merge context j.Context)
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item
             with get(n:int*int) = this.Create(typ,this.Idx1 n,context)
 
+        /// Creates a result array from an element type, expression body, and context.
         member private this.New(etype, body, resultContext) = this.Create(etype,Arx1(this.size1,body),resultContext)
 
+        /// Combines two arrays elementwise after checking their dimensions.
         static member private Binary
             (x:NumericArray1<'Scalar,'Self>, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
             base1.sizeMismatchError(x,y)
             let resultContext = Aqualis.merge x.Context y.Context
             x.New(x.etype%%y.etype, (fun i -> make(x.etype%%y.etype,(x[i] :> INum0).Expr,(y[i] :> INum0).Expr)), resultContext)
 
+        /// Combines a scalar on the left with every array element.
         static member private ScalarLeft
             (scalar:INum0, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
             let resultContext = Aqualis.merge scalar.Context y.Context
             y.New(scalar.Etype%%y.etype, (fun i -> make(scalar.Etype%%y.etype,scalar.Expr,(y[i] :> INum0).Expr)), resultContext)
 
+        /// Combines every array element with a scalar on the right.
         static member private ScalarRight
             (x:NumericArray1<'Scalar,'Self>, scalar:INum0, make:Etype*expr*expr->expr) =
             let resultContext = Aqualis.merge x.Context scalar.Context
             x.New(x.etype%%scalar.Etype, (fun i -> make(x.etype%%scalar.Etype,(x[i] :> INum0).Expr,scalar.Expr)), resultContext)
 
+        /// Combines a primitive value on the left with every array element.
         static member private PrimitiveLeft
             (etype:Etype, value:expr, y:NumericArray1<'Scalar,'Self>, make:Etype*expr*expr->expr) =
             y.New(etype%%y.etype, (fun i -> make(etype%%y.etype,value,(y[i] :> INum0).Expr)), y.Context)
 
+        /// Combines every array element with a primitive value on the right.
         static member private PrimitiveRight
             (x:NumericArray1<'Scalar,'Self>, etype:Etype, value:expr, make:Etype*expr*expr->expr) =
             x.New(x.etype%%etype, (fun i -> make(x.etype%%etype,(x[i] :> INum0).Expr,value)), x.Context)
 
+        /// Adds the operands.
         static member (+) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
             NumericArray1.Binary(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Add(t,a,b))
 
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
             NumericArray1.Binary(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Sub(t,a,b))
 
+        /// Multiplies the operands.
         static member (*) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
             NumericArray1.Binary(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Mul(t,a,b))
 
+        /// Divides the left operand by the right operand.
         static member (/) (x:NumericArray1<'Scalar,'Self>,y:NumericArray1<'Scalar,'Self>) =
             NumericArray1.Binary(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:int0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:double0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:complex0,y:NumericArray1<'Scalar,'Self>) = NumericArray1.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:int,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:double,y:NumericArray1<'Scalar,'Self>) = NumericArray1.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:NumericArray1<'Scalar,'Self>,y:int0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:NumericArray1<'Scalar,'Self>,y:double0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:NumericArray1<'Scalar,'Self>,y:complex0) = NumericArray1.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:NumericArray1<'Scalar,'Self>,y:int) = NumericArray1.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/) (x:NumericArray1<'Scalar,'Self>,y:double) = NumericArray1.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Div(t,a,b))
 
+        /// Assigns another array after validating compatible dimensions.
         member this.AssignArray(other:NumericArray1<'Scalar,'Self>) =
             Aqualis.merge context other.Context |> ignore
             let writein text = context.codewritein text
@@ -487,6 +574,7 @@ namespace Aqualis
                 |Numeric -> ()
             |_ -> context.iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
 
+        /// Assigns a scalar value to the array elements.
         member this.AssignScalar(value:INum0) =
             Aqualis.merge context value.Context |> ignore
             let writein text = context.codewritein text

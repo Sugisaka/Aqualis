@@ -8,26 +8,35 @@ namespace Aqualis
 
 /// A typed POST value together with generated presence and validation expressions.
 type ValidatedPost<'T> internal (isPresent:bool0, isValid:bool0, value:PhpExpr<'T>) =
+    /// Gets a generated expression that checks whether the field was submitted.
     member _.IsPresent = isPresent
+    /// Gets a generated expression that checks whether the field passes validation.
     member _.IsValid = isValid
+    /// Gets the typed PHP expression for the submitted value.
     member _.Value = value
 
 [<RequireQualifiedAccess>]
+/// Builds PHP expressions for typed request validation.
 module private RequestCode =
+    /// Builds a PHP expression for a POST field.
     let postExpression fieldName =
         "$_POST[" + PhpEncoding.stringLiteral (FieldName.value fieldName) + "]"
 
+    /// Wraps a PHP condition as a Boolean expression.
     let boolean context expression =
         bool0(Var(Nt, "(" + expression + ")", NaN), context)
 
+    /// Appends a lower-bound validation when configured.
     let optionalMinimum expression = function
         | Some minimum -> " && " + expression + " >= " + string minimum
         | None -> ""
 
+    /// Appends an upper-bound validation when configured.
     let optionalMaximum expression = function
         | Some maximum -> " && " + expression + " <= " + string maximum
         | None -> ""
 
+    /// Rejects a minimum greater than its maximum.
     let validateRange argumentName minimum maximum =
         match minimum, maximum with
         | Some lower, Some upper when lower > upper ->
@@ -105,9 +114,12 @@ type PostRequest internal (context:Aqualis) =
 
 /// Typed access to values supplied by the current HTTP request.
 type ContextRequest internal (context:Aqualis) =
+    /// Gets typed access to POST fields in this generation context.
     member _.post = PostRequest(context)
 
 [<AutoOpen>]
+/// Adds typed request access to generation contexts.
 module RequestExtensions =
     type Aqualis with
+        /// Gets typed access to the current HTTP request.
         member this.request = ContextRequest(this)

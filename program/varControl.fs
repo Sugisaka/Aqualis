@@ -9,6 +9,7 @@ namespace Aqualis
     open System
     open System.IO
     
+    /// Allocates and reuses generated variable names in a thread-safe manner.
     type varGenerator(h:int->string) =
         let gate = obj()
         let mutable offlineNumList:list<int> = []
@@ -16,6 +17,7 @@ namespace Aqualis
         let mutable offlineStrList:list<string> = []
         let mutable onlineStrList:list<string> = []
         let mutable autoVarCounter = 0
+        /// Acquires a variable name and returns an action that releases it for reuse.
         member _.getVar() =
             let varname,num =
                 lock gate (fun () ->
@@ -35,6 +37,7 @@ namespace Aqualis
                         onlineNumList <- List.filter (fun x -> x <> num) onlineNumList
                         offlineNumList <- num::offlineNumList)
             varname,returnVar
+        /// Acquires a variable name, its counter, and an action that releases it.
         member _.getVarAndCounter() =
             let varname,num,counter =
                 lock gate (fun () ->
@@ -55,24 +58,38 @@ namespace Aqualis
                         onlineNumList <- List.filter (fun x -> x <> num) onlineNumList
                         offlineNumList <- num::offlineNumList)
             varname,counter,returnVar
+        /// Searches active and reusable numeric and named variables for a name.
         member this.isVarExist(v:string) =
             lock gate (fun () ->
                 List.tryFind (fun x -> x=v) onlineStrList,
                 List.tryFind (fun x -> x=v) offlineStrList,
                 List.tryFind (fun (x:int) -> h x = v) onlineNumList,
                 List.tryFind (fun (x:int) -> h x = v) offlineNumList)
+        /// Formats a generated name from its numeric identifier.
         member this.varName(x:int) = h x
+        /// Gets the next counter value used for generated variables.
         member this.maxcounter with get() = lock gate (fun () -> autoVarCounter)
+        /// Gets reusable named variables and generated numeric variable names.
         member this.varList with get() = lock gate (fun () -> offlineStrList@([1..autoVarCounter] |> List.map (fun a -> h a)))
+        /// Gets numeric identifiers currently available for reuse.
         member this.OfflineNumList with get() = lock gate (fun () -> offlineNumList)
+        /// Gets numeric identifiers currently in use.
         member this.OnlineNumList with get() = lock gate (fun () -> onlineNumList)
+        /// Gets named variables currently available for reuse.
         member this.OfflineStrList with get() = lock gate (fun () -> offlineStrList)
+        /// Gets named variables currently in use.
         member this.OnlineStrList with get() = lock gate (fun () -> onlineStrList)
+        /// Adds a named variable to the reusable list.
         member this.addOfflineStrList(v:string) = lock gate (fun () -> offlineStrList <- v::offlineStrList)
+        /// Adds a named variable to the active list.
         member this.addOnlineStrList(v:string) = lock gate (fun () -> onlineStrList <- v::onlineStrList)
+        /// Removes a numeric identifier from the reusable list.
         member this.removeOfflineNumList(v:int) = lock gate (fun () -> offlineNumList <- List.filter (fun x -> x <> v) offlineNumList)
+        /// Removes a numeric identifier from the active list.
         member this.removeOnlineNumList(v:int) = lock gate (fun () -> onlineNumList <- List.filter (fun x -> x <> v) onlineNumList)
+        /// Removes a named variable from the reusable list.
         member this.removeOfflineStrList(v:string) = lock gate (fun () -> offlineStrList <- List.filter (fun x -> x <> v) offlineStrList)
+        /// Removes a named variable from the active list.
         member this.removeOnlineStrList(v:string) = lock gate (fun () -> onlineStrList <- List.filter (fun x -> x <> v) onlineStrList)
         
     ///<summary>重複なしリスト</summary>
@@ -106,17 +123,21 @@ namespace Aqualis
         let mutable modules : Set<string> = Set.empty
         let mutable symbols : Map<string, Set<string>> = Map.empty
 
+        /// Registers a Python module import, ignoring duplicates.
         member _.RequireModule(moduleName:string) =
             lock gate (fun () -> modules <- Set.add moduleName modules)
 
+        /// Registers a Python symbol import, ignoring duplicates.
         member _.RequireSymbol(moduleName:string, symbol:string) =
             lock gate (fun () ->
                 let current = symbols |> Map.tryFind moduleName |> Option.defaultValue Set.empty
                 symbols <- symbols |> Map.add moduleName (Set.add symbol current))
 
+        /// Gets a snapshot of the currently registered entries.
         member _.Snapshot =
             lock gate (fun () -> modules, symbols)
 
+        /// Merges registered entries from another controller.
         member this.Merge(source:PythonImportController) =
             let sourceModules,sourceSymbols = source.Snapshot
             lock gate (fun () ->
@@ -125,6 +146,7 @@ namespace Aqualis
                     let current = symbols |> Map.tryFind moduleName |> Option.defaultValue Set.empty
                     symbols <- symbols |> Map.add moduleName (Set.union current sourceModuleSymbols))
 
+        /// Gets Python import statements in deterministic order.
         member _.Lines =
             lock gate (fun () ->
                 let moduleLines =
@@ -144,21 +166,27 @@ namespace Aqualis
         let mutable mathJaxScript : string option = None
         let mutable fontStylesheet : string option = None
 
+        /// Registers the MathJax script URL for generated HTML.
         member _.SetMathJaxScript(url:string) =
             lock gate (fun () -> mathJaxScript <- Some url)
 
+        /// Removes the MathJax script from generated HTML assets.
         member _.DisableMathJax() =
             lock gate (fun () -> mathJaxScript <- None)
 
+        /// Registers a font stylesheet URL for generated HTML.
         member _.SetFontStylesheet(url:string) =
             lock gate (fun () -> fontStylesheet <- Some url)
 
+        /// Removes the external font stylesheet from generated HTML assets.
         member _.UseSystemFonts() =
             lock gate (fun () -> fontStylesheet <- None)
 
+        /// Gets a snapshot of the currently registered entries.
         member _.Snapshot =
             lock gate (fun () -> mathJaxScript, fontStylesheet)
 
+        /// Merges registered entries from another controller.
         member this.Merge(source:HtmlAssetController) =
             let sourceMathJaxScript,sourceFontStylesheet = source.Snapshot
             lock gate (fun () ->
@@ -169,9 +197,13 @@ namespace Aqualis
     type IndentController(indentsize:int) =
         let gate = obj()
         let mutable indentposition = 0
+        /// Increases the indentation level by one.
         member _.inc() = lock gate (fun () -> indentposition <- indentposition + 1)
+        /// Decreases the indentation level by one.
         member _.dec() = lock gate (fun () -> indentposition <- indentposition - 1)
+        /// Resets the indentation level to zero.
         member _.clear() = lock gate (fun () -> indentposition <- 0)
+        /// Gets the spaces for the current indentation level.
         member _.space with get() = lock gate (fun () -> String(' ', indentsize*indentposition))
         
     ///<summary>数値から文字列変換時のフォーマット管理</summary>
@@ -203,6 +235,7 @@ namespace Aqualis
     ///<summary>デバッグモード管理</summary>
     type debugController() =
         let mutable enabled = 0
+        /// Gets or sets whether debug code generation is enabled.
         member _.debugMode
             with get() = System.Threading.Volatile.Read(&enabled) <> 0
             and set value =
@@ -217,6 +250,7 @@ namespace Aqualis
     type gotoLabelController() =
         let mutable gotoLabel = 10
         
+        /// Advances the goto label counter and returns its new value.
         member _.nextGotoLabel() =
             System.Threading.Interlocked.Increment(&gotoLabel).ToString()
             
@@ -232,22 +266,29 @@ namespace Aqualis
     type errorIDController() =
         let mutable errorid = 1
         
+        /// Gets the current error identifier as text.
         member _.ID
             with get() =
                 System.Threading.Volatile.Read(&errorid).ToString()
+        /// Increments the error identifier.
         member _.inc() =
             System.Threading.Interlocked.Increment(&errorid) |> ignore
         
+    /// Paths for an output file and its temporary staging file.
     type internal AtomicOutputFile = {
         TargetPath : string
         StagingPath : string }
 
     [<RequireQualifiedAccess>]
+    /// Creates, publishes, and discards staged output files.
     module internal AtomicOutputFile =
+        /// Lock protecting staged-output publication.
         let private publishGate = obj()
 
+        /// Runs an output-file action under the publication lock.
         let synchronize action = lock publishGate action
 
+        /// Creates a staging file path for an output target.
         let create (targetPath:string) =
             if String.IsNullOrWhiteSpace targetPath then
                 invalidArg (nameof targetPath) "An atomic output target path is required."
@@ -265,10 +306,12 @@ namespace Aqualis
                 StagingPath = Path.Combine(targetDirectory, stagingFileName)
             }
 
+        /// Atomically replaces the target with its staged output.
         let publish output =
             synchronize (fun () ->
                 File.Move(output.StagingPath, output.TargetPath, true))
 
+        /// Deletes a staged output file when it still exists.
         let discard output =
             if File.Exists output.StagingPath then
                 try
@@ -356,13 +399,17 @@ namespace Aqualis
         new(filename:string,indentsize:int,lan:Language) =
             new codeWriter(filename,indentsize,lan,None)
 
+        /// Creates a writer that publishes its output atomically to the target path.
         static member internal CreateAtomic(targetPath:string,indentsize:int,lan:Language) =
             let output = AtomicOutputFile.create targetPath
             new codeWriter(output.StagingPath,indentsize,lan,Some output.TargetPath)
         
+        /// Gets the current output file path.
         member _.FilePath with get() = filename
+        /// Gets the writer indentation controller.
         member val indent = IndentController indentsize with get
         
+        /// Writes raw text to the active capture or output stream.
         member _.cwrite(s:string) =
             lock gate (fun () ->
                 if captureWriters.Count > 0 then
@@ -376,6 +423,7 @@ namespace Aqualis
                 requireWriter() |> ignore
                 prefixes.Add s)
 
+        /// Transforms and writes each nonempty line for non-numeric targets.
         member private this.writeLines(ss:string, transform:string -> string) =
             match lan with
             |Numeric -> ()
@@ -438,6 +486,7 @@ namespace Aqualis
             |JavaScript -> "//" + line
             |Numeric -> ""
 
+        /// Writes each line as a comment in the target language.
         member this.comment (ss:string) =
             this.writeLines(
                 ss,
@@ -488,14 +537,17 @@ namespace Aqualis
                 disposeWriter()
                 if File.Exists filename then File.Delete filename)
             
+        /// Reads all text from the output file.
         member _.allCode with get() = File.ReadAllText filename
 
         interface IDisposable with
+            /// Closes the writer and removes any unpublished staging file.
             member _.Dispose() =
                 lock gate (fun () ->
                     disposeWriter()
                     deleteUnpublishedStagingFile())
         
+    /// Stores argument names and variable metadata for a generated function.
     type argumentController(lang:Language) =
         let gate = obj()
         let mutable arguments:(string*(Etype*VarType*string)) list = []
@@ -542,6 +594,7 @@ namespace Aqualis
             |_ -> ()
         ///<summary>リスト</summary>
         member _.list with get() = lock gate (fun () -> vlist)
+        /// Clears registered variable declarations.
         member _.clear() =
             lock gate (fun () -> vlist <- [])
         ///<summary>変数が存在するか検証</summary>
@@ -581,6 +634,7 @@ namespace Aqualis
                 else
                     vlist <- (etyp,atyp,name,cst)::vlist
                     true)
+        /// Adds a variable if absent and reports a warning for a duplicate.
         member this.setUniqVarWarning(etyp,atyp,name,cst) =
             this.trySetUniqVarWarning(etyp,atyp,name,cst) |> ignore
                 

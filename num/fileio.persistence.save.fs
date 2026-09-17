@@ -7,7 +7,9 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// File-saving operations on the I/O context.
     module ContextIoSaveExtensions =
+        /// File input and output operations for an Aqualis context.
         type ContextIo with
             ///<summary>配列をファイルに保存</summary>
             member this.save_text (f:int3,filename:exprString) =
@@ -80,18 +82,27 @@ namespace Aqualis
     
             ///<summary>配列をファイルに保存</summary>
             member this.save_text (f:int3,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:int2,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:int1,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:int0,filename:string) = this.save_text(f,st filename)
             ///<summary>配列をファイルに保存</summary>
             member this.save_text (f:double3,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:double2,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:double1,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:double0,filename:string) = this.save_text(f,st filename)
             ///<summary>配列をファイルに保存</summary>
             member this.save_text (f:complex3,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:complex2,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:complex1,filename:string) = this.save_text(f,st filename)
+            /// Writes the scalar or array to a text file at the supplied path.
             member this.save_text (f:complex0,filename:string) = this.save_text(f,st filename)
     
             ///<summary>数値をファイルに保存</summary>
@@ -119,8 +130,11 @@ namespace Aqualis
                     |It 4 ->
                         w.b (int0 f)
                     |_ -> ()
+            /// Delegates binary scalar saving to the expression overload.
             member private this.save (f:int0,filename:exprString) = this.save (f.Expr,filename)
+            /// Delegates binary scalar saving to the expression overload.
             member private this.save (f:double0,filename:exprString) = this.save (f.Expr,filename)
+            /// Delegates binary scalar saving to the expression overload.
             member private this.save (f:complex0,filename:exprString) = this.save (f.Expr,filename)
     
             ///<summary>1次元データをファイルに保存</summary>
@@ -314,15 +328,27 @@ namespace Aqualis
                             this.GenerationContext.iter.num f.size1 <| fun i ->
                                 w.b f[i,j,k].re
                                 w.b f[i,j,k].im
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:int3,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:int2,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:int1,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:int0,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:double3,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:double2,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:double1,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:double0,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:complex3,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:complex2,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:complex1,filename:string) = this.save(f,st filename)
+            /// Writes the scalar or array to a binary file at the supplied path.
             member this.save (f:complex0,filename:string) = this.save(f,st filename)

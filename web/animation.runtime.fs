@@ -10,6 +10,7 @@ open System
 open System.IO
 open System.Text.Json
 
+/// Generates slide animation controls.
 type ContextSlideAnimation internal (context:HtmlGenerationContext) =
     /// <summary>
     /// 登録された音声ファイルの一覧を書きだす

@@ -6,25 +6,29 @@
 //
 namespace Aqualis
 
-    ///<summary>3次元配列変数</summary>
+    /// Storage descriptor for a three-dimensional numeric expression array.
     type Expr3 =
-        ///<summary>変数</summary>
+        /// Named array variable with its shape.
         |Var3 of (VarType*string)
-        ///<summary>部分配列</summary>
+        /// Computed array expression with its extents and element function.
         |Arx3 of (int0*int0*int0*((int0*int0*int0)->expr))
 
     /// Common read-only representation of a three-dimensional numeric expression array.
     type INum3 =
+        /// Gets the generated code for a named array.
         abstract member Code : string
+        /// Gets the underlying three-dimensional array expression.
         abstract member Expr : Expr3
+        /// Gets the element type.
         abstract member Etype : Etype
+        /// Gets the generation context associated with the array.
         abstract member Context : Aqualis
 
     /// Marker for three-dimensional numeric expression arrays whose values are always real.
     type IReal3 =
         inherit INum3
 
-    ///<summary>3次元配列</summary>
+    /// Base implementation of three-dimensional symbolic arrays.
     type base3 (typ:Etype,x:Expr3, c:Aqualis) =
         let writein text = c.codewritein text
         let comment text = c.comment text
@@ -37,8 +41,11 @@ namespace Aqualis
         new(context:Aqualis,sname,size,name) =
             context.cvar.setVar(Structure sname,size,name,"")
             base3(Structure sname,Var3(size,name),context)
+        /// Gets the owning generation context.
         member internal _.Aqualis = c
+        /// Gets the underlying array expression.
         member _.Expr with get() = x
+        /// Gets the rendered array expression.
         member _.code with get() =
             match x with
             |Var3(_,x) -> x
@@ -160,346 +167,687 @@ namespace Aqualis
             |Var3(_,name),_ -> Idx3(typ,name,i.Expr,j.Expr,k.Expr)
             |Arx3(_,_,_,f),_ -> f (i,j,k)
 
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int0,k:int) = this.Idx3(i,j,I k)
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int,k:int0) = this.Idx3(i,I j,k)
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int,k:int) = this.Idx3(i,I j,I k)
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int0,k:int0) = this.Idx3(I i,j,k)
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int0,k:int) = this.Idx3(I i,j,I k)
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int,k:int0) = this.Idx3(I i,I j,k)
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int,k:int) = this.Idx3(I i,I j,I k)
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int0,(a3:int0,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int0,(a3:int0,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int0,(a3:int,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int0,(a3:int,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int0,_:unit) = Arx1(this.size3,  fun k -> this.Idx3(i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int,(a3:int0,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int,(a3:int0,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int,(a3:int,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int,(a3:int,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,j:int,_:unit) = Arx1(this.size3,  fun k -> this.Idx3(i,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int0),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int0),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int0),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int0),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int0),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int0),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int0),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int0,b2:int),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int0),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int0),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int0),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int0),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int0),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int0),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int0),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,(a2:int,b2:int),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,_:unit,k:int0) = Arx1(this.size2,  fun j -> this.Idx3(i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,_:unit,k:int) = Arx1(this.size2,  fun j -> this.Idx3(i,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,_:unit,(a3:int0,b3:int0)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,_:unit,(a3:int0,b3:int)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,_:unit,(a3:int,b3:int0)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,_:unit,(a3:int,b3:int)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int0,_:unit,_:unit) = Arx2(this.size2, this.size3,  fun (j,k) -> this.Idx3(i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int0,(a3:int0,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int0,(a3:int0,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int0,(a3:int,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int0,(a3:int,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int0,_:unit) = Arx1(this.size3,  fun k -> this.Idx3(I i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int,(a3:int0,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int,(a3:int0,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int,(a3:int,b3:int0)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int,(a3:int,b3:int)) = Arx1(b3-a3+_1,  fun k -> this.Idx3(I i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,j:int,_:unit) = Arx1(this.size3,  fun k -> this.Idx3(I i,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int0),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int0),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int0),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int0),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int0),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int0),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int0),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int0,b2:int),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int0),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int0),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int0),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int0),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int0),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int0),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int0),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int),k:int0) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int),k:int) = Arx1(b2-a2+_1,  fun j -> this.Idx3(I i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int),(a3:int0,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int),(a3:int0,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int),(a3:int,b3:int0)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int),(a3:int,b3:int)) = Arx2(b2-a2+_1, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,(a2:int,b2:int),_:unit) = Arx2(b2-a2+_1, this.size3,  fun (j,k) -> this.Idx3(I i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,_:unit,k:int0) = Arx1(this.size2,  fun j -> this.Idx3(I i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,_:unit,k:int) = Arx1(this.size2,  fun j -> this.Idx3(I i,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,_:unit,(a3:int0,b3:int0)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,_:unit,(a3:int0,b3:int)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,_:unit,(a3:int,b3:int0)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,_:unit,(a3:int,b3:int)) = Arx2(this.size2, b3-a3+_1,  fun (j,k) -> this.Idx3(I i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(i:int,_:unit,_:unit) = Arx2(this.size2, this.size3,  fun (j,k) -> this.Idx3(I i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int0,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int0,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int0,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int0,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int0,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int0,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int0,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),j:int,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int0,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),(a2:int,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),_:unit,k:int0) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),_:unit,k:int) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),_:unit,(a3:int0,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),_:unit,(a3:int0,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),_:unit,(a3:int,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),_:unit,(a3:int,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int0),_:unit,_:unit) = Arx3(b1-a1+_1, this.size2, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int0,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int0,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int0,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int0,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int0,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int0,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int0,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),j:int,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int0,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),(a2:int,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),_:unit,k:int0) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),_:unit,k:int) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),_:unit,(a3:int0,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),_:unit,(a3:int0,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),_:unit,(a3:int,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),_:unit,(a3:int,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int0,b1:int),_:unit,_:unit) = Arx3(b1-a1+_1, this.size2, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int0,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int0,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int0,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int0,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int0,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int0,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int0,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),j:int,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int0,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),(a2:int,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),_:unit,k:int0) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),_:unit,k:int) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),_:unit,(a3:int0,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),_:unit,(a3:int0,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),_:unit,(a3:int,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),_:unit,(a3:int,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int0),_:unit,_:unit) = Arx3(b1-a1+_1, this.size2, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int0,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int0,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int0,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int0,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int0,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int0,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int0,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int,k:int0) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int,k:int) = Arx1(b1-a1+_1,  fun i -> this.Idx3(i+a1,I j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int,(a3:int0,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int,(a3:int0,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int,(a3:int,b3:int0)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int,(a3:int,b3:int)) = Arx2(b1-a1+_1, b3-a3+_1,  fun (i,k) -> this.Idx3(i+a1,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),j:int,_:unit) = Arx2(b1-a1+_1, this.size3,  fun (i,k) -> this.Idx3(i+a1,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int0,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int0),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int0),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int0),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int0),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int0),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int0),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int0),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int),k:int0) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int),k:int) = Arx2(b1-a1+_1, b2-a2+_1,  fun (i,j) -> this.Idx3(i+a1,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int),(a3:int0,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int),(a3:int0,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int),(a3:int,b3:int0)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int),(a3:int,b3:int)) = Arx3(b1-a1+_1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),(a2:int,b2:int),_:unit) = Arx3(b1-a1+_1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),_:unit,k:int0) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),_:unit,k:int) = Arx2(b1-a1+_1, this.size2,  fun (i,j) -> this.Idx3(i+a1,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),_:unit,(a3:int0,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),_:unit,(a3:int0,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),_:unit,(a3:int,b3:int0)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),_:unit,(a3:int,b3:int)) = Arx3(b1-a1+_1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i+a1,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3((a1:int,b1:int),_:unit,_:unit) = Arx3(b1-a1+_1, this.size2, this.size3,  fun (i,j,k) -> this.Idx3(i+a1,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int0,k:int0) = Arx1(this.size1,  fun i -> this.Idx3(i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int0,k:int) = Arx1(this.size1,  fun i -> this.Idx3(i,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int0,(a3:int0,b3:int0)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int0,(a3:int0,b3:int)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int0,(a3:int,b3:int0)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int0,(a3:int,b3:int)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int0,_:unit) = Arx2(this.size1, this.size3,  fun (i,k) -> this.Idx3(i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int,k:int0) = Arx1(this.size1,  fun i -> this.Idx3(i,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int,k:int) = Arx1(this.size1,  fun i -> this.Idx3(i,I j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int,(a3:int0,b3:int0)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int,(a3:int0,b3:int)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int,(a3:int,b3:int0)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int,(a3:int,b3:int)) = Arx2(this.size1, b3-a3+_1,  fun (i,k) -> this.Idx3(i,I j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,j:int,_:unit) = Arx2(this.size1, this.size3,  fun (i,k) -> this.Idx3(i,I j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int0),k:int0) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int0),k:int) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int0),(a3:int0,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int0),(a3:int0,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int0),(a3:int,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int0),(a3:int,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int0),_:unit) = Arx3(this.size1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int),k:int0) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int),k:int) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int),(a3:int0,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int),(a3:int0,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int),(a3:int,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int),(a3:int,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int0,b2:int),_:unit) = Arx3(this.size1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int0),k:int0) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int0),k:int) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int0),(a3:int0,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int0),(a3:int0,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int0),(a3:int,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int0),(a3:int,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int0),_:unit) = Arx3(this.size1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int),k:int0) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int),k:int) = Arx2(this.size1, b2-a2+_1,  fun (i,j) -> this.Idx3(i,j+a2,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int),(a3:int0,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int),(a3:int0,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int),(a3:int,b3:int0)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int),(a3:int,b3:int)) = Arx3(this.size1, b2-a2+_1, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j+a2,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,(a2:int,b2:int),_:unit) = Arx3(this.size1, b2-a2+_1, this.size3,  fun (i,j,k) -> this.Idx3(i,j+a2,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,_:unit,k:int0) = Arx2(this.size1, this.size2,  fun (i,j) -> this.Idx3(i,j,k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,_:unit,k:int) = Arx2(this.size1, this.size2,  fun (i,j) -> this.Idx3(i,j,I k))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,_:unit,(a3:int0,b3:int0)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,_:unit,(a3:int0,b3:int)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,_:unit,(a3:int,b3:int0)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
+        /// Constructs an expression for a three-dimensional array element or slice.
         member this.Idx3(_:unit,_:unit,(a3:int,b3:int)) = Arx3(this.size1, this.size2, b3-a3+_1,  fun (i,j,k) -> this.Idx3(i,j,k+a3))
 
         ///<summary>配列のメモリ割り当て</summary>
@@ -613,12 +961,19 @@ namespace Aqualis
                         ()
                 |_ -> ()
 
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int,n2:int0,n3:int0) = this.allocate(I n1,n2,n3)
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int0,n2:int,n3:int0) = this.allocate(n1,I n2,n3)
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int0,n2:int0,n3:int) = this.allocate(n1,n2,I n3)
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int,n2:int,n3:int0) = this.allocate(I n1,I n2,n3)
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int,n2:int0,n3:int) = this.allocate(I n1,n2,I n3)
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int0,n2:int,n3:int) = this.allocate(n1,I n2,I n3)
+        /// Allocates the array using the specified dimensions.
         member this.allocate(n1:int,n2:int,n3:int) = this.allocate(I n1,I n2,I n3)
 
         ///<summary>配列のメモリ割り当て</summary>
@@ -736,6 +1091,7 @@ namespace Aqualis
                     c.iter.num_exit (this.size3,counterName3) <| fun (ext3,k) ->
                         code(ext1,ext2,ext3,i,j,k)
 
+        /// Reports that operand arrays have incompatible dimensions.
         static member sizeMismatchError(v1:base3,v2:base3) =
             let ctx = Aqualis.merge v1.Aqualis v2.Aqualis
             NumericArrayValidation.require ctx (v1.size1 .=/ v2.size1) "Array size (first dimension) mismatch."
@@ -756,410 +1112,799 @@ namespace Aqualis
         //     |None,Arx3(size1,size2,size3,_) ->
         //         Aqualis.mergeMany [size1.Context;size2.Context;size3.Context]
         //     |None,Var3 _ -> None
+        /// Gets the owning generation context.
         member _.Context=context
+        /// Gets the array element type.
         member _.etype=typ
 
         interface INum3 with
+            /// Gets the rendered array expression.
             member this.Code = this.code
+            /// Gets the underlying array expression.
             member this.Expr = this.Expr
+            /// Gets the array element type.
             member this.Etype = this.etype
+            /// Gets the owning generation context.
             member this.Context = this.Context
+        /// Wraps an element expression as a scalar value.
         abstract member WrapScalar:expr->'Scalar
+        /// Wraps a row expression as a one-dimensional array.
         abstract member WrapRow:Expr1->'Row
+        /// Wraps a matrix expression as a two-dimensional array.
         abstract member WrapMatrix:Expr2->'Matrix
+        /// Creates a typed array wrapper for an expression and context.
         abstract member CreateWithContext:Etype*Expr3*Aqualis->'Self
+        /// Assigns an expression to the element at the specified indices.
         abstract member AssignAt:int0*int0*int0*expr->unit
+        /// Creates an array wrapper in the current generation context.
         member this.Create(elementType,value)=this.CreateWithContext(elementType,value,context)
 
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int0,i3:int0) = this.WrapScalar(this.Idx3(i1,i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int0,i3:int) = this.WrapScalar(this.Idx3(i1,i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int0,(a3:int0,b3:int0)) = this.WrapRow(this.Idx3(i1,i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int0,(a3:int0,b3:int)) = this.WrapRow(this.Idx3(i1,i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int0,(a3:int,b3:int0)) = this.WrapRow(this.Idx3(i1,i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int0,(a3:int,b3:int)) = this.WrapRow(this.Idx3(i1,i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int0,_:unit) = this.WrapRow(this.Idx3(i1,i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int,i3:int0) = this.WrapScalar(this.Idx3(i1,I i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int,i3:int) = this.WrapScalar(this.Idx3(i1,I i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int,(a3:int0,b3:int0)) = this.WrapRow(this.Idx3(i1,I i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int,(a3:int0,b3:int)) = this.WrapRow(this.Idx3(i1,I i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int,(a3:int,b3:int0)) = this.WrapRow(this.Idx3(i1,I i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int,(a3:int,b3:int)) = this.WrapRow(this.Idx3(i1,I i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,i2:int,_:unit) = this.WrapRow(this.Idx3(i1,I i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int0),i3:int0) = this.WrapRow(this.Idx3(i1,(a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int0),i3:int) = this.WrapRow(this.Idx3(i1,(a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int0),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int0),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(i1,(a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int0),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int0),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(i1,(a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int0),_:unit) = this.WrapMatrix(this.Idx3(i1,(a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int),i3:int0) = this.WrapRow(this.Idx3(i1,(a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int),i3:int) = this.WrapRow(this.Idx3(i1,(a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(i1,(a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(i1,(a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int0,b2:int),_:unit) = this.WrapMatrix(this.Idx3(i1,(a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int0),i3:int0) = this.WrapRow(this.Idx3(i1,(I a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int0),i3:int) = this.WrapRow(this.Idx3(i1,(I a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int0),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(I a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int0),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(i1,(I a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int0),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(I a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int0),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(i1,(I a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int0),_:unit) = this.WrapMatrix(this.Idx3(i1,(I a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int),i3:int0) = this.WrapRow(this.Idx3(i1,(I a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int),i3:int) = this.WrapRow(this.Idx3(i1,(I a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(I a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(i1,(I a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(I a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(i1,(I a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,(a2:int,b2:int),_:unit) = this.WrapMatrix(this.Idx3(i1,(I a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,_:unit,i3:int0) = this.WrapRow(this.Idx3(i1,(),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,_:unit,i3:int) = this.WrapRow(this.Idx3(i1,(),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,_:unit,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,_:unit,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(i1,(),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,_:unit,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(i1,(),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,_:unit,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(i1,(),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int0,_:unit,_:unit) = this.WrapMatrix(this.Idx3(i1,(),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int0,i3:int0) = this.WrapScalar(this.Idx3(I i1,i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int0,i3:int) = this.WrapScalar(this.Idx3(I i1,i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int0,(a3:int0,b3:int0)) = this.WrapRow(this.Idx3(I i1,i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int0,(a3:int0,b3:int)) = this.WrapRow(this.Idx3(I i1,i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int0,(a3:int,b3:int0)) = this.WrapRow(this.Idx3(I i1,i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int0,(a3:int,b3:int)) = this.WrapRow(this.Idx3(I i1,i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int0,_:unit) = this.WrapRow(this.Idx3(I i1,i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int,i3:int0) = this.WrapScalar(this.Idx3(I i1,I i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int,i3:int) = this.WrapScalar(this.Idx3(I i1,I i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int,(a3:int0,b3:int0)) = this.WrapRow(this.Idx3(I i1,I i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int,(a3:int0,b3:int)) = this.WrapRow(this.Idx3(I i1,I i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int,(a3:int,b3:int0)) = this.WrapRow(this.Idx3(I i1,I i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int,(a3:int,b3:int)) = this.WrapRow(this.Idx3(I i1,I i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,i2:int,_:unit) = this.WrapRow(this.Idx3(I i1,I i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int0),i3:int0) = this.WrapRow(this.Idx3(I i1,(a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int0),i3:int) = this.WrapRow(this.Idx3(I i1,(a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int0),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int0),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int0),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int0),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int0),_:unit) = this.WrapMatrix(this.Idx3(I i1,(a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int),i3:int0) = this.WrapRow(this.Idx3(I i1,(a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int),i3:int) = this.WrapRow(this.Idx3(I i1,(a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int0,b2:int),_:unit) = this.WrapMatrix(this.Idx3(I i1,(a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int0),i3:int0) = this.WrapRow(this.Idx3(I i1,(I a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int0),i3:int) = this.WrapRow(this.Idx3(I i1,(I a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int0),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(I a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int0),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(I a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int0),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(I a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int0),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(I a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int0),_:unit) = this.WrapMatrix(this.Idx3(I i1,(I a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int),i3:int0) = this.WrapRow(this.Idx3(I i1,(I a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int),i3:int) = this.WrapRow(this.Idx3(I i1,(I a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int),(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(I a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int),(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(I a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int),(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(I a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int),(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(I a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,(a2:int,b2:int),_:unit) = this.WrapMatrix(this.Idx3(I i1,(I a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,_:unit,i3:int0) = this.WrapRow(this.Idx3(I i1,(),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,_:unit,i3:int) = this.WrapRow(this.Idx3(I i1,(),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,_:unit,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,_:unit,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,_:unit,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3(I i1,(),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,_:unit,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3(I i1,(),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(i1:int,_:unit,_:unit) = this.WrapMatrix(this.Idx3(I i1,(),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int0,i3:int0) = this.WrapRow(this.Idx3((a1,b1),i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int0,i3:int) = this.WrapRow(this.Idx3((a1,b1),i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int0,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((a1,b1),i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int0,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((a1,b1),i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int0,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((a1,b1),i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int0,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((a1,b1),i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int0,_:unit) = this.WrapMatrix(this.Idx3((a1,b1),i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int,i3:int0) = this.WrapRow(this.Idx3((a1,b1),I i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int,i3:int) = this.WrapRow(this.Idx3((a1,b1),I i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((a1,b1),I i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((a1,b1),I i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((a1,b1),I i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((a1,b1),I i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),i2:int,_:unit) = this.WrapMatrix(this.Idx3((a1,b1),I i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((a1,b1),(a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((a1,b1),(a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int0),_:unit) = this.Create(typ,this.Idx3((a1,b1),(a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((a1,b1),(a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int),i3:int) = this.WrapMatrix(this.Idx3((a1,b1),(a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int0,b2:int),_:unit) = this.Create(typ,this.Idx3((a1,b1),(a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((a1,b1),(I a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((a1,b1),(I a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(I a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(I a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(I a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(I a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int0),_:unit) = this.Create(typ,this.Idx3((a1,b1),(I a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((a1,b1),(I a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int),i3:int) = this.WrapMatrix(this.Idx3((a1,b1),(I a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(I a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(I a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(I a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(I a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),(a2:int,b2:int),_:unit) = this.Create(typ,this.Idx3((a1,b1),(I a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),_:unit,i3:int0) = this.WrapMatrix(this.Idx3((a1,b1),(),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),_:unit,i3:int) = this.WrapMatrix(this.Idx3((a1,b1),(),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),_:unit,(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),_:unit,(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),_:unit,(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,b1),(),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),_:unit,(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,b1),(),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int0),_:unit,_:unit) = this.Create(typ,this.Idx3((a1,b1),(),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int0,i3:int0) = this.WrapRow(this.Idx3((a1,I b1),i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int0,i3:int) = this.WrapRow(this.Idx3((a1,I b1),i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int0,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((a1,I b1),i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int0,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((a1,I b1),i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int0,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((a1,I b1),i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int0,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((a1,I b1),i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int0,_:unit) = this.WrapMatrix(this.Idx3((a1,I b1),i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int,i3:int0) = this.WrapRow(this.Idx3((a1,I b1),I i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int,i3:int) = this.WrapRow(this.Idx3((a1,I b1),I i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((a1,I b1),I i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((a1,I b1),I i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((a1,I b1),I i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((a1,I b1),I i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),i2:int,_:unit) = this.WrapMatrix(this.Idx3((a1,I b1),I i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((a1,I b1),(a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((a1,I b1),(a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int0),_:unit) = this.Create(typ,this.Idx3((a1,I b1),(a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((a1,I b1),(a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int),i3:int) = this.WrapMatrix(this.Idx3((a1,I b1),(a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int0,b2:int),_:unit) = this.Create(typ,this.Idx3((a1,I b1),(a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((a1,I b1),(I a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((a1,I b1),(I a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int0),_:unit) = this.Create(typ,this.Idx3((a1,I b1),(I a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((a1,I b1),(I a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int),i3:int) = this.WrapMatrix(this.Idx3((a1,I b1),(I a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(I a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),(a2:int,b2:int),_:unit) = this.Create(typ,this.Idx3((a1,I b1),(I a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),_:unit,i3:int0) = this.WrapMatrix(this.Idx3((a1,I b1),(),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),_:unit,i3:int) = this.WrapMatrix(this.Idx3((a1,I b1),(),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),_:unit,(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),_:unit,(a3:int0,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),_:unit,(a3:int,b3:int0)) = this.Create(typ,this.Idx3((a1,I b1),(),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),_:unit,(a3:int,b3:int)) = this.Create(typ,this.Idx3((a1,I b1),(),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int0,b1:int),_:unit,_:unit) = this.Create(typ,this.Idx3((a1,I b1),(),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int0,i3:int0) = this.WrapRow(this.Idx3((I a1,b1),i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int0,i3:int) = this.WrapRow(this.Idx3((I a1,b1),i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int0,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,b1),i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int0,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((I a1,b1),i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int0,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,b1),i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int0,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((I a1,b1),i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int0,_:unit) = this.WrapMatrix(this.Idx3((I a1,b1),i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int,i3:int0) = this.WrapRow(this.Idx3((I a1,b1),I i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int,i3:int) = this.WrapRow(this.Idx3((I a1,b1),I i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,b1),I i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((I a1,b1),I i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,b1),I i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((I a1,b1),I i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),i2:int,_:unit) = this.WrapMatrix(this.Idx3((I a1,b1),I i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((I a1,b1),(a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((I a1,b1),(a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int0),_:unit) = this.Create(typ,this.Idx3((I a1,b1),(a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((I a1,b1),(a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int),i3:int) = this.WrapMatrix(this.Idx3((I a1,b1),(a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int0,b2:int),_:unit) = this.Create(typ,this.Idx3((I a1,b1),(a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((I a1,b1),(I a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((I a1,b1),(I a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int0),_:unit) = this.Create(typ,this.Idx3((I a1,b1),(I a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((I a1,b1),(I a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int),i3:int) = this.WrapMatrix(this.Idx3((I a1,b1),(I a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(I a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),(a2:int,b2:int),_:unit) = this.Create(typ,this.Idx3((I a1,b1),(I a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),_:unit,i3:int0) = this.WrapMatrix(this.Idx3((I a1,b1),(),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),_:unit,i3:int) = this.WrapMatrix(this.Idx3((I a1,b1),(),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),_:unit,(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),_:unit,(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),_:unit,(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,b1),(),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),_:unit,(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,b1),(),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int0),_:unit,_:unit) = this.Create(typ,this.Idx3((I a1,b1),(),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int0,i3:int0) = this.WrapRow(this.Idx3((I a1,I b1),i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int0,i3:int) = this.WrapRow(this.Idx3((I a1,I b1),i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int0,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,I b1),i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int0,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((I a1,I b1),i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int0,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,I b1),i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int0,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((I a1,I b1),i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int0,_:unit) = this.WrapMatrix(this.Idx3((I a1,I b1),i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int,i3:int0) = this.WrapRow(this.Idx3((I a1,I b1),I i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int,i3:int) = this.WrapRow(this.Idx3((I a1,I b1),I i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,I b1),I i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((I a1,I b1),I i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((I a1,I b1),I i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((I a1,I b1),I i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),i2:int,_:unit) = this.WrapMatrix(this.Idx3((I a1,I b1),I i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((I a1,I b1),(a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((I a1,I b1),(a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int0),_:unit) = this.Create(typ,this.Idx3((I a1,I b1),(a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((I a1,I b1),(a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int),i3:int) = this.WrapMatrix(this.Idx3((I a1,I b1),(a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int0,b2:int),_:unit) = this.Create(typ,this.Idx3((I a1,I b1),(a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((I a1,I b1),(I a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((I a1,I b1),(I a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int0),_:unit) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((I a1,I b1),(I a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int),i3:int) = this.WrapMatrix(this.Idx3((I a1,I b1),(I a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),(a2:int,b2:int),_:unit) = this.Create(typ,this.Idx3((I a1,I b1),(I a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),_:unit,i3:int0) = this.WrapMatrix(this.Idx3((I a1,I b1),(),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),_:unit,i3:int) = this.WrapMatrix(this.Idx3((I a1,I b1),(),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),_:unit,(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),_:unit,(a3:int0,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),_:unit,(a3:int,b3:int0)) = this.Create(typ,this.Idx3((I a1,I b1),(),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),_:unit,(a3:int,b3:int)) = this.Create(typ,this.Idx3((I a1,I b1),(),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get((a1:int,b1:int),_:unit,_:unit) = this.Create(typ,this.Idx3((I a1,I b1),(),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int0,i3:int0) = this.WrapRow(this.Idx3((),i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int0,i3:int) = this.WrapRow(this.Idx3((),i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int0,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((),i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int0,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((),i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int0,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((),i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int0,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((),i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int0,_:unit) = this.WrapMatrix(this.Idx3((),i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int,i3:int0) = this.WrapRow(this.Idx3((),I i2,i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int,i3:int) = this.WrapRow(this.Idx3((),I i2,I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int,(a3:int0,b3:int0)) = this.WrapMatrix(this.Idx3((),I i2,(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int,(a3:int0,b3:int)) = this.WrapMatrix(this.Idx3((),I i2,(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int,(a3:int,b3:int0)) = this.WrapMatrix(this.Idx3((),I i2,(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int,(a3:int,b3:int)) = this.WrapMatrix(this.Idx3((),I i2,(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,i2:int,_:unit) = this.WrapMatrix(this.Idx3((),I i2,()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((),(a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((),(a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((),(a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((),(a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((),(a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((),(a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int0),_:unit) = this.Create(typ,this.Idx3((),(a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((),(a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int),i3:int) = this.WrapMatrix(this.Idx3((),(a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((),(a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((),(a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((),(a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((),(a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int0,b2:int),_:unit) = this.Create(typ,this.Idx3((),(a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int0),i3:int0) = this.WrapMatrix(this.Idx3((),(I a2,b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int0),i3:int) = this.WrapMatrix(this.Idx3((),(I a2,b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int0),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((),(I a2,b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int0),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((),(I a2,b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int0),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((),(I a2,b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int0),(a3:int,b3:int)) = this.Create(typ,this.Idx3((),(I a2,b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int0),_:unit) = this.Create(typ,this.Idx3((),(I a2,b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int),i3:int0) = this.WrapMatrix(this.Idx3((),(I a2,I b2),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int),i3:int) = this.WrapMatrix(this.Idx3((),(I a2,I b2),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int),(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((),(I a2,I b2),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int),(a3:int0,b3:int)) = this.Create(typ,this.Idx3((),(I a2,I b2),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int),(a3:int,b3:int0)) = this.Create(typ,this.Idx3((),(I a2,I b2),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int),(a3:int,b3:int)) = this.Create(typ,this.Idx3((),(I a2,I b2),(I a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,(a2:int,b2:int),_:unit) = this.Create(typ,this.Idx3((),(I a2,I b2),()))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,_:unit,i3:int0) = this.WrapMatrix(this.Idx3((),(),i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,_:unit,i3:int) = this.WrapMatrix(this.Idx3((),(),I i3))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,_:unit,(a3:int0,b3:int0)) = this.Create(typ,this.Idx3((),(),(a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,_:unit,(a3:int0,b3:int)) = this.Create(typ,this.Idx3((),(),(a3,I b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,_:unit,(a3:int,b3:int0)) = this.Create(typ,this.Idx3((),(),(I a3,b3)))
+        /// Gets a symbolic array element or slice selected by the supplied indices and ranges.
         member this.Item with get(_:unit,_:unit,(a3:int,b3:int)) = this.Create(typ,this.Idx3((),(),(I a3,I b3)))
 
+        /// Creates a result array from an element type, expression body, and context.
         member private this.New(elementType,body,resultContext)=
             this.CreateWithContext(elementType,Arx3(this.size1,this.size2,this.size3,body),resultContext)
+        /// Combines two arrays elementwise after checking their dimensions.
         static member private Binary(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
             base3.sizeMismatchError(x,y)
             let resultContext=Aqualis.merge x.Context y.Context
             x.New(x.etype%%y.etype,(fun (i:int0,j:int0,k:int0)->make(x.etype%%y.etype,(x[i,j,k]:>INum0).Expr,(y[i,j,k]:>INum0).Expr)),resultContext)
+        /// Combines a scalar on the left with every array element.
         static member private ScalarLeft(value:INum0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
             let resultContext=Aqualis.merge value.Context y.Context
             y.New(value.Etype%%y.etype,(fun (i:int0,j:int0,k:int0)->make(value.Etype%%y.etype,value.Expr,(y[i,j,k]:>INum0).Expr)),resultContext)
+        /// Combines every array element with a scalar on the right.
         static member private ScalarRight(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,value:INum0,make:Etype*expr*expr->expr)=
             let resultContext=Aqualis.merge x.Context value.Context
             x.New(x.etype%%value.Etype,(fun (i:int0,j:int0,k:int0)->make(x.etype%%value.Etype,(x[i,j,k]:>INum0).Expr,value.Expr)),resultContext)
+        /// Combines a primitive value on the left with every array element.
         static member private PrimitiveLeft(elementType,value,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>,make:Etype*expr*expr->expr)=
             y.New(elementType%%y.etype,(fun (i:int0,j:int0,k:int0)->make(elementType%%y.etype,value,(y[i,j,k]:>INum0).Expr)),y.Context)
+        /// Combines every array element with a primitive value on the right.
         static member private PrimitiveRight(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,elementType,value,make:Etype*expr*expr->expr)=
             x.New(x.etype%%elementType,(fun (i:int0,j:int0,k:int0)->make(x.etype%%elementType,(x[i,j,k]:>INum0).Expr,value)),x.Context)
 
+        /// Adds the operands.
         static member (+)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.Binary(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+)(x:int0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.ScalarLeft(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+)(x:int,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+)(x:double,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int0)=NumericArray3.ScalarRight(x,y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int)=NumericArray3.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Add(t,a,b))
+        /// Adds the operands.
         static member (+)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:double)=NumericArray3.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Add(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.Binary(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-)(x:int0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.ScalarLeft(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-)(x:int,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-)(x:double,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int0)=NumericArray3.ScalarRight(x,y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int)=NumericArray3.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Sub(t,a,b))
+        /// Subtracts the right operand from the left operand.
         static member (-)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:double)=NumericArray3.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Sub(t,a,b))
+        /// Multiplies the operands.
         static member (*)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.Binary(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*)(x:int0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.ScalarLeft(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*)(x:int,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*)(x:double,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int0)=NumericArray3.ScalarRight(x,y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int)=NumericArray3.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Mul(t,a,b))
+        /// Multiplies the operands.
         static member (*)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:double)=NumericArray3.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Mul(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.Binary(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/)(x:int0,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.ScalarLeft(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/)(x:int,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(It 4,Int x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/)(x:double,y:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=NumericArray3.PrimitiveLeft(Dt,Dbl x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int0)=NumericArray3.ScalarRight(x,y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:int)=NumericArray3.PrimitiveRight(x,It 4,Int y,fun(t,a,b)->Div(t,a,b))
+        /// Divides the left operand by the right operand.
         static member (/)(x:NumericArray3<'Scalar,'Row,'Matrix,'Self>,y:double)=NumericArray3.PrimitiveRight(x,Dt,Dbl y,fun(t,a,b)->Div(t,a,b))
 
+        /// Assigns another array after validating compatible dimensions.
         member this.AssignArray(other:NumericArray3<'Scalar,'Row,'Matrix,'Self>)=
             Aqualis.merge context other.Context |> ignore
             let writein text=context.codewritein text
@@ -1175,6 +1920,7 @@ namespace Aqualis
                 |Numeric->()
             |_->elementwise()
 
+        /// Assigns a scalar value to the array elements.
         member this.AssignScalar(value:INum0)=
             Aqualis.merge context value.Context |> ignore
             let writein text=context.codewritein text

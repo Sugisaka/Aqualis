@@ -7,7 +7,9 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Generates Bessel function expressions for supported target languages.
     module asm_bessel =
+        /// Requires a target language with Bessel support and registers dependencies.
         let private requireBesselBackend (context:Aqualis) cSymbol pythonSymbol =
             match context.Language with
             | C99 -> context.elist.add ("double " + cSymbol + "(double)")
@@ -17,6 +19,7 @@ namespace Aqualis
             | Fortran | LaTeX | HTML | HTMLSequenceDiagram -> ()
 
         type asm with
+            /// Computes the order-0 first-kind Bessel function and passes its temporary result to the callback.
             static member besselj0 (x:double0) = fun code ->
                 let context = x.Context
                 requireBesselBackend context "j0" "jv"
@@ -33,6 +36,7 @@ namespace Aqualis
                 context.ch.d <| fun bes ->
                     bes <== double0(besselj0_ x, x.Context)
                     code bes
+            /// Computes the order-0 second-kind Bessel function and passes its temporary result to the callback.
             static member bessely0 (x:double0) = fun code ->
                 let context = x.Context
                 requireBesselBackend context "y0" "yn"
@@ -49,6 +53,7 @@ namespace Aqualis
                 context.ch.d <| fun bes ->
                     bes <== double0(bessely0_(x), x.Context)
                     code bes
+            /// Computes the order-0 Hankel function J minus iY and passes its temporary result to the callback.
             static member besselh0 (x:double0) = fun code ->
                 let context = x.Context
                 requireBesselBackend context "j0" "jv"
@@ -76,6 +81,7 @@ namespace Aqualis
                 context.ch.z <| fun bes ->
                     bes <== double0(besselj0_ x, x.Context)-double0(bessely0_ x, x.Context)*asm.uj
                     code bes
+            /// Computes the order-1 first-kind Bessel function and passes its temporary result to the callback.
             static member besselj1 (x:double0) = fun code ->
                 let context = x.Context
                 requireBesselBackend context "j1" "jv"
@@ -92,6 +98,7 @@ namespace Aqualis
                 context.ch.d <| fun bes ->
                     bes <== double0(besselj1_(x), x.Context)
                     code bes
+            /// Computes the order-1 second-kind Bessel function and passes its temporary result to the callback.
             static member bessely1 (x:double0) = fun code ->
                 let context = x.Context
                 requireBesselBackend context "y1" "yn"
@@ -108,6 +115,7 @@ namespace Aqualis
                 context.ch.d <| fun bes ->
                     bes <== double0(bessely1_ x, x.Context)
                     code bes
+            /// Computes the order-1 Hankel function J minus iY and passes its temporary result to the callback.
             static member besselh1 (x:double0) = fun code ->
                 let context = x.Context
                 requireBesselBackend context "j1" "jv"

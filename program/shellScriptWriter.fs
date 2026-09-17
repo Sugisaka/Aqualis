@@ -10,7 +10,9 @@ open System.IO
 open System.Text
 
 [<RequireQualifiedAccess>]
+/// Builds safely quoted POSIX shell commands from executable paths and arguments.
 module internal ShellCommand =
+    /// Quotes a single argument for a POSIX shell, rejecting null and NUL characters.
     let quoteArgument (value:string) =
         if isNull value then
             nullArg (nameof value)
@@ -26,12 +28,14 @@ module internal ShellCommand =
         else
             "'" + value.Replace("'", "'\"'\"'") + "'"
 
+    /// Joins the executable and nonblank arguments into a quoted shell command.
     let buildCommand executable arguments =
         executable::arguments
         |> List.filter (System.String.IsNullOrWhiteSpace >> not)
         |> List.map quoteArgument
         |> String.concat " "
 
+    /// Builds a compiler invocation with sources, options, and an output path.
     let buildCompileCommand
         compiler
         fixedArguments
@@ -49,12 +53,15 @@ module internal ShellCommand =
         ]
 
 [<RequireQualifiedAccess>]
+/// Writes UTF-8 shell scripts with Unix line endings.
 module internal ShellScriptWriter =
+    /// Creates or overwrites a script file without a UTF-8 byte-order mark.
     let create path =
         let writer = new StreamWriter(path, false, UTF8Encoding(false))
         writer.NewLine <- "\n"
         writer
 
+    /// Writes an <c>exec</c> command for the supplied executable and arguments.
     let writeExec
         (writer:StreamWriter)
         executable
@@ -62,6 +69,9 @@ module internal ShellScriptWriter =
         let command = ShellCommand.buildCommand executable arguments
         writer.WriteLine("exec " + command)
 
+    /// Writes a compile command followed by a guarded execution step.
+    /// On compilation failure, the generated script reports the error and exits
+    /// with the compiler's status.
     let writeCompileAndRun
         (writer:StreamWriter)
         (compileCommand:string)

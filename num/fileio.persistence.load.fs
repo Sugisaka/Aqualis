@@ -7,7 +7,9 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// File-loading operations on the I/O context.
     module ContextIoLoadExtensions =
+        /// Reports invalid saved-data contents.
         let private failInvalidPersistenceData (context:Aqualis) message =
             match context.language with
             | C99 ->
@@ -18,12 +20,15 @@ namespace Aqualis
                 context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n")
             | _ -> context.print.s message
 
+        /// Checks the saved-data format version.
         let private requireFormatVersion (context:Aqualis) (version:int0) =
             context.br.if1 (version .=/ 1) (fun () -> failInvalidPersistenceData context "invalid data format")
 
+        /// Checks the size of a saved scalar.
         let private requireScalarSize (context:Aqualis) (size:int0) =
             context.br.if1 (size .=/ 1) (fun () -> failInvalidPersistenceData context "invalid scalar data size")
 
+        /// Checks that an array payload has the expected size.
         let private requireArrayPayload (reader:BinReader) (typeCode:int) (dimensions:int0 list) =
             let bytesPerElement =
                 match typeCode with
@@ -33,11 +38,13 @@ namespace Aqualis
                 | _ -> invalidArg (nameof typeCode) "Unsupported persistence element type."
             reader.RequireArrayPayload(dimensions,bytesPerElement)
 
+        /// Checks that a destination array can hold saved data.
         let private requireArrayAllocation (context:Aqualis) (arrayCode:string) (dimensions:int0 list) =
             if context.language = C99 then
                 let nonEmpty = dimensions |> List.map (fun size -> "(" + size.Expr.eval context + " > 0)") |> String.concat " && "
                 context.codewritein("if (" + nonEmpty + " && " + arrayCode + " == NULL) { fprintf(stderr, \"Aqualis: failed to allocate array data.\\n\"); exit(EXIT_FAILURE); }\n")
 
+        /// File input and output operations for an Aqualis context.
         type ContextIo with
             ///<summary>数値をファイルから読み込み</summary>
             member this.load (f:int0,filename:exprString) =
@@ -512,9 +519,13 @@ namespace Aqualis
                             |_ ->
                                 failInvalidPersistenceData this.GenerationContext "invalid data type"
     
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:int3,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:int2,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:int1,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:int0,filename:string) = this.load(f,st filename)
     
             ///<summary>3次元データをファイルから読み込み</summary>
@@ -565,9 +576,13 @@ namespace Aqualis
                             |_ ->
                                 failInvalidPersistenceData this.GenerationContext "invalid data type"
     
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:double3,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:double2,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:double1,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:double0,filename:string) = this.load(f,st filename)
     
             ///<summary>3次元データをファイルから読み込み</summary>
@@ -619,8 +634,12 @@ namespace Aqualis
                             |_ ->
                                 failInvalidPersistenceData this.GenerationContext "invalid data type"
     
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:complex3,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:complex2,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:complex1,filename:string) = this.load(f,st filename)
+            /// Loads a scalar or array from the supplied file path.
             member this.load (f:complex0,filename:string) = this.load(f,st filename)
             

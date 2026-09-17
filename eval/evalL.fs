@@ -7,24 +7,29 @@
 namespace Aqualis
     
     [<AutoOpen>]
+    /// Expression output operations for LaTeX.
     module exprEvalL =
         
         open System
         
         type expr with
             
+            /// Emits an assignment for LaTeX.
             static member substL (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein "\\begin{align}"
                 c.codewritein (x.evalL c  + " \\leftarrow " + y.evalL c)
                 c.codewritein "\\end{align}"
 
                 
+            /// Emits an equation display for LaTeX.
             static member equivL (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " = " + y.evalL c)
                 
+            /// Emits an aligned equation display for LaTeX.
             static member equivAlignL (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalL c  + " =& " + y.evalL c)
                 
+            /// Emits a counted loop for LaTeX.
             static member forLoopL (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -37,7 +42,7 @@ namespace Aqualis
                 c.codewritein "end\\\\"
                 returnVar()
                 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for LaTeX.
             static member loopL (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -53,7 +58,7 @@ namespace Aqualis
                 c.codewritein(label + " continue")
                 returnVar()
                 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for LaTeX.
             static member whiledoL (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("while " + cond.evalL c + "\\\\")
                 c.indentInc()
@@ -61,7 +66,7 @@ namespace Aqualis
                 c.indentDec()
                 c.codewritein "end\\\\"
                 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for LaTeX.
             static member rangeL (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
@@ -83,7 +88,7 @@ namespace Aqualis
                     c.codewritein "end\\\\"
                     returnVar()
                     
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for LaTeX.
             static member range_exitL (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1,i2 with
                 |Int a, Int b when a>b -> 
@@ -111,6 +116,7 @@ namespace Aqualis
                     c.codewritein(label + " continue")
                     returnVar()
                     
+            /// Emits a branch callback for LaTeX.
             static member branchL (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalL c
@@ -132,6 +138,7 @@ namespace Aqualis
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein "endif"
                 
+            /// Renders an expression for LaTeX.
             member this.evalL(c:Aqualis) =
                 let par (s:string) (pl:int) =
                     match pl%3 with

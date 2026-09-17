@@ -7,10 +7,13 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Linear-system solvers on the LAPACK context.
     module ContextLaSolveExtensions =
+        /// Requires a target backend for linear-system solving.
         let private requireSolveBackend (context:Aqualis) =
             LapackValidation.requireBackend context "LAPACK linear solve"
 
+        /// Checks the LAPACK status of a linear solve.
         let private checkSolveInfo (context:Aqualis) (info:int0) =
             match context.language with
             |Fortran ->
@@ -20,6 +23,7 @@ namespace Aqualis
                                     " != 0) { fprintf(stderr, \"Aqualis: LAPACK solve failed (INFO=%d).\\n\", " +
                                     info.code + "); exit(EXIT_FAILURE); }\n")
             |_ -> ()
+        /// Validates a shape precondition for linear solving.
         let private requireSolveShape (context:Aqualis) (condition:bool0) message =
             match context.language with
             | C99 ->
@@ -33,9 +37,11 @@ namespace Aqualis
                     context.codewritein("raise ValueError(" + OutputTextLiteral.python ("Aqualis: " + message) + ")\n"))
             | _ -> ()
 
+        /// Requires a square coefficient matrix.
         let private requireSquareMatrix context (matrixSize1:int0) (matrixSize2:int0) =
             requireSolveShape context (matrixSize1 .<= 0) "LAPACK matrix order must be positive."
             requireSolveShape context (matrixSize1 .=/ matrixSize2) "LAPACK matrix must be square."
+        /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
             ///<summary>連立方程式の求解</summary>
             ///<param name="matrix">係数行列</param>

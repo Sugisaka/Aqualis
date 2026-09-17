@@ -26,7 +26,9 @@ type SessionOptions = {
 }
 
 [<RequireQualifiedAccess>]
+/// Default configuration for generated PHP sessions.
 module SessionOptions =
+    /// Creates default session options for a cookie name and path.
     let private create name path secure = {
         Name = name
         Lifetime = 0
@@ -43,29 +45,43 @@ module SessionOptions =
     /// Defaults suitable for one local HTTP development application.
     let development name path = create name path false
 
+/// Mutable session and CSRF setup state for a generation context.
 type private SecurityGenerationState() =
+    /// Gets or sets the selected session options.
     member val SessionOptions: SessionOptions option = None with get, set
+    /// Tracks whether session startup code has been registered.
     member val SessionPrologueRegistered = false with get, set
+    /// Tracks whether CSRF token initialization has been emitted.
     member val CsrfTokenEmitted = false with get, set
+    /// Tracks whether CSRF initialization code has been registered.
     member val CsrfPrologueRegistered = false with get, set
+    /// Gets the synchronization gate for security generation.
     member val Gate = obj() with get
 
 [<RequireQualifiedAccess>]
+/// Associates security generation state with an Aqualis context.
 module private SecurityGenerationStates =
+    /// Per-context storage for generated security state.
     let private states = ConditionalWeakTable<Aqualis, SecurityGenerationState>()
+    /// Gets or creates security generation state for a context.
     let get (context:Aqualis) = states.GetOrCreateValue context
 
 [<RequireQualifiedAccess>]
+/// Builds PHP expressions for session and CSRF handling.
 module private SecurityCode =
     [<Literal>]
+    /// Session key used to store the CSRF token.
     let CsrfTokenName = "_aqualis_csrf"
 
+    /// Formats a Boolean as a PHP literal.
     let boolLiteral value = if value then "true" else "false"
 
+    /// Formats a SameSite cookie option for PHP.
     let sameSiteLiteral = function
         | SameSite.Lax -> "Lax"
         | SameSite.Strict -> "Strict"
 
+    /// Builds PHP session-cookie options.
     let sessionCookieOptions options =
         "[" +
         "'lifetime' => " + string options.Lifetime + ", " +
@@ -76,6 +92,7 @@ module private SecurityCode =
         "'samesite' => " + PhpEncoding.stringLiteral (sameSiteLiteral options.SameSite) +
         "]"
 
+    /// Builds cookie options emitted by the generated response.
     let emittedCookieOptions options =
         let expires =
             if options.Lifetime = 0 then "0"
@@ -89,6 +106,7 @@ module private SecurityCode =
         "'samesite' => " + PhpEncoding.stringLiteral (sameSiteLiteral options.SameSite) +
         "]"
 
+    /// Validates configured session options.
     let validateSessionOptions options =
         let isAsciiLetter character =
             ('A' <= character && character <= 'Z') ||
@@ -115,12 +133,14 @@ module private SecurityCode =
                 (nameof options)
                 "A session cookie path must be an absolute HTTP path without control characters or semicolons."
 
+    /// Requires that the PHP session has been started.
     let requireStarted context operation =
         let state = SecurityGenerationStates.get context
         lock state.Gate (fun () ->
             if state.SessionOptions.IsNone then
                 invalidOp (operation + " requires session.Start to be called first."))
 
+    /// Gets options from an already started session.
     let getStartedOptions context operation =
         let state = SecurityGenerationStates.get context
         lock state.Gate (fun () ->
@@ -130,6 +150,7 @@ module private SecurityCode =
 
 /// Emits PHP session operations for one Aqualis generation context.
 type WebSession internal (context:Aqualis) =
+    /// Gets the owning generation context.
     member internal _.Context = context
 
     /// Registers an unconditional file prologue that configures a host-only
@@ -146,6 +167,7 @@ type WebSession internal (context:Aqualis) =
                 invalidOp "The session has already been started with different options in this generation context."
             | None ->
                 let cookieOptions = SecurityCode.sessionCookieOptions options
+                /// Builds cookie options emitted by the generated response.
                 let emittedCookieOptions = SecurityCode.emittedCookieOptions options
                 let expectedName = PhpEncoding.stringLiteral options.Name
                 let expectedPath = PhpEncoding.stringLiteral options.Path
@@ -203,6 +225,7 @@ type WebSession internal (context:Aqualis) =
     /// and reissues the cookie with the settings supplied to Start.
     member _.RegenerateId() =
         let options = SecurityCode.getStartedOptions context "session.RegenerateId"
+        /// Builds cookie options emitted by the generated response.
         let emittedCookieOptions = SecurityCode.emittedCookieOptions options
         context.codewritein(
             "<?php ",
@@ -263,8 +286,10 @@ type WebSession internal (context:Aqualis) =
 
 /// Emits synchronizer-token CSRF protection for POST forms.
 type CsrfProtection internal (context:Aqualis, session:WebSession) =
+    /// Gets the owning generation context.
     member internal _.Context = context
 
+    /// Gets the session entry containing the CSRF token.
     member private _.Token = session.Item SecurityCode.CsrfTokenName
 
     /// Registers unconditional token initialization in the file prologue once.
@@ -342,11 +367,13 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
 type SessionKey<'T> =
     private
     | SessionKey of FieldName
+    /// Gets the validated session key name.
     member internal this.Name =
         let (SessionKey fieldName) = this
         FieldName.value fieldName
 
 [<RequireQualifiedAccess>]
+/// Constructors for typed PHP session keys.
 module SessionKey =
     /// Creates a string-valued session key.
     let string name : SessionKey<PhpString> = SessionKey(FieldName.create name)
@@ -359,6 +386,7 @@ module SessionKey =
 
 /// A PHP session that has already been configured and started.
 type ActiveSession internal (session:WebSession) =
+    /// Gets the underlying active session.
     member internal _.Session = session
 
     /// Gets a typed expression for a value in this session.
@@ -377,8 +405,11 @@ type ActiveSession internal (session:WebSession) =
     member _.Set(key:SessionKey<PhpString>, value:string) =
         session.Item(key.Name) <== value
 
+    /// Regenerates the active PHP session identifier.
     member _.RegenerateId() = session.RegenerateId()
+    /// Destroys the active PHP session.
     member _.Destroy() = session.Destroy()
+    /// Destroys the session and redirects the response.
     member _.DestroyAndRedirect(location:Url,status:RedirectStatus) =
         session.DestroyAndRedirect(location,status)
 
@@ -390,14 +421,21 @@ type ActiveSession internal (session:WebSession) =
 
 /// An initialized CSRF token that is safe to validate or render.
 and CsrfToken internal (protection:CsrfProtection) =
+    /// Gets the underlying CSRF protection helper.
     member internal _.Protection = protection
+    /// Gets the owning generation context.
     member internal _.Context = protection.Context
+    /// Gets the generated CSRF validity expression for a POST request.
     member _.IsValidPost = protection.IsValidPost
+    /// Rejects a POST request unless its CSRF token is valid.
     member _.RequireValidPost() = protection.RequireValidPost()
+    /// Rotates the CSRF token.
     member _.Rotate() = protection.RotateToken()
+    /// Renders a hidden form field carrying the CSRF token.
     member _.Field() = protection.Field()
 
 [<AutoOpen>]
+/// Adds session and CSRF operations to PHP generation contexts.
 module SecurityExtensions =
     type ContextPhp with
         /// Session support associated with this PHP generation context.

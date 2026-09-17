@@ -1,5 +1,6 @@
 namespace Aqualis
 
+    /// Three-dimensional array of symbolic real expressions.
     type double3(typ:Etype,x:Expr3,context:Aqualis) as this=
         inherit NumericArray3<double0,double1,double2,double3>(typ,x,context)
         interface IReal3
@@ -22,27 +23,48 @@ namespace Aqualis
         override _.AssignAt(i,j,k,value)=this[i,j,k] <== double0(value,this.Context)
         override _.clear()=this.AssignScalar(D 0.0)
         override _.sizeinit()=this.size1<== -1;this.size2<== -1;this.size3<== -1
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:double3,y:double3)=x.AssignArray y
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:double3,y:double0)=x.AssignScalar y
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:double3,y:int0)=x.AssignScalar((y :> IReal0).ToDouble0)
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:double3,y:double)=x.AssignScalar(D y)
+        /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:double3,y:int)=x.AssignScalar(I y)
 
     [<AutoOpen>]
+    /// Numeric operations for double-precision 3D arrays.
     module asm_double3=
         type asm with
+            /// Raises the first operand to the power of the second operand.
             static member pow(x:double3,y:int0)=double3(x.etype%%y.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.pow(x[i,j,k],y).Expr),Aqualis.merge x.Context y.Context)
+            /// Computes the sine of the operand.
             static member sin(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sin(x[i,j,k]).Expr),x.Context)
+            /// Computes the cosine of the operand.
             static member cos(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.cos(x[i,j,k]).Expr),x.Context)
+            /// Computes the tangent of the operand.
             static member tan(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.tan(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse sine of the operand.
             static member asin(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.asin(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse cosine of the operand.
             static member acos(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.acos(x[i,j,k]).Expr),x.Context)
+            /// Computes the inverse tangent of the operand.
             static member atan(x:double3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan(x[i,j,k]).Expr),x.Context)
+            /// Computes the two-argument inverse tangent.
             static member atan2(x:double3,y:double3)=double3(Dt,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.atan2(x[i,j,k],y[i,j,k]).Expr),Aqualis.merge x.Context y.Context)
+            /// Computes the exponential of the operand.
             static member exp(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.exp(x[i,j,k]).Expr),x.Context)
+            /// Computes the absolute value or complex magnitude of the operand.
             static member abs(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.abs(x[i,j,k]).Expr),x.Context)
+            /// Computes the natural logarithm of the operand.
             static member log(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log(x[i,j,k]).Expr),x.Context)
+            /// Computes the base-10 logarithm of the operand.
             static member log10(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.log10(x[i,j,k]).Expr),x.Context)
+            /// Computes the square root of the operand.
             static member sqrt(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.sqrt(x[i,j,k]).Expr),x.Context)
+            /// Rounds the operand down to an integer value.
             static member floor(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.floor(x[i,j,k]).Expr),x.Context)
+            /// Rounds the operand up to an integer value.
             static member ceil(x:double3)=double3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.ceil(x[i,j,k]).Expr),x.Context)

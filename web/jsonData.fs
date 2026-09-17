@@ -11,7 +11,9 @@ type JsonFailurePolicy = {
 }
 
 [<RequireQualifiedAccess>]
+/// Default public messages and limits for JSON data operations.
 module JsonFailurePolicy =
+    /// Default public messages, diagnostics, and JSON operation limits.
     let defaults = {
         ReadPublicMessage = "データを読み込めませんでした。管理者に連絡してください。"
         SchemaPublicMessage = "データ形式が正しくありません。管理者に連絡してください。"
@@ -22,10 +24,13 @@ module JsonFailurePolicy =
     }
 
 [<RequireQualifiedAccess>]
+/// Typed JSON file access and atomic update helpers for PHP generation.
 module JsonData =
+    /// Builds a schema-validation expression for JSON data.
     let private valid (schema:JsonSchema) (data:PHPdata) (shape:PHPdata) =
         bool0(Var(Nt,JsonSchema.expression schema data shape,NaN),data.Context)
 
+    /// Decodes the source JSON while retaining object shape information.
     let private decodeShape (ctx:Aqualis) (name:string) (source:PHPdata) (maxDepth:int) =
         let shape = PHPdata.var(ctx,name)
         ctx.php.phpcode <| fun () ->
@@ -121,6 +126,7 @@ module JsonData =
             PHPdata (policy.DiagnosticPrefix + " update failed: ") ++ result.ErrorCode)
         result.Value
 
+    /// Reads JSON and rejects the request if reading or schema validation fails.
     let read (ctx:Aqualis) (resultName:PhpVariableName) (filename:PHPdata) (schema:JsonSchema) (policy:JsonFailurePolicy) =
         JsonSchema.requireContext ctx schema
         let result = ctx.php.tryReadJsonFile(resultName,filename,policy.ReadOptions)
@@ -138,6 +144,7 @@ module JsonData =
             PHPdata (policy.DiagnosticPrefix + " schema validation failed."))
         result.Value
 
+    /// Updates application-owned JSON atomically and validates its schema before and after the update.
     let updateAtomic
         (ctx:Aqualis)
         (resultName:PhpVariableName)

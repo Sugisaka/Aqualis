@@ -14,20 +14,25 @@ namespace Aqualis
     open System.Text.Json
 
     [<AutoOpen>]
+    /// Coordinates compilation and publication of generated project files.
     module Aqualis_main =
 
         [<Literal>]
+        /// Maximum supported length of a Fortran identifier.
         let private MaximumFortranIdentifierLength = 63
 
+        /// Validates a project name for generated output.
         let private validateProjectName (projectName:string) =
             PortableFileNameSegment.validate "projectname" "project" projectName
 
+        /// Validates the selected generation languages.
         let private validateLanguageSelection languages =
             if List.contains HTML languages && List.contains HTMLSequenceDiagram languages then
                 invalidArg
                     "langgList"
                     "HTML and HTMLSequenceDiagram cannot be requested together because they produce the same output file."
 
+        /// Derives a valid Fortran program identifier.
         let private fortranProgramIdentifier (projectName:string) =
             let asciiLetter character =
                 ('A' <= character && character <= 'Z') ||
@@ -54,6 +59,7 @@ namespace Aqualis
                     |> fun value -> value.Substring(0, 8).ToLowerInvariant()
                 candidate.Substring(0, MaximumFortranIdentifierLength - digest.Length - 1) + "_" + digest
 
+        /// Normalizes metadata to a single line.
         let private singleLineMetadata argumentName (value:string) =
             if isNull value then nullArg argumentName
 
@@ -71,6 +77,7 @@ namespace Aqualis
                 |character -> result.Append(character) |> ignore
             result.ToString()
 
+        /// Escapes text for LaTeX output.
         let private latexText (value:string) =
             let result = StringBuilder(value.Length)
             for character in value do
@@ -88,6 +95,7 @@ namespace Aqualis
                 |character -> result.Append(character) |> ignore
             result.ToString()
 
+        /// Stages generated files and publishes them as one transaction.
         type private CompilationOutputTransaction(outputDirectory:string,projectName:string) =
             let outputDirectory = Path.GetFullPath outputDirectory
             let transactionId = Guid.NewGuid().ToString("N")
@@ -164,8 +172,10 @@ namespace Aqualis
                     raise (DirectoryNotFoundException($"The output directory '{outputDirectory}' does not exist."))
                 Directory.CreateDirectory(stagingDirectory) |> ignore
 
+            /// Gets the directory containing staged generated files.
             member _.StagingDirectory = stagingDirectory
 
+            /// Publishes staged files and removes previously managed files no longer generated.
             member _.Commit() =
                 let generatedFiles = relativeFiles stagingDirectory
                 let current = Dictionary<string,string>(pathComparer)
@@ -262,11 +272,13 @@ namespace Aqualis
                     | :? UnauthorizedAccessException -> ()
 
             interface IDisposable with
+                /// Discards staged files when the transaction has not been committed.
                 member _.Dispose() =
                     if not committed then
                         removeDirectory stagingDirectory
                         if not preserveRollback then removeDirectory rollbackDirectory
 
+        /// Builds and publishes the selected generated outputs.
         let private compileCore (policy:DiagnosticPolicy) (diagnostics:DiagnosticBag) langgList dir projectname (codever:string) code =
             let languages = langgList |> Seq.toList
             validateLanguageSelection languages

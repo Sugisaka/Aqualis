@@ -29,11 +29,13 @@ namespace Aqualis
         /// (データ値実部,データ値虚部,最小値,最大値)→(赤,緑,青)
         |Cx of ((double*double*double*double)->(double*double*double))
 
+    /// Supported binary value categories in plot input.
     type private PlotBinaryValueType =
         |Int32Value
         |Float64Value
         |Complex128Value
 
+    /// Computed row and image sizes for a 24-bit bitmap.
     type private Bmp24Layout =
         {
             Width: int
@@ -43,7 +45,9 @@ namespace Aqualis
             FileSize: int64
         }
 
+    /// Computes validated dimensions for 24-bit BMP output.
     module private Bmp24Layout =
+        /// Validates dimensions and creates a 24-bit bitmap layout.
         let create parameterName (width:int64) (height:int64) =
             if width < 1L || height < 1L then
                 invalidArg parameterName "The bitmap dimensions must be positive."
@@ -66,6 +70,7 @@ namespace Aqualis
                 FileSize = 54L + pixelBytes
             }
 
+    /// Writes a bitmap through a staged output file.
     type private AtomicBinaryOutput(targetPath:string) =
         let output = AtomicOutputFile.create targetPath
         let stream =
@@ -76,8 +81,10 @@ namespace Aqualis
                 FileShare.None)
         let mutable completed = false
 
+        /// Gets the temporary stream receiving bitmap bytes.
         member _.Stream = stream
 
+        /// Copies the completed bitmap to the destination writer.
         member _.Complete(writer:BinaryWriter) =
             if not completed then
                 writer.Dispose()
@@ -86,11 +93,13 @@ namespace Aqualis
                 completed <- true
 
         interface IDisposable with
+            /// Disposes the temporary bitmap stream.
             member _.Dispose() =
                 stream.Dispose()
                 if not completed then
                     AtomicOutputFile.discard output
         
+    /// Color-map functions for two-dimensional plots.
     module colorMap  =
         /// 黒→白
         let Gray = Rx(
@@ -189,6 +198,7 @@ namespace Aqualis
                 else
                     r+(1.0-r)*(a-0.5)/0.5, g+(1.0-g)*(a-0.5)/0.5, b+(1.0-b)*(a-0.5)/0.5)
                     
+    /// Renders scalar or complex array data as two-dimensional bitmap plots.
     type plot2d() =
         let diagnostics = DiagnosticBag()
         
@@ -208,7 +218,9 @@ namespace Aqualis
                 else
                     error + Environment.NewLine + message
 
+        /// Gets diagnostics produced while loading or rendering plot data.
         member _.Diagnostics = diagnostics
+        /// Records an input error as a diagnostic.
         member private _.ReportErrorDiagnostic(inputFilename:string, outputFilename:string) =
             if not (String.IsNullOrEmpty error) then
                 let diagnostic = {
@@ -264,6 +276,7 @@ namespace Aqualis
                         if min > value then min <- value
                 min,max
 
+        /// Chooses a color range from the plot values and autoscale setting.
         member private this.ResolveColorRange(autoscale:PlotColorRange, eval:(double*double)->double) =
             let minimum,maximum =
                 match autoscale with

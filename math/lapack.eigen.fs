@@ -7,7 +7,9 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Adds standard and generalized eigenvalue calculations to the linear-algebra context.
     module ContextLaEigenExtensions =
+        /// Validates matrix and output shapes for eigenvalue operations.
         let private requireEigenShapes (context:Aqualis) (matrix:complex2)
                                        (eigenvalues:complex1) (eigenvectors:complex2) =
             match context.language with
@@ -19,13 +21,12 @@ namespace Aqualis
                 LapackValidation.require context (eigenvectors.size2 .=/ matrix.size1) "LAPACK eigenvector shape must match matrix order."
             | _ -> ()
 
+        /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
-            /// <summary>
-            /// Ax=λxの固有値λと固有ベクトルxを計算
-            /// </summary>
-            /// <param name="eigenvalues">固有値</param>
-            /// <param name="eigenvectors">固有ベクトル</param>
-            /// <param name="mat1">複素非対称行列</param>
+            /// <summary>Computes eigenvalues and right eigenvectors of a general complex matrix.</summary>
+            /// <param name="eigenvalues">Output eigenvalue vector.</param>
+            /// <param name="eigenvectors">Output matrix of right eigenvectors.</param>
+            /// <param name="mat1">Square complex input matrix; LAPACK paths may overwrite it.</param>
             member this.eigen_matrix (eigenvalues:complex1,eigenvectors:complex2) (mat1:complex2) =
                 LapackValidation.requireBackend this.GenerationContext "LAPACK eigenvalue calculation"
                 if eigenvectors.code = mat1.code then
@@ -103,14 +104,12 @@ namespace Aqualis
                         this.GenerationContext.codewritein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
                     |_ -> ()
                     
-            /// <summary>
-            /// Ax=λBxの固有値λと固有ベクトルxを計算
-            /// </summary>
-            /// <param name="eigenvalues1">λ1(λ=λ1/λ2)</param>
-            /// <param name="eigenvalues2">λ2(λ=λ1/λ2)</param>
-            /// <param name="eigenvectors">固有ベクトルx</param>
-            /// <param name="mat1">行列A</param>
-            /// <param name="mat2">行列B</param>
+            /// <summary>Computes generalized right eigenvectors satisfying A*x = lambda*B*x.</summary>
+            /// <param name="eigenvalues1">Numerators of the generalized eigenvalues.</param>
+            /// <param name="eigenvalues2">Denominators of the generalized eigenvalues.</param>
+            /// <param name="eigenvectors">Output matrix of right eigenvectors.</param>
+            /// <param name="mat1">First square complex input matrix.</param>
+            /// <param name="mat2">Second square complex input matrix.</param>
             member this.eigen_matrix2 (eigenvalues1:complex1,eigenvalues2:complex1,eigenvectors:complex2) (mat1:complex2) (mat2:complex2) =
                     LapackValidation.requireBackend this.GenerationContext "LAPACK eigenvalue calculation"
                     if eigenvalues1.code = eigenvalues2.code then

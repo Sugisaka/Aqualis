@@ -9,8 +9,14 @@ namespace Aqualis
     open System
     open System.IO
 
-    type Label = |WriteLabel of StreamWriter |ReadLabel of list<string*string>
+    /// Label destination used when writing or resolving document references.
+    type Label =
+        /// Writes labels to a stream.
+        |WriteLabel of StreamWriter
+        /// Resolves labels from previously loaded name-value pairs.
+        |ReadLabel of list<string*string>
 
+    /// Writes LaTeX or HTML documents with numbered sections and cross-references.
     type TeXWriter(context:Aqualis,figlabel:Label,equlabel:Label,tablabel:Label,codelabel:Label,lang:Language,figdir:string) =
         let writein text = context.codewritein(text + "\n")
         let htmlText text = HtmlEncoding.textContent text
@@ -35,8 +41,10 @@ namespace Aqualis
             disposeLabel tablabel
             disposeLabel codelabel
 
+        /// Writes a line of document source.
         member _.write s = writein s
 
+        /// Wraps callback content in an HTML tag or LaTeX environment.
         member this.tag (tagname:string) code =
             match lang with
             |HTML ->
@@ -50,6 +58,7 @@ namespace Aqualis
                 writein("\\end{"+tagname+"}")
             |_ -> ()
 
+        /// Writes an attributed HTML div around callback content.
         member this.block lst code =
             match lang with
             |HTML ->
@@ -61,6 +70,7 @@ namespace Aqualis
                 code()
                 writein "</div>"
             |_ -> ()
+        /// Writes a named HTML form around callback content.
         member this.form (name:string) code =
             match lang with
             |HTML ->
@@ -68,6 +78,7 @@ namespace Aqualis
                 code()
                 writein "</form>"
             |_ -> ()
+        /// Writes a group of radio inputs with custom attributes.
         member this.radioButtonAttributes (name:string) (lst:list<string*string*bool*list<Atr>>) =
             match lang with
             | HTML ->
@@ -80,6 +91,7 @@ namespace Aqualis
                         writein("<input " + Atr.list allAttributes + ">" + htmlText text)
             | _ -> ()
 
+        /// Writes the document title.
         member this.title txt =
             match lang with
             |HTML ->
@@ -87,6 +99,7 @@ namespace Aqualis
             |LaTeX ->
                 writein("\\MyTitle{"+txt+"}")
             |_ -> ()
+        /// Writes a numbered section heading and invokes its content callback.
         member this.section title code =
             secnum <- secnum + 1
             ssecnum <- 0
@@ -98,6 +111,7 @@ namespace Aqualis
                 writein("\\section{"+title+"}")
             |_ -> ()
             code()
+        /// Writes a numbered subsection heading and invokes its content callback.
         member this.subsection title code =
             ssecnum <- ssecnum + 1
             sssecnum <- 0
@@ -108,6 +122,7 @@ namespace Aqualis
                 writein("\\subsection{"+title+"}")
             |_ -> ()
             code()
+        /// Writes an unnumbered subsection heading and invokes its content callback.
         member this.subsection_ title code =
             match lang with
             |HTML ->
@@ -116,6 +131,7 @@ namespace Aqualis
                 writein("\\subsection*{"+title+"}")
             |_ -> ()
             code()
+        /// Writes a numbered subsubsection heading and invokes its content callback.
         member this.subsubsection title code =
             sssecnum <- sssecnum + 1
             match lang with
@@ -125,6 +141,7 @@ namespace Aqualis
                 writein("\\subsubsection{"+title+"}")
             |_ -> ()
             code()
+        /// Writes an unnumbered subsubsection heading and invokes its content callback.
         member this.subsubsection_ title code =
             match lang with
             |HTML ->
@@ -133,6 +150,7 @@ namespace Aqualis
                 writein("\\subsubsection*{"+title+"}")
             |_ -> ()
             code()
+        /// Writes paragraph content and manages footnote output.
         member this.para code =
             match lang with
             |HTML ->
@@ -156,12 +174,15 @@ namespace Aqualis
                 code this.footnote
             |_ ->
                 ()
+        /// Writes a footnote reference and text.
         member this.footnote(txt:string) =
             writein("\\footnote{"+txt+"}")
+        /// Escapes underscores in a URL for LaTeX; returns it unchanged otherwise.
         member this.url(txt:string) =
             match lang with
             |LaTeX -> txt.Replace("_","\\_")
             |_ -> txt
+        /// Writes a labeled table with caption and cells.
         member this.table label tbalign elalign caption (lst:list<list<string>>) =
             match lang with
             |HTML ->
@@ -199,6 +220,7 @@ namespace Aqualis
                 wr.WriteLine(label + "," + tabnum.ToString())
             |ReadLabel _ ->
                 ()
+        /// Writes a linked reference to a figure label.
         member this.figref label =
             match lang,figlabel with
             |_,WriteLabel _ ->
@@ -213,6 +235,7 @@ namespace Aqualis
                 |Some(_,n) ->
                     "<a href=\"#" + HtmlEncoding.attributeValue label + "\">図" + n.ToString() + "</a>"
             |_ -> ""
+        /// Writes an unlinked reference to a figure label.
         member this.figref_nolink(label) =
             match lang,figlabel with
             |_,WriteLabel _ ->
@@ -227,6 +250,7 @@ namespace Aqualis
                 |Some(_,n) ->
                     "図"+n.ToString()
             |_ -> ""
+        /// Writes a reference to a table label.
         member this.tabref label =
             match lang,tablabel with
             |_,WriteLabel _ ->
@@ -241,6 +265,7 @@ namespace Aqualis
                 |Some(_,n) ->
                     n.ToString()
             |_ -> ""
+        /// Writes a reference to an equation label.
         member this.equref label =
             match lang,equlabel with
             |_,WriteLabel _ ->
@@ -255,6 +280,7 @@ namespace Aqualis
                 |Some(_,n) ->
                     n.ToString()
             |_ -> ""
+        /// Writes a reference to a code listing label.
         member this.coderef label =
             match lang,codelabel with
             |_,WriteLabel _ ->
@@ -269,6 +295,7 @@ namespace Aqualis
                 |Some(_,n) ->
                     "ソースコード"+n.ToString()
             |_ -> ""
+        /// Writes a labeled figure and caption.
         member this.figure (filename:string) (caption:string) =
             match lang with
             |HTML ->
@@ -289,6 +316,7 @@ namespace Aqualis
                 wr.WriteLine(filename + "," + fignum.ToString())
             |ReadLabel lst ->
                 ()
+        /// Includes an image file in the document.
         member this.graphics (filename:string) =
             match lang with
             |HTML ->
@@ -306,6 +334,7 @@ namespace Aqualis
                 wr.WriteLine(filename + "," + fignum.ToString())
             |ReadLabel lst ->
                 ()
+        /// Writes a numbered list around callback content.
         member this.enumerate code =
             match lang with
             |HTML ->
@@ -317,6 +346,7 @@ namespace Aqualis
                 code()
                 writein "\\end{enumerate}"
             |_ -> ()
+        /// Writes a bulleted list around callback content.
         member this.itemize code =
             match lang with
             |HTML ->
@@ -328,6 +358,7 @@ namespace Aqualis
                 code()
                 writein "\\end{itemize}"
             |_ -> ()
+        /// Writes a list item around callback content.
         member this.item code =
             match lang with
             |HTML ->
@@ -340,6 +371,7 @@ namespace Aqualis
                 let c = code()
                 c
             |_ -> code()
+        /// Writes a checklist item around callback content.
         member this.itemchk code =
             licheck <- licheck + 1
             match lang with
@@ -353,6 +385,7 @@ namespace Aqualis
                 let c = code()
                 c
             |_ -> code()
+        /// Formats an inline equation.
         member this.eq(txt:string) =
             match lang with
             |HTML ->
@@ -360,8 +393,10 @@ namespace Aqualis
             |LaTeX ->
                 "$"+txt+"$"
             |_ -> ""
+        /// Writes an inline equation followed by a source line break.
         member this.eqwr(txt:string) =
             writein(this.eq txt)
+        /// Writes aligned equation content.
         member this.align (code:unit->unit) =
             match lang with
             |HTML ->
@@ -375,6 +410,7 @@ namespace Aqualis
                 code()
                 writein "\\end{align}"
             |_ -> ()
+        /// Writes a labeled code listing and invokes its content callback.
         member this.code (caption,label) (c:unit->unit) =
             match lang with
             |HTML ->
@@ -395,6 +431,7 @@ namespace Aqualis
                 c()
                 writein "\\end{lstlisting}"
             |_ -> ()
+        /// Writes a labeled display equation.
         member this.equation (label:string) = fun (code:unit->unit) ->
             match lang with
             |HTML ->
@@ -410,6 +447,7 @@ namespace Aqualis
                 code()
                 if label<>"" then writein("\\label{"+label+"}")
             |_ -> ()
+        /// Writes a display equation without a number.
         member this.equation_nonumber (code:unit->unit) =
             match lang with
             |HTML ->
@@ -419,8 +457,10 @@ namespace Aqualis
                 code()
                 writein "\\nonumber"
             |_ -> ()
+        /// Writes an equation line break.
         member this.eqbr() =
             writein "\\\\"
+        /// Writes a LaTeX or HTML line break.
         member this.br with get() =
             match lang with
             |LaTeX ->
@@ -429,7 +469,7 @@ namespace Aqualis
                 writein "<br/>"
             |_ ->
                 ()
-        /// code内部で使用する改行
+        /// Writes a line break used inside a code listing.
         member this.codebr with get() =
             match lang with
             |LaTeX ->
@@ -438,6 +478,7 @@ namespace Aqualis
                 writein "<br/>"
             |_ ->
                 ()
+        /// Writes bold text in LaTeX or HTML.
         member this.bf(txt:string) =
             match lang with
             |LaTeX ->
@@ -446,6 +487,7 @@ namespace Aqualis
                 writein("<strong>"+txt+"</strong>")
             |_ ->
                 ()
+        /// Formats a number followed by a unit.
         member this.numunit (n:int) = fun (u:string) ->
             match lang with
             |LaTeX ->
@@ -453,6 +495,7 @@ namespace Aqualis
             |HTML ->
                 InvariantFormat.integer n+" "+u
             |_ -> ""
+        /// Formats a number followed by a unit enclosed in square brackets.
         member this.numunitbr (n:int) = fun (u:string) ->
             match lang with
             |LaTeX ->
@@ -460,6 +503,7 @@ namespace Aqualis
             |HTML ->
                 InvariantFormat.integer n+" ["+u+"]"
             |_ -> ""
+        /// Formats a number followed by a unit.
         member this.numunit (n:float) = fun (u:string) ->
             match lang with
             |LaTeX ->
@@ -467,6 +511,7 @@ namespace Aqualis
             |HTML ->
                 InvariantFormat.number n+" "+u
             |_ -> ""
+        /// Formats a number followed by a unit enclosed in square brackets.
         member this.numunitbr (n:float) = fun (u:string) ->
             match lang with
             |LaTeX ->
@@ -474,6 +519,7 @@ namespace Aqualis
             |HTML ->
                 InvariantFormat.number n+" ["+u+"]"
             |_ -> ""
+        /// Formats a unit in document markup.
         member this.unit (u:string) =
             match lang with
             |LaTeX ->
@@ -481,6 +527,7 @@ namespace Aqualis
             |HTML ->
                 u
             |_ -> ""
+        /// Formats a hyperlink.
         member this.link txt url =
             match lang with
             |LaTeX ->
@@ -489,64 +536,113 @@ namespace Aqualis
                 "<a href=\"" + HtmlEncoding.attributeValue url + "\">" + txt + "</a>"
             |_ ->
                 ""
+        /// Writes an HTML link to a PDF file.
         member this.pdflink(text,filename) =
             match lang with
             |HTML ->
                 writein("    <div class='pdflink'><a href=\"" + HtmlEncoding.attributeValue (filename + ".pdf") + "\" target='_blank'>" + text + "</a></div>")
             |_ ->
                 ()
+        /// Formats a bold mathematical symbol.
         member this.bold(txt:string) = match lang with |LaTeX -> "\\boldsymbol{"+txt+"}" |HTML -> "\\boldsymbol{"+txt+"}" |_ -> ""
+        /// Gets markup for a less-than sign.
         member this.lt with get() = match lang with |LaTeX -> "<" |HTML -> "\\lt" |_ -> ""
+        /// Gets markup for a greater-than sign.
         member this.gt with get() = match lang with |LaTeX -> ">" |HTML -> "\\gt" |_ -> ""
+        /// Gets LaTeX or HTML markup for the kilo unit or prefix.
         member this.kilo with get() = match lang with |LaTeX -> "\\kilo" |HTML -> "\\mathrm{k}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the centi unit or prefix.
         member this.centi with get() = match lang with |LaTeX -> "\\centi" |HTML -> "\\mathrm{c}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the milli unit or prefix.
         member this.milli with get() = match lang with |LaTeX -> "\\milli" |HTML -> "\\mathrm{m}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the micro unit or prefix.
         member this.micro with get() = match lang with |LaTeX -> "\\micro" |HTML -> "\\mathrm{\\mu}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the pico unit or prefix.
         member this.pico with get() = match lang with |LaTeX -> "\\pico" |HTML -> "\\mathrm{p}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the mega unit or prefix.
         member this.mega with get() = match lang with |LaTeX -> "\\mega" |HTML -> "\\mathrm{M}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the second unit or prefix.
         member this.second with get() = match lang with |LaTeX -> "\\second" |HTML -> "\\mathrm{s}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the rad unit or prefix.
         member this.rad with get() = match lang with |LaTeX -> "\\mathrm{rad}" |HTML -> "\\mathrm{rad}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the minute unit or prefix.
         member this.minute with get() = match lang with |LaTeX -> "\\minute" |HTML -> "\\mathrm{min}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the hour unit or prefix.
         member this.hour with get() = match lang with |LaTeX -> "\\hour" |HTML -> "\\mathrm{h}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the day unit or prefix.
         member this.day with get() = match lang with |LaTeX -> "\\day" |HTML -> "\\mathrm{day}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the metre unit or prefix.
         member this.metre with get() = match lang with |LaTeX -> "\\metre" |HTML -> "\\mathrm{m}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the arcminute unit or prefix.
         member this.arcminute with get() = match lang with |LaTeX -> "\\arcminute" |HTML -> "'" |_ -> ""
+        /// Gets LaTeX or HTML markup for the arcsecond unit or prefix.
         member this.arcsecond with get() = match lang with |LaTeX -> "\\arcsecond" |HTML -> "''" |_ -> ""
+        /// Gets LaTeX or HTML markup for the degree unit or prefix.
         member this.degree with get() = match lang with |LaTeX -> "\\degree" |HTML -> "^\\circ" |_ -> ""
+        /// Gets LaTeX or HTML markup for the mole unit or prefix.
         member this.mole with get() = match lang with |LaTeX -> "\\mole" |HTML -> "\\mathrm{mol}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the candela unit or prefix.
         member this.candela with get() = match lang with |LaTeX -> "\\candela" |HTML -> "\\mathrm{cd}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the liter unit or prefix.
         member this.liter with get() = match lang with |LaTeX -> "\\liter" |HTML -> "\\mathrm{L}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the tonne unit or prefix.
         member this.tonne with get() = match lang with |LaTeX -> "\\tonne" |HTML -> "\\mathrm{t}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the kilogram unit or prefix.
         member this.kilogram with get() = match lang with |LaTeX -> "\\kilogram" |HTML -> "\\mathrm{kg}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the degreeCelsius unit or prefix.
         member this.degreeCelsius with get() = match lang with |LaTeX -> "\\degreeCelsius" |HTML -> "\\mathrm{^\\circ C}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the ampere unit or prefix.
         member this.ampere with get() = match lang with |LaTeX -> "\\ampere" |HTML -> "\\mathrm{A}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the henry unit or prefix.
         member this.henry with get() = match lang with |LaTeX -> "\\henry" |HTML -> "\\mathrm{H}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the hertz unit or prefix.
         member this.hertz with get() = match lang with |LaTeX -> "\\hertz" |HTML -> "\\mathrm{Hz}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the newton unit or prefix.
         member this.newton with get() = match lang with |LaTeX -> "\\newton" |HTML -> "\\mathrm{N}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the pascal unit or prefix.
         member this.pascal with get() = match lang with |LaTeX -> "\\pascal" |HTML -> "\\mathrm{Pa}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the watt unit or prefix.
         member this.watt with get() = match lang with |LaTeX -> "\\watt" |HTML -> "\\mathrm{W}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the joule unit or prefix.
         member this.joule with get() = match lang with |LaTeX -> "\\joule" |HTML -> "\\mathrm{J}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the coulomb unit or prefix.
         member this.coulomb with get() = match lang with |LaTeX -> "\\coulomb" |HTML -> "\\mathrm{C}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the siemens unit or prefix.
         member this.siemens with get() = match lang with |LaTeX -> "\\siemens" |HTML -> "\\mathrm{S}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the weber unit or prefix.
         member this.weber with get() = match lang with |LaTeX -> "\\weber" |HTML -> "\\mathrm{Wb}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the tesla unit or prefix.
         member this.tesla with get() = match lang with |LaTeX -> "\\tesla" |HTML -> "\\mathrm{T}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the kelvin unit or prefix.
         member this.kelvin with get() = match lang with |LaTeX -> "\\kelvin" |HTML -> "\\mathrm{K}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the ohm unit or prefix.
         member this.ohm with get() = match lang with |LaTeX -> "\\ohm" |HTML -> "\\mathrm{\\Omega}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the volt unit or prefix.
         member this.volt with get() = match lang with |LaTeX -> "\\volt" |HTML -> "\\mathrm{V}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the farad unit or prefix.
         member this.farad with get() = match lang with |LaTeX -> "\\farad" |HTML -> "\\mathrm{F}" |_ -> ""
+        /// Gets LaTeX or HTML markup for the vpp unit or prefix.
         member this.vpp with get() = match lang with |LaTeX -> "\\volt_{pp}" |HTML -> "\\mathrm{V_{pp}}" |_ -> ""
+        /// Gets markup for the divergence operator.
         member this.div with get() = match lang with |LaTeX -> "\\mathrm{div}" |HTML -> "\\mathrm{div}" |_ -> ""
+        /// Gets markup for a division slash.
         member this.per with get() = match lang with |LaTeX -> "/" |HTML -> "/" |_ -> ""
+        /// Gets markup for a squared exponent.
         member this.squared with get() = match lang with |LaTeX -> "\\squared" |HTML -> "^2" |_ -> ""
+        /// Gets markup for a cubed exponent.
         member this.cubed with get() = match lang with |LaTeX -> "\\cubed" |HTML -> "^3" |_ -> ""
+        /// Gets markup for a percent sign.
         member this.percent with get() = match lang with |LaTeX -> "\\%" |HTML -> "%" |_ -> ""
+        /// Formats an integer exponent.
         member this.pow(n:int) = match lang with |LaTeX -> "^"+(if n<0 then "{"+n.ToString()+"}" else n.ToString()) |HTML -> "^"+(if n<0 then "{"+n.ToString()+"}" else n.ToString()) |_ -> ""
 
         interface IDisposable with
+            /// Closes the owned document output stream.
             member _.Dispose() =
                 disposeLabels()
 
     [<AutoOpen>]
+    /// Document generation helpers exposed through Aqualis.
     module Aqualis_doc =
         /// <summary>
         /// 自動採点サイト(HTML)を出力

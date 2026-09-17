@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.IO
 
+/// Paths and URL prefix used by generated web output.
 type internal WebOutputLayout = {
     OutputDirectory:string
     ProjectName:string
@@ -14,7 +15,9 @@ type internal WebOutputLayout = {
     ContentsName:string
     ContentsDirectory:string }
 
+/// Resolves output paths and URLs for generated web assets.
 module internal WebOutputLayout =
+    /// Builds the output layout for a web project.
     let create outputDirectory projectName =
         let mainFileName = projectName + ".html"
         let bodyTemporaryFileName = projectName + "_body"
@@ -30,6 +33,7 @@ module internal WebOutputLayout =
             ContentsDirectory = Path.Combine(outputDirectory, contentsName)
         }
 
+    /// Builds a relative URL for a generated asset.
     let assetUrl (contentsName:string) (fileName:string) =
         if String.IsNullOrWhiteSpace fileName then
             invalidArg (nameof fileName) "An asset file name is required."
@@ -182,6 +186,7 @@ type WebAssetContext(outputDirectory:string, contentsName:string) =
                 importedAssetSourcesByName.Add(allocatedFileName, sourceFullPath)
                 this.AssetUrl(allocatedFileName))
 
+/// Owns the contexts and assets for an HTML presentation.
 type HtmlGenerationContext internal (dir:string,projectName:string) =
     let gate = obj()
     let diagnostics = DiagnosticBag()
@@ -256,20 +261,33 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
            jsAnimationReset
            autoAnimation |]
 
+    /// Gets the generation context for the HTML body.
     member _.BodyContext with get() = body
+    /// Gets diagnostics produced during web generation.
     member _.Diagnostics = diagnostics
 
+    /// Runs the callback in the main generation context.
     member this.switchMain code = code main
+    /// Runs the callback in the body generation context.
     member this.switchBody code = code body
+    /// Runs the callback in the j s main generation context.
     member this.switchJSMain code = code jsMain
+    /// Runs the callback in the animation seq generation context.
     member this.switchAnimationSeq code = code animationSeq
+    /// Runs the callback in the j s animation start generation context.
     member this.switchJSAnimationStart code = code jsAnimationStart
+    /// Runs the callback in the j s animation seq reset generation context.
     member this.switchJSAnimationSeqReset code = code jsAnimationSeqReset
+    /// Runs the callback in the j s animation reset generation context.
     member this.switchJSAnimationReset code = code jsAnimationReset
+    /// Runs the callback in the auto animation generation context.
     member this.switchAutoAnimation code = code autoAnimation
 
+    /// Gets or sets whether character imagery is enabled.
     member _.CharacterEnabled with get() = characterEnabled and set(v) = characterEnabled <- v
+    /// Gets or sets whether subtitles are enabled.
     member _.SubtitleEnabled with get() = subtitleEnabled and set(v) = subtitleEnabled <- v
+    /// Gets or sets whether audio narration is enabled.
     member _.VoiceEnabled with get() = voiceEnabled and set(v) = voiceEnabled <- v
     
     /// <summary>Gets the directory that receives generated web content.</summary>
@@ -347,23 +365,30 @@ type HtmlGenerationContext internal (dir:string,projectName:string) =
         lock gate (fun () -> audioFiles |> Seq.toList)
             
 
+    /// Allocates a unique HTML content identifier.
     member this.nextContentsID() =
         "contentsID" + this.NextContentsNumber().ToString()
 
+    /// Allocates paired animation sequence and reset identifiers.
     member this.nextAnimationSeqID() =
         let number = this.NextAnimationSequenceNumber()
         "animationSeqID" + number.ToString(), "animationSeqResetID" + number.ToString()
 
+    /// Allocates an animation group number as text.
     member this.nextAnimationGroup() = this.NextAnimationGroupNumber().ToString()
+    /// Clears registered animation buttons.
     member this.animationButtonReset() = this.ClearAnimationButtons()
+    /// Registers an animation start and reset button.
     member this.addAnimationButton(fnameStart,fnameReset,buttonX,buttonY) =
         this.AddAnimationButton(fnameStart,fnameReset,buttonX,buttonY)
 
+    /// Emits a call to start an automatically triggered animation.
     member this.addAutoAnimation(fnameStart,_) =
         this.switchAutoAnimation (fun child ->
             child.codewritein("animationStartMap['"+fnameStart+"']();"))
 
     interface IDisposable with
+        /// Disposes all owned web generation contexts.
         member _.Dispose() =
             ownedContexts
             |> Array.iter (fun context -> (context :> IDisposable).Dispose())

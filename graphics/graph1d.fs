@@ -47,7 +47,7 @@ type LineStyle =
 ///<summary>点プロット設定</summary>
 type PointStyle = 
     {
-        ///<summary>線プロットのスタイル</summary>
+        /// Marker shape used for each plotted point.
         Shape: PlotShape;
         ///<summary>プロット点のサイズ</summary>
         Size: float;
@@ -163,63 +163,119 @@ type GraphSetting =
         // 凡例の記号(線)の長さ
         LegendLineLength: float
     }
+/// Unicode Greek characters for graph labels.
 type Greek =
+    /// Gets the Unicode character for alpha.
     static member alpha with get() = "α"
+    /// Gets the Unicode character for beta.
     static member beta with get() = "β"
+    /// Gets the Unicode character for gamma.
     static member gamma with get() = "γ"
+    /// Gets the Unicode character for delta.
     static member delta with get() = "δ"
+    /// Gets the Unicode character for epsilon.
     static member epsilon with get() = "ε"
+    /// Gets the Unicode character for zeta.
     static member zeta with get() = "ζ"
+    /// Gets the Unicode character for eta.
     static member eta with get() = "η"
+    /// Gets the Unicode character for theta.
     static member theta with get() = "θ"
+    /// Gets the Unicode character for iota.
     static member iota with get() = "ι"
+    /// Gets the Unicode character for kappa.
     static member kappa with get() = "κ"
+    /// Gets the Unicode character for lambda.
     static member lambda with get() = "λ"
+    /// Gets the Unicode character for mu.
     static member mu with get() = "μ"
+    /// Gets the Unicode character for nu.
     static member nu with get() = "ν"
+    /// Gets the Unicode character for xi.
     static member xi with get() = "ξ"
+    /// Gets the Unicode character for omicron.
     static member omicron with get() = "ο"
+    /// Gets the Unicode character for pi.
     static member pi with get() = "π"
+    /// Gets the Unicode character for rho.
     static member rho with get() = "ρ"
+    /// Gets the Unicode character for finalSigma.
     static member finalSigma with get() = "ς"
+    /// Gets the Unicode character for sigma.
     static member sigma with get() = "σ"
+    /// Gets the Unicode character for tau.
     static member tau with get() = "τ"
+    /// Gets the Unicode character for upsilon.
     static member upsilon with get() = "υ"
+    /// Gets the Unicode character for phi.
     static member phi with get() = "φ"
+    /// Gets the Unicode character for chi.
     static member chi with get() = "χ"
+    /// Gets the Unicode character for psi.
     static member psi with get() = "ψ"
+    /// Gets the Unicode character for omega.
     static member omega with get() = "ω"
+    /// Gets the Unicode character for alpha (uppercase).
     static member Alpha with get() = "Α"
+    /// Gets the Unicode character for beta (uppercase).
     static member Beta with get() = "Β"
+    /// Gets the Unicode character for gamma (uppercase).
     static member Gamma with get() = "Γ"
+    /// Gets the Unicode character for delta (uppercase).
     static member Delta with get() = "Δ"
+    /// Gets the Unicode character for epsilon (uppercase).
     static member Epsilon with get() = "Ε"
+    /// Gets the Unicode character for zeta (uppercase).
     static member Zeta with get() = "Ζ"
+    /// Gets the Unicode character for eta (uppercase).
     static member Eta with get() = "Η"
+    /// Gets the Unicode character for theta (uppercase).
     static member Theta with get() = "Θ"
+    /// Gets the Unicode character for iota (uppercase).
     static member Iota with get() = "Ι"
+    /// Gets the Unicode character for kappa (uppercase).
     static member Kappa with get() = "Κ"
+    /// Gets the Unicode character for lambda (uppercase).
     static member Lambda with get() = "Λ"
+    /// Gets the Unicode character for mu (uppercase).
     static member Mu with get() = "Μ"
+    /// Gets the Unicode character for nu (uppercase).
     static member Nu with get() = "Ν"
+    /// Gets the Unicode character for xi (uppercase).
     static member Xi with get() = "Ξ"
+    /// Gets the Unicode character for omicron (uppercase).
     static member Omicron with get() = "Ο"
+    /// Gets the Unicode character for pi (uppercase).
     static member Pi with get() = "Π"
+    /// Gets the Unicode character for rho (uppercase).
     static member Rho with get() = "Ρ"
+    /// Gets the Unicode character for sigma (uppercase).
     static member Sigma with get() = "Σ"
+    /// Gets the Unicode character for tau (uppercase).
     static member Tau with get() = "Τ"
+    /// Gets the Unicode character for upsilon (uppercase).
     static member Upsilon with get() = "Υ"
+    /// Gets the Unicode character for phi (uppercase).
     static member Phi with get() = "Φ"
+    /// Gets the Unicode character for chi (uppercase).
     static member Chi with get() = "Χ"
+    /// Gets the Unicode character for psi (uppercase).
     static member Psi with get() = "Ψ"
+    /// Gets the Unicode character for omega (uppercase).
     static member Omega with get() = "Ω"
     
+/// SVG text-span formatting helpers for graph labels.
 type TextStyle =
+    /// Wraps text in an italic SVG span.
     static member Italic t = "<tspan font-style=\"italic\">"+t+"</tspan>"
+    /// Wraps text in a bold SVG span.
     static member Bold t = "<tspan font-weight=\"bold\">"+t+"</tspan>"
+    /// Wraps text in a subscript SVG span.
     static member Sub t = "<tspan font-size=\"7\" baseline-shift=\"sub\">"+t+"</tspan>"
+    /// Wraps text in a superscript SVG span.
     static member Sup t = "<tspan font-size=\"7\" baseline-shift=\"super\">"+t+"</tspan>"
     
+/// Reads plot data and generates one-dimensional graphs.
 type graph1d =
     ///<summary>A4縦2段組ドキュメント内の図：横2枚、縦ny枚配置</summary>
     static member A4PTwoColDouble (ny:int) = {
@@ -255,10 +311,12 @@ type graph1d =
         }
     ///<summary>グラフ生成(ダミー)</summary>
     static member dummy_makeGraph (outputdir:string) (filename:string) (setting:GraphSetting) code = ()
+    /// Reads plot data and returns any diagnostics.
     static member readdataWithDiagnostics (filename:string) columns =
         let value,diagnostics =
             Diagnostics.Capture(fun () -> graph1d.readdata filename columns)
         { Value = value; Diagnostics = diagnostics }
+    /// Generates a graph and returns any diagnostics.
     static member makeGraphWithDiagnostics (outputdir:string) (filename:string) (setting:GraphSetting) code =
         let value,diagnostics =
             Diagnostics.Capture(fun () -> graph1d.makeGraph outputdir filename setting code)
@@ -314,6 +372,7 @@ type graph1d =
             y[i] <- coly pd
         x,y
 
+    /// Clips function segments to the vertical range.
     static member internal clipFunctionSegments
         (yr1:double,yr2:double)
         (points:(double*double) array) =
@@ -368,6 +427,7 @@ type graph1d =
         flush()
         List.ofSeq completed
 
+    /// Clips polyline segments to the plotting range.
     static member internal clipPolylineSegments
         (xr1:double,xr2:double)
         (yr1:double,yr2:double)

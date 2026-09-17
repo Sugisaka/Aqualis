@@ -10,7 +10,9 @@ namespace Aqualis
     open System.Text
 
     [<RequireQualifiedAccess>]
+    /// Escapes output text literals for target languages.
     module internal OutputTextLiteral =
+        /// Quotes and escapes text for a generated literal.
         let private quoted (cStyle:bool) (value:string) =
             if isNull value then nullArg (nameof value)
             let builder = StringBuilder(value.Length + 2)
@@ -29,10 +31,14 @@ namespace Aqualis
                 | c -> builder.Append(c) |> ignore
             builder.Append('"').ToString()
 
+        /// Escapes a string as a quoted C literal.
         let c value = quoted true value
+        /// Escapes a string as a quoted Python literal.
         let python value = quoted false value
+        /// Escapes a string as a quoted JavaScript literal.
         let javaScript value = quoted false value
 
+        /// Escapes a string as a quoted Fortran literal.
         let fortran (value:string) =
             if isNull value then nullArg (nameof value)
             let parts = ResizeArray<string>()
@@ -216,13 +222,16 @@ namespace Aqualis
         ///<summary>1個の項目を画面表示</summary>
     type ContextPrint internal (c:Aqualis) =
         
+        /// Gets the owning generation context.
         member _.Environment with get() = c
         
+        /// Writes literal text to the generated output.
         member _.s(str:string) =
             match c.CodeFile with
             |Some _ -> PrintEmitter.sWith c str
             |None -> printfn "%s" str
 
+        /// Writes an expression string to the generated output.
         member _.tt(value:exprString) =
             match c.CodeFile with
             |Some _ ->
@@ -237,11 +246,15 @@ namespace Aqualis
                     |RStr text -> printf "%s" text
                     |_ -> ()
 
+        /// Writes a numeric expression to the generated output.
         member this.t(value:int0) = this.tt(iv value)
+        /// Writes a numeric expression to the generated output.
         member this.t(value:double0) = this.tt(dv value)
+        /// Writes a numeric expression to the generated output.
         member this.t(value:complex0) = this.tt(zv value)
 
     [<AutoOpen>]
+    /// Adds formatted output to Aqualis.
     module CompilationEnvironmentPrintExtensions =
         type Aqualis with
             ///<summary>画面表示</summary>

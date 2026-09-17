@@ -11,7 +11,9 @@ open System.IO
 open System.Text.Json
 
 [<AutoOpen>]
+/// HTML presentation and document rendering helpers.
 module dochtml =
+    /// Creates and renders an HTML presentation page.
     let private htmlpresentationCore
         (dir:string)
         (filename:string)
@@ -165,7 +167,7 @@ module dochtml =
                 // JavaScript関数一時コード削除
                 context.switchJSMain <| fun c -> c.delete()
 
-    /// 全体がキャンバスの無制限レイアウト
+    /// Builds an HTML presentation with an unrestricted page layout.
     let htmlpresentation
         (dir:string)
         (filename:string)
@@ -183,18 +185,20 @@ module dochtml =
             isPageAnimation
             code
 
+    /// Builds a free-layout page with a zero-sized figure container.
     let freeCanvas outputdir filename (title:string) cssfile code =
         htmlpresentation outputdir filename title cssfile (None, None) false <| fun ctx ->
             ctx.html.canvas <| Style [size.width "0px"; size.height "0px"] <| fun () -> code ctx
 
-    /// 全体がキャンバスの無制限レイアウト
+    /// Builds an HTML presentation without fixed page dimensions.
     let freePage outputdir filename (title:string) cssfile code =
         htmlpresentation outputdir filename title cssfile (None, None) false code
 
-    /// 固定幅レイアウト
+    /// Builds an HTML presentation with a fixed page width.
     let fixedWidthPage outputdir filename (title:string) pageWidth cssfile code =
         htmlpresentation outputdir filename title cssfile (Some pageWidth, None) false code
 
+    /// Builds a fixed-size animated presentation page with navigation controls.
     let fixedPage outputdir filename (title:string) pageWidth pageHeight cssfile code =
         htmlpresentationCore outputdir filename title cssfile (Some pageWidth, Some pageHeight) true <| fun ctx ->
             code ctx
@@ -204,4 +208,3 @@ module dochtml =
             ctx.switchSubtitle()
             ctx.switchAudio()
             ctx.audioPlayer()
-

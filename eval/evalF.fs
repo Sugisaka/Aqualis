@@ -7,21 +7,26 @@
 namespace Aqualis
 
     [<AutoOpen>]
+    /// Expression output operations for Fortran.
     module exprEvalF =
 
         open System
 
         type expr with
 
+            /// Emits an assignment for Fortran.
             static member substF (x:expr) (y:expr) (c:Aqualis) =
                 c.codewritein (x.evalF c  + " = " + y.evalF c)
 
+            /// Reports that equation display is unsupported for this target language.
             static member equivF (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "Fortran" "equation display"
 
+            /// Reports that aligned equation display is unsupported for this target language.
             static member equivAlignF (x:expr) (y:expr) (c:Aqualis) =
                 UnsupportedOperation.codeGeneration "Fortran" "aligned equation display"
 
+            /// Emits a counted loop for Fortran.
             static member forLoopF (c:Aqualis) (n1:expr,n2:expr) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -35,7 +40,7 @@ namespace Aqualis
                 c.codewritein "end do"
                 returnVar()
 
-            ///<summary>無限ループ</summary>
+            /// Emits an unbounded loop for Fortran.
             static member loopF (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
@@ -51,7 +56,7 @@ namespace Aqualis
                 c.codewritein(label+" continue")
                 returnVar()
 
-            ///<summary>条件を満たす間ループ</summary>
+            /// Emits a conditional loop for Fortran.
             static member whiledoF (c:Aqualis) (cond:expr) = fun code ->
                 c.codewritein("do while(" + cond.evalF c + ")")
                 c.indentInc()
@@ -59,7 +64,7 @@ namespace Aqualis
                 c.indentDec()
                 c.codewritein "end do"
 
-            ///<summary>指定した範囲でループ</summary>
+            /// Emits an inclusive range loop for Fortran.
             static member rangeF (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -79,7 +84,7 @@ namespace Aqualis
                     c.codewritein "end do"
                     returnVar()
 
-            ///<summary>指定した範囲でループ(途中脱出可)</summary>
+            /// Emits an inclusive range loop with an exit action for Fortran.
             static member range_exitF (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
@@ -103,6 +108,7 @@ namespace Aqualis
                     c.codewritein(label+" continue")
                     returnVar()
 
+            /// Emits a branch callback for Fortran.
             static member branchF (c:Aqualis) code =
                 let ifcode (cond:expr) code =
                     let cond = cond.evalF c
@@ -124,6 +130,7 @@ namespace Aqualis
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein "endif"
 
+            /// Renders an expression for Fortran.
             member this.evalF(c:Aqualis) =
                 let complexArgument (value:expr) =
                     if value.etype=Zt then value.evalF c
