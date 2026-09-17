@@ -1,6 +1,6 @@
 namespace Aqualis
 
-/// User-facing failures and limits for a validated JSON data file.
+/// User-facing failures and limits for JSON data access.
 type JsonFailurePolicy = {
     ReadPublicMessage: string
     SchemaPublicMessage: string
@@ -86,6 +86,40 @@ module JsonData =
             ctx.writein(
                 "if (!(" + condition.code + ")) { throw new \\RuntimeException(" +
                 (PHPdata diagnostic).code + "); }")
+
+    /// Read JSON produced by the same application without checking its data shape.
+    let readWithoutSchema (ctx:Aqualis) (resultName:PhpVariableName) (filename:PHPdata) (policy:JsonFailurePolicy) =
+        let result = ctx.php.tryReadJsonFile(resultName,filename,policy.ReadOptions)
+        ctx.response.Require(
+            result.IsSuccess,
+            ServiceUnavailable,
+            policy.ReadPublicMessage,
+            PHPdata (policy.DiagnosticPrefix + " read failed: ") ++ result.ErrorCode)
+        result.Value
+
+    /// Update application-owned JSON atomically without checking its data shape.
+    let updateAtomicWithoutSchema
+        (ctx:Aqualis)
+        (resultName:PhpVariableName)
+        (filename:PHPdata)
+        (policy:JsonFailurePolicy)
+        (update:PHPdata -> unit) =
+        let result =
+            ctx.php.updateJsonFileAtomicWithSource(resultName,filename,policy.UpdateOptions,fun latest sourceText ->
+                let baseName = PhpVariableName.value resultName
+                let inputShape = decodeShape ctx (baseName + "_sourceShape") sourceText policy.UpdateOptions.MaxDepth
+                let replacements = "$" + baseName + "_replacedPaths"
+                ctx.php.phpcode <| fun () -> ctx.writein(replacements + " = [];")
+                latest.TrackJsonReplacements replacements
+                update latest
+                let published = preserveObjectShapes ctx baseName latest inputShape replacements
+                Some published)
+        ctx.response.Require(
+            result.IsSuccess,
+            ServiceUnavailable,
+            policy.UpdatePublicMessage,
+            PHPdata (policy.DiagnosticPrefix + " update failed: ") ++ result.ErrorCode)
+        result.Value
 
     let read (ctx:Aqualis) (resultName:PhpVariableName) (filename:PHPdata) (schema:JsonSchema) (policy:JsonFailurePolicy) =
         JsonSchema.requireContext ctx schema
