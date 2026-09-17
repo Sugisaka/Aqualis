@@ -3,9 +3,15 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <PackageId>Aqualis</PackageId>
     <Version>188.0.0</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
+    <Authors>Jun-ichiro Sugisaka</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>This F# library generates C, Fortran, Python, LaTeX, HTML, JavaScript, and PHP source code for numerical simulation and related applications.</Description>
+    <RepositoryUrl>https://github.com/Sugisaka/Aqualis</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -132,6 +138,10 @@
     <Compile Include="web\request.fs" />
     <Compile Include="main\function.fs" />
     <Compile Include="main\compile.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
