@@ -15,9 +15,9 @@ uploads through a local HTTP server, including rejection of public, symlinked,
 and overly permissive destinations. The core Python program runs with NumPy
 but without SciPy; a separate program checks the conditional SciPy import.
 
-On Linux, install Bash, GCC, GNU Fortran, BLAS and LAPACK development libraries,
-Python with NumPy and SciPy, Node.js, PHP CLI, and curl, then run from the
-repository root:
+On Linux, install Bash, GCC, GNU Fortran, BLAS, LAPACK, and FFTW development
+libraries, Python with NumPy and SciPy, Node.js, PHP CLI, and curl, then run
+from the repository root:
 
 ```bash
 dotnet run --project tests/Aqualis.GeneratedCodeSmoke/Aqualis.GeneratedCodeSmoke.fsproj -- /tmp/aqualis-generated
