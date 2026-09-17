@@ -1,0 +1,107 @@
+//#############################################################################
+// project title
+let projectname = "sample02"
+// sample program version
+let version = "1.0.0"
+// Directory for source file output
+let outputdir = @"C:\home\work"
+//#############################################################################
+
+#I @"..\bin\Debug\net10.0"
+#r "Aqualis.dll"
+ 
+open Aqualis
+
+let step = 2
+
+group.section (step,1) <| fun () ->
+    Compile [Numeric] outputdir projectname version <| fun ctx ->
+        let res1 =
+            ctx.ch.xLet _2 <| fun x ->
+                ctx.ch.xLet _3 <| fun y ->
+                    asm.iSum (1, 4) <| fun z -> (x+y)*z
+        let aqualis  = new AqualisBuilder<int0>()
+        let res2 = aqualis{
+            let! x = ctx.ch.xLet _2
+            let! y = ctx.ch.xLet _3
+            let  s = asm.iSum (1, 4) <| fun z -> (x+y)*z
+            return s}
+        printfn "--- Direct expression ----------------------"
+        printfn "%s" <| res1.Expr.eval().ToString()
+        printfn "--- Monad ----------------------------------"
+        printfn "%s" <| (res2 id).Expr.eval().ToString()
+        printfn "--------------------------------------------"
+        
+group.section (step,2) <| fun () ->
+    Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname version <| fun c ->
+        let x = c.var.i0 "x"
+        let y = c.var.d0 "y"
+        let z = c.var.z0 "z"
+        x <== 1
+        y <== asm.pi
+        z <== asm.uj
+        c.ch.i <| fun z ->
+            c.ch.I "i" <| fun x ->
+                c.ch.I "i" <| fun y -> // Variable i is already in use; using i0002 instead.
+                    c.iter.num 10 <| fun i ->
+                        x <== z + x + y 
+                    c.iter.num 10 <| fun i ->
+                        x <== z + x + y
+                    c.iter.num 10 <| fun i ->
+                        x <== z + x + y                        
+        c.ch.i <| fun x ->
+            c.ch.i <| fun y ->
+                c.ch.i <| fun z ->
+                    x <== 1
+                    c.br.if1 (Or [x .< y .< z; z .< 1]) <| fun () ->
+                        x <== 0
+                    y <== 2
+                    z <== 3
+                    c.print.t x
+                    c.print.s "aaa"
+                    c.print.tt <| x++y++z
+                    c.print.tt <| x++"aaa"++y++"bbb"++z
+                    
+        c.io.fileOutput "test.dat" <| fun wr ->
+            c.ch.z <| fun z ->
+                z <== 1+asm.uj*2
+                wr.t z
+
+        c.io.fileInput "test.dat" <| fun rd ->
+            c.ch.z <| fun z ->
+                rd.t z
+                c.print.t z
+        c.ch.i1 10 <| fun x ->
+            x[0] <== 0
+            
+group.section (step,3) <| fun () ->
+    Compile [Fortran;C99;Python;LaTeX;HTML] outputdir projectname version <| fun ctx ->
+        let x = ctx.var.d0 "x"
+        let y = ctx.var.d0 "y"
+        x <== asm.pi
+        ctx.comment "test"
+        y <== 1
+        ctx.ch.d <| fun a ->
+        ctx.ch.d1 10 <| fun b ->
+        ctx.ch.z2 (10, 20) <| fun c ->
+            a <== asm.sin x
+            ctx.iter.num b.size1 <| fun i ->
+                b[i] <== b[i]/b.size1
+            ctx.iter.num c.size1 <| fun i ->
+            ctx.iter.num c.size2 <| fun j ->
+                c[i,j] <== c[i,j]/(c.size1*c.size2)
+                c[i,j] <== (c[i,j]+x*a/y)/(c.size1*c.size2)
+        let f1(a:double0, b:#IReal0) =
+            a <== b.ToDouble0 + 1
+        let f2(a:complex0, b:#INum0) =
+            a <== b.ToComplex0 + 1
+        ctx.ch.idz <| fun (a,b,c) ->
+            f1(b,I 1)
+            f1(b,D 1.22)
+            f1(b,a)
+            f1(b,b)
+            //f1(b,c) //error
+            f2(c,I 1)
+            f2(c,D 1.22)
+            f2(c,a)
+            f2(c,b)
