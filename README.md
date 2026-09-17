@@ -1,19 +1,44 @@
 # Aqualis
-Algorithm and equation analyzer for lightwave simulation
+Algorithm and equation analyzer for lightwave simulation.
 
-This library generates C/FORTRAN/Python/LaTeX/HTML source codes for numerical simulation. You can create simple readable and high-performance programs under multiparadigm programming (F#).
+This F# library generates C, Fortran, Python, LaTeX, HTML, JavaScript, and PHP source code for numerical simulation and related applications.
 
 ## Installation
-1. Install Visual Studio 2026 or the Build Tools for Visual Studio 2026. During installation, be sure to select "F# desktop language support."
-2. Copy `Aqualis.dll` to `C:\Aqualis\lib\(version number)` (`(version number)` refers to the Aqualis version number such as `188_0_0_0`, for example).
+
+Aqualis targets .NET 10. Install the .NET 10 SDK to run F# scripts or build an application that uses Aqualis. Once version `188.0.0` is published on NuGet, add it to an F# project with:
+
+```sh
+dotnet add package Aqualis --version 188.0.0
+```
+
+For an F# script, reference the package directly instead of copying the DLL:
+
+```fsharp
+#r "nuget: Aqualis, 188.0.0"
+```
 
 ## How to use
 
-Run the script file `sample1.fsx` to generate C, Fortran, and Python source files in `C:\home\work`.
+Save the following as `hello.fsx`, then run `dotnet fsi hello.fsx`. It creates a `generated` directory next to the script and writes C, Fortran, and Python source files there.
 
-See also the [Japanese manual](docs/doc-jp.md) or [English manual](docs/doc-en.md).
+```fsharp
+#r "nuget: Aqualis, 188.0.0"
 
-For PHP file uploads, follow the [private upload storage deployment requirements](docs/php-upload-storage-jp.md). Generated PHP rejects public or overly permissive storage directories before saving files.
+open System.IO
+open Aqualis
+
+let outputdir = Path.Combine(__SOURCE_DIRECTORY__, "generated")
+Directory.CreateDirectory(outputdir) |> ignore
+
+Compile [C99; Fortran; Python] outputdir "hello" "1.0.0" <| fun ctx ->
+    ctx.print.s "Hello World!"
+```
+
+The version passed to `Compile` identifies your generated project; it is separate from the Aqualis package version. Compiling or running generated code requires the corresponding language tools.
+
+See also the [Japanese manual](https://github.com/Sugisaka/Aqualis/blob/master/docs/doc-jp.md) or [English manual](https://github.com/Sugisaka/Aqualis/blob/master/docs/doc-en.md). Their setup instructions describe building the repository and copying the DLL for local development.
+
+For PHP file uploads, configure private upload storage outside the public web root. Generated PHP rejects public or overly permissive storage directories before saving files.
 
 ## Optional HTML assets
 
@@ -49,6 +74,6 @@ for diagnostic in result.Diagnostics do
 Successful `Compile` runs create a per-project `.aqualis-generated-<project>.json` manifest in the output directory. On later runs for the same project, files listed in the previous manifest but not generated again are removed transactionally. Unrelated files are left alone; if a previously generated file was edited after the previous run, compilation stops rather than deleting or replacing that edit. Existing outputs from before a manifest is first created are not automatically claimed or removed. Do not run multiple generator processes against the same output directory concurrently.
 
 ## License
-[MIT License](LICENSE.txt)
+[MIT License](https://github.com/Sugisaka/Aqualis/blob/master/LICENSE.txt)
 
 Copyright (c) 2023 Jun-ichiro Sugisaka
