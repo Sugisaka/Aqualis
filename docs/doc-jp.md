@@ -1,6 +1,6 @@
 # Aqualis
 
-- [インストール](#インストール) 
+- [必要な準備](#必要な準備)
 - [ソースファイルの実行](#ソースファイルの実行)
 - [プリアンブル部](#プリアンブル部)
 - [各種設定](#各種設定)
@@ -24,18 +24,13 @@
 - [データの可視化](#データの可視化)
 - [Webコンテンツの生成](#webコンテンツの生成)
 
-## インストール
+## 必要な準備
+
 [トップへ戻る](#aqualis)
-1. .NET 10 SDKをインストールする。Visual StudioまたはBuild Tools for Visual Studioを使用する場合は、「F#デスクトップ言語のサポート」も選択する。
-2. リポジトリのルートで次を実行し、Release版の`Aqualis.dll`を生成する。
-    ```powershell
-    dotnet build Aqualis.fsproj -c Release
-    ```
-3. 次を実行すると、ライブラリのバージョンに対応する`C:\Aqualis\lib\(バージョン番号)`へDLLがコピーされる。
-    ```powershell
-    dotnet fsi install.fsx
-    ```
-   DLLを別の場所へ手動でコピーした場合は、F#スクリプトの`#I`もその場所に合わせて変更する。
+
+- .NET 10 SDKをインストールする。F#スクリプトの実行には、SDKに含まれるF#コンパイラとF# Interactive（`dotnet fsi`）が必要。Visual StudioまたはBuild Tools for Visual Studioを使用する場合は、「F#デスクトップ言語のサポート」も選択する。
+- 初回実行時にAqualisパッケージを取得できるよう、NuGet.orgに接続できる環境を用意する。以下のコード例では`#r "nuget: Aqualis, 188.0.0"`を使用する。
+- 生成したソースコードをコンパイル・実行する場合は、対象言語のコンパイラや実行環境、必要なライブラリを別途用意する。
 
 ## ソースファイルの実行
 [トップへ戻る](#aqualis)
@@ -54,8 +49,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\188_0_0_0"
-#r "Aqualis.dll"
+#r "nuget: Aqualis, 188.0.0"
  
 open Aqualis
  
@@ -65,12 +59,11 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
 
 - 2行目：このプログラムの説明を書く。複数行になっても良いが、各行の先頭に半角「`//`」を記入
 - 3行目：プロジェクト名を「`""`」の間に書く。半角のアルファベットと数字、アンダースコアが使用可能
-- 4行目：バージョン番号。任意の文字列を指定可能
+- 4行目：生成プロジェクトのバージョン番号。Aqualisパッケージのバージョンとは別で、任意の文字列を指定可能
 - 7行目：ソースファイルの出力先フォルダ。
-- 9行目：Aqualis.dllがあるディレクトリを指定する。
-- 10行目：Aqualis.dllを読み込む
-- 12行目：Aqualisを使用可能にする
-- 14行目：出力ソースファイルの言語を`[]`の中に指定。セミコロン`;`で区切って複数指定することもできる。以下の言語を指定可能
+- 9行目：NuGetからAqualis 188.0.0を読み込む。
+- 11行目：Aqualisを使用可能にする
+- 13行目：出力ソースファイルの言語を`[]`の中に指定。セミコロン`;`で区切って複数指定することもできる。以下の言語を指定可能
   - Fortran
   - C99
   - Python
@@ -81,7 +74,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
   - PHP
   - Numeric（ソースファイルを生成せず直接計算）
 - 選択した言語で未対応の操作はエラーとなる。`HTML`と`HTMLSequenceDiagram`は同じ出力ファイルを使用するため、同時には指定できない。
-- 14行目：`ctx`はコード生成に使用するコンテキスト。他の名称に変更してもよい。
+- 13行目：`ctx`はコード生成に使用するコンテキスト。他の名称に変更してもよい。
 
 以下のコードでは、「`ctx.print.s "aaa"`」と「`ctx.print.s "bbb"`」がFortranのコードに変換される。「`ctx.print.s "ccc"`」はインデントが戻っているので出力の対象外となる。
 ```fsharp
@@ -986,8 +979,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\188_0_0_0"
-#r "Aqualis.dll"
+#r "nuget: Aqualis, 188.0.0"
  
 open Aqualis
  

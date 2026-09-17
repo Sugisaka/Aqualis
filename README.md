@@ -5,7 +5,7 @@ This F# library generates C, Fortran, Python, LaTeX, HTML, JavaScript, and PHP s
 
 ## Installation
 
-Aqualis targets .NET 10. Install the .NET 10 SDK to run F# scripts or build an application that uses Aqualis. Once version `188.0.0` is published on NuGet, add it to an F# project with:
+Aqualis targets .NET 10. Install the .NET 10 SDK to run F# scripts or build an application that uses Aqualis. Add version `188.0.0` from NuGet to an F# project with:
 
 ```sh
 dotnet add package Aqualis --version 188.0.0
@@ -36,7 +36,7 @@ Compile [C99; Fortran; Python] outputdir "hello" "1.0.0" <| fun ctx ->
 
 The version passed to `Compile` identifies your generated project; it is separate from the Aqualis package version. Compiling or running generated code requires the corresponding language tools.
 
-See also the [Japanese manual](https://github.com/Sugisaka/Aqualis/blob/master/docs/doc-jp.md) or [English manual](https://github.com/Sugisaka/Aqualis/blob/master/docs/doc-en.md). Their setup instructions describe building the repository and copying the DLL for local development.
+See also the [Japanese manual](https://github.com/Sugisaka/Aqualis/blob/master/docs/doc-jp.md) or [English manual](https://github.com/Sugisaka/Aqualis/blob/master/docs/doc-en.md) for detailed usage and prerequisites.
 
 For PHP file uploads, configure private upload storage outside the public web root. Generated PHP rejects public or overly permissive storage directories before saving files.
 

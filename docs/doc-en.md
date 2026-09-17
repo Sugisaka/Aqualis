@@ -1,6 +1,6 @@
 # Aqualis
 
-- [Installation](#installation)
+- [Prerequisites](#prerequisites)
 - [Running a Source File](#running-a-source-file)
 - [Preamble](#preamble)
 - [Settings](#settings)
@@ -24,24 +24,13 @@
 - [Data Visualization](#data-visualization)
 - [Web Content Generation](#web-content-generation)
 
-## Installation
+## Prerequisites
 
 [Back to top](#aqualis)
 
-1. Install the .NET 10 SDK. If you use Visual Studio or Build Tools for Visual Studio, also select **F# desktop language support**.
-2. Run the following command in the repository root to build the Release version of `Aqualis.dll`.
-
-    ```powershell
-    dotnet build Aqualis.fsproj -c Release
-    ```
-
-3. Run the following command to copy the DLL to `C:\Aqualis\lib\(version number)`, where the directory name corresponds to the library version.
-
-    ```powershell
-    dotnet fsi install.fsx
-    ```
-
-   If you copy the DLL elsewhere manually, update `#I` in your F# script accordingly.
+- Install the .NET 10 SDK. Running F# scripts requires the F# compiler and F# Interactive (`dotnet fsi`) included with the SDK. If you use Visual Studio or Build Tools for Visual Studio, also select **F# desktop language support**.
+- Ensure NuGet.org is accessible so the Aqualis package can be restored on first use. The examples below use `#r "nuget: Aqualis, 188.0.0"`.
+- To compile or run generated source code, install the compiler or runtime and any libraries required by the selected target language.
 
 ## Running a Source File
 
@@ -64,8 +53,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\188_0_0_0"
-#r "Aqualis.dll"
+#r "nuget: Aqualis, 188.0.0"
  
 open Aqualis
  
@@ -75,12 +63,11 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
 
 - Line 2: Describe the program. A description may span multiple lines, but each line must start with `//`.
 - Line 3: Specify the project name inside `""`. ASCII letters, digits, and underscores may be used.
-- Line 4: Specify an arbitrary version string.
+- Line 4: Specify an arbitrary version string for the generated project. This is separate from the Aqualis package version.
 - Line 7: Specify the source-file output directory.
-- Line 9: Specify the directory containing `Aqualis.dll`.
-- Line 10: Load `Aqualis.dll`.
-- Line 12: Open the `Aqualis` namespace.
-- Line 14: Specify target languages inside `[]`. Separate multiple targets with semicolons (`;`). Supported targets are:
+- Line 9: Load Aqualis 188.0.0 from NuGet.
+- Line 11: Open the `Aqualis` namespace.
+- Line 13: Specify target languages inside `[]`. Separate multiple targets with semicolons (`;`). Supported targets are:
   - Fortran
   - C99
   - Python
@@ -91,7 +78,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
   - PHP
   - Numeric (evaluates directly without generating a source file)
 - Operations unsupported by a selected target raise an error. `HTML` and `HTMLSequenceDiagram` cannot be selected together because they use the same output file.
-- Line 14: `ctx` is the context used for code generation. You may choose another name.
+- Line 13: `ctx` is the context used for code generation. You may choose another name.
 
 In the following example, `ctx.print.s "aaa"` and `ctx.print.s "bbb"` are converted to Fortran. `ctx.print.s "ccc"` is outside the callback because its indentation has returned, so it is not part of the generated code.
 
@@ -1012,8 +999,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#I "C:\\Aqualis\\lib\\188_0_0_0"
-#r "Aqualis.dll"
+#r "nuget: Aqualis, 188.0.0"
  
 open Aqualis
  
