@@ -172,11 +172,14 @@ namespace Aqualis
                         x.evalF c + "/(" + y.evalF c + ")"
                     |_ -> x.evalF c + "/" + y.evalF c
                 |Mod(_,x,y) -> "mod(" + x.evalF c + "," + y.evalF c + ")"
-                |Pow(_,x,y) ->
+                |Pow(t,x,y) ->
                     let baseValue =
-                        match x with
-                        |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + x.evalF c + ")"
-                        |_ -> x.evalF c
+                        if t=Zt && x.etype<>Zt then
+                            "cmplx(" + x.evalF c + ",kind=kind(0.0d0))"
+                        else
+                            match x with
+                            |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + x.evalF c + ")"
+                            |_ -> x.evalF c
                     let exponentValue =
                         match y with
                         |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + y.evalF c + ")"

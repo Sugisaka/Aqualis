@@ -19,6 +19,23 @@ module Program =
             context.print.t (asm.sqrt (D -4.0))
             context.print.t (asm.sqrt (-(D 4.0)))
 
+    let private generatePowerAndZeroRegression outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "power-zero-regression-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            let value = context.var.d0 "value"
+            value <== 3.0
+            context.print.t (D 0.0 * value)
+            context.print.t (value - value)
+            context.print.t (double0.powr(D -4.0, D 0.5))
+            context.print.t (complex0.powr(complex0(Dbl -4.0), D 0.5))
+            let runtimeBase = context.var.d0 "runtimeBase"
+            let runtimeExponent = context.var.d0 "runtimeExponent"
+            runtimeBase <== -4.0
+            runtimeExponent <== 0.5
+            context.print.t (double0.powr(runtimeBase, runtimeExponent))
+            context.print.t (complex0.powr(runtimeBase.ToComplex0, runtimeExponent))
+
     let private generate outputRoot (directoryName, language) =
         let outputDirectory = Path.Combine(outputRoot, directoryName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1432,6 +1449,8 @@ module Program =
             generationTargets |> List.iter (generate outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateNegativeRealSqrt outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python]
+            |> List.iter (generatePowerAndZeroRegression outputRoot)
             generateJavaScriptIntegerDivision outputRoot
             ["c", C99; "fortran", Fortran; "javascript", JavaScript; "php", PHP]
             |> List.iter (generateArithmeticPrecedence outputRoot)

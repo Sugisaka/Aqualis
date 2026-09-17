@@ -16,7 +16,14 @@ namespace Aqualis
         let private isTruncatingDivision = function
             |Div(It _,_,_) -> true
             |_ -> false
-        
+
+        let private preserveNumericType resultType result =
+            match resultType,result with
+            |Dt,Int value -> Dbl(double value)
+            |Zt,Int value -> Cpx(double value,0.0)
+            |Zt,Dbl value -> Cpx(value,0.0)
+            |_ -> result
+
         type expr with
             
             static member simpInv(x:expr) =
@@ -337,6 +344,8 @@ namespace Aqualis
                 |Int x,Int y when y>0 -> Int (List.fold (fun acc _ -> acc*x) 1 [1..y])
                 |Int x, Int y -> Dbl (double x ** double y)
                 |Int x, Dbl y -> Dbl (double x ** y)
+                |Inv(_,Int x),Dbl y -> Dbl (Math.Pow(-(double x),y))
+                |Inv(_,Dbl x),Dbl y -> Dbl (Math.Pow(-x,y))
                 |Int _, Cpx _ -> expr.simpExp((y*expr.simpLog x).simp)
                 |Dbl x, Int y -> Dbl (x ** double y)
                 |Dbl x, Dbl y -> Dbl (x ** y)
@@ -636,14 +645,14 @@ namespace Aqualis
                     let x = x.simp
                     let y = y.simp
                     expr.simpAdd(x,y)
-                |Sub(_,x,y) ->
+                |Sub(t,x,y) ->
                     let x = x.simp
                     let y = y.simp
-                    expr.simpSub(x,y)
-                |Mul(_,x,y) ->
+                    preserveNumericType t (expr.simpSub(x,y))
+                |Mul(t,x,y) ->
                     let x = x.simp
                     let y = y.simp
-                    expr.simpMul(x,y)
+                    preserveNumericType t (expr.simpMul(x,y))
                 |Div(It _, x,y) ->
                     let x = x.simp
                     let y = y.simp
@@ -659,10 +668,21 @@ namespace Aqualis
                     let x = x.simp
                     let y = y.simp
                     expr.simpMod(x,y)
-                |Pow(_, x,y) -> 
+                |Pow(t, x,y) ->
                     let x = x.simp
                     let y = y.simp
-                    expr.simpPow(x,y)
+                    let negativeRealFractionalPower =
+                        match x,y with
+                        |Inv(_,Int value),Dbl exponent -> value>0 && Double.IsFinite exponent && exponent <> truncate exponent
+                        |Inv(_,Dbl value),Dbl exponent -> value>0.0 && Double.IsFinite exponent && exponent <> truncate exponent
+                        |_ -> false
+                    let result =
+                        if t=Zt && negativeRealFractionalPower then Pow(Zt,x,y)
+                        else expr.simpPow(x,y)
+                    match t,result with
+                    |Zt,Pow _ -> Pow(Zt,x,y)
+                    |Dt,Pow _ -> Pow(Dt,x,y)
+                    |_ -> preserveNumericType t result
                 |Exp(_, x) -> 
                     let x = x.simp
                     expr.simpExp x

@@ -5,6 +5,24 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``real zero simplification keeps a real literal`` () =
+        let value = double0(Var(Dt, "value", NaN))
+        for expression in [(D 0.0 * value).Expr; (value - value).Expr] do
+            match expression.simp with
+            |Dbl zero -> Assert.Equal(0.0, zero)
+            |actual -> Assert.Fail($"Expected a real zero, but got {actual}.")
+
+    [<Fact>]
+    let ``power simplification preserves the requested numeric domain`` () =
+        match (double0.powr(D -4.0, D 0.5)).Expr.simp with
+        |Dbl result -> Assert.True(System.Double.IsNaN(result))
+        |actual -> Assert.Fail($"Expected a real NaN, but got {actual}.")
+
+        match (complex0.powr(complex0(Dbl -4.0), D 0.5)).Expr.simp with
+        |Pow(Zt,_,_) -> ()
+        |actual -> Assert.Fail($"Expected a complex power, but got {actual}.")
+
+    [<Fact>]
     let ``real negative square root remains real and complex square root remains complex`` () =
         for value in [asm.sqrt (D -4.0); asm.sqrt (-(D 4.0))] do
             match value.Expr.simp with

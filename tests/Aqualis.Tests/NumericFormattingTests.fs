@@ -61,10 +61,10 @@ module NumericFormattingTests =
         Assert.Equal(Dt,result.etype)
         Assert.Equal("pow((double)base,exponent)",result.Expr.evalC cTarget)
         Assert.Equal("dble(base)**exponent",result.Expr.evalF fortranTarget)
-        Assert.Equal("float(base)**exponent",result.Expr.evalPy pythonTarget)
+        Assert.Equal("numpy.power(float(float(base)),exponent)",result.Expr.evalPy pythonTarget)
         Assert.Equal("pow((double)base,-3)",negativeResult.Expr.evalC cTarget)
         Assert.Equal("dble(base)**(-3)",negativeResult.Expr.evalF fortranTarget)
-        Assert.Equal("float(base)**(-3)",negativeResult.Expr.evalPy pythonTarget)
+        Assert.Equal("numpy.power(float(float(base)),-3)",negativeResult.Expr.evalPy pythonTarget)
 
     [<Theory>]
     [<InlineData("ja-JP")>]

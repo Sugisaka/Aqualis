@@ -202,18 +202,22 @@ namespace Aqualis
                     |_ -> x.evalPy c + "/" + y.evalPy c
                 |Mod(_,x,y) ->
                     truncatingIntegerRemainder (x.evalPy c) (y.evalPy c)
-                |Pow(_,x,y) ->
+                |Pow(t,x,y) ->
                     let baseValue =
-                        match x with
-                        |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + x.evalPy c + ")"
-                        |_ -> x.evalPy c
+                        if t=Zt && x.etype<>Zt then
+                            "complex(" + x.evalPy c + ")"
+                        else
+                            match x with
+                            |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + x.evalPy c + ")"
+                            |_ -> x.evalPy c
                     let exponentValue =
                         match y with
                         |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + y.evalPy c + ")"
                         |Int value when value < 0 -> "(" + y.evalPy c + ")"
                         |Dbl value when value < 0.0 -> "(" + y.evalPy c + ")"
                         |_ -> y.evalPy c
-                    baseValue + "**" + exponentValue
+                    if t=Dt then "numpy.power(float(" + x.evalPy c + ")," + y.evalPy c + ")"
+                    else baseValue + "**" + exponentValue
                 |Exp(Zt,x) -> "cmath.exp(" + x.evalPy c + ")"
                 |Sin(Zt,x) -> "cmath.sin(" + x.evalPy c + ")"
                 |Cos(Zt,x) -> "cmath.cos(" + x.evalPy c + ")"

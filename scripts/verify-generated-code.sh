@@ -160,6 +160,30 @@ PY
   fi
   printf '%s real negative square root: passed\n' "$language"
 done
+for target in 'c C' 'fortran F' 'python P'; do
+  read -r language suffix <<< "$target"
+  case_directory="$output_root/power-zero-regression-$language"
+  if [[ "$language" == c ]]; then
+    gcc -std=c99 -Werror=format "$case_directory/smoke.c" -lm -o "$case_directory/smoke.exe"
+  fi
+  output="$(cd "$case_directory" && bash "proc_smoke_$suffix.sh")"
+  if ! python3 - "$output" <<'PY'
+import math
+import sys
+
+values = [float(value) for value in sys.argv[1].split()]
+if (len(values) != 8 or values[0] != 0.0 or values[1] != 0.0
+        or not math.isnan(values[2]) or abs(values[3]) > 1e-12
+        or abs(values[4] - 2.0) > 1e-12 or not math.isnan(values[5])
+        or abs(values[6]) > 1e-12 or abs(values[7] - 2.0) > 1e-12):
+    sys.exit(f"Unexpected zero/power output: {values!r}.")
+PY
+  then
+    printf '%s power and zero regression failed.\n' "$language" >&2
+    exit 1
+  fi
+  printf '%s power and zero regression: passed\n' "$language"
+done
 run_and_verify 'Python with SciPy' "$output_root/python-scipy" '1.00000000000000000e+00' "$scipy_python" smoke.py
 gcc -std=c99 -Werror=implicit-function-declaration "$output_root/c-bessel/smoke.c" -lm -o "$output_root/c-bessel/smoke.exe"
 bessel_output="$(cd "$output_root/c-bessel" && ./smoke.exe)"
