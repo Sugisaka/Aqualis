@@ -1659,6 +1659,53 @@ module Program =
             |> ignore
             context.php.echo "ok"
 
+        generate "update-object-self-assignment" <| fun context ->
+            let schema = JsonSchema.obj ["Payload", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]
+            JsonData.updateAtomic context (PhpVariableName.create "selfUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest["Payload"] <== latest["Payload"])
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-nested-self-assignment" <| fun context ->
+            let schema =
+                JsonSchema.obj ["Payload", JsonSchema.obj ["Nested", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]]
+            JsonData.updateAtomic context (PhpVariableName.create "nestedSelfUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest["Payload"] <== latest["Payload"])
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-parent-copy" <| fun context ->
+            let schema =
+                JsonSchema.obj ["Payload", JsonSchema.obj ["Nested", JsonSchema.obj []]]
+            JsonData.updateAtomic context (PhpVariableName.create "parentCopyUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest ->
+                    let nested = latest["Payload"].["Nested"]
+                    latest["Payload"] <== PHPdata.f("['Nested' => " + nested.code + "]",context))
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-list-to-object" <| fun context ->
+            let schema = JsonSchema.obj ["Payload", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]
+            JsonData.updateAtomic context (PhpVariableName.create "objectShapeUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest["Payload"] <== PHPdata.f("(object)[]",context))
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-side-effect-copy" <| fun context ->
+            context.php.phpcode <| fun () ->
+                context.writein "$keyCalls = 0; function nextCopyKey() { global $keyCalls; $keyCalls++; return $keyCalls === 1 ? 'Source' : 'Target'; }"
+            let field = JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]
+            let schema = JsonSchema.obj ["Source", field; "Target", field]
+            JsonData.updateAtomic context (PhpVariableName.create "dynamicCopyUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest[PHPdata.f("nextCopyKey()",context)] <== latest[PHPdata.f("nextCopyKey()",context)])
+            |> ignore
+            context.php.echo (PHPdata.f("(string)$keyCalls",context))
+
         generate "read-rule-order" <| fun context ->
             let schema =
                 JsonSchema.andAlso [
@@ -1681,6 +1728,14 @@ module Program =
         Compile [PHP] outputDirectory "smoke" "1.0" <| fun context ->
             expr.loopPh context <| fun (exitLoop,_) -> exitLoop()
             context.php.echo "ok"
+
+    let private generateFortranIntegerAbsBoundary outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "fortran-integer-abs-boundary")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [Fortran] outputDirectory "smoke" "1.0" <| fun context ->
+            let value = context.var.i0 "value"
+            value <== Int32.MinValue
+            context.print.t (asm.abs value)
 
     [<EntryPoint>]
     let main arguments =
@@ -1726,6 +1781,7 @@ module Program =
             generatePhpInitializedArrays outputRoot
             generatePhpJsonSchema outputRoot
             generatePhpLoopExit outputRoot
+            generateFortranIntegerAbsBoundary outputRoot
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot
             generateCArrayCases outputRoot

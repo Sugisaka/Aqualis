@@ -208,6 +208,7 @@ namespace Aqualis
                 |Atan(Zt,x) -> "atan(" + complexArgument x + ")"
                 |Atan(_,x) -> "atan(" + x.evalF c + ")"
                 |Atan2(x,y) -> "atan2(" + x.evalF c + "," + y.evalF c + ")"
+                |Abs(Dt,x) when x.etype = It 4 -> "abs(dble(" + x.evalF c + "))"
                 |Abs(_,x) -> "abs(" + x.evalF c + ")"
                 |Log(Zt,x) -> "log(" + complexArgument x + ")"
                 |Log(_,x) -> "log(" + x.evalF c + ")"

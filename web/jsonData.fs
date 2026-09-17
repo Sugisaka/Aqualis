@@ -39,7 +39,16 @@ module JsonData =
         let published = PHPdata.var(ctx,name + "_publishValue")
         ctx.php.phpcode <| fun () ->
             ctx.writein(rebuild + " = function ($value, $original, $path) use (&" + rebuild + ", " + replacements + ") {")
-            ctx.writein("if (isset(" + replacements + "[serialize($path)])) { return $value; }")
+            ctx.writein("if (isset(" + replacements + "[serialize($path)])) {")
+            ctx.writein("if (!is_array($value)) { return $value; }")
+            ctx.writein("$result = [];")
+            ctx.writein("foreach ($value as $key => $item) {")
+            ctx.writein("$property = (string)$key;")
+            ctx.writein("$previous = is_object($original) ? (property_exists($original, $property) ? $original->{$property} : null) : (is_array($original) && array_key_exists($key, $original) ? $original[$key] : null);")
+            ctx.writein("$result[$key] = " + rebuild + "($item, $previous, [...$path, $key]);")
+            ctx.writein("}")
+            ctx.writein("return $result;")
+            ctx.writein("}")
             ctx.writein("if (!is_array($value)) { return $value; }")
             ctx.writein("if (is_object($original)) {")
             ctx.writein("$originalArray = (array)$original;")
@@ -120,9 +129,15 @@ module JsonData =
                 latest.TrackJsonReplacements replacements
                 update latest
                 let published = preserveObjectShapes ctx baseName latest inputShape replacements
-                let outputText = PHPdata.f("json_encode(" + published.code + ", JSON_THROW_ON_ERROR)",ctx)
+                let outputText = PHPdata.var(ctx,baseName + "_outputText")
+                ctx.php.phpcode <| fun () ->
+                    ctx.writein(outputText.code + " = json_encode(" + published.code + ", JSON_THROW_ON_ERROR);")
                 let outputShape = decodeShape ctx (baseName + "_schemaShape") outputText policy.UpdateOptions.MaxDepth
-                assertValid latest outputShape
+                let outputData = PHPdata.var(ctx,baseName + "_schemaData")
+                ctx.php.phpcode <| fun () ->
+                    ctx.writein(outputData.code + " = json_decode(" + outputText.code + ", true, " +
+                                InvariantFormat.integer policy.UpdateOptions.MaxDepth + ", JSON_THROW_ON_ERROR);")
+                assertValid outputData outputShape
                 Some published)
         ctx.response.Require(
             result.IsSuccess,

@@ -17,6 +17,11 @@ numeric_transition_directory="$output_root/php-json-schema-update-numeric-object
 numeric_noop_directory="$output_root/php-json-schema-update-numeric-object-unchanged"
 side_effect_directory="$output_root/php-json-schema-update-side-effect-key"
 nested_numeric_directory="$output_root/php-json-schema-update-nested-numeric-key"
+self_assignment_directory="$output_root/php-json-schema-update-object-self-assignment"
+nested_self_directory="$output_root/php-json-schema-update-nested-self-assignment"
+parent_copy_directory="$output_root/php-json-schema-update-parent-copy"
+object_transition_directory="$output_root/php-json-schema-update-list-to-object"
+side_effect_copy_directory="$output_root/php-json-schema-update-side-effect-copy"
 rule_order_directory="$output_root/php-json-schema-read-rule-order"
 php -l "$read_directory/smoke.php" >/dev/null
 php -l "$update_directory/smoke.php" >/dev/null
@@ -28,6 +33,11 @@ php -l "$numeric_transition_directory/smoke.php" >/dev/null
 php -l "$numeric_noop_directory/smoke.php" >/dev/null
 php -l "$side_effect_directory/smoke.php" >/dev/null
 php -l "$nested_numeric_directory/smoke.php" >/dev/null
+php -l "$self_assignment_directory/smoke.php" >/dev/null
+php -l "$nested_self_directory/smoke.php" >/dev/null
+php -l "$parent_copy_directory/smoke.php" >/dev/null
+php -l "$object_transition_directory/smoke.php" >/dev/null
+php -l "$side_effect_copy_directory/smoke.php" >/dev/null
 php -l "$rule_order_directory/smoke.php" >/dev/null
 
 check_case() {
@@ -118,6 +128,32 @@ assert numeric == {"Payload": [1, 2]}, numeric
 assert unchanged == {"Payload": {"0": 7}}, unchanged
 assert dynamic == {"Payload": []}, dynamic
 assert nested == {"Payload": {"0": []}}, nested
+PY
+
+check_case 'JSON update preserves a self-assigned empty object' "$self_assignment_directory/smoke.php" ok "$self_assignment_directory/data.json" '{"Payload":{}}'
+check_case 'JSON update preserves a nested empty object on self-assignment' "$nested_self_directory/smoke.php" ok "$nested_self_directory/data.json" '{"Payload":{"Nested":{}}}'
+check_case 'JSON update preserves a nested object on parent copy' "$parent_copy_directory/smoke.php" ok "$parent_copy_directory/data.json" '{"Payload":{"Nested":{}}}'
+check_case 'JSON update replaces a list with an empty object' "$object_transition_directory/smoke.php" ok "$object_transition_directory/data.json" '{"Payload":[]}'
+check_case 'JSON update distinguishes side-effecting keys' "$side_effect_copy_directory/smoke.php" 2 "$side_effect_copy_directory/data.json" '{"Source":{},"Target":[]}'
+python3 - "$self_assignment_directory/data.json" "$nested_self_directory/data.json" "$parent_copy_directory/data.json" "$object_transition_directory/data.json" "$side_effect_copy_directory/data.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as stream:
+    self_assigned = json.load(stream)
+with open(sys.argv[2], encoding="utf-8") as stream:
+    nested_self = json.load(stream)
+with open(sys.argv[3], encoding="utf-8") as stream:
+    parent_copy = json.load(stream)
+with open(sys.argv[4], encoding="utf-8") as stream:
+    object_transition = json.load(stream)
+with open(sys.argv[5], encoding="utf-8") as stream:
+    side_effect_copy = json.load(stream)
+assert self_assigned == {"Payload": {}}, self_assigned
+assert nested_self == {"Payload": {"Nested": {}}}, nested_self
+assert parent_copy == {"Payload": {"Nested": {}}}, parent_copy
+assert object_transition == {"Payload": {}}, object_transition
+assert side_effect_copy == {"Source": [], "Target": []}, side_effect_copy
 PY
 
 for case in wrong-identity object-as-list nested-object-as-list list-as-object list-as-map; do

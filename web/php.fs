@@ -8,6 +8,7 @@ namespace Aqualis
 
 open System
 open System.IO
+open System.Text.RegularExpressions
 
 /// Limits applied while reading and decoding a JSON file in generated PHP.
 type JsonReadOptions = {
@@ -53,6 +54,9 @@ type PHPbool(x:string, context:Aqualis) =
 type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     // Explicit assignments inside JsonData.updateAtomic identify replacements whose JSON shape must be kept.
     let mutable jsonReplacementTracking : (string * string * string list) option = None
+    let stableJsonKey (key:string) =
+        Regex.IsMatch(key, @"^(?:\$[A-Za-z_][A-Za-z0-9_]*|-?[0-9]+|""(?:\\.|[^""\\])*""|'(?:\\.|[^'\\])*')$")
+    member private _.IsStableJsonKey(key:string) = stableJsonKey key
     member internal this.TrackJsonReplacements(replacements:string) =
         jsonReplacementTracking <- Some(replacements, this.code, [])
     member private _.SetJsonReplacementTracking(tracking) =
@@ -219,6 +223,9 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
     static member (<==) (a:PHPdata,b:PHPdata) =
         Aqualis.merge a.Context b.Context |> ignore
         match a.JsonReplacementTracking with
+        | Some (_, _, path) when a.code = b.code && List.forall a.IsStableJsonKey path ->
+            // A self-assignment keeps the original JSON container shapes.
+            a.Context.codewritein("<?php ", a.code + " = " + b.code + "; ?>")
         | Some (replacements, root, path) ->
             let assignmentId = a.Context.GotoLabels.nextGotoLabel()
             let keys =

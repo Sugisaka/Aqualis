@@ -940,6 +940,10 @@ expect_c_array_failure 'release-malloc-failure' 'memory allocation failed'
 bash "$(dirname "$0")/verify-php-upload.sh" "$output_root"
 bash "$(dirname "$0")/verify-json-schema.sh" "$output_root"
 
+run_and_verify_number 'Fortran integer minimum absolute value' \
+  "$output_root/fortran-integer-abs-boundary" 2147483648 \
+  bash proc_smoke_F.sh
+
 php -l "$output_root/php-loop-exit/smoke.php" >/dev/null
 if [[ "$(php "$output_root/php-loop-exit/smoke.php")" != ok ]]; then
   printf '%s\n' 'PHP loop exit failed.' >&2

@@ -103,5 +103,6 @@ module JsonDataGenerationTests =
         Assert.Contains("is_object($update_sourceShape)",generated)
         Assert.Contains("is_array($update_sourceShape->{\"Items\"})",generated)
         Assert.Contains("$update_publishValue = $update_rebuildShape($update_data, $update_sourceShape, [])",generated)
-        Assert.Contains("json_encode($update_publishValue, JSON_THROW_ON_ERROR",generated)
-        Assert.Contains("$update_schemaShape = json_decode(json_encode($update_publishValue",generated)
+        Assert.Contains("$update_outputText = json_encode($update_publishValue, JSON_THROW_ON_ERROR)",generated)
+        Assert.Contains("$update_schemaShape = json_decode($update_outputText, false",generated)
+        Assert.Contains("$update_schemaData = json_decode($update_outputText, true",generated)
