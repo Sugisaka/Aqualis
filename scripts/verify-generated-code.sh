@@ -556,7 +556,7 @@ for language in c fortran python; do
   case "$language" in
     c) run_command=(bash proc_smoke_C.sh) ;;
     fortran) run_command=(bash proc_smoke_F.sh) ;;
-    python) run_command=(bash proc_smoke_P.sh) ;;
+    python) run_command=("$scipy_python" -- smoke.py) ;;
   esac
   for case_name in valid literal; do
     valid_directory="$output_root/spline-$language-$case_name"
@@ -585,7 +585,7 @@ for language in c fortran python; do
   case "$language" in
     c) run_command=(bash proc_smoke_C.sh) ;;
     fortran) run_command=(bash proc_smoke_F.sh) ;;
-    python) run_command=(bash proc_smoke_P.sh) ;;
+    python) run_command=("$scipy_python" -- smoke.py) ;;
   esac
 
   for rank in vector matrix tensor; do
