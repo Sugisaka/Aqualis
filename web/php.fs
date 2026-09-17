@@ -51,6 +51,13 @@ type PHPbool(x:string, context:Aqualis) =
         a.Context.codewritein ("<?php ", a.name + " = " + b.name + " ?>")
 
 type PHPdata(x:list<reduceExprString>, context:Aqualis) =
+    // Explicit assignments inside JsonData.updateAtomic identify replacements whose JSON shape must be kept.
+    let mutable jsonReplacementTracking : (string * string * string list) option = None
+    member internal this.TrackJsonReplacements(replacements:string) =
+        jsonReplacementTracking <- Some(replacements, this.code, [])
+    member private _.SetJsonReplacementTracking(tracking) =
+        jsonReplacementTracking <- tracking
+    member private _.JsonReplacementTracking = jsonReplacementTracking
     new(x:string) = PHPdata([RStr x],Aqualis.BlankWriter PHP)
     new(x:int0) = PHPdata([RNvr(x.Expr,x.Context)], x.Context)
     new(x:double0) = PHPdata([RNvr(x.Expr,x.Context)], x.Context)
@@ -177,7 +184,11 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
         |> fun s -> String.Join(c,s)
     member this.Item(i:PHPdata) =
         let resultContext = Aqualis.merge context i.Context
-        PHPdata([RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN),resultContext)], resultContext)
+        let result = PHPdata([RNvr(Var(Nt,this.toString(".",StrQuotation) + "[" + i.toString(".",StrQuotation) + "]",NaN),resultContext)], resultContext)
+        match jsonReplacementTracking with
+        | Some (replacements, root, path) -> result.SetJsonReplacementTracking(Some(replacements, root, path @ [i.code]))
+        | None -> ()
+        result
     member this.Item(i:int) = this[PHPdata ([RNvr(Int i,Aqualis.BlankWriter PHP)],Aqualis.BlankWriter PHP)]
     member this.Item(i:string) = this[PHPdata ([RStr i],Aqualis.BlankWriter PHP)]
     member this.Item(i:int0) = this[PHPdata i]
@@ -207,7 +218,20 @@ type PHPdata(x:list<reduceExprString>, context:Aqualis) =
             ContextPhp(ctx).phpcode <| fun () -> ctx.writei "endforeach;"
     static member (<==) (a:PHPdata,b:PHPdata) =
         Aqualis.merge a.Context b.Context |> ignore
-        a.Context.codewritein("<?php ", a.code + " = " + b.code + "; ?>")
+        match a.JsonReplacementTracking with
+        | Some (replacements, root, path) ->
+            let assignmentId = a.Context.GotoLabels.nextGotoLabel()
+            let keys =
+                path
+                |> List.mapi (fun index key ->
+                    let keyVariable = "$aqualisJsonKey_" + assignmentId + "_" + string index
+                    // PHP normalizes numeric-string array keys; evaluate each key once for both assignment and tracking.
+                    a.Context.codewritein("<?php ", keyVariable + " = array_key_first([" + key + " => true]); ?>")
+                    keyVariable)
+            let target = root + (keys |> List.map (fun key -> "[" + key + "]") |> String.concat "")
+            a.Context.codewritein("<?php ", target + " = " + b.code + "; ?>")
+            a.Context.codewritein("<?php ", replacements + "[serialize([" + String.Join(", ", keys) + "])] = true; ?>")
+        | None -> a.Context.codewritein("<?php ", a.code + " = " + b.code + "; ?>")
     static member (<==) (a:PHPdata,b:string) = a <== PHPdata b
     static member (<==) (a:PHPdata,b:int0) = a <== PHPdata b
     static member (<==) (a:PHPdata,b:double0) = a <== PHPdata b

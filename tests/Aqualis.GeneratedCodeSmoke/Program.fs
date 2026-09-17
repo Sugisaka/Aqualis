@@ -1615,6 +1615,50 @@ module Program =
             |> ignore
             context.php.echo "ok"
 
+        generate "update-object-to-empty-list" <| fun context ->
+            let schema = JsonSchema.obj ["Payload", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]
+            JsonData.updateAtomic context (PhpVariableName.create "emptyShapeUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest["Payload"] <== PHPdata.f("[]",context))
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-numeric-object-to-list" <| fun context ->
+            let schema = JsonSchema.obj ["Payload", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]
+            JsonData.updateAtomic context (PhpVariableName.create "numericShapeUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest["Payload"] <== PHPdata.f("[1, 2]",context))
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-numeric-object-unchanged" <| fun context ->
+            let schema = JsonSchema.obj ["Payload", JsonSchema.obj []]
+            JsonData.updateAtomic context (PhpVariableName.create "numericNoopUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy ignore
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-side-effect-key" <| fun context ->
+            context.php.phpcode <| fun () ->
+                context.writein "$keyCalls = 0; function nextPayloadKey() { global $keyCalls; $keyCalls++; return 'Payload'; }"
+            let schema = JsonSchema.obj ["Payload", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]
+            JsonData.updateAtomic context (PhpVariableName.create "dynamicShapeUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest[PHPdata.f("nextPayloadKey()",context)] <== PHPdata.f("[]",context))
+            |> ignore
+            context.php.echo (PHPdata.f("(string)$keyCalls",context))
+
+        generate "update-nested-numeric-key" <| fun context ->
+            let schema =
+                JsonSchema.obj [
+                    "Payload", JsonSchema.obj ["0", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]
+                ]
+            JsonData.updateAtomic context (PhpVariableName.create "nestedNumericUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest["Payload"].["0"] <== PHPdata.f("[]",context))
+            |> ignore
+            context.php.echo "ok"
+
         generate "read-rule-order" <| fun context ->
             let schema =
                 JsonSchema.andAlso [
@@ -1629,6 +1673,13 @@ module Program =
             JsonData.read context (PhpVariableName.create "orderedRead")
                 (PHPdata.f("$argv[1]",context)) schema policy
             |> ignore
+            context.php.echo "ok"
+
+    let private generatePhpLoopExit outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "php-loop-exit")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [PHP] outputDirectory "smoke" "1.0" <| fun context ->
+            expr.loopPh context <| fun (exitLoop,_) -> exitLoop()
             context.php.echo "ok"
 
     [<EntryPoint>]
@@ -1674,6 +1725,7 @@ module Program =
             |> List.iter (generateWebArrayValidation outputRoot)
             generatePhpInitializedArrays outputRoot
             generatePhpJsonSchema outputRoot
+            generatePhpLoopExit outputRoot
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot
             generateCArrayCases outputRoot

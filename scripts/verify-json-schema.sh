@@ -12,12 +12,22 @@ update_directory="$output_root/php-json-schema-update"
 expression_directory="$output_root/php-json-schema-read-expression"
 path_directory="$output_root/php-json-schema-read-path"
 transition_directory="$output_root/php-json-schema-update-object-to-list"
+empty_transition_directory="$output_root/php-json-schema-update-object-to-empty-list"
+numeric_transition_directory="$output_root/php-json-schema-update-numeric-object-to-list"
+numeric_noop_directory="$output_root/php-json-schema-update-numeric-object-unchanged"
+side_effect_directory="$output_root/php-json-schema-update-side-effect-key"
+nested_numeric_directory="$output_root/php-json-schema-update-nested-numeric-key"
 rule_order_directory="$output_root/php-json-schema-read-rule-order"
 php -l "$read_directory/smoke.php" >/dev/null
 php -l "$update_directory/smoke.php" >/dev/null
 php -l "$expression_directory/smoke.php" >/dev/null
 php -l "$path_directory/smoke.php" >/dev/null
 php -l "$transition_directory/smoke.php" >/dev/null
+php -l "$empty_transition_directory/smoke.php" >/dev/null
+php -l "$numeric_transition_directory/smoke.php" >/dev/null
+php -l "$numeric_noop_directory/smoke.php" >/dev/null
+php -l "$side_effect_directory/smoke.php" >/dev/null
+php -l "$nested_numeric_directory/smoke.php" >/dev/null
 php -l "$rule_order_directory/smoke.php" >/dev/null
 
 check_case() {
@@ -82,6 +92,32 @@ import sys
 with open(sys.argv[1], encoding="utf-8") as stream:
     data = json.load(stream)
 assert data == {"Payload": [1, 2]}, data
+PY
+
+check_case 'JSON update replaces an object with an empty list' "$empty_transition_directory/smoke.php" ok "$empty_transition_directory/data.json" '{"Payload":{"Name":7}}'
+check_case 'JSON update replaces a numeric-key object with a list' "$numeric_transition_directory/smoke.php" ok "$numeric_transition_directory/data.json" '{"Payload":{"0":7}}'
+check_case 'JSON update preserves an unchanged numeric-key object' "$numeric_noop_directory/smoke.php" ok "$numeric_noop_directory/data.json" '{"Payload":{"0":7}}'
+check_case 'JSON update evaluates a dynamic key once' "$side_effect_directory/smoke.php" 1 "$side_effect_directory/data.json" '{"Payload":{"Name":7}}'
+check_case 'JSON update tracks a numeric-string nested key' "$nested_numeric_directory/smoke.php" ok "$nested_numeric_directory/data.json" '{"Payload":{"0":{"Name":7}}}'
+python3 - "$empty_transition_directory/data.json" "$numeric_transition_directory/data.json" "$numeric_noop_directory/data.json" "$side_effect_directory/data.json" "$nested_numeric_directory/data.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as stream:
+    empty = json.load(stream)
+with open(sys.argv[2], encoding="utf-8") as stream:
+    numeric = json.load(stream)
+with open(sys.argv[3], encoding="utf-8") as stream:
+    unchanged = json.load(stream)
+with open(sys.argv[4], encoding="utf-8") as stream:
+    dynamic = json.load(stream)
+with open(sys.argv[5], encoding="utf-8") as stream:
+    nested = json.load(stream)
+assert empty == {"Payload": []}, empty
+assert numeric == {"Payload": [1, 2]}, numeric
+assert unchanged == {"Payload": {"0": 7}}, unchanged
+assert dynamic == {"Payload": []}, dynamic
+assert nested == {"Payload": {"0": []}}, nested
 PY
 
 for case in wrong-identity object-as-list nested-object-as-list list-as-object list-as-map; do

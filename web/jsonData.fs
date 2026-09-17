@@ -34,11 +34,12 @@ module JsonData =
         shape
 
     /// Retain object shapes for associative arrays, while allowing a replacement list.
-    let private preserveObjectShapes (ctx:Aqualis) (name:string) (data:PHPdata) (originalShape:PHPdata) =
+    let private preserveObjectShapes (ctx:Aqualis) (name:string) (data:PHPdata) (originalShape:PHPdata) (replacements:string) =
         let rebuild = "$" + name + "_rebuildShape"
         let published = PHPdata.var(ctx,name + "_publishValue")
         ctx.php.phpcode <| fun () ->
-            ctx.writein(rebuild + " = function ($value, $original) use (&" + rebuild + ") {")
+            ctx.writein(rebuild + " = function ($value, $original, $path) use (&" + rebuild + ", " + replacements + ") {")
+            ctx.writein("if (isset(" + replacements + "[serialize($path)])) { return $value; }")
             ctx.writein("if (!is_array($value)) { return $value; }")
             ctx.writein("if (is_object($original)) {")
             ctx.writein("$originalArray = (array)$original;")
@@ -47,7 +48,7 @@ module JsonData =
             ctx.writein("foreach ($value as $key => $item) {")
             ctx.writein("$property = (string)$key;")
             ctx.writein("$previous = property_exists($original, $property) ? $original->{$property} : null;")
-            ctx.writein("$result[$key] = " + rebuild + "($item, $previous);")
+            ctx.writein("$result[$key] = " + rebuild + "($item, $previous, [...$path, $key]);")
             ctx.writein("}")
             ctx.writein("return $result;")
             ctx.writein("}")
@@ -55,18 +56,18 @@ module JsonData =
             ctx.writein("foreach ($value as $key => $item) {")
             ctx.writein("$property = (string)$key;")
             ctx.writein("$previous = property_exists($original, $property) ? $original->{$property} : null;")
-            ctx.writein("$result->{$property} = " + rebuild + "($item, $previous);")
+            ctx.writein("$result->{$property} = " + rebuild + "($item, $previous, [...$path, $key]);")
             ctx.writein("}")
             ctx.writein("return $result;")
             ctx.writein("}")
             ctx.writein("$result = [];")
             ctx.writein("foreach ($value as $key => $item) {")
             ctx.writein("$previous = is_array($original) && array_key_exists($key, $original) ? $original[$key] : null;")
-            ctx.writein("$result[$key] = " + rebuild + "($item, $previous);")
+            ctx.writein("$result[$key] = " + rebuild + "($item, $previous, [...$path, $key]);")
             ctx.writein("}")
             ctx.writein("return $result;")
             ctx.writein("};")
-            ctx.writein(published.code + " = " + rebuild + "(" + data.code + ", " + originalShape.code + ");")
+            ctx.writein(published.code + " = " + rebuild + "(" + data.code + ", " + originalShape.code + ", []);")
         published
 
     /// Rejects an update inside the atomic transaction so cleanup and unlocking still run.
@@ -114,8 +115,11 @@ module JsonData =
                 let baseName = PhpVariableName.value resultName
                 let inputShape = decodeShape ctx (baseName + "_sourceShape") sourceText policy.UpdateOptions.MaxDepth
                 assertValid latest inputShape
+                let replacements = "$" + baseName + "_replacedPaths"
+                ctx.php.phpcode <| fun () -> ctx.writein(replacements + " = [];")
+                latest.TrackJsonReplacements replacements
                 update latest
-                let published = preserveObjectShapes ctx baseName latest inputShape
+                let published = preserveObjectShapes ctx baseName latest inputShape replacements
                 let outputText = PHPdata.f("json_encode(" + published.code + ", JSON_THROW_ON_ERROR)",ctx)
                 let outputShape = decodeShape ctx (baseName + "_schemaShape") outputText policy.UpdateOptions.MaxDepth
                 assertValid latest outputShape

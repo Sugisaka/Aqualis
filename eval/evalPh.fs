@@ -53,7 +53,7 @@ namespace Aqualis
                 expr.substPh i (Add(It 4, i, Int 1)) c
                 c.indentDec()
                 c.codewritein("<?php ", "endfor; ?>")
-                c.codewritein(label+":;")
+                c.codewritein("<?php ", label+":; ?>")
                 returnVar()
 
             ///<summary>条件を満たす間ループ</summary>
