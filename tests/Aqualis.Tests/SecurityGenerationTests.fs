@@ -180,6 +180,21 @@ module SecurityGenerationTests =
         Assert.True(restartIndex < reinitializeIndex)
 
     [<Fact>]
+    let ``destroy and redirect preserves session generation in sibling branches`` () =
+        let generated =
+            generate "session-redirect-branches" <| fun context ->
+                let session = context.php.startSession productionOptions
+                let csrf = session.CsrfToken()
+                context.br.if2 (context.php.var "logout" .= 1)
+                <| fun () -> session.DestroyAndRedirect(Url.relative "login.php",RedirectStatus.SeeOther)
+                <| fun () ->
+                    csrf.Field()
+                    session.DestroyAndRedirect(Url.relative "login.php",RedirectStatus.SeeOther)
+
+        Assert.Equal(2,occurrences "session_destroy();" generated)
+        Assert.Equal(2,occurrences "header('Location: " generated)
+
+    [<Fact>]
     let ``CSRF token and field are emitted once and HTML escaped at runtime`` () =
         let generated =
             generate "csrf-field" <| fun context ->

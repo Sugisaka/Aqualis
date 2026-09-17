@@ -238,6 +238,20 @@ type WebSession internal (context:Aqualis) =
             state.SessionOptions <- None
             state.CsrfTokenEmitted <- false)
 
+    /// Destroys the session and redirects; the generated branch cannot continue.
+    /// Restores generation state so sibling branches can still use the session.
+    member this.DestroyAndRedirect(location:Url,status:RedirectStatus) =
+        let state = SecurityGenerationStates.get context
+        let options = SecurityCode.getStartedOptions context "session.DestroyAndRedirect"
+        let csrfTokenEmitted = lock state.Gate (fun () -> state.CsrfTokenEmitted)
+        try
+            this.Destroy()
+            context.php.redirect(location,status)
+        finally
+            lock state.Gate (fun () ->
+                state.SessionOptions <- Some options
+                state.CsrfTokenEmitted <- csrfTokenEmitted)
+
     /// Returns an expression for a value in the PHP session array.
     member _.Item(key:string) =
         if isNull key then nullArg (nameof key)
@@ -365,6 +379,8 @@ type ActiveSession internal (session:WebSession) =
 
     member _.RegenerateId() = session.RegenerateId()
     member _.Destroy() = session.Destroy()
+    member _.DestroyAndRedirect(location:Url,status:RedirectStatus) =
+        session.DestroyAndRedirect(location,status)
 
     /// Ensures that a CSRF token exists and returns an initialized token capability.
     member _.CsrfToken() =

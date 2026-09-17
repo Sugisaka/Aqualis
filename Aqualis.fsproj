@@ -114,6 +114,8 @@
     <Compile Include="web\php.fs" />
     <Compile Include="web\typedPhp.fs" />
     <Compile Include="web\response.fs" />
+    <Compile Include="web\jsonSchema.fs" />
+    <Compile Include="web\jsonData.fs" />
     <Compile Include="web\loginThrottle.fs" />
     <Compile Include="web\table.fs" />
     <Compile Include="web\animation.types.fs" />
