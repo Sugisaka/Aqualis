@@ -1,6 +1,6 @@
 //#############################################################################
 // project title
-let projectname = "sample17"
+let projectname = "sample09E"
 // sample program version
 let version = "1.0.0"
 // Directory for source file output
@@ -12,12 +12,12 @@ let outputdir = @"C:\home\work"
 
 open Aqualis
 
-Compile [HTMLSequenceDiagram] outputdir "test8d" version <| fun ctx ->
+Compile [HTMLSequenceDiagram] outputdir "test8e" version <| fun ctx ->
     
-    //結果(正しい代入)
+    //結果(間違った代入)
     ctx.ch.I "x" <| fun x ->
     ctx.ch.I "x_1" <| fun x1 ->
         x <== 0
         x1 <== 0
         ctx.iter.range (1,10) <| fun i ->
-            x <== x + i
+            x <== x1 + i

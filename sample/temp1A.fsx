@@ -1,12 +1,13 @@
 //#############################################################################
-// 微分演算テスト
-let projectname = "test6_1"
+// project title
+let projectname = "temp1A"
+// sample program version
 let version = "1.0.0"
+// Directory for source file output
+let outputdir = @"C:\home\work"
 //#############################################################################
- 
-let outputdir = __SOURCE_DIRECTORY__
 
-#I @"..\..\bin\Debug\net10.0"
+#I @"..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open Aqualis

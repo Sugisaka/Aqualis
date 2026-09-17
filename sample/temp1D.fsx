@@ -1,12 +1,13 @@
 //#############################################################################
-// Wirtinger自動微分テスト
-let projectname = "test6_4"
+// project title
+let projectname = "temp1D"
+// sample program version
 let version = "1.0.0"
+// Directory for source file output
+let outputdir = @"C:\home\work"
 //#############################################################################
- 
-let outputdir = @"C:\home\work" //__SOURCE_DIRECTORY__
 
-#I @"..\..\bin\Debug\net10.0"
+#I @"..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open Aqualis

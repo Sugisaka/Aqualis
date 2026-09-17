@@ -1,6 +1,6 @@
 //#############################################################################
 // project title
-let projectname = "sample12"
+let projectname = "sample08A"
 // sample program version
 let version = "1.0.0"
 // Directory for source file output

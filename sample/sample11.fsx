@@ -10,199 +10,97 @@ let outputdir = @"C:\home\work"
 #I @"..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
-open System
-open System.IO
 open Aqualis
 
-type Tale(ctx,dir:string,name:string) =
-    inherit Character(ctx,dir,name)
-    let st = "position: absolute; margin-left: 0px; margin-top: -122px; width: 850px; object-position: right 204px top 426px; z-index: 2;"
-    override _.scriptColor with get() = "#d11aff"
-    override _.audioFile(a:Audio) = 
-        match a.AudioSourceNumber, a.AudioFileNumber with
-        |Some n, Some m -> Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav") 
-        |_ -> None
-    override _.scriptFile(n:int) = Path.Combine(dir, name + "_" + n.ToString() + ".txt")
-    member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\テール右斜AAA-.png"; CharacterImageStyle = st}
+let step = 2
 
-type Dango(ctx,dir:string,name:string) =
-    inherit Character(ctx,dir,name)
-    let st = "position: absolute; margin-left: 1462px; margin-top: 727px; width: 450px; z-index: 3;"
-    override _.scriptColor with get() = "#455eff"
-    override _.audioFile(a:Audio) = 
-        match a.AudioSourceNumber, a.AudioFileNumber with
-        |Some n, Some m ->Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav")
-        |_ -> None
-    override _.scriptFile(n:int) = Path.Combine(dir, name + "_" + n.ToString() + ".txt")
-    member _.D00 with get() = {CharacterImageFile = @"C:\home\contents\dango.png"; CharacterImageStyle = st}
-    
-type Armillaris(ctx,dir:string,name:string) =
-    inherit Character(ctx,dir,name)
-    let st = "position: absolute; margin-left: 1503px; margin-top: 638px; width: 360px; z-index: 4;"
-    override _.scriptColor with get() = "#ff8800"
-    override _.audioFile(a:Audio) = 
-        match a.AudioSourceNumber, a.AudioFileNumber with
-        |Some n, Some m ->Some (n.ToString "0000" + "-" + name + "_" + m.ToString() + ".wav")
-        |_ -> None
-    override _.scriptFile(n:int) = Path.Combine(dir, name + "_" + n.ToString() + ".txt")
-    member _.AAA with get() = {CharacterImageFile = @"C:\home\contents\armi.png"; CharacterImageStyle = st}
-    
-let scriptDir = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "script"))
-
-let textA = Style[font.size 48]
-let textAM = Style[font.size 48; font.color "#ff00ff"]
-let textAG = Style[font.size 48; font.color "#00ddaa"]
-let textB = Style[font.size 30]
-let textBR = Style[font.size 30; font.color "#ff0000"]
-let lineBlack = Style[stroke.color "#000000";fill.color "none";stroke.width 3.0]
-let arrowBlack = lineBlack,Style[stroke.color "#000000";fill.color "#000000";stroke.width 3.0],3.0,20.0
-let NL = double0(Var(Dt,"",NaN))
-
-let ff t = 0.2+0.2*t+0.01*cos(2.0*System.Math.PI*t/0.6)+0.1*cos(2.0*System.Math.PI*t/3.4)+0.05*sin(2.0*System.Math.PI*t/2.9)
-let gg t = if abs(t) < 0.4 then 1.0 else 0.0
-
-fixedPage outputdir projectname projectname 1920 1080 None <| fun ctx ->
-    let tale = Tale(ctx,scriptDir, "tale")
-    let dang = Dango(ctx,scriptDir, "dango")
-    let armi = Armillaris(ctx,scriptDir, "armi")
-    let f(x:double0) = double0(Var(Dt,"f("+x.code+")",NaN))
-    let t = double0(Var(Dt,"t",NaN))
-    ctx.page
-        [tale.AAA;
-         dang.D00;]
-        <| dang.script "だんごのセリフ"
-        <| fun p -> ctx.image (Style [size.width "100%";],p) @"C:\home\contents/title.PNG"
-    ctx.page
-        [tale.AAA;
-         dang.D00;]
-        <| tale.script "テールのセリフ"
-        <| fun p ->
-            ctx.html.text textA (p+position(1860,10)) "10"
-            ctx.html.contents Style[] (p+position(50,50)) "アニメーション制御の実装1"
-            ctx.html.subtitle1 Style[] (p+position(80,150)) "サンプルページ1"
-            ctx.html.subtitle2 Style[] (p+position(100,250)) "テキストと数式の表示"
-            ctx.html.text textB (p+position(100,320)) "AAA"
-            ctx.BodyContext.ch.D "x" <| fun x ->
-                ctx.BodyContext.ch.D "y" <| fun y ->
-                    ctx.html.text textB  (p+position(180,320)) "x+y"
-                    ctx.html.text textBR (p+position(280,320)) <| double0.html (2*x*(-y)*asm.pow(-y,x+1))
-                    ctx.html.text textB  (p+position(180,390)) <| double0.html 
-                        [asm.sin(x+y)
-                         x-y]
-            ctx.html.subtitle2 Style[] (p+position(100,520)) "アニメーション1"
-            ctx.html.text textB (p+position(100,590)) "startボタンを押すとアニメーションが開始する"
-
-            ctx.html.graphEq (100,650) (800,400) (-10,10,100) (-1.2,1.2) [
-                Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";], fun x -> sin(x)
-                Style[stroke.width 3.0; stroke.color "#0000ff"; fill.color "none";], fun x -> cos(x)
+//データファイルの作成
+group.section (step, 1) <| fun () ->
+    Compile [Fortran] outputdir projectname version <| fun ctx ->
+        ctx.io.fileOutput "data1.dat" <| fun wr ->
+            let N = 21
+            ctx.iter.num N <| fun i ->
+                ctx.ch.ddd <| fun (x,y1,y2) ->
+                    x <== i
+                    y1 <== 2*i+1
+                    y2 <== 0.5*i*i
+                    wr.tt <| x++y1++y2
+        ctx.io.fileOutput "data2.dat" <| fun wr ->
+            let N = 21
+            ctx.iter.num N <| fun i ->
+                ctx.ch.ddd <| fun (x,y1,y2) ->
+                    x <== i
+                    y1 <== -2*(i-10)+1
+                    y2 <== 0.5*(i-10)*(i-10)
+                    wr.tt <| x++y1++y2
+                    
+group.section (step, 2) <| fun () ->
+    // outputdir：読み込むデータファイルと生成するsvgファイルのディレクトリ
+    // "plot.svg"：グラフのファイル名
+    // (graph1d.A4PTwoColSingle 1)：A4サイズ２段組のドキュメントに挿入する図面。グラフは横方向に1個、縦に1個配置
+    graph1d.makeGraph outputdir "plot10C.svg" (graph1d.A4PTwoColSingle 1) <| fun addGraph ->
+        // (1,1)：グラフを図面内の左から一つ目、下から一つ目の位置に追加
+        // None：サブキャプション（グラフ下部に挿入するテキスト）なし
+        addGraph (1,1) None
+            {
+                // 横軸の設定
+                // Scale：Linearは線形軸、Log10は対数軸
+                // Range：プロット範囲。Autoは自動、MinMax(0,10)とすると1から10の範囲に設定
+                // NumFormat：横軸の目盛り数字のフォーマット。F0は小数点以下0桁
+                Xaxis = {Scale=Linear; Range=Auto; NumFormat=Some "F0"}
+                // 縦軸の設定
+                // Scale：Linearは線形軸、Log10は対数軸
+                // Range：プロット範囲。Autoは自動、MinMax(0,10)とすると1から10の範囲に設定
+                // NumFormat：横軸の目盛り数字のフォーマット。Noneはデフォルト（小数点以下1桁）
+                Yaxis = {Scale=Linear; Range=Auto; NumFormat=None}
+                // 横軸ラベル
+                Xlabel = TextStyle.Italic "x"
+                // 縦軸ラベル。TextStyle.Italicは斜体、TextStyle.Subは下付き文字、TextStyle.Supは上付き文字
+                Ylabel = TextStyle.Italic "f" + TextStyle.Sub "1"
+            }
+            [
+                // グラフにプロットデータを追加
+                Datafile{
+                    // 線と点でプロット
+                    Style = LinesPoints{
+                        // 線のスタイル。黒の破線、線幅：0.5、線の長さ：2.0、破線の隙間：1.0
+                        Lines = {Style=color.stroke.dashblack(0.5,[2.0;1.0])}
+                        // 点のスタイル。形状：円形、サイズ：1.0、円の枠線：なし、円の塗り色：黒
+                        Points = {Shape=Circle; Size=1.0; StrokeStyle = (fun (x,y) -> color.stroke.none); FillStyle = fun (x,y) -> color.fill.black}}
+                    // データファイル名
+                    FileName = "data1.dat"
+                    // 凡例：なし
+                    Legend = None
+                    // 横軸のデータ
+                    // データファイルの1列目を横軸にプロットする場合： Xcolumn = fun data -> data(1)
+                    // データファイルの2列目に5を足した値を横軸にプロットする場合： Xcolumn = fun data -> data(2)+5.0
+                    // データファイルの3列目を100倍した値を横軸にプロットする場合： Xcolumn = fun data -> 100.0*data(3)
+                    Xcolumn = fun data -> data 1
+                    // 縦軸のデータ
+                    // データファイルの1列目を縦軸にプロットする場合： Ycolumn = fun data -> data(1)
+                    // データファイルの2列目に5を足した値を縦軸にプロットする場合： Ycolumn = fun data -> data(2)+5.0
+                    // データファイルの2列目の2乗と3列目の2乗の和の平方根を縦軸にプロットする場合： Ycolumn = fun data -> sqrt(data(2)*data(2)+data(3)*data(3))
+                    Ycolumn = fun data -> data 2}
+                // グラフにプロットデータを追加
+                Datafile{
+                    // 線と点でプロット
+                    Style = LinesPoints{
+                        // 線のスタイル。黒の破線、線幅：0.5、線の長さ：2.0、破線の隙間：1.0
+                        Lines = {Style=color.stroke.dashRGB(0,100,255,0.5,[2.0;1.0])}
+                        // 点のスタイル。形状：円形、サイズ：1.0、円の枠線：なし、円の塗り色：黒
+                        Points = {Shape=Circle; Size=1.0; StrokeStyle = (fun (x,y) -> color.stroke.none); FillStyle = fun (x,y) -> color.fill.RGB(0,100,255)}}
+                    // データファイル名
+                    FileName = "data2.dat"
+                    // 凡例：なし
+                    Legend = None
+                    // 横軸のデータ
+                    // データファイルの1列目を横軸にプロットする場合： Xcolumn = fun data -> data(1)
+                    // データファイルの2列目に5を足した値を横軸にプロットする場合： Xcolumn = fun data -> data(2)+5.0
+                    // データファイルの3列目を100倍した値を横軸にプロットする場合： Xcolumn = fun data -> 100.0*data(3)
+                    Xcolumn = fun data -> data 1
+                    // 縦軸のデータ
+                    // データファイルの1列目を縦軸にプロットする場合： Ycolumn = fun data -> data(1)
+                    // データファイルの2列目に5を足した値を縦軸にプロットする場合： Ycolumn = fun data -> data(2)+5.0
+                    // データファイルの2列目の2乗と3列目の2乗の和の平方根を縦軸にプロットする場合： Ycolumn = fun data -> sqrt(data(2)*data(2)+data(3)*data(3))
+                    Ycolumn = fun data -> data 3}
             ]
-            ctx.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
-                let line1 = f.animationLine Style[stroke.width 3.0; stroke.dasharray [4;4]; stroke.color "#000000"]
-                let elps1 = f.animationArc Style[stroke.width 3.0; stroke.color "#000000"; fill.color "none";]
-                f.ellipse Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";] (position(200.0,400.0)) (200, 100)
-                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; fill.color "none";] (position(400.0,400.0)) 50
-                f.rect Style[stroke.width 3.0; stroke.color "#0088ff"; fill.color "none";] (position(400.0,200.0)) (50,100)
-                f.ellipseArc Style[stroke.width 3.0; stroke.color "#00bb00"; fill.color "none";] (position(200.0,200.0)) (200, 200) (-Math.PI*0.5, Math.PI*1.2)
-                f.polygon Style[stroke.width 3.0; stroke.color "#ff00ff"; fill.color "none";] [position(200.0,200.0);position(300.0,300.0);position(300.0,200.0)]
-                f.polyline Style[stroke.width 3.0; stroke.color "#aa00ff"; fill.color "none";] [position(200.0,600.0);position(300.0,700.0);position(300.0,600.0)]
-
-                //f.image Style[] (position(0.0,0.0)) @"C:\home\contents\アルミAAA.png"
-                ctx.BodyContext.ch.D "t" <| fun t ->
-                    f.eqd Style[] (position(0.0,40.0)) (asm.sin t)
-                f.text Style[] (position(0.0,80.0)) "ABC"
-                /// 中心座標
-                let cx,cy = D 350, D 390
-                let constCenter = { X = (fun _ -> cx); Y = fun _ -> cy }
-                /// 円弧の半径
-                let R = D 198.0
-                // 中心から右に破線描画
-                f.seq {FrameTime=6; FrameNumber=100} <| fun s ->
-                    line1.P {
-                        Start = constCenter
-                        End = {
-                            X = fun t -> cx + R*t/(s.FrameNumber-1)
-                            Y = fun _ -> cy }}
-                // 円弧描画
-                f.seq {FrameTime=6; FrameNumber=100} <| fun s ->
-                    elps1.P {
-                        center = constCenter
-                        angle1 = fun _ -> D 0
-                        angle2 = fun t -> 360*t/(s.FrameNumber-1)
-                        radius = fun _ -> R }
-    ctx.page
-        [tale.AAA;
-         dang.D00;]
-        <| tale.script "テールのセリフ"
-        <| fun p ->
-            ctx.html.text textA (p+position(1860,10)) "10"
-            ctx.html.contents Style[] (p+position(50,50)) "アニメーション制御の実装2"
-            ctx.html.subtitle1 Style[] (p+position(80,150)) "アニメーション2"
-            ctx.html.text textB (p+position(100,320)) "startボタンを押すとアニメーションが無限ループする"
-
-            ctx.html.graphEqs (100,500) (800,300) (-1,1,400) (-0.01,1.0)
-                [
-                    Style[stroke.width 3.0; stroke.color "#0000ff"; fill.color "none";], fun t -> ff t * gg t
-                ]
-                <| fun (line,arrow,circle,rectangle,text) ->
-                    arrow arrowBlack [position(-0.4,-0.04);position(0.4,-0.04)]
-                    text textB (position(-0.1,-0.04)) <| "幅：" + ctx.html.inlineMath _1d
-
-            ctx.animationManual {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p (1080,250) <| fun (f,p) ->
-                /// 中心座標
-                let cx,cy = 350.0, 390.0
-                /// 円弧の半径
-                let R = 198.0
-                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; fill.color "none";] (position(cx,cy)) R
-                let circ1 = f.animationEllipse Style[stroke.width 3.0; stroke.color "none"; fill.color "#00aa00";]
-                // 円軌道上を移動
-                f.loop {FrameTime=20; FrameNumber=100} <| fun s ->
-                    circ1.P {
-                        center = {
-                            X = fun t -> cx + R*asm.cos(2*asm.pi*t/s.FrameNumber)
-                            Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber)}
-                        radiusX = fun _ -> D 10
-                        radiusY = fun _ -> D 10}
-    ctx.page
-        [tale.AAA;
-         dang.D00;]
-        <| tale.script ("テールのセリフ："++asm.sin(t))
-        <| fun p ->
-            ctx.html.text textA (p+position(1860,10)) "10"
-            ctx.html.contents Style[] (p+position(50,50)) "アニメーション制御の実装3"
-            ctx.html.subtitle1 Style[] (p+position(80,150)) "アニメーション3"
-            ctx.BodyContext.ch.D "x" <| fun x ->
-                ctx.BodyContext.ch.D "y" <| fun y ->
-                    ctx.html.text textAM (position(80,400)) <| double0.html [y === x + 1]
-                    ctx.html.text textAG (position(80,500)) <| double0.html 
-                        [y  =|= x + 1
-                         NL =|= (x + 2)
-                         NL =|= (x + 3)]
-            ctx.html.text textB (p+position(100,320)) "ページの表示直後にアニメーションが始まる"
-            ctx.animationAuto {sX=700; sY=780; mX=1140; mY=250; backgroundColor="#bbeeff"} p <| fun (f,p) ->
-                /// 中心座標
-                let cx,cy = 350.0, 390.0
-                /// 円弧の半径
-                let R = 198.0
-                f.circle Style[stroke.width 3.0; stroke.color "#ff8800"; fill.color "none";] (position(cx,cy)) R
-                let line1 = f.animationLine Style[stroke.width 3.0; stroke.color "#ff0000"; fill.color "none";]
-                let line2 = f.animationLine Style[stroke.width 3.0; stroke.color "#0000ff"; fill.color "none";]
-                // 円軌道上を移動
-                f.loop {FrameTime=60; FrameNumber=300} <| fun s ->
-                    line1.P {
-                        Start = {
-                            X = fun t -> cx + R*asm.cos(2*asm.pi*t/s.FrameNumber)
-                            Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber)}
-                        End = {
-                            X = fun t -> cx + R*asm.cos(2*asm.pi*t/s.FrameNumber+asm.pi)
-                            Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber+asm.pi)}}
-                    line2.P {
-                        Start = {
-                            X = fun t -> cx + R*asm.cos(2*asm.pi*t/s.FrameNumber+asm.pi/2)
-                            Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber+asm.pi/2)}
-                        End = {
-                            X = fun t -> cx + R*asm.cos(2*asm.pi*t/s.FrameNumber+asm.pi/2+asm.pi)
-                            Y = fun t -> cy + R*asm.sin(2*asm.pi*t/s.FrameNumber+asm.pi/2+asm.pi)}}
-
-    tale.saveScriptData()
-    dang.saveScriptData()
-    armi.saveScriptData()

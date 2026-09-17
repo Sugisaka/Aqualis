@@ -1,12 +1,13 @@
 //#############################################################################
-// 離散データテスト
-let projectname = "test11"
+// project title
+let projectname = "temp2"
+// sample program version
 let version = "1.0.0"
+// Directory for source file output
+let outputdir = @"C:\home\work"
 //#############################################################################
- 
-let outputdir = __SOURCE_DIRECTORY__
 
-#I @"..\..\bin\Debug\net10.0"
+#I @"..\bin\Debug\net10.0"
 #r "Aqualis.dll"
 
 open Aqualis
