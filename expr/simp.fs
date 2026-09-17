@@ -94,18 +94,18 @@ namespace Aqualis
                 |Inv(_,x),_ -> (y-x).simp
                 |_ when expr.equal(x,y) -> 
                     (Int 2*x).simp
-                |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,c) -> 
+                |Mul(_,a,b),Mul(_,c,d) when x.etype=It 4 && y.etype=It 4 && expr.equal(a,c) ->
                     ((b+d).simp*a).simp
-                |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,d) ->
+                |Mul(_,a,b),Mul(_,c,d) when x.etype=It 4 && y.etype=It 4 && expr.equal(a,d) ->
                     ((b+c).simp*a).simp
-                |Mul(_,a,b),Mul(_,c,d) when expr.equal(b,c) ->
+                |Mul(_,a,b),Mul(_,c,d) when x.etype=It 4 && y.etype=It 4 && expr.equal(b,c) ->
                     ((a+d).simp*b).simp
-                |Mul(_,a,b),Mul(_,c,d) when expr.equal(b,d) ->
+                |Mul(_,a,b),Mul(_,c,d) when x.etype=It 4 && y.etype=It 4 && expr.equal(b,d) ->
                     ((a+c).simp*b).simp
-                |Div(_,a,b),Div(_,c,d) when expr.equal(b,d) &&
+                |Div(_,a,b),Div(_,c,d) when x.etype=It 4 && y.etype=It 4 && expr.equal(b,d) &&
                                                not (isTruncatingDivision x || isTruncatingDivision y) ->
                     ((a+c).simp/b).simp
-                |Add(_,a,b),c ->
+                |Add(_,a,b),c when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -114,7 +114,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a+c).simp+b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a+b).simp+c).simp
                     |_ -> Add(x%%y,x,y)
-                |a,Add(_,b,c) ->
+                |a,Add(_,b,c) when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -123,7 +123,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a+c).simp+b).simp
                     |_, (Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _) -> ((b+c).simp+a).simp
                     |_ -> Add(x%%y,x,y)
-                |Sub(_,a,b),c ->
+                |Sub(_,a,b),c when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -132,7 +132,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a+c).simp-b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a-b).simp+c).simp
                     |_ -> Add(x%%y,x,y)
-                |a,Sub(_,b,c) ->
+                |a,Sub(_,b,c) when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -169,6 +169,7 @@ namespace Aqualis
                 |_,Dbl yy when yy<0.0 -> (x + Dbl -yy).simp
                 |_,Inv(_,y) -> (x+y).simp
                 |v1,v2 when expr.equal(v1,v2) && x.etype=It 4 -> Int 0
+                |_ when x.etype<>It 4 || y.etype<>It 4 -> Sub(x%%y,x,y)
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,c) -> ((b-d).simp*a).simp
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,d) -> ((b-c).simp*a).simp
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(b,c) -> ((a-d).simp*b).simp
@@ -240,7 +241,7 @@ namespace Aqualis
                 |Int xx,_ when xx<0 -> (-(Int -xx * y).simp).simp
                 |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx * y).simp).simp
                 |Inv(_,x),_ -> (-(x*y).simp).simp
-                |Mul(_,a,b),c ->
+                |Mul(_,a,b),c when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -249,7 +250,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a*c).simp*b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a*b).simp*c).simp
                     |_ -> Mul(x%%y,x,y)
-                |a,Mul(_,b,c) ->
+                |a,Mul(_,b,c) when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -258,7 +259,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a*c).simp*b).simp
                     |_, (Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _) -> ((b*c).simp*a).simp
                     |_ -> Mul(x%%y,x,y)
-                |Div(_,a,b),c when not (isTruncatingDivision x) ->
+                |Div(_,a,b),c when x.etype=It 4 && y.etype=It 4 && not (isTruncatingDivision x) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -267,7 +268,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a*c).simp/b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a/b).simp*c).simp
                     |_ -> Mul(x%%y,x,y)
-                |a,Div(_,b,c) when not (isTruncatingDivision y) ->
+                |a,Div(_,b,c) when x.etype=It 4 && y.etype=It 4 && not (isTruncatingDivision y) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -307,7 +308,7 @@ namespace Aqualis
                 |Int xx,_ when xx<0 -> (-(Int -xx / y).simp).simp
                 |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx / y).simp).simp
                 |Inv(_,x),_ -> (-(x/y).simp).simp
-                |Mul(_,a,b),c ->
+                |Mul(_,a,b),c when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -316,7 +317,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a/c).simp*b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a*b).simp/c).simp
                     |_ -> Div(Dt%%x%%y,x,y)
-                |a,Mul(_,b,c) ->
+                |a,Mul(_,b,c) when x.etype=It 4 && y.etype=It 4 ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -325,7 +326,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a/c).simp/b).simp
                     |_, (Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _) -> (Dbl 1.0/(b*c).simp).simp*a
                     |_ -> Div(Dt%%x%%y,x,y)
-                |Div(_,a,b),c when not (isTruncatingDivision x) ->
+                |Div(_,a,b),c when x.etype=It 4 && y.etype=It 4 && not (isTruncatingDivision x) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -334,7 +335,7 @@ namespace Aqualis
                     |(Int _|Dbl _|Cpx _), _, (Int _|Dbl _|Cpx _) -> ((a/c).simp/b).simp
                     |(Int _|Dbl _|Cpx _), (Int _|Dbl _|Cpx _), _ -> ((a/b).simp/c).simp
                     |_ -> Div(Dt%%x%%y,x,y)
-                |a,Div(_,b,c) when not (isTruncatingDivision y) ->
+                |a,Div(_,b,c) when x.etype=It 4 && y.etype=It 4 && not (isTruncatingDivision y) ->
                     let a = a.simp
                     let b = b.simp
                     let c = c.simp
@@ -395,7 +396,9 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpExp(Dbl -x)
                 |Int x -> Dbl (exp x)
                 |Dbl x -> Dbl (exp x)
-                |Cpx (re,im) -> let a = exp re in Cpx (a*cos im,a*sin im)
+                |Cpx (re,im) ->
+                    let scale = exp (re/2.0)
+                    Cpx((scale*cos im)*scale,(scale*sin im)*scale)
                 |_ when x.etype=It 4 -> expr.simpExp(ToDbl x)
                 |_ -> Exp(x.etype,x)
                     
@@ -441,8 +444,9 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpAsin(Dbl -x)
                 |Int x -> if asin (double x) < 0.0 then Inv(Dt,Dbl -(asin (double x))) else Dbl (asin (double x))
                 |Dbl x -> if asin x < 0.0 then Inv(Dt,Dbl -(asin x)) else Dbl (asin x)
-                |Cpx _ -> 
-                    (-(Cpx(0.0,1.0)*expr.simpLog(((Cpx(0.0,1.0)*x).simp+expr.simpSqrt((Int 1-expr.simpPow(x,Int 2)).simp)).simp)).simp).simp
+                |Cpx (re,im) ->
+                    let result = System.Numerics.Complex.Asin(System.Numerics.Complex(re,im))
+                    Cpx(result.Real,result.Imaginary)
                 |_ when x.etype=It 4 -> expr.simpAsin(ToDbl x)
                 |_ -> Asin(x.etype,x)
                 
@@ -452,8 +456,9 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpAcos(Dbl -x)
                 |Int x -> if acos (double x) < 0.0 then Inv(Dt,Dbl -(acos (double x))) else Dbl (acos (double x))
                 |Dbl x -> if acos x < 0.0 then Inv(Dt,Dbl -(acos x)) else Dbl (acos x)
-                |Cpx _ -> 
-                    (-(Cpx(0.0,1.0)*expr.simpLog((x+(Cpx(0.0,1.0)*expr.simpSqrt((Int 1-expr.simpPow(x,Int 2)).simp)).simp).simp)).simp).simp
+                |Cpx (re,im) ->
+                    let result = System.Numerics.Complex.Acos(System.Numerics.Complex(re,im))
+                    Cpx(result.Real,result.Imaginary)
                 |_ when x.etype=It 4 -> expr.simpAcos(ToDbl x)
                 |_ -> Acos(x.etype,x)
                 
@@ -463,7 +468,12 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpAtan(Dbl -x)
                 |Int x -> if atan (double x) < 0.0 then Inv(Dt,Dbl -(atan (double x))) else Dbl (atan (double x))
                 |Dbl x -> if atan x < 0.0 then Inv(Dt,Dbl -(atan x)) else Dbl (atan x)
-                |Cpx _ -> 
+                |Cpx (re,im) when max (abs re) (abs im) <= 1.0e-3 ->
+                    let value = System.Numerics.Complex(re,im)
+                    let square = value*value
+                    let result = value*(System.Numerics.Complex.One-square/3.0+square*square/5.0)
+                    Cpx(result.Real,result.Imaginary)
+                |Cpx _ ->
                     ((Int 1/(Int 2*Cpx(0.0,1.0)).simp).simp*expr.simpLog(((Int 1+(Cpx(0.0,1.0)*x).simp).simp/(Int 1-(Cpx(0.0,1.0)*x).simp).simp).simp)).simp
                 |_ when x.etype=It 4 -> expr.simpAtan(ToDbl x)
                 |_ -> Atan(x.etype,x)

@@ -149,6 +149,60 @@ module ExpressionSimplificationTests =
               (asm.atan value).Expr ] do
             Assert.Equal(Zt,expression.simp.etype)
 
+    [<Fact>]
+    let ``complex exponential constant avoids intermediate overflow`` () =
+        let argument = complex0(Cpx(710.0,System.Math.PI/4.0))
+        match (asm.exp argument).Expr.simp with
+        |Cpx(real,imaginary) ->
+            let expected = 1.5796728482882015e308
+            Assert.True(System.Double.IsFinite real)
+            Assert.True(System.Double.IsFinite imaginary)
+            Assert.InRange(abs (real/expected-1.0),0.0,1.0e-12)
+            Assert.InRange(abs (imaginary/expected-1.0),0.0,1.0e-12)
+        |actual -> Assert.Fail($"Expected a finite complex exponential, but got {actual}.")
+
+    [<Fact>]
+    let ``complex inverse trigonometric constants avoid intermediate overflow`` () =
+        let argument = complex0(Cpx(1.0e308,1.0))
+        for expression,expectedReal,expectedImaginary in
+            [ (asm.asin argument).Expr, System.Math.PI/2.0, 709.889355822726
+              (asm.acos argument).Expr, 0.0, -709.889355822726 ] do
+            match expression.simp with
+            |Cpx(real,imaginary) ->
+                Assert.True(System.Double.IsFinite real)
+                Assert.True(System.Double.IsFinite imaginary)
+                Assert.InRange(abs (real-expectedReal),0.0,1.0e-12)
+                Assert.InRange(abs (imaginary-expectedImaginary),0.0,1.0e-12)
+            |actual -> Assert.Fail($"Expected a finite complex inverse trigonometric value, but got {actual}.")
+
+    [<Fact>]
+    let ``small complex arctangent retains both components`` () =
+        for magnitude in [1.0e-8; 1.0e-20; 1.0e-308] do
+            let argument = complex0(Cpx(magnitude,magnitude))
+            match (asm.atan argument).Expr.simp with
+            |Cpx(real,imaginary) ->
+                Assert.InRange(abs (real/magnitude-1.0),0.0,1.0e-12)
+                Assert.InRange(abs (imaginary/magnitude-1.0),0.0,1.0e-12)
+            |actual -> Assert.Fail($"Expected both arctangent components, but got {actual}.")
+
+    [<Fact>]
+    let ``real multiplication retains intermediate overflow`` () =
+        let variable = double0(Var(Dt,"variable",NaN))
+        match ((variable*D 1.0e308)*D 1.0e-308).Expr.simp with
+        |Mul(Dt,Mul(Dt,Var(Dt,"variable",_),Dbl inner),Dbl outer) ->
+            Assert.Equal(1.0e308,inner)
+            Assert.Equal(1.0e-308,outer)
+        |actual -> Assert.Fail($"Multiplication order changed: {actual}.")
+
+    [<Fact>]
+    let ``real addition and subtraction retain rounding order`` () =
+        let variable = double0(Var(Dt,"variable",NaN))
+        match ((variable+D 1.0e308)-D 1.0e308).Expr.simp with
+        |Sub(Dt,Add(Dt,Var(Dt,"variable",_),Dbl added),Dbl subtracted) ->
+            Assert.Equal(1.0e308,added)
+            Assert.Equal(1.0e308,subtracted)
+        |actual -> Assert.Fail($"Addition and subtraction order changed: {actual}.")
+
     let private namedInteger name =
         int0(Var(It 4, name, Int 0))
 

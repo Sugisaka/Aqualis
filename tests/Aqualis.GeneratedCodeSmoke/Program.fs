@@ -55,6 +55,12 @@ module Program =
             context.print.t complexValue
             complexValue <== complex0(Cpx(Double.NaN,1.0))
             context.print.t complexValue
+            let overflowingProduct = context.var.d0 "overflowingProduct"
+            overflowingProduct <== 2.0
+            context.print.t ((overflowingProduct*D 1.0e308)*D 1.0e-308)
+            let roundedSum = context.var.d0 "roundedSum"
+            roundedSum <== 1.0
+            context.print.t ((roundedSum+D 1.0e308)-D 1.0e308)
 
     let private generate outputRoot (directoryName, language) =
         let outputDirectory = Path.Combine(outputRoot, directoryName)
@@ -193,6 +199,16 @@ module Program =
                 context.print.t result.im
 
             let largeImaginary = complex0(Cpx(1.0,710.0))
+            let largeExponential = asm.exp (complex0(Cpx(710.0,System.Math.PI/4.0)))
+            context.print.t largeExponential.re
+            context.print.t largeExponential.im
+            let largeInverseArgument = complex0(Cpx(1.0e308,1.0))
+            for result in [ asm.asin largeInverseArgument; asm.acos largeInverseArgument ] do
+                context.print.t result.re
+                context.print.t result.im
+            let smallArctangent = asm.atan (complex0(Cpx(1.0e-20,1.0e-20)))
+            context.print.t smallArctangent.re
+            context.print.t smallArctangent.im
             for result in
                 [ asm.sin largeImaginary
                   asm.cos largeImaginary

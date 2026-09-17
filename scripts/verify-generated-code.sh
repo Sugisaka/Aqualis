@@ -196,11 +196,13 @@ import math
 import sys
 
 values = [float(value) for value in sys.argv[1].split()]
-if (len(values) != 13 or values[:3] != [2.0, 2.0, 1.0]
+if (len(values) != 15 or values[:3] != [2.0, 2.0, 1.0]
         or not all(math.isnan(value) for value in values[3:5])
         or values[5:9] != [1.0, 0.0, 1.0, 0.0]
         or values[9] != 1.0 or not (math.isinf(values[10]) and values[10] > 0)
-        or not math.isnan(values[11]) or values[12] != 1.0):
+        or not math.isnan(values[11]) or values[12] != 1.0
+        or not (math.isinf(values[13]) and values[13] > 0)
+        or values[14] != 0.0):
     sys.exit(f"Unexpected arithmetic/complex output: {values!r}.")
 PY
   then
@@ -283,6 +285,13 @@ complex_results = [cmath.log(-4+0j), cmath.log10(-4+0j),
                    cmath.asin(2+0j), cmath.acos(2+0j)]
 for result in complex_results + [cmath.sqrt(1e308+1e308j)] + complex_results + [cmath.sqrt(-4+0j)]:
     expected.extend([result.real, result.imag])
+large_exponential = cmath.exp(710+1j*math.pi/4)
+expected.extend([large_exponential.real, large_exponential.imag])
+for result in [cmath.asin(1e308+1j), cmath.acos(1e308+1j)]:
+    expected.extend([result.real, result.imag])
+small_arctangent = cmath.atan(1e-20+1e-20j)
+small_arctangent_offset = len(expected)
+expected.extend([small_arctangent.real, small_arctangent.imag])
 for result in [cmath.sin(1+710j), cmath.cos(1+710j),
                cmath.tan(1+710j), cmath.tan(1+750j),
                cmath.exp(1+0j), cmath.sin(1+0j), cmath.cos(1+0j),
@@ -290,6 +299,12 @@ for result in [cmath.sin(1+710j), cmath.cos(1+710j),
     expected.extend([result.real, result.imag])
 if label == 'C99':
     expected.append(2.0)
+small_components = values[small_arctangent_offset:small_arctangent_offset+2]
+if len(small_components) != 2 or any(
+    not math.isclose(value, 1e-20, rel_tol=1e-12, abs_tol=0.0)
+    for value in small_components
+):
+    sys.exit(f'{label} small complex arctangent: received {small_components}')
 if len(values) != len(expected) or any(
     not math.isclose(value, wanted, rel_tol=1e-9, abs_tol=1e-9)
     for value, wanted in zip(values, expected)
