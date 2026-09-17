@@ -271,6 +271,7 @@ verify_complex_math() {
   local actual
   actual="$(cd "$working_directory" && "$@")"
   python3 - "$label" "$actual" <<'PY'
+import cmath
 import math
 import sys
 
@@ -278,6 +279,10 @@ label, output = sys.argv[1:]
 values = [float(value) for value in output.split()]
 expected = [5.0, math.log(5.0), math.atan2(4.0, 3.0),
             math.log10(5.0), math.atan2(4.0, 3.0) / math.log(10.0)]
+complex_results = [cmath.log(-4+0j), cmath.log10(-4+0j),
+                   cmath.asin(2+0j), cmath.acos(2+0j)]
+for result in complex_results + [cmath.sqrt(1e308+1e308j)] + complex_results + [cmath.sqrt(-4+0j)]:
+    expected.extend([result.real, result.imag])
 if label == 'C99':
     expected.append(2.0)
 if len(values) != len(expected) or any(

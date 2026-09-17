@@ -125,6 +125,9 @@ namespace Aqualis
                 c.codewritein "endif"
 
             member this.evalF(c:Aqualis) =
+                let complexArgument (value:expr) =
+                    if value.etype=Zt then value.evalF c
+                    else "cmplx(" + value.evalF c + ",kind=kind(0.0d0))"
                 match this.simp with
                 |False -> ".false."
                 |True -> ".true."
@@ -193,14 +196,18 @@ namespace Aqualis
                 |Sin(_,x) -> "sin(" + x.evalF c + ")"
                 |Cos(_,x) -> "cos(" + x.evalF c + ")"
                 |Tan(_,x) -> "tan(" + x.evalF c + ")"
+                |Asin(Zt,x) -> "asin(" + complexArgument x + ")"
                 |Asin(_,x) -> "asin(" + x.evalF c + ")"
+                |Acos(Zt,x) -> "acos(" + complexArgument x + ")"
                 |Acos(_,x) -> "acos(" + x.evalF c + ")"
                 |Atan(_,x) -> "atan(" + x.evalF c + ")"
                 |Atan2(x,y) -> "atan2(" + x.evalF c + "," + y.evalF c + ")"
                 |Abs(_,x) -> "abs(" + x.evalF c + ")"
+                |Log(Zt,x) -> "log(" + complexArgument x + ")"
                 |Log(_,x) -> "log(" + x.evalF c + ")"
-                |Log10(Zt,x) -> "log(" + x.evalF c + ")/log(10.0d0)"
+                |Log10(Zt,x) -> "log(" + complexArgument x + ")/log(10.0d0)"
                 |Log10(_,x) -> "log10(" + x.evalF c + ")"
+                |Sqrt(Zt,x) -> "sqrt(" + complexArgument x + ")"
                 |Sqrt(_,x) -> "sqrt(" + x.evalF c + ")"
                 |ToInt x -> "int(" + x.evalF c + ")"
                 |ToDbl x -> "dble(" + x.evalF c + ")"

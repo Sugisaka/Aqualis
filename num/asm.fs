@@ -58,11 +58,11 @@ namespace Aqualis
         ///<summary>逆正弦関数</summary>
         static member asin (v:int0) = double0(Asin(v.etype,v.Expr), v.Context)
         static member asin (v:double0) = double0(Asin(v.etype,v.Expr), v.Context)
-        static member asin (v:complex0) = complex0(Asin(v.etype,v.Expr), v.Context)
+        static member asin (v:complex0) = complex0(Asin(Zt,v.Expr), v.Context)
         ///<summary>逆余弦関数</summary>
         static member acos (v:int0) = double0(Acos(v.etype,v.Expr), v.Context)
         static member acos (v:double0) = double0(Acos(v.etype,v.Expr), v.Context)
-        static member acos (v:complex0) = complex0(Acos(v.etype,v.Expr), v.Context)
+        static member acos (v:complex0) = complex0(Acos(Zt,v.Expr), v.Context)
         ///<summary>逆正接関数</summary>
         static member atan (v:int0) = double0(Atan(v.etype,v.Expr), v.Context)
         static member atan (v:double0) = double0(Atan(v.etype,v.Expr), v.Context)
@@ -79,15 +79,15 @@ namespace Aqualis
         ///<summary>自然対数</summary>
         static member log (v:int0) = double0(Log(v.etype,v.Expr), v.Context)
         static member log (v:double0) = double0(Log(v.etype,v.Expr), v.Context)
-        static member log (v:complex0) = complex0(Log(v.etype,v.Expr), v.Context)
+        static member log (v:complex0) = complex0(Log(Zt,v.Expr), v.Context)
         ///<summary>常用対数</summary>
         static member log10 (v:int0) = double0(Log10(v.etype,v.Expr), v.Context)
         static member log10 (v:double0) = double0(Log10(v.etype,v.Expr), v.Context)
-        static member log10 (v:complex0) = complex0(Log10(v.etype,v.Expr), v.Context)
+        static member log10 (v:complex0) = complex0(Log10(Zt,v.Expr), v.Context)
         ///<summary>平方根</summary>
         static member sqrt (v:int0) = double0(Sqrt(v.etype,v.Expr), v.Context)
         static member sqrt (v:double0) = double0(Sqrt(v.etype,v.Expr), v.Context)
-        static member sqrt (v:complex0) = complex0(Sqrt(v.etype,v.Expr), v.Context)
+        static member sqrt (v:complex0) = complex0(Sqrt(Zt,v.Expr), v.Context)
         ///<summary>小数点以下切り捨て</summary>
         static member floor (v:double0) = int0(ToInt(Floor v.Expr), v.Context)
         ///<summary>小数点以下切り上げ</summary>

@@ -30,6 +30,19 @@ namespace Aqualis
             |Cpx(real,imaginary) -> Double.IsFinite real && Double.IsFinite imaginary
             |_ -> false
 
+        let private realLiteralValue = function
+            |Int value -> Some(double value)
+            |Dbl value -> Some value
+            |Inv(_,Int value) -> Some(-double value)
+            |Inv(_,Dbl value) -> Some(-value)
+            |_ -> None
+
+        let private complexRealLiteral (operation:System.Numerics.Complex -> System.Numerics.Complex) (expression:expr) =
+            realLiteralValue expression
+            |> Option.map (fun real ->
+                let result = operation (System.Numerics.Complex(real,0.0))
+                Cpx(result.Real,result.Imaginary))
+
         let private divideComplexLiterals xre xim yre yim =
             let numeratorScale = max (abs xre) (abs xim)
             let denominatorScale = max (abs yre) (abs yim)
@@ -514,7 +527,10 @@ namespace Aqualis
                     Dbl (sqrt -(double x))
                 |Inv(_,Dbl x) ->
                     Dbl (sqrt -x)
-                |Cpx (re,im) -> 
+                |Cpx (re,im) when Double.IsFinite re && Double.IsFinite im ->
+                    let result = System.Numerics.Complex.Sqrt(System.Numerics.Complex(re,im))
+                    Cpx(result.Real,result.Imaginary)
+                |Cpx (re,im) ->
                     let a = expr.simpAbs x
                     (expr.simpSqrt(((a+Dbl re).simp/Int 2).simp)+
                      (Cpx(0.0,1.0)*(Int(if im>=0.0 then 1 else -1)*expr.simpSqrt(((a-Dbl re).simp/Int 2).simp)).simp).simp).simp
@@ -714,12 +730,25 @@ namespace Aqualis
                 |Tan(_, x) ->
                     let x = x.simp
                     expr.simpTan x
-                |Asin(_, x) ->
+                |Asin(t, x) ->
                     let x = x.simp
-                    expr.simpAsin x
-                |Acos(_, x) ->
+                    if t=Zt then
+                        match complexRealLiteral System.Numerics.Complex.Asin x with
+                        |Some result -> result
+                        |None when x.etype<>Zt -> Asin(Zt,x)
+                        |None -> expr.simpAsin x
+                    else expr.simpAsin x
+                |Acos(t, x) ->
                     let x = x.simp
-                    expr.simpAcos x
+                    let complexAcos (value:System.Numerics.Complex) =
+                        let asin = System.Numerics.Complex.Asin value
+                        System.Numerics.Complex(Math.PI/2.0-asin.Real,-asin.Imaginary)
+                    if t=Zt then
+                        match complexRealLiteral complexAcos x with
+                        |Some result -> result
+                        |None when x.etype<>Zt -> Acos(Zt,x)
+                        |None -> expr.simpAcos x
+                    else expr.simpAcos x
                 |Atan(_, x) ->
                     let x = x.simp
                     expr.simpAtan x
@@ -730,12 +759,22 @@ namespace Aqualis
                 |Abs(_, x) ->
                     let x = x.simp
                     expr.simpAbs x
-                |Log(_, x) ->
+                |Log(t, x) ->
                     let x = x.simp
-                    expr.simpLog x
-                |Log10(_, x) ->
+                    if t=Zt then
+                        match complexRealLiteral System.Numerics.Complex.Log x with
+                        |Some result -> result
+                        |None when x.etype<>Zt -> Log(Zt,x)
+                        |None -> expr.simpLog x
+                    else expr.simpLog x
+                |Log10(t, x) ->
                     let x = x.simp
-                    expr.simpLog10 x
+                    if t=Zt then
+                        match complexRealLiteral System.Numerics.Complex.Log10 x with
+                        |Some result -> result
+                        |None when x.etype<>Zt -> Log10(Zt,x)
+                        |None -> expr.simpLog10 x
+                    else expr.simpLog10 x
                 |Sqrt(t, x)  ->
                     let x = x.simp
                     match t,x with
@@ -743,6 +782,7 @@ namespace Aqualis
                     |Zt,Inv(_,Dbl n) when n>0.0 -> expr.simpSqrt(Cpx(-n,0.0))
                     |Zt,Int n when n<0 -> expr.simpSqrt(Cpx(double n,0.0))
                     |Zt,Dbl n when n<0.0 -> expr.simpSqrt(Cpx(n,0.0))
+                    |Zt,_ when x.etype<>Zt && Option.isNone (realLiteralValue x) -> Sqrt(Zt,x)
                     |_ -> expr.simpSqrt x
                 |ToInt x ->
                     let x = x.simp

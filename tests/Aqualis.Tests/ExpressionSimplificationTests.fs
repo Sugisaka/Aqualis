@@ -79,6 +79,44 @@ module ExpressionSimplificationTests =
         |Dbl magnitude -> Assert.True(System.Double.IsFinite(magnitude))
         |actual -> Assert.Fail($"Expected a finite magnitude, but got {actual}.")
 
+    [<Fact>]
+    let ``complex real-axis literals stay in the complex domain`` () =
+        let negative = complex0(Cpx(-4.0, 0.0))
+        let outside = complex0(Cpx(2.0, 0.0))
+        let assertComplex expectedReal expectedImaginary (expression:expr) =
+            match expression.simp with
+            |Cpx(real, imaginary) ->
+                Assert.Equal(expectedReal, real, 12)
+                Assert.Equal(expectedImaginary, imaginary, 12)
+            |actual -> Assert.Fail($"Expected a complex literal, but got {actual}.")
+
+        assertComplex (System.Math.Log 4.0) System.Math.PI (asm.log negative).Expr
+        assertComplex (System.Math.Log10 4.0) (System.Math.PI / System.Math.Log 10.0) (asm.log10 negative).Expr
+        assertComplex (System.Math.PI / 2.0) (System.Math.Acosh 2.0) (asm.asin outside).Expr
+        assertComplex 0.0 (-(System.Math.Acosh 2.0)) (asm.acos outside).Expr
+
+        let symbolicReal = double0(Var(Dt, "symbolicReal", NaN)).ToComplex0
+        for expression in
+            [ (asm.log symbolicReal).Expr
+              (asm.log10 symbolicReal).Expr
+              (asm.asin symbolicReal).Expr
+              (asm.acos symbolicReal).Expr
+              (asm.sqrt symbolicReal).Expr ] do
+            Assert.Equal(Zt, expression.simp.etype)
+
+    [<Fact>]
+    let ``large finite complex square root remains finite`` () =
+        for real,imaginary,expectedReal,expectedImaginary in
+            [ 1.0e308, 1.0e308, 1.09868411346781e154, 4.5508986056222734e153
+              -1.0e308, 1.0e308, 4.5508986056222734e153, 1.09868411346781e154 ] do
+            match (asm.sqrt (complex0(Cpx(real,imaginary)))).Expr.simp with
+            |Cpx(actualReal, actualImaginary) ->
+                Assert.True(System.Double.IsFinite actualReal)
+                Assert.True(System.Double.IsFinite actualImaginary)
+                Assert.InRange(abs (actualReal / expectedReal - 1.0), 0.0, 1.0e-12)
+                Assert.InRange(abs (actualImaginary / expectedImaginary - 1.0), 0.0, 1.0e-12)
+            |actual -> Assert.Fail($"Expected a finite complex square root, but got {actual}.")
+
     let private namedInteger name =
         int0(Var(It 4, name, Int 0))
 

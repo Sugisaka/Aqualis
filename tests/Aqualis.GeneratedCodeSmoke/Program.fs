@@ -167,6 +167,31 @@ module Program =
             context.print.t baseTenLogarithm.re
             context.print.t baseTenLogarithm.im
 
+            let negative = complex0(Cpx(-4.0, 0.0))
+            let outside = complex0(Cpx(2.0, 0.0))
+            let large = complex0(Cpx(1.0e308, 1.0e308))
+            for result in
+                [ asm.log negative
+                  asm.log10 negative
+                  asm.asin outside
+                  asm.acos outside
+                  asm.sqrt large ] do
+                context.print.t result.re
+                context.print.t result.im
+
+            let negativeReal = context.var.d0 "negativeReal"
+            let outsideReal = context.var.d0 "outsideReal"
+            negativeReal <== -4.0
+            outsideReal <== 2.0
+            for result in
+                [ asm.log negativeReal.ToComplex0
+                  asm.log10 negativeReal.ToComplex0
+                  asm.asin outsideReal.ToComplex0
+                  asm.acos outsideReal.ToComplex0
+                  asm.sqrt negativeReal.ToComplex0 ] do
+                context.print.t result.re
+                context.print.t result.im
+
             if language = C99 then
                 let dividend = context.var.i0 "dividend"
                 let divisor = context.var.i0 "divisor"
