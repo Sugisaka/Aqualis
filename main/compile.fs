@@ -378,10 +378,18 @@ namespace Aqualis
                         writer.codewritein "#include <stdint.h>\n"
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
+                        writer.codewritein "#include <string.h>\n"
                         //ヘッダファイルのインクルード
                         List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
+                        writer.codewritein "static inline double complex aqualis_complex_literal(double real_part, double imaginary_part)\n"
+                        writer.codewritein "{\n"
+                        writer.codewritein "  double components[2] = {real_part, imaginary_part};\n"
+                        writer.codewritein "  double complex value;\n"
+                        writer.codewritein "  memcpy(&value, components, sizeof(value));\n"
+                        writer.codewritein "  return value;\n"
+                        writer.codewritein "}\n"
                         //構造体の定義
                         context.str.Def_Structure writer
                         //グローバル変数の宣言

@@ -5,12 +5,38 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
-    let ``real zero simplification keeps a real literal`` () =
+    let ``zero arithmetic with a real variable remains symbolic`` () =
         let value = double0(Var(Dt, "value", NaN))
-        for expression in [(D 0.0 * value).Expr; (value - value).Expr] do
+        match (D 0.0 * value).Expr.simp with
+        |Mul(Dt,_,_) -> ()
+        |actual -> Assert.Fail($"Expected multiplication to remain symbolic, but got {actual}.")
+        match (value - value).Expr.simp with
+        |Sub(Dt,_,_) -> ()
+        |actual -> Assert.Fail($"Expected subtraction to remain symbolic, but got {actual}.")
+        for expression in [(D 0.0 * D 3.0).Expr; (D 3.0 - D 3.0).Expr] do
             match expression.simp with
             |Dbl zero -> Assert.Equal(0.0, zero)
             |actual -> Assert.Fail($"Expected a real zero, but got {actual}.")
+
+    [<Fact>]
+    let ``addition and division preserve their declared real type`` () =
+        for expression,expected in
+            [(I 2 + D 0.0).Expr, 2.0
+             (I 2 / I 1).Expr, 2.0
+             (I 2 / I 2).Expr, 1.0] do
+            match expression.simp with
+            |Dbl actual -> Assert.Equal(expected,actual)
+            |actual -> Assert.Fail($"Expected a real literal, but got {actual}.")
+
+    [<Fact>]
+    let ``complex literal division remains finite across extreme magnitudes`` () =
+        for magnitude in [1.0e-308; 1.0e-200; 1.0e200; 1.0e308] do
+            let value = complex0(Cpx(magnitude,magnitude))
+            match (value/value).Expr.simp with
+            |Cpx(real,imaginary) ->
+                Assert.Equal(1.0,real,12)
+                Assert.Equal(0.0,imaginary,12)
+            |actual -> Assert.Fail($"Expected a finite quotient, but got {actual}.")
 
     [<Fact>]
     let ``power simplification preserves the requested numeric domain`` () =

@@ -24,6 +24,26 @@ namespace Aqualis
             |Zt,Dbl value -> Cpx(value,0.0)
             |_ -> result
 
+        let private isFiniteLiteral = function
+            |Int _ -> true
+            |Dbl value -> Double.IsFinite value
+            |Cpx(real,imaginary) -> Double.IsFinite real && Double.IsFinite imaginary
+            |_ -> false
+
+        let private divideComplexLiterals xre xim yre yim =
+            let numeratorScale = max (abs xre) (abs xim)
+            let denominatorScale = max (abs yre) (abs yim)
+            if numeratorScale = 0.0 then Cpx(0.0,0.0)
+            else
+                let xr = xre/numeratorScale
+                let xi = xim/numeratorScale
+                let yr = yre/denominatorScale
+                let yi = yim/denominatorScale
+                let denominator = yr*yr + yi*yi
+                let ratio = numeratorScale/denominatorScale
+                Cpx(((xr*yr + xi*yi)/denominator)*ratio,
+                    ((xi*yr - xr*yi)/denominator)*ratio)
+
         type expr with
             
             static member simpInv(x:expr) =
@@ -135,7 +155,7 @@ namespace Aqualis
                 |_,Int yy when yy<0 -> (x + Int -yy).simp
                 |_,Dbl yy when yy<0.0 -> (x + Dbl -yy).simp
                 |_,Inv(_,y) -> (x+y).simp
-                |v1,v2 when expr.equal(v1,v2) -> Int 0
+                |v1,v2 when expr.equal(v1,v2) && x.etype=It 4 -> Int 0
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,c) -> ((b-d).simp*a).simp
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(a,d) -> ((b-c).simp*a).simp
                 |Mul(_,a,b),Mul(_,c,d) when expr.equal(b,c) -> ((a-d).simp*b).simp
@@ -183,7 +203,8 @@ namespace Aqualis
                 
             static member simpMul(x:expr,y:expr) =
                 match x,y with
-                |Int 0,_|Dbl 0.0,_|Cpx (0.0,0.0),_|_,Int 0|_,Dbl 0.0|_,Cpx (0.0,0.0) -> Int 0
+                |(Int 0|Dbl 0.0|Cpx(0.0,0.0)),other when other.etype=It 4 || isFiniteLiteral other -> Int 0
+                |other,(Int 0|Dbl 0.0|Cpx(0.0,0.0)) when other.etype=It 4 || isFiniteLiteral other -> Int 0
                 |Int 1,_|Dbl 1.0,_|Cpx (1.0,0.0),_ -> y
                 |_,Int 1|_,Dbl 1.0|_,Cpx (1.0,0.0) -> x
                 |Int v1,Int v2 -> Int(v1*v2)
@@ -255,15 +276,13 @@ namespace Aqualis
                 |Int x,Int y when x%y=0 -> Int (x/y)
                 |Int x,Int y -> Dbl (double x / double y)
                 |Int x,Dbl y -> Dbl (double x / y)
-                |Int x, Cpx (yre,yim) ->
-                    let d = yre*yre+yim*yim
-                    Cpx (double x*yre/d,-double x*yim/d)
+                |Int x, Cpx (yre,yim) -> divideComplexLiterals (double x) 0.0 yre yim
                 |Dbl x, Int y -> Dbl (x / double y)
                 |Dbl x, Dbl y -> Dbl (x/y)
-                |Dbl x, Cpx (yre,yim) -> let d = yre*yre+yim*yim in Cpx (x*yre/d,-x*yim/d)
+                |Dbl x, Cpx (yre,yim) -> divideComplexLiterals x 0.0 yre yim
                 |Cpx (xre,xim), Int y -> Cpx (xre/double y,xim/double y)
                 |Cpx (xre,xim), Dbl y -> Cpx (xre/y,xim/y)
-                |Cpx (xre,xim), Cpx (yre,yim) -> let d = yre*yre+yim*yim in Cpx((xre*yre+xim*yim)/d, (-xre*yim+xim*yre)/d)
+                |Cpx (xre,xim), Cpx (yre,yim) -> divideComplexLiterals xre xim yre yim
                 |Int xx,Inv(_,y) when xx<0 -> (Int -xx / y).simp
                 |Dbl xx,Inv(_,y) when xx<0.0 -> (Dbl -xx / y).simp
                 |Inv(_,x),Int yy when yy<0 -> (x / Int -yy).simp
@@ -641,10 +660,10 @@ namespace Aqualis
                     Inv(Dt, Dbl -x)
                 |Cpx(re,0.0) -> 
                     Dbl re
-                |Add(_,x,y) -> 
+                |Add(t,x,y) ->
                     let x = x.simp
                     let y = y.simp
-                    expr.simpAdd(x,y)
+                    preserveNumericType t (expr.simpAdd(x,y))
                 |Sub(t,x,y) ->
                     let x = x.simp
                     let y = y.simp
@@ -657,10 +676,10 @@ namespace Aqualis
                     let x = x.simp
                     let y = y.simp
                     expr.simpIntDiv(x,y)
-                |Div(_, x,y) ->
+                |Div(t, x,y) ->
                     let x = x.simp
                     let y = y.simp
-                    expr.simpDiv(x,y)
+                    preserveNumericType t (expr.simpDiv(x,y))
                 |Inv(t,x) ->
                     let x = x.simp
                     expr.simpInv x

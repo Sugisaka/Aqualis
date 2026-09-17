@@ -184,6 +184,31 @@ PY
   fi
   printf '%s power and zero regression: passed\n' "$language"
 done
+for target in 'c C' 'fortran F' 'python P'; do
+  read -r language suffix <<< "$target"
+  case_directory="$output_root/arithmetic-complex-regression-$language"
+  if [[ "$language" == c ]]; then
+    gcc -std=c99 -Wall -Wextra -Werror=format "$case_directory/smoke.c" -lm -o "$case_directory/smoke.exe"
+  fi
+  output="$(cd "$case_directory" && bash "proc_smoke_$suffix.sh")"
+  if ! python3 - "$output" <<'PY'
+import math
+import sys
+
+values = [float(value) for value in sys.argv[1].split()]
+if (len(values) != 13 or values[:3] != [2.0, 2.0, 1.0]
+        or not all(math.isnan(value) for value in values[3:5])
+        or values[5:9] != [1.0, 0.0, 1.0, 0.0]
+        or values[9] != 1.0 or not (math.isinf(values[10]) and values[10] > 0)
+        or not math.isnan(values[11]) or values[12] != 1.0):
+    sys.exit(f"Unexpected arithmetic/complex output: {values!r}.")
+PY
+  then
+    printf '%s arithmetic and complex regression failed.\n' "$language" >&2
+    exit 1
+  fi
+  printf '%s arithmetic and complex regression: passed\n' "$language"
+done
 run_and_verify 'Python with SciPy' "$output_root/python-scipy" '1.00000000000000000e+00' "$scipy_python" smoke.py
 gcc -std=c99 -Werror=implicit-function-declaration "$output_root/c-bessel/smoke.c" -lm -o "$output_root/c-bessel/smoke.exe"
 bessel_output="$(cd "$output_root/c-bessel" && ./smoke.exe)"

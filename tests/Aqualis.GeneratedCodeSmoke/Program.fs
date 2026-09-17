@@ -36,6 +36,26 @@ module Program =
             context.print.t (double0.powr(runtimeBase, runtimeExponent))
             context.print.t (complex0.powr(runtimeBase.ToComplex0, runtimeExponent))
 
+    let private generateArithmeticAndComplexRegression outputRoot (directoryName, language) =
+        let outputDirectory = Path.Combine(outputRoot, "arithmetic-complex-regression-" + directoryName)
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [language] outputDirectory "smoke" "1.0" <| fun context ->
+            context.print.t (I 2 + D 0.0)
+            context.print.t (I 2 / I 1)
+            context.print.t (I 2 / I 2)
+            let infinite = context.var.d0 "infinite"
+            infinite <== Double.PositiveInfinity
+            context.print.t (D 0.0 * infinite)
+            context.print.t (infinite - infinite)
+            for magnitude in [1.0e-200; 1.0e308] do
+                let value = complex0(Cpx(magnitude,magnitude))
+                context.print.t (value/value)
+            let complexValue = context.var.z0 "complexValue"
+            complexValue <== complex0(Cpx(1.0,Double.PositiveInfinity))
+            context.print.t complexValue
+            complexValue <== complex0(Cpx(Double.NaN,1.0))
+            context.print.t complexValue
+
     let private generate outputRoot (directoryName, language) =
         let outputDirectory = Path.Combine(outputRoot, directoryName)
         Directory.CreateDirectory(outputDirectory) |> ignore
@@ -1451,6 +1471,8 @@ module Program =
             |> List.iter (generateNegativeRealSqrt outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generatePowerAndZeroRegression outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python]
+            |> List.iter (generateArithmeticAndComplexRegression outputRoot)
             generateJavaScriptIntegerDivision outputRoot
             ["c", C99; "fortran", Fortran; "javascript", JavaScript; "php", PHP]
             |> List.iter (generateArithmeticPrecedence outputRoot)

@@ -145,6 +145,8 @@ namespace Aqualis
                 |Int x -> c.numFormat.ItoS x
                 |Dbl x -> c.numFormat.DtoS x
                 |Cpx (0.0,1.0) -> "(0d0,1d0)"
+                |Cpx (re,im) when not (Double.IsFinite re && Double.IsFinite im) ->
+                    "cmplx(" + c.numFormat.DtoS re + "," + c.numFormat.DtoS im + ",kind=kind(0.0d0))"
                 |Cpx (re,im) -> "(" + c.numFormat.DtoS re + "," + c.numFormat.DtoS im + ")"
                 |Var (_,s,x) -> s
                 |Inv(_,x) ->
