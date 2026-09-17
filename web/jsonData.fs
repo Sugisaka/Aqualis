@@ -33,7 +33,7 @@ module JsonData =
                         InvariantFormat.integer maxDepth + ", JSON_THROW_ON_ERROR);")
         shape
 
-    /// Keep JSON objects as objects when the public update callback edits associative arrays.
+    /// Retain object shapes for associative arrays, while allowing a replacement list.
     let private preserveObjectShapes (ctx:Aqualis) (name:string) (data:PHPdata) (originalShape:PHPdata) =
         let rebuild = "$" + name + "_rebuildShape"
         let published = PHPdata.var(ctx,name + "_publishValue")
@@ -41,6 +41,16 @@ module JsonData =
             ctx.writein(rebuild + " = function ($value, $original) use (&" + rebuild + ") {")
             ctx.writein("if (!is_array($value)) { return $value; }")
             ctx.writein("if (is_object($original)) {")
+            ctx.writein("$originalArray = (array)$original;")
+            ctx.writein("if ($value !== [] && array_values($value) === $value && ($originalArray === [] || array_values($originalArray) !== $originalArray)) {")
+            ctx.writein("$result = [];")
+            ctx.writein("foreach ($value as $key => $item) {")
+            ctx.writein("$property = (string)$key;")
+            ctx.writein("$previous = property_exists($original, $property) ? $original->{$property} : null;")
+            ctx.writein("$result[$key] = " + rebuild + "($item, $previous);")
+            ctx.writein("}")
+            ctx.writein("return $result;")
+            ctx.writein("}")
             ctx.writein("$result = new \\stdClass();")
             ctx.writein("foreach ($value as $key => $item) {")
             ctx.writein("$property = (string)$key;")

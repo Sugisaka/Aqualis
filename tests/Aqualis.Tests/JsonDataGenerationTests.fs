@@ -81,6 +81,17 @@ module JsonDataGenerationTests =
         Assert.Contains("((is_string($read[\"value\"])) || (is_int($read[\"value\"]))) && $read[\"value\"] === $expected",generated)
 
     [<Fact>]
+    let ``sameAs groups a compound expected expression`` () =
+        let generated =
+            generate <| fun ctx ->
+                let expected = PHPdata.f("$expectedA || $expectedB",ctx)
+                let schema = JsonSchema.sameAs expected JsonSchema.bool
+                JsonData.read ctx (PhpVariableName.create "read") (PHPdata "data.json") schema JsonFailurePolicy.defaults
+                |> ignore
+
+        Assert.Contains("$read[\"value\"] === ($expectedA || $expectedB)",generated)
+
+    [<Fact>]
     let ``schema checks the original JSON container type before update and the published type after update`` () =
         let generated =
             generate <| fun ctx ->

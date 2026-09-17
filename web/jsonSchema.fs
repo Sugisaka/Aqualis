@@ -1,6 +1,7 @@
 namespace Aqualis
 
 open System
+open System.Text.RegularExpressions
 
 /// A reusable schema for JSON values decoded as PHP associative arrays.
 type JsonSchema internal (render:string -> string -> int -> string, dependencies:Aqualis list) =
@@ -50,8 +51,13 @@ module JsonSchema =
         if String.IsNullOrEmpty pattern then invalidArg (nameof pattern) "A JSON string pattern is required."
         create (fun value _ _ -> "is_string(" + value + ") && preg_match(" + literal pattern + ", " + value + ") === 1")
     let sameAs (expected:PHPdata) (schema:JsonSchema) =
+        let expectedExpression =
+            // A variable or fixed array offset is already one PHP expression.
+            // Parenthesize everything else so ||, ??, and similar operators stay on the right of ===.
+            if Regex.IsMatch(expected.code, @"^\$[A-Za-z_][A-Za-z0-9_]*(?:\[""[A-Za-z0-9_]+""\]|\['[A-Za-z0-9_]+'\]|\[[0-9]+\])*$") then expected.code
+            else "(" + expected.code + ")"
         createWith (expected.Context :: schema.Dependencies)
-            (fun value shape depth -> schema.Render(value,shape,depth) + " && " + value + " === " + expected.code)
+            (fun value shape depth -> schema.Render(value,shape,depth) + " && " + value + " === " + expectedExpression)
 
     let list (item:JsonSchema) =
         createWith item.Dependencies (fun value shape depth ->
@@ -122,11 +128,23 @@ module JsonSchema =
         let uniqueKey = literal uniqueField
         create (fun value _ _ ->
             let entries = value + "[" + listKey + "]"
-            "count(array_unique(array_column(" + entries + ", " + uniqueKey + "), SORT_STRING)) === count(" + entries + ")")
+            all [ "is_array(" + value + ")"
+                  "array_key_exists(" + listKey + ", " + value + ")"
+                  "is_array(" + entries + ")"
+                  "count(array_filter(" + entries + ", static fn($aqualisEntry): bool => is_array($aqualisEntry) && array_key_exists(" + uniqueKey + ", $aqualisEntry) && (is_scalar($aqualisEntry[" + uniqueKey + "]) || is_null($aqualisEntry[" + uniqueKey + "])))) === count(" + entries + ")"
+                  "count(array_unique(array_column(" + entries + ", " + uniqueKey + "), SORT_STRING)) === count(" + entries + ")" ])
     let sameLength leftField rightField =
         let left = literal leftField
         let right = literal rightField
-        create (fun value _ _ -> "count(" + value + "[" + left + "]) === count(" + value + "[" + right + "])")
+        create (fun value _ _ ->
+            let leftEntries = value + "[" + left + "]"
+            let rightEntries = value + "[" + right + "]"
+            all [ "is_array(" + value + ")"
+                  "array_key_exists(" + left + ", " + value + ")"
+                  "array_key_exists(" + right + ", " + value + ")"
+                  "is_array(" + leftEntries + ")"
+                  "is_array(" + rightEntries + ")"
+                  "count(" + leftEntries + ") === count(" + rightEntries + ")" ])
 
     let internal expression (schema:JsonSchema) (data:PHPdata) (shape:PHPdata) = schema.Render(data.code,shape.code,0)
     let internal requireContext (ctx:Aqualis) (schema:JsonSchema) =

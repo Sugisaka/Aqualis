@@ -208,17 +208,31 @@ module PhpCommunicationGenerationTests =
                     context.php.echo result.Value
                 context.php.echo result.ErrorCode)
 
-        Assert.Contains("!is_string($settingsPath) || $settingsPath === ''", source)
-        Assert.Contains("!is_file($settingsPath)", source)
-        Assert.Contains("!is_readable($settingsPath)", source)
-        Assert.Contains("@filesize($settingsPath)", source)
-        Assert.Contains("@file_get_contents($settingsPath, false, null, 0, 4097)", source)
+        Assert.Contains("$settingsRead_path = $settingsPath;", source)
+        Assert.Contains("!is_string($settingsRead_path) || $settingsRead_path === ''", source)
+        Assert.Contains("!is_file($settingsRead_path)", source)
+        Assert.Contains("!is_readable($settingsRead_path)", source)
+        Assert.Contains("@filesize($settingsRead_path)", source)
+        Assert.Contains("@file_get_contents($settingsRead_path, false, null, 0, 4097)", source)
         Assert.Contains("strlen($settingsRead_jsonText) > 4096", source)
         Assert.Contains("json_decode($settingsRead_jsonText, true, 32, JSON_THROW_ON_ERROR)", source)
         Assert.Contains("catch (\\JsonException $error)", source)
         for errorCode in
             ["invalid_path"; "file_missing"; "file_unreadable"; "file_too_large"; "read_failed"; "invalid_json"] do
             Assert.Contains(PhpEncoding.stringLiteral errorCode, source)
+
+    [<Fact>]
+    let ``checked JSON input evaluates a dynamic path once`` () =
+        let source =
+            generate (fun context ->
+                context.php.tryReadJsonFile(
+                    PhpVariableName.create "dynamicRead",
+                    PHPdata.f("nextPath()",context),
+                    JsonReadOptions.defaults)
+                |> ignore)
+
+        Assert.Contains("$dynamicRead_path = nextPath();",source)
+        Assert.Equal(1,Regex.Matches(source,@"nextPath\(\)").Count)
 
     [<Fact>]
     let ``checked JSON input validates configured limits`` () =

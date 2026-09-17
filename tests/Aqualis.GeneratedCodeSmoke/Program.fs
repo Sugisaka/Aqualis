@@ -1581,11 +1581,53 @@ module Program =
             JsonData.read context (PhpVariableName.create "jsonRead") path (schema context) policy |> ignore
             context.php.echo "ok"
 
+        generate "read-expression" <| fun context ->
+            context.php.phpcode <| fun () -> context.writein "$expectedA = false; $expectedB = true;"
+            let expected = PHPdata.f("$expectedA || $expectedB",context)
+            JsonData.read context (PhpVariableName.create "expressionRead")
+                (PHPdata.f("$argv[1]",context)) (JsonSchema.sameAs expected JsonSchema.bool) policy
+            |> ignore
+            context.php.echo "ok"
+
+        generate "read-path" <| fun context ->
+            context.php.phpcode <| fun () ->
+                context.writein "$calls = 0; function nextPath() { global $argv, $calls; $calls++; return $calls === 1 ? $argv[1] : 'missing.json'; }"
+            context.php.tryReadJsonFile(
+                PhpVariableName.create "pathRead",
+                PHPdata.f("nextPath()",context),
+                JsonReadOptions.defaults)
+            |> ignore
+            context.php.echo (PHPdata.f("($pathRead['success'] ? 'ok' : $pathRead['error']).':'.$calls",context))
+
         generate "update" <| fun context ->
             context.php.var "expected" <== 7
             let path = PHPdata.f("$argv[1]",context)
             JsonData.updateAtomic context (PhpVariableName.create "jsonUpdate") path (schema context) policy
                 (fun latest -> latest["Items"].[0].["Value"] <== "b")
+            |> ignore
+            context.php.echo "ok"
+
+        generate "update-object-to-list" <| fun context ->
+            let schema = JsonSchema.obj ["Payload", JsonSchema.anyOf [JsonSchema.obj []; JsonSchema.list JsonSchema.int]]
+            JsonData.updateAtomic context (PhpVariableName.create "shapeUpdate")
+                (PHPdata.f("$argv[1]",context)) schema policy
+                (fun latest -> latest["Payload"] <== PHPdata.f("[1, 2]",context))
+            |> ignore
+            context.php.echo "ok"
+
+        generate "read-rule-order" <| fun context ->
+            let schema =
+                JsonSchema.andAlso [
+                    JsonRule.sameLength "A" "B"
+                    JsonRule.uniqueFieldInList "Entries" "ID"
+                    JsonSchema.obj [
+                        "A", JsonSchema.list JsonSchema.int
+                        "B", JsonSchema.list JsonSchema.int
+                        "Entries", JsonSchema.list (JsonSchema.obj ["ID", JsonSchema.string])
+                    ]
+                ]
+            JsonData.read context (PhpVariableName.create "orderedRead")
+                (PHPdata.f("$argv[1]",context)) schema policy
             |> ignore
             context.php.echo "ok"
 

@@ -9,14 +9,27 @@ fi
 output_root="$(cd "$1" && pwd)"
 read_directory="$output_root/php-json-schema-read"
 update_directory="$output_root/php-json-schema-update"
+expression_directory="$output_root/php-json-schema-read-expression"
+path_directory="$output_root/php-json-schema-read-path"
+transition_directory="$output_root/php-json-schema-update-object-to-list"
+rule_order_directory="$output_root/php-json-schema-read-rule-order"
 php -l "$read_directory/smoke.php" >/dev/null
 php -l "$update_directory/smoke.php" >/dev/null
+php -l "$expression_directory/smoke.php" >/dev/null
+php -l "$path_directory/smoke.php" >/dev/null
+php -l "$transition_directory/smoke.php" >/dev/null
+php -l "$rule_order_directory/smoke.php" >/dev/null
 
 check_case() {
   local label="$1" script="$2" expected="$3" file="$4" contents="$5"
   printf '%s' "$contents" > "$file"
-  local actual
-  actual="$(php "$script" "$file")"
+  local actual stderr_file="${file}.stderr"
+  actual="$(php "$script" "$file" 2>"$stderr_file")"
+  if grep -Eq 'PHP (Warning|Fatal error|Notice|Deprecated)|Fatal error:|Warning:' "$stderr_file"; then
+    printf '%s: PHP emitted a warning or fatal error.\n' "$label" >&2
+    cat "$stderr_file" >&2
+    exit 1
+  fi
   if [[ "$actual" != "$expected" ]]; then
     printf '%s: expected %s, received %s\n' "$label" "$expected" "$actual" >&2
     exit 1
@@ -37,6 +50,13 @@ check_case 'JSON schema rejects an object as a list' "$read_directory/smoke.php"
 check_case 'JSON schema rejects a nested object as a list' "$read_directory/smoke.php" schema-error "$read_directory/nested-object-as-list.json" "$nested_object_as_list"
 check_case 'JSON schema rejects a list as an object' "$read_directory/smoke.php" schema-error "$read_directory/list-as-object.json" "$list_as_object"
 check_case 'JSON schema rejects a list as a map' "$read_directory/smoke.php" schema-error "$read_directory/list-as-map.json" "$list_as_map"
+check_case 'JSON sameAs rejects a mismatched compound expression' "$expression_directory/smoke.php" schema-error "$expression_directory/false.json" false
+check_case 'JSON sameAs accepts a matching compound expression' "$expression_directory/smoke.php" ok "$expression_directory/true.json" true
+check_case 'JSON read evaluates a dynamic path once' "$path_directory/smoke.php" ok:1 "$path_directory/data.json" false
+check_case 'JSON relation rules reject missing fields' "$rule_order_directory/smoke.php" schema-error "$rule_order_directory/missing.json" '{}'
+check_case 'JSON relation rules reject wrong field types' "$rule_order_directory/smoke.php" schema-error "$rule_order_directory/wrong-types.json" '{"A":null,"B":[],"Entries":null}'
+check_case 'JSON relation rules reject nested arrays' "$rule_order_directory/smoke.php" schema-error "$rule_order_directory/nested-array.json" '{"A":[],"B":[],"Entries":[{"ID":[]}]}'
+check_case 'JSON relation rules accept valid fields' "$rule_order_directory/smoke.php" ok "$rule_order_directory/valid.json" '{"A":[1],"B":[2],"Entries":[{"ID":"a"}]}'
 
 check_case 'JSON schema updates valid data' "$update_directory/smoke.php" ok "$update_directory/valid.json" "$valid"
 python3 - "$update_directory/valid.json" <<'PY'
@@ -52,6 +72,16 @@ assert data == {
     "EmptyObject": {},
     "Map": {"k": "v"},
 }, data
+PY
+
+check_case 'JSON update replaces an object with a list' "$transition_directory/smoke.php" ok "$transition_directory/data.json" '{"Payload":{}}'
+python3 - "$transition_directory/data.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as stream:
+    data = json.load(stream)
+assert data == {"Payload": [1, 2]}, data
 PY
 
 for case in wrong-identity object-as-list nested-object-as-list list-as-object list-as-map; do

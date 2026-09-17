@@ -356,6 +356,7 @@ and ContextPhp internal (context:Aqualis) =
         let name = PhpVariableName.value resultName
         let result = PHPdata.var(context,name)
         let resultCode = result.code
+        let path = "$" + name + "_path"
         let fileSize = "$" + name + "_fileSize"
         let jsonText = "$" + name + "_jsonText"
         let decoded = "$" + name + "_decoded"
@@ -364,21 +365,22 @@ and ContextPhp internal (context:Aqualis) =
         let maxDepth = InvariantFormat.integer options.MaxDepth
         let error code = PhpEncoding.stringLiteral code
         let source =
+            path + " = " + filename.code + "; " +
             resultCode + " = ['success' => false, 'value' => null, 'error' => null]; " +
-            "if (!is_string(" + filename.code + ") || " + filename.code + " === '') { " +
+            "if (!is_string(" + path + ") || " + path + " === '') { " +
             resultCode + "['error'] = " + error "invalid_path" + "; " +
-            "} elseif (!is_file(" + filename.code + ")) { " +
+            "} elseif (!is_file(" + path + ")) { " +
             resultCode + "['error'] = " + error "file_missing" + "; " +
-            "} elseif (!is_readable(" + filename.code + ")) { " +
+            "} elseif (!is_readable(" + path + ")) { " +
             resultCode + "['error'] = " + error "file_unreadable" + "; " +
             "} else { " +
-            fileSize + " = @filesize(" + filename.code + "); " +
+            fileSize + " = @filesize(" + path + "); " +
             "if (" + fileSize + " === false) { " +
             resultCode + "['error'] = " + error "read_failed" + "; " +
             "} elseif (" + fileSize + " > " + maxBytes + ") { " +
             resultCode + "['error'] = " + error "file_too_large" + "; " +
             "} else { " +
-            jsonText + " = @file_get_contents(" + filename.code + ", false, null, 0, " + readLimit + "); " +
+            jsonText + " = @file_get_contents(" + path + ", false, null, 0, " + readLimit + "); " +
             "if (" + jsonText + " === false) { " +
             resultCode + "['error'] = " + error "read_failed" + "; " +
             "} elseif (strlen(" + jsonText + ") > " + maxBytes + ") { " +
