@@ -289,7 +289,7 @@ module GenerationContextTests =
     let ``Public version matches the assembly version`` () =
         let assemblyVersion = typeof<Aqualis>.Assembly.GetName().Version
 
-        Assert.Equal("188.0.0", Aqualis.Version)
+        Assert.Equal("188.0.1", Aqualis.Version)
         Assert.Equal(Aqualis.Version, assemblyVersion.ToString(3))
 
     [<Theory>]

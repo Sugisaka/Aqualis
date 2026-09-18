@@ -5,16 +5,16 @@ This F# library generates C, Fortran, Python, LaTeX, HTML, JavaScript, and PHP s
 
 ## Installation
 
-Aqualis targets .NET 10. Install the .NET 10 SDK to run F# scripts or build an application that uses Aqualis. Add version `188.0.0` from NuGet to an F# project with:
+Aqualis targets .NET 10. Install the .NET 10 SDK to run F# scripts or build an application that uses Aqualis. Add version `188.0.1` from NuGet to an F# project with:
 
 ```sh
-dotnet add package Aqualis --version 188.0.0
+dotnet add package Aqualis --version 188.0.1
 ```
 
 For an F# script, reference the package directly instead of copying the DLL:
 
 ```fsharp
-#r "nuget: Aqualis, 188.0.0"
+#r "nuget: Aqualis, 188.0.1"
 ```
 
 ## How to use
@@ -22,7 +22,7 @@ For an F# script, reference the package directly instead of copying the DLL:
 Save the following as `hello.fsx`, then run `dotnet fsi hello.fsx`. It creates a `generated` directory next to the script and writes C, Fortran, and Python source files there.
 
 ```fsharp
-#r "nuget: Aqualis, 188.0.0"
+#r "nuget: Aqualis, 188.0.1"
 
 open System.IO
 open Aqualis
