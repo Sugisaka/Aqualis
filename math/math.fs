@@ -189,8 +189,8 @@ namespace Aqualis
                                     pmmp1 <== pll
                                 pl <== pll
 
-    [<AutoOpen>]
     /// Adds mathematical operations to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentMathExtensions =
         type html with
 

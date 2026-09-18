@@ -153,8 +153,8 @@ namespace Aqualis
         /// <param name="n">変数名</param>
         static member addarg (context:Aqualis,sname:string,vtp:VarType,n:string) = fn.addarg(context,Structure sname,vtp,n)
 
-    [<AutoOpen>]
     /// Function argument wrappers for scalar and array values.
+    [<AutoOpen>]
     module num_farg =
         // let private argumentContexts
         //     (sourceContext:Aqualis)

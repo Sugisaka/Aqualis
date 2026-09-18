@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Adds rank and pseudoinverse calculations to the linear-algebra context.
+    [<AutoOpen>]
     module ContextLaRankExtensions =
         /// Validates matrix shapes for pseudoinverse generation.
         let private requirePseudoInverseShapes (context:Aqualis) (rows:int0) (columns:int0)

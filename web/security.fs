@@ -25,8 +25,8 @@ type SessionOptions = {
     SameSite: SameSite
 }
 
-[<RequireQualifiedAccess>]
 /// Default configuration for generated PHP sessions.
+[<RequireQualifiedAccess>]
 module SessionOptions =
     /// Creates default session options for a cookie name and path.
     let private create name path secure = {
@@ -58,19 +58,19 @@ type private SecurityGenerationState() =
     /// Gets the synchronization gate for security generation.
     member val Gate = obj() with get
 
-[<RequireQualifiedAccess>]
 /// Associates security generation state with an Aqualis context.
+[<RequireQualifiedAccess>]
 module private SecurityGenerationStates =
     /// Per-context storage for generated security state.
     let private states = ConditionalWeakTable<Aqualis, SecurityGenerationState>()
     /// Gets or creates security generation state for a context.
     let get (context:Aqualis) = states.GetOrCreateValue context
 
-[<RequireQualifiedAccess>]
 /// Builds PHP expressions for session and CSRF handling.
+[<RequireQualifiedAccess>]
 module private SecurityCode =
-    [<Literal>]
     /// Session key used to store the CSRF token.
+    [<Literal>]
     let CsrfTokenName = "_aqualis_csrf"
 
     /// Formats a Boolean as a PHP literal.
@@ -372,8 +372,8 @@ type SessionKey<'T> =
         let (SessionKey fieldName) = this
         FieldName.value fieldName
 
-[<RequireQualifiedAccess>]
 /// Constructors for typed PHP session keys.
+[<RequireQualifiedAccess>]
 module SessionKey =
     /// Creates a string-valued session key.
     let string name : SessionKey<PhpString> = SessionKey(FieldName.create name)
@@ -434,8 +434,8 @@ and CsrfToken internal (protection:CsrfProtection) =
     /// Renders a hidden form field carrying the CSRF token.
     member _.Field() = protection.Field()
 
-[<AutoOpen>]
 /// Adds session and CSRF operations to PHP generation contexts.
+[<AutoOpen>]
 module SecurityExtensions =
     type ContextPhp with
         /// Session support associated with this PHP generation context.

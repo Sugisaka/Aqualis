@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Adds standard and generalized eigenvalue calculations to the linear-algebra context.
+    [<AutoOpen>]
     module ContextLaEigenExtensions =
         /// Validates matrix and output shapes for eigenvalue operations.
         let private requireEigenShapes (context:Aqualis) (matrix:complex2)

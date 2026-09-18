@@ -6,8 +6,8 @@
 // 
 namespace Aqualis
     
-    [<AutoOpen>]
     /// Adds a Japanese spoken-text rendering of supported expressions.
+    [<AutoOpen>]
     module exprEvalT =
         
         open System

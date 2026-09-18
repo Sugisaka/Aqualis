@@ -8,8 +8,8 @@ namespace Aqualis
 
     open System
 
-    [<AutoOpen>]
     /// Adds linear-algebra operations to the generation context.
+    [<AutoOpen>]
     module CompilationEnvironmentLaExtensions =
         type Aqualis with
             /// Gets LAPACK-backed linear-algebra helpers bound to this context.

@@ -40,8 +40,8 @@ namespace Aqualis
         /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:int3,y:int)=x.AssignScalar(I y)
 
-    [<AutoOpen>]
     /// Numeric operations for integer 3D arrays.
+    [<AutoOpen>]
     module asm_int3=
         type asm with
             /// Raises the first operand to the power of the second operand.

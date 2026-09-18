@@ -279,8 +279,8 @@ namespace Aqualis
         TargetPath : string
         StagingPath : string }
 
-    [<RequireQualifiedAccess>]
     /// Creates, publishes, and discards staged output files.
+    [<RequireQualifiedAccess>]
     module internal AtomicOutputFile =
         /// Lock protecting staged-output publication.
         let private publishGate = obj()

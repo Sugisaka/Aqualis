@@ -32,8 +32,8 @@ type FileLoginThrottleOptions = {
     MaxQuarantineFiles: int
 }
 
-[<RequireQualifiedAccess>]
 /// Default settings for file-backed login throttling.
+[<RequireQualifiedAccess>]
 module FileLoginThrottleOptions =
     /// Conservative defaults for a data directory located two levels above the generated PHP file.
     let defaults identifier dataDirectoryName applicationName = {
@@ -49,8 +49,8 @@ module FileLoginThrottleOptions =
         MaxQuarantineFiles = 3
     }
 
-[<RequireQualifiedAccess>]
 /// Validates login-throttle options and identifiers.
+[<RequireQualifiedAccess>]
 module private FileLoginThrottleValidation =
     /// Checks a character in a generated PHP identifier.
     let validIdentifierCharacter character =

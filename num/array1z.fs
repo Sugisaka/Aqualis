@@ -37,8 +37,8 @@ namespace Aqualis
         /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==) (x:complex1,y:int) = x.AssignScalar(complex0(Int y))
 
-    [<AutoOpen>]
     /// Numeric operations for complex 1D arrays.
+    [<AutoOpen>]
     module asm_complex1 =
         type asm with
             /// Raises the first operand to the power of the second operand.
@@ -78,15 +78,15 @@ namespace Aqualis
             /// Computes the complex conjugate of the operand.
             static member conj(x:complex1) = complex1(x.etype,Arx1(x.size1,fun i -> asm.conj(x[i]).Expr),x.Context)
 
-    [<AutoOpen>]
     /// Conversions for one-dimensional real arrays.
+    [<AutoOpen>]
     module Real1Extensions =
         type IReal1 with
             /// Views this real one-dimensional expression array as a double-precision array.
             member this.ToDouble1 = double1(this.Etype, this.Expr, this.Context)
 
-    [<AutoOpen>]
     /// Conversions for one-dimensional numeric arrays.
+    [<AutoOpen>]
     module Num1Extensions =
         type INum1 with
             /// Views this one-dimensional numeric expression array as a complex array.

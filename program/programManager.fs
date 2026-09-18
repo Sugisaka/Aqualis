@@ -545,8 +545,8 @@ namespace Aqualis
                 (fun () -> new Aqualis(None, None, language))
                 code
 
-    [<AutoOpen>]
     /// Adds generation settings and Python import configuration to contexts.
+    [<AutoOpen>]
     module SettingExtensions =
         /// Reserved Python keywords for generated identifiers.
         let private pythonKeywords =

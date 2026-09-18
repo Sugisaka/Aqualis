@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Linear-system solvers on the LAPACK context.
+    [<AutoOpen>]
     module ContextLaSolveExtensions =
         /// Requires a target backend for linear-system solving.
         let private requireSolveBackend (context:Aqualis) =

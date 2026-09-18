@@ -401,8 +401,8 @@ type CheckBoxVar(context:Aqualis) =
     /// チェックボックス（チェックされたとき1、チェックされていないとき0を送信）
     member _.show_checked_disabled(id:PHPdata) = context.html.checkbox_checked_disabled id
 
-[<AutoOpen>]
 /// Adds HTML form controls to generation contexts.
+[<AutoOpen>]
 module CompilationEnvironmentFormExtensions =
     /// Creates form controls bound to this generation context.
     type ContextForm internal (context:Aqualis) =

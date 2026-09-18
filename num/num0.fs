@@ -937,8 +937,8 @@ namespace Aqualis
         /// Concatenates the operands for generated output.
         static member (++) (a:exprString,b:double) = a ++ double0(Dbl b)
 
-    [<AutoOpen>]
     /// Adds inline MathJax output methods to generation contexts.
+    [<AutoOpen>]
     module ExprStringOutputExtensions =
         type Aqualis with
             /// Writes text and embedded expressions as inline MathJax.
@@ -950,22 +950,22 @@ namespace Aqualis
             /// Writes a complex expression as inline MathJax.
             member this.writein(value:complex0) = this.writein(exprString(value))
             
-    [<AutoOpen>]
     /// Adds conversion to double-precision expressions for real scalars.
+    [<AutoOpen>]
     module Real0Extensions =
         type IReal0 with
             /// Views this real scalar expression as a double-precision expression.
             member this.ToDouble0 = double0(this.Expr, this.Context)
 
-    [<AutoOpen>]
     /// Adds conversion to complex expressions for numeric scalars.
+    [<AutoOpen>]
     module Num0Extensions =
         type INum0 with
             /// Views this scalar numeric expression as a complex expression.
             member this.ToComplex0 = complex0(this.Expr, this.Context)
 
-    [<AutoOpen>]
     /// Constructs expression strings from literal and numeric values.
+    [<AutoOpen>]
     module strExpr =
         /// Wraps a literal string as an expression string.
         let st (x:string) = exprString x

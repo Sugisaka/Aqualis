@@ -9,8 +9,8 @@ namespace Aqualis
     open System
     open System.IO
 
-    [<AutoOpen>]
     /// Variable and structure declaration helpers.
+    [<AutoOpen>]
     module Aqualis_declare =
 
         ///<summary>宣言されたすべての変数を一時ファイルに書き込み</summary>

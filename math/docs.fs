@@ -336,8 +336,8 @@ namespace Aqualis
         /// Wraps an expression in scalable braces.
         member this.par3 (v:double0) = double0(Var(v.etype,"\\left\\{"+v.code+"\\right\\}",NaN))
 
-    [<AutoOpen>]
     /// Adds document generation access to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentDocExtensions =
         type Aqualis with
             /// Gets document-markup helpers bound to this generation context.

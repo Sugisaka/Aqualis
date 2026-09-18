@@ -10,8 +10,8 @@ type JsonSchema internal (render:string -> string -> int -> string, dependencies
     /// Gets contexts referenced by the schema's generated expression.
     member internal _.Dependencies = dependencies
 
-[<RequireQualifiedAccess>]
 /// Builds composable validators for JSON decoded into PHP values.
+[<RequireQualifiedAccess>]
 module JsonSchema =
     /// Encodes a PHP string literal for schema generation.
     let private literal (value:string) = PhpEncoding.stringLiteral value

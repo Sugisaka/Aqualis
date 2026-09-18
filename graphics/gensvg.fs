@@ -1102,8 +1102,8 @@ type ContextSvgFile internal (context:Aqualis) =
             sv.header <| fun sv ->
                 code sv
 
-[<AutoOpen>]
 /// Adds SVG output to Aqualis.
+[<AutoOpen>]
 module CompilationEnvironmentGenSvgExtensions =
     /// SVG output helpers exposed through a generation context.
     type svgfile =

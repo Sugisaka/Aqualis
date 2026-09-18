@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Generates Bessel function expressions for supported target languages.
+    [<AutoOpen>]
     module asm_bessel =
         /// Requires a target language with Bessel support and registers dependencies.
         let private requireBesselBackend (context:Aqualis) cSymbol pythonSymbol =

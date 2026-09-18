@@ -53,8 +53,8 @@ type AnimationSetting = {
     /// アニメーションのフレーム数（時間は0からFrameNumber-1まで進む）
     FrameNumber:int}
 
-[<RequireQualifiedAccess>]
 /// Stages and publishes generated character script files.
+[<RequireQualifiedAccess>]
 module private CharacterOutputFile =
     /// Writes content to a staged character-script file.
     let private stage (targetPath:string) (write:string -> unit) =
@@ -76,8 +76,8 @@ module private CharacterOutputFile =
             use writer = new StreamWriter(stagingPath, false)
             lines |> List.iter writer.WriteLine)
 
-[<AbstractClass>]
 /// Stores a presentation character and its narration scripts.
+[<AbstractClass>]
 type Character(context:HtmlGenerationContext,scriptDataDir:string,name:string) =
     let name =
         if isNull name then nullArg "name"

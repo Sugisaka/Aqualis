@@ -102,8 +102,8 @@ namespace Aqualis
         member this.num_exit (count:int0,counterName:string) = fun code ->
             this.range_exit (counterName,int0(Int 0),count - 1) code
 
-    [<AutoOpen>]
     /// Adds iteration helpers to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentIterExtensions =
         type Aqualis with
             ///<summary>反復処理</summary>

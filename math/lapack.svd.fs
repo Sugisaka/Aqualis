@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Adds singular-value decompositions to the linear-algebra context.
+    [<AutoOpen>]
     module ContextLaSvdExtensions =
         /// Validates input and output shapes for singular-value decomposition.
         let private requireSvdShapes (context:Aqualis) (rows:int0) (columns:int0)

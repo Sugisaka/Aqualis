@@ -65,8 +65,8 @@ type MathText<'a when 'a :> INum0> = {
     /// Expression to display.
     eq:'a; }
 
-[<AutoOpen>]
 /// Adds HTML helpers to an animation generation context.
+[<AutoOpen>]
 module HtmlGenerationExtensions1 =
     /// Owns the contexts and assets for an HTML presentation.
     type HtmlGenerationContext with

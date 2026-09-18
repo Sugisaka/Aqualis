@@ -82,8 +82,8 @@ type DiagnosticBag(?maxDiagnostics:int) =
     member _.HasErrors =
         lock gate (fun () -> diagnostics |> Seq.exists (fun item -> item.Severity = Error))
 
-[<RequireQualifiedAccess>]
 /// Writes structured diagnostics to the console.
+[<RequireQualifiedAccess>]
 module internal DiagnosticConsoleRenderer =
     /// Formats a diagnostic severity for console output.
     let private severityName = function
@@ -100,8 +100,8 @@ module internal DiagnosticConsoleRenderer =
                 diagnostic.Code,
                 diagnostic.Message)
 
-[<RequireQualifiedAccess>]
 /// Tracks the current diagnostic bag for nested operations.
+[<RequireQualifiedAccess>]
 module internal DiagnosticScope =
     /// Current diagnostic bag for an asynchronous flow.
     let private current = AsyncLocal<DiagnosticBag>()
@@ -124,8 +124,8 @@ module internal DiagnosticScope =
         | Some diagnostics -> diagnostics.Report diagnostic
         | None -> DiagnosticConsoleRenderer.write [diagnostic]
 
-[<RequireQualifiedAccess>]
 /// Creates and emits structured diagnostics.
+[<RequireQualifiedAccess>]
 module Diagnostic =
     /// Creates a diagnostic after validating its code and message.
     let create code severity message location properties =
@@ -144,8 +144,8 @@ module Diagnostic =
         create code severity message location properties
         |> DiagnosticScope.report
 
-[<RequireQualifiedAccess>]
 /// Captures diagnostics emitted by operations without a generation context.
+[<RequireQualifiedAccess>]
 module Diagnostics =
     /// Captures diagnostics produced by an operation that has no Aqualis generation context.
     let Capture(action:unit -> 'T) =
@@ -182,8 +182,8 @@ type DiagnosticPolicy =
         MaxDiagnostics: int
     }
 
-[<RequireQualifiedAccess>]
 /// Default diagnostic policy values.
+[<RequireQualifiedAccess>]
 module DiagnosticPolicy =
     /// Does not promote warnings to errors and permits up to 1,000 diagnostics.
     let defaults = {

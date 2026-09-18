@@ -200,8 +200,8 @@ namespace Aqualis
             ctx.cvar.setUniqVarWarning(Zt,A3(0,0,0),name,"")
             complex3(Zt,Var3(A3(0,0,0),name),context=ctx)
             
-    [<AutoOpen>]
     /// Adds variable declarations to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentVarExtensions =
         type Aqualis with
             ///<summary>変数生成</summary>

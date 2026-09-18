@@ -9,8 +9,8 @@ namespace Aqualis
 open System.IO
 open System.Text
 
-[<RequireQualifiedAccess>]
 /// Builds safely quoted POSIX shell commands from executable paths and arguments.
+[<RequireQualifiedAccess>]
 module internal ShellCommand =
     /// Quotes a single argument for a POSIX shell, rejecting null and NUL characters.
     let quoteArgument (value:string) =
@@ -52,8 +52,8 @@ module internal ShellCommand =
             yield output
         ]
 
-[<RequireQualifiedAccess>]
 /// Writes UTF-8 shell scripts with Unix line endings.
+[<RequireQualifiedAccess>]
 module internal ShellScriptWriter =
     /// Creates or overwrites a script file without a UTF-8 byte-order mark.
     let create path =

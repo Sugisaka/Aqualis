@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Expression output operations for C99.
+    [<AutoOpen>]
     module exprEvalC =
 
         open System

@@ -6,8 +6,8 @@
 // 
 namespace Aqualis
     
-    [<AutoOpen>]
     /// Expression output operations for the selected output language.
+    [<AutoOpen>]
     module exprEval =
         
         type expr with

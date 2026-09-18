@@ -147,8 +147,8 @@ namespace Aqualis
         /// Generates an inverse 2D FFT.
         member _.ifft args = fft2.ifft context args
 
-    [<AutoOpen>]
     /// Exposes 2D FFT operations through Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentFft2Extensions =
         type Aqualis with
             ///<summary>2次元フーリエ変換</summary>

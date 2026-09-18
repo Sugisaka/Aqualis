@@ -105,8 +105,8 @@ type ContextGroup internal (ctx:Aqualis) =
     /// Writes a level-5 labeled heading around generated code.
     member this.h5 label code = this.Heading '-' "" "END " label code
 
-[<AutoOpen>]
 /// Adds grouped code-generation helpers to Aqualis.
+[<AutoOpen>]
 module CompilationEnvironmentGroupExtensions =
     /// Conditional group helpers that run matching sections.
     type group =

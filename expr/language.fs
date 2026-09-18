@@ -30,8 +30,8 @@ namespace Aqualis
         /// Direct numeric evaluation without generating source code.
         |Numeric
 
-    [<RequireQualifiedAccess>]
     /// Raises consistent errors for operations unsupported by a target or evaluation mode.
+    [<RequireQualifiedAccess>]
     module internal UnsupportedOperation =
         /// Raises a <see cref="T:System.NotSupportedException"/> with the supplied message.
         let raise message : 'T =
@@ -116,8 +116,8 @@ namespace Aqualis
             else
                 finiteLiteral language value
 
-    [<RequireQualifiedAccess>]
     /// Escapes text for HTML rendering.
+    [<RequireQualifiedAccess>]
     module internal HtmlTextEncoding =
         /// Escapes text for HTML content.
         let textContent (value:string) =

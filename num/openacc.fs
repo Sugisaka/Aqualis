@@ -33,8 +33,8 @@ type ContextOpenAcc internal (c:Aqualis) =
             if dataClause <> "" then c.codewritein "}"
         |_ -> invalidOp "OpenACC generation is available only for Fortran and C99."
 
-[<AutoOpen>]
 /// Exposes OpenACC generation through Aqualis.
+[<AutoOpen>]
 module CompilationEnvironmentOpenAccExtensions =
     type Aqualis with
         ///<summary>OpenACC</summary>

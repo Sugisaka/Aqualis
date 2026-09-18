@@ -10,8 +10,8 @@ open System
 open System.IO
 open System.Text.Json
 
-[<AutoOpen>]
 /// HTML and animation helpers for web generation.
+[<AutoOpen>]
 module htmlexpr2 =
     /// Owns the contexts and assets for an HTML presentation.
     type HtmlGenerationContext with

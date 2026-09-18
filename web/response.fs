@@ -13,8 +13,8 @@ type HttpFailureStatus =
     | TooManyRequests
     | ServiceUnavailable
 
-[<RequireQualifiedAccess>]
 /// Maps failure statuses to HTTP response codes.
+[<RequireQualifiedAccess>]
 module private HttpFailureStatusCode =
     /// Maps an HTTP failure status to its numeric code.
     let value = function
@@ -46,8 +46,8 @@ type PhpResponse internal (context:Aqualis) =
         let accepted = bool0(Var(Nt,"!(" + condition.code + ")",NaN),condition.Context)
         this.Require(accepted,status,publicMessage,?logMessage=logMessage)
 
-[<AutoOpen>]
 /// Adds terminal HTTP response generation to generation contexts.
+[<AutoOpen>]
 module ResponseExtensions =
     type Aqualis with
         /// Terminal HTTP response generation associated with this context.

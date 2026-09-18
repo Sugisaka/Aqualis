@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Array minimum and maximum search helpers.
+    [<AutoOpen>]
     module asm_minmax =
         type asm with
             /// Searches a 1D array with the supplied comparison, updating the result and optional indices.

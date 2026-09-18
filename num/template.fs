@@ -641,8 +641,8 @@ namespace Aqualis
             member _.Dispose() =
                 disposeLabels()
 
-    [<AutoOpen>]
     /// Document generation helpers exposed through Aqualis.
+    [<AutoOpen>]
     module Aqualis_doc =
         /// <summary>
         /// 自動採点サイト(HTML)を出力

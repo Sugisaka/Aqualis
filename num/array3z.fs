@@ -35,8 +35,8 @@ namespace Aqualis
         /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==)(x:complex3,y:int)=x.AssignScalar(complex0(Int y))
 
-    [<AutoOpen>]
     /// Numeric operations for complex 3D arrays.
+    [<AutoOpen>]
     module asm_complex3=
         type asm with
             /// Raises the first operand to the power of the second operand.
@@ -66,15 +66,15 @@ namespace Aqualis
             /// Computes the complex conjugate of the operand.
             static member conj(x:complex3)=complex3(x.etype,Arx3(x.size1,x.size2,x.size3,fun(i,j,k)->asm.conj(x[i,j,k]).Expr),x.Context)
 
-    [<AutoOpen>]
     /// Conversions for three-dimensional real arrays.
+    [<AutoOpen>]
     module Real3Extensions =
         type IReal3 with
             /// Views this real three-dimensional expression array as a double-precision array.
             member this.ToDouble3 = double3(this.Etype, this.Expr, this.Context)
 
-    [<AutoOpen>]
     /// Conversions for three-dimensional numeric arrays.
+    [<AutoOpen>]
     module Num3Extensions =
         type INum3 with
             /// Views this three-dimensional numeric expression array as a complex array.

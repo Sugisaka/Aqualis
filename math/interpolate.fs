@@ -9,8 +9,8 @@ namespace Aqualis
     ///<summary>データ補間</summary>
     module interpolate =
 
-        [<RequireQualifiedAccess>]
         /// Validates spline sample dimensions and numeric values.
+        [<RequireQualifiedAccess>]
         module private SplineValidation =
             /// Reports an invalid interpolation input.
             let private fail (context:Aqualis) message =
@@ -525,8 +525,8 @@ namespace Aqualis
         /// Creates a complex-valued cubic spline interpolator.
         member _.splineComplex(isComplex) = interpolate.splineInterpolateComplex(context,isComplex)
 
-    [<AutoOpen>]
     /// Adds interpolation access to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentInterpolateExtensions =
         type Aqualis with
             ///<summary>データ補間</summary>

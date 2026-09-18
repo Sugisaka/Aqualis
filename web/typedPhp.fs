@@ -35,8 +35,8 @@ type PhpExpr<'T> internal (value:PHPdata) =
     /// Gets the PHP generation context for this typed expression.
     member _.Context = value.Context
 
-[<RequireQualifiedAccess>]
 /// Constructors and conversions for typed PHP expressions.
+[<RequireQualifiedAccess>]
 module PhpExpr =
     /// Creates a typed PHP string literal.
     let stringLiteral (value:string) = PhpExpr<PhpString>(PHPdata value)
@@ -55,20 +55,20 @@ module PhpExpr =
     /// Wraps an untyped PHP expression with its expected value category.
     let internal ofUntyped<'T> value = PhpExpr<'T>(value)
 
-[<RequireQualifiedAccess>]
 /// Integer operations for typed PHP expressions.
+[<RequireQualifiedAccess>]
 module PhpIntExpr =
     /// Converts a typed PHP integer into Aqualis's numeric expression DSL.
     let numeric (value:PhpExpr<PhpInt>) = value.Untyped.int0
 
-[<RequireQualifiedAccess>]
 /// Floating-point operations for typed PHP expressions.
+[<RequireQualifiedAccess>]
 module PhpFloatExpr =
     /// Converts a typed PHP floating-point value into Aqualis's numeric expression DSL.
     let numeric (value:PhpExpr<PhpFloat>) = value.Untyped.double0
 
-[<AutoOpen>]
 /// Converts typed PHP expressions to common generation APIs.
+[<AutoOpen>]
 module TypedPhpExtensions =
     type ContextPhp with
         /// Creates a typed PHP string variable.

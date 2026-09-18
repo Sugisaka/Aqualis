@@ -6,8 +6,8 @@
 // 
 namespace Aqualis
     
-    [<AutoOpen>]
     /// Expression output operations for HTML.
+    [<AutoOpen>]
     module exprEvalH =
         
         open System

@@ -10,8 +10,8 @@ open System
 open System.IO
 open System.Text.Json
 
-[<AutoOpen>]
 /// Adds web-specific HTML elements and attributes.
+[<AutoOpen>]
 module HtmlWebExtensions =
     /// Builds an HTML attribute from a PHP expression.
     let private phpAttributeCode (name:string) (value:PHPdata) =

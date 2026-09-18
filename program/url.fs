@@ -8,8 +8,8 @@ namespace Aqualis
 
 open System
 
-[<RequireQualifiedAccess>]
 /// Checks whether a string can be used as an application-relative URL.
+[<RequireQualifiedAccess>]
 module internal WebUrlValidation =
     /// Checks whether a URL contains control characters.
     let containsControlCharacters (value:string) =
@@ -36,8 +36,8 @@ type Url =
         let (Url value) = this
         value
 
-[<RequireQualifiedAccess>]
 /// Constructs validated URLs for generated pages and redirects.
+[<RequireQualifiedAccess>]
 module Url =
     /// Validates shared URL restrictions.
     let private validateCommon (value:string) =

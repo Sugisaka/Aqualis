@@ -11,8 +11,8 @@ namespace Aqualis
     /// One CSS property and its serialized value.
     type CSS = {Key:string; Value:string}
 
-    [<RequireQualifiedAccess>]
     /// Validates and escapes HTML names and values.
+    [<RequireQualifiedAccess>]
     module internal HtmlEncoding =
         /// Escapes text for insertion into HTML content.
         let textContent = HtmlTextEncoding.textContent
@@ -101,8 +101,8 @@ namespace Aqualis
         /// Gets an empty CSS style.
         static member blank = Style []
 
-    [<RequireQualifiedAccess>]
     /// Formats numeric CSS lengths using invariant culture.
+    [<RequireQualifiedAccess>]
     module CssLength =
         /// Formats a floating-point value as a CSS pixel length.
         let pixels (value:float) =
@@ -112,8 +112,8 @@ namespace Aqualis
         let pixelsInt (value:int) =
             InvariantFormat.integer value + "px"
 
-    [<AutoOpen>]
     /// CSS style construction helpers.
+    [<AutoOpen>]
     module style =
         /// Creates a CSS declaration for z-index.
         let zindex(n:int) = {Key="z-index"; Value=InvariantFormat.integer n}
@@ -336,15 +336,15 @@ namespace Aqualis
             ensureHtml()
             context.htmlAssets.UseSystemFonts()
 
-    [<AutoOpen>]
     /// CSS HtmlAssetSettingsExtensions helpers.
+    [<AutoOpen>]
     module HtmlAssetSettingsExtensions =
         type Aqualis with
             /// <summary>Configures optional assets referenced by generated HTML.</summary>
             member this.HtmlAssets = HtmlAssetSettings this
 
-    [<RequireQualifiedAccess>]
     /// Emits configured HTML scripts and stylesheets.
+    [<RequireQualifiedAccess>]
     module internal HtmlAssetRendering =
         /// Writes configured scripts and stylesheets into the HTML output.
         let write indent (writeLine:string -> unit) (assets:HtmlAssetController) =
@@ -1120,8 +1120,8 @@ namespace Aqualis
                 this.updateRange(position(q2x,q2y))
             this.polyLine s [position(q1x,q1y);endP;position(q2x,q2y)]
 
-    [<AutoOpen>]
     /// Adds HTML generation helpers to Aqualis contexts.
+    [<AutoOpen>]
     module CompilationEnvironmentHtmlExtensions =
         type Aqualis with
             /// Gets the HTML writer bound to this context.

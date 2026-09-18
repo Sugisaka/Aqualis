@@ -15,8 +15,8 @@ type ValidatedPost<'T> internal (isPresent:bool0, isValid:bool0, value:PhpExpr<'
     /// Gets the typed PHP expression for the submitted value.
     member _.Value = value
 
-[<RequireQualifiedAccess>]
 /// Builds PHP expressions for typed request validation.
+[<RequireQualifiedAccess>]
 module private RequestCode =
     /// Builds a PHP expression for a POST field.
     let postExpression fieldName =
@@ -117,8 +117,8 @@ type ContextRequest internal (context:Aqualis) =
     /// Gets typed access to POST fields in this generation context.
     member _.post = PostRequest(context)
 
-[<AutoOpen>]
 /// Adds typed request access to generation contexts.
+[<AutoOpen>]
 module RequestExtensions =
     type Aqualis with
         /// Gets typed access to the current HTTP request.

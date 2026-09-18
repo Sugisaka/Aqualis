@@ -172,8 +172,8 @@ namespace Aqualis
         /// Generates an inverse 1D FFT.
         member _.ifft args = fft1.ifft context args
 
-    [<AutoOpen>]
     /// Exposes 1D FFT operations through Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentFft1Extensions =
         type Aqualis with
             ///<summary>1次元フーリエ変換</summary>

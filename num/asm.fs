@@ -186,8 +186,8 @@ namespace Aqualis
             let context = NumericContext.binary f x
             complex0(expr.diff f.Expr x.Expr context, context)
         
-    [<AutoOpen>]
     /// Convenience operations on scalar numeric expressions.
+    [<AutoOpen>]
     module num0_op =
         type int0 with
             ///<summary>インクリメント</summary>
@@ -257,8 +257,8 @@ namespace Aqualis
                 double0(Var(Dt,"\\pi",NaN), context=c)
             |(JavaScript|Numeric) -> double0(Dbl Math.PI)
                 
-    [<AutoOpen>]
     /// Adds assembler operations to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentAsmExtensions =
         type Aqualis with
             ///<summary>数学関数</summary>

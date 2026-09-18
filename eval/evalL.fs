@@ -6,8 +6,8 @@
 // 
 namespace Aqualis
     
-    [<AutoOpen>]
     /// Expression output operations for LaTeX.
+    [<AutoOpen>]
     module exprEvalL =
         
         open System

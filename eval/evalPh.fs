@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Expression output operations for PHP.
+    [<AutoOpen>]
     module exprEvalPh =
 
         open System

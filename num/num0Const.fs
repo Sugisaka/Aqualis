@@ -8,8 +8,8 @@ namespace Aqualis
 
 open System
 
-[<AutoOpen>]
 /// Constructors and literal constants for scalar numeric expressions.
+[<AutoOpen>]
 module num0Const =
     /// Creates an integer expression from a literal.
     let I x = int0(Int x)

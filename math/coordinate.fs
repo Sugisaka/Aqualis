@@ -57,8 +57,8 @@ namespace Aqualis
                     fun code ->
                         this.rotate_deg (D degree) (x,y) code
 
-    [<AutoOpen>]
     /// Adds coordinate transformation helpers to an Aqualis context.
+    [<AutoOpen>]
     module CompilationEnvironmentCoordinateExtensions =
         type Aqualis with
             /// Gets coordinate transformation helpers bound to this context.

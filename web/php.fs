@@ -16,8 +16,8 @@ type JsonReadOptions = {
     MaxDepth: int
 }
 
-[<RequireQualifiedAccess>]
 /// Default options for generated JSON reads.
+[<RequireQualifiedAccess>]
 module JsonReadOptions =
     /// Conservative defaults for small application data files.
     let defaults = {
@@ -33,8 +33,8 @@ type JsonUpdateOptions = {
     FilePermissions: int
 }
 
-[<RequireQualifiedAccess>]
 /// Default options for generated JSON updates.
+[<RequireQualifiedAccess>]
 module JsonUpdateOptions =
     /// Conservative defaults for small private application data files.
     let defaults = {
@@ -1063,8 +1063,8 @@ and ContextPhp internal (context:Aqualis) =
     /// Gets a tab character.
     member this.tb = "\t"
 
-[<AutoOpen>]
 /// Conversions between numeric expressions and PHP data.
+[<AutoOpen>]
 module num0ForPHP =
 
     type int0 with

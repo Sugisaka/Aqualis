@@ -9,8 +9,8 @@ namespace Aqualis
     open System
     open System.Text
 
-    [<RequireQualifiedAccess>]
     /// Escapes output text literals for target languages.
+    [<RequireQualifiedAccess>]
     module internal OutputTextLiteral =
         /// Quotes and escapes text for a generated literal.
         let private quoted (cStyle:bool) (value:string) =
@@ -253,8 +253,8 @@ namespace Aqualis
         /// Writes a numeric expression to the generated output.
         member this.t(value:complex0) = this.tt(zv value)
 
-    [<AutoOpen>]
     /// Adds formatted output to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentPrintExtensions =
         type Aqualis with
             ///<summary>画面表示</summary>

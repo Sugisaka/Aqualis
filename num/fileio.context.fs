@@ -9,8 +9,8 @@ namespace Aqualis
     open System
     open System.Text
 
-    [<RequireQualifiedAccess>]
     /// Encodes file names and string literals for target languages.
+    [<RequireQualifiedAccess>]
     module private FileNameCode =
         /// Appends an escaped character to a target-language string literal.
         let private appendCommonEscape (builder:StringBuilder) character =

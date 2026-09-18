@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Adds homogeneous-system solvers to the linear-algebra context.
+    [<AutoOpen>]
     module ContextLaHomogeneousExtensions =
         /// Validates shapes for a homogeneous eigenvalue problem.
         let private requireHomogeneousShapes (context:Aqualis) (rows:int0) (columns:int0) (resultLength:int0) =

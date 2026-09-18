@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-[<AutoOpen>]
 /// Structure declaration and member-access helpers.
+[<AutoOpen>]
 module Aqualis_str =
 
     /// Structure declaration and member access operations.
@@ -292,8 +292,8 @@ module Aqualis_str =
                 ctx.cvar.setVar(Structure sname,A3(size1,size2,size3),name_,"")
 
 
-    [<AutoOpen>]
     /// Adds structure declarations to Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentStrExtensions =
         type Aqualis with
             ///<summary>構造体定義</summary>

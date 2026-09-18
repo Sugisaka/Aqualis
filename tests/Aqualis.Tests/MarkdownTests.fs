@@ -6,6 +6,28 @@ open Aqualis
 
 module MarkdownTests =
     [<Fact>]
+    let ``table closing pipes do not create empty columns`` () =
+        use output = new TemporaryDirectory()
+        let source = Path.Combine(output.Path, "table.md")
+        let destination = Path.Combine(output.Path, "table.html")
+
+        File.WriteAllText(
+            source,
+            String.concat "\n" [
+                "| A | B |"
+                "| --- | --- |"
+                "| 1 | 2 |"
+                "| 3 | |"
+            ])
+
+        convertHTML source destination
+        let html = File.ReadAllText(destination)
+
+        Assert.Contains("<tr><th>A</th><th>B</th></tr>", html)
+        Assert.Contains("<tr><td>1</td><td>2</td></tr>", html)
+        Assert.Contains("<tr><td>3</td><td></td></tr>", html)
+
+    [<Fact>]
     let ``shared regular expressions preserve markdown conversion`` () =
         use output = new TemporaryDirectory()
         let source = Path.Combine(output.Path, "source.md")

@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Least-squares operations on the LAPACK context.
+    [<AutoOpen>]
     module ContextLaLeastSquaresExtensions =
         /// Validates vector dimensions for Tikhonov least squares.
         let private requireTikhonovVectorShapes (context:Aqualis) (rows:int0) (columns:int0) (rhsLength:int0) =

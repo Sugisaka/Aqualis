@@ -10,8 +10,8 @@ type JsonFailurePolicy = {
     UpdateOptions: JsonUpdateOptions
 }
 
-[<RequireQualifiedAccess>]
 /// Default public messages and limits for JSON data operations.
+[<RequireQualifiedAccess>]
 module JsonFailurePolicy =
     /// Default public messages, diagnostics, and JSON operation limits.
     let defaults = {
@@ -23,8 +23,8 @@ module JsonFailurePolicy =
         UpdateOptions = JsonUpdateOptions.defaults
     }
 
-[<RequireQualifiedAccess>]
 /// Typed JSON file access and atomic update helpers for PHP generation.
+[<RequireQualifiedAccess>]
 module JsonData =
     /// Builds a schema-validation expression for JSON data.
     let private valid (schema:JsonSchema) (data:PHPdata) (shape:PHPdata) =

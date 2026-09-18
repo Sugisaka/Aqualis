@@ -13,12 +13,12 @@ namespace Aqualis
     open System.Text
     open System.Text.Json
 
-    [<AutoOpen>]
     /// Coordinates compilation and publication of generated project files.
+    [<AutoOpen>]
     module Aqualis_main =
 
-        [<Literal>]
         /// Maximum supported length of a Fortran identifier.
+        [<Literal>]
         let private MaximumFortranIdentifierLength = 63
 
         /// Validates a project name for generated output.

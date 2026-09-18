@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Expression output operations for JavaScript.
+    [<AutoOpen>]
     module exprEvalJ =
 
         open System

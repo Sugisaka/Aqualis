@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Array-output operations on the print context.
+    [<AutoOpen>]
     module ContextPrintArrayExtensions =
         type ContextPrint with
             /// Checks that the array belongs to this output context.

@@ -37,8 +37,8 @@ namespace Aqualis
         /// Assigns the right-hand value or array to the left-hand destination.
         static member (<==) (x:double1,y:int) = x.AssignScalar(I y)
 
-    [<AutoOpen>]
     /// Numeric operations for double-precision 1D arrays.
+    [<AutoOpen>]
     module asm_double1 =
         type asm with
             /// Raises the first operand to the power of the second operand.

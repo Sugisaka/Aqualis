@@ -171,8 +171,8 @@ type ContextOmp internal (c:Aqualis) =
         |Fortran|C99 -> int0(Var(It 4,"omp_get_max_threads()",NaN), context=c)
         |_ -> invalidOp "OpenMP thread counts are available only for Fortran and C99."
 
-[<AutoOpen>]
 /// Exposes OpenMP generation through Aqualis.
+[<AutoOpen>]
 module CompilationEnvironmentOmpExtensions =
     type Aqualis with
         ///<summary>OpenMP</summary>

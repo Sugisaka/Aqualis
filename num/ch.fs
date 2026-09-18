@@ -196,8 +196,8 @@ type ContextCh internal (c:Aqualis) =
     /// Provides temporary complex, complex, complex, complex scalar variables to the callback and releases them afterward.
     member this.zzzz code = this.z (fun first -> this.z (fun second -> this.z (fun third -> this.z (fun fourth -> code(first,second,third,fourth)))))
 
-[<AutoOpen>]
 /// Adds temporary-variable helpers to Aqualis.
+[<AutoOpen>]
 module CompilationEnvironmentChExtensions =
     type Aqualis with
         ///<summary>一時変数生成</summary>

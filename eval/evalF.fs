@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Expression output operations for Fortran.
+    [<AutoOpen>]
     module exprEvalF =
 
         open System

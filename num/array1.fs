@@ -40,8 +40,8 @@ namespace Aqualis
                 "if (" + condition + ") { fprintf(stderr, \"Aqualis runtime error: "
                 + escapeCString message + "\\n\"); exit(EXIT_FAILURE); }\n")
 
-    [<RequireQualifiedAccess>]
     /// Shared dimension and value checks for numeric arrays.
+    [<RequireQualifiedAccess>]
     module internal NumericArrayValidation =
         /// Reports an array validation failure.
         let fail (context:Aqualis) message =

@@ -4,8 +4,8 @@ namespace Aqualis
 // ambient/static `ch` surface was intentionally removed; new helpers should
 // always be implemented against CompilationEnvironment.ch.
 
-[<AutoOpen>]
 /// Adds temporary array allocation helpers to <c>ContextCh</c>.
+[<AutoOpen>]
 module ContextChArrayExtensions =
   type ContextCh with
     /// Provides a temporary character variable to the callback and releases its name afterward.

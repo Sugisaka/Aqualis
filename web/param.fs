@@ -18,8 +18,8 @@ type FieldName =
         let (FieldName value) = this
         value
 
-[<RequireQualifiedAccess>]
 /// Validation and access helpers for HTML field names.
+[<RequireQualifiedAccess>]
 module FieldName =
     /// Creates a field name containing only portable HTML name characters.
     let create (value:string) =
@@ -51,8 +51,8 @@ type PhpVariableName =
         let (PhpVariableName value) = this
         value
 
-[<RequireQualifiedAccess>]
 /// Validation and access helpers for PHP variable names.
+[<RequireQualifiedAccess>]
 module PhpVariableName =
     /// Creates a portable ASCII PHP variable name.
     let create (value:string) =
@@ -83,8 +83,8 @@ type CssClass =
         let (CssClass value) = this
         value
 
-[<RequireQualifiedAccess>]
 /// Validation and access helpers for CSS class names.
+[<RequireQualifiedAccess>]
 module CssClass =
     /// Creates one CSS class token without whitespace or markup delimiters.
     let create (value:string) =
@@ -107,8 +107,8 @@ type RedirectStatus =
     | TemporaryRedirect
     | PermanentRedirect
 
-[<RequireQualifiedAccess>]
 /// Maps redirect choices to HTTP status codes.
+[<RequireQualifiedAccess>]
 module internal RedirectStatus =
     /// Maps a redirect status to its HTTP code.
     let code = function

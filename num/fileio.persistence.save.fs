@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// File-saving operations on the I/O context.
+    [<AutoOpen>]
     module ContextIoSaveExtensions =
         /// File input and output operations for an Aqualis context.
         type ContextIo with

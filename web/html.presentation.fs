@@ -10,8 +10,8 @@ open System
 open System.IO
 open System.Text.Json
 
-[<AutoOpen>]
 /// HTML presentation and document rendering helpers.
+[<AutoOpen>]
 module dochtml =
     /// Creates and renders an HTML presentation page.
     let private htmlpresentationCore

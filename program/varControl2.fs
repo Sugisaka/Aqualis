@@ -1,7 +1,7 @@
 namespace Aqualis
 
-[<AutoOpen>]
 /// Adds collision-aware named-variable allocation to variable generators.
+[<AutoOpen>]
 module varControl2 =
     type varGenerator with
         /// Checks whether a name is occupied by any scalar, array, character,

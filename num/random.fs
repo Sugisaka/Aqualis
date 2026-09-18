@@ -1,7 +1,7 @@
 namespace Aqualis
 
-[<AutoOpen>]
 /// Random-number generation methods for the assembler context.
+[<AutoOpen>]
 module asm_random =
     type ContextAsm with
         /// Provides seed-setting and uniform random-number callbacks for generated code.

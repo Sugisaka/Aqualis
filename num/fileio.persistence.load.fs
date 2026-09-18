@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// File-loading operations on the I/O context.
+    [<AutoOpen>]
     module ContextIoLoadExtensions =
         /// Reports invalid saved-data contents.
         let private failInvalidPersistenceData (context:Aqualis) message =

@@ -10,11 +10,11 @@ open System
 open System.IO
 open System.Text
 
-[<RequireQualifiedAccess>]
 /// Validates one portable file-name component before it is used in generated paths.
+[<RequireQualifiedAccess>]
 module internal PortableFileNameSegment =
-    [<Literal>]
     /// Upper limit on the UTF-8 byte length of a file-name component.
+    [<Literal>]
     let MaximumUtf8Bytes = 200
 
     /// Checks whether a segment uses a reserved Windows device name.

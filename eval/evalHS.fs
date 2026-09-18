@@ -8,8 +8,8 @@ namespace Aqualis
 
     open System
     
-    [<RequireQualifiedAccess>]
     /// Layout constants and helpers for generated sequence diagrams.
+    [<RequireQualifiedAccess>]
     module SequenceDiagramContext =
         /// Top margin of a sequence diagram.
         let topMargin = 40.0
@@ -59,8 +59,8 @@ namespace Aqualis
                 padding.bottom 5;
                 {Key="text-align"; Value="center"}]
                 
-    [<AutoOpen>]
     /// Expression output operations for HTML sequence diagrams.
+    [<AutoOpen>]
     module exprEvalHS =
 
         type expr with

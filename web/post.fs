@@ -542,8 +542,8 @@ type UploadPolicy = {
     /// Number of cryptographically random bytes used in stored file names.
     RandomNameBytes:int }
 
-[<RequireQualifiedAccess>]
 /// Defaults for generated file-upload validation.
+[<RequireQualifiedAccess>]
 module UploadPolicy =
     /// Creates a policy whose private destination is verified by the generated PHP before storage.
     let create destinationDirectory maxBytes allowedMimeTypes = {
@@ -721,8 +721,8 @@ module private UploadGeneration =
         context.php.phpcode <| fun () ->
             lines |> List.iter context.writein
 
-[<RequireQualifiedAccess>]
 /// Selects whether an upload field accepts one or many files.
+[<RequireQualifiedAccess>]
 type UploadCardinality =
     /// One uploaded file.
     | Single

@@ -6,8 +6,8 @@
 //
 namespace Aqualis
 
-    [<AutoOpen>]
     /// Adds base-10 log-absolute-determinant calculations to the linear-algebra context.
+    [<AutoOpen>]
     module ContextLaDeterminantExtensions =
         /// Checks the LAPACK status of a determinant operation.
         let private checkDeterminantInfo (context:Aqualis) (info:int0) =

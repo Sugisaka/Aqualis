@@ -6,8 +6,8 @@
 // 
 namespace Aqualis
     
-    [<AutoOpen>]
     /// Adds symbolic differentiation to expressions.
+    [<AutoOpen>]
     module exprDiff =
         type expr with
             

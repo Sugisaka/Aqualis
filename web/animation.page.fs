@@ -10,8 +10,8 @@ open System
 open System.IO
 open System.Text.Json
 
-[<AutoOpen>]
 /// Adds presentation elements to the HTML generation context.
+[<AutoOpen>]
 module HtmlGenerationExtensions2 =
     type html with
         /// <summary>

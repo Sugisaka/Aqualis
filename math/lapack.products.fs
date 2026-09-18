@@ -8,8 +8,8 @@ namespace Aqualis
 
     open System
 
-    [<RequireQualifiedAccess>]
     /// Validates LAPACK inputs and reports backend errors.
+    [<RequireQualifiedAccess>]
     module internal LapackValidation =
         /// Requires a target language with the requested LAPACK operation.
         let requireBackend (context:Aqualis) operation =

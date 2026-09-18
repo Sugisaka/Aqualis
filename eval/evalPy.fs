@@ -6,8 +6,8 @@
 // 
 namespace Aqualis
     
-    [<AutoOpen>]
     /// Expression output operations for Python.
+    [<AutoOpen>]
     module exprEvalPy =
         
         open System

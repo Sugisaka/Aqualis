@@ -8,8 +8,8 @@ namespace Aqualis
     
     open System
     
-    [<AutoOpen>]
     /// Simplification helpers for expression trees.
+    [<AutoOpen>]
     module exprSimp =
         /// Reports an invalid expression operation.
         let private reportExpressionError code message operation =

@@ -9,12 +9,12 @@ namespace Aqualis
     open System
     open System.IO
 
-    [<AutoOpen>]
     /// Generates functions and their target-language signatures.
+    [<AutoOpen>]
     module Aqualis_function =
 
-        [<Literal>]
         /// Maximum portable generated function-name length.
+        [<Literal>]
         let private MaximumPortableFunctionNameLength = 128
 
         /// Reserved C99 words rejected as generated function names.

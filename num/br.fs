@@ -70,8 +70,8 @@ namespace Aqualis
                         branch.IF condition codeWhenTrue
                         branch.EL codeWhenFalse)
 
-    [<AutoOpen>]
     /// Exposes conditional generation through Aqualis.
+    [<AutoOpen>]
     module CompilationEnvironmentBrExtensions =
         type Aqualis with
             ///<summary>条件分岐</summary>
