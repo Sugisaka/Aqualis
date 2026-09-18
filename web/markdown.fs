@@ -103,8 +103,8 @@ type MarkDown<'a> =
         Direct : InlineNode list -> list<'a> -> list<'a>
     }
 
-[<AutoOpen>]
 /// Parses Markdown into callbacks for document generation.
+[<AutoOpen>]
 module markDown =
     /// Closes all open Markdown block callbacks.
     let private closeAllStack (md:MarkDown<'a>) data stack =
@@ -170,14 +170,8 @@ module markDown =
 
     /// Checks whether a line is a Markdown table separator.
     let private isTableSeparator (cells:string list) =
-        let rec allButLastAreSeparators (remaining:string list) =
-            match remaining with
-            |[]
-            |[_] -> true
-            |cell::rest ->
-                MarkdownRegex.tableSeparator.IsMatch(cell) &&
-                allButLastAreSeparators rest
-        allButLastAreSeparators cells
+        not cells.IsEmpty &&
+        (cells |> List.forall MarkdownRegex.tableSeparator.IsMatch)
 
     /// Parses Markdown from a reader, carrying open block state and callback results.
     let rec readmd (md:MarkDown<'a>) (rd:StreamReader) (stack:list<MarkDownContents>) (data:list<'a>) =
@@ -207,7 +201,9 @@ module markDown =
             let mol = MarkdownRegex.orderedList.Match(normalizedCode)
             let tableData = 
                 if normalizedCode.StartsWith "|" && normalizedCode.EndsWith "|" then
-                    MarkdownRegex.tableCell.Matches(normalizedCode)
+                    // The final pipe closes the row; it does not start another cell.
+                    let cells = normalizedCode.Substring(0, normalizedCode.Length - 1)
+                    MarkdownRegex.tableCell.Matches(cells)
                     |> Seq.cast<Match>
                     |> Seq.map (fun m -> m.Groups.[1].Value.Trim())
                     |> Seq.toList
