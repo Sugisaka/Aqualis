@@ -7,7 +7,7 @@ let version = "1.0.0"
 let outputdir = @"C:\home\work"
 //#############################################################################
 
-#r "nuget: Aqualis, 188.0.2"
+#r "nuget: Aqualis, 188.0.3"
 
 open Aqualis
 open System

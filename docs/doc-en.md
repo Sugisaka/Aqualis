@@ -29,7 +29,7 @@
 [Back to top](#aqualis)
 
 - Install the .NET 10 SDK. Running F# scripts requires the F# compiler and F# Interactive (`dotnet fsi`) included with the SDK. If you use Visual Studio or Build Tools for Visual Studio, also select **F# desktop language support**.
-- Ensure NuGet.org is accessible so the Aqualis package can be restored on first use. The examples below use `#r "nuget: Aqualis, 188.0.2"`.
+- Ensure NuGet.org is accessible so the Aqualis package can be restored on first use. The examples below use `#r "nuget: Aqualis, 188.0.3"`.
 - To compile or run generated source code, install the compiler or runtime and any libraries required by the selected target language.
 
 ## Running a Source File
@@ -53,7 +53,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#r "nuget: Aqualis, 188.0.2"
+#r "nuget: Aqualis, 188.0.3"
  
 open Aqualis
  
@@ -65,7 +65,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
 - Line 3: Specify the project name inside `""`. ASCII letters, digits, and underscores may be used.
 - Line 4: Specify an arbitrary version string for the generated project. This is separate from the Aqualis package version.
 - Line 7: Specify the source-file output directory.
-- Line 9: Load Aqualis 188.0.2 from NuGet.
+- Line 9: Load Aqualis 188.0.3 from NuGet.
 - Line 11: Open the `Aqualis` namespace.
 - Line 13: Specify target languages inside `[]`. Separate multiple targets with semicolons (`;`). Supported targets are:
   - Fortran
@@ -999,7 +999,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#r "nuget: Aqualis, 188.0.2"
+#r "nuget: Aqualis, 188.0.3"
  
 open Aqualis
  
