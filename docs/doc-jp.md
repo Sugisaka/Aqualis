@@ -29,7 +29,7 @@
 [トップへ戻る](#aqualis)
 
 - .NET 10 SDKをインストールする。F#スクリプトの実行には、SDKに含まれるF#コンパイラとF# Interactive（`dotnet fsi`）が必要。Visual StudioまたはBuild Tools for Visual Studioを使用する場合は、「F#デスクトップ言語のサポート」も選択する。
-- 初回実行時にAqualisパッケージを取得できるよう、NuGet.orgに接続できる環境を用意する。以下のコード例では`#r "nuget: Aqualis, 188.0.1"`を使用する。
+- 初回実行時にAqualisパッケージを取得できるよう、NuGet.orgに接続できる環境を用意する。以下のコード例では`#r "nuget: Aqualis, 188.0.2"`を使用する。
 - 生成したソースコードをコンパイル・実行する場合は、対象言語のコンパイラや実行環境、必要なライブラリを別途用意する。
 
 ## ソースファイルの実行
@@ -49,7 +49,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#r "nuget: Aqualis, 188.0.1"
+#r "nuget: Aqualis, 188.0.2"
  
 open Aqualis
  
@@ -61,7 +61,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
 - 3行目：プロジェクト名を「`""`」の間に書く。半角のアルファベットと数字、アンダースコアが使用可能
 - 4行目：生成プロジェクトのバージョン番号。Aqualisパッケージのバージョンとは別で、任意の文字列を指定可能
 - 7行目：ソースファイルの出力先フォルダ。
-- 9行目：NuGetからAqualis 188.0.1を読み込む。
+- 9行目：NuGetからAqualis 188.0.2を読み込む。
 - 11行目：Aqualisを使用可能にする
 - 13行目：出力ソースファイルの言語を`[]`の中に指定。セミコロン`;`で区切って複数指定することもできる。以下の言語を指定可能
   - Fortran
@@ -979,7 +979,7 @@ let version = "1.0.0"
  
 let outputdir = @"C:\home\work"
 
-#r "nuget: Aqualis, 188.0.1"
+#r "nuget: Aqualis, 188.0.2"
  
 open Aqualis
  
