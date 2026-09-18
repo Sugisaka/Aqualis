@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <PackageId>Aqualis</PackageId>
-    <Version>188.0.0</Version>
+    <Version>188.0.1</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <Authors>Jun-ichiro Sugisaka</Authors>
