@@ -61,13 +61,45 @@ module HtmlGenerationExtensions2 =
         /// <param name="filename">表示する動画のファイル名</param>
         member this.video (s:Style,p:position) = fun (filename:string) ->
             let sourceUrl = this.ImportAsset filename
+            let idatr = Atr("id", "video" + InvariantFormat.integer this.AnimationCount);
             let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
-            this.html.tagv ("video", [st.atr; Atr("src", sourceUrl); Atr("controls")])
+            this.html.tagv ("video", [idatr; st.atr; Atr("src", sourceUrl); Atr("controls")])
             this.html.tage "video"
         /// Imports and writes a video with the supplied filename and optional styling.
         member this.video (s:Style) = fun (filename:string) ->
             let sourceUrl = this.ImportAsset filename
-            this.html.tagv ("video", [s.atr; Atr("src", sourceUrl); Atr("controls")])
+            let idatr = Atr("id", "video" + InvariantFormat.integer this.AnimationCount);
+            this.html.tagv ("video", [idatr; s.atr; Atr("src", sourceUrl); Atr("controls")])
+            this.html.tage "video"
+        /// Imports and writes a video with the supplied filename and optional styling.
+        member this.video (filename:string) =
+            let sourceUrl = this.ImportAsset filename
+            let idatr = Atr("id", "video" + InvariantFormat.integer this.AnimationCount);
+            this.html.tagv ("video", [idatr; Atr("src", sourceUrl); Atr("controls")])
+            this.html.tage "video"
+        /// <summary>
+        /// 指定位置に自動再生する動画を表示する
+        /// </summary>
+        /// <param name="s">適用するスタイル</param>
+        /// <param name="p">表示位置</param>
+        /// <param name="filename">表示する動画のファイル名</param>
+        member this.autoVideo (s:Style,p:position) = fun (filename:string) ->
+            let sourceUrl = this.ImportAsset filename
+            let idatr = Atr("id", "video" + InvariantFormat.integer this.AnimationCount);
+            let st = Style [{Key="margin-left"; Value=InvariantFormat.number p.x+"px"}; {Key="margin-top"; Value=InvariantFormat.number p.y+"px"}] + s
+            this.html.tagv ("video", [idatr; st.atr; Atr("src", sourceUrl); Atr "autoplay"; Atr "muted"; Atr "playsinline"])
+            this.html.tage "video"
+        /// Imports and writes an auto-playing video with the supplied filename and optional styling.
+        member this.autoVideo (s:Style) = fun (filename:string) ->
+            let sourceUrl = this.ImportAsset filename
+            let idatr = Atr("id", "video" + InvariantFormat.integer this.AnimationCount);
+            this.html.tagv ("video", [idatr; s.atr; Atr("src", sourceUrl); Atr "autoplay"; Atr "muted"; Atr "playsinline"])
+            this.html.tage "video"
+        /// Imports and writes an auto-playing video with the supplied filename and optional styling.
+        member this.autoVideo (filename:string) =
+            let sourceUrl = this.ImportAsset filename
+            let idatr = Atr("id", "video" + InvariantFormat.integer this.AnimationCount);
+            this.html.tagv ("video", [idatr; Atr("src", sourceUrl); Atr "autoplay"; Atr "muted"; Atr "playsinline"])
             this.html.tage "video"
         /// <summary>
         /// キャラクター付き解説ページ

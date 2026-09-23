@@ -74,7 +74,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        const swc = document.getElementById(\"switchCharacter\");"
             ctx.writein "        const sws = document.getElementById(\"switchSubtitle\");"
             ctx.writein "        const swa = document.getElementById(\"switchAudio\");"
-            ctx.writein "        "
+            ctx.writein "        stopVideo(pagecount);"
             ctx.writein "        const p1 = document.getElementById(\"p\"+pagecount);"
             ctx.writein "        p1.style.display = \"none\";"
             ctx.writein "        const b1 = document.getElementById(\"sb\"+pagecount);"
@@ -86,6 +86,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        pagecount++;"
             ctx.writein "        const p2 = document.getElementById(\"p\"+pagecount);"
             ctx.writein "        p2.style.display = \"block\";"
+            ctx.writein "        playVideo(pagecount);"
             ctx.writein "        if(sws.checked)"
             ctx.writein "        {"
             ctx.writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
@@ -133,6 +134,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        const swc = document.getElementById(\"switchCharacter\");"
             ctx.writein "        const sws = document.getElementById(\"switchSubtitle\");"
             ctx.writein "        const swa = document.getElementById(\"switchAudio\");"
+            ctx.writein "        stopVideo(pagecount);"
             ctx.writein "        const p1 = document.getElementById(\"p\"+pagecount);"
             ctx.writein "        p1.style.display = \"none\";"
             ctx.writein "        const b1 = document.getElementById(\"sb\"+pagecount);"
@@ -144,6 +146,7 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        pagecount--;"
             ctx.writein "        const p2 = document.getElementById(\"p\"+pagecount);"
             ctx.writein "        p2.style.display = \"block\";"
+            ctx.writein "        playVideo(pagecount);"
             ctx.writein "        if(sws.checked)"
             ctx.writein "        {"
             ctx.writein "            const b2 = document.getElementById(\"sb\"+pagecount);"
@@ -176,9 +179,31 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        }"
             ctx.writein "    }"
             ctx.writein "}"
-
-    /// キャラクターのデフォルト表示・非表示設定
-    /// 字幕のデフォルト表示・非表示設定
-    /// 音声のデフォルト表示・非表示設定
-    /// デフォルトの設定
-
+    /// <summary>
+    /// 埋め込まれた動画を再生
+    /// </summary>
+    member this.jsPlayVideo() =
+        context.switchJSMain <| fun ctx ->
+            ctx.writein "function playVideo(page)"
+            ctx.writein "{"
+            ctx.writein "    const video = document.querySelector(\"#p\" + page + \" video\");"
+            ctx.writein "    if(video)"
+            ctx.writein "    {"
+            ctx.writein "        video.currentTime = 0;"
+            ctx.writein "        video.play();"
+            ctx.writein "    }"
+            ctx.writein "}"
+    /// <summary>
+    /// 埋め込まれた動画を停止
+    /// </summary>
+    member this.jsStopVideo() =
+        context.switchJSMain <| fun ctx ->
+            ctx.writein "function stopVideo(page)"
+            ctx.writein "{"
+            ctx.writein "    const video = document.querySelector(\"#p\" + page + \" video\");"
+            ctx.writein "    if(video)"
+            ctx.writein "    {"
+            ctx.writein "        video.pause();"
+            ctx.writein "        video.currentTime = 0;"
+            ctx.writein "    }"
+            ctx.writein "}"
