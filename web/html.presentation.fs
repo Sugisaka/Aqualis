@@ -74,6 +74,7 @@ module dochtml =
             context.slideAnimation.jsDrawPrev(context.ContentsUrlPrefix)
             context.slideAnimation.jsPlayVideo()
             context.slideAnimation.jsStopVideo()
+            context.slideAnimation.jsNextPrevKeys()
         // head、body要素書き込みストリームを閉じてhead、body要素のコード取得
         let codeDraw = context.switchJSMain <| fun ctx ->
             ctx.allCodes

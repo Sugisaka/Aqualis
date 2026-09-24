@@ -207,3 +207,16 @@ type ContextSlideAnimation internal (context:HtmlGenerationContext) =
             ctx.writein "        video.currentTime = 0;"
             ctx.writein "    }"
             ctx.writein "}"
+            
+    member this.jsNextPrevKeys() =
+        context.switchJSMain <| fun ctx ->
+            ctx.writein "document.addEventListener(\"keydown\", function(event) {"
+            ctx.writein "    if (event.repeat) return;"
+            ctx.writein "    if (event.key === \"ArrowRight\")"
+            ctx.writein "    {"
+            ctx.writein "        drawNext();"
+            ctx.writein "    }"
+            ctx.writein "    else if (event.key === \"ArrowLeft\") {"
+            ctx.writein "        drawPrev();"
+            ctx.writein "    }"
+            ctx.writein "});"
