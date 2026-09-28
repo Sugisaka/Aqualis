@@ -584,7 +584,6 @@ type graph1d =
                             [ for i in tmin..tmax -> 10.0**double i ]
                     /// プロット範囲
                     let (xr1,xr2),(yr1,yr2) =
-                        let inrange x = match gstyle.Xaxis.Range with |Auto -> true |MinMax(x1,x2) -> x1<=x && x<=x2
                         /// データ範囲検出
                         let searchRange (data:Plot) =
                             match data with

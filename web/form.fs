@@ -308,8 +308,6 @@ type ComboBoxVar(context:Aqualis) =
                     context.html.option i.Tag <| fun () -> context.writein  i.Text
     /// コンボボックスを表示（送信された選択項目を選択状態にする）
     member this.show_selected(id:PHPdata,items:list<ComboBoxItem>) =
-        let c = post(context,id)
-        //c.select <| fun () ->
         context.html.select id <| fun () ->
             for i in items do
                 context.br.if2(this.selectedTag id .= PHPdata i.Tag)

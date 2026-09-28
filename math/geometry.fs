@@ -40,7 +40,6 @@ namespace Aqualis
             /// Gets the generated structure type name.
             static member sname = "point2"
             new(name,context:Aqualis) =
-                let aaa = context.str
                 context.str.reg(point2.sname,name)
                 point2(point2.sname,name,context)
             new(name,c,context:Aqualis) =

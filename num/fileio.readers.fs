@@ -183,17 +183,6 @@ namespace Aqualis
                         |_ ->
                             ()
             |LaTeX ->
-                let double0string_format_F =
-                    let a,b = ctx.numFormat.dFormat
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                let format =
-                    lst.data
-                    |> List.map (fun b ->
-                        match b.etype with
-                          |It _ ->"I"+ctx.numFormat.iFormat.ToString()
-                          |Dt -> double0string_format_F
-                          |_ -> "")
-                    |> fun s -> String.Join(",",s)
                 let code =
                     lst.data
                     |> List.map (fun b ->
@@ -203,17 +192,6 @@ namespace Aqualis
                     |> fun s -> String.Join(",",s)
                 writein("Read(text): \\("+code+" \\leftarrow "+fp+"\\)\n")
             |HTML ->
-                let double0string_format_F =
-                    let a,b = ctx.numFormat.dFormat
-                    "E"+a.ToString()+"."+b.ToString()+"e3"
-                let format =
-                    lst.data
-                    |> List.map (fun b ->
-                        match b.etype with
-                        |It _ ->"I"+ctx.numFormat.iFormat.ToString()
-                        |Dt -> double0string_format_F
-                        |_ -> "")
-                    |> fun s -> String.Join(",",s)
                 let code =
                     lst.data
                     |> List.map (fun b ->

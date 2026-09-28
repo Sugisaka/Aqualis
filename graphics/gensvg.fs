@@ -367,7 +367,6 @@ type ContextGenSvg internal (context:Aqualis) =
 
     /// Projects and draws a three-dimensional triangle.
     member this.triangle3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3:double0,y3:double0,z3:double0,p3D:Setting3D,fillcolor,strokecolor) =
-        let pi = Math.PI
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
@@ -392,7 +391,6 @@ type ContextGenSvg internal (context:Aqualis) =
 
     /// Projects and draws a three-dimensional quadrilateral.
     member this.quadrangle3D(cvx,cvy,wr:exprString -> unit,x1:double0,y1:double0,z1:double0,x2:double0,y2:double0,z2:double0,x3:double0,y3:double0,z3:double0,x4:double0,y4:double0,z4:double0,p3D:Setting3D,fillcolor,strokecolor) =
-        let pi = Math.PI
         let xy3D (x:double0) (y:double0) (z:double0) =
             p3D.ScaleX*x*asm.cos(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.cos(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.cos(asm.pi/180.0*p3D.DirZ),
             p3D.ScaleX*x*asm.sin(asm.pi/180.0*p3D.DirX)+p3D.ScaleY*y*asm.sin(asm.pi/180.0*p3D.DirY)+p3D.ScaleZ*z*asm.sin(asm.pi/180.0*p3D.DirZ)
@@ -900,7 +898,6 @@ type svgfilemaker_aq(context:Aqualis,cvx:double,cvy:double,wr:exprString -> unit
     /// <param name="strokecolor">線色</param>
     member this.circle3D(c:double*double*double, r, p3D:Setting3D, fillcolor,strokecolor) =
         let cx, cy, cz = c
-        let x3D,y3D,z3D = p3D.DirX,p3D.DirY,p3D.DirZ
         generator.circle3D(cvx,cvy,wr,D scale*cx,D scale*cy,D scale*cz,D scale*r,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加
@@ -912,7 +909,6 @@ type svgfilemaker_aq(context:Aqualis,cvx:double,cvy:double,wr:exprString -> unit
     /// <param name="strokecolor">線色</param>
     member this.circle3D(c:double0*double0*double0, r:double0, p3D:Setting3D, fillcolor,strokecolor) =
         let cx, cy, cz = c
-        let x3D,y3D,z3D = p3D.DirX,p3D.DirY,p3D.DirZ
         generator.circle3D(cvx,cvy,wr,scale*cx,scale*cy,scale*cz,scale*r,p3D,fillcolor,strokecolor)
     /// <summary>
     /// 円を追加

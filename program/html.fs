@@ -369,10 +369,6 @@ namespace Aqualis
 
     /// Writes HTML elements and positioned content to a generation context.
     type html internal (c:Aqualis) =
-        /// Writes raw HTML to the generation context.
-        let write(s:string) = c.codewrite s
-        let writei(s:string) = c.codewritei s
-        let writen(s:string) = c.codewriten s
         let writein(s:string) = c.codewritein s
         let writeConfiguredAssets() = HtmlAssetRendering.write "    " writein c.htmlAssets
         /// Gets the associated generation context.

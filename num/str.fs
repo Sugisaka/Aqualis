@@ -83,7 +83,6 @@ module Aqualis_str =
 
         ///<summary>構造体メンバへのアクセス</summary>
         member this.mem(vname,name) =
-            let definitions = ctx.cstr
             match ctx.language with
             |Fortran ->
                 vname+"%"+name
@@ -247,7 +246,6 @@ module Aqualis_str =
 
         /// Registers a structure variable without adding a structure definition.
         member this.regWithoutAddStructure(sname,name:string) =
-            let definitions = ctx.cstr
             let str_ac = match ctx.language with |Fortran -> "%" |C99 |LaTeX |HTML |HTMLSequenceDiagram |Python |JavaScript |PHP |Numeric -> "."
             //構造体のメンバの場合はリスト登録不要
             if name.Contains(str_ac)=false then
