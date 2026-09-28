@@ -1,6 +1,6 @@
 # Local NuGet package smoke test
 
-Place `Aqualis.188.0.3.nupkg` in the repository's `artifacts` directory. From the repository root, run:
+Place `Aqualis.188.0.4.nupkg` in the repository's `artifacts` directory. From the repository root, run:
 
 ```powershell
 dotnet restore tests/Aqualis.PackageSmoke/Aqualis.PackageSmoke.fsproj --configfile tests/Aqualis.PackageSmoke/NuGet.Config
