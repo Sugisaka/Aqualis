@@ -13,6 +13,7 @@ namespace Aqualis
     /// Generation context that owns output, variables, diagnostics, and target-language state.
     type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool,writerDirectory:string option,diagnostics:DiagnosticBag option) =
         let contextId = System.Guid.NewGuid()
+        let securityGenerationState = SecurityGenerationState()
         let diagnosticBag =
             diagnostics
             |> Option.orElseWith DiagnosticScope.tryCurrent
@@ -87,6 +88,8 @@ namespace Aqualis
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(Path.Combine(dir, src)) |_ -> None
         /// Gets the unique identity of this generation context.
         member _.ContextId with get() = contextId
+        /// Gets session and CSRF setup state owned by this context.
+        member internal _.SecurityGenerationState = securityGenerationState
         /// Gets the diagnostic collection owned by this context.
         member _.Diagnostics = diagnosticBag
         /// Adds a generation diagnostic with language and project location.

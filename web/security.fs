@@ -7,64 +7,6 @@
 namespace Aqualis
 
 open System
-open System.Runtime.CompilerServices
-
-/// SameSite policy used by the generated PHP session cookie.
-[<RequireQualifiedAccess>]
-type SameSite =
-    | Lax
-    | Strict
-
-/// Options passed to PHP's session cookie configuration.
-type SessionOptions = {
-    Name: string
-    Lifetime: int
-    Path: string
-    Secure: bool
-    HttpOnly: bool
-    SameSite: SameSite
-}
-
-/// Default configuration for generated PHP sessions.
-[<RequireQualifiedAccess>]
-module SessionOptions =
-    /// Creates default session options for a cookie name and path.
-    let private create name path secure = {
-        Name = name
-        Lifetime = 0
-        Path = path
-        Secure = secure
-        HttpOnly = true
-        SameSite = SameSite.Lax
-    }
-
-    /// Secure defaults for one HTTPS application. Use a distinct alphanumeric
-    /// session name and the narrowest cookie path served by the application.
-    let production name path = create name path true
-
-    /// Defaults suitable for one local HTTP development application.
-    let development name path = create name path false
-
-/// Mutable session and CSRF setup state for a generation context.
-type private SecurityGenerationState() =
-    /// Gets or sets the selected session options.
-    member val SessionOptions: SessionOptions option = None with get, set
-    /// Tracks whether session startup code has been registered.
-    member val SessionPrologueRegistered = false with get, set
-    /// Tracks whether CSRF token initialization has been emitted.
-    member val CsrfTokenEmitted = false with get, set
-    /// Tracks whether CSRF initialization code has been registered.
-    member val CsrfPrologueRegistered = false with get, set
-    /// Gets the synchronization gate for security generation.
-    member val Gate = obj() with get
-
-/// Associates security generation state with an Aqualis context.
-[<RequireQualifiedAccess>]
-module private SecurityGenerationStates =
-    /// Per-context storage for generated security state.
-    let private states = ConditionalWeakTable<Aqualis, SecurityGenerationState>()
-    /// Gets or creates security generation state for a context.
-    let get (context:Aqualis) = states.GetOrCreateValue context
 
 /// Builds PHP expressions for session and CSRF handling.
 [<RequireQualifiedAccess>]
@@ -134,15 +76,15 @@ module private SecurityCode =
                 "A session cookie path must be an absolute HTTP path without control characters or semicolons."
 
     /// Requires that the PHP session has been started.
-    let requireStarted context operation =
-        let state = SecurityGenerationStates.get context
+    let requireStarted (context:Aqualis) operation =
+        let state = context.SecurityGenerationState
         lock state.Gate (fun () ->
             if state.SessionOptions.IsNone then
                 invalidOp (operation + " requires session.Start to be called first."))
 
     /// Gets options from an already started session.
-    let getStartedOptions context operation =
-        let state = SecurityGenerationStates.get context
+    let getStartedOptions (context:Aqualis) operation =
+        let state = context.SecurityGenerationState
         lock state.Gate (fun () ->
             match state.SessionOptions with
             | Some options -> options
@@ -158,7 +100,7 @@ type WebSession internal (context:Aqualis) =
     /// An already-active session is accepted only when all requested security settings match.
     member _.Start(options:SessionOptions) =
         SecurityCode.validateSessionOptions options
-        let state = SecurityGenerationStates.get context
+        let state = context.SecurityGenerationState
 
         lock state.Gate (fun () ->
             match state.SessionOptions with
@@ -256,7 +198,7 @@ type WebSession internal (context:Aqualis) =
             "'samesite' => $sessionCookieParams['samesite'] ?? 'Lax']); " +
             "} " +
             "session_destroy(); } ?>")
-        let state = SecurityGenerationStates.get context
+        let state = context.SecurityGenerationState
         lock state.Gate (fun () ->
             state.SessionOptions <- None
             state.CsrfTokenEmitted <- false)
@@ -264,7 +206,7 @@ type WebSession internal (context:Aqualis) =
     /// Destroys the session and redirects; the generated branch cannot continue.
     /// Restores generation state so sibling branches can still use the session.
     member this.DestroyAndRedirect(location:Url,status:RedirectStatus) =
-        let state = SecurityGenerationStates.get context
+        let state = context.SecurityGenerationState
         let options = SecurityCode.getStartedOptions context "session.DestroyAndRedirect"
         let csrfTokenEmitted = lock state.Gate (fun () -> state.CsrfTokenEmitted)
         try
@@ -295,7 +237,7 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
     /// Registers unconditional token initialization in the file prologue once.
     member this.EnsureToken() =
         SecurityCode.requireStarted context "csrf.EnsureToken"
-        let state = SecurityGenerationStates.get context
+        let state = context.SecurityGenerationState
 
         lock state.Gate (fun () ->
             if not state.CsrfTokenEmitted then
@@ -315,7 +257,7 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
     member this.RotateToken() =
         SecurityCode.requireStarted context "csrf.RotateToken"
         this.EnsureToken()
-        let state = SecurityGenerationStates.get context
+        let state = context.SecurityGenerationState
 
         lock state.Gate (fun () ->
             context.codewritein(
@@ -338,7 +280,7 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
 
     /// Emits an HTML-escaped hidden field containing the current session token.
     member this.Field() =
-        let state = SecurityGenerationStates.get context
+        let state = context.SecurityGenerationState
         lock state.Gate (fun () ->
             if not state.CsrfTokenEmitted then
                 invalidOp "csrf.Field requires csrf.EnsureToken or csrf.RotateToken to be called first.")
@@ -351,7 +293,7 @@ type CsrfProtection internal (context:Aqualis, session:WebSession) =
 
     /// Rejects an invalid POST request with HTTP 403 and terminates the generated script.
     member this.RequireValidPost() =
-        let state = SecurityGenerationStates.get context
+        let state = context.SecurityGenerationState
         lock state.Gate (fun () ->
             if not state.CsrfTokenEmitted then
                 invalidOp "csrf.RequireValidPost requires csrf.EnsureToken or csrf.RotateToken to be called first.")
