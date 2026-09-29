@@ -12,12 +12,14 @@ let outputdir = @"C:\home\work"
 open Aqualis
 
     type testClass1(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass1>(sname_,name,ctx)
+        inherit structureValue(sname_,name,ctx)
         static member sname = "testClass1"
+        static member Descriptor : StructureDescriptor<testClass1> =
+            { StructureName = testClass1.sname
+              Wrap = fun (n,targetContext) -> testClass1(testClass1.sname,n,targetContext) }
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)
             testClass1(testClass1.sname,name,ctx)
-        override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)
         member public __.n1 = ctx.str.i0(sname_,name,"n1")
         member public __.x1 = ctx.str.d0(sname_,name,"x1")
         member public __.z1 = ctx.str.z0(sname_,name,"z1")
@@ -25,48 +27,26 @@ open Aqualis
             ctx.str.addmember(psname,(Structure testClass1.sname,size1,name))
             testClass1(testClass1.sname,ctx.str.mem(vname,name),ctx)
         
-    type testClass1_1(sname_,name,size1,ctx:Aqualis) =
-        inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,ctx)
-        new(name,size1,ctx:Aqualis) =
-            ctx.str.reg(testClass1.sname,name,size1)
-            testClass1_1(testClass1.sname,name,A1 size1,ctx)
-        new(name,ctx) = testClass1_1(name,0,ctx)
-        override _.WrapElement n = testClass1(sname_,n,ctx)
-        override _.Rewrap(n,v,targetEnvironment) = testClass1_1(sname_,n,v,targetEnvironment)
-        static member str_mem(psname, vname, name, size1,ctx:Aqualis) =
-            ctx.str.addmember(psname,(Structure testClass1.sname,size1,name))
-            testClass1_1(testClass1.sname,ctx.str.mem(vname,name), size1,ctx)
-        
     type testClass2(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass2>(sname_,name,ctx)
+        inherit structureValue(sname_,name,ctx)
         static member sname = "testClass2"
+        static member Descriptor : StructureDescriptor<testClass2> =
+            { StructureName = testClass2.sname
+              Wrap = fun (n,targetContext) -> testClass2(testClass2.sname,n,targetContext) }
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass2.sname,name)
             testClass2(testClass2.sname,name,ctx)
-        override _.Rewrap(n,targetEnvironment) = testClass2(sname_,n,targetEnvironment)
         member public __.n1 = ctx.str.i0(sname_,name,"n2")
         member public __.x1 = ctx.str.d0(sname_,name,"x2")
         member public __.z1 = ctx.str.z0(sname_,name,"z2")
         member public __.s1 = testClass1.str_mem(testClass2.sname,name,"s2",A0,ctx)
-        member public __.t1 = testClass1_1.str_mem(testClass2.sname,name,"t2",A1 0,ctx)
-        
-    type testClass2_1(sname_,name,size1,ctx:Aqualis) =
-        inherit structureArray1<testClass2,testClass2_1>(sname_,name,size1,ctx)
-        new(name,size1,ctx:Aqualis) =
-            ctx.str.reg(testClass2.sname,name,size1)
-            testClass2_1(testClass2.sname,name,A1(size1),ctx)
-        new(name,ctx:Aqualis) = testClass2_1(name,0,ctx)
-        override _.WrapElement n = testClass2(sname_,n,ctx)
-        override _.Rewrap(n,v,targetEnvironment) = testClass2_1(sname_,n,v,targetEnvironment)
-        static member str_mem(psname, vname, name, size1,ctx:Aqualis) =
-            ctx.str.addmember(psname,(Structure testClass2.sname,size1,name))
-            testClass2_1(testClass2.sname,ctx.str.mem(vname,name), size1, ctx)
+        member public __.t1 = structureArray1<testClass1>.str_mem(testClass1.Descriptor,testClass2.sname,name,"t2",A1 0,ctx)
         
 Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname version <| fun ctx ->
-    let dd = testClass1_1("d",ctx)
+    let dd = structureArray1<testClass1>(testClass1.Descriptor,"d",0,ctx)
     let xx = ctx.var.i1 "xx"
     let pp = testClass2("p",ctx)
-    let qq = testClass2_1("q",ctx)
+    let qq = structureArray1<testClass2>(testClass2.Descriptor,"q",0,ctx)
     dd.allocate 4
     xx.allocate 8
     pp.s1.n1 <== 100

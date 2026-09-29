@@ -12,7 +12,7 @@ type private FunctionArgumentStructure(
     structureName,
     name,
     environment:Aqualis) =
-    inherit structureValue<FunctionArgumentStructure>(
+    inherit structureValue(
         structureName,
         name,
         environment)
@@ -28,11 +28,15 @@ type private FunctionArgumentStructure(
             name,
             environment)
 
-    override _.Rewrap(name,targetEnvironment) =
-        FunctionArgumentStructure(
-            structureName,
-            name,
-            targetEnvironment)
+    static member Descriptor : StructureDescriptor<FunctionArgumentStructure> =
+        {
+            StructureName = FunctionArgumentStructure.StructureName
+            Wrap = fun (name,targetContext) ->
+                FunctionArgumentStructure(
+                    FunctionArgumentStructure.StructureName,
+                    name,
+                    targetContext)
+        }
 
     member _.Value =
         environment.str.d0(
@@ -362,7 +366,7 @@ module CompilerScriptTests =
         result.farg target <| fun reboundResult ->
         value.farg target <| fun reboundValue ->
         values.farg target <| fun reboundValues ->
-        structureValue.farg target <| fun reboundStructure ->
+        FunctionArgumentStructure.Descriptor.farg structureValue target <| fun reboundStructure ->
             Assert.Same(target, reboundResult.Context)
             Assert.Same(target, reboundValue.Context)
             Assert.Same(target, reboundValues.Context)

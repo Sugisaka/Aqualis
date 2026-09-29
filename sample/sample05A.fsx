@@ -15,30 +15,17 @@ open Aqualis
     /// testClass1
     /// </summary>
     type testClass1(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass1>(sname_,name,ctx)
+        inherit structureValue(sname_,name,ctx)
         static member sname = "testClass1"
+        static member Descriptor : StructureDescriptor<testClass1> =
+            { StructureName = testClass1.sname
+              Wrap = fun (n,targetContext) -> testClass1(testClass1.sname,n,targetContext) }
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)
             testClass1(testClass1.sname,name,ctx)
-        override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)
         member public __.n1 = ctx.str.i0(sname_,name,"x1")
         member public __.x1 = ctx.str.d0(sname_,name,"y1")
         member public __.z1 = ctx.str.z0(sname_,name,"x2")
-        
-    /// <summary>
-    /// testClass1の配列
-    /// </summary>
-    type testClass1_1(sname_,name,size1,ctx:Aqualis) =
-        inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,ctx)
-        new(name,size1,ctx:Aqualis) =
-            ctx.str.reg(testClass1.sname,name,size1)
-            testClass1_1(testClass1.sname,name,A1 size1,ctx)
-        new(name,ctx:Aqualis) = testClass1_1(name,0,ctx)
-        override _.WrapElement n = testClass1(sname_,n,ctx)
-        override _.Rewrap(n,v,targetEnvironment) = testClass1_1(sname_,n,v,targetEnvironment)
-        static member str_mem(psname, vname, name, size1,ctx:Aqualis) =
-            ctx.str.addmember(psname,(Structure(testClass1.sname),size1,name))
-            testClass1_1(testClass1.sname,ctx.str.mem(vname,name), size1,ctx)
             
 Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname version <| fun ctx ->
     let cc = testClass1("c",ctx)
@@ -48,7 +35,7 @@ Compile [Fortran;C99;Python;HTML;LaTeX;] outputdir projectname version <| fun ct
     ctx.print.t cc.n1
     ctx.print.t cc.x1
     ctx.print.t cc.z1
-    let dd = testClass1_1("d",ctx)
+    let dd = structureArray1<testClass1>(testClass1.Descriptor,"d",0,ctx)
     let xx = ctx.var.i1 "xx"
     dd.allocate 4
     xx.allocate 8

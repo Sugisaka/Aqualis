@@ -1104,37 +1104,26 @@ The following defines `testClass1`. For generated Fortran and C code, fields are
 /// testClass1
 /// </summary>
 type testClass1(sname_,name,ctx:Aqualis) =
-    inherit structureValue<testClass1>(sname_,name,ctx)
+    inherit structureValue(sname_,name,ctx)
     /// Class name
     static member sname = "testClass1"
+    /// Metadata used to wrap an existing generated variable as testClass1
+    static member Descriptor : StructureDescriptor<testClass1> =
+        { StructureName = testClass1.sname
+          Wrap = fun (n,targetContext) -> testClass1(testClass1.sname,n,targetContext) }
     /// Constructor
     new(name,ctx:Aqualis) =
         ctx.str.reg(testClass1.sname,name)
         testClass1(testClass1.sname,name,ctx)
-    override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)
     /// Field 1
     member public __.n1 = ctx.str.i0(sname_,name,"x1")
     /// Field 2
     member public __.x1 = ctx.str.d0(sname_,name,"y1")
     /// Field 3
     member public __.z1 = ctx.str.z0(sname_,name,"x2")
-        
-/// <summary>
-/// Array of testClass1
-/// </summary>
-type testClass1_1(sname_,name,size1,ctx:Aqualis) =
-    inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,ctx)
-    new(name,size1,ctx:Aqualis) =
-        ctx.str.reg(testClass1.sname,name,size1)
-        testClass1_1(testClass1.sname,name,A1 size1,ctx)
-    new(name,ctx:Aqualis) = testClass1_1(name,0,ctx)
-    override _.WrapElement n = testClass1(sname_,n,ctx)
-    override _.Rewrap(n,v,targetEnvironment) = testClass1_1(sname_,n,v,targetEnvironment)
-    /// Define this method when this class is used as a field of another class
-    static member str_mem(psname, vname, name, size1,ctx:Aqualis) =
-        ctx.str.addmember(psname,(Structure(testClass1.sname),size1,name))
-        testClass1_1(testClass1.sname,ctx.str.mem(vname,name), size1,ctx)
 ```
+
+No array-specific derived class is required. The same `Descriptor` creates one-, two-, and three-dimensional arrays.
 
 ### Usage
 
@@ -1149,7 +1138,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
     ctx.print.tt <| u.n1 ++ u.x1 ++ u.z1
     
     // Create a one-dimensional testClass1 array named v
-    let v = testClass1_1("v",ctx)
+    let v = structureArray1<testClass1>(testClass1.Descriptor,"v",0,ctx)
     // Allocate memory for ten elements
     v.allocate(10)
     // Access array elements
@@ -1158,6 +1147,12 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
         v[i].x1 <== 2.0
         v[i].z1 <== 3.0+asm.uj*4.0
         ctx.print.tt <| v[i].n1 ++ v[i].x1 ++ v[i].z1
+
+    // Fixed-size two- and three-dimensional arrays
+    let matrix = structureArray2<testClass1>(testClass1.Descriptor,"matrix",3,4,ctx)
+    let tensor = structureArray3<testClass1>(testClass1.Descriptor,"tensor",2,3,4,ctx)
+    matrix[1,2].x1 <== 1.0
+    tensor[0,1,2].z1 <== 2.0
 ```
 
 ## Symbolic Differentiation

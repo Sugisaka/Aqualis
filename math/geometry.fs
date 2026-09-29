@@ -35,18 +35,22 @@ namespace Aqualis
             static member ( * ) (a:Point2,b:Point2) = a.x*b.x+a.y*b.y
 
         /// Named two-dimensional vector stored as a generated structure.
-        type point2(sname_,name,context:Aqualis) =
-            inherit structureValue<point2>(sname_,name,context)
+        type point2(sname_:string,name:string,context:Aqualis) =
+            inherit structureValue(sname_,name,context)
             /// Gets the generated structure type name.
             static member sname = "point2"
-            new(name,context:Aqualis) =
+            new(name:string,context:Aqualis) =
                 context.str.reg(point2.sname,name)
                 point2(point2.sname,name,context)
-            new(name,c,context:Aqualis) =
+            new(name:string,c:int,context:Aqualis) =
                 context.str.reg(point2.sname,name,c)
                 point2(point2.sname,name,context)
-            override _.Rewrap(n,targetEnvironment) =
-                point2(sname_,n,targetEnvironment)
+            /// Gets the metadata used to wrap point values and arrays.
+            static member Descriptor : StructureDescriptor<point2> =
+                {
+                    StructureName = point2.sname
+                    Wrap = fun (n,targetContext) -> point2(point2.sname,n,targetContext)
+                }
             /// Gets the horizontal coordinate.
             member public __.x = context.str.d0(sname_,name,"x")
             /// Gets the vertical coordinate.
@@ -100,22 +104,6 @@ namespace Aqualis
                 context.str.addmember(psname,(Structure point2.sname,A0,name))
                 point2(point2.sname,context.str.mem(vname,name),context)
 
-        /// One-dimensional array of generated two-dimensional point structures.
-        type point2_1(sname_,name,size1,context:Aqualis) =
-            inherit structureArray1<point2,point2_1>(sname_,name,size1,context)
-            //変数宣言を行う場合
-            new(name,size1,context:Aqualis) =
-                context.str.reg(point2.sname,name,size1)
-                point2_1(point2.sname,name,A1 size1,context)
-            override _.WrapElement n = point2(sname_,n,context)
-            override _.Rewrap(n,v,targetEnvironment) =
-                point2_1(sname_,n,v,targetEnvironment)
-            //他の構造体snameのメンバ変数がこの構造体になる場合に使用
-            /// Registers and returns a point member of a generated structure.
-            static member str_mem(psname, vname, name, size1, context:Aqualis) =
-                context.str.addmember(psname,(Structure point2.sname,A1 size1,name))
-                point2_1(point2.sname,context.str.mem(vname,name),A1 size1,context)
-
         /// Immutable three-dimensional vector of symbolic real coordinates.
         type Point3(x:double0,y:double0,z:double0) =
             /// Gets the horizontal coordinate.
@@ -148,15 +136,19 @@ namespace Aqualis
             static member ( % ) (a:Point3,b:Point3) = new Point3(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x)
 
         /// Named three-dimensional vector stored as a generated structure.
-        type point3(sname_,name,context:Aqualis) =
-            inherit structureValue<point3>(sname_,name,context)
+        type point3(sname_:string,name:string,context:Aqualis) =
+            inherit structureValue(sname_,name,context)
             /// Gets the generated structure type name.
             static member sname = "point3"
-            new(name,context:Aqualis) =
+            new(name:string,context:Aqualis) =
                 context.str.reg(point3.sname,name)
                 point3(point3.sname,name,context)
-            override _.Rewrap(n,targetEnvironment) =
-                point3(sname_,n,targetEnvironment)
+            /// Gets the metadata used to wrap point values and arrays.
+            static member Descriptor : StructureDescriptor<point3> =
+                {
+                    StructureName = point3.sname
+                    Wrap = fun (n,targetContext) -> point3(point3.sname,n,targetContext)
+                }
             /// Gets the horizontal coordinate.
             member public __.x = context.str.d0(sname_,name,"x")
             /// Gets the vertical coordinate.
@@ -210,16 +202,6 @@ namespace Aqualis
             static member str_mem(psname, vname, name, context:Aqualis) =
                 context.str.addmember(psname,(Structure(point3.sname),A0,name))
                 point3(point3.sname,context.str.mem(vname,name),context)
-
-        /// One-dimensional array of generated three-dimensional point structures.
-        type point3_1(sname_,name,size1,context:Aqualis) =
-            inherit structureArray1<point3,point3_1>(sname_,name,size1,context=context)
-            new(name,size1,context:Aqualis) =
-                context.str.reg(point3.sname,name,size1)
-                point3_1(point3.sname,name,A1 size1,context)
-            override _.WrapElement n = point3(sname_,n,context)
-            override _.Rewrap(n,v,targetEnvironment) =
-                point3_1(sname_,n,v,targetEnvironment)
 
         /// Computes the fraction of a square of side <c>d</c> centered at
         /// <c>(x,y)</c> covered by a circle centered at

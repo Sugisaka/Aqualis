@@ -15,12 +15,14 @@ open Aqualis
     /// testClass1
     /// </summary>
     type testClass1(sname_,name,ctx:Aqualis) =
-        inherit structureValue<testClass1>(sname_,name,ctx)
+        inherit structureValue(sname_,name,ctx)
         static member sname = "testClass1"
+        static member Descriptor : StructureDescriptor<testClass1> =
+            { StructureName = testClass1.sname
+              Wrap = fun (n,targetContext) -> testClass1(testClass1.sname,n,targetContext) }
         new(name,ctx:Aqualis) =
             ctx.str.reg(testClass1.sname,name)
             testClass1(testClass1.sname,name,ctx)
-        override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)
         member public __.n1 = ctx.str.i0(sname_,name,"x1")
         member public __.x1 = ctx.str.d0(sname_,name,"y1")
         member public __.z1 = ctx.str.z0(sname_,name,"x2")
@@ -32,7 +34,7 @@ Compile [Fortran;C99;Python] outputdir projectname version <| fun ctx ->
             x.farg c <| fun x ->
             n.farg c <| fun n ->
             n1.farg c <| fun n1 ->
-            s.farg c <| fun s ->
+            testClass1.Descriptor.farg s c <| fun s ->
                 y <== x + n + n1[0] + s.x1
                 c.print.t y
     ctx.ch.idd <| fun (n,x,z) ->

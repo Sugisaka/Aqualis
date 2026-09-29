@@ -1082,37 +1082,26 @@ OpenACCは並列化部分をGPUなどのアクセラレータで実行する。�
 /// testClass1
 /// </summary>
 type testClass1(sname_,name,ctx:Aqualis) =
-    inherit structureValue<testClass1>(sname_,name,ctx)
+    inherit structureValue(sname_,name,ctx)
     /// クラス名
     static member sname = "testClass1"
+    /// 既存の生成済み変数をtestClass1としてラップするための型情報
+    static member Descriptor : StructureDescriptor<testClass1> =
+        { StructureName = testClass1.sname
+          Wrap = fun (n,targetContext) -> testClass1(testClass1.sname,n,targetContext) }
     /// コンストラクタ
     new(name,ctx:Aqualis) =
         ctx.str.reg(testClass1.sname,name)
         testClass1(testClass1.sname,name,ctx)
-    override _.Rewrap(n,targetEnvironment) = testClass1(sname_,n,targetEnvironment)
     /// フィールド1
     member public __.n1 = ctx.str.i0(sname_,name,"x1")
     /// フィールド2
     member public __.x1 = ctx.str.d0(sname_,name,"y1")
     /// フィールド3
     member public __.z1 = ctx.str.z0(sname_,name,"x2")
-        
-/// <summary>
-/// testClass1の配列
-/// </summary>
-type testClass1_1(sname_,name,size1,ctx:Aqualis) =
-    inherit structureArray1<testClass1,testClass1_1>(sname_,name,size1,ctx)
-    new(name,size1,ctx:Aqualis) =
-        ctx.str.reg(testClass1.sname,name,size1)
-        testClass1_1(testClass1.sname,name,A1 size1,ctx)
-    new(name,ctx:Aqualis) = testClass1_1(name,0,ctx)
-    override _.WrapElement n = testClass1(sname_,n,ctx)
-    override _.Rewrap(n,v,targetEnvironment) = testClass1_1(sname_,n,v,targetEnvironment)
-    /// このクラスを別のクラスのフィールドにする場合は以下のメソッドも定義する
-    static member str_mem(psname, vname, name, size1,ctx:Aqualis) =
-        ctx.str.addmember(psname,(Structure(testClass1.sname),size1,name))
-        testClass1_1(testClass1.sname,ctx.str.mem(vname,name), size1,ctx)
 ```
+
+構造体配列ごとの派生クラスは不要であり、同じ`Descriptor`から1～3次元配列を生成できる。
 
 ### 使用例
 
@@ -1128,7 +1117,7 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
     ctx.print.tt <| u.n1 ++ u.x1 ++ u.z1
     
     //testClass1型1次元配列（配列名：v）を生成
-    let v = testClass1_1("v",ctx)
+    let v = structureArray1<testClass1>(testClass1.Descriptor,"v",0,ctx)
     //配列要素数を指定してメモリ確保
     v.allocate(10)
     //配列へのアクセス
@@ -1137,6 +1126,12 @@ Compile [Fortran] outputdir projectname version <| fun ctx ->
         v[i].x1 <== 2.0
         v[i].z1 <== 3.0+asm.uj*4.0
         ctx.print.tt <| v[i].n1 ++ v[i].x1 ++ v[i].z1
+
+    //固定長2次元・3次元配列
+    let matrix = structureArray2<testClass1>(testClass1.Descriptor,"matrix",3,4,ctx)
+    let tensor = structureArray3<testClass1>(testClass1.Descriptor,"tensor",2,3,4,ctx)
+    matrix[1,2].x1 <== 1.0
+    tensor[0,1,2].z1 <== 2.0
 ```
 
 ## シンボリック微分
