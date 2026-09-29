@@ -9,7 +9,7 @@ let outputdir =
         "compile-policy-" + System.Guid.NewGuid().ToString("N"))
 //#############################################################################
 
-#r "nuget: Aqualis, 188.0.4"
+#r "nuget: Aqualis, 188.1.1"
 
 open System
 open System.IO

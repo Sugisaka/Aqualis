@@ -4,7 +4,7 @@ open Aqualis
 
 [<EntryPoint>]
 let main _ =
-    let expectedVersion = "188.0.4"
+    let expectedVersion = "188.1.1"
     let outputDirectory =
         Path.Combine(Path.GetTempPath(), "aqualis-package-smoke-" + Guid.NewGuid().ToString("N"))
 
