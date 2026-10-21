@@ -69,6 +69,44 @@ for diagnostic in result.Diagnostics do
 
 `Compile` remains available for compatibility and renders collected diagnostics to standard error. Error diagnostics abort the output transaction. `CompileWithDiagnosticPolicy` can additionally treat warnings as errors or limit the number of collected diagnostics. Context-free operations can be inspected with `Diagnostics.Capture`.
 
+## Optimization convergence
+
+Higher-level optimizers stop when the gradient's Euclidean norm is at most
+`1e-8` by default. Existing method signatures remain available. Use a
+`WithConvergence` variant to set absolute tolerances and inspect the termination
+code in the generated program:
+
+```fsharp
+let termination = context.var.i0 "termination"
+let options =
+    { OptimizationConvergence.Default with
+        GradientTolerance = 1e-10
+        StepTolerance = Some 1e-12
+        ObjectiveTolerance = None }
+context.optimization.findmin_NewtonWithConvergence
+    (100, 40, 64) (options, termination) position (D 1.0)
+    objective gradient hessian None
+```
+
+The three counts are the maximum optimizer iterations, line-search iterations,
+and bracket expansions. Tolerances must be finite and nonnegative; `None`
+disables the optional step and objective tests. Step tolerance applies to the
+Euclidean norm of the change in position; objective tolerance applies to the
+absolute change in objective value. These two tests indicate stagnation and do
+not guarantee a small gradient or a local minimum. Gradient tolerance is checked
+before each step and again after the final permitted step.
+
+`OptimizationTermination` defines the generated integer codes: `IterationLimit`
+(0), `GradientTolerance` (1), `StepTolerance` (2), `ObjectiveTolerance` (3), and
+`DirectionBreakdown` (4). Zero optimizer iterations retain the initial point and
+report `IterationLimit`. The existing step callback still receives the initial
+point and each completed step. Objective/gradient callbacks should compute their
+outputs without unrelated side effects, since convergence checks evaluate them.
+
+Newton methods solve `H p = -g` directly instead of forming an inverse matrix.
+A singular Hessian fails through the existing solver's diagnostic; an initial
+point satisfying the gradient tolerance stops before the Hessian is solved.
+
 ## Generated output ownership
 
 Successful `Compile` runs create a per-project `.aqualis-generated-<project>.json` manifest in the output directory. On later runs for the same project, files listed in the previous manifest but not generated again are removed transactionally. Unrelated files are left alone; if a previously generated file was edited after the previous run, compilation stops rather than deleting or replacing that edit. Existing outputs from before a manifest is first created are not automatically claimed or removed. Do not run multiple generator processes against the same output directory concurrently.

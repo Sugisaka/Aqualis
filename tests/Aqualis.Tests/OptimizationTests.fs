@@ -7,6 +7,49 @@ open Xunit
 open Aqualis
 
 module OptimizationTests =
+    [<Fact>]
+    let ``invalid convergence tolerances and iteration counts are rejected`` () =
+        let defaults = OptimizationConvergence.Default
+        let invalid =
+            [ { defaults with GradientTolerance = -1.0 }
+              { defaults with GradientTolerance = Double.NaN }
+              { defaults with StepTolerance = Some Double.PositiveInfinity }
+              { defaults with ObjectiveTolerance = Some -1.0 } ]
+        for options in invalid do
+            use context = Aqualis.BlankWriter C99
+            let x = context.var.d1("position",1)
+            let status = context.var.i0 "status"
+            Assert.Throws<ArgumentException>(fun () ->
+                context.optimization.findmin_GradientDescentWithConvergence (2,4,2)
+                    (options,status) x (D 1.0) (fun _ _ -> ()) (fun _ _ -> ()) None) |> ignore
+        use context = Aqualis.BlankWriter C99
+        let x = context.var.d1("position",1)
+        Assert.Throws<ArgumentException>(fun () ->
+            context.optimization.findmin_GradientDescent (-1,4) x (D 1.0)
+                (fun _ _ -> ()) (fun _ _ -> ()) None) |> ignore
+
+    [<Fact>]
+    let ``Newton generates a direct solve with status checks instead of an inverse`` () =
+        for language,extension,solve in [C99,".c","dgesv_"; Fortran,".f90","call dgesv"; Python,".py"," = solve("] do
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "newton_direct" "1.0" (fun context ->
+                let x = context.var.d1("position",1)
+                context.optimization.findmin_Newton (2,8) x (D 1.0)
+                    (fun value point -> value <== point[0]*point[0])
+                    (fun gradient point -> gradient[0] <== 2.0*point[0])
+                    (fun h _ -> h[0,0] <== 2.0) None)
+            let generated = File.ReadAllText(Path.Combine(output.Path,"newton_direct"+extension))
+            Assert.Contains(solve,generated)
+            Assert.DoesNotContain("getri",generated)
+            Assert.DoesNotContain(" = inv(",generated)
+            if language <> Python then Assert.Contains("LAPACK solve failed",generated)
+
+    [<Fact>]
+    let ``convergence variants are available for every higher-level optimizer`` () =
+        let names = typeof<ContextOptimization>.GetMethods() |> Array.map _.Name
+        for name in ["GradientDescent"; "ConjugateGradient1"; "ConjugateGradient2"; "Newton"; "quasiNewton"] do
+            Assert.Contains("findmin_"+name+"WithConvergence",names)
+
     let private generateFindmin maxBracketExpansions =
         use output = new TemporaryDirectory()
         let project = "findmin-bracket-limit"

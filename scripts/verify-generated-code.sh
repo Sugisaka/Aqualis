@@ -951,4 +951,38 @@ if [[ "$(php "$output_root/php-loop-exit/smoke.php")" != ok ]]; then
 fi
 printf '%s\n' 'PHP loop exit: passed'
 
+for language in c fortran python; do
+  case "$language" in
+    c) run_command=(bash proc_smoke_C.sh) ;;
+    fortran) run_command=(bash proc_smoke_F.sh) ;;
+    python) run_command=("$scipy_python" -- smoke.py) ;;
+  esac
+  for mode in gradient cg1 cg2 quasi boundary step objective limit newton last stationary; do
+    actual="$(cd "$output_root/optimization-$mode-$language" && "${run_command[@]}")"
+    python3 - "$mode" "$actual" <<'PY'
+import math
+import sys
+mode, output = sys.argv[1:]
+status, position, callbacks = map(float, output.split())
+expected = {'gradient': 1, 'cg1': 1, 'cg2': 1, 'quasi': 1, 'boundary': 1, 'step': 2, 'objective': 3, 'limit': 0,
+            'newton': 1, 'last': 1, 'stationary': 1}[mode]
+assert status == expected, (mode, output)
+assert math.isfinite(position), (mode, output)
+if mode in ('gradient', 'cg1', 'cg2', 'quasi', 'boundary', 'limit', 'stationary'):
+    assert callbacks == 1, (mode, output)  # Initial-point callback only.
+    expected_position = {'gradient': 1e-10, 'cg1': 1e-10, 'cg2': 1e-10, 'quasi': 1e-10,
+                         'boundary': 5e-9, 'limit': 3.0, 'stationary': 0.0}[mode]
+    assert position == expected_position, (mode, output)
+elif mode in ('newton', 'last'):
+    assert abs(position) < 1e-8, output
+else:
+    assert callbacks == 2, (mode, output)  # Initial point and one completed step.
+PY
+  done
+  if (cd "$output_root/optimization-singular-$language" && "${run_command[@]}" >actual.txt 2>error.txt); then
+    printf '%s\n' "$language Newton accepted a singular Hessian." >&2
+    exit 1
+  fi
+done
+
 printf '%s\n' 'All generated-code runtime checks passed.'

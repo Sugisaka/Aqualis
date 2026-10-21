@@ -6,6 +6,23 @@
 //
 namespace Aqualis
 
+/// Absolute convergence tolerances. Optional tests are disabled by None.
+type OptimizationConvergence =
+    { GradientTolerance: float
+      StepTolerance: float option
+      ObjectiveTolerance: float option }
+    /// Default stopping rule: gradient norm at most 1e-8.
+    static member Default =
+        { GradientTolerance = 1e-8; StepTolerance = None; ObjectiveTolerance = None }
+
+/// Values written to the generated termination variable.
+type OptimizationTermination =
+    | IterationLimit = 0
+    | GradientTolerance = 1
+    | StepTolerance = 2
+    | ObjectiveTolerance = 3
+    | DirectionBreakdown = 4
+
 /// Constants used by optimization routines.
 module private OptimizationDefaults =
     /// Maximum number of bracketing expansion steps.
@@ -14,6 +31,64 @@ module private OptimizationDefaults =
 
 /// Optimization operations for an Aqualis context.
 type ContextOptimization internal (context:Aqualis) =
+
+    /// Shares convergence checks across all higher-level optimizers.
+    member private _.iterations (n:int) (options:OptimizationConvergence,termination:int0 option)
+        (x:double1) (f:double0->double1->unit) (df:double1->double1->unit) code =
+        if n < 0 then invalidArg "n" "The iteration count cannot be negative."
+        let validate name value =
+            if not (System.Double.IsFinite value) || value < 0.0 then
+                invalidArg name "Convergence tolerances must be finite and nonnegative."
+        validate "GradientTolerance" options.GradientTolerance
+        options.StepTolerance |> Option.iter (validate "StepTolerance")
+        options.ObjectiveTolerance |> Option.iter (validate "ObjectiveTolerance")
+        let report reason = termination |> Option.iter (fun result -> result <== int reason)
+        report OptimizationTermination.IterationLimit
+        LapackValidation.require context (x.size1 .<= 0) "Optimization vector length must be positive."
+        x.foreach <| fun j ->
+            NumericArrayValidation.requireFinite context x[j] "Optimization initial point must be finite."
+        let withStepVector code =
+            if options.StepTolerance.IsSome then
+                context.ch.d1 x.size1 (fun previous -> code (Some previous))
+            else code None
+        context.ch.d1 x.size1 <| fun gradient ->
+        withStepVector <| fun previous ->
+        context.ch.dd <| fun (oldValue,newValue) ->
+            context.iter.num_exit (I n) <| fun (exit,i) ->
+                let stop reason = report reason; exit()
+                df gradient x
+                gradient.foreach <| fun j ->
+                    NumericArrayValidation.requireFinite context gradient[j] "Optimization gradient must be finite."
+                context.la.norm gradient <| fun norm ->
+                    context.br.if1 (norm .<= options.GradientTolerance) <| fun () ->
+                        stop OptimizationTermination.GradientTolerance
+                previous |> Option.iter (fun value -> value <== x)
+                if options.ObjectiveTolerance.IsSome then
+                    f oldValue x
+                    NumericArrayValidation.requireFinite context oldValue "Optimization objective must be finite."
+                code ((fun () -> stop OptimizationTermination.DirectionBreakdown),i,gradient)
+                // Check the final point too, so convergence on the last step is reported.
+                context.br.if1 (i .= n-1) <| fun () ->
+                    df gradient x
+                    gradient.foreach <| fun j ->
+                        NumericArrayValidation.requireFinite context gradient[j] "Optimization gradient must be finite."
+                    context.la.norm gradient <| fun norm ->
+                        context.br.if1 (norm .<= options.GradientTolerance) <| fun () ->
+                            stop OptimizationTermination.GradientTolerance
+                match options.StepTolerance,previous with
+                | Some tolerance,Some delta ->
+                    delta.foreach <| fun j -> delta[j] <== x[j]-delta[j]
+                    context.la.norm delta <| fun norm ->
+                        context.br.if1 (norm .<= tolerance) <| fun () ->
+                            stop OptimizationTermination.StepTolerance
+                | _ -> ()
+                match options.ObjectiveTolerance with
+                | Some tolerance ->
+                    f newValue x
+                    NumericArrayValidation.requireFinite context newValue "Optimization objective must be finite."
+                    context.br.if1 (asm.abs(newValue-oldValue) .<= tolerance) <| fun () ->
+                        stop OptimizationTermination.ObjectiveTolerance
+                | None -> ()
 
     /// BFGS公式により逆ヘッセ行列の近似を更新します。
     member internal _.updateInverseHessianBfgs (B:double2,y:double1,s:double1,p:double0) =
@@ -157,7 +232,7 @@ type ContextOptimization internal (context:Aqualis) =
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
     /// <param name="stepProc">各ステップの暫定解に対して行う処理</param>
-    member private this.findminGradientDescentCore (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
+    member private this.findminGradientDescentCore (n:int,m:int,maxBracketExpansions:int) (convergence:OptimizationConvergence,termination:int0 option) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some(pu) ->
                 pu (_0,x0)
@@ -165,10 +240,10 @@ type ContextOptimization internal (context:Aqualis) =
             ()
         context.ch.d <| fun dd0_ ->
             context.ch.d1 x0.size1 <| fun y ->
-                context.iter.num_exit (I n) <| fun (ext,i) ->
+                this.iterations n (convergence,termination) x0 f df <| fun (ext,i,gradient) ->
                     dd0_ <== dd0
                     context.ch.d1 x0.size1 <| fun (df0:double1) ->
-                        df df0 x0
+                        df0 <== gradient
                         //勾配を計算
                         y.foreach <| fun i ->
                             y.[i] <== -df0.[i]
@@ -185,11 +260,11 @@ type ContextOptimization internal (context:Aqualis) =
 
     /// 既定の探索区間拡張上限を用いて、最急降下法で極小値を探索します。
     member this.findmin_GradientDescent (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminGradientDescentCore (n,m,OptimizationDefaults.MaxBracketExpansions) x0 dd0 f df stepProc
+        this.findminGradientDescentCore (n,m,OptimizationDefaults.MaxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df stepProc
 
     /// 探索区間の拡張回数に上限を指定して、最急降下法で極小値を探索します。
     member this.findmin_GradientDescentWithBracketLimit (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminGradientDescentCore (n,m,maxBracketExpansions) x0 dd0 f df stepProc
+        this.findminGradientDescentCore (n,m,maxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df stepProc
 
     /// <summary>
     /// ヘッセ行列を用いた共役勾配法
@@ -201,7 +276,7 @@ type ContextOptimization internal (context:Aqualis) =
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
     /// <param name="fH">目的関数のヘッセ行列</param>
-    member private this.findminConjugateGradient1Core (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
+    member private this.findminConjugateGradient1Core (n:int,m:int,maxBracketExpansions:int) (convergence:OptimizationConvergence,termination:int0 option) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some(pu) ->
                 pu (_0,x0)
@@ -212,10 +287,10 @@ type ContextOptimization internal (context:Aqualis) =
             context.ch.d1 x0.size1 <| fun b ->
             context.ch.d1 x0.size1 <| fun y ->
                 b.clear()
-                context.iter.num_exit (I n) <| fun (ext,i) ->
+                this.iterations n (convergence,termination) x0 f df <| fun (ext,i,gradient) ->
                     dd0_ <== dd0
                     context.ch.d1 x0.size1 <| fun df0 ->
-                        df df0 x0
+                        df0 <== gradient
                         context.br.branch <| fun r ->
                             r.IF (i.=0) <| fun () ->
                                 a <== 0
@@ -245,11 +320,11 @@ type ContextOptimization internal (context:Aqualis) =
 
     /// 既定の探索区間拡張上限を用いて、共役勾配法で極小値を探索します。
     member this.findmin_ConjugateGradient1 (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminConjugateGradient1Core (n,m,OptimizationDefaults.MaxBracketExpansions) x0 dd0 f df fH stepProc
+        this.findminConjugateGradient1Core (n,m,OptimizationDefaults.MaxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df fH stepProc
 
     /// 探索区間の拡張回数に上限を指定して、共役勾配法で極小値を探索します。
     member this.findmin_ConjugateGradient1WithBracketLimit (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminConjugateGradient1Core (n,m,maxBracketExpansions) x0 dd0 f df fH stepProc
+        this.findminConjugateGradient1Core (n,m,maxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df fH stepProc
 
     /// <summary>
     /// ヘッセ行列を用いない共役勾配法
@@ -260,7 +335,7 @@ type ContextOptimization internal (context:Aqualis) =
     /// <param name="dd0">探索間隔</param>
     /// <param name="f">目的関数</param>
     /// <param name="df">目的関数の勾配</param>
-    member private this.findminConjugateGradient2Core (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
+    member private this.findminConjugateGradient2Core (n:int,m:int,maxBracketExpansions:int) (convergence:OptimizationConvergence,termination:int0 option) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some pu ->
                 pu (_0,x0)
@@ -273,10 +348,10 @@ type ContextOptimization internal (context:Aqualis) =
             context.ch.d1 x0.size1 <| fun df1 ->
             context.ch.d1 x0.size1 <| fun p1 ->
                 b.clear()
-                context.iter.num_exit (I n) <| fun (ext,i) ->
+                this.iterations n (convergence,termination) x0 f df <| fun (ext,i,gradient) ->
                     dd0_ <== dd0
                     context.ch.d1 x0.size1 <| fun (df0:double1) ->
-                        df df0 x0
+                        df0 <== gradient
                         context.br.branch <| fun r ->
                             r.IF (i.=0) <| fun () ->
                                 a <== 0
@@ -310,11 +385,11 @@ type ContextOptimization internal (context:Aqualis) =
 
     /// 既定の探索区間拡張上限を用いて、共役勾配法で極小値を探索します。
     member this.findmin_ConjugateGradient2 (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminConjugateGradient2Core (n,m,OptimizationDefaults.MaxBracketExpansions) x0 dd0 f df stepProc
+        this.findminConjugateGradient2Core (n,m,OptimizationDefaults.MaxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df stepProc
 
     /// 探索区間の拡張回数に上限を指定して、共役勾配法で極小値を探索します。
     member this.findmin_ConjugateGradient2WithBracketLimit (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminConjugateGradient2Core (n,m,maxBracketExpansions) x0 dd0 f df stepProc
+        this.findminConjugateGradient2Core (n,m,maxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df stepProc
 
     /// <summary>
     /// ニュートン法
@@ -326,40 +401,37 @@ type ContextOptimization internal (context:Aqualis) =
     /// <param name="f"></param>
     /// <param name="df"></param>
     /// <param name="fH"></param>
-    member private this.findminNewtonCore (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
+    member private this.findminNewtonCore (n:int,m:int,maxBracketExpansions:int) (convergence:OptimizationConvergence,termination:int0 option) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some pu ->
                 pu (_0,x0)
           |None ->
             ()
         context.ch.d <| fun dd0_ ->
-            context.iter.num_exit (I n) <| fun (ext,i) ->
+            this.iterations n (convergence,termination) x0 f df <| fun (ext,i,gradient) ->
                 dd0_ <== dd0
-                context.ch.d2 (x0.size1, x0.size1) <| fun ih ->
-                    context.ch.d2 (x0.size1, x0.size1) <| fun h ->
-                        fH h x0
-                        context.la.inverse_matrix (ih, h)
-                    context.ch.d1 x0.size1 <| fun df0 ->
-                        df df0 x0
-                        context.la.matmul (ih,df0) <| fun a ->
-                            context.la.norm a <| fun nr ->
-                                context.br.if1 (nr.=0.0) <| fun () -> ext()
-                            a.foreach <| fun j ->
-                                a.[j] <== -a.[j]
-                            this.findminWithBracketLimit (m,maxBracketExpansions) (x0,a) dd0_ f x0
-                            match stepProc with
-                              |Some pu ->
-                                    pu(i,x0)
-                              |None ->
-                                ()
+                context.ch.d2 (x0.size1, x0.size1) <| fun h ->
+                    fH h x0
+                    context.ch.d1 x0.size1 <| fun a ->
+                        a <== gradient
+                        a.foreach <| fun j -> a[j] <== -a[j]
+                        context.la.solve_simuleq(h,a)
+                        context.la.norm a <| fun nr ->
+                            context.br.if1 (nr.=0.0) <| fun () -> ext()
+                        this.findminWithBracketLimit (m,maxBracketExpansions) (x0,a) dd0_ f x0
+                        match stepProc with
+                          |Some pu ->
+                                pu(i,x0)
+                          |None ->
+                            ()
 
     /// 既定の探索区間拡張上限を用いて、ニュートン法で極小値を探索します。
     member this.findmin_Newton (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminNewtonCore (n,m,OptimizationDefaults.MaxBracketExpansions) x0 dd0 f df fH stepProc
+        this.findminNewtonCore (n,m,OptimizationDefaults.MaxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df fH stepProc
 
     /// 探索区間の拡張回数に上限を指定して、ニュートン法で極小値を探索します。
     member this.findmin_NewtonWithBracketLimit (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminNewtonCore (n,m,maxBracketExpansions) x0 dd0 f df fH stepProc
+        this.findminNewtonCore (n,m,maxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df fH stepProc
 
     /// <summary>
     /// 準ニュートン法
@@ -370,7 +442,7 @@ type ContextOptimization internal (context:Aqualis) =
     /// <param name="dd0"></param>
     /// <param name="f"></param>
     /// <param name="df"></param>
-    member private this.findminQuasiNewtonCore (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
+    member private this.findminQuasiNewtonCore (n:int,m:int,maxBracketExpansions:int) (convergence:OptimizationConvergence,termination:int0 option) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
         match stepProc with
           |Some pu ->
                 pu (_0,x0)
@@ -384,10 +456,10 @@ type ContextOptimization internal (context:Aqualis) =
             B.clear()
             context.iter.num x0.size1 <| fun i ->
                 B.[i,i] <== 1.0
-            context.iter.num_exit (I n) <| fun (ext,i) ->
+            this.iterations n (convergence,termination) x0 f df <| fun (ext,i,gradient) ->
                 dd0_ <== dd0
                 context.ch.d1 x0.size1 <| fun df0 ->
-                    df df0 x0
+                    df0 <== gradient
                     context.br.if1 (i.>0) <| fun () ->
                         y.foreach <| fun j -> y.[j] <== df0.[j] - df1.[j]
                         context.ch.d <| fun p ->
@@ -410,11 +482,31 @@ type ContextOptimization internal (context:Aqualis) =
 
     /// 既定の探索区間拡張上限を用いて、準ニュートン法で極小値を探索します。
     member this.findmin_quasiNewton (n:int,m:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminQuasiNewtonCore (n,m,OptimizationDefaults.MaxBracketExpansions) x0 dd0 f df stepProc
+        this.findminQuasiNewtonCore (n,m,OptimizationDefaults.MaxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df stepProc
 
     /// 探索区間の拡張回数に上限を指定して、準ニュートン法で極小値を探索します。
     member this.findmin_quasiNewtonWithBracketLimit (n:int,m:int,maxBracketExpansions:int) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
-        this.findminQuasiNewtonCore (n,m,maxBracketExpansions) x0 dd0 f df stepProc
+        this.findminQuasiNewtonCore (n,m,maxBracketExpansions) (OptimizationConvergence.Default,None) x0 dd0 f df stepProc
+
+    /// Minimizes with absolute convergence tolerances and a generated termination code.
+    member this.findmin_GradientDescentWithConvergence (n:int,m:int,maxBracketExpansions:int) (options:OptimizationConvergence,termination:int0) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
+        this.findminGradientDescentCore (n,m,maxBracketExpansions) (options,Some termination) x0 dd0 f df stepProc
+
+    /// Minimizes with absolute convergence tolerances and a generated termination code.
+    member this.findmin_ConjugateGradient1WithConvergence (n:int,m:int,maxBracketExpansions:int) (options:OptimizationConvergence,termination:int0) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
+        this.findminConjugateGradient1Core (n,m,maxBracketExpansions) (options,Some termination) x0 dd0 f df fH stepProc
+
+    /// Minimizes with absolute convergence tolerances and a generated termination code.
+    member this.findmin_ConjugateGradient2WithConvergence (n:int,m:int,maxBracketExpansions:int) (options:OptimizationConvergence,termination:int0) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
+        this.findminConjugateGradient2Core (n,m,maxBracketExpansions) (options,Some termination) x0 dd0 f df stepProc
+
+    /// Solves H p = -g directly, with convergence tolerances and a termination code.
+    member this.findmin_NewtonWithConvergence (n:int,m:int,maxBracketExpansions:int) (options:OptimizationConvergence,termination:int0) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (fH:double2->double1->unit) (stepProc:((int0*double1)->unit)option) =
+        this.findminNewtonCore (n,m,maxBracketExpansions) (options,Some termination) x0 dd0 f df fH stepProc
+
+    /// Minimizes with absolute convergence tolerances and a generated termination code.
+    member this.findmin_quasiNewtonWithConvergence (n:int,m:int,maxBracketExpansions:int) (options:OptimizationConvergence,termination:int0) (x0:double1) (dd0:double0) (f:double0->double1->unit) (df:double1->double1->unit) (stepProc:((int0*double1)->unit)option) =
+        this.findminQuasiNewtonCore (n,m,maxBracketExpansions) (options,Some termination) x0 dd0 f df stepProc
 
 /// Adds optimization operations to Aqualis.
 [<AutoOpen>]

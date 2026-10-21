@@ -656,6 +656,38 @@ module Program =
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
 
+        for mode in ["gradient"; "cg1"; "cg2"; "quasi"; "boundary"; "step"; "objective"; "limit"; "newton"; "last"; "stationary"; "singular"] do
+            generate ("optimization-"+mode) <| fun context ->
+                let x = context.var.d1("position",1)
+                let status = context.var.i0 "termination"
+                let calls = context.var.i0 "steps"
+                x[0] <== (if List.contains mode ["gradient"; "cg1"; "cg2"; "quasi"] then 1e-10 elif mode = "boundary" then 5e-9 elif mode = "stationary" then 0.0 else 3.0)
+                calls <== 0
+                let options =
+                    { OptimizationConvergence.Default with
+                        StepTolerance = if mode = "step" then Some 10.0 else None
+                        ObjectiveTolerance = if mode = "objective" then Some 100.0 else None }
+                let f (value:double0) (point:double1) = value <== point[0]*point[0]
+                let df (gradient:double1) (point:double1) = gradient[0] <== 2.0*point[0]
+                // Preserve the existing initial-point callback as well as completed steps.
+                let callback = Some(fun (_:int0,_:double1) -> calls.inc())
+                if mode = "cg1" then
+                    context.optimization.findmin_ConjugateGradient1WithConvergence (5,40,64) (options,status) x (D 1.0) f df
+                        (fun h _ -> h[0,0] <== 2.0) callback
+                elif mode = "cg2" then
+                    context.optimization.findmin_ConjugateGradient2WithConvergence (5,40,64) (options,status) x (D 1.0) f df callback
+                elif mode = "quasi" then
+                    context.optimization.findmin_quasiNewtonWithConvergence (5,40,64) (options,status) x (D 1.0) f df callback
+                elif List.contains mode ["newton"; "last"; "stationary"; "singular"] then
+                    context.optimization.findmin_NewtonWithConvergence ((if mode = "last" then 1 else 5),40,64) (options,status) x (D 1.0) f df
+                        (fun h _ -> h[0,0] <== (if mode = "stationary" || mode = "singular" then 0.0 else 2.0)) callback
+                else
+                    context.optimization.findmin_GradientDescentWithConvergence
+                        ((if mode = "limit" then 0 else 5),40,64) (options,status) x (D 1.0) f df callback
+                context.print.t status
+                context.print.t x[0]
+                context.print.t calls
+
         generate "array-shape-vector" <| fun context ->
             let target = context.var.i1 "target"
             let source = context.var.i1 "source"
