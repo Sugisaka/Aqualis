@@ -54,16 +54,39 @@ namespace Aqualis
         let private divideComplexLiterals xre xim yre yim =
             let numeratorScale = max (abs xre) (abs xim)
             let denominatorScale = max (abs yre) (abs yim)
-            if numeratorScale = 0.0 then Cpx(0.0,0.0)
+            if not (Double.IsFinite numeratorScale && Double.IsFinite denominatorScale) then
+                let result = System.Numerics.Complex(xre,xim) / System.Numerics.Complex(yre,yim)
+                Cpx(result.Real,result.Imaginary)
+            elif numeratorScale = 0.0 then Cpx(0.0,0.0)
             else
-                let xr = xre/numeratorScale
-                let xi = xim/numeratorScale
-                let yr = yre/denominatorScale
-                let yi = yim/denominatorScale
+                let numeratorExponent = Math.ILogB numeratorScale
+                let denominatorExponent = Math.ILogB denominatorScale
+                let xr = Math.ScaleB(xre, -numeratorExponent)
+                let xi = Math.ScaleB(xim, -numeratorExponent)
+                let yr = Math.ScaleB(yre, -denominatorExponent)
+                let yi = Math.ScaleB(yim, -denominatorExponent)
                 let denominator = yr*yr + yi*yi
-                let ratio = numeratorScale/denominatorScale
-                Cpx(((xr*yr + xi*yi)/denominator)*ratio,
-                    ((xi*yr - xr*yi)/denominator)*ratio)
+                let exponent = numeratorExponent-denominatorExponent
+                Cpx(Math.ScaleB((xr*yr + xi*yi)/denominator, exponent),
+                    Math.ScaleB((xi*yr - xr*yi)/denominator, exponent))
+
+        /// Recomputes overflowing finite products before restoring their exponent.
+        let private multiplyComplexLiterals ar ai br bi =
+            let real = ar*br-ai*bi
+            let imaginary = ar*bi+ai*br
+            if (Double.IsFinite real && Double.IsFinite imaginary) ||
+               not (Double.IsFinite ar && Double.IsFinite ai && Double.IsFinite br && Double.IsFinite bi) then
+                Cpx(real,imaginary)
+            else
+                let aExponent = Math.ILogB(max (abs ar) (abs ai))
+                let bExponent = Math.ILogB(max (abs br) (abs bi))
+                let a = Math.ScaleB(ar,-aExponent)
+                let b = Math.ScaleB(ai,-aExponent)
+                let c = Math.ScaleB(br,-bExponent)
+                let d = Math.ScaleB(bi,-bExponent)
+                let exponent = aExponent+bExponent
+                Cpx((if Double.IsFinite real then real else Math.ScaleB(a*c-b*d,exponent)),
+                    (if Double.IsFinite imaginary then imaginary else Math.ScaleB(a*d+b*c,exponent)))
 
         type expr with
             
@@ -241,7 +264,7 @@ namespace Aqualis
                 |Dbl v1,Cpx(v2re,v2im) -> Cpx(v1*v2re,v1*v2im)
                 |Cpx(v1re,v1im),Int v2 -> Cpx(v1re*double v2,v1im*double v2)
                 |Cpx(v1re,v1im),Dbl v2 -> Cpx(v1re*v2,v1im*v2)
-                |Cpx(v1re,v1im),Cpx(v2re,v2im) -> Cpx(v1re*v2re-v1im*v2im,v1re*v2im+v1im*v2re)
+                |Cpx(v1re,v1im),Cpx(v2re,v2im) -> multiplyComplexLiterals v1re v1im v2re v2im
                 |Int xx,Inv(_,y) when xx<0 -> (Int -xx * y).simp
                 |Dbl xx,Inv(_,y) when xx<0.0 -> (Dbl -xx * y).simp
                 |Inv(_,x),Int yy when yy<0 -> (x * Int -yy).simp

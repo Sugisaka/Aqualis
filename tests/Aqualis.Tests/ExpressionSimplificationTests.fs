@@ -5,6 +5,39 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``complex division restores exponents after computing components`` () =
+        for magnitude in [1e308; -1e308; 1e-308; -1e-308] do
+            let divisor = if abs magnitude > 1.0 then 0.5 else 2.0
+            match Div(Zt,Cpx(magnitude,0.0),Cpx(divisor,divisor)).simp with
+            |Cpx(real,imaginary) ->
+                let expected = magnitude / (2.0*divisor)
+                Assert.True(System.Double.IsFinite real)
+                Assert.True(abs (real/expected-1.0) < 1e-14)
+                Assert.True(abs (imaginary/expected+1.0) < 1e-14)
+            |actual -> Assert.Fail($"Expected a complex quotient, got {actual}.")
+
+    [<Fact>]
+    let ``overflowing complex products preserve cancelling components`` () =
+        for sign in [1.0; -1.0] do
+            match Mul(Zt,Cpx(1e308,1e308),Cpx(2.0,sign*2.0)).simp with
+            |Cpx(real,imaginary) ->
+                if sign > 0.0 then
+                    Assert.Equal(0.0,real)
+                    Assert.Equal(System.Double.PositiveInfinity,imaginary)
+                else
+                    Assert.Equal(System.Double.PositiveInfinity,real)
+                    Assert.Equal(0.0,imaginary)
+            |actual -> Assert.Fail($"Expected a complex product, got {actual}.")
+
+    [<Fact>]
+    let ``complex multiplication recovers finite components after product overflow`` () =
+        match Mul(Zt,Cpx(1e308,1e308),Cpx(2.0,1.5)).simp with
+        |Cpx(real,imaginary) ->
+            Assert.True(abs (real/5e307-1.0) < 1e-14)
+            Assert.Equal(System.Double.PositiveInfinity,imaginary)
+        |actual -> Assert.Fail($"Expected a complex product, got {actual}.")
+
+    [<Fact>]
     let ``zero arithmetic with a real variable remains symbolic`` () =
         let value = double0(Var(Dt, "value", NaN))
         match (D 0.0 * value).Expr.simp with

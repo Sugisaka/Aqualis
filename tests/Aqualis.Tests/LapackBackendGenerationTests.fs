@@ -1,10 +1,41 @@
 namespace Aqualis.Tests
 
 open System
+open System.IO
 open Xunit
 open Aqualis
 
 module LapackBackendGenerationTests =
+    [<Fact>]
+    let ``FFT plan failures are checked before execution in every native transform`` () =
+        for language in [C99; Fortran] do
+            for dimensions in [1; 2] do
+                for inverse in [false; true] do
+                    use output = new TemporaryDirectory()
+                    Compile [language] output.Path "fft_plan_guard" "1.0" (fun context ->
+                        if dimensions = 1 then
+                            let input = context.var.z1("input", 3)
+                            let result = context.var.z1("result", 3)
+                            if inverse then context.fft1.ifft("plan",input,result)
+                            else context.fft1.fft("plan",input,result)
+                        else
+                            let input = context.var.z2("input", 2, 3)
+                            let result = context.var.z2("result", 2, 3)
+                            if inverse then context.fft2.ifft("plan",input,result)
+                            else context.fft2.fft("plan",input,result))
+                    let extension = if language = C99 then ".c" else ".f90"
+                    let source = File.ReadAllText(Path.Combine(output.Path,"fft_plan_guard"+extension))
+                    let planning = source.IndexOf("plan_dft_",StringComparison.Ordinal)
+                    let guard = source.IndexOf("FFT plan creation failed.",StringComparison.Ordinal)
+                    let execute = source.IndexOf("fftw_execute(",StringComparison.Ordinal)
+                    Assert.True(planning >= 0 && guard > planning && execute > guard)
+                    if language = C99 then
+                        Assert.Contains("plan == NULL",source)
+                        Assert.Contains("exit(EXIT_FAILURE)",source)
+                    else
+                        Assert.Contains("plan == 0",source)
+                        Assert.Contains("error stop",source)
+
     [<Fact>]
     let ``LAPACK dependent operations reject unsupported languages before generation`` () =
         for language in [JavaScript; PHP; HTMLSequenceDiagram; Numeric] do

@@ -78,6 +78,7 @@ namespace Aqualis
                     let plan = context.var.i1(planname, 8)
                     if fftdir=1 then
                         context.codewritein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
+                        context.codewritein("if (" + plan.code + " == 0) error stop 'Aqualis: FFT plan creation failed.'")
                         fftshift2 context data1
                         context.group.comment "FFT"
                         context.codewritein("call dfftw_execute(" + plan.code + ")")
@@ -85,6 +86,7 @@ namespace Aqualis
                         context.codewritein("call dfftw_destroy_plan(" + plan.code + ")")
                     else
                         context.codewritein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE )")
+                        context.codewritein("if (" + plan.code + " == 0) error stop 'Aqualis: FFT plan creation failed.'")
                         ifftshift2 context data1
                         context.group.comment "FFT"
                         context.codewritein("call dfftw_execute(" + plan.code + ")")
@@ -96,6 +98,7 @@ namespace Aqualis
                     // Aqualis stores matrices with the first index contiguous; FFTW's C API expects row-major dimensions.
                     if fftdir=1 then
                         context.codewritein(plan.code + " = fftw_plan_dft_2d(" + ny.code + ", "+ nx.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE);")
+                        context.codewritein("if (" + plan.code + " == NULL) { fprintf(stderr, \"Aqualis: FFT plan creation failed.\\n\"); exit(EXIT_FAILURE); }")
                         fftshift2 context data1
                         context.group.comment "FFT"
                         context.codewritein("fftw_execute(" + plan.code + ");")
@@ -103,6 +106,7 @@ namespace Aqualis
                         context.codewritein("fftw_destroy_plan(" + plan.code + ");")
                     else
                         context.codewritein(plan.code + " = fftw_plan_dft_2d(" + ny.code + ", "+ nx.code + ", " + data1.code + ", " + data2.code + ", FFTW_BACKWARD, FFTW_ESTIMATE);")
+                        context.codewritein("if (" + plan.code + " == NULL) { fprintf(stderr, \"Aqualis: FFT plan creation failed.\\n\"); exit(EXIT_FAILURE); }")
                         ifftshift2 context data1
                         context.group.comment "FFT"
                         context.codewritein("fftw_execute(" + plan.code + ");")
