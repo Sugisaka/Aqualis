@@ -5,6 +5,64 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``power generation preserves left and right nested expression trees`` () =
+        for language in [Fortran; Python] do
+            use context = Aqualis.BlankWriter language
+            for domain in [It 4; Zt] do
+                let x = Var(domain,"baseValue",NaN)
+                let left = Pow(domain,Pow(domain,x,Int 2),Int 3)
+                let right = Pow(domain,x,Pow(It 4,Var(It 4,"exponent",NaN),Int 3))
+                let emit (expression:expr) =
+                    if language = Fortran then expression.evalF context else expression.evalPy context
+                Assert.Equal("(baseValue**2)**3",emit left)
+                Assert.Equal("baseValue**exponent**3",emit right)
+
+    [<Fact>]
+    let ``minimum integer arithmetic terminates and remains stable under simplification`` () =
+        let x = Var(It 4,"x",NaN)
+        let minimum = Int System.Int32.MinValue
+        for left,right in [x,minimum; minimum,x; Inv(It 4,x),minimum; minimum,Inv(It 4,x)] do
+            for expression in [Add(It 4,left,right); Sub(It 4,left,right); Mul(It 4,left,right); Div(Dt,left,right)] do
+                let simplified = expression.simp
+                Assert.True(expr.equal(simplified,simplified.simp))
+
+    [<Fact>]
+    let ``complex division preserves tiny components beside very large components`` () =
+        for sign in [1.0; -1.0] do
+            match Div(Zt,Cpx(1e308,sign*1e-100),Cpx(0.0,1e200)).simp with
+            |Cpx(real,imaginary) ->
+                Assert.True(abs(real/(sign*1e-300)-1.0) < 1e-14)
+                Assert.True(abs(imaginary/(-1e108)-1.0) < 1e-14)
+            |actual -> Assert.Fail($"Expected complex quotient, got {actual}.")
+
+    [<Fact>]
+    let ``complex multiplication rounds subnormal component sums only once`` () =
+        for sign in [1.0; -1.0] do
+            match Mul(Zt,Cpx(1e-200,1e-200),Cpx(2e-124,sign*2e-124)).simp with
+            |Cpx(real,imaginary) ->
+                if sign > 0.0 then
+                    Assert.Equal(0.0,real)
+                    Assert.Equal(System.Double.Epsilon,imaginary)
+                else
+                    Assert.Equal(System.Double.Epsilon,real)
+                    Assert.Equal(0.0,imaginary)
+            |actual -> Assert.Fail($"Expected complex product, got {actual}.")
+
+    [<Fact>]
+    let ``complex constant folding rounds subnormal ties to even`` () =
+        let epsilon = System.Double.Epsilon
+        match Div(Zt,Cpx(epsilon,2.0*epsilon),Cpx(1.0,1.0)).simp with
+        |Cpx(real,imaginary) ->
+            Assert.Equal(2.0*epsilon,real)
+            Assert.Equal(0.0,imaginary)
+        |actual -> Assert.Fail($"Expected complex quotient, got {actual}.")
+        match Mul(Zt,Cpx(epsilon,epsilon),Cpx(0.5,0.5)).simp with
+        |Cpx(real,imaginary) ->
+            Assert.Equal(0.0,real)
+            Assert.Equal(epsilon,imaginary)
+        |actual -> Assert.Fail($"Expected complex product, got {actual}.")
+
+    [<Fact>]
     let ``complex division restores exponents after computing components`` () =
         for magnitude in [1e308; -1e308; 1e-308; -1e-308] do
             let divisor = if abs magnitude > 1.0 then 0.5 else 2.0

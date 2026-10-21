@@ -226,7 +226,7 @@ namespace Aqualis
                             "complex(" + x.evalPy c + ")"
                         else
                             match x with
-                            |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + x.evalPy c + ")"
+                            |Add _|Sub _|Mul _|Div _|Inv _|Pow _ -> "(" + x.evalPy c + ")"
                             |_ -> x.evalPy c
                     let exponentValue =
                         match y with

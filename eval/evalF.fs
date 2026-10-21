@@ -191,7 +191,7 @@ namespace Aqualis
                             "cmplx(" + x.evalF c + ",kind=kind(0.0d0))"
                         else
                             match x with
-                            |Add _|Sub _|Mul _|Div _|Inv _ -> "(" + x.evalF c + ")"
+                            |Add _|Sub _|Mul _|Div _|Inv _|Pow _ -> "(" + x.evalF c + ")"
                             |_ -> x.evalF c
                     let exponentValue =
                         match y with

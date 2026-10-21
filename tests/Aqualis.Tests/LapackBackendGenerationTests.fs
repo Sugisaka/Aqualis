@@ -33,6 +33,8 @@ module LapackBackendGenerationTests =
                         Assert.Contains("plan == NULL",source)
                         Assert.Contains("exit(EXIT_FAILURE)",source)
                     else
+                        Assert.Contains("integer(8) :: plan",source)
+                        Assert.DoesNotContain("plan(8)",source)
                         Assert.Contains("plan == 0",source)
                         Assert.Contains("error stop",source)
 

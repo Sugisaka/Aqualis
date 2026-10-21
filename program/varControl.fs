@@ -643,6 +643,7 @@ namespace Aqualis
             match lang with
             |Fortran ->
                 match typ with 
+                |It 8 -> "integer(8)"
                 |It 1 -> "integer(1)" 
                 |It _ -> "integer" 
                 |Dt -> "double precision" 

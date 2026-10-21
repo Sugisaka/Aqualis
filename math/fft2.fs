@@ -75,7 +75,8 @@ namespace Aqualis
                 match context.language with
                 |Fortran ->
                     context.hlist.add "'fftw3.f'"
-                    let plan = context.var.i1(planname, 8)
+                    context.cvar.setUniqVarWarning(It 8,A0,planname,"")
+                    let plan = int0(Var(It 8,planname,NaN),context)
                     if fftdir=1 then
                         context.codewritein("call dfftw_plan_dft_2d(" + plan.code + ", " + nx.code + ", " + ny.code + ", " + data1.code + ", " + data2.code + ", FFTW_FORWARD, FFTW_ESTIMATE )")
                         context.codewritein("if (" + plan.code + " == 0) error stop 'Aqualis: FFT plan creation failed.'")

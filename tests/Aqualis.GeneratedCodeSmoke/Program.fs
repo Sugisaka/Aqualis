@@ -656,6 +656,47 @@ module Program =
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
 
+        generate "nested-powers" <| fun context ->
+            let x = context.var.i0 "baseValue"
+            let left = context.var.i0 "left"
+            let right = context.var.i0 "right"
+            x <== 2
+            left <== int0.powr(int0.powr(x,I 2),I 3)
+            right <== int0.powr(x,int0.powr(I 2,I 3))
+            context.print.t left
+            context.print.t right
+            let z = context.var.z0 "complexBase"
+            z <== complex0(Cpx(1.0,1.0))
+            context.print.t (complex0.powr(complex0.powr(z,I 2),I 3)).im
+
+        generate "minimum-integer-arithmetic" <| fun context ->
+            let x = context.var.i0 "value"
+            let result = context.var.i0 "result"
+            let minimum = I Int32.MinValue
+            x <== 1
+            result <== x+minimum
+            context.print.t result
+            x <== -1
+            result <== x-minimum
+            context.print.t result
+            result <== minimum-x
+            context.print.t result
+
+        for name,iterations,expansions,objective in
+            ["reject-worse",1,64,(fun (value:double0) (point:double1) -> value <== point[0]*point[0]);
+             "reject-worse-zero",0,64,(fun value point -> value <== point[0]*point[0]);
+             "retain-best",0,64,(fun value point -> value <== (point[0]-1.0)*(point[0]-1.0));
+             "bracket-best",1,0,(fun value point -> value <== -point[0])] do
+            generate ("findmin-"+name) <| fun context ->
+                let point = context.var.d1("position",1)
+                let direction = context.var.d1("direction",1)
+                point[0] <== (if name.StartsWith("reject") then 3.0 else 0.0)
+                direction[0] <== (if name.StartsWith("reject") then -1.0 else 1.0)
+                // In-place output must not overwrite the saved initial/best point.
+                context.optimization.findminWithBracketLimit (iterations,expansions) (point,direction)
+                    (D (if name.StartsWith("reject") then 100.0 else 1.0)) objective point
+                context.print.t point[0]
+
         for mode in ["gradient"; "cg1"; "cg2"; "quasi"; "boundary"; "step"; "objective"; "limit"; "newton"; "last"; "stationary"; "singular"] do
             generate ("optimization-"+mode) <| fun context ->
                 let x = context.var.d1("position",1)

@@ -636,9 +636,9 @@ for language in c fortran python; do
   run_and_verify_number "$language negated power base" "$output_root/negated-base-power-$language" '9' "${run_command[@]}"
   run_and_verify_number "$language conjugate sum" "$output_root/conjugate-sum-$language" '-6' "${run_command[@]}"
   expect_generated_failure "$language short line-search output" "$output_root/findmin-short-output-$language" 'Aqualis: Line-search output length must match the initial point.' "${run_command[@]}"
-  run_and_verify_number "$language large line-search direction" "$output_root/findmin-large-direction-$language" '0.5' "${run_command[@]}"
-  run_and_verify_number "$language small line-search direction" "$output_root/findmin-small-direction-$language" '0.5' "${run_command[@]}"
-  run_and_verify_number "$language huge line-search direction" "$output_root/findmin-huge-direction-$language" '0.3535533905932738' "${run_command[@]}"
+  run_and_verify_number "$language large line-search direction" "$output_root/findmin-large-direction-$language" '1' "${run_command[@]}"
+  run_and_verify_number "$language small line-search direction" "$output_root/findmin-small-direction-$language" '1' "${run_command[@]}"
+  run_and_verify_number "$language huge line-search direction" "$output_root/findmin-huge-direction-$language" '0.7071067811865476' "${run_command[@]}"
   run_and_verify_number "$language large line-search midpoint" "$output_root/findmin-midpoint-large-$language" '1.05' "${run_command[@]}"
   expect_generated_failure "$language overflowing line-search point" \
     "$output_root/findmin-point-overflow-$language" 'Aqualis: Line-search point must be finite.' "${run_command[@]}"
@@ -957,6 +957,27 @@ for language in c fortran python; do
     fortran) run_command=(bash proc_smoke_F.sh) ;;
     python) run_command=("$scipy_python" -- smoke.py) ;;
   esac
+  actual="$(cd "$output_root/nested-powers-$language" && "${run_command[@]}")"
+  python3 - "$actual" <<'PY'
+import sys
+left, right, imaginary = map(float, sys.argv[1].split())
+assert left == 64 and right == 256 and abs(imaginary + 8) < 1e-10, sys.argv[1]
+PY
+  actual="$(cd "$output_root/minimum-integer-arithmetic-$language" && "${run_command[@]}")"
+  python3 - "$actual" <<'PY'
+import sys
+assert list(map(int, sys.argv[1].split())) == [-2147483647, 2147483647, -2147483647], sys.argv[1]
+PY
+  for mode in reject-worse reject-worse-zero retain-best bracket-best; do
+    actual="$(cd "$output_root/findmin-$mode-$language" && "${run_command[@]}")"
+    python3 - "$mode" "$actual" <<'PY'
+import sys
+mode, output = sys.argv[1:]
+value = float(output.split()[-1])
+expected = 3 if mode.startswith('reject') else 1
+assert abs(value - expected) < 1e-12, (mode, output)
+PY
+  done
   for mode in gradient cg1 cg2 quasi boundary step objective limit newton last stationary; do
     actual="$(cd "$output_root/optimization-$mode-$language" && "${run_command[@]}")"
     python3 - "$mode" "$actual" <<'PY'

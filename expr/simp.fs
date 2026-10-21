@@ -7,6 +7,7 @@
 namespace Aqualis
     
     open System
+    open System.Numerics
     
     /// Simplification helpers for expression trees.
     [<AutoOpen>]
@@ -50,43 +51,57 @@ namespace Aqualis
                 let result = operation (System.Numerics.Complex(real,0.0))
                 Cpx(result.Real,result.Imaginary))
 
-        /// Divides two complex literal values.
-        let private divideComplexLiterals xre xim yre yim =
-            let numeratorScale = max (abs xre) (abs xim)
-            let denominatorScale = max (abs yre) (abs yim)
-            if not (Double.IsFinite numeratorScale && Double.IsFinite denominatorScale) then
-                let result = System.Numerics.Complex(xre,xim) / System.Numerics.Complex(yre,yim)
-                Cpx(result.Real,result.Imaginary)
-            elif numeratorScale = 0.0 then Cpx(0.0,0.0)
-            else
-                let numeratorExponent = Math.ILogB numeratorScale
-                let denominatorExponent = Math.ILogB denominatorScale
-                let xr = Math.ScaleB(xre, -numeratorExponent)
-                let xi = Math.ScaleB(xim, -numeratorExponent)
-                let yr = Math.ScaleB(yre, -denominatorExponent)
-                let yi = Math.ScaleB(yim, -denominatorExponent)
-                let denominator = yr*yr + yi*yi
-                let exponent = numeratorExponent-denominatorExponent
-                Cpx(Math.ScaleB((xr*yr + xi*yi)/denominator, exponent),
-                    Math.ScaleB((xi*yr - xr*yi)/denominator, exponent))
+        /// Represents a finite double exactly in units of the smallest subnormal.
+        let private dyadicInteger (value:double) =
+            let bits = BitConverter.DoubleToUInt64Bits value
+            let exponent = int ((bits >>> 52) &&& 0x7ffUL)
+            let fraction = bits &&& 0xfffffffffffffUL
+            let magnitude =
+                if exponent = 0 then BigInteger fraction
+                else BigInteger(fraction ||| 0x10000000000000UL) <<< (exponent-1)
+            if bits >>> 63 = 0UL then magnitude else -magnitude
 
-        /// Recomputes overflowing finite products before restoring their exponent.
-        let private multiplyComplexLiterals ar ai br bi =
-            let real = ar*br-ai*bi
-            let imaginary = ar*bi+ai*br
-            if (Double.IsFinite real && Double.IsFinite imaginary) ||
-               not (Double.IsFinite ar && Double.IsFinite ai && Double.IsFinite br && Double.IsFinite bi) then
-                Cpx(real,imaginary)
+        /// Rounds an exact rational times a power of two once, including subnormals.
+        let private roundBinaryRational (numerator:BigInteger) (denominator:BigInteger) power =
+            if numerator.IsZero then 0.0
             else
-                let aExponent = Math.ILogB(max (abs ar) (abs ai))
-                let bExponent = Math.ILogB(max (abs br) (abs bi))
-                let a = Math.ScaleB(ar,-aExponent)
-                let b = Math.ScaleB(ai,-aExponent)
-                let c = Math.ScaleB(br,-bExponent)
-                let d = Math.ScaleB(bi,-bExponent)
-                let exponent = aExponent+bExponent
-                Cpx((if Double.IsFinite real then real else Math.ScaleB(a*c-b*d,exponent)),
-                    (if Double.IsFinite imaginary then imaginary else Math.ScaleB(a*d+b*c,exponent)))
+                let magnitude = BigInteger.Abs numerator
+                let difference = int (magnitude.GetBitLength()-denominator.GetBitLength())
+                let below =
+                    if difference >= 0 then magnitude < (denominator <<< difference)
+                    else (magnitude <<< -difference) < denominator
+                let exponent = difference + power - (if below then 1 else 0)
+                let unitExponent = max -1074 (exponent-52)
+                let shift = power-unitExponent
+                let scaledNumerator,scaledDenominator =
+                    if shift >= 0 then magnitude <<< shift,denominator
+                    else magnitude,denominator <<< -shift
+                let quotient,remainder = BigInteger.DivRem(scaledNumerator,scaledDenominator)
+                let rounded =
+                    let comparison = compare (remainder <<< 1) scaledDenominator
+                    if comparison > 0 || (comparison = 0 && not quotient.IsEven) then quotient+BigInteger.One
+                    else quotient
+                let result = Math.ScaleB(double rounded,unitExponent)
+                if numerator.Sign < 0 then -result else result
+
+        /// Folds finite complex division without discarding components of different scales.
+        let private divideComplexLiterals ar ai br bi =
+            if Double.IsFinite ar && Double.IsFinite ai && Double.IsFinite br && Double.IsFinite bi then
+                let a,b,c,d = dyadicInteger ar,dyadicInteger ai,dyadicInteger br,dyadicInteger bi
+                let denominator = c*c+d*d
+                Cpx(roundBinaryRational (a*c+b*d) denominator 0,
+                    roundBinaryRational (b*c-a*d) denominator 0)
+            else
+                let result = Complex(ar,ai) / Complex(br,bi)
+                Cpx(result.Real,result.Imaginary)
+
+        /// Folds finite complex products with a single rounding after cancellation or addition.
+        let private multiplyComplexLiterals ar ai br bi =
+            if Double.IsFinite ar && Double.IsFinite ai && Double.IsFinite br && Double.IsFinite bi then
+                let a,b,c,d = dyadicInteger ar,dyadicInteger ai,dyadicInteger br,dyadicInteger bi
+                Cpx(roundBinaryRational (a*c-b*d) BigInteger.One -2148,
+                    roundBinaryRational (a*d+b*c) BigInteger.One -2148)
+            else Cpx(ar*br-ai*bi,ar*bi+ai*br)
 
         type expr with
             
@@ -114,15 +129,15 @@ namespace Aqualis
                 |Cpx(v1re,v1im),Int v2 -> Cpx(v1re+double v2,v1im)
                 |Cpx(v1re,v1im),Dbl v2 -> Cpx(v1re+v2,v1im)
                 |Cpx(v1re,v1im),Cpx(v2re,v2im) -> Cpx(v1re+v2re,v1im+v2im)
-                |Int xx,Inv(_,y) when xx<0 -> (-(Int -xx + y)).simp
+                |Int xx,Inv(_,y) when xx<0 && xx<>Int32.MinValue -> (-(Int -xx + y)).simp
                 |Dbl xx,Inv(_,y) when xx<0.0 -> (-(Dbl -xx + y)).simp
-                |Inv(_,x),Int yy when yy<0 -> (-(x + Int -yy)).simp
+                |Inv(_,x),Int yy when yy<0 && yy<>Int32.MinValue -> (-(x + Int -yy)).simp
                 |Inv(_,x),Dbl yy when yy<0.0 -> (-(x + Dbl -yy)).simp
                 |Inv(_,x),Inv(_,y) -> (-(x+y)).simp
-                |_,Int yy when yy<0 -> (x-Int -yy).simp
+                |_,Int yy when yy<0 && yy<>Int32.MinValue -> (x-Int -yy).simp
                 |_,Dbl yy when yy<0.0 -> (x-Dbl -yy).simp
                 |_,Inv(_,y) -> (x-y).simp
-                |Int xx,_ when xx<0 -> (y - Int -xx).simp
+                |Int xx,_ when xx<0 && xx<>Int32.MinValue -> (y - Int -xx).simp
                 |Dbl xx,_ when xx<0.0 -> (y - Dbl -xx).simp
                 |Inv(_,x),_ -> (y-x).simp
                 |_ when expr.equal(x,y) -> 
@@ -191,15 +206,15 @@ namespace Aqualis
                 |Cpx(v1re,v1im),Int v2 -> Cpx(v1re-double v2,v1im)
                 |Cpx(v1re,v1im),Dbl v2 -> Cpx(v1re-v2,v1im)
                 |Cpx(v1re,v1im),Cpx(v2re,v2im) -> Cpx(v1re-v2re,v1im-v2im)
-                |Int xx,Inv(_,y) when xx<0 -> (y - Int -xx).simp
+                |Int xx,Inv(_,y) when xx<0 && xx<>Int32.MinValue -> (y - Int -xx).simp
                 |Dbl xx,Inv(_,y) when xx<0.0 -> (y - Dbl -xx).simp
-                |Inv(_,x),Int yy when yy<0 -> (Int -yy - x).simp
+                |Inv(_,x),Int yy when yy<0 && yy<>Int32.MinValue -> (Int -yy - x).simp
                 |Inv(_,x),Dbl yy when yy<0.0 -> (Dbl -yy - x).simp
                 |Inv(_,x),Inv(_,y) -> (y-x).simp
-                |Int xx,_ when xx<0 -> (-(Int -xx + y).simp).simp
+                |Int xx,_ when xx<0 && xx<>Int32.MinValue -> (-(Int -xx + y).simp).simp
                 |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx + y).simp).simp
                 |Inv(_,x),_ -> (-(x+y).simp).simp
-                |_,Int yy when yy<0 -> (x + Int -yy).simp
+                |_,Int yy when yy<0 && yy<>Int32.MinValue -> (x + Int -yy).simp
                 |_,Dbl yy when yy<0.0 -> (x + Dbl -yy).simp
                 |_,Inv(_,y) -> (x+y).simp
                 |v1,v2 when expr.equal(v1,v2) && x.etype=It 4 -> Int 0
@@ -265,15 +280,15 @@ namespace Aqualis
                 |Cpx(v1re,v1im),Int v2 -> Cpx(v1re*double v2,v1im*double v2)
                 |Cpx(v1re,v1im),Dbl v2 -> Cpx(v1re*v2,v1im*v2)
                 |Cpx(v1re,v1im),Cpx(v2re,v2im) -> multiplyComplexLiterals v1re v1im v2re v2im
-                |Int xx,Inv(_,y) when xx<0 -> (Int -xx * y).simp
+                |Int xx,Inv(_,y) when xx<0 && xx<>Int32.MinValue -> (Int -xx * y).simp
                 |Dbl xx,Inv(_,y) when xx<0.0 -> (Dbl -xx * y).simp
-                |Inv(_,x),Int yy when yy<0 -> (x * Int -yy).simp
+                |Inv(_,x),Int yy when yy<0 && yy<>Int32.MinValue -> (x * Int -yy).simp
                 |Inv(_,x),Dbl yy when yy<0.0 -> (x * Dbl -yy).simp
                 |Inv(_,x),Inv(_,y) -> (x*y).simp
-                |_,Int yy when yy<0 -> (-(x * Int -yy).simp).simp
+                |_,Int yy when yy<0 && yy<>Int32.MinValue -> (-(x * Int -yy).simp).simp
                 |_,Dbl yy when yy<0.0 -> (-(x * Dbl -yy).simp).simp
                 |_,Inv(_,y) -> (-(x*y).simp).simp
-                |Int xx,_ when xx<0 -> (-(Int -xx * y).simp).simp
+                |Int xx,_ when xx<0 && xx<>Int32.MinValue -> (-(Int -xx * y).simp).simp
                 |Dbl xx,_ when xx<0.0 -> (-(Dbl -xx * y).simp).simp
                 |Inv(_,x),_ -> (-(x*y).simp).simp
                 |Mul(_,a,b),c when x.etype=It 4 && y.etype=It 4 ->
@@ -333,15 +348,15 @@ namespace Aqualis
                 |Cpx (xre,xim), Int y -> Cpx (xre/double y,xim/double y)
                 |Cpx (xre,xim), Dbl y -> Cpx (xre/y,xim/y)
                 |Cpx (xre,xim), Cpx (yre,yim) -> divideComplexLiterals xre xim yre yim
-                |Int xx,Inv(_,y) when xx<0 -> (Int -xx / y).simp
+                |Int xx,Inv(_,y) when xx<0 && xx<>Int32.MinValue -> (Int -xx / y).simp
                 |Dbl xx,Inv(_,y) when xx<0.0 -> (Dbl -xx / y).simp
-                |Inv(_,x),Int yy when yy<0 -> (x / Int -yy).simp
+                |Inv(_,x),Int yy when yy<0 && yy<>Int32.MinValue -> (x / Int -yy).simp
                 |Inv(_,x),Dbl yy when yy<0.0 -> (x / Dbl -yy).simp
                 |Inv(_,x),Inv(_,y) -> (x/y).simp
-                |_,Int yy when yy<0 -> (-(x/Int -yy).simp).simp
+                |_,Int yy when yy<0 && yy<>Int32.MinValue -> (-(x/Int -yy).simp).simp
                 |_,Dbl yy when yy<0.0 -> (-(x/Dbl -yy).simp).simp
                 |_,Inv(_,y) -> (-(x/y).simp).simp
-                |Int xx,_ when xx<0 ->
+                |Int xx,_ when xx<0 && xx<>Int32.MinValue ->
                     let positive = (Int (-xx) / y).simp
                     (-positive).simp
                 |Dbl xx,_ when xx<0.0 ->

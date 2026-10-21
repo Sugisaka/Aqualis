@@ -129,11 +129,12 @@ type ContextOptimization internal (context:Aqualis) =
         NumericArrayValidation.requireFinite context dd "Line-search step width must be finite."
         let r = 0.5*(1.0+sqrt(5.0))
         context.ch.d1 x0_.size1 <| fun xa ->
+        context.ch.d1 x0_.size1 <| fun bestPoint ->
         context.ch.d1 x0_.size1 <| fun x1 ->
         context.ch.d1 x0_.size1 <| fun x2 ->
         context.ch.d1 x0_.size1 <| fun xb ->
         context.ch.dddd <| fun (fa,f1,f2,fb) ->
-        context.ch.d <| fun fa_ ->
+        context.ch.d <| fun bestValue ->
         context.ch.d <| fun norm_df ->
         context.ch.d1 df.size1 <| fun unitDirection ->
         context.ch.iii <| fun (counter,expansionCounter,expansionLimitReached) ->
@@ -141,10 +142,17 @@ type ContextOptimization internal (context:Aqualis) =
             NumericArrayValidation.requireFinite context norm_df "Line-search direction norm must be finite."
             context.br.if2 (norm_df.>0.0)
             <| fun () ->
+                bestPoint <== x0_
+                evaluate bestValue bestPoint
+                let evaluate value point =
+                    evaluate value point
+                    context.br.if1 (value .<= bestValue) <| fun () ->
+                        bestValue <== value
+                        bestPoint <== point
                 unitDirection <== df
                 context.la.normalize unitDirection
                 xa.foreach <| fun i -> xa.[i] <== x0_.[i]
-                evaluate fa xa
+                fa <== bestValue
                 xb.foreach <| fun i -> xb.[i] <== x0_.[i] + dd * unitDirection.[i]
                 evaluate fb xb
                 x1.foreach <| fun i -> x1.[i] <== xa.[i] + (xb.[i]-xa.[i])/(1.0+r)
@@ -154,7 +162,6 @@ type ContextOptimization internal (context:Aqualis) =
                 counter.clear()
                 expansionCounter.clear()
                 expansionLimitReached.clear()
-                fa_ <== fa
                 context.iter.whiledo (And [counter.<m; expansionLimitReached.=0]) <| fun _ ->
                     context.br.branch <| fun b ->
                         b.IF (fa .> f1 .> f2 .> fb) <| fun () ->
@@ -209,6 +216,9 @@ type ContextOptimization internal (context:Aqualis) =
                 <| fun () ->
                     xx <== xb
                     context.print.s "Aqualis: line-search bracket expansion limit reached."
+                // Include the midpoint, but never replace a better sampled point or the initial point.
+                context.ch.d <| fun candidateValue -> evaluate candidateValue xx
+                xx <== bestPoint
                 xx.foreach <| fun i -> NumericArrayValidation.requireFinite context xx[i] "Line-search result must be finite."
             <| fun () ->
                 xx <== x0_
