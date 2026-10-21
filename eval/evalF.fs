@@ -12,6 +12,14 @@ namespace Aqualis
 
         open System
 
+        /// The DO variable must represent the value immediately after the 32-bit endpoint.
+        let private wideCounter (c:Aqualis) name =
+            let mutable candidate = name + "_wide"
+            while varGenerator.isVarExist(c,candidate,It 8,A0) do candidate <- candidate + "_"
+            c.cvar.setUniqVar(It 8,A0,candidate,"")
+            if c.ParallelMode then c.varPrivate.setVar(It 8,A0,candidate,"")
+            candidate
+
         type expr with
 
             /// Emits an assignment for Fortran.
@@ -32,9 +40,11 @@ namespace Aqualis
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalF c
                 let n2_ = n2.evalF c
+                let control = wideCounter c iname
                 if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                c.codewritein("do " + i.evalF c + "=" + n1_ + "," + n2_)
+                c.codewritein("do " + control + "=" + n1_ + "," + n2_)
                 c.indentInc()
+                c.codewritein(i.evalF c + " = int(" + control + ")")
                 code i
                 c.indentDec()
                 c.codewritein "end do"
@@ -77,8 +87,10 @@ namespace Aqualis
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
+                    let control = wideCounter c iname
+                    c.codewritein("do " + control + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
+                    c.codewritein(i.evalF c + " = int(" + control + ")")
                     code i
                     c.indentDec()
                     c.codewritein "end do"
@@ -100,8 +112,10 @@ namespace Aqualis
                     let label = c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label)
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("do " + i.evalF c + "=" + i1.evalF c + "," + i2.evalF c)
+                    let control = wideCounter c iname
+                    c.codewritein("do " + control + "=" + i1.evalF c + "," + i2.evalF c)
                     c.indentInc()
+                    c.codewritein(i.evalF c + " = int(" + control + ")")
                     code(exit,i)
                     c.indentDec()
                     c.codewritein "end do"
@@ -260,12 +274,12 @@ namespace Aqualis
                         u)).evalF c
                 |IfEl(cond,n1,n2) ->
                     let v =
-                        match n1.etype with
+                        match n1.etype%%n2.etype with
                         |It 4 -> Var (It 4, (fun (a,_) -> a) (c.i0.getVar()), NaN)
                         |Dt   -> Var (Dt, (fun (a,_) -> a) (c.d0.getVar()), NaN)
                         |Zt   -> Var (Zt, (fun (a,_) -> a) (c.z0.getVar()), NaN)
                         |_    -> NaN
-                    (Let(n1.etype, NaN, v, fun x ->
+                    (Let(n1.etype%%n2.etype, NaN, v, fun x ->
                         expr.branchF c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substF x n1 c

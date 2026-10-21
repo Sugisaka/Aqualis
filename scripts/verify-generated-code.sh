@@ -1015,7 +1015,7 @@ for language in c fortran python; do
   run_math_regression() {
     local directory="$output_root/$1-$language"
     if [[ "$language" == c ]]; then
-      gcc -std=c99 -Werror=format "$directory/smoke.c" -lm -o "$directory/checked.exe"
+      gcc -std=c99 -Werror=format "$directory/smoke.c" -lm -o "$directory/checked.exe" || return 1
       "$directory/checked.exe"
     else
       (cd "$directory" && "${run_command[@]}")
@@ -1080,6 +1080,65 @@ for mode in overflow invalid; do
     exit 1
   fi
   grep -Fq 'Aqualis:' "$output_root/checked-power-$mode-c/error.txt"
+done
+
+for language in c fortran python; do
+  run_control_regression() {
+    local directory="$output_root/$1-$language"
+    case "$language" in
+      c)
+        gcc -std=c99 -fopenmp -fsanitize=undefined -fno-sanitize-recover=undefined \
+          "$directory/smoke.c" -lm -o "$directory/checked.exe" || return 1
+        "$directory/checked.exe" ;;
+      fortran)
+        gfortran -ffree-line-length-none -fopenmp -fcheck=all -ftrapv \
+          "$directory/smoke.f90" -o "$directory/checked.exe" || return 1
+        "$directory/checked.exe" ;;
+      python) python3 "$directory/smoke.py" ;;
+    esac
+  }
+  actual="$(run_control_regression conditional-promotion)"
+  python3 - "$actual" <<'PY'
+import sys
+expected = [2.5, 1, 2, 3, 1, 2.5, 1, 0, 7, 7, 0]
+assert list(map(float, sys.argv[1].split())) == expected, sys.argv[1]
+PY
+  actual="$(run_control_regression integer-power-parity)"
+  python3 - "$actual" <<'PY'
+import sys
+assert list(map(float, sys.argv[1].split())) == [0, 0, -1, -1, 1, 1, -2147483648, -2147483648, 1, 1], sys.argv[1]
+PY
+  for variant in plain named exit early sum static static-exit static-sum; do
+    for boundary in max pair min empty; do
+      actual="$(run_control_regression "range-boundary-$variant-$boundary")"
+      python3 - "$variant" "$boundary" "$actual" <<'PY'
+import sys
+variant, boundary, output = sys.argv[1:]
+expected = 0 if boundary == 'empty' else 2 if boundary == 'pair' and variant != 'early' else 1
+values = list(map(int, output.split()))
+assert values == [expected] * (2 if variant in ('sum', 'static-sum') else 1), (variant, boundary, output)
+PY
+    done
+  done
+  if [[ "$language" != python ]]; then
+    actual="$(run_control_regression range-boundary-parallel)"
+    [[ "${actual//[[:space:]]/}" == 2 ]]
+  fi
+done
+for mode in negative boundary; do
+  actual="$(python3 "$output_root/checked-power-$mode-python/smoke.py")"
+  python3 - "$mode" "$actual" <<'PY'
+import sys
+mode, output = sys.argv[1:]
+assert int(output) == (0 if mode == 'negative' else -2147483648), output
+PY
+done
+for mode in overflow invalid; do
+  if python3 "$output_root/checked-power-$mode-python/smoke.py" >"$output_root/power-actual.txt" 2>"$output_root/power-error.txt"; then
+    printf '%s\n' "Python integer power accepted $mode input." >&2
+    exit 1
+  fi
+  grep -Fq 'Aqualis:' "$output_root/power-error.txt"
 done
 
 printf '%s\n' 'All generated-code runtime checks passed.'

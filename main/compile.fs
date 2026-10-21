@@ -388,6 +388,7 @@ namespace Aqualis
                         writer.codewritein "#include <stdio.h>\n"
                         writer.codewritein "#include <stdlib.h>\n"
                         writer.codewritein "#include <stdint.h>\n"
+                        writer.codewritein "#include <stdbool.h>\n"
                         writer.codewritein "#include <complex.h>\n"
                         writer.codewritein "#include <math.h>\n"
                         writer.codewritein "#include <string.h>\n"
@@ -736,6 +737,24 @@ namespace Aqualis
                         |> List.iter (fun importLine -> writer.codewritein(importLine + "\n"))
                         //ヘッダファイルのインクルード
                         List.iter (fun (s:string) -> writer.codewritein("import " + s + "\n")) <| context.hlist.list
+                        writer.codewritein "def _aqualis_int_power(base, exponent):\n"
+                        writer.codewritein "  base, exponent = int(base), int(exponent)\n"
+                        writer.codewritein "  if base == 0 and exponent <= 0:\n"
+                        writer.codewritein "    raise ValueError('Aqualis: invalid integer power.')\n"
+                        writer.codewritein "  if exponent < 0:\n"
+                        writer.codewritein "    return 1 if base == 1 else (-1 if exponent % 2 else 1) if base == -1 else 0\n"
+                        writer.codewritein "  result = 1\n"
+                        writer.codewritein "  while exponent:\n"
+                        writer.codewritein "    if exponent % 2:\n"
+                        writer.codewritein "      result *= base\n"
+                        writer.codewritein "      if result < -2147483648 or result > 2147483647:\n"
+                        writer.codewritein "        raise OverflowError('Aqualis: integer power overflow.')\n"
+                        writer.codewritein "    exponent //= 2\n"
+                        writer.codewritein "    if exponent:\n"
+                        writer.codewritein "      base *= base\n"
+                        writer.codewritein "      if base > 2147483647:\n"
+                        writer.codewritein "        raise OverflowError('Aqualis: integer power overflow.')\n"
+                        writer.codewritein "  return result\n"
                         //構造体の定義
                         context.str.Def_Structure writer
                         //グローバル変数の定義

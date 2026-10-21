@@ -5,6 +5,30 @@ open Xunit
 open Aqualis
 
 module ControlFlowGenerationTests =
+    [<Fact>]
+    let ``Python constant upper boundary is incremented without 32-bit folding`` () =
+        use output = new TemporaryDirectory()
+        Compile [Python] output.Path "python_max_bound" "1.0" (fun context ->
+            context.iter.range(System.Int32.MaxValue,System.Int32.MaxValue) (fun i -> context.print.t i))
+        let generated = File.ReadAllText(Path.Combine(output.Path,"python_max_bound.py"))
+        let loop = generated.Split('\n') |> Array.find (fun line -> line.TrimStart().StartsWith("for "))
+        Assert.Contains("(2147483647) + 1",loop)
+        Assert.DoesNotContain("-2147483648",loop)
+
+    [<Fact>]
+    let ``conditional temporaries use the promoted branch type`` () =
+        for language in [C99;Fortran;Python] do
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "promoted_condition" "1.0" (fun context ->
+                let flag = context.var.i0 "flag"
+                let condition = Eq(flag.Expr,Int 1)
+                let expression = IfEl(condition,Int 1,Dbl 2.5)
+                let rendered = expression.eval context
+                Assert.Contains(rendered,context.d0.varList)
+                let complexExpression = IfEl(condition,Dbl 1.0,Cpx(2.0,3.0))
+                let complexRendered = complexExpression.eval context
+                Assert.Contains(complexRendered,context.z0.varList))
+
     let private extension = function
         |C99 -> ".c"
         |Fortran -> ".f90"

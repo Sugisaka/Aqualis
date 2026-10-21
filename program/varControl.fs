@@ -655,6 +655,7 @@ namespace Aqualis
                 |_ -> ""
             |C99 ->
                 match typ with 
+                |It 8 -> "int64_t"
                 |It 1 -> "unsigned char" 
                 |It _ -> "int" 
                 |Dt -> "double" 

@@ -61,7 +61,7 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalPy c
-                let n2_ = (Add(It 4, n2, Int 1)).evalPy c
+                let n2_ = "(" + n2.evalPy c + ") + 1"
                 c.codewritein("for " + i.evalPy c + " in range(" + n1_ + ", " + n2_ + ", 1):")
                 c.indentInc()
                 writeSuite c (fun () -> code i)
@@ -111,7 +111,7 @@ namespace Aqualis
                 |_ ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
-                    c.codewritein("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    c.codewritein("for " + i.evalPy c + " in range("+i1.evalPy c + ", " + ("(" + i2.evalPy c + ") + 1") + ", 1):")
                     c.indentInc()
                     writeSuite c (fun () -> code i)
                     c.indentDec()
@@ -137,7 +137,7 @@ namespace Aqualis
                     c.indentDec()
                     c.codewritein "try:"
                     c.indentInc()
-                    c.codewritein("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + (Add(It 4,i2,Int 1)).evalPy c + ", 1):")
+                    c.codewritein("for " + i.evalPy c + " in range(" + i1.evalPy c + ", " + ("(" + i2.evalPy c + ") + 1") + ", 1):")
                     c.indentInc()
                     writeSuite c (fun () -> code(exit,i))
                     c.indentDec()
@@ -235,6 +235,8 @@ namespace Aqualis
                         |Dbl value when value < 0.0 -> "(" + y.evalPy c + ")"
                         |_ -> y.evalPy c
                     if t=Dt then "numpy.power(float(" + x.evalPy c + ")," + y.evalPy c + ")"
+                    elif (match t with It _ -> true | _ -> false) then
+                        "_aqualis_int_power(" + x.evalPy c + "," + y.evalPy c + ")"
                     else baseValue + "**" + exponentValue
                 |Exp(Zt,x) -> "cmath.exp(" + x.evalPy c + ")"
                 |Sin(Zt,x) -> "cmath.sin(" + x.evalPy c + ")"
@@ -296,12 +298,12 @@ namespace Aqualis
                         u)).evalPy c
                 |IfEl(cond,n1,n2) -> 
                     let v =
-                        match n1.etype with
+                        match n1.etype%%n2.etype with
                         |It 4 -> Var (It 4, (fun (a,_) -> a) (c.i0.getVar()), NaN)
                         |Dt   -> Var (Dt, (fun (a,_) -> a) (c.d0.getVar()), NaN)
                         |Zt   -> Var (Zt, (fun (a,_) -> a) (c.z0.getVar()), NaN)
                         |_    -> NaN
-                    (Let(n1.etype, NaN, v, fun x -> 
+                    (Let(n1.etype%%n2.etype, NaN, v, fun x ->
                         expr.branchPy c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substPy x n1 c

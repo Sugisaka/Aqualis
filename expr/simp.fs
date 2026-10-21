@@ -975,9 +975,18 @@ namespace Aqualis
                     let x = List.map (fun (v:expr) -> v.simp) x
                     expr.simpOR x
                 |IfEl (c,p,q) ->
+                    let select (branch:expr) =
+                        let value = branch.simp
+                        match this.etype,value with
+                        |Dt,_ when (match value.etype with It _ -> true | _ -> false) -> (ToDbl value).simp
+                        |Zt,Int n -> Cpx(double n,0.0)
+                        |Zt,Dbl n -> Cpx(n,0.0)
+                        |expected,_ when expected = value.etype -> value
+                        |Zt,_ -> IfEl(True,value,Cpx(0.0,0.0))
+                        |_ -> IfEl(c.simp,p,q)
                     match c.simp with
-                    |True -> p.simp
-                    |False -> q.simp
+                    |True -> select p
+                    |False -> select q
                     |_ -> this
                 |_ ->
                     this

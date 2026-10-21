@@ -284,12 +284,12 @@ namespace Aqualis
                         u)).evalJ c
                 |IfEl(cond,n1,n2) ->
                     let v =
-                        match n1.etype with
+                        match n1.etype%%n2.etype with
                         |It 4 -> Var (It 4, (fun (a,_) -> a) (c.i0.getVar()), NaN)
                         |Dt   -> Var (Dt, (fun (a,_) -> a) (c.d0.getVar()), NaN)
                         |Zt   -> Var (Zt, (fun (a,_) -> a) (c.z0.getVar()), NaN)
                         |_    -> NaN
-                    (Let(n1.etype, NaN, v, fun x ->
+                    (Let(n1.etype%%n2.etype, NaN, v, fun x ->
                         expr.branchJ c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substJ x n1 c

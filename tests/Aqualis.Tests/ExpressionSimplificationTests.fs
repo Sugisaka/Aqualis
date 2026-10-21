@@ -14,8 +14,27 @@ module ExpressionSimplificationTests =
                 let right = Pow(domain,x,Pow(It 4,Var(It 4,"exponent",NaN),Int 3))
                 let emit (expression:expr) =
                     if language = Fortran then expression.evalF context else expression.evalPy context
-                Assert.Equal("(baseValue**2)**3",emit left)
-                Assert.Equal("baseValue**exponent**3",emit right)
+                if language = Python && domain = It 4 then
+                    Assert.Equal("_aqualis_int_power(_aqualis_int_power(baseValue,2),3)",emit left)
+                    Assert.Equal("_aqualis_int_power(baseValue,_aqualis_int_power(exponent,3))",emit right)
+                else
+                    Assert.Equal("(baseValue**2)**3",emit left)
+                    Assert.Equal((if language = Python then "baseValue**_aqualis_int_power(exponent,3)" else "baseValue**exponent**3"),emit right)
+
+    [<Fact>]
+    let ``constant conditionals preserve the promoted result domain`` () =
+        for expression,expected in
+            [IfEl(True,Int 1,Dbl 2.5),Dbl 1.0
+             IfEl(False,Dbl 2.5,Int 1),Dbl 1.0
+             IfEl(True,Dbl 1.0,Cpx(2.0,3.0)),Cpx(1.0,0.0)] do
+            let actual = expression.simp
+            Assert.Equal(expression.etype,actual.etype)
+            match actual,expected with
+            |Cpx(a,b),Cpx(c,d) -> Assert.Equal(c,a); Assert.Equal(d,b)
+            |_ -> Assert.True(expr.equal(actual,expected))
+        let x = Var(It 4,"value",NaN)
+        Assert.Equal(Dt,IfEl(True,x,Dbl 2.5).simp.etype)
+        Assert.Equal(Zt,IfEl(True,x,Cpx(2.0,3.0)).simp.etype)
 
     [<Fact>]
     let ``minimum integer arithmetic terminates and remains stable under simplification`` () =

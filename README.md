@@ -72,7 +72,7 @@ for diagnostic in result.Diagnostics do
 ## Integer powers
 
 `int0.powr` represents an integer result. Constant integer powers and generated
-C integer powers truncate negative-exponent results toward zero, reject zero
+C and Python integer powers truncate negative-exponent results toward zero, reject zero
 raised to a non-positive power, and report results outside the 32-bit range.
 Use `asm.pow` for real-valued powers, including fractional results.
 

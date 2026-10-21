@@ -12,6 +12,15 @@ namespace Aqualis
 
         open System
 
+        /// Keep the public index 32-bit while the control variable can step past INT_MAX.
+        let private wideCounter (c:Aqualis) name =
+            let mutable candidate = name + "_wide"
+            while varGenerator.isVarExist(c,candidate,It 8,A0) do candidate <- candidate + "_"
+            c.cvar.setUniqVar(It 8,A0,candidate,"")
+            if c.ParallelMode then c.varPrivate.setVar(It 8,A0,candidate,"")
+            c.hlist.add "<stdint.h>"
+            candidate
+
         type expr with
 
             /// Emits an assignment for C99.
@@ -32,10 +41,12 @@ namespace Aqualis
                 let i = Var(It 4, iname, NaN)
                 let n1_ = n1.evalC c
                 let n2_ = n2.evalC c
+                let control = wideCounter c iname
                 if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                c.codewritein("for(" + i.evalC c + " = " + n1_ + "; " + i.evalC c + " <= " + n2_ + "; " + i.evalC c + "++)")
+                c.codewritein("for(" + control + " = " + n1_ + "; " + control + " <= " + n2_ + "; " + control + "++)")
                 c.codewritein "{"
                 c.indentInc()
+                c.codewritein(i.evalC c + " = (int)" + control + ";")
                 code i
                 c.indentDec()
                 c.codewritein "}"
@@ -81,9 +92,11 @@ namespace Aqualis
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("for(" + i.evalC c + "=" + i1.evalC c + "; " + i.evalC c + "<=" + i2.evalC c + "; " + i.evalC c + "++)")
+                    let control = wideCounter c iname
+                    c.codewritein("for(" + control + "=" + i1.evalC c + "; " + control + "<=" + i2.evalC c + "; " + control + "++)")
                     c.codewritein "{"
                     c.indentInc()
+                    c.codewritein(i.evalC c + " = (int)" + control + ";")
                     code i
                     c.indentDec()
                     c.codewritein "}"
@@ -105,9 +118,11 @@ namespace Aqualis
                     let label = "_" + c.GotoLabels.nextGotoLabel()
                     let exit() = c.codewritein("goto "+label+";")
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("for(" + i.evalC c + "=" + i1.evalC c + "; " + i.evalC c + "<=" + i2.evalC c + "; " + i.evalC c + "++)")
+                    let control = wideCounter c iname
+                    c.codewritein("for(" + control + "=" + i1.evalC c + "; " + control + "<=" + i2.evalC c + "; " + control + "++)")
                     c.codewritein "{"
                     c.indentInc()
+                    c.codewritein(i.evalC c + " = (int)" + control + ";")
                     code(exit,i)
                     c.indentDec()
                     c.codewritein "}"
@@ -277,12 +292,12 @@ namespace Aqualis
                         u)).evalC c
                 |IfEl(cond,n1,n2) ->
                     let v =
-                        match n1.etype with
+                        match n1.etype%%n2.etype with
                         |It 4 -> Var (It 4, (fun (a,_) -> a) (c.i0.getVar()), NaN)
                         |Dt   -> Var (Dt, (fun (a,_) -> a) (c.d0.getVar()), NaN)
                         |Zt   -> Var (Zt, (fun (a,_) -> a) (c.z0.getVar()), NaN)
                         |_    -> NaN
-                    (Let(n1.etype, NaN, v, fun x ->
+                    (Let(n1.etype%%n2.etype, NaN, v, fun x ->
                         expr.branchC c <| fun (ifcode,_,elsecode) ->
                             ifcode cond <| fun () ->
                                 expr.substC x n1 c

@@ -656,6 +656,85 @@ module Program =
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
 
+        generate "conditional-promotion" <| fun context ->
+            let flag = context.var.i0 "flag"
+            let real = context.var.d0 "realResult"
+            let complex = context.var.z0 "complexResult"
+            for choice in [0;1] do
+                flag <== choice
+                let condition = Eq(flag.Expr,Int 1)
+                real <== double0(IfEl(condition,Int 1,Dbl 2.5),context)
+                context.print.t real
+                real <== double0(IfEl(condition,Dbl 2.5,Int 1),context)
+                context.print.t real
+                complex <== complex0(IfEl(condition,Dbl 1.0,Cpx(2.0,3.0)),context)
+                context.print.t complex.re
+                context.print.t complex.im
+            flag <== 7
+            context.print.t (double0(IfEl(True,flag.Expr,Dbl 2.5),context))
+            // The selected branch must retain complex type without evaluating an invalid unused branch.
+            complex <== complex0(IfEl(True,flag.Expr,Div(Zt,Int 1,Int 0)),context)
+            context.print.t complex.re
+            context.print.t complex.im
+
+        generate "integer-power-parity" <| fun context ->
+            let baseValue = context.var.i1("baseValues",1)
+            let exponent = context.var.i1("exponents",1)
+            for b,e in [2,-3; -1,-3; -1,Int32.MinValue; -2,31; 2,0] do
+                baseValue[0] <== b
+                exponent[0] <== e
+                context.print.t (asm.todouble(int0.powr(I b,I e)))
+                context.print.t (asm.todouble(int0.powr(baseValue[0],exponent[0])))
+
+        for variant in ["plain";"named";"exit";"early";"sum";"static";"static-exit";"static-sum"] do
+            for name,first,last in ["max",Int32.MaxValue,Int32.MaxValue; "pair",Int32.MaxValue-1,Int32.MaxValue; "min",Int32.MinValue,Int32.MinValue; "empty",Int32.MaxValue,Int32.MaxValue-1] do
+                generate ($"range-boundary-{variant}-{name}") <| fun context ->
+                    let firstValue = context.var.i0 "firstValue"
+                    let lastValue = context.var.i0 "lastValue"
+                    let count = context.var.i0 "count"
+                    let sum = context.var.i0 "sum"
+                    firstValue <== first
+                    lastValue <== last
+                    count <== 0
+                    let body (index:int0) =
+                        count.inc()
+                        context.br.if1 (count .> 2) (fun () ->
+                            match language with
+                            |C99 -> context.writein "exit(EXIT_FAILURE);"
+                            |Fortran -> context.writein "error stop 'range overrun'"
+                            |_ -> context.writein "raise AssertionError('range overrun')")
+                        context.br.if1 (Or [index .< firstValue; index .> lastValue]) (fun () ->
+                            match language with
+                            |C99 -> context.writein "exit(EXIT_FAILURE);"
+                            |Fortran -> context.writein "error stop 'invalid loop index'"
+                            |_ -> context.writein "raise AssertionError('invalid loop index')")
+                    match variant with
+                    |"plain" -> context.iter.range(firstValue,lastValue) body
+                    |"named" -> context.iter.range("namedIndex",firstValue,lastValue) body
+                    |"exit" -> context.iter.range_exit(firstValue,lastValue) (fun (_,index) -> body index)
+                    |"early" -> context.iter.range_exit(firstValue,lastValue) (fun (exit,index) -> body index; exit())
+                    |"static" -> context.iter.range(first,last) body
+                    |"static-exit" -> context.iter.range_exit(I first,I last) (fun (_,index) -> body index)
+                    |"static-sum" ->
+                        sum <== asm.iSum(first,last) (fun index -> body index; I 1)
+                        context.print.t sum
+                    |_ ->
+                        sum <== asm.iSum(firstValue,lastValue) (fun index -> body index; I 1)
+                        context.print.t sum
+                    context.print.t count
+
+        if language = C99 || language = Fortran then
+            generate "range-boundary-parallel" <| fun context ->
+                let first = context.var.i0 "first"
+                let last = context.var.i0 "last"
+                let count = context.var.i0 "count"
+                first <== Int32.MaxValue-1
+                last <== Int32.MaxValue
+                count <== 0
+                context.omp.reduction_th(2,count,"+") (fun parallelContext ->
+                    parallelContext.iter.range(first,last) (fun _ -> count.inc()))
+                context.print.t count
+
         generate "typed-integer-math" <| fun context ->
             let x = context.var.i0 "value"
             let exponent = context.var.i0 "exponent"
@@ -675,7 +754,7 @@ module Program =
             context.print.t (asm.asin x)
             context.print.t (asm.acos x)
 
-        if language = C99 then
+        if language = C99 || language = Python then
             for name,baseValue,exponent in ["overflow",2,31; "invalid",0,-1; "negative",2,-3; "boundary",-2,31] do
                 generate ("checked-power-"+name) <| fun context ->
                     let x = context.var.i0 "value"
