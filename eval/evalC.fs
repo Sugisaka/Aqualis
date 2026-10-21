@@ -202,6 +202,7 @@ namespace Aqualis
                         |_ -> y.evalC c
                     left + "%" + right
                 |Pow(Zt,x,y) -> "cpow(" + x.evalC c + "," + y.evalC c + ")"
+                |Pow(It _,x,y) -> "aqualis_int_power(" + x.evalC c + "," + y.evalC c + ")"
                 |Pow(_,x,y) -> "pow(" + x.evalC c + "," + y.evalC c + ")"
                 |Exp(Zt,x) -> "cexp(" + x.evalC c + ")"
                 |Exp(_,x) -> "exp(" + x.evalC c + ")"

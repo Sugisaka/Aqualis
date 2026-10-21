@@ -9,6 +9,33 @@ namespace Aqualis
     /// Two- and three-dimensional symbolic geometry helpers.
     module geometry =
 
+        /// Uses component scaling so squaring cannot overflow or erase tiny vectors.
+        let private componentScale (components:double0 list) =
+            let first = List.head components
+            for value in components do NumericContext.binary first value |> ignore
+            components |> List.map (fun value -> (asm.abs value).Expr)
+            |> List.reduce (fun a b -> IfEl(OR [Greater(a,b); NEq(a,a)],a,b))
+
+        let private stableLength (components:double0 list) =
+            let scale = componentScale components
+            let sum =
+                components |> List.map (fun value ->
+                    let ratio = Div(Dt,value.Expr,scale)
+                    Mul(Dt,ratio,ratio))
+                |> List.reduce (fun a b -> Add(Dt,a,b))
+            double0(IfEl(Eq(scale,Dbl 0.0),Dbl 0.0,
+                        IfEl(Eq(scale,Dbl System.Double.PositiveInfinity),scale,
+                             Mul(Dt,scale,Sqrt(Dt,sum)))),(List.head components).Context)
+
+        let private normalizeComponents (context:Aqualis) (components:double0 list) =
+            for value in components do
+                NumericArrayValidation.requireFinite context value "Geometry normalization requires finite coordinates."
+            context.ch.dd <| fun (scale,norm) ->
+                scale <== double0(componentScale components,context)
+                NumericArrayValidation.require context (scale .<= 0.0) "Geometry normalization requires a nonzero vector."
+                norm <== asm.sqrt (components |> List.map (fun value -> (value/scale)*(value/scale)) |> List.reduce (+))
+                for value in components do value <== (value/scale)/norm
+
         /// Immutable two-dimensional vector of symbolic real coordinates.
         type Point2(x:double0,y:double0) =
             /// Gets the horizontal coordinate.
@@ -16,7 +43,7 @@ namespace Aqualis
             /// Gets the vertical coordinate.
             member public _.y with get() = y
             /// Gets the Euclidean length of the vector.
-            member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y)
+            member public this.abs with get() = stableLength [this.x;this.y]
             /// Negates every coordinate.
             static member (~-) (a:Point2) = new Point2(-a.x, -a.y)
             /// Adds the coordinates of two vectors.
@@ -56,13 +83,10 @@ namespace Aqualis
             /// Gets the vertical coordinate.
             member public __.y = context.str.d0(sname_,name,"y")
             /// Gets the Euclidean length of the vector.
-            member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y)
+            member public this.abs with get() = stableLength [this.x;this.y]
             /// Divides each coordinate by the current Euclidean length.
             member public this.normalize() =
-                context.ch.d <| fun norm ->
-                    norm <== this.abs
-                    this.x <== this.x/norm
-                    this.y <== this.y/norm
+                normalizeComponents context [this.x;this.y]
             /// Negates every coordinate.
             static member (~-) (a:point2) = new Point2(-a.x, -a.y)
             /// Adds the coordinates of two vectors.
@@ -113,7 +137,7 @@ namespace Aqualis
             /// Gets the depth coordinate.
             member public _.z with get() = z
             /// Gets the Euclidean length of the vector.
-            member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y+this.z*this.z)
+            member public this.abs with get() = stableLength [this.x;this.y;this.z]
             /// Gets the three-dimensional zero vector.
             static member O = new Point3(D 0.0, D 0.0, D 0.0)
             /// Negates every coordinate.
@@ -156,14 +180,10 @@ namespace Aqualis
             /// Gets the depth coordinate.
             member public __.z = context.str.d0(sname_,name,"z")
             /// Gets the Euclidean length of the vector.
-            member public this.abs with get() = asm.sqrt(this.x*this.x+this.y*this.y+this.z*this.z)
+            member public this.abs with get() = stableLength [this.x;this.y;this.z]
             /// Divides each coordinate by the current Euclidean length.
             member public this.normalize() =
-                context.ch.d <| fun norm ->
-                    norm <== this.abs
-                    this.x <== this.x/norm
-                    this.y <== this.y/norm
-                    this.z <== this.z/norm
+                normalizeComponents context [this.x;this.y;this.z]
             /// Negates every coordinate.
             static member (~-) (a:point3) = new Point3(-a.x, -a.y, -a.z)
             /// Adds the coordinates of two vectors.

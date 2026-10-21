@@ -3,6 +3,18 @@ namespace Aqualis.Tests
 open Xunit
 open Aqualis
 
+module GeometryNormTests =
+    [<Fact>]
+    let ``geometry lengths preserve extreme finite magnitudes and zero`` () =
+        for magnitude in [1e200; 1e-200; 1e308; 1e-308] do
+            for expression,factor in
+                [(geometry.Point2(D magnitude,D -magnitude)).abs.Expr,sqrt 2.0
+                 (geometry.Point3(D magnitude,D -magnitude,D magnitude)).abs.Expr,sqrt 3.0] do
+                match expression.simp with
+                |Dbl value -> Assert.True(abs(value/magnitude-factor) < 1e-14)
+                |actual -> Assert.Fail($"Expected finite length, got {actual}.")
+        Assert.True(expr.equal((geometry.Point3.O.abs.Expr.simp),Dbl 0.0))
+
 type private baseStructure(sname:string,name:string,context:Aqualis) =
     inherit structureValue(sname,name,context)
 

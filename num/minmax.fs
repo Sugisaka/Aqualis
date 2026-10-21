@@ -10,86 +10,119 @@ namespace Aqualis
     [<AutoOpen>]
     module asm_minmax =
         type asm with
-            /// Searches a 1D array with the supplied comparison, updating the result and optional indices.
+            /// Searches without modifying any caller output until the input has been scanned.
             static member private cp1(zA:int1,v:int0,iv:int0 option,compare:int0*int0->bool0) =
                 NumericArrayValidation.require zA.Context (zA.size1 .<= 0) "Min/max requires a nonempty array."
-                match iv with |Some(iv) -> iv <== 0 |_ -> ()
-                v <== zA[_0]
-                zA.Context.iter.num zA.size1 <| fun i ->
-                    zA.Context.br.if1 (compare(v, i)) <| fun () ->
-                        match iv with |Some(iv) -> iv <== i |_ -> ()
-                        v <== zA[i]
-            /// Searches a 1D array with the supplied comparison, updating the result and optional indices.
+                zA.Context.ch.i <| fun best ->
+                zA.Context.ch.i <| fun index1 ->
+                    index1 <== 0
+                    best <== zA[_0]
+                    zA.Context.iter.num zA.size1 <| fun i ->
+                        zA.Context.br.if1 (compare(best, i)) <| fun () ->
+                            index1 <== i
+                            best <== zA[i]
+                    v <== best
+                    iv |> Option.iter (fun output -> output <== index1)
+
+            /// Searches without modifying any caller output until the input has been scanned.
             static member private cp1(zA:double1,v:double0,iv:int0 option,compare:double0*int0->bool0) =
                 NumericArrayValidation.require zA.Context (zA.size1 .<= 0) "Min/max requires a nonempty array."
-                match iv with |Some(iv) -> iv <== 0 |_ -> ()
-                v <== zA[_0]
-                zA.Context.iter.num zA.size1 <| fun i ->
-                    zA.Context.br.if1 (compare(v, i)) <| fun () ->
-                        match iv with |Some(iv) -> iv <== i |_ -> ()
-                        v <== zA[i]
+                zA.Context.ch.d <| fun best ->
+                zA.Context.ch.i <| fun index1 ->
+                    index1 <== 0
+                    best <== zA[_0]
+                    zA.Context.iter.num zA.size1 <| fun i ->
+                        zA.Context.br.if1 (compare(best, i)) <| fun () ->
+                            index1 <== i
+                            best <== zA[i]
+                    v <== best
+                    iv |> Option.iter (fun output -> output <== index1)
 
-            /// Searches a 2D array with the supplied comparison, updating the result and optional indices.
-            static member private cp2(zA:int2,v:int0,iv1:int0 option,iv2:int0 option, compare:int0*int0*int0->bool0) =
+            /// Searches without modifying any caller output until the input has been scanned.
+            static member private cp2(zA:int2,v:int0,iv1:int0 option,iv2:int0 option,compare:int0*int0*int0->bool0) =
                 NumericArrayValidation.require zA.Context (zA.size1 .<= 0) "Min/max requires a nonempty array."
                 NumericArrayValidation.require zA.Context (zA.size2 .<= 0) "Min/max requires a nonempty array."
-                match iv1 with |Some(iv1) -> iv1 <== 0 |_ -> ()
-                match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
-                v <== zA[_0,_0]
-                zA.Context.iter.num zA.size1 <| fun i ->
-                zA.Context.iter.num zA.size2 <| fun j ->
-                    zA.Context.br.if1 (compare(v, i, j)) <| fun () ->
-                        match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
-                        match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
-                        v <== zA[i,j]
-            /// Searches a 2D array with the supplied comparison, updating the result and optional indices.
-            static member private cp2(zA:double2,v:double0,iv1:int0 option,iv2:int0 option, compare:double0*int0*int0->bool0) =
+                zA.Context.ch.i <| fun best ->
+                zA.Context.ch.ii <| fun (index1,index2) ->
+                    index1 <== 0
+                    index2 <== 0
+                    best <== zA[_0,_0]
+                    zA.Context.iter.num zA.size1 <| fun i ->
+                    zA.Context.iter.num zA.size2 <| fun j ->
+                        zA.Context.br.if1 (compare(best, i, j)) <| fun () ->
+                            index1 <== i
+                            index2 <== j
+                            best <== zA[i,j]
+                    v <== best
+                    iv1 |> Option.iter (fun output -> output <== index1)
+                    iv2 |> Option.iter (fun output -> output <== index2)
+
+            /// Searches without modifying any caller output until the input has been scanned.
+            static member private cp2(zA:double2,v:double0,iv1:int0 option,iv2:int0 option,compare:double0*int0*int0->bool0) =
                 NumericArrayValidation.require zA.Context (zA.size1 .<= 0) "Min/max requires a nonempty array."
                 NumericArrayValidation.require zA.Context (zA.size2 .<= 0) "Min/max requires a nonempty array."
-                match iv1 with |Some(iv1) -> iv1 <== 0 |_ -> ()
-                match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
-                v <== zA[_0,_0]
-                zA.Context.iter.num zA.size1 <| fun i ->
-                zA.Context.iter.num zA.size2 <| fun j ->
-                    zA.Context.br.if1 (compare(v, i, j)) <| fun () ->
-                        match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
-                        match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
-                        v <== zA[i,j]
+                zA.Context.ch.d <| fun best ->
+                zA.Context.ch.ii <| fun (index1,index2) ->
+                    index1 <== 0
+                    index2 <== 0
+                    best <== zA[_0,_0]
+                    zA.Context.iter.num zA.size1 <| fun i ->
+                    zA.Context.iter.num zA.size2 <| fun j ->
+                        zA.Context.br.if1 (compare(best, i, j)) <| fun () ->
+                            index1 <== i
+                            index2 <== j
+                            best <== zA[i,j]
+                    v <== best
+                    iv1 |> Option.iter (fun output -> output <== index1)
+                    iv2 |> Option.iter (fun output -> output <== index2)
 
-            /// Searches a 3D array with the supplied comparison, updating the result and optional indices.
-            static member private cp3(zA:int3,v:int0,iv1:int0 option,iv2:int0 option,iv3:int0 option, compare:int0*int0*int0*int0->bool0) =
+            /// Searches without modifying any caller output until the input has been scanned.
+            static member private cp3(zA:int3,v:int0,iv1:int0 option,iv2:int0 option,iv3:int0 option,compare:int0*int0*int0*int0->bool0) =
                 NumericArrayValidation.require zA.Context (zA.size1 .<= 0) "Min/max requires a nonempty array."
                 NumericArrayValidation.require zA.Context (zA.size2 .<= 0) "Min/max requires a nonempty array."
                 NumericArrayValidation.require zA.Context (zA.size3 .<= 0) "Min/max requires a nonempty array."
-                match iv1 with |Some(iv1) -> iv1 <== 0 |_ -> ()
-                match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
-                match iv3 with |Some(iv3) -> iv3 <== 0 |_ -> ()
-                v <== zA[_0,_0,_0]
-                zA.Context.iter.num zA.size1 <| fun i ->
-                zA.Context.iter.num zA.size2 <| fun j ->
-                zA.Context.iter.num zA.size3 <| fun k ->
-                    zA.Context.br.if1 (compare(v, i, j, k)) <| fun () ->
-                        match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
-                        match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
-                        match iv3 with |Some(iv3) -> iv3 <== k |_ -> ()
-                        v <== zA[i,j,k]
-            /// Searches a 3D array with the supplied comparison, updating the result and optional indices.
-            static member private cp3(zA:double3,v:double0,iv1:int0 option,iv2:int0 option,iv3:int0 option, compare:double0*int0*int0*int0->bool0) =
+                zA.Context.ch.i <| fun best ->
+                zA.Context.ch.iii <| fun (index1,index2,index3) ->
+                    index1 <== 0
+                    index2 <== 0
+                    index3 <== 0
+                    best <== zA[_0,_0,_0]
+                    zA.Context.iter.num zA.size1 <| fun i ->
+                    zA.Context.iter.num zA.size2 <| fun j ->
+                    zA.Context.iter.num zA.size3 <| fun k ->
+                        zA.Context.br.if1 (compare(best, i, j, k)) <| fun () ->
+                            index1 <== i
+                            index2 <== j
+                            index3 <== k
+                            best <== zA[i,j,k]
+                    v <== best
+                    iv1 |> Option.iter (fun output -> output <== index1)
+                    iv2 |> Option.iter (fun output -> output <== index2)
+                    iv3 |> Option.iter (fun output -> output <== index3)
+
+            /// Searches without modifying any caller output until the input has been scanned.
+            static member private cp3(zA:double3,v:double0,iv1:int0 option,iv2:int0 option,iv3:int0 option,compare:double0*int0*int0*int0->bool0) =
                 NumericArrayValidation.require zA.Context (zA.size1 .<= 0) "Min/max requires a nonempty array."
                 NumericArrayValidation.require zA.Context (zA.size2 .<= 0) "Min/max requires a nonempty array."
                 NumericArrayValidation.require zA.Context (zA.size3 .<= 0) "Min/max requires a nonempty array."
-                match iv1 with |Some(iv1) -> iv1 <== 0 |_ -> ()
-                match iv2 with |Some(iv2) -> iv2 <== 0 |_ -> ()
-                match iv3 with |Some(iv3) -> iv3 <== 0 |_ -> ()
-                v <== zA[_0,_0,_0]
-                zA.Context.iter.num zA.size1 <| fun i ->
-                zA.Context.iter.num zA.size2 <| fun j ->
-                zA.Context.iter.num zA.size3 <| fun k ->
-                    zA.Context.br.if1 (compare(v, i, j, k)) <| fun () ->
-                        match iv1 with |Some(iv1) -> iv1 <== i |_ -> ()
-                        match iv2 with |Some(iv2) -> iv2 <== j |_ -> ()
-                        match iv3 with |Some(iv3) -> iv3 <== k |_ -> ()
-                        v <== zA[i,j,k]
+                zA.Context.ch.d <| fun best ->
+                zA.Context.ch.iii <| fun (index1,index2,index3) ->
+                    index1 <== 0
+                    index2 <== 0
+                    index3 <== 0
+                    best <== zA[_0,_0,_0]
+                    zA.Context.iter.num zA.size1 <| fun i ->
+                    zA.Context.iter.num zA.size2 <| fun j ->
+                    zA.Context.iter.num zA.size3 <| fun k ->
+                        zA.Context.br.if1 (compare(best, i, j, k)) <| fun () ->
+                            index1 <== i
+                            index2 <== j
+                            index3 <== k
+                            best <== zA[i,j,k]
+                    v <== best
+                    iv1 |> Option.iter (fun output -> output <== index1)
+                    iv2 |> Option.iter (fun output -> output <== index2)
+                    iv3 |> Option.iter (fun output -> output <== index3)
 
             /// <summary>
             /// 最大値を検索

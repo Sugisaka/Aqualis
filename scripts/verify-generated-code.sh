@@ -1006,4 +1006,80 @@ PY
   fi
 done
 
+for language in c fortran python; do
+  case "$language" in
+    c) run_command=(bash proc_smoke_C.sh) ;;
+    fortran) run_command=(bash proc_smoke_F.sh) ;;
+    python) run_command=(python3 smoke.py) ;;
+  esac
+  run_math_regression() {
+    local directory="$output_root/$1-$language"
+    if [[ "$language" == c ]]; then
+      gcc -std=c99 -Werror=format "$directory/smoke.c" -lm -o "$directory/checked.exe"
+      "$directory/checked.exe"
+    else
+      (cd "$directory" && "${run_command[@]}")
+    fi
+  }
+  actual="$(run_math_regression typed-integer-math)"
+  python3 - "$actual" <<'PY'
+import math
+import sys
+actual = list(map(float, sys.argv[1].split()))
+expected = [8, 2, math.sqrt(2), math.exp(2), math.log(2), math.log10(2),
+            math.sin(2), math.cos(2), math.tan(2), math.atan(2), 0, math.acos(0)]
+assert len(actual) == len(expected), actual
+assert all(math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-12) for a, b in zip(actual, expected)), actual
+PY
+  for rank in 1 2 3; do
+    for kind in int real; do
+      for maximum in True False; do
+        actual="$(run_math_regression "minmax-alias-$rank-$kind-$maximum")"
+        python3 - "$maximum" "$actual" <<'PY'
+import sys
+maximum, output = sys.argv[1:]
+assert list(map(float, output.split())) == [5 if maximum == 'True' else 1, 2], output
+PY
+      done
+    done
+  done
+  for dimensions in 2 3; do
+    for magnitude in large small huge tiny; do
+      actual="$(run_math_regression "geometry-norm-$dimensions-$magnitude")"
+      python3 - "$dimensions" "$actual" <<'PY'
+import math
+import sys
+dimensions = int(sys.argv[1])
+length, *coordinates = map(float, sys.argv[2].split())
+assert len(coordinates) == dimensions, coordinates
+assert math.isclose(length, math.sqrt(dimensions), rel_tol=1e-12), length
+for i, value in enumerate(coordinates):
+    assert math.isclose(value, (-1 if i == 1 else 1) / math.sqrt(dimensions), rel_tol=1e-12), coordinates
+PY
+    done
+    for invalid in zero nonfinite; do
+      if run_math_regression "geometry-norm-$dimensions-$invalid" >"$output_root/geometry-error.txt" 2>&1; then
+        printf '%s\n' "$language geometry normalization accepted $invalid coordinates." >&2
+        exit 1
+      fi
+      grep -Fq 'Geometry normalization requires' "$output_root/geometry-error.txt"
+    done
+  done
+done
+for mode in negative boundary; do
+  actual="$(cd "$output_root/checked-power-$mode-c" && bash proc_smoke_C.sh)"
+  python3 - "$mode" "$actual" <<'PY'
+import sys
+mode, output = sys.argv[1:]
+assert int(output) == (0 if mode == 'negative' else -2147483648), output
+PY
+done
+for mode in overflow invalid; do
+  if (cd "$output_root/checked-power-$mode-c" && bash proc_smoke_C.sh >actual.txt 2>error.txt); then
+    printf '%s\n' "C integer power accepted $mode input." >&2
+    exit 1
+  fi
+  grep -Fq 'Aqualis:' "$output_root/checked-power-$mode-c/error.txt"
+done
+
 printf '%s\n' 'All generated-code runtime checks passed.'

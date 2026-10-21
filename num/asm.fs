@@ -64,43 +64,43 @@ namespace Aqualis
         static member pow(x:double, y:complex0) = asm.pow(D x,y)
 
         ///<summary>指数関数</summary>
-        static member exp (v:int0) = double0(Exp(v.etype,v.Expr), v.Context)
+        static member exp (v:int0) = double0(Exp(Dt,ToDbl v.Expr), v.Context)
         /// Computes the exponential of the operand.
         static member exp (v:double0) = double0(Exp(v.etype,v.Expr), v.Context)
         /// Computes the exponential of the operand.
         static member exp (v:complex0) = complex0(Exp(Zt,v.Expr), v.Context)
         ///<summary>正弦関数</summary>
-        static member sin (v:int0) = double0(Sin(v.etype,v.Expr), v.Context)
+        static member sin (v:int0) = double0(Sin(Dt,ToDbl v.Expr), v.Context)
         /// Computes the sine of the operand.
         static member sin (v:double0) = double0(Sin(v.etype,v.Expr), v.Context)
         /// Computes the sine of the operand.
         static member sin (v:complex0) = complex0(Sin(Zt,v.Expr), v.Context)
         ///<summary>余弦関数</summary>
-        static member cos (v:int0) = double0(Cos(v.etype,v.Expr), v.Context)
+        static member cos (v:int0) = double0(Cos(Dt,ToDbl v.Expr), v.Context)
         /// Computes the cosine of the operand.
         static member cos (v:double0) = double0(Cos(v.etype,v.Expr), v.Context)
         /// Computes the cosine of the operand.
         static member cos (v:complex0) = complex0(Cos(Zt,v.Expr), v.Context)
         ///<summary>正接関数</summary>
-        static member tan (v:int0) = double0(Tan(v.etype,v.Expr), v.Context)
+        static member tan (v:int0) = double0(Tan(Dt,ToDbl v.Expr), v.Context)
         /// Computes the tangent of the operand.
         static member tan (v:double0) = double0(Tan(v.etype,v.Expr), v.Context)
         /// Computes the tangent of the operand.
         static member tan (v:complex0) = complex0(Tan(Zt,v.Expr), v.Context)
         ///<summary>逆正弦関数</summary>
-        static member asin (v:int0) = double0(Asin(v.etype,v.Expr), v.Context)
+        static member asin (v:int0) = double0(Asin(Dt,ToDbl v.Expr), v.Context)
         /// Computes the inverse sine of the operand.
         static member asin (v:double0) = double0(Asin(v.etype,v.Expr), v.Context)
         /// Computes the inverse sine of the operand.
         static member asin (v:complex0) = complex0(Asin(Zt,v.Expr), v.Context)
         ///<summary>逆余弦関数</summary>
-        static member acos (v:int0) = double0(Acos(v.etype,v.Expr), v.Context)
+        static member acos (v:int0) = double0(Acos(Dt,ToDbl v.Expr), v.Context)
         /// Computes the inverse cosine of the operand.
         static member acos (v:double0) = double0(Acos(v.etype,v.Expr), v.Context)
         /// Computes the inverse cosine of the operand.
         static member acos (v:complex0) = complex0(Acos(Zt,v.Expr), v.Context)
         ///<summary>逆正接関数</summary>
-        static member atan (v:int0) = double0(Atan(v.etype,v.Expr), v.Context)
+        static member atan (v:int0) = double0(Atan(Dt,ToDbl v.Expr), v.Context)
         /// Computes the inverse tangent of the operand.
         static member atan (v:double0) = double0(Atan(v.etype,v.Expr), v.Context)
         /// Computes the inverse tangent of the operand.
@@ -120,19 +120,19 @@ namespace Aqualis
         /// Computes the absolute value or complex magnitude of the operand.
         static member abs (v:complex0) = double0(Abs(Dt,v.Expr), v.Context)
         ///<summary>自然対数</summary>
-        static member log (v:int0) = double0(Log(v.etype,v.Expr), v.Context)
+        static member log (v:int0) = double0(Log(Dt,ToDbl v.Expr), v.Context)
         /// Computes the natural logarithm of the operand.
         static member log (v:double0) = double0(Log(v.etype,v.Expr), v.Context)
         /// Computes the natural logarithm of the operand.
         static member log (v:complex0) = complex0(Log(Zt,v.Expr), v.Context)
         ///<summary>常用対数</summary>
-        static member log10 (v:int0) = double0(Log10(v.etype,v.Expr), v.Context)
+        static member log10 (v:int0) = double0(Log10(Dt,ToDbl v.Expr), v.Context)
         /// Computes the base-10 logarithm of the operand.
         static member log10 (v:double0) = double0(Log10(v.etype,v.Expr), v.Context)
         /// Computes the base-10 logarithm of the operand.
         static member log10 (v:complex0) = complex0(Log10(Zt,v.Expr), v.Context)
         ///<summary>平方根</summary>
-        static member sqrt (v:int0) = double0(Sqrt(v.etype,v.Expr), v.Context)
+        static member sqrt (v:int0) = double0(Sqrt(Dt,ToDbl v.Expr), v.Context)
         /// Computes the square root of the operand.
         static member sqrt (v:double0) = double0(Sqrt(v.etype,v.Expr), v.Context)
         /// Computes the square root of the operand.

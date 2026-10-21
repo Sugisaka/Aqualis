@@ -656,6 +656,100 @@ module Program =
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
 
+        generate "typed-integer-math" <| fun context ->
+            let x = context.var.i0 "value"
+            let exponent = context.var.i0 "exponent"
+            x <== 2
+            exponent <== 3
+            context.print.t (int0.powr(x,exponent))
+            context.print.t (int0.powr(x,exponent) % I 3)
+            context.print.t (asm.sqrt x)
+            context.print.t (asm.exp x)
+            context.print.t (asm.log x)
+            context.print.t (asm.log10 x)
+            context.print.t (asm.sin x)
+            context.print.t (asm.cos x)
+            context.print.t (asm.tan x)
+            context.print.t (asm.atan x)
+            x <== 0
+            context.print.t (asm.asin x)
+            context.print.t (asm.acos x)
+
+        if language = C99 then
+            for name,baseValue,exponent in ["overflow",2,31; "invalid",0,-1; "negative",2,-3; "boundary",-2,31] do
+                generate ("checked-power-"+name) <| fun context ->
+                    let x = context.var.i0 "value"
+                    let e = context.var.i0 "exponent"
+                    x <== baseValue
+                    e <== exponent
+                    context.print.t (int0.powr(x,e))
+
+        for rank in [1;2;3] do
+            for kind in ["int";"real"] do
+                for maximum in [true;false] do
+                    generate ($"minmax-alias-{rank}-{kind}-{maximum}") <| fun context ->
+                        let values = if maximum then [1;3;5] else [5;3;1]
+                        let index = context.var.i0 "index"
+                        match rank,kind with
+                        |1,"int" ->
+                            let a = context.var.i1("values",3)
+                            values |> List.iteri (fun i value -> a[i] <== value)
+                            if maximum then asm.max(a,a[2],Some a[0]) else asm.min(a,a[2],Some a[0])
+                            context.print.t a[2]
+                            context.print.t a[0]
+                        |2,"int" ->
+                            let a = context.var.i2("values",1,3)
+                            values |> List.iteri (fun i value -> a[0,i] <== value)
+                            if maximum then asm.max(a,a[0,2],None,Some a[0,0]) else asm.min(a,a[0,2],None,Some a[0,0])
+                            context.print.t a[0,2]
+                            context.print.t a[0,0]
+                        |3,"int" ->
+                            let a = context.var.i3("values",1,1,3)
+                            values |> List.iteri (fun i value -> a[0,0,i] <== value)
+                            if maximum then asm.max(a,a[0,0,2],None,None,Some a[0,0,0]) else asm.min(a,a[0,0,2],None,None,Some a[0,0,0])
+                            context.print.t a[0,0,2]
+                            context.print.t a[0,0,0]
+                        |1,_ ->
+                            let a = context.var.d1("values",3)
+                            values |> List.iteri (fun i value -> a[i] <== float value)
+                            if maximum then asm.max(a,a[2],Some index) else asm.min(a,a[2],Some index)
+                            context.print.t a[2]
+                            context.print.t index
+                        |2,_ ->
+                            let a = context.var.d2("values",1,3)
+                            values |> List.iteri (fun i value -> a[0,i] <== float value)
+                            if maximum then asm.max(a,a[0,2],None,Some index) else asm.min(a,a[0,2],None,Some index)
+                            context.print.t a[0,2]
+                            context.print.t index
+                        |_ ->
+                            let a = context.var.d3("values",1,1,3)
+                            values |> List.iteri (fun i value -> a[0,0,i] <== float value)
+                            if maximum then asm.max(a,a[0,0,2],None,None,Some index) else asm.min(a,a[0,0,2],None,None,Some index)
+                            context.print.t a[0,0,2]
+                            context.print.t index
+
+        for dimensions in [2;3] do
+            for name,magnitude in ["large",1e200; "small",1e-200; "huge",1e308; "tiny",1e-308; "zero",0.0; "nonfinite",Double.PositiveInfinity] do
+                generate ($"geometry-norm-{dimensions}-{name}") <| fun context ->
+                    if dimensions = 2 then
+                        let p = geometry.point2("point",context)
+                        p.x <== magnitude
+                        p.y <== -magnitude
+                        if magnitude > 0.0 && Double.IsFinite magnitude then context.print.t (p.abs/magnitude)
+                        p.normalize()
+                        context.print.t p.x
+                        context.print.t p.y
+                    else
+                        let p = geometry.point3("point",context)
+                        p.x <== magnitude
+                        p.y <== -magnitude
+                        p.z <== magnitude
+                        if magnitude > 0.0 && Double.IsFinite magnitude then context.print.t (p.abs/magnitude)
+                        p.normalize()
+                        context.print.t p.x
+                        context.print.t p.y
+                        context.print.t p.z
+
         generate "nested-powers" <| fun context ->
             let x = context.var.i0 "baseValue"
             let left = context.var.i0 "left"

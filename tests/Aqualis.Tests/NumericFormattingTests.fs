@@ -8,6 +8,40 @@ open Xunit
 open Aqualis
 
 module NumericFormattingTests =
+    [<Fact>]
+    let ``integer argument real functions retain real expression types`` () =
+        let x = int0(Var(It 4,"value",NaN))
+        let operations: (int0 -> double0) list = [asm.exp; asm.sin; asm.cos; asm.tan; asm.asin; asm.acos; asm.atan; asm.log; asm.log10; asm.sqrt]
+        for operation in operations do
+            let result:double0 = operation x
+            Assert.Equal(Dt,result.Expr.etype)
+            Assert.Equal(Dt,result.Expr.simp.etype)
+
+    [<Fact>]
+    let ``C integer power remains integer in composed expressions`` () =
+        use context = Aqualis.BlankWriter C99
+        let x = int0(Var(It 4,"value",NaN),context)
+        let power = int0.powr(x,I 3)
+        Assert.Equal("aqualis_int_power(value,3)",power.Expr.evalC context)
+        Assert.Contains("aqualis_int_power(value,3)%3",(power % I 3).Expr.evalC context)
+
+    [<Fact>]
+    let ``constant integer powers truncate negative exponents and retain boundaries`` () =
+        for baseValue,exponent,expected in [(2,-3,0); (-1,-3,-1); (-2,31,System.Int32.MinValue); (2,30,1073741824)] do
+            let actual = (int0.powr(I baseValue,I exponent)).Expr.simp
+            Assert.True(expr.equal(actual,Int expected))
+
+    [<Fact>]
+    let ``invalid constant integer powers produce structured errors`` () =
+        for baseValue,exponent,code in [(2,31,"AQL4003"); (0,-1,"AQL4002"); (0,0,"AQL4002")] do
+            let result,diagnostics = Diagnostics.Capture(fun () -> (int0.powr(I baseValue,I exponent)).Expr.simp)
+            match result with
+            |NaN -> ()
+            |other -> Assert.Fail($"Expected invalid integer power, got {other}.")
+            let diagnostic = Assert.Single diagnostics
+            Assert.Equal(code,diagnostic.Code)
+            Assert.Equal(Error,diagnostic.Severity)
+
     let private withCulture (cultureName:string) code =
         let previousCulture = CultureInfo.CurrentCulture
         let previousUiCulture = CultureInfo.CurrentUICulture

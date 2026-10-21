@@ -69,6 +69,13 @@ for diagnostic in result.Diagnostics do
 
 `Compile` remains available for compatibility and renders collected diagnostics to standard error. Error diagnostics abort the output transaction. `CompileWithDiagnosticPolicy` can additionally treat warnings as errors or limit the number of collected diagnostics. Context-free operations can be inspected with `Diagnostics.Capture`.
 
+## Integer powers
+
+`int0.powr` represents an integer result. Constant integer powers and generated
+C integer powers truncate negative-exponent results toward zero, reject zero
+raised to a non-positive power, and report results outside the 32-bit range.
+Use `asm.pow` for real-valued powers, including fractional results.
+
 ## Optimization convergence
 
 Higher-level optimizers stop when the gradient's Euclidean norm is at most

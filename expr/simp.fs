@@ -103,6 +103,36 @@ namespace Aqualis
                     roundBinaryRational (a*d+b*c) BigInteger.One -2148)
             else Cpx(ar*br-ai*bi,ar*bi+ai*br)
 
+        /// Constant counterpart of the checked C integer-power implementation.
+        let private integerPower baseValue exponent =
+            let fail code message =
+                reportExpressionError code message "integer power"
+                NaN
+            if baseValue = 0 && exponent <= 0 then
+                fail "AQL4002" "Zero raised to a non-positive power is undefined."
+            elif exponent < 0 then
+                Int(if baseValue = 1 then 1 elif baseValue = -1 then (if exponent%2 = 0 then 1 else -1) else 0)
+            else
+                let mutable result = 1L
+                let mutable factor = int64 baseValue
+                let mutable remaining = exponent
+                let mutable overflow = false
+                while remaining > 0 && not overflow do
+                    if remaining%2 <> 0 then
+                        result <- result*factor
+                        overflow <- result < int64 Int32.MinValue || result > int64 Int32.MaxValue
+                    remaining <- remaining/2
+                    if remaining > 0 && not overflow then
+                        factor <- factor*factor
+                        overflow <- factor > int64 Int32.MaxValue
+                if overflow then fail "AQL4003" "Integer power exceeds the supported 32-bit range."
+                else Int(int result)
+
+        let private integerLiteral = function
+            |Int value -> Some value
+            |Inv(_,Int value) when value <> Int32.MinValue -> Some(-value)
+            |_ -> None
+
         type expr with
             
             /// Simplifies negation for literal or symbolic operands.
@@ -820,8 +850,10 @@ namespace Aqualis
                         |Dbl value,Dbl exponent -> value<0.0 && Double.IsFinite exponent && exponent <> truncate exponent
                         |_ -> false
                     let result =
-                        if t=Zt && negativeRealFractionalPower then Pow(Zt,x,y)
-                        else expr.simpPow(x,y)
+                        match t,integerLiteral x,integerLiteral y with
+                        |It _,Some baseValue,Some exponent -> integerPower baseValue exponent
+                        |_ when t=Zt && negativeRealFractionalPower -> Pow(Zt,x,y)
+                        |_ -> expr.simpPow(x,y)
                     match t,result with
                     |Zt,Pow _ -> Pow(Zt,x,y)
                     |Dt,Pow _ -> Pow(Dt,x,y)
