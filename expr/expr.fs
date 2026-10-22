@@ -123,6 +123,32 @@ namespace Aqualis
 
         member internal this.emitsStatements = this.requiresStatements false
 
+        /// Conservatively identifies dependence without evaluating array/body builders.
+        member internal this.dependsOn (variable:expr) =
+            let any = List.exists (fun (value:expr) -> value.dependsOn variable)
+            let sameArray name =
+                match variable with
+                |Idx1(_,other,_) |Idx2(_,other,_,_) |Idx3(_,other,_,_,_) -> name = other
+                |_ -> false
+            match this with
+            |Var(_,name,_) ->
+                match variable with
+                |Var(_,other,_) -> name = other
+                |_ -> false
+            |Idx1(_,name,i) -> sameArray name || any [i]
+            |Idx2(_,name,i,j) -> sameArray name || any [i;j]
+            |Idx3(_,name,i,j,k) -> sameArray name || any [i;j;k]
+            |Eq(a,b) |NEq(a,b) |Greater(a,b) |GreaterEq(a,b) |Less(a,b) |LessEq(a,b)
+            |Add(_,a,b) |Sub(_,a,b) |Mul(_,a,b) |Div(_,a,b) |Mod(_,a,b) |Pow(_,a,b)
+            |Atan2(a,b) -> any [a;b]
+            |AND values |OR values -> any values
+            |Inv(_,a) |Exp(_,a) |Sin(_,a) |Cos(_,a) |Tan(_,a) |Asin(_,a) |Acos(_,a)
+            |Atan(_,a) |Abs(_,a) |Log(_,a) |Log10(_,a) |Sqrt(_,a) |ToInt a |ToDbl a
+            |Floor a |Ceil a |Re a |Im a |Conj a -> a.dependsOn variable
+            |IfEl(condition,a,b) -> any [condition;a;b]
+            |Let _ |Sum _ -> true
+            |False |True |Int _ |Dbl _ |Cpx _ |NaN -> false
+
         /// Lowers logical operands to conditional integer values, preserving evaluation order.
         static member internal shortCircuit conjunction operands =
             let rec lower = function

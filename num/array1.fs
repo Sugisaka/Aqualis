@@ -572,7 +572,34 @@ namespace Aqualis
                 |Python -> writein(left+" = copy.deepcopy("+right+")")
                 |C99|JavaScript|PHP -> context.iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
                 |Numeric -> ()
-            |_ -> context.iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
+            |_ when (match context.language with C99|Fortran|Python|JavaScript|PHP -> false | _ -> true) ->
+                context.iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
+            |_ ->
+                // An expression array may be a view into the destination. Read all
+                // source values before writing any destination element.
+                let acquire =
+                    match typ with
+                    |It 4 -> fun () -> context.i1.getVar()
+                    |It _ -> fun () ->
+                        // The standard integer pool declares 32-bit elements.
+                        // Other widths need a buffer with their actual element type.
+                        let mutable name = if context.language = PHP then "$aqualisCopy" else "aqualisCopy"
+                        while varGenerator.isVarExist(context,name,typ,A1 0) do name <- name + "_"
+                        context.cvar.setUniqVar(typ,A1 0,name,"")
+                        name,ignore
+                    |Dt -> fun () -> context.d1.getVar()
+                    |Zt -> fun () -> context.z1.getVar()
+                    |_ -> invalidOp "Array assignment requires a numeric element type."
+                TemporaryVariableScope.useOne acquire
+                    (fun name -> this.Create(typ,Var1(A1 0,name),context))
+                    (fun temporary ->
+                        temporary.allocate this.size1
+                        try
+                            context.iter.num temporary.size1 <| fun i ->
+                                temporary.AssignAt(i,(other[i] :> INum0).Expr)
+                            context.iter.num temporary.size1 <| fun i ->
+                                this.AssignAt(i,(temporary[i] :> INum0).Expr)
+                        finally temporary.deallocate())
 
         /// Assigns a scalar value to the array elements.
         member this.AssignScalar(value:INum0) =

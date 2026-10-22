@@ -742,6 +742,124 @@ module Program =
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
 
+        generate "array-view-products" <| fun context ->
+            let matrix = context.var.d2("matrix",2,2)
+            let identity = context.var.d2("identity",2,2)
+            let vector = context.var.d1("vector",2)
+            let complexVector = context.var.z1("complexVector",2)
+            for i in 0..1 do
+                for j in 0..1 do
+                    matrix[i,j] <== double(2*i+j+1)
+                    identity[i,j] <== (if i=j then 1.0 else 0.0)
+            let resetReal () = vector[0] <== 1.0; vector[1] <== 2.0
+            let resetComplex () =
+                complexVector[0] <== complex0(Cpx(1.0,1.0),context)
+                complexVector[1] <== complex0(Cpx(2.0,-1.0),context)
+            let printComplex () =
+                for i in 0..1 do
+                    context.print.t complexVector[i].re
+                    context.print.t complexVector[i].im
+            resetReal()
+            context.la.matmul(vector,matrix,vector[(0,1)])
+            context.print.t vector[0]
+            context.print.t vector[1]
+            resetComplex()
+            context.la.matmul(complexVector,matrix,complexVector[(0,1)])
+            printComplex()
+            let complexMatrix = context.var.z2("complexMatrix",2,2)
+            for i in 0..1 do
+                for j in 0..1 do complexMatrix[i,j] <== double(2*i+j+1)
+            resetComplex()
+            context.la.matmul(complexVector,complexMatrix,complexVector[(0,1)])
+            printComplex()
+            // This matrix expression reads the output vector's original contents.
+            resetReal()
+            resetComplex()
+            let matrixView = complex2(Zt,Arx2(I 2,I 2,fun (_,j) -> complexVector[j].Expr),context)
+            context.la.matmul(complexVector,matrixView,vector)
+            printComplex()
+            let storage = context.var.d1("storage",4)
+            for i in 0..3 do storage[i] <== double(i+1)
+            context.la.matmul(storage[(1,2)],matrix,storage[(0,1)])
+            for i in 0..3 do context.print.t storage[i]
+            context.la.matmul(matrix,matrix+matrix,identity)
+            for i in 0..1 do
+                for j in 0..1 do context.print.t matrix[i,j]
+
+        generate "array-overlap-assignment" <| fun context ->
+            let integers = context.var.i1("integers",4)
+            let reals = context.var.d1("reals",4)
+            let complexes = context.var.z1("complexes",4)
+            let first = context.var.i0 "first"
+            let last = context.var.i0 "last"
+            first <== 1
+            last <== 3
+            for mode in 0..5 do
+                for i in 0..3 do
+                    integers[i] <== i+1
+                    reals[i] <== double(i+1)
+                    complexes[i] <== complex0(Cpx(double(i+1),-double(i+1)),context)
+                match mode with
+                |0 ->
+                    integers[(1,3)] <== integers[(0,2)]
+                    reals[(1,3)] <== reals[(0,2)]
+                    complexes[(1,3)] <== complexes[(0,2)]
+                |1 ->
+                    integers[(0,2)] <== integers[(1,3)]
+                    reals[(0,2)] <== reals[(1,3)]
+                    complexes[(0,2)] <== complexes[(1,3)]
+                |2 ->
+                    integers[(0,3)] <== integers[(0,3)]
+                    reals[(0,3)] <== reals[(0,3)]
+                    complexes[(0,3)] <== complexes[(0,3)]
+                |3 ->
+                    integers[(0,1)] <== integers[(2,3)]
+                    reals[(0,1)] <== reals[(2,3)]
+                    complexes[(0,1)] <== complexes[(2,3)]
+                |4 ->
+                    integers[(1,3)] <== 2*integers[(0,2)]
+                    reals[(1,3)] <== 2*reals[(0,2)]
+                    complexes[(1,3)] <== 2*complexes[(0,2)]
+                |_ ->
+                    integers[(first,last)] <== integers[(0,2)]
+                    reals[(first,last)] <== reals[(0,2)]
+                    complexes[(first,last)] <== complexes[(0,2)]
+                for i in 0..3 do
+                    context.print.t integers[i]
+                    context.print.t reals[i]
+                    context.print.t complexes[i].re
+                    context.print.t complexes[i].im
+
+        generate "array-overlap-integer-width" <| fun context ->
+            for width in [1;8] do
+                let values = int1(context,It width,A1 3,"values"+string width,"")
+                for i in 0..2 do values[i] <== i+1
+                values[(1,2)] <== values[(0,1)]
+                // Convert before printing, because scalar integer formatting is 32-bit.
+                for i in 0..2 do context.print.t (asm.todouble values[i])
+
+        generate "independent-power-derivative" <| fun context ->
+            let x = context.var.d0 "x"
+            let exponent = context.var.i0 "exponent"
+            let realExponent = context.var.d0 "realExponent"
+            for baseValue,power in [-2.0,3; -2.0,2; -2.0,-2; 0.0,3; 0.0,1; 0.0,0; 1.0,Int32.MinValue] do
+                x <== baseValue
+                exponent <== power
+                context.print.t (asm.diff(asm.pow(x,exponent),x))
+            x <== -2.0
+            exponent <== 1
+            context.print.t (asm.diff(asm.pow(x,exponent*2+1),x))
+            realExponent <== 3.0
+            context.print.t (asm.diff(asm.pow(x,realExponent),x))
+            x <== 4.0
+            realExponent <== 0.5
+            context.print.t (asm.diff(asm.pow(x,realExponent),x))
+            x <== 2.0
+            context.print.t (asm.diff(asm.pow(x,x),x))
+            x <== 0.0
+            context.print.t (asm.diff(asm.pow(x,0),x))
+            context.print.t (asm.diff(asm.pow(x,1),x))
+
         generate "complex-log10-grouping" <| fun context ->
             let z = context.var.z0 "z"
             for value in [Cpx(100.0,0.0);Cpx(0.0,1.0);Cpx(10.0,10.0)] do

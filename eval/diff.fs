@@ -35,14 +35,34 @@ namespace Aqualis
                         Add(t, Mul(t, v, expr.diff u x g), Mul(t, expr.diff v x g, u))
                     |Div(t,v,u),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Sub(t, Div(t, expr.diff v x g, u), Mul(t, Div(t, v, Pow(u.etype, u, Int 2)), expr.diff u x g))
+                    |Pow(_,_,Int 0),(Var _|Idx1 _|Idx2 _|Idx3 _) -> Int 0
+                    |Pow(_,v,Int 1),(Var _|Idx1 _|Idx2 _|Idx3 _) -> expr.diff v x g
                     |Pow(t, v, Int 2),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Mul(t, Int 2, Mul(t, v, expr.diff v x g))
+                    |Pow(t,v,Int u),(Var _|Idx1 _|Idx2 _|Idx3 _) when u = System.Int32.MinValue ->
+                        Mul(t,Mul(t,Int u,Div(t,Pow(t,v,Int u),v)),expr.diff v x g)
                     |Pow(t,v,Int u),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Mul(t, Mul(t, Int u, Pow(t, v, Int (u-1))), expr.diff v x g)
+                    |Pow(_,_,Dbl 0.0),(Var _|Idx1 _|Idx2 _|Idx3 _) -> Int 0
+                    |Pow(_,v,Dbl 1.0),(Var _|Idx1 _|Idx2 _|Idx3 _) -> expr.diff v x g
                     |Pow(t,v,Dbl u),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Mul(t, Mul(t, Dbl u, Pow(t,v,Dbl (u-1.0))), expr.diff v x g)
                     |Pow(t,v,u),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
-                        Mul(u%%v, Exp(u%%v, Mul(t, u, Log(v.etype,v))), expr.diff (Mul(u%%v, u, Log(v.etype,v))) x g)
+                        if not (u.dependsOn x) then
+                            if not (v.dependsOn x) then Int 0
+                            else
+                                let derivative = expr.diff v x g
+                                let regular = Mul(t,Mul(t,u,Pow(t,v,Sub(u.etype,u,Int 1))),derivative)
+                                // Avoid overflowing a 32-bit exponent predecessor.
+                                let regular =
+                                    match u.etype with
+                                    |It 4 ->
+                                        IfEl(Eq(u,Int System.Int32.MinValue),
+                                            Mul(t,Mul(t,u,Div(t,Pow(t,v,u),v)),derivative),regular)
+                                    |_ -> regular
+                                IfEl(Eq(u,Int 0),Int 0,IfEl(Eq(u,Int 1),derivative,regular))
+                        else
+                            Mul(u%%v, Exp(u%%v, Mul(t, u, Log(v.etype,v))), expr.diff (Mul(u%%v, u, Log(v.etype,v))) x g)
                     |Exp(t,v),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Mul(t, Exp(t,v), expr.diff v x g)
                     |Sin(t,v),(Var _|Idx1 _|Idx2 _|Idx3 _) ->

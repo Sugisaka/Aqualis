@@ -60,6 +60,18 @@ namespace Aqualis
             LapackValidation.require context (outputRows .=/ rows) "LAPACK matrix multiplication output shape must match result."
             LapackValidation.require context (outputColumns .=/ columns) "LAPACK matrix multiplication output shape must match result."
 
+        // Computed arrays include views and can read any of the output's storage.
+        // Preserve the direct path only when named operands establish independence.
+        let matvecNeedsTemporary (output:INum1) (matrix:INum2) (input:INum1) =
+            match output.Expr,matrix.Expr,input.Expr with
+            |Var1(_,destination),Var2 _,Var1(_,source) -> destination = source
+            |_ -> true
+
+        let matmulNeedsTemporary (output:INum2) (left:INum2) (right:INum2) =
+            match output.Expr,left.Expr,right.Expr with
+            |Var2(_,destination),Var2(_,a),Var2(_,b) -> destination = a || destination = b
+            |_ -> true
+
         let withScaledRealNorm (a:double1) code =
             context.ch.dd <| fun (scale,sumSquares) ->
                 scale.clear()
@@ -109,7 +121,7 @@ namespace Aqualis
                 context.iter.num a.size1 <| fun i ->
                     context.iter.num a.size2 <| fun j ->
                         target[i] <== target[i] + a[i,j] * b[j]
-            if x.code = b.code then
+            if matvecNeedsTemporary x a b then
                 context.ch.d1 x.size1 <| fun temporary ->
                     calculate temporary
                     context.iter.num x.size1 <| fun i -> x[i] <== temporary[i]
@@ -122,10 +134,16 @@ namespace Aqualis
         /// <param name="b">b</param>
         member this.matmul (x:complex1,a:complex2,b:double1) =
             requireMatvec a.size1 a.size2 b.size1 x.size1
-            x.clear()
-            context.iter.num a.size1 <| fun i ->
-                context.iter.num a.size2 <| fun j ->
-                    x[i] <== x[i] + a[i,j] * b[j]
+            let calculate (target:complex1) =
+                target.clear()
+                context.iter.num a.size1 <| fun i ->
+                    context.iter.num a.size2 <| fun j ->
+                        target[i] <== target[i] + a[i,j] * b[j]
+            if matvecNeedsTemporary x a b then
+                context.ch.z1 x.size1 <| fun temporary ->
+                    calculate temporary
+                    context.iter.num x.size1 <| fun i -> x[i] <== temporary[i]
+            else calculate x
         /// <summary>
         /// 行列×ベクトルの計算
         /// </summary>
@@ -139,7 +157,7 @@ namespace Aqualis
                 context.iter.num a.size1 <| fun i ->
                     context.iter.num a.size2 <| fun j ->
                         target[i] <== target[i] + a[i,j] * b[j]
-            if x.code = b.code then
+            if matvecNeedsTemporary x a b then
                 context.ch.z1 x.size1 <| fun temporary ->
                     calculate temporary
                     context.iter.num x.size1 <| fun i -> x[i] <== temporary[i]
@@ -157,7 +175,7 @@ namespace Aqualis
                 context.iter.num a.size1 <| fun i ->
                     context.iter.num a.size2 <| fun j ->
                         target[i] <== target[i] + a[i,j] * b[j]
-            if x.code = b.code then
+            if matvecNeedsTemporary x a b then
                 context.ch.z1 x.size1 <| fun temporary ->
                     calculate temporary
                     context.iter.num x.size1 <| fun i -> x[i] <== temporary[i]
@@ -212,7 +230,7 @@ namespace Aqualis
                     context.iter.num b.size2 <| fun j ->
                         context.iter.num a.size2 <| fun k ->
                             target[i,j] <== target[i,j] + a[i,k] * b[k,j]
-            if u.code = a.code || u.code = b.code then
+            if matmulNeedsTemporary u a b then
                 context.ch.d2 (u.size1,u.size2) <| fun temporary ->
                     calculate temporary
                     context.iter.num u.size1 <| fun i ->
@@ -228,7 +246,7 @@ namespace Aqualis
                     context.iter.num b.size2 <| fun j ->
                         context.iter.num a.size1 <| fun k ->
                             target[i,j] <== target[i,j] + a[k,i] * b[k,j]
-            if u.code = a.code || u.code = b.code then
+            if matmulNeedsTemporary u a b then
                 context.ch.d2 (u.size1,u.size2) <| fun temporary ->
                     calculate temporary
                     context.iter.num u.size1 <| fun i ->
@@ -246,7 +264,7 @@ namespace Aqualis
                     context.iter.num b.size2 <| fun j ->
                         context.iter.num a.size2 <| fun k ->
                             target[i,j] <== target[i,j] + a[i,k] * b[k,j]
-            if u.code = a.code then
+            if matmulNeedsTemporary u a b then
                 context.ch.z2 (u.size1,u.size2) <| fun temporary ->
                     calculate temporary
                     context.iter.num u.size1 <| fun i ->
@@ -264,7 +282,7 @@ namespace Aqualis
                     context.iter.num b.size2 <| fun j ->
                         context.iter.num a.size2 <| fun k ->
                             target[i,j] <== target[i,j] + a[i,k] * b[k,j]
-            if u.code = b.code then
+            if matmulNeedsTemporary u a b then
                 context.ch.z2 (u.size1,u.size2) <| fun temporary ->
                     calculate temporary
                     context.iter.num u.size1 <| fun i ->
@@ -282,7 +300,7 @@ namespace Aqualis
                     context.iter.num b.size2 <| fun j ->
                         context.iter.num a.size2 <| fun k ->
                             target[i,j] <== target[i,j] + a[i,k] * b[k,j]
-            if u.code = a.code || u.code = b.code then
+            if matmulNeedsTemporary u a b then
                 context.ch.z2 (u.size1,u.size2) <| fun temporary ->
                     calculate temporary
                     context.iter.num u.size1 <| fun i ->

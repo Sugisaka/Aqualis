@@ -1098,6 +1098,23 @@ for language in c fortran python; do
     esac
   }
   actual="$(run_control_regression logical-evaluation)"
+  product_actual="$(run_control_regression array-view-products)"
+  assignment_actual="$(run_control_regression array-overlap-assignment)"
+  width_actual="$(run_control_regression array-overlap-integer-width)"
+  derivative_actual="$(run_control_regression independent-power-derivative)"
+  python3 - "$product_actual" "$assignment_actual" "$derivative_actual" "$width_actual" <<'PY'
+import math
+import sys
+products, assignment, derivative, widths = (list(map(float, value.split())) for value in sys.argv[1:])
+assert widths == [1, 1, 2, 1, 1, 2], widths
+assert products == [5, 11, 5, -1, 11, -1, 5, -1, 11, -1, 5, -1, 5, -1, 1, 5, 11, 4, 2, 4, 6, 8], products
+expected = [component for values in ([1,1,2,3], [2,3,4,4], [1,2,3,4], [3,4,3,4], [1,2,4,6], [1,1,2,3])
+            for value in values for component in (value, value, value, -value)]
+assert assignment == expected, assignment
+expected = [12, -4, 0.25, 0, 1, 0, -2147483648, 12, 12, 0.25, 4*(math.log(2)+1), 0, 1]
+assert len(derivative) == len(expected) and all(
+    math.isclose(a,b,rel_tol=1e-12,abs_tol=1e-12) for a,b in zip(derivative,expected)), derivative
+PY
   python3 - "$actual" <<'PY'
 import sys
 expected = [1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 2, 0]

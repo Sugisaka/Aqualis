@@ -5,6 +5,26 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``power differentiation avoids real logarithms for independent exponent expressions`` () =
+        for language in [C99;Fortran;Python] do
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "independent_exponent" "1.0" (fun context ->
+                let x = context.var.d0 "x"
+                let exponent = context.var.i0 "exponent"
+                context.print.t (asm.diff(asm.pow(x,exponent*2+1),x)))
+            let extension = if language=C99 then ".c" elif language=Fortran then ".f90" else ".py"
+            let generated = System.IO.File.ReadAllText(System.IO.Path.Combine(output.Path,"independent_exponent"+extension))
+            Assert.DoesNotContain("log(",generated)
+
+    [<Fact>]
+    let ``dependence checks preserve exponent dependence on the differentiation variable`` () =
+        let x = Var(Dt,"x",NaN)
+        let y = Var(It 4,"y",NaN)
+        Assert.False((Add(It 4,Pow(It 4,y,Int 2),Int 1)).dependsOn x)
+        Assert.True((Pow(Dt,x,Dbl 2.0)).dependsOn x)
+        Assert.True((IfEl(Eq(x,Int 0),Int 1,Int 2)).dependsOn x)
+
+    [<Fact>]
     let ``complex constants differentiate independently and inside expressions`` () =
         use context = Aqualis.BlankWriter C99
         let x = context.var.d0 "x"
