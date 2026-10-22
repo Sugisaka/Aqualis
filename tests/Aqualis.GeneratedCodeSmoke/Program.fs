@@ -736,11 +736,230 @@ module Program =
                     context.print.t (int0(IfEl(predicate,Int 1,Int 0),context))
                     context.print.t count
 
+    let private generateFrozenLoopBounds outputRoot (directoryName,language) =
+        let directory = Path.Combine(outputRoot,"frozen-loop-bounds-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1.0" (fun context ->
+            if language=JavaScript then context.writein "globalThis.print = console.log;"
+            let last = context.var.i0 "last"
+            let count = context.var.i0 "count"
+            let output (value:int0) =
+                context.print.t value
+                if language=PHP then context.php.echo "\n"
+            let guard () =
+                context.br.if1 (count .> 12) (fun () ->
+                    match language with
+                    |C99 -> context.writein "exit(EXIT_FAILURE);"
+                    |Fortran -> context.writein "error stop 'loop bounds were not frozen'"
+                    |Python -> context.writein "raise AssertionError('loop bounds were not frozen')"
+                    |JavaScript -> context.writein "throw new Error('loop bounds were not frozen');"
+                    |_ -> context.php.phpcode (fun () -> context.writein "throw new RuntimeException('loop bounds were not frozen');"))
+            for variant in ["plain";"named";"exit";"named-exit";"early";"count";"sum"] do
+                for change in [1;-1] do
+                    last <== (if variant="count" then 3 else 2)
+                    count <== 0
+                    let body (_:int0) = count.inc(); last <== last+change; guard()
+                    let suffix = if change=1 then "Grow" else "Shrink"
+                    match variant with
+                    |"plain" -> context.iter.range(I 0,last) body
+                    |"named" -> context.iter.range("named"+suffix,I 0,last) body
+                    |"exit" -> context.iter.range_exit(I 0,last) (fun (_,i) -> body i)
+                    |"named-exit" -> context.iter.range_exit("exit"+suffix,I 0,last) (fun (_,i) -> body i)
+                    |"early" -> context.iter.range_exit(I 0,last) (fun (exit,i) -> body i; exit())
+                    |"count" -> context.iter.num last body
+                    |_ -> output (asm.iSum(I 0,last) (fun i -> body i; I 1))
+                    output count
+            let innerLast = context.var.i0 "innerLast"
+            last <== 2
+            count <== 0
+            context.iter.range(I 0,last) (fun _ ->
+                last.inc()
+                innerLast <== 1
+                context.iter.range(I 0,innerLast) (fun _ -> count.inc(); innerLast.inc(); guard()))
+            output count
+            if language=C99 || language=Fortran then
+                let first = context.var.i0 "first"
+                first <== 0
+                last <== 2
+                count <== 0
+                context.omp.reduction_th(2,count,"+") (fun parallelContext ->
+                    parallelContext.varPrivate.setVar(It 4,A0,innerLast.code,"")
+                    parallelContext.iter.range(first,last) (fun i ->
+                        innerLast <== i
+                        parallelContext.iter.range(I 0,innerLast) (fun _ -> count.inc(); innerLast.inc())))
+                output count)
+
+    let private generateAssignmentRegressionCases outputRoot (directoryName, language) =
+        let native = language <> JavaScript && language <> PHP
+        let generate name (code:Aqualis -> (INum0 -> unit) -> unit) =
+            let directory = Path.Combine(outputRoot,name+"-"+directoryName)
+            Directory.CreateDirectory(directory) |> ignore
+            Compile [language] directory "smoke" "1.0" (fun context ->
+                if language=JavaScript then context.writein "globalThis.print = console.log;"
+                let output (value:INum0) =
+                    context.print.tt (exprString([RNvr(value.Expr,value.Context)],context))
+                    if language=PHP then context.php.echo "\n"
+                code context output)
+
+        if language <> PHP then generate "multidimensional-overlap" (fun context output ->
+            let i2 = context.var.i2("integers2",3,2)
+            let d2 = context.var.d2("reals2",3,2)
+            let i3 = context.var.i3("integers3",3,2,1)
+            let d3 = context.var.d3("reals3",3,2,1)
+            let complexArrays =
+                if native then Some(context.var.z2("complex2",3,2),context.var.z3("complex3",3,2,1))
+                else None
+            for reverse in [false;true] do
+                for j in 0..1 do
+                    for i in 0..2 do
+                        let value = 10*j+i+1
+                        i2[i,j] <== value
+                        d2[i,j] <== double value
+                        i3[i,j,0] <== value
+                        d3[i,j,0] <== double value
+                        complexArrays |> Option.iter (fun (z2,z3) ->
+                            let z = complex0(Cpx(double value,-double value),context)
+                            z2[i,j] <== z
+                            z3[i,j,0] <== z)
+                let destination,source = if reverse then (0,1),(1,2) else (1,2),(0,1)
+                i2[destination,()] <== i2[source,()]
+                d2[destination,()] <== d2[source,()]
+                i3[destination,(),()] <== i3[source,(),()]
+                d3[destination,(),()] <== d3[source,(),()]
+                complexArrays |> Option.iter (fun (z2,z3) ->
+                    z2[destination,()] <== z2[source,()]
+                    z3[destination,(),()] <== z3[source,(),()])
+                for j in 0..1 do
+                    for i in 0..2 do
+                        output i2[i,j]
+                        output d2[i,j]
+                        output i3[i,j,0]
+                        output d3[i,j,0]
+                        complexArrays |> Option.iter (fun (z2,z3) ->
+                            output z2[i,j].re
+                            output z2[i,j].im
+                            output z3[i,j,0].re
+                            output z3[i,j,0].im))
+
+        if language = PHP then
+            generate "scalar-broadcast-once" (fun context output ->
+                let integers = context.var.ip1("integers",[1;2;3])
+                let reals = context.var.dp1("reals",[1.0;2.0;3.0])
+                for view in [false;true] do
+                    for i in 0..2 do
+                        integers[i] <== i+1
+                        reals[i] <== double(i+1)
+                    if view then
+                        integers[(0,2)] <== integers[0]+integers[1]
+                        reals[(0,2)] <== reals[0]+reals[1]
+                    else
+                        integers <== integers[0]+integers[1]
+                        reals <== reals[0]+reals[1]
+                    for i in 0..2 do
+                        output integers[i]
+                        output reals[i]
+                    let count = context.var.i0 (if view then "viewCount" else "count")
+                    count <== 0
+                    let counted = int0(Let(It 4,NaN,Int 7,fun value -> count.inc(); value),context)
+                    if view then integers[(0,2)] <== counted else integers <== counted
+                    output count)
+        else generate "scalar-broadcast-once" (fun context output ->
+            let integers = context.var.i1("integers",3)
+            let reals = context.var.d1("reals",3)
+            let matrix = context.var.d2("matrix",3,1)
+            let tensor = context.var.d3("tensor",3,1,1)
+            let complexArrays =
+                if native then Some(context.var.z1("complex1",3),context.var.z2("complex2",3,1),context.var.z3("complex3",3,1,1))
+                else None
+            for view in [false;true] do
+                for i in 0..2 do
+                    integers[i] <== i+1
+                    reals[i] <== double(i+1)
+                    matrix[i,0] <== double(i+1)
+                    tensor[i,0,0] <== double(i+1)
+                    complexArrays |> Option.iter (fun (z1,z2,z3) ->
+                        let z = complex0(Cpx(double(i+1),-double(i+1)),context)
+                        z1[i] <== z
+                        z2[i,0] <== z
+                        z3[i,0,0] <== z)
+                if view then
+                    integers[(0,2)] <== integers[0]+integers[1]
+                    reals[(0,2)] <== reals[0]+reals[1]
+                    matrix[(0,2),()] <== matrix[0,0]+matrix[1,0]
+                    tensor[(0,2),(),()] <== tensor[0,0,0]+tensor[1,0,0]
+                else
+                    integers <== integers[0]+integers[1]
+                    reals <== reals[0]+reals[1]
+                    matrix <== matrix[0,0]+matrix[1,0]
+                    tensor <== tensor[0,0,0]+tensor[1,0,0]
+                complexArrays |> Option.iter (fun (z1,z2,z3) ->
+                    if view then
+                        z1[(0,2)] <== z1[0]+z1[1]
+                        z2[(0,2),()] <== z2[0,0]+z2[1,0]
+                        z3[(0,2),(),()] <== z3[0,0,0]+z3[1,0,0]
+                    else
+                        z1 <== z1[0]+z1[1]
+                        z2 <== z2[0,0]+z2[1,0]
+                        z3 <== z3[0,0,0]+z3[1,0,0])
+                for i in 0..2 do
+                    output integers[i]
+                    output reals[i]
+                    output matrix[i,0]
+                    output tensor[i,0,0]
+                    complexArrays |> Option.iter (fun (z1,z2,z3) ->
+                        output z1[i].re
+                        output z1[i].im
+                        output z2[i,0].re
+                        output z2[i,0].im
+                        output z3[i,0,0].re
+                        output z3[i,0,0].im)
+                let count = context.var.i0 (if view then "viewCount" else "count")
+                count <== 0
+                let counted = int0(Let(It 4,NaN,Int 7,fun value -> count.inc(); value),context)
+                if view then integers[(0,2)] <== counted else integers <== counted
+                output count)
+
     let private generateRegressionCases outputRoot (directoryName, language) =
         let generate caseName code =
             let outputDirectory = Path.Combine(outputRoot, caseName + "-" + directoryName)
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
+
+        generate "complex-constant-stability" <| fun context ->
+            let z = context.var.z0 "z"
+            let compare (value:expr) (operation:complex0 -> complex0) =
+                z <== complex0(value,context)
+                let folded = operation (complex0(value,context))
+                let runtime = operation z
+                context.print.t folded.re
+                context.print.t folded.im
+                context.print.t runtime.re
+                context.print.t runtime.im
+            for re,im in [1.7e308,1.7e308; -1.7e308,1.7e308; 1.7e308,-1.7e308; 1e-300,1e-300; 1e308,1.0; 1.0,1e-12] do
+                compare (Cpx(re,im)) asm.log
+                compare (Cpx(re,im)) asm.log10
+            for re,im in [0.0,1e20;0.0,-1e20;1e20,1e20;-1e20,1e20;0.0,1e308;0.0,-1e308;1e-12,1e-12;1e-200,1.0;-1e-200,-1.0;0.3,0.4;-2.0,0.5] do
+                compare (Cpx(re,im)) asm.atan
+
+        generate "stable-quotient-derivative" <| fun context ->
+            let x = context.var.d0 "x"
+            for value in [-1e200;-1e-200;1e-200;1.0;1e200] do
+                x <== value
+                context.print.t (asm.diff(x/x,x))
+                context.print.t (asm.diff((x+x)/x,x))
+            x <== 1e200
+            context.print.t (asm.diff(x/1e-200,x))
+            context.print.t (asm.diff(1e200/x,x))
+            x <== 1e-100
+            context.print.t (asm.diff(1.0/x,x))
+            x <== 1e100
+            context.print.t (asm.diff(1.0/x,x))
+            x <== 2.0
+            context.print.t (asm.diff((x*x+1.0)/(x+1.0),x))
+            let numerator = context.var.i0 "numerator"
+            for value in [Int32.MinValue;Int32.MaxValue] do
+                numerator <== value
+                context.print.t (asm.diff(numerator/x,x))
 
         generate "array-view-products" <| fun context ->
             let matrix = context.var.d2("matrix",2,2)
@@ -2207,6 +2426,8 @@ module Program =
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
+            generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
+            generationTargets |> List.iter (generateAssignmentRegressionCases outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateNegativeRealSqrt outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]

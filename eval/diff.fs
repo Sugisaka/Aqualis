@@ -34,7 +34,16 @@ namespace Aqualis
                     |Mul(t,v,u),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
                         Add(t, Mul(t, v, expr.diff u x g), Mul(t, expr.diff v x g, u))
                     |Div(t,v,u),(Var _|Idx1 _|Idx2 _|Idx3 _) ->
-                        Sub(t, Div(t, expr.diff v x g, u), Mul(t, Div(t, v, Pow(u.etype, u, Int 2)), expr.diff u x g))
+                        if not (u.dependsOn x) then
+                            Div(t,expr.diff v x g,u)
+                        elif not (v.dependsOn x) then
+                            // Promote integer numerators before a generated unary
+                            // minus, which must not negate Int32.MinValue as an int.
+                            let numerator = match v.etype with It _ -> ToDbl v | _ -> v
+                            Inv(t,Div(t,Mul(t,Div(t,numerator,u),expr.diff u x g),u))
+                        else
+                            // Factor out one denominator instead of squaring it.
+                            Div(t,Sub(t,expr.diff v x g,Mul(t,Div(t,v,u),expr.diff u x g)),u)
                     |Pow(_,_,Int 0),(Var _|Idx1 _|Idx2 _|Idx3 _) -> Int 0
                     |Pow(_,v,Int 1),(Var _|Idx1 _|Idx2 _|Idx3 _) -> expr.diff v x g
                     |Pow(t, v, Int 2),(Var _|Idx1 _|Idx2 _|Idx3 _) ->

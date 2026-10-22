@@ -62,14 +62,17 @@ type ContextOmp internal (c:Aqualis) =
                 let ending = if isLast then ")" + suffix else ", &"
                 c.codewritein ("!$omp& " + String.concat "," namesOnLine + ending))
 
-    let captureParallelBody code =
+    let captureParallelBody isLoop code =
         let previousPrivateVariables = c.varPrivate.list
         c.varPrivate.clear()
         try
-            let body,_ =
-                c.captureCode(fun () ->
-                    c.WithParallelMode(fun child -> code child))
-            body, privateNames()
+            let action () = c.WithParallelMode(fun child -> code child)
+            let setup,body,_ =
+                if isLoop then c.captureParallelLoop action
+                else
+                    let body,result = c.captureCode action
+                    "",body,result
+            setup,body,privateNames()
         finally
             c.varPrivate.clear()
             previousPrivateVariables
@@ -91,8 +94,9 @@ type ContextOmp internal (c:Aqualis) =
 
     let emitParallelFor (threadCount:int option) (reduction:string option) code =
         validateRegion threadCount
-        let body,names = captureParallelBody code
+        let setup,body,names = captureParallelBody true code
         registerOpenMpUsage()
+        c.writeRaw setup
         let threadPart = threadCount |> Option.map (sprintf " num_threads(%d)") |> Option.defaultValue ""
         let reductionPart = reduction |> Option.map (sprintf " reduction(%s)") |> Option.defaultValue ""
         match c.language with
@@ -127,7 +131,7 @@ type ContextOmp internal (c:Aqualis) =
     /// Emits an OpenMP parallel sections region.
     member _.sections threadCount code =
         validateRegion (Some threadCount)
-        let body,names = captureParallelBody code
+        let _,body,names = captureParallelBody false code
         registerOpenMpUsage()
         match c.language with
         |Fortran ->

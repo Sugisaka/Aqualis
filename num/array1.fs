@@ -73,6 +73,43 @@ namespace Aqualis
             condition |> Option.iter (fun expression ->
                 require context (bool0(Var(Nt, expression, NaN), context)) message)
 
+    /// Temporary storage shared by numeric array operations of every rank.
+    module internal NumericArrayTemporaries =
+        let executable (context:Aqualis) =
+            match context.language with C99|Fortran|Python|JavaScript|PHP -> true | _ -> false
+
+        let acquire (context:Aqualis) typ shape =
+            match typ,shape with
+            |It 4,A0 -> context.i0.getVar()
+            |Dt,A0 -> context.d0.getVar()
+            |Zt,A0 -> context.z0.getVar()
+            |It 4,A1 0 -> context.i1.getVar()
+            |Dt,A1 0 -> context.d1.getVar()
+            |Zt,A1 0 -> context.z1.getVar()
+            |It 4,A2(0,0) -> context.i2.getVar()
+            |Dt,A2(0,0) -> context.d2.getVar()
+            |Zt,A2(0,0) -> context.z2.getVar()
+            |It 4,A3(0,0,0) -> context.i3.getVar()
+            |Dt,A3(0,0,0) -> context.d3.getVar()
+            |Zt,A3(0,0,0) -> context.z3.getVar()
+            |_ ->
+                // Nonstandard integer widths cannot use the 32-bit integer pool.
+                let mutable name = if context.language = PHP then "$aqualisCopy" else "aqualisCopy"
+                while varGenerator.isVarExist(context,name,typ,shape) do name <- name + "_"
+                context.cvar.setUniqVar(typ,shape,name,"")
+                name,ignore
+
+        let scalar (context:Aqualis) (value:INum0) code =
+            match value.Expr with
+            |Int _ |Dbl _ |Cpx _ -> code value.Expr
+            |_ when not (executable context) -> code value.Expr
+            |_ ->
+                TemporaryVariableScope.useOne (fun () -> acquire context value.Etype A0)
+                    (fun name -> Var(value.Etype,name,NaN))
+                    (fun temporary ->
+                        expr.subst temporary value.Expr context
+                        code temporary)
+
     /// Base implementation of one-dimensional symbolic arrays.
     type base1 (typ:Etype,x:Expr1, c:Aqualis) =
         let writein text = c.codewritein text
@@ -572,25 +609,12 @@ namespace Aqualis
                 |Python -> writein(left+" = copy.deepcopy("+right+")")
                 |C99|JavaScript|PHP -> context.iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
                 |Numeric -> ()
-            |_ when (match context.language with C99|Fortran|Python|JavaScript|PHP -> false | _ -> true) ->
+            |_ when not (NumericArrayTemporaries.executable context) ->
                 context.iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
             |_ ->
                 // An expression array may be a view into the destination. Read all
                 // source values before writing any destination element.
-                let acquire =
-                    match typ with
-                    |It 4 -> fun () -> context.i1.getVar()
-                    |It _ -> fun () ->
-                        // The standard integer pool declares 32-bit elements.
-                        // Other widths need a buffer with their actual element type.
-                        let mutable name = if context.language = PHP then "$aqualisCopy" else "aqualisCopy"
-                        while varGenerator.isVarExist(context,name,typ,A1 0) do name <- name + "_"
-                        context.cvar.setUniqVar(typ,A1 0,name,"")
-                        name,ignore
-                    |Dt -> fun () -> context.d1.getVar()
-                    |Zt -> fun () -> context.z1.getVar()
-                    |_ -> invalidOp "Array assignment requires a numeric element type."
-                TemporaryVariableScope.useOne acquire
+                TemporaryVariableScope.useOne (fun () -> NumericArrayTemporaries.acquire context typ (A1 0))
                     (fun name -> this.Create(typ,Var1(A1 0,name),context))
                     (fun temporary ->
                         temporary.allocate this.size1
@@ -614,6 +638,10 @@ namespace Aqualis
                     match typ with
                     |Structure sname -> writein(name+" = numpy.array(["+sname+"() for _ in range(int("+this.size1.Expr.eval context+"))], dtype=object)\n")
                     |_ -> writein(name+"[:]="+value.Expr.eval context+"\n")
-                |C99|JavaScript|PHP -> context.iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)
+                |C99|JavaScript|PHP ->
+                    NumericArrayTemporaries.scalar context value (fun scalar ->
+                        context.iter.num this.size1 <| fun i -> this.AssignAt(i,scalar))
                 |Numeric -> ()
-            |Arx1 _ -> context.iter.num this.size1 <| fun i -> this.AssignAt(i,value.Expr)
+            |Arx1 _ ->
+                NumericArrayTemporaries.scalar context value (fun scalar ->
+                    context.iter.num this.size1 <| fun i -> this.AssignAt(i,scalar))

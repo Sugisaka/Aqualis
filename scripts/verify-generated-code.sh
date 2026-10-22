@@ -1082,6 +1082,31 @@ for mode in overflow invalid; do
   grep -Fq 'Aqualis:' "$output_root/checked-power-$mode-c/error.txt"
 done
 
+verify_assignment_regression() {
+  python3 - "$1" "$2" "$3" <<'PY'
+import sys
+language, case, output = sys.argv[1:]
+native = language not in ('javascript', 'php')
+expected = []
+if case == 'multidimensional-overlap':
+    for copied in ([1, 1, 2], [2, 3, 3]):
+        for column in range(2):
+            for row in copied:
+                value = 10*column+row
+                expected.extend([value]*4)
+                if native:
+                    expected.extend([value, -value, value, -value])
+else:
+    for _ in range(2):
+        for _ in range(3):
+            expected.extend([3]*(2 if language == 'php' else 4))
+            if native:
+                expected.extend([3, -3]*3)
+        expected.append(1)
+assert list(map(float, output.split())) == expected, (language, case, output)
+PY
+}
+
 for language in c fortran python; do
   run_control_regression() {
     local directory="$output_root/$1-$language"
@@ -1098,6 +1123,43 @@ for language in c fortran python; do
     esac
   }
   actual="$(run_control_regression logical-evaluation)"
+  bounds_actual="$(run_control_regression frozen-loop-bounds)"
+  complex_actual="$(run_control_regression complex-constant-stability)"
+  python3 - "$language" "$bounds_actual" "$complex_actual" <<'PY'
+import cmath
+import math
+import sys
+language, bounds, output = sys.argv[1:]
+expected_bounds = [3]*8 + [1,1] + [3]*6 + [6]
+if language != 'python':
+    expected_bounds.append(6)
+assert list(map(int, bounds.split())) == expected_bounds, (language, bounds)
+expected = []
+for z in [complex(1.7e308,1.7e308),complex(-1.7e308,1.7e308),complex(1.7e308,-1.7e308),complex(1e-300,1e-300),complex(1e308,1),complex(1,1e-12)]:
+    for operation in [cmath.log, cmath.log10]:
+        value = operation(z)
+        expected.extend([value.real,value.imag]*2)
+for z in [complex(0,1e20),complex(0,-1e20),complex(1e20,1e20),complex(-1e20,1e20),complex(0,1e308),complex(0,-1e308),complex(1e-12,1e-12),complex(1e-200,1),complex(-1e-200,-1),complex(0.3,0.4),complex(-2,0.5)]:
+    value = cmath.atan(z)
+    expected.extend([value.real,value.imag]*2)
+actual = list(map(float, output.split()))
+assert len(actual) == len(expected) and all(
+    math.isclose(a,b,rel_tol=1e-12,abs_tol=0)
+    for a,b in zip(actual,expected)), (language, actual, expected)
+PY
+  for regression in multidimensional-overlap scalar-broadcast-once; do
+    verify_assignment_regression "$language" "$regression" "$(run_control_regression "$regression")"
+  done
+  quotient_actual="$(run_control_regression stable-quotient-derivative)"
+  python3 - "$quotient_actual" <<'PY'
+import math
+import sys
+values = list(map(float, sys.argv[1].split()))
+expected = [0]*10 + [1e200, -1e-200, -1e200, -1e-200, 7/9, 536870912, -536870911.75]
+assert len(values) == len(expected) and all(
+    math.isclose(a, b, rel_tol=1e-12, abs_tol=0)
+    for a, b in zip(values, expected)), values
+PY
   product_actual="$(run_control_regression array-view-products)"
   assignment_actual="$(run_control_regression array-overlap-assignment)"
   width_actual="$(run_control_regression array-overlap-integer-width)"
@@ -1169,7 +1231,9 @@ PY
   fi
 done
 for language in javascript php; do
-  for regression in logical-evaluation logical-control-flow; do
+  for regression in logical-evaluation logical-control-flow multidimensional-overlap scalar-broadcast-once frozen-loop-bounds; do
+    # PHP only supports one-dimensional numeric array indexing.
+    if [[ "$language" == php && "$regression" == multidimensional-overlap ]]; then continue; fi
     directory="$output_root/$regression-$language"
     if [[ "$language" == javascript ]]; then
       script="$directory/smoke.js"
@@ -1179,6 +1243,17 @@ for language in javascript php; do
     else
       php -l "$directory/smoke.php" >/dev/null
       actual="$(php "$directory/smoke.php")"
+    fi
+    if [[ "$regression" == frozen-loop-bounds ]]; then
+      python3 - "$actual" <<'PY'
+import sys
+assert list(map(int,sys.argv[1].split())) == [3]*8+[1,1]+[3]*6+[6], sys.argv[1]
+PY
+      continue
+    fi
+    if [[ "$regression" == multidimensional-overlap || "$regression" == scalar-broadcast-once ]]; then
+      verify_assignment_regression "$language" "$regression" "$actual"
+      continue
     fi
     python3 - "$language" "$regression" "$actual" <<'PY'
 import sys

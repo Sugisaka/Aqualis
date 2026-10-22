@@ -37,20 +37,21 @@ namespace Aqualis
 
             /// Emits a counted loop for C99.
             static member forLoopC (c:Aqualis) (n1:expr,n2:expr) code =
-                let iname,returnVar = c.i0.getVar()
-                let i = Var(It 4, iname, NaN)
-                let n1_ = n1.evalC c
-                let n2_ = n2.evalC c
-                let control = wideCounter c iname
-                if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                c.codewritein("for(" + control + " = " + n1_ + "; " + control + " <= " + n2_ + "; " + control + "++)")
-                c.codewritein "{"
-                c.indentInc()
-                c.codewritein(i.evalC c + " = (int)" + control + ";")
-                code i
-                c.indentDec()
-                c.codewritein "}"
-                returnVar()
+                c.withLoopBounds (n1,n2) (fun target value -> expr.substC target value c) (fun (n1,n2) ->
+                    let iname,returnVar = c.i0.getVar()
+                    let i = Var(It 4, iname, NaN)
+                    let n1_ = n1.evalC c
+                    let n2_ = n2.evalC c
+                    let control = wideCounter c iname
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    c.codewritein("for(" + control + " = " + n1_ + "; " + control + " <= " + n2_ + "; " + control + "++)")
+                    c.codewritein "{"
+                    c.indentInc()
+                    c.codewritein(i.evalC c + " = (int)" + control + ";")
+                    code i
+                    c.indentDec()
+                    c.codewritein "}"
+                    returnVar())
 
             /// Emits an unbounded loop for C99.
             static member loopC (c:Aqualis) code =
@@ -92,18 +93,19 @@ namespace Aqualis
                     c.captureCode(fun () -> code i) |> ignore
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
-                    let i = Var(It 4, iname, NaN)
-                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    let control = wideCounter c iname
-                    c.codewritein("for(" + control + "=" + i1.evalC c + "; " + control + "<=" + i2.evalC c + "; " + control + "++)")
-                    c.codewritein "{"
-                    c.indentInc()
-                    c.codewritein(i.evalC c + " = (int)" + control + ";")
-                    code i
-                    c.indentDec()
-                    c.codewritein "}"
-                    returnVar()
+                    c.withLoopBounds (i1,i2) (fun target value -> expr.substC target value c) (fun (i1,i2) ->
+                        let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
+                        let i = Var(It 4, iname, NaN)
+                        if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                        let control = wideCounter c iname
+                        c.codewritein("for(" + control + "=" + i1.evalC c + "; " + control + "<=" + i2.evalC c + "; " + control + "++)")
+                        c.codewritein "{"
+                        c.indentInc()
+                        c.codewritein(i.evalC c + " = (int)" + control + ";")
+                        code i
+                        c.indentDec()
+                        c.codewritein "}"
+                        returnVar())
 
             /// Emits an inclusive range loop with an exit action for C99.
             static member range_exitC (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
@@ -116,21 +118,22 @@ namespace Aqualis
                     c.captureCode(fun () -> code(exit,i)) |> ignore
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
-                    let i = Var(It 4, iname, NaN)
-                    let label = "_" + c.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("goto "+label+";")
-                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    let control = wideCounter c iname
-                    c.codewritein("for(" + control + "=" + i1.evalC c + "; " + control + "<=" + i2.evalC c + "; " + control + "++)")
-                    c.codewritein "{"
-                    c.indentInc()
-                    c.codewritein(i.evalC c + " = (int)" + control + ";")
-                    code(exit,i)
-                    c.indentDec()
-                    c.codewritein "}"
-                    c.codewritein(label+":;")
-                    returnVar()
+                    c.withLoopBounds (i1,i2) (fun target value -> expr.substC target value c) (fun (i1,i2) ->
+                        let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
+                        let i = Var(It 4, iname, NaN)
+                        let label = "_" + c.GotoLabels.nextGotoLabel()
+                        let exit() = c.codewritein("goto "+label+";")
+                        if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                        let control = wideCounter c iname
+                        c.codewritein("for(" + control + "=" + i1.evalC c + "; " + control + "<=" + i2.evalC c + "; " + control + "++)")
+                        c.codewritein "{"
+                        c.indentInc()
+                        c.codewritein(i.evalC c + " = (int)" + control + ";")
+                        code(exit,i)
+                        c.indentDec()
+                        c.codewritein "}"
+                        c.codewritein(label+":;")
+                        returnVar())
 
             /// Emits a branch callback for C99.
             static member branchC (c:Aqualis) code =

@@ -52,6 +52,7 @@ namespace Aqualis
         let mutable isOpenMpUsed = false
         let mutable isOpenAccUsed = false
         let mutable parallelMode = false
+        let mutable parallelLoopSetup : ResizeArray<string> option = None
         let mutable terminalLifeLine = 100.0
         let mutable sequenceVariables : (string*int*float) list = []
         let mutable sequenceFrames : (float*float*float*float) list = []
@@ -211,6 +212,17 @@ namespace Aqualis
             |None ->
                 let result = action()
                 "", result
+
+        /// Captures the outer loop's setup separately from an OpenMP loop body.
+        member internal this.captureParallelLoop(action:unit -> 'T) =
+            let previous = parallelLoopSetup
+            let setup = ResizeArray<string>()
+            parallelLoopSetup <- Some setup
+            try
+                let body,result = this.captureCode action
+                String.Concat(setup),body,result
+            finally parallelLoopSetup <- previous
+
         /// Increases the writer indentation level.
         member _.indentInc() = withWriter (fun writer -> writer.indent.inc())
         /// Decreases the writer indentation level.
@@ -448,6 +460,35 @@ namespace Aqualis
 
         /// Gets the collector for private variables.
         member val varPrivate = varCollector(lang, diagnosticBag) with get
+
+        /// Freezes bounds for the lifetime of the generated loop, including nested loops.
+        member internal this.withLoopBounds (first:expr,last:expr) assign code =
+            let outerParallelLoop = parallelLoopSetup.IsSome
+            let acquire (value:expr) =
+                match value.simp with
+                |Int _ as literal -> literal,ignore,false
+                |value ->
+                    let name,release = this.i0.getVar()
+                    if this.ParallelMode && not outerParallelLoop then
+                        this.varPrivate.setVar(It 4,A0,name,"")
+                    Var(It 4,name,NaN),release,true
+            let lower,releaseLower,copyLower = acquire first
+            try
+                let upper,releaseUpper,copyUpper = acquire last
+                try
+                    let setup () =
+                        if copyLower then assign lower first
+                        if copyUpper then assign upper last
+                    match parallelLoopSetup with
+                    |Some prefix ->
+                        parallelLoopSetup <- None
+                        let text,_ = this.captureCode setup
+                        prefix.Add text
+                    |None -> setup()
+                    code(lower,upper)
+                finally releaseUpper()
+            finally releaseLower()
+
 
         /// Gets the collector for copied input variables.
         member val varCopyIn = varCollector(lang, diagnosticBag) with get

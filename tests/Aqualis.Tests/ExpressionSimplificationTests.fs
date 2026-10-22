@@ -5,6 +5,47 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``complex logarithm folds overflowing magnitudes to finite logarithms`` () =
+        match (asm.log(complex0(Cpx(1.7e308,1.7e308)))).Expr.simp with
+        |Cpx(real,imaginary) ->
+            Assert.True(System.Double.IsFinite real)
+            Assert.InRange(abs(real-710.0734104835082),0.0,1e-12)
+            Assert.InRange(abs(imaginary-System.Math.PI/4.0),0.0,1e-15)
+        |other -> failwithf "Unexpected logarithm: %A" other
+
+    [<Fact>]
+    let ``complex atan preserves small components and finite values near its branch points`` () =
+        for imaginary in [1e20;-1e20;1e308;-1e308] do
+            match (asm.atan(complex0(Cpx(0.0,imaginary)))).Expr.simp with
+            |Cpx(_,result) -> Assert.InRange(abs((result-1.0/imaginary)/(1.0/imaginary)),0.0,1e-12)
+            |other -> failwithf "Unexpected atan: %A" other
+        match (asm.atan(complex0(Cpx(1e-200,1.0)))).Expr.simp with
+        |Cpx(real,imaginary) ->
+            Assert.InRange(abs(real-System.Math.PI/4.0),0.0,1e-14)
+            Assert.InRange(abs(imaginary-0.5*(log 2.0+200.0*log 10.0)),0.0,1e-12)
+        |other -> failwithf "Unexpected atan: %A" other
+
+    [<Fact>]
+    let ``quotient differentiation does not square a small denominator`` () =
+        for value in [1e-200;1e200] do
+            // Differentiate symbolically, then substitute the numeric point by
+            // evaluating the resulting expression with a literal-valued builder.
+            use context = Aqualis.BlankWriter C99
+            let variable = Var(Dt,"x",NaN)
+            let rec atPoint = function
+                |Var(_,"x",_) -> Dbl value
+                |Div(t,a,b) -> Div(t,atPoint a,atPoint b)
+                |Sub(t,a,b) -> Sub(t,atPoint a,atPoint b)
+                |Mul(t,a,b) -> Mul(t,atPoint a,atPoint b)
+                |Pow(t,a,b) -> Pow(t,atPoint a,atPoint b)
+                |literal -> literal
+            let derivative = expr.diff (Div(Dt,variable,variable)) variable context |> atPoint
+            match derivative.simp with
+            |Dbl result -> Assert.Equal(0.0,result)
+            |Int 0 -> ()
+            |other -> failwithf "Unexpected derivative: %A" other
+
+    [<Fact>]
     let ``power differentiation avoids real logarithms for independent exponent expressions`` () =
         for language in [C99;Fortran;Python] do
             use output = new TemporaryDirectory()

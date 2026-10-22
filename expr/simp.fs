@@ -12,6 +12,40 @@ namespace Aqualis
     /// Simplification helpers for expression trees.
     [<AutoOpen>]
     module exprSimp =
+        /// Corrects rounding in 1+x, including increments smaller than one ulp.
+        let private logOnePlus value =
+            let sum = 1.0+value
+            if sum = 1.0 || Double.IsPositiveInfinity value then value
+            else log sum * (value/(sum-1.0))
+
+        /// Computes log(hypot(x,y)) without forming an overflowing magnitude.
+        let private logMagnitude x y =
+            let a,b = abs x,abs y
+            if Double.IsPositiveInfinity a || Double.IsPositiveInfinity b then Double.PositiveInfinity
+            elif Double.IsNaN a || Double.IsNaN b then Double.NaN
+            else
+                let scale = max a b
+                if scale = 0.0 then Double.NegativeInfinity
+                else
+                    let ratio = min a b / scale
+                    log scale + 0.5 * logOnePlus(ratio*ratio)
+
+        /// Uses scaled real arithmetic and log1p to retain small atan components.
+        let private finiteComplexAtan re im =
+            let magnitude = abs im
+            let scale = max 1.0 (max (abs re) magnitude)
+            let x,y,inverse = re/scale,magnitude/scale,1.0/scale
+            let real = 0.5 * atan2 ((2.0*x)*inverse) ((inverse-y)*(inverse+y)-x*x)
+            let delta = (magnitude-1.0)/scale
+            let denominator = x*x + delta*delta
+            let ratio = ((4.0*y)/scale)/denominator
+            let imaginary =
+                if denominator = 0.0 || Double.IsPositiveInfinity ratio then
+                    // Near +/-i the squared distance can underflow, while its log is finite.
+                    0.5 * (logMagnitude re (magnitude+1.0) - logMagnitude re (magnitude-1.0))
+                else 0.25 * logOnePlus ratio
+            Cpx(real,Math.CopySign(imaginary,im))
+
         /// Reports an invalid expression operation.
         let private reportExpressionError code message operation =
             Diagnostic.report code Error message (Some(Expression operation)) Map.empty
@@ -569,13 +603,11 @@ namespace Aqualis
                 |Inv(_,Dbl x) -> expr.simpAtan(Dbl -x)
                 |Int x -> if atan (double x) < 0.0 then Inv(Dt,Dbl -(atan (double x))) else Dbl (atan (double x))
                 |Dbl x -> if atan x < 0.0 then Inv(Dt,Dbl -(atan x)) else Dbl (atan x)
-                |Cpx (re,im) when max (abs re) (abs im) <= 1.0e-3 ->
-                    let value = System.Numerics.Complex(re,im)
-                    let square = value*value
-                    let result = value*(System.Numerics.Complex.One-square/3.0+square*square/5.0)
+                |Cpx (re,im) when Double.IsFinite re && Double.IsFinite im ->
+                    finiteComplexAtan re im
+                |Cpx (re,im) ->
+                    let result = System.Numerics.Complex.Atan(System.Numerics.Complex(re,im))
                     Cpx(result.Real,result.Imaginary)
-                |Cpx _ ->
-                    ((Int 1/(Int 2*Cpx(0.0,1.0)).simp).simp*expr.simpLog(((Int 1+(Cpx(0.0,1.0)*x).simp).simp/(Int 1-(Cpx(0.0,1.0)*x).simp).simp).simp)).simp
                 |_ when x.etype=It 4 -> expr.simpAtan(ToDbl x)
                 |_ -> Atan(x.etype,x)
                 
@@ -616,7 +648,7 @@ namespace Aqualis
                 |Int x -> if log (double x) < 0.0 then Inv(Dt,Dbl -(log (double x))) else Dbl (log (double x))
                 |Dbl x -> if log x < 0.0 then Inv(Dt,Dbl -(log x)) else Dbl (log x)
                 |Cpx (re,im) ->
-                    (expr.simpLog(expr.simpAbs x)+(Cpx(0.0,1.0)*expr.simpAtan2(Dbl im,Dbl re)).simp).simp
+                    Cpx(logMagnitude re im,atan2 im re)
                 |_ when x.etype=It 4 -> expr.simpLog(ToDbl x)
                 |_ -> Log(x.etype,x)
                 

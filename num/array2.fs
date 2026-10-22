@@ -721,13 +721,29 @@ namespace Aqualis
                 |Python->writein(left+" = copy.deepcopy("+right+")")
                 |C99|JavaScript|PHP->elementwise()
                 |Numeric->()
-            |_->elementwise()
+            |_ when not (NumericArrayTemporaries.executable context) -> elementwise()
+            |_ ->
+                TemporaryVariableScope.useOne (fun () -> NumericArrayTemporaries.acquire context typ (A2(0,0)))
+                    (fun name -> this.Create(typ,Var2(A2(0,0),name)))
+                    (fun temporary ->
+                        temporary.allocate(this.size1,this.size2)
+                        try
+                            context.iter.num temporary.size1 <| fun i ->
+                                context.iter.num temporary.size2 <| fun j ->
+                                    temporary.AssignAt(i,j,(other[i,j]:>INum0).Expr)
+                            context.iter.num temporary.size1 <| fun i ->
+                                context.iter.num temporary.size2 <| fun j ->
+                                    this.AssignAt(i,j,(temporary[i,j]:>INum0).Expr)
+                        finally temporary.deallocate())
 
         /// Assigns a scalar value to the array elements.
         member this.AssignScalar(value:INum0)=
             Aqualis.merge context value.Context |> ignore
             let writein text=context.codewritein text
-            let elementwise()=context.iter.num this.size1 <| fun i->context.iter.num this.size2 <| fun j->this.AssignAt(i,j,value.Expr)
+            let elementwise()=
+                NumericArrayTemporaries.scalar context value (fun scalar ->
+                    context.iter.num this.size1 <| fun i ->
+                        context.iter.num this.size2 <| fun j -> this.AssignAt(i,j,scalar))
             match this.Expr with
             |Var2(_,name)->
                 match context.language with

@@ -32,18 +32,19 @@ namespace Aqualis
 
             /// Emits a counted loop for JavaScript.
             static member forLoopJ (c:Aqualis) (n1:expr,n2:expr) code =
-                let iname,returnVar = c.i0.getVar()
-                let i = Var(It 4, iname, NaN)
-                let n1_ = n1.evalJ c
-                let n2_ = n2.evalJ c
-                if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                c.codewritein("for(" + i.evalJ c + " = " + n1_ + "; " + i.evalJ c + " <= " + n2_ + "; " + i.evalJ c + "++)")
-                c.codewritein "{"
-                c.indentInc()
-                code i
-                c.indentDec()
-                c.codewritein "}"
-                returnVar()
+                c.withLoopBounds (n1,n2) (fun target value -> expr.substJ target value c) (fun (n1,n2) ->
+                    let iname,returnVar = c.i0.getVar()
+                    let i = Var(It 4, iname, NaN)
+                    let n1_ = n1.evalJ c
+                    let n2_ = n2.evalJ c
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    c.codewritein("for(" + i.evalJ c + " = " + n1_ + "; " + i.evalJ c + " <= " + n2_ + "; " + i.evalJ c + "++)")
+                    c.codewritein "{"
+                    c.indentInc()
+                    code i
+                    c.indentDec()
+                    c.codewritein "}"
+                    returnVar())
 
             /// Emits an unbounded loop for JavaScript.
             static member loopJ (c:Aqualis) code =
@@ -83,16 +84,17 @@ namespace Aqualis
                     c.captureCode(fun () -> code i) |> ignore
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
-                    let i = Var(It 4, iname, NaN)
-                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
-                    c.codewritein "{"
-                    c.indentInc()
-                    code i
-                    c.indentDec()
-                    c.codewritein "}"
-                    returnVar()
+                    c.withLoopBounds (i1,i2) (fun target value -> expr.substJ target value c) (fun (i1,i2) ->
+                        let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
+                        let i = Var(It 4, iname, NaN)
+                        if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                        c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
+                        c.codewritein "{"
+                        c.indentInc()
+                        code i
+                        c.indentDec()
+                        c.codewritein "}"
+                        returnVar())
 
             /// Emits an inclusive range loop with an exit action for JavaScript.
             static member range_exitJ (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
@@ -105,17 +107,18 @@ namespace Aqualis
                     c.captureCode(fun () -> code(exit,i)) |> ignore
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
-                    let i = Var(It 4, iname, NaN)
-                    let exit() = c.codewritein "break;"
-                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
-                    c.codewritein "{"
-                    c.indentInc()
-                    code(exit,i)
-                    c.indentDec()
-                    c.codewritein "}"
-                    returnVar()
+                    c.withLoopBounds (i1,i2) (fun target value -> expr.substJ target value c) (fun (i1,i2) ->
+                        let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
+                        let i = Var(It 4, iname, NaN)
+                        let exit() = c.codewritein "break;"
+                        if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                        c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
+                        c.codewritein "{"
+                        c.indentInc()
+                        code(exit,i)
+                        c.indentDec()
+                        c.codewritein "}"
+                        returnVar())
 
             /// Emits a branch callback for JavaScript.
             static member branchJ (c:Aqualis) code =

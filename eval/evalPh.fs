@@ -32,17 +32,18 @@ namespace Aqualis
 
             /// Emits a counted loop for PHP.
             static member forLoopPh (c:Aqualis) (n1:expr,n2:expr) code =
-                let iname,returnVar = c.i0.getVar()
-                let i = Var(It 4, iname, NaN)
-                let n1_ = n1.evalPh c
-                let n2_ = n2.evalPh c
-                if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                c.codewritein("<?php ", "for(" + i.evalPh c + " = " + n1_ + "; " + i.evalPh c + " <= " + n2_ + "; " + i.evalPh c + "++): ?>")
-                c.indentInc()
-                code i
-                c.indentDec()
-                c.codewritein("<?php ", "endfor; ?>")
-                returnVar()
+                c.withLoopBounds (n1,n2) (fun target value -> expr.substPh target value c) (fun (n1,n2) ->
+                    let iname,returnVar = c.i0.getVar()
+                    let i = Var(It 4, iname, NaN)
+                    let n1_ = n1.evalPh c
+                    let n2_ = n2.evalPh c
+                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                    c.codewritein("<?php ", "for(" + i.evalPh c + " = " + n1_ + "; " + i.evalPh c + " <= " + n2_ + "; " + i.evalPh c + "++): ?>")
+                    c.indentInc()
+                    code i
+                    c.indentDec()
+                    c.codewritein("<?php ", "endfor; ?>")
+                    returnVar())
 
             /// Emits an unbounded loop for PHP.
             static member loopPh (c:Aqualis) code =
@@ -74,6 +75,7 @@ namespace Aqualis
 
             /// Emits an inclusive range loop for PHP.
             static member rangePh (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let counter = counter |> Option.map (fun name -> if name.StartsWith("$") then name else "$" + name)
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -82,18 +84,20 @@ namespace Aqualis
                     c.captureCode(fun () -> code i) |> ignore
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
-                    let i = Var(It 4, iname, NaN)
-                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
-                    c.indentInc()
-                    code i
-                    c.indentDec()
-                    c.codewritein("<?php ", "endfor; ?>")
-                    returnVar()
+                    c.withLoopBounds (i1,i2) (fun target value -> expr.substPh target value c) (fun (i1,i2) ->
+                        let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
+                        let i = Var(It 4, iname, NaN)
+                        if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                        c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
+                        c.indentInc()
+                        code i
+                        c.indentDec()
+                        c.codewritein("<?php ", "endfor; ?>")
+                        returnVar())
 
             /// Emits an inclusive range loop with an exit action for PHP.
             static member range_exitPh (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                let counter = counter |> Option.map (fun name -> if name.StartsWith("$") then name else "$" + name)
                 match i1.simp,i2.simp with
                 |Int a, Int b when a>b ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
@@ -103,18 +107,19 @@ namespace Aqualis
                     c.captureCode(fun () -> code(exit,i)) |> ignore
                     returnVar()
                 |i1,i2 ->
-                    let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
-                    let i = Var(It 4, iname, NaN)
-                    let label = "_" + c.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("<?php ", "goto "+label+"; ?>")
-                    if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                    c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
-                    c.indentInc()
-                    code(exit,i)
-                    c.indentDec()
-                    c.codewritein("<?php ", "endfor; ?>")
-                    c.codewritein("<?php ", label+":; ?>")
-                    returnVar()
+                    c.withLoopBounds (i1,i2) (fun target value -> expr.substPh target value c) (fun (i1,i2) ->
+                        let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
+                        let i = Var(It 4, iname, NaN)
+                        let label = "_" + c.GotoLabels.nextGotoLabel()
+                        let exit() = c.codewritein("<?php ", "goto "+label+"; ?>")
+                        if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
+                        c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
+                        c.indentInc()
+                        code(exit,i)
+                        c.indentDec()
+                        c.codewritein("<?php ", "endfor; ?>")
+                        c.codewritein("<?php ", label+":; ?>")
+                        returnVar())
 
             /// Emits a branch callback for PHP.
             static member branchPh (c:Aqualis) code =

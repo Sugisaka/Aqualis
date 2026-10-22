@@ -12,6 +12,19 @@ module OpenMpGenerationTests =
         File.ReadAllText(Path.Combine(output.Path, project + extension))
 
     [<Fact>]
+    let ``C snapshots dynamic parallel loop bounds before the directive`` () =
+        let source = generate C99 ".c" "openmp-bound-snapshot" (fun context ->
+            let last = context.var.i0 "last"
+            last <== 2
+            context.omp.parallelize (fun parallelContext ->
+                parallelContext.iter.range(I 0,last) (fun _ -> parallelContext.writein "puts(\"ok\");")))
+        let directive = source.IndexOf("#pragma omp parallel for",StringComparison.Ordinal)
+        let assignment = source.IndexOf("= last;",StringComparison.Ordinal)
+        Assert.True(assignment >= 0 && assignment < directive,source)
+        let following = source.Substring(directive).Split('\n')
+        Assert.StartsWith("for(",following[1].Trim())
+
+    [<Fact>]
     let ``C parallel loop is emitted after its OpenMP directive`` () =
         let source =
             generate C99 ".c" "openmp-loop-order" (fun context ->
