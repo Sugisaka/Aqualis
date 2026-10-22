@@ -95,8 +95,11 @@ namespace Aqualis
                 
             /// Emits a conditional loop for Python.
             static member whiledoPy (c:Aqualis) (cond:expr) = fun code ->
-                c.codewritein("while(" + cond.evalPy c + "):")
+                c.codewritein("while(" + (if cond.emitsStatements then "True" else cond.evalPy c) + "):")
                 c.indentInc()
+                if cond.emitsStatements then
+                    let value = cond.evalPy c
+                    c.codewritein("if not (" + value + "): break")
                 writeSuite c code
                 c.indentDec()
                 
@@ -150,6 +153,7 @@ namespace Aqualis
                     
             /// Emits a branch callback for Python.
             static member branchPy (c:Aqualis) code =
+                let mutable nestedElseCount = 0
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPy c
                     c.codewritein("if " + cond + ":")
@@ -157,8 +161,13 @@ namespace Aqualis
                     writeSuite c code
                     c.indentDec()
                 let elseifcode (cond:expr) code =
+                    let nested = cond.emitsStatements
+                    if nested then
+                        c.codewritein "else:"
+                        c.indentInc()
+                        nestedElseCount <- nestedElseCount + 1
                     let cond = cond.evalPy c
-                    c.codewritein("elif " + cond + ":")
+                    c.codewritein((if nested then "if " else "elif ") + cond + ":")
                     c.indentInc()
                     writeSuite c code
                     c.indentDec()
@@ -167,23 +176,30 @@ namespace Aqualis
                     c.indentInc()
                     writeSuite c code
                     c.indentDec()
-                code(ifcode,elseifcode,elsecode)
+                let result = code(ifcode,elseifcode,elsecode)
+                for _ in 1..nestedElseCount do c.indentDec()
+                result
                 
             /// Renders an expression for Python.
             member this.evalPy(c:Aqualis) =
+                let comparisonOperand (value:expr) =
+                    let rendered = value.evalPy c
+                    if value.etype = Bt then "(" + rendered + ")" else rendered
                 match this.simp with
                 |False -> "False"
                 |True -> "True"
-                |Eq(x,y) -> x.evalPy c + " == " + y.evalPy c
-                |NEq(x,y) -> x.evalPy c + " != " + y.evalPy c
-                |Greater(x,y) -> x.evalPy c + " > " + y.evalPy c
-                |GreaterEq(x,y) -> x.evalPy c + " >= " + y.evalPy c
-                |Less(x,y) -> x.evalPy c + " < " + y.evalPy c
-                |LessEq(x,y) -> x.evalPy c + " <= " + y.evalPy c
+                |Eq(x,y) -> comparisonOperand x + " == " + comparisonOperand y
+                |NEq(x,y) -> comparisonOperand x + " != " + comparisonOperand y
+                |Greater(x,y) -> comparisonOperand x + " > " + comparisonOperand y
+                |GreaterEq(x,y) -> comparisonOperand x + " >= " + comparisonOperand y
+                |Less(x,y) -> comparisonOperand x + " < " + comparisonOperand y
+                |LessEq(x,y) -> comparisonOperand x + " <= " + comparisonOperand y
+                |AND x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit true x).evalPy c
                 |AND x -> 
                     x 
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalPy c + ")" |_ -> v.evalPy c)
                     |> fun lst -> String.Join(" and ", lst)
+                |OR x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit false x).evalPy c
                 |OR x -> 
                     x 
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalPy c + ")" |_ -> v.evalPy c)

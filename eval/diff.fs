@@ -19,6 +19,8 @@ namespace Aqualis
                         Int 0
                     |Dbl _,_ ->
                         Int 0
+                    |Cpx _,_ ->
+                        Int 0
                     |Var(_,vt,_),Var(_,xt,_) when vt = xt ->
                         Int 1
                     |Var _,_ ->

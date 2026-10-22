@@ -1097,6 +1097,17 @@ for language in c fortran python; do
       python) python3 "$directory/smoke.py" ;;
     esac
   }
+  actual="$(run_control_regression logical-evaluation)"
+  python3 - "$actual" <<'PY'
+import sys
+expected = [1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 2, 0]
+assert list(map(float, sys.argv[1].split())) == expected, sys.argv[1]
+PY
+  actual="$(run_control_regression logical-control-flow)"
+  python3 - "$actual" <<'PY'
+import sys
+assert list(map(int, sys.argv[1].split())) == [1, 10, 20, 30, 0], sys.argv[1]
+PY
   actual="$(run_control_regression conditional-promotion)"
   python3 - "$actual" <<'PY'
 import sys

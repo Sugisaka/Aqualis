@@ -656,6 +656,74 @@ module Program =
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
 
+        generate "logical-evaluation" <| fun context ->
+            let flag = context.var.i0 "flag"
+            let denominator = context.var.i0 "denominator"
+            let a = context.var.i0 "a"
+            let b = context.var.i0 "b"
+            let d = context.var.i0 "d"
+            let e = context.var.i0 "e"
+            let output condition = context.print.t (int0(IfEl(condition,Int 1,Int 0),context))
+            a <== 1
+            b <== 1
+            d <== 2
+            e <== 2
+            output (Eq(Eq(a.Expr,b.Expr),Eq(d.Expr,e.Expr)))
+            output (NEq(Eq(a.Expr,b.Expr),Eq(d.Expr,e.Expr)))
+            e <== 3
+            output (Eq(Eq(a.Expr,b.Expr),Eq(d.Expr,e.Expr)))
+            output (NEq(Eq(a.Expr,b.Expr),Eq(d.Expr,e.Expr)))
+            for choice in [0;1] do
+                flag <== choice
+                denominator <== 0
+                let condition = Eq(flag.Expr,Int 1)
+                let dangerous = Div(It 4,Int 1,denominator.Expr)
+                let andOperand = Eq(IfEl(condition,Int 1,dangerous),Int 1)
+                let orOperand = Eq(IfEl(condition,dangerous,Int 1),Int 1)
+                output (AND [condition;andOperand])
+                output (OR [condition;orOperand])
+                // Also cover nested logical nodes and statements inside arithmetic operands.
+                output (OR [NEq(flag.Expr,Int 1);AND [condition;andOperand]])
+                let wrapped = Eq(Add(It 4,Int 2,IfEl(condition,Int 1,dangerous)),Int 3)
+                output (AND [condition;wrapped])
+            denominator <== 1
+            flag <== 1
+            output (AND [Eq(flag.Expr,Int 1);Eq(Div(It 4,Int 1,denominator.Expr),Int 1)])
+            let x = context.var.d0 "x"
+            x <== 3.0
+            let coefficient = complex0(Cpx(1.0,2.0),context)
+            let derivative = asm.diff(coefficient * x,x)
+            context.print.t derivative.re
+            context.print.t derivative.im
+            context.print.t (asm.diff(coefficient,x)).re
+
+        generate "logical-control-flow" <| fun context ->
+            let flag = context.var.i0 "flag"
+            let denominator = context.var.i0 "denominator"
+            let count = context.var.i0 "count"
+            let condition = Eq(flag.Expr,Int 1)
+            let dangerous = Div(It 4,Int 1,denominator.Expr)
+            let operand = Eq(IfEl(condition,Int 1,dangerous),Int 1)
+            flag <== 1
+            denominator <== 0
+            count <== 0
+            expr.whiledo context (AND [condition;operand]) (fun () ->
+                count.inc()
+                flag <== 0)
+            context.print.t count
+            // The condition must be evaluated only when its preceding branches fail.
+            for choice in [0;1;2] do
+                flag <== choice
+                expr.branch context (fun (ifCode,elseIfCode,elseCode) ->
+                    ifCode (Eq(flag.Expr,Int 0)) (fun () -> context.print.t (I 10))
+                    elseIfCode (AND [condition;operand]) (fun () -> context.print.t (I 20))
+                    elseIfCode (Eq(flag.Expr,Int 2)) (fun () -> context.print.t (I 30))
+                    elseCode (fun () -> context.print.t (I 40)))
+            flag <== 0
+            let sum = Sum(It 4,Int 0,Int 1,fun _ -> dangerous)
+            let skipped = AND [condition;Eq(sum,Int 0)]
+            context.print.t (int0(IfEl(skipped,Int 1,Int 0),context))
+
         generate "conditional-promotion" <| fun context ->
             let flag = context.var.i0 "flag"
             let real = context.var.d0 "realResult"

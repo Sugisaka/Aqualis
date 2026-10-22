@@ -68,8 +68,12 @@ namespace Aqualis
 
             /// Emits a conditional loop for Fortran.
             static member whiledoF (c:Aqualis) (cond:expr) = fun code ->
-                c.codewritein("do while(" + cond.evalF c + ")")
+                let statements = cond.requiresStatements true
+                c.codewritein(if statements then "do" else "do while(" + cond.evalF c + ")")
                 c.indentInc()
+                if statements then
+                    let value = cond.evalF c
+                    c.codewritein("if (.not.(" + value + ")) exit")
                 code()
                 c.indentDec()
                 c.codewritein "end do"
@@ -124,6 +128,7 @@ namespace Aqualis
 
             /// Emits a branch callback for Fortran.
             static member branchF (c:Aqualis) code =
+                let mutable nestedElseCount = 0
                 let ifcode (cond:expr) code =
                     let cond = cond.evalF c
                     c.codewritein("if(" + cond + ") then")
@@ -131,8 +136,13 @@ namespace Aqualis
                     code()
                     c.indentDec()
                 let elseifcode (cond:expr) code =
+                    // A logical condition can emit short-circuit branches. Keep those
+                    // statements inside the preceding branch's else clause.
+                    c.codewritein "else"
+                    c.indentInc()
+                    nestedElseCount <- nestedElseCount + 1
                     let cond = cond.evalF c
-                    c.codewritein("else if(" + cond + ") then")
+                    c.codewritein("if(" + cond + ") then")
                     c.indentInc()
                     code()
                     c.indentDec()
@@ -143,25 +153,33 @@ namespace Aqualis
                     c.indentDec()
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein "endif"
+                for _ in 1..nestedElseCount do
+                    c.indentDec()
+                    c.codewritein "endif"
 
             /// Renders an expression for Fortran.
             member this.evalF(c:Aqualis) =
                 let complexArgument (value:expr) =
                     if value.etype=Zt then value.evalF c
                     else "cmplx(" + value.evalF c + ",kind=kind(0.0d0))"
+                let comparisonOperand (value:expr) =
+                    let rendered = value.evalF c
+                    if value.etype = Bt then "(" + rendered + ")" else rendered
                 match this.simp with
                 |False -> ".false."
                 |True -> ".true."
-                |Eq(x,y) -> x.evalF c + " == " + y.evalF c
-                |NEq(x,y) -> x.evalF c + " /= " + y.evalF c
-                |Greater(x,y) -> x.evalF c + " > " + y.evalF c
-                |GreaterEq(x,y) -> x.evalF c + " >= " + y.evalF c
-                |Less(x,y) -> x.evalF c + " < " + y.evalF c
-                |LessEq(x,y) -> x.evalF c + " <= " + y.evalF c
+                |Eq(x,y) -> comparisonOperand x + (if x.etype = Bt && y.etype = Bt then " .eqv. " else " == ") + comparisonOperand y
+                |NEq(x,y) -> comparisonOperand x + (if x.etype = Bt && y.etype = Bt then " .neqv. " else " /= ") + comparisonOperand y
+                |Greater(x,y) -> comparisonOperand x + " > " + comparisonOperand y
+                |GreaterEq(x,y) -> comparisonOperand x + " >= " + comparisonOperand y
+                |Less(x,y) -> comparisonOperand x + " < " + comparisonOperand y
+                |LessEq(x,y) -> comparisonOperand x + " <= " + comparisonOperand y
+                |AND x when x.Length > 1 -> (expr.shortCircuit true x).evalF c
                 |AND x ->
                     x
                     |> List.map (fun v -> match v with |OR _ -> "(" + v.evalF c + ")" |_ -> v.evalF c)
                     |> fun lst -> String.Join(" .and. ", lst)
+                |OR x when x.Length > 1 -> (expr.shortCircuit false x).evalF c
                 |OR x ->
                     x
                     |> List.map (fun v -> match v with |AND _ -> "(" + v.evalF c + ")" |_ -> v.evalF c)

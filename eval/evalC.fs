@@ -72,9 +72,12 @@ namespace Aqualis
 
             /// Emits a conditional loop for C99.
             static member whiledoC (c:Aqualis) (cond:expr) = fun code ->
-                c.codewritein("while(" + cond.evalC c + ")")
+                c.codewritein("while(" + (if cond.emitsStatements then "true" else cond.evalC c) + ")")
                 c.codewritein "{"
                 c.indentInc()
+                if cond.emitsStatements then
+                    let value = cond.evalC c
+                    c.codewritein("if (!(" + value + ")) break;")
                 code()
                 c.indentDec()
                 c.codewritein "}"
@@ -131,6 +134,7 @@ namespace Aqualis
 
             /// Emits a branch callback for C99.
             static member branchC (c:Aqualis) code =
+                let mutable nestedElseCount = 0
                 let ifcode (cond:expr) code =
                     let cond = cond.evalC c
                     c.codewritein("if(" + cond + ")")
@@ -140,8 +144,14 @@ namespace Aqualis
                     c.indentDec()
                     c.codewritein "}"
                 let elseifcode (cond:expr) code =
+                    let nested = cond.emitsStatements
+                    if nested then
+                        c.codewritein "else"
+                        c.codewritein "{"
+                        c.indentInc()
+                        nestedElseCount <- nestedElseCount + 1
                     let cond = cond.evalC c
-                    c.codewritein("else if(" + cond + ")")
+                    c.codewritein((if nested then "if(" else "else if(") + cond + ")")
                     c.codewritein "{"
                     c.indentInc()
                     code()
@@ -154,23 +164,32 @@ namespace Aqualis
                     code()
                     c.indentDec()
                     c.codewritein "}"
-                code(ifcode,elseifcode,elsecode)
+                let result = code(ifcode,elseifcode,elsecode)
+                for _ in 1..nestedElseCount do
+                    c.indentDec()
+                    c.codewritein "}"
+                result
 
             /// Renders an expression for C99.
             member this.evalC(c:Aqualis) =
+                let comparisonOperand (value:expr) =
+                    let rendered = value.evalC c
+                    if value.etype = Bt then "(" + rendered + ")" else rendered
                 match this.simp with
                 |False -> "false"
                 |True -> "true"
-                |Eq(x,y) -> x.evalC c + " == " + y.evalC c
-                |NEq(x,y) -> x.evalC c + " != " + y.evalC c
-                |Greater(x,y) -> x.evalC c + " > " + y.evalC c
-                |GreaterEq(x,y) -> x.evalC c + " >= " + y.evalC c
-                |Less(x,y) -> x.evalC c + " < " + y.evalC c
-                |LessEq(x,y) -> x.evalC c + " <= " + y.evalC c
+                |Eq(x,y) -> comparisonOperand x + " == " + comparisonOperand y
+                |NEq(x,y) -> comparisonOperand x + " != " + comparisonOperand y
+                |Greater(x,y) -> comparisonOperand x + " > " + comparisonOperand y
+                |GreaterEq(x,y) -> comparisonOperand x + " >= " + comparisonOperand y
+                |Less(x,y) -> comparisonOperand x + " < " + comparisonOperand y
+                |LessEq(x,y) -> comparisonOperand x + " <= " + comparisonOperand y
+                |AND x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit true x).evalC c
                 |AND x ->
                     x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalC c + ")" |_ -> v.evalC c)
                     |> fun lst -> String.Join(" && ", lst)
+                |OR x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit false x).evalC c
                 |OR x ->
                     x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalC c + ")" |_ -> v.evalC c)

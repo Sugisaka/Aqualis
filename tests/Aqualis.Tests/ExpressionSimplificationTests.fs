@@ -5,6 +5,28 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``complex constants differentiate independently and inside expressions`` () =
+        use context = Aqualis.BlankWriter C99
+        let x = context.var.d0 "x"
+        let coefficient = complex0(Cpx(1.0,2.0),context)
+        match (asm.diff(coefficient,x)).Expr.simp with
+        |Int 0 -> ()
+        |other -> failwithf "Unexpected constant derivative: %A" other
+        match (asm.diff(coefficient + x,x)).Expr.simp with
+        |Cpx(re,im) -> Assert.Equal(1.0,re); Assert.Equal(0.0,im)
+        |other -> failwithf "Unexpected derivative: %A" other
+
+    [<Fact>]
+    let ``nested boolean comparisons retain operand grouping`` () =
+        let a,b,d,e = Var(It 4,"a",NaN),Var(It 4,"b",NaN),Var(It 4,"d",NaN),Var(It 4,"e",NaN)
+        for language in [C99;Fortran;Python] do
+            use context = Aqualis.BlankWriter language
+            let equal = Eq(Eq(a,b),Eq(d,e)).eval context
+            let unequal = NEq(Eq(a,b),Eq(d,e)).eval context
+            Assert.Equal((if language=Fortran then "(a == b) .eqv. (d == e)" else "(a == b) == (d == e)"),equal)
+            Assert.Equal((if language=Fortran then "(a == b) .neqv. (d == e)" else "(a == b) != (d == e)"),unequal)
+
+    [<Fact>]
     let ``power generation preserves left and right nested expression trees`` () =
         for language in [Fortran; Python] do
             use context = Aqualis.BlankWriter language

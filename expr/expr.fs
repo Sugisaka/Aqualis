@@ -105,6 +105,32 @@ namespace Aqualis
         |Sum of Etype*expr*expr*(expr->expr)
         /// Unavailable or undefined expression.
         |NaN
+
+        /// Whether rendering this expression can emit statements before its value.
+        member internal this.requiresStatements forceLogical =
+            let any = List.exists (fun (x:expr) -> x.requiresStatements forceLogical)
+            match this with
+            |Let _ |IfEl _ |Sum _ -> true
+            |Eq(a,b) |NEq(a,b) |Greater(a,b) |GreaterEq(a,b) |Less(a,b) |LessEq(a,b)
+            |Add(_,a,b) |Sub(_,a,b) |Mul(_,a,b) |Div(_,a,b) |Mod(_,a,b) |Pow(_,a,b)
+            |Atan2(a,b) |Idx2(_,_,a,b) -> any [a;b]
+            |Idx3(_,_,a,b,d) -> any [a;b;d]
+            |AND xs |OR xs -> (forceLogical && xs.Length > 1) || any xs
+            |Inv(_,x) |Exp(_,x) |Sin(_,x) |Cos(_,x) |Tan(_,x) |Asin(_,x) |Acos(_,x)
+            |Atan(_,x) |Abs(_,x) |Log(_,x) |Log10(_,x) |Sqrt(_,x) |ToInt x |ToDbl x
+            |Floor x |Ceil x |Re x |Im x |Conj x |Idx1(_,_,x) -> x.requiresStatements forceLogical
+            |False |True |Int _ |Dbl _ |Cpx _ |Var _ |NaN -> false
+
+        member internal this.emitsStatements = this.requiresStatements false
+
+        /// Lowers logical operands to conditional integer values, preserving evaluation order.
+        static member internal shortCircuit conjunction operands =
+            let rec lower = function
+                |[] -> Int(if conjunction then 1 else 0)
+                |head::tail ->
+                    if conjunction then IfEl(head,lower tail,Int 0)
+                    else IfEl(head,Int 1,lower tail)
+            Eq(lower operands,Int 1)
         
         /// Gets the element type of the expression, promoting conditional branches.
         member this.etype with get() =
