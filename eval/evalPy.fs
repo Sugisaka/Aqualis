@@ -227,7 +227,7 @@ namespace Aqualis
                     |_,(Add _|Sub _) -> x.evalPy c + "*(" + y.evalPy c + ")"
                     |_ -> x.evalPy c + "*" + y.evalPy c
                 |Div(It _,x,y) ->
-                    truncatingIntegerDivision (x.evalPy c) (y.evalPy c)
+                    "_aqualis_int_div(" + x.evalPy c + "," + y.evalPy c + ")"
                 |Div(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalPy c + ")/(" + y.evalPy c + ")"

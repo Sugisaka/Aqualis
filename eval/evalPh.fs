@@ -225,7 +225,7 @@ namespace Aqualis
                     |_,(Add _|Sub _|Div _|Mod _) -> x.evalPh c + "*(" + y.evalPh c + ")"
                     |_ -> x.evalPh c + "*" + y.evalPh c
                 |Div(It 4,x,y) when x.etype = It 4 && y.etype = It 4 ->
-                    "intdiv(" + x.evalPh c + ", " + y.evalPh c + ")"
+                    "(function($a,$b){if($b==0 || ($a==-2147483648 && $b==-1)) throw new RuntimeException('Aqualis: invalid 32-bit integer division.');return intdiv($a,$b);})(" + x.evalPh c + "," + y.evalPh c + ")"
                 |Div(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _|Mul _|Div _|Mod _) -> "(" + x.evalPh c + ")/(" + y.evalPh c + ")"

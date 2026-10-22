@@ -5,6 +5,24 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``promoted integer powers are evaluated in their result domain`` () =
+        for baseValue,exponent,expected in [2,31,2147483648.0; -2,31,-2147483648.0; 2,-31,2.0**(-31.0); 1,System.Int32.MaxValue,1.0] do
+            for domain in [Dt;Zt] do
+                match Pow(domain,Int baseValue,Int exponent).simp with
+                |Dbl value when domain=Dt -> Assert.Equal(expected,value)
+                |Cpx(real,imaginary) when domain=Zt -> Assert.Equal(expected,real); Assert.Equal(0.0,imaginary)
+                |other -> Assert.Fail($"Incorrect promoted power: {other}")
+
+    [<Fact>]
+    let ``minimum integer divided by minus one reports overflow without wrapping`` () =
+        let value,diagnostics = Diagnostics.Capture(fun () -> Div(It 4,Int System.Int32.MinValue,Int -1).simp)
+        match value with NaN -> () |other -> Assert.Fail($"Unexpected quotient: {other}")
+        Assert.Equal("AQL4003",(Assert.Single diagnostics).Code)
+        match Div(It 4,Var(It 4,"value",NaN),Int -1).simp with
+        |Div(It 4,_,_) -> ()
+        |other -> Assert.Fail($"Overflow check bypassed: {other}")
+
+    [<Fact>]
     let ``complex logarithm folds overflowing magnitudes to finite logarithms`` () =
         match (asm.log(complex0(Cpx(1.7e308,1.7e308)))).Expr.simp with
         |Cpx(real,imaginary) ->

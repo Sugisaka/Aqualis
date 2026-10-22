@@ -736,6 +736,32 @@ module Program =
                     context.print.t (int0(IfEl(predicate,Int 1,Int 0),context))
                     context.print.t count
 
+    let private generateIntegerDivisionBoundaries outputRoot (directoryName,language) =
+        for mode in ["valid";"overflow";"zero";"literal-minus-one"] do
+            let directory = Path.Combine(outputRoot,"integer-division-"+mode+"-"+directoryName)
+            Directory.CreateDirectory(directory) |> ignore
+            Compile [language] directory "smoke" "1.0" (fun context ->
+                if language=JavaScript then context.writein "globalThis.print = console.log;"
+                let a,b = context.var.i0 "a",context.var.i0 "b"
+                let output value =
+                    context.print.t (int0(value,context))
+                    if language=PHP then context.php.echo "\n"
+                if mode="valid" then
+                    for dividend,divisor in [System.Int32.MinValue,1; System.Int32.MinValue,2; System.Int32.MinValue,System.Int32.MinValue; System.Int32.MaxValue,-1; -7,3; 7,-3; -7,-3; 0,-1] do
+                        a <== dividend
+                        b <== divisor
+                        output (Div(It 4,a.Expr,b.Expr))
+                    // Function arguments must each be evaluated exactly once.
+                    let calls = context.var.i0 "calls"
+                    calls <== 0
+                    let once value = Let(It 4,NaN,Int value,fun x -> calls.inc(); x)
+                    output (Div(It 4,once -7,once 3))
+                    output calls.Expr
+                else
+                    a <== System.Int32.MinValue
+                    b <== (if mode="zero" then 0 else -1)
+                    output (Div(It 4,a.Expr,if mode="literal-minus-one" then Int -1 else b.Expr)))
+
     let private generateFrozenLoopBounds outputRoot (directoryName,language) =
         let directory = Path.Combine(outputRoot,"frozen-loop-bounds-"+directoryName)
         Directory.CreateDirectory(directory) |> ignore
@@ -924,6 +950,22 @@ module Program =
             let outputDirectory = Path.Combine(outputRoot, caseName + "-" + directoryName)
             Directory.CreateDirectory(outputDirectory) |> ignore
             Compile [language] outputDirectory "smoke" "1.0" code
+
+        generate "promoted-power" <| fun context ->
+            let baseValue = context.var.i0 "baseValue"
+            for value,exponent in [2,31;-2,31;2,-31;1,System.Int32.MaxValue] do
+                baseValue <== value
+                for operand in [Int value;baseValue.Expr] do
+                    context.print.t (double0(Pow(Dt,operand,Int exponent),context))
+                    context.print.t (complex0(Pow(Zt,operand,Int exponent),context)).re
+        if language=C99 || language=Fortran then
+            generate "empty-parallel" <| fun context ->
+                let count = context.var.i0 "count"
+                count <== 0
+                for first,last in [0,-1;3,1] do
+                    context.omp.parallelize (fun parallelContext ->
+                        parallelContext.iter.range(first,last) (fun _ -> count.inc()))
+                context.print.t count
 
         generate "complex-constant-stability" <| fun context ->
             let z = context.var.z0 "z"
@@ -2427,6 +2469,7 @@ module Program =
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
+            generationTargets |> List.iter (generateIntegerDivisionBoundaries outputRoot)
             generationTargets |> List.iter (generateAssignmentRegressionCases outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateNegativeRealSqrt outputRoot)

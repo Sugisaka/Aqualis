@@ -188,16 +188,15 @@ module NumericFormattingTests =
 
         let pythonDivision = division.evalPy target
         let pythonModulo = modulo.evalPy target
-        Assert.Contains("abs(_aqualis_dividend) // abs(_aqualis_divisor)", pythonDivision)
-        Assert.Contains("(_aqualis_dividend < 0) == (_aqualis_divisor < 0)", pythonDivision)
+        Assert.Equal("_aqualis_int_div(dividend,divisor)", pythonDivision)
         Assert.Contains("_aqualis_dividend - ", pythonModulo)
         Assert.Contains(" * _aqualis_divisor", pythonModulo)
         Assert.Contains("(value, 2)", simple)
         Assert.Contains("(left+right, modulus-offset)", compound)
 
-        Assert.Equal("dividend/divisor", division.evalC cTarget)
-        Assert.Equal("dividend/divisor", division.evalF fortranTarget)
-        Assert.Equal("Math.trunc((dividend)/(divisor))", division.evalJ javascriptTarget)
+        Assert.Equal("aqualis_int_div(dividend,divisor)", division.evalC cTarget)
+        Assert.Equal("aqualis_int_div(dividend,divisor)", division.evalF fortranTarget)
+        Assert.Contains("return Math.trunc(a/b);", division.evalJ javascriptTarget)
         Assert.Equal(
             "Number(dividend)/Number(divisor)",
             Div(Dt, dividend, divisor).evalJ javascriptTarget)
@@ -227,7 +226,7 @@ module NumericFormattingTests =
             [ C99, fun (value:expr) (target:Aqualis) -> value.evalC target
               Fortran, fun value target -> value.evalF target ] do
             use target = Aqualis.BlankWriter language
-            Assert.Equal("a*(b/c)", render (Mul(It 4, a, Div(It 4, b, c))) target)
+            Assert.Equal("a*(aqualis_int_div(b,c))", render (Mul(It 4, a, Div(It 4, b, c))) target)
 
     [<Fact>]
     let ``complex base ten logarithm and casts produce valid target expressions`` () =

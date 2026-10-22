@@ -322,6 +322,12 @@ namespace Aqualis
                         //サブルーチン
                         writer.codewritein "\n"
                         writer.codewritein "contains\n"
+                        writer.codewritein "integer function aqualis_int_div(a,b) result(quotient)\n"
+                        writer.codewritein "  integer, intent(in) :: a,b\n"
+                        writer.codewritein "  if (b == 0) error stop 'Aqualis: integer division by zero.'\n"
+                        writer.codewritein "  if (a == (-2147483647-1) .and. b == -1) error stop 'Aqualis: integer division overflow.'\n"
+                        writer.codewritein "  quotient = a/b\n"
+                        writer.codewritein "end function aqualis_int_div\n"
                         writer.codewritein "\n"
                         for funname in context.flist.list do
                             let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
@@ -396,6 +402,11 @@ namespace Aqualis
                         List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
+                        writer.codewritein "static inline int aqualis_int_div(int a, int b)\n"
+                        writer.codewritein "{\n"
+                        writer.codewritein "  if (b == 0 || (a == INT32_MIN && b == -1)) { fprintf(stderr, \"Aqualis: invalid 32-bit integer division.\\n\"); exit(EXIT_FAILURE); }\n"
+                        writer.codewritein "  return a/b;\n"
+                        writer.codewritein "}\n"
                         writer.codewritein "static inline int aqualis_int_power(int base, int exponent)\n"
                         writer.codewritein "{\n"
                         writer.codewritein "  if (base == 0 && exponent <= 0) { fprintf(stderr, \"Aqualis: invalid integer power.\\n\"); exit(EXIT_FAILURE); }\n"
@@ -737,6 +748,11 @@ namespace Aqualis
                         |> List.iter (fun importLine -> writer.codewritein(importLine + "\n"))
                         //ヘッダファイルのインクルード
                         List.iter (fun (s:string) -> writer.codewritein("import " + s + "\n")) <| context.hlist.list
+                        writer.codewritein "def _aqualis_int_div(a, b):\n"
+                        writer.codewritein "  if b == 0 or (a == -2147483648 and b == -1):\n"
+                        writer.codewritein "    raise ArithmeticError('Aqualis: invalid 32-bit integer division.')\n"
+                        writer.codewritein "  magnitude = abs(a) // abs(b)\n"
+                        writer.codewritein "  return magnitude if (a < 0) == (b < 0) else -magnitude\n"
                         writer.codewritein "def _aqualis_int_power(base, exponent):\n"
                         writer.codewritein "  base, exponent = int(base), int(exponent)\n"
                         writer.codewritein "  if base == 0 and exponent <= 0:\n"

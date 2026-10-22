@@ -468,6 +468,12 @@ namespace Aqualis
             /// Simplifies truncating integer division for literal or symbolic operands.
             static member simpIntDiv(x:expr,y:expr) =
                 match x,y with
+                |_,_ when integerLiteral x = Some Int32.MinValue && integerLiteral y = Some -1 ->
+                    reportExpressionError "AQL4003" "Integer division exceeds the supported 32-bit range." "integer division"
+                    NaN
+                |_,_ when Option.isSome (integerLiteral x) && integerLiteral y = Some -1 ->
+                    Int(-(Option.get (integerLiteral x)))
+                |_,_ when integerLiteral y = Some -1 -> Div(It 4,x,y)
                 |_,Int 0 -> 
                     reportExpressionError "AQL4001" "Division by zero was detected during integer expression simplification." "integer division"
                     NaN
@@ -503,7 +509,7 @@ namespace Aqualis
                         NaN
                     |Some exponent when exponent > 0.0 -> Int 0
                     |_ -> Pow(x%%y.etype,x,y)
-                |Int x,Int y when y>0 -> Int (List.fold (fun acc _ -> acc*x) 1 [1..y])
+                |Int x,Int y when y>0 -> integerPower x y
                 |Int x, Int y -> Dbl (double x ** double y)
                 |Int x, Dbl y -> Dbl (double x ** y)
                 |Inv(_,Int x),Dbl y -> Dbl (Math.Pow(-(double x),y))
@@ -884,6 +890,8 @@ namespace Aqualis
                     let result =
                         match t,integerLiteral x,integerLiteral y with
                         |It _,Some baseValue,Some exponent -> integerPower baseValue exponent
+                        |(Dt|Zt),Some baseValue,Some exponent when baseValue <> 0 || exponent > 0 ->
+                            preserveNumericType t (Dbl(Math.Pow(double baseValue,double exponent)))
                         |_ when t=Zt && negativeRealFractionalPower -> Pow(Zt,x,y)
                         |_ -> expr.simpPow(x,y)
                     match t,result with

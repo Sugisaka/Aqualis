@@ -1123,6 +1123,18 @@ for language in c fortran python; do
     esac
   }
   actual="$(run_control_regression logical-evaluation)"
+  power_actual="$(run_control_regression promoted-power)"
+  python3 - "$power_actual" <<'PY'
+import math
+import sys
+expected = [value for value in (2147483648.0, -2147483648.0, 2.0**-31, 1.0) for _ in range(4)]
+actual = list(map(float, sys.argv[1].split()))
+assert len(actual) == len(expected) and all(math.isclose(a,b,rel_tol=1e-12,abs_tol=0) for a,b in zip(actual,expected)), (actual,expected)
+PY
+  if [[ "$language" != python ]]; then
+    empty_actual="$(run_control_regression empty-parallel)"
+    [[ "${empty_actual//[[:space:]]/}" == 0 ]]
+  fi
   bounds_actual="$(run_control_regression frozen-loop-bounds)"
   complex_actual="$(run_control_regression complex-constant-stability)"
   python3 - "$language" "$bounds_actual" "$complex_actual" <<'PY'
@@ -1283,6 +1295,39 @@ for mode in overflow invalid; do
     exit 1
   fi
   grep -Fq 'Aqualis:' "$output_root/power-error.txt"
+done
+
+for language in c fortran python javascript php; do
+  for mode in valid overflow zero literal-minus-one; do
+    directory="$output_root/integer-division-$mode-$language"
+    case "$language" in
+      c)
+        gcc -std=c99 -fsanitize=undefined -fno-sanitize-recover=undefined "$directory/smoke.c" -lm -o "$directory/checked.exe"
+        command=("$directory/checked.exe") ;;
+      fortran)
+        gfortran -ffree-line-length-none -fcheck=all -ftrapv "$directory/smoke.f90" -o "$directory/checked.exe"
+        command=("$directory/checked.exe") ;;
+      python) command=(python3 "$directory/smoke.py") ;;
+      javascript)
+        script="$directory/smoke.js"
+        if [[ "$node_command" == node.exe ]]; then script="$(wslpath -w "$script")"; fi
+        command=("$node_command" "$script") ;;
+      php) php -l "$directory/smoke.php" >/dev/null; command=(php "$directory/smoke.php") ;;
+    esac
+    if [[ "$mode" == valid ]]; then
+      actual="$("${command[@]}")"
+      python3 - "$actual" <<'PY'
+import sys
+assert list(map(int,sys.argv[1].split())) == [-2147483648,-1073741824,1,-2147483647,-2,-2,2,0,-2,2], sys.argv[1]
+PY
+    else
+      if "${command[@]}" >"$directory/actual.txt" 2>"$directory/error.txt"; then
+        printf '%s\n' "$language accepted invalid integer division ($mode)." >&2
+        exit 1
+      fi
+      grep -Fq 'Aqualis:' "$directory/error.txt"
+    fi
+  done
 done
 
 printf '%s\n' 'All generated-code runtime checks passed.'

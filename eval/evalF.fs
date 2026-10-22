@@ -81,7 +81,7 @@ namespace Aqualis
             /// Emits an inclusive range loop for Fortran.
             static member rangeF (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
-                |Int a, Int b when a>b ->
+                |Int a, Int b when a>b && not c.ParallelMode ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
@@ -103,7 +103,7 @@ namespace Aqualis
             /// Emits an inclusive range loop with an exit action for Fortran.
             static member range_exitF (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
-                |Int a, Int b when a>b ->
+                |Int a, Int b when a>b && not c.ParallelMode ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let exit() = ()
@@ -209,6 +209,7 @@ namespace Aqualis
                     |_ -> x.evalF c + "*" + y.evalF c
                 |Div(Dt,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     (ToDbl x/ToDbl y).evalF c
+                |Div(It 4,x,y) -> "aqualis_int_div(" + x.evalF c + "," + y.evalF c + ")"
                 |Div(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _|Mul _|Div _) -> "(" + x.evalF c + ")/(" + y.evalF c + ")"
@@ -221,6 +222,8 @@ namespace Aqualis
                     let baseValue =
                         if t=Zt && x.etype<>Zt then
                             "cmplx(" + x.evalF c + ",kind=kind(0.0d0))"
+                        elif t=Dt && (match x.etype with It _ -> true | _ -> false) then
+                            "dble(" + x.evalF c + ")"
                         else
                             match x with
                             |Add _|Sub _|Mul _|Div _|Inv _|Pow _ -> "(" + x.evalF c + ")"

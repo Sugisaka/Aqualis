@@ -86,7 +86,7 @@ namespace Aqualis
             /// Emits an inclusive range loop for C99.
             static member rangeC (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
-                |Int a, Int b when a>b ->
+                |Int a, Int b when a>b && not c.ParallelMode ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
@@ -110,7 +110,7 @@ namespace Aqualis
             /// Emits an inclusive range loop with an exit action for C99.
             static member range_exitC (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
                 match i1.simp,i2.simp with
-                |Int a, Int b when a>b ->
+                |Int a, Int b when a>b && not c.ParallelMode ->
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let exit() = ()
@@ -222,6 +222,7 @@ namespace Aqualis
                     |_ -> x.evalC c + "*" + y.evalC c
                 |Div(Dt,x,y) when x.etype = It 4 && y.etype = It 4 ->
                     (ToDbl x/ToDbl y).evalC c
+                |Div(It 4,x,y) -> "aqualis_int_div(" + x.evalC c + "," + y.evalC c + ")"
                 |Div(_,x,y) ->
                     match x,y with
                     |(Add _|Sub _),(Add _|Sub _|Mul _|Div _|Mod _) -> "(" + x.evalC c + ")/(" + y.evalC c + ")"

@@ -12,6 +12,15 @@ module OpenMpGenerationTests =
         File.ReadAllText(Path.Combine(output.Path, project + extension))
 
     [<Fact>]
+    let ``empty OpenMP loops retain a canonical zero-trip loop`` () =
+        for language,extension,directive,loop in [C99,".c","#pragma omp parallel for","for("; Fortran,".f90","!$omp parallel do","do "] do
+            let source = generate language extension "openmp-empty" (fun context ->
+                context.omp.parallelize (fun parallelContext ->
+                    parallelContext.iter.num 0 (fun _ -> parallelContext.writein (if language=C99 then "puts(\"unexpected\");" else "print *, 'unexpected'"))))
+            let following = source.Substring(source.IndexOf(directive,StringComparison.Ordinal)).Split('\n')
+            Assert.StartsWith(loop,following[1].Trim())
+
+    [<Fact>]
     let ``C snapshots dynamic parallel loop bounds before the directive`` () =
         let source = generate C99 ".c" "openmp-bound-snapshot" (fun context ->
             let last = context.var.i0 "last"
