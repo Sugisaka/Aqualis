@@ -1106,7 +1106,22 @@ PY
   actual="$(run_control_regression logical-control-flow)"
   python3 - "$actual" <<'PY'
 import sys
-assert list(map(int, sys.argv[1].split())) == [1, 10, 20, 30, 0], sys.argv[1]
+assert list(map(int, sys.argv[1].split())) == [1, 10, 20, 30, 0, 0, 0, 1, 1, 1, 2, 1, 2], sys.argv[1]
+PY
+  actual="$(run_control_regression complex-log10-grouping)"
+  python3 - "$actual" <<'PY'
+import cmath
+import math
+import sys
+expected = []
+for z in [100+0j, 1j, 10+10j]:
+    logarithm = cmath.log10(z)
+    for value in [1/logarithm, logarithm**2]:
+        expected.extend([value.real, value.imag])
+actual = list(map(float, sys.argv[1].split()))
+assert len(actual) == len(expected) and all(
+    math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-12)
+    for a, b in zip(actual, expected)), (actual, expected)
 PY
   actual="$(run_control_regression conditional-promotion)"
   python3 - "$actual" <<'PY'
@@ -1135,6 +1150,32 @@ PY
     actual="$(run_control_regression range-boundary-parallel)"
     [[ "${actual//[[:space:]]/}" == 2 ]]
   fi
+done
+for language in javascript php; do
+  for regression in logical-evaluation logical-control-flow; do
+    directory="$output_root/$regression-$language"
+    if [[ "$language" == javascript ]]; then
+      script="$directory/smoke.js"
+      if [[ "$node_command" == node.exe ]]; then script="$(wslpath -w "$script")"; fi
+      "$node_command" --check "$script"
+      actual="$("$node_command" "$script")"
+    else
+      php -l "$directory/smoke.php" >/dev/null
+      actual="$(php "$directory/smoke.php")"
+    fi
+    python3 - "$language" "$regression" "$actual" <<'PY'
+import sys
+language, case, output = sys.argv[1:]
+expected = ([1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1]
+            if case == 'logical-evaluation' else
+            [1, 10, 20, 30, 0, 0, 0, 1, 1, 1, 2, 1, 2])
+if language == 'php':
+    # PHP's scalar printer writes values without a separator.
+    assert output.strip() == ''.join(map(str, expected)), (case, output)
+else:
+    assert list(map(int, output.split())) == expected, (case, output)
+PY
+  done
 done
 for mode in negative boundary; do
   actual="$(python3 "$output_root/checked-power-$mode-python/smoke.py")"

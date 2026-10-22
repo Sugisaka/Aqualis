@@ -63,8 +63,11 @@ namespace Aqualis
 
             /// Emits a conditional loop for PHP.
             static member whiledoPh (c:Aqualis) (cond:expr) = fun code ->
-                c.codewritein("<?php ", "while(" + cond.evalPh c + "): ?>")
+                c.codewritein("<?php ", "while(" + (if cond.emitsStatements then "true" else cond.evalPh c) + "): ?>")
                 c.indentInc()
+                if cond.emitsStatements then
+                    let value = cond.evalPh c
+                    c.codewritein("<?php ", "if (!(" + value + ")) break; ?>")
                 code()
                 c.indentDec()
                 c.codewritein("<?php ", "endwhile; ?>")
@@ -115,6 +118,7 @@ namespace Aqualis
 
             /// Emits a branch callback for PHP.
             static member branchPh (c:Aqualis) code =
+                let mutable nestedElseCount = 0
                 let ifcode (cond:expr) code =
                     let cond = cond.evalPh c
                     c.codewritein ("<?php ", "if(" + cond + "): ?>")
@@ -122,8 +126,13 @@ namespace Aqualis
                     code()
                     c.indentDec()
                 let elseifcode (cond:expr) code =
+                    let nested = cond.emitsStatements
+                    if nested then
+                        c.codewritein("<?php ", "else: ?>")
+                        c.indentInc()
+                        nestedElseCount <- nestedElseCount + 1
                     let cond = cond.evalPh c
-                    c.codewritein ("<?php ", "elseif(" + cond + "): ?>")
+                    c.codewritein ("<?php ", (if nested then "if(" else "elseif(") + cond + "): ?>")
                     c.indentInc()
                     code()
                     c.indentDec()
@@ -134,9 +143,15 @@ namespace Aqualis
                     c.indentDec()
                 code(ifcode,elseifcode,elsecode)
                 c.codewritein("<?php ", "endif; ?>")
+                for _ in 1..nestedElseCount do
+                    c.indentDec()
+                    c.codewritein("<?php ", "endif; ?>")
 
             /// Renders an expression for PHP.
             member this.evalPh(c:Aqualis) =
+                let comparisonOperand (value:expr) =
+                    let rendered = value.evalPh c
+                    if value.etype = Bt then "(" + rendered + ")" else rendered
                 match this.simp with
                 |False -> "false"
                 |True -> "true"
@@ -147,16 +162,18 @@ namespace Aqualis
                 |Less(x,y)
                 |LessEq(x,y) when x.etype = Zt || y.etype = Zt ->
                     UnsupportedOperation.codeGeneration "PHP" "complex-number comparisons"
-                |Eq(x,y) -> x.evalPh c + " == " + y.evalPh c
-                |NEq(x,y) -> x.evalPh c + " != " + y.evalPh c
-                |Greater(x,y) -> x.evalPh c + " > " + y.evalPh c
-                |GreaterEq(x,y) -> x.evalPh c + " >= " + y.evalPh c
-                |Less(x,y) -> x.evalPh c + " < " + y.evalPh c
-                |LessEq(x,y) -> x.evalPh c + " <= " + y.evalPh c
+                |Eq(x,y) -> comparisonOperand x + " == " + comparisonOperand y
+                |NEq(x,y) -> comparisonOperand x + " != " + comparisonOperand y
+                |Greater(x,y) -> comparisonOperand x + " > " + comparisonOperand y
+                |GreaterEq(x,y) -> comparisonOperand x + " >= " + comparisonOperand y
+                |Less(x,y) -> comparisonOperand x + " < " + comparisonOperand y
+                |LessEq(x,y) -> comparisonOperand x + " <= " + comparisonOperand y
+                |AND x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit true x).evalPh c
                 |AND x ->
                     x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalPh c + ")" |_ -> v.evalPh c)
                     |> fun lst -> String.Join(" && ", lst)
+                |OR x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit false x).evalPh c
                 |OR x ->
                     x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalPh c + ")" |_ -> v.evalPh c)

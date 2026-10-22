@@ -251,7 +251,7 @@ namespace Aqualis
                 |Abs(_,x) -> "abs(" + x.evalF c + ")"
                 |Log(Zt,x) -> "log(" + complexArgument x + ")"
                 |Log(_,x) -> "log(" + x.evalF c + ")"
-                |Log10(Zt,x) -> "log(" + complexArgument x + ")/log(10.0d0)"
+                |Log10(Zt,x) -> "(log(" + complexArgument x + ")/log(10.0d0))"
                 |Log10(_,x) -> "log10(" + x.evalF c + ")"
                 |Sqrt(Zt,x) -> "sqrt(" + complexArgument x + ")"
                 |Sqrt(_,x) -> "sqrt(" + x.evalF c + ")"

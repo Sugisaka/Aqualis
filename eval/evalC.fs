@@ -258,7 +258,7 @@ namespace Aqualis
                 |Abs(_,x) -> "abs(" + x.evalC c + ")"
                 |Log(Zt,x) -> "clog(" + x.evalC c + ")"
                 |Log(_,x) -> "log(" + x.evalC c + ")"
-                |Log10(Zt,x) -> "clog(" + x.evalC c + ")/log(10.0)"
+                |Log10(Zt,x) -> "(clog(" + x.evalC c + ")/log(10.0))"
                 |Log10(_,x) -> "log10(" + x.evalC c + ")"
                 |Sqrt(Zt,x) -> "csqrt(" + x.evalC c + ")"
                 |Sqrt(_,x) -> "sqrt(" + x.evalC c + ")"

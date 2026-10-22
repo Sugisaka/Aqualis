@@ -63,9 +63,12 @@ namespace Aqualis
 
             /// Emits a conditional loop for JavaScript.
             static member whiledoJ (c:Aqualis) (cond:expr) = fun code ->
-                c.codewritein("while(" + cond.evalJ c + ")")
+                c.codewritein("while(" + (if cond.emitsStatements then "true" else cond.evalJ c) + ")")
                 c.codewritein "{"
                 c.indentInc()
+                if cond.emitsStatements then
+                    let value = cond.evalJ c
+                    c.codewritein("if (!(" + value + ")) break;")
                 code()
                 c.indentDec()
                 c.codewritein "}"
@@ -116,6 +119,7 @@ namespace Aqualis
 
             /// Emits a branch callback for JavaScript.
             static member branchJ (c:Aqualis) code =
+                let mutable nestedElseCount = 0
                 let ifcode (cond:expr) code =
                     let cond = cond.evalJ c
                     c.codewritein("if(" + cond + ")")
@@ -125,8 +129,14 @@ namespace Aqualis
                     c.indentDec()
                     c.codewritein "}"
                 let elseifcode (cond:expr) code =
+                    let nested = cond.emitsStatements
+                    if nested then
+                        c.codewritein "else"
+                        c.codewritein "{"
+                        c.indentInc()
+                        nestedElseCount <- nestedElseCount + 1
                     let cond = cond.evalJ c
-                    c.codewritein("else if(" + cond + ")")
+                    c.codewritein((if nested then "if(" else "else if(") + cond + ")")
                     c.codewritein "{"
                     c.indentInc()
                     code()
@@ -139,10 +149,17 @@ namespace Aqualis
                     code()
                     c.indentDec()
                     c.codewritein "}"
-                code(ifcode,elseifcode,elsecode)
+                let result = code(ifcode,elseifcode,elsecode)
+                for _ in 1..nestedElseCount do
+                    c.indentDec()
+                    c.codewritein "}"
+                result
 
             /// Renders an expression for JavaScript.
             member this.evalJ(c:Aqualis) =
+                let comparisonOperand (value:expr) =
+                    let rendered = value.evalJ c
+                    if value.etype = Bt then "(" + rendered + ")" else rendered
                 match this.simp with
                 |False -> "false"
                 |True -> "true"
@@ -153,16 +170,18 @@ namespace Aqualis
                 |Less(x,y)
                 |LessEq(x,y) when x.etype = Zt || y.etype = Zt ->
                     notSupported "complex-number comparisons"
-                |Eq(x,y) -> x.evalJ c + " == " + y.evalJ c
-                |NEq(x,y) -> x.evalJ c + " != " + y.evalJ c
-                |Greater(x,y) -> x.evalJ c + " > " + y.evalJ c
-                |GreaterEq(x,y) -> x.evalJ c + " >= " + y.evalJ c
-                |Less(x,y) -> x.evalJ c + " < " + y.evalJ c
-                |LessEq(x,y) -> x.evalJ c + " <= " + y.evalJ c
+                |Eq(x,y) -> comparisonOperand x + " == " + comparisonOperand y
+                |NEq(x,y) -> comparisonOperand x + " != " + comparisonOperand y
+                |Greater(x,y) -> comparisonOperand x + " > " + comparisonOperand y
+                |GreaterEq(x,y) -> comparisonOperand x + " >= " + comparisonOperand y
+                |Less(x,y) -> comparisonOperand x + " < " + comparisonOperand y
+                |LessEq(x,y) -> comparisonOperand x + " <= " + comparisonOperand y
+                |AND x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit true x).evalJ c
                 |AND x ->
                     x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalJ c + ")" |_ -> v.evalJ c)
                     |> fun lst -> String.Join(" && ", lst)
+                |OR x when x |> List.skip (min 1 x.Length) |> List.exists (fun v -> v.emitsStatements) -> (expr.shortCircuit false x).evalJ c
                 |OR x ->
                     x
                     |> List.map (fun v -> match v with |OR _ |AND _ -> "(" + v.evalJ c + ")" |_ -> v.evalJ c)

@@ -237,8 +237,8 @@ module NumericFormattingTests =
         use fortranTarget = Aqualis.BlankWriter Fortran
         use phpTarget = Aqualis.BlankWriter PHP
 
-        Assert.Equal("clog(z)/log(10.0)", Log10(Zt, complexValue).evalC cTarget)
-        Assert.Equal("log(z)/log(10.0d0)", Log10(Zt, complexValue).evalF fortranTarget)
+        Assert.Equal("(clog(z)/log(10.0))", Log10(Zt, complexValue).evalC cTarget)
+        Assert.Equal("(log(z)/log(10.0d0))", Log10(Zt, complexValue).evalF fortranTarget)
         Assert.Equal("(double)(a%b)", ToDbl(remainder).evalC cTarget)
         Assert.Equal("(float)(a%b)", ToDbl(remainder).evalPh phpTarget)
 

@@ -650,11 +650,13 @@ module Program =
             spline.Y[1] <== complex0(Cpx(1.0, Double.NaN))
             spline.set()
 
-    let private generateRegressionCases outputRoot (directoryName, language) =
+    let private generateLogicalRegressionCases outputRoot (directoryName, language) =
         let generate caseName code =
             let outputDirectory = Path.Combine(outputRoot, caseName + "-" + directoryName)
             Directory.CreateDirectory(outputDirectory) |> ignore
-            Compile [language] outputDirectory "smoke" "1.0" code
+            Compile [language] outputDirectory "smoke" "1.0" (fun context ->
+                if language = JavaScript then context.writein "globalThis.print = console.log;"
+                code context)
 
         generate "logical-evaluation" <| fun context ->
             let flag = context.var.i0 "flag"
@@ -689,13 +691,14 @@ module Program =
             denominator <== 1
             flag <== 1
             output (AND [Eq(flag.Expr,Int 1);Eq(Div(It 4,Int 1,denominator.Expr),Int 1)])
-            let x = context.var.d0 "x"
-            x <== 3.0
-            let coefficient = complex0(Cpx(1.0,2.0),context)
-            let derivative = asm.diff(coefficient * x,x)
-            context.print.t derivative.re
-            context.print.t derivative.im
-            context.print.t (asm.diff(coefficient,x)).re
+            if language <> JavaScript && language <> PHP then
+                let x = context.var.d0 "x"
+                x <== 3.0
+                let coefficient = complex0(Cpx(1.0,2.0),context)
+                let derivative = asm.diff(coefficient * x,x)
+                context.print.t derivative.re
+                context.print.t derivative.im
+                context.print.t (asm.diff(coefficient,x)).re
 
         generate "logical-control-flow" <| fun context ->
             let flag = context.var.i0 "flag"
@@ -723,6 +726,33 @@ module Program =
             let sum = Sum(It 4,Int 0,Int 1,fun _ -> dangerous)
             let skipped = AND [condition;Eq(sum,Int 0)]
             context.print.t (int0(IfEl(skipped,Int 1,Int 0),context))
+            // Make unnecessary evaluation observable even on JavaScript, where
+            // division by zero produces Infinity rather than throwing.
+            count <== 0
+            let counted = Eq(Let(It 4,NaN,Int 1,fun value -> count.inc(); value),Int 1)
+            for choice in [0;1] do
+                flag <== choice
+                for predicate in [AND [condition;counted];OR [condition;counted]] do
+                    context.print.t (int0(IfEl(predicate,Int 1,Int 0),context))
+                    context.print.t count
+
+    let private generateRegressionCases outputRoot (directoryName, language) =
+        let generate caseName code =
+            let outputDirectory = Path.Combine(outputRoot, caseName + "-" + directoryName)
+            Directory.CreateDirectory(outputDirectory) |> ignore
+            Compile [language] outputDirectory "smoke" "1.0" code
+
+        generate "complex-log10-grouping" <| fun context ->
+            let z = context.var.z0 "z"
+            for value in [Cpx(100.0,0.0);Cpx(0.0,1.0);Cpx(10.0,10.0)] do
+                z <== complex0(value,context)
+                let logarithm = asm.log10 z
+                let inverse = 1.0 / logarithm
+                let square = complex0.powr(logarithm,2)
+                context.print.t inverse.re
+                context.print.t inverse.im
+                context.print.t square.re
+                context.print.t square.im
 
         generate "conditional-promotion" <| fun context ->
             let flag = context.var.i0 "flag"
@@ -2058,6 +2088,7 @@ module Program =
             let outputRoot = Path.GetFullPath(outputRoot)
             Directory.CreateDirectory(outputRoot) |> ignore
             generationTargets |> List.iter (generate outputRoot)
+            generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateNegativeRealSqrt outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]

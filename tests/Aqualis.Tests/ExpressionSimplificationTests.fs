@@ -19,7 +19,7 @@ module ExpressionSimplificationTests =
     [<Fact>]
     let ``nested boolean comparisons retain operand grouping`` () =
         let a,b,d,e = Var(It 4,"a",NaN),Var(It 4,"b",NaN),Var(It 4,"d",NaN),Var(It 4,"e",NaN)
-        for language in [C99;Fortran;Python] do
+        for language in [C99;Fortran;Python;JavaScript;PHP] do
             use context = Aqualis.BlankWriter language
             let equal = Eq(Eq(a,b),Eq(d,e)).eval context
             let unequal = NEq(Eq(a,b),Eq(d,e)).eval context
