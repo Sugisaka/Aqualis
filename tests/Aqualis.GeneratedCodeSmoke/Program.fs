@@ -736,6 +736,68 @@ module Program =
                     context.print.t (int0(IfEl(predicate,Int 1,Int 0),context))
                     context.print.t count
 
+    let private generateArithmeticRegressions outputRoot (directoryName,language) =
+        let nativeComplex = language=C99 || language=Fortran || language=Python
+        let generate name code =
+            let directory = Path.Combine(outputRoot,name+"-"+directoryName)
+            Directory.CreateDirectory(directory) |> ignore
+            Compile [language] directory "smoke" "1.0" (fun context ->
+                if language=JavaScript then context.writein "globalThis.print = console.log;"
+                code context)
+        let newline (context:Aqualis) = if language=PHP then context.php.echo "\n"
+        generate "promoted-arithmetic" (fun context ->
+            let a,b = context.var.i0 "a",context.var.i0 "b"
+            for domain in (if nativeComplex then [Dt;Zt] else [Dt]) do
+                for operation,left,right in
+                    [(fun t x y -> Add(t,x,y)),Int32.MaxValue,1
+                     (fun t x y -> Sub(t,x,y)),Int32.MinValue,1
+                     (fun t x y -> Mul(t,x,y)),50000,50000] do
+                    a <== left
+                    b <== right
+                    for x,y in [Int left,Int right;a.Expr,b.Expr] do
+                        let value = operation domain x y
+                        if domain=Dt then context.print.t (double0(value,context))
+                        else
+                            let z = complex0(value,context)
+                            context.print.t z.re
+                            context.print.t z.im
+                        newline context)
+        generate "safe-remainder" (fun context ->
+            let a,b = context.var.i0 "a",context.var.i0 "b"
+            for left,right in [Int32.MinValue,-1;Int32.MinValue,1;Int32.MinValue,3;Int32.MinValue,Int32.MinValue;Int32.MaxValue,-1;-7,3;7,-3;-7,-3;0,-1] do
+                a <== left
+                b <== right
+                for dividend,divisor in [Int left,Int right;a.Expr,b.Expr] do
+                    context.print.t (int0(Mod(It 4,dividend,divisor),context))
+                    newline context
+            let calls = context.var.i0 "calls"
+            calls <== 0
+            let once value = Let(It 4,NaN,Int value,fun x -> calls.inc(); x)
+            context.print.t (int0(Mod(It 4,once Int32.MinValue,once -1),context))
+            newline context
+            context.print.t calls
+            newline context)
+        if language=C99 || language=Fortran then
+            generate "remainder-zero" (fun context ->
+                let divisor = context.var.i0 "divisor"
+                divisor <== 0
+                context.print.t (int0(Mod(It 4,Int 7,divisor.Expr),context)))
+        generate "zero-product-effects" (fun context ->
+            let calls = context.var.i0 "calls"
+            for domain in (if nativeComplex then [It 4;Dt;Zt] else [It 4;Dt]) do
+                for useSum in [true;false] do
+                    for zeroOnLeft in [true;false] do
+                        calls <== 0
+                        let effect =
+                            if useSum then Sum(It 4,Int 0,Int 2,fun _ -> calls.inc(); Int 1)
+                            else Let(It 4,NaN,Int 1,fun value -> calls.inc(); value)
+                        let value = if zeroOnLeft then Mul(domain,Int 0,effect) else Mul(domain,effect,Int 0)
+                        if domain=Zt then context.print.t (complex0(value,context)).re
+                        else context.print.t (double0((if domain=Dt then value else ToDbl value),context))
+                        newline context
+                        context.print.t calls
+                        newline context)
+
     let private generateIntegerDivisionBoundaries outputRoot (directoryName,language) =
         for mode in ["valid";"overflow";"zero";"literal-minus-one"] do
             let directory = Path.Combine(outputRoot,"integer-division-"+mode+"-"+directoryName)
@@ -2470,6 +2532,7 @@ module Program =
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
             generationTargets |> List.iter (generateIntegerDivisionBoundaries outputRoot)
+            generationTargets |> List.iter (generateArithmeticRegressions outputRoot)
             generationTargets |> List.iter (generateAssignmentRegressionCases outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python]
             |> List.iter (generateNegativeRealSqrt outputRoot)

@@ -196,6 +196,12 @@ namespace Aqualis
                     match x with
                     |Add _|Sub _ -> "-(" + x.evalF c + ")"
                     |_ -> "-" + x.evalF c
+                |Add(Zt,x,y) when x.etype<>Zt && y.etype<>Zt ->
+                    "cmplx(" + (Add(Dt,x,y)).evalF c + ",kind=kind(0.0d0))"
+                |Sub(Zt,x,y) when x.etype<>Zt && y.etype<>Zt ->
+                    "cmplx(" + (Sub(Dt,x,y)).evalF c + ",kind=kind(0.0d0))"
+                |Mul(Zt,x,y) when x.etype<>Zt && y.etype<>Zt ->
+                    "cmplx(" + (Mul(Dt,x,y)).evalF c + ",kind=kind(0.0d0))"
                 |Add(_,x,y) -> x.evalF c + "+" + y.evalF c
                 |Sub(_,x,y) ->
                     match x,y with
@@ -217,6 +223,7 @@ namespace Aqualis
                     |_,(Add _|Sub _|Mul _|Div _) ->
                         x.evalF c + "/(" + y.evalF c + ")"
                     |_ -> x.evalF c + "/" + y.evalF c
+                |Mod(It 4,x,y) -> "aqualis_int_mod(" + x.evalF c + "," + y.evalF c + ")"
                 |Mod(_,x,y) -> "mod(" + x.evalF c + "," + y.evalF c + ")"
                 |Pow(t,x,y) ->
                     let baseValue =

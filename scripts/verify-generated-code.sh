@@ -1298,6 +1298,49 @@ for mode in overflow invalid; do
 done
 
 for language in c fortran python javascript php; do
+  run_arithmetic_regression() {
+    local directory="$output_root/$1-$language"
+    case "$language" in
+      c)
+        gcc -std=c99 -Werror=format -fsanitize=undefined -fno-sanitize-recover=undefined "$directory/smoke.c" -lm -o "$directory/checked.exe" || return 1
+        "$directory/checked.exe" ;;
+      fortran)
+        gfortran -ffree-line-length-none -fcheck=all -ftrapv "$directory/smoke.f90" -o "$directory/checked.exe" || return 1
+        "$directory/checked.exe" ;;
+      python) python3 "$directory/smoke.py" ;;
+      javascript)
+        local script="$directory/smoke.js"
+        if [[ "$node_command" == node.exe ]]; then script="$(wslpath -w "$script")"; fi
+        "$node_command" "$script" ;;
+      php) php "$directory/smoke.php" ;;
+    esac
+  }
+  for regression in promoted-arithmetic safe-remainder zero-product-effects; do
+    actual="$(run_arithmetic_regression "$regression")"
+    python3 - "$language" "$regression" "$actual" <<'PY'
+import sys
+language, case, output = sys.argv[1:]
+native = language in ('c','fortran','python')
+if case == 'promoted-arithmetic':
+    values = [2147483648, -2147483649, 2500000000]
+    expected = [v for v in values for _ in range(2)]
+    if native:
+        expected += [v for value in values for v in (value,0,value,0)]
+elif case == 'safe-remainder':
+    expected = [v for value in (0,0,-2,0,0,-1,1,-1,0) for v in (value,value)] + [0,2]
+else:
+    expected = [0,3,0,3,0,1,0,1] * (3 if native else 2)
+assert list(map(float,output.split())) == expected, (language,case,output,expected)
+PY
+  done
+  if [[ "$language" == c || "$language" == fortran ]]; then
+    directory="$output_root/remainder-zero-$language"
+    if run_arithmetic_regression remainder-zero >"$directory/actual.txt" 2>"$directory/error.txt"; then
+      printf '%s\n' "$language accepted a zero remainder divisor." >&2
+      exit 1
+    fi
+    grep -Fq 'Aqualis:' "$directory/error.txt"
+  fi
   for mode in valid overflow zero literal-minus-one; do
     directory="$output_root/integer-division-$mode-$language"
     case "$language" in

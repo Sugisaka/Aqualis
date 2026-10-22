@@ -328,6 +328,15 @@ namespace Aqualis
                         writer.codewritein "  if (a == (-2147483647-1) .and. b == -1) error stop 'Aqualis: integer division overflow.'\n"
                         writer.codewritein "  quotient = a/b\n"
                         writer.codewritein "end function aqualis_int_div\n"
+                        writer.codewritein "integer function aqualis_int_mod(a,b) result(remainder)\n"
+                        writer.codewritein "  integer, intent(in) :: a,b\n"
+                        writer.codewritein "  if (b == 0) error stop 'Aqualis: integer remainder by zero.'\n"
+                        writer.codewritein "  if (b == -1) then\n"
+                        writer.codewritein "    remainder = 0\n"
+                        writer.codewritein "  else\n"
+                        writer.codewritein "    remainder = mod(a,b)\n"
+                        writer.codewritein "  end if\n"
+                        writer.codewritein "end function aqualis_int_mod\n"
                         writer.codewritein "\n"
                         for funname in context.flist.list do
                             let functionPath = Path.Combine(context.IntermediateDirectory, funname + "_main")
@@ -402,6 +411,11 @@ namespace Aqualis
                         List.iter (fun (s:string) -> writer.codewritein ("#include " + s + "\n")) <| context.hlist.list
                         writer.codewritein "#undef I\n"
                         writer.codewritein "#define uj _Complex_I\n"
+                        writer.codewritein "static inline int aqualis_int_mod(int a, int b)\n"
+                        writer.codewritein "{\n"
+                        writer.codewritein "  if (b == 0) { fprintf(stderr, \"Aqualis: integer remainder by zero.\\n\"); exit(EXIT_FAILURE); }\n"
+                        writer.codewritein "  return b == -1 ? 0 : a%b;\n"
+                        writer.codewritein "}\n"
                         writer.codewritein "static inline int aqualis_int_div(int a, int b)\n"
                         writer.codewritein "{\n"
                         writer.codewritein "  if (b == 0 || (a == INT32_MIN && b == -1)) { fprintf(stderr, \"Aqualis: invalid 32-bit integer division.\\n\"); exit(EXIT_FAILURE); }\n"

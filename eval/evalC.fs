@@ -229,16 +229,10 @@ namespace Aqualis
                     |(Add _|Sub _),_ -> "(" + x.evalC c + ")/" + y.evalC c
                     |_,(Add _|Sub _|Mul _|Div _|Mod _) -> x.evalC c + "/(" + y.evalC c + ")"
                     |_ -> x.evalC c + "/" + y.evalC c
+                |Mod(It 4,x,y) ->
+                    "aqualis_int_mod(" + x.evalC c + "," + y.evalC c + ")"
                 |Mod(_,x,y) ->
-                    let left =
-                        match x with
-                        |Add _|Sub _ -> "(" + x.evalC c + ")"
-                        |_ -> x.evalC c
-                    let right =
-                        match y with
-                        |Add _|Sub _|Mul _|Div _|Mod _ -> "(" + y.evalC c + ")"
-                        |_ -> y.evalC c
-                    left + "%" + right
+                    "(" + x.evalC c + ")%(" + y.evalC c + ")"
                 |Pow(Zt,x,y) -> "cpow(" + x.evalC c + "," + y.evalC c + ")"
                 |Pow(It _,x,y) -> "aqualis_int_power(" + x.evalC c + "," + y.evalC c + ")"
                 |Pow(_,x,y) -> "pow(" + x.evalC c + "," + y.evalC c + ")"

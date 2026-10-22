@@ -5,6 +5,26 @@ open Aqualis
 
 module ExpressionSimplificationTests =
     [<Fact>]
+    let ``real and complex arithmetic promotes integer literals before calculating`` () =
+        for operation,left,right,expected in
+            [(fun t a b -> Add(t,a,b)),System.Int32.MaxValue,1,2147483648.0
+             (fun t a b -> Sub(t,a,b)),System.Int32.MinValue,1,-2147483649.0
+             (fun t a b -> Mul(t,a,b)),50000,50000,2500000000.0] do
+            for domain in [Dt;Zt] do
+                match (operation domain (Int left) (Int right)).simp.eval() with
+                |Dbl real when domain=Dt -> Assert.Equal(expected,real)
+                |Cpx(real,imaginary) when domain=Zt -> Assert.Equal(expected,real); Assert.Equal(0.0,imaginary)
+                |other -> Assert.Fail($"Unexpected promoted arithmetic: {other}")
+
+    [<Fact>]
+    let ``minimum integer remainder is zero for either sign of one`` () =
+        for dividend in [System.Int32.MinValue;System.Int32.MaxValue;-7;0;7] do
+            for divisor in [-1;1] do
+                match Mod(It 4,Int dividend,Int divisor).simp with
+                |Int result -> Assert.Equal(0,result)
+                |other -> Assert.Fail($"Unexpected remainder: {other}")
+
+    [<Fact>]
     let ``promoted integer powers are evaluated in their result domain`` () =
         for baseValue,exponent,expected in [2,31,2147483648.0; -2,31,-2147483648.0; 2,-31,2.0**(-31.0); 1,System.Int32.MaxValue,1.0] do
             for domain in [Dt;Zt] do

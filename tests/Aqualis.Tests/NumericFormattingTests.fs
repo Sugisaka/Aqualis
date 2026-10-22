@@ -9,6 +9,15 @@ open Aqualis
 
 module NumericFormattingTests =
     [<Fact>]
+    let ``wide integer remainder does not narrow its operands to 32 bits`` () =
+        let value = Mod(It 8,Var(It 8,"left",NaN),Var(It 8,"right",NaN))
+        Assert.Equal(It 8,value.simp.etype)
+        use c = Aqualis.BlankWriter C99
+        use fortran = Aqualis.BlankWriter Fortran
+        Assert.Equal("(left)%(right)",value.evalC c)
+        Assert.Equal("mod(left,right)",value.evalF fortran)
+
+    [<Fact>]
     let ``integer argument real functions retain real expression types`` () =
         let x = int0(Var(It 4,"value",NaN))
         let operations: (int0 -> double0) list = [asm.exp; asm.sin; asm.cos; asm.tan; asm.asin; asm.acos; asm.atan; asm.log; asm.log10; asm.sqrt]
@@ -23,7 +32,7 @@ module NumericFormattingTests =
         let x = int0(Var(It 4,"value",NaN),context)
         let power = int0.powr(x,I 3)
         Assert.Equal("aqualis_int_power(value,3)",power.Expr.evalC context)
-        Assert.Contains("aqualis_int_power(value,3)%3",(power % I 3).Expr.evalC context)
+        Assert.Equal("aqualis_int_mod(aqualis_int_power(value,3),3)",(power % I 3).Expr.evalC context)
 
     [<Fact>]
     let ``constant integer powers truncate negative exponents and retain boundaries`` () =
@@ -200,8 +209,8 @@ module NumericFormattingTests =
         Assert.Equal(
             "Number(dividend)/Number(divisor)",
             Div(Dt, dividend, divisor).evalJ javascriptTarget)
-        Assert.Equal("dividend%divisor", modulo.evalC cTarget)
-        Assert.Equal("mod(dividend,divisor)", modulo.evalF fortranTarget)
+        Assert.Equal("aqualis_int_mod(dividend,divisor)", modulo.evalC cTarget)
+        Assert.Equal("aqualis_int_mod(dividend,divisor)", modulo.evalF fortranTarget)
 
     [<Fact>]
     let ``generated arithmetic preserves multiplication division and remainder grouping`` () =
@@ -215,12 +224,14 @@ module NumericFormattingTests =
               JavaScript, fun value target -> value.evalJ target
               PHP, fun value target -> value.evalPh target ] do
             use target = Aqualis.BlankWriter language
-            Assert.Equal("a*(b%c)", render (Mul(It 4, a, Mod(It 4, b, c))) target)
-            Assert.Equal("(a+b)%c", render (Mod(It 4, Add(It 4, a, b), c)) target)
-            Assert.Equal("a%(b+c)", render (Mod(It 4, a, Add(It 4, b, c))) target)
-            Assert.Equal("a%(b*c)", render (Mod(It 4, a, Mul(It 4, b, c))) target)
-            Assert.Equal("a%(b%c)", render (Mod(It 4, a, Mod(It 4, b, c))) target)
-            Assert.Equal("real/(b%c)", render (Div(Dt, real, Mod(It 4, b, c))) target)
+            let modulo left right = if language=C99 then "aqualis_int_mod("+left+","+right+")" else left+"%"+right
+            let inner = modulo "b" "c"
+            Assert.Equal("a*("+inner+")", render (Mul(It 4, a, Mod(It 4, b, c))) target)
+            Assert.Equal(modulo (if language=C99 then "a+b" else "(a+b)") "c", render (Mod(It 4, Add(It 4, a, b), c)) target)
+            Assert.Equal(modulo "a" (if language=C99 then "b+c" else "(b+c)"), render (Mod(It 4, a, Add(It 4, b, c))) target)
+            Assert.Equal(modulo "a" (if language=C99 then "b*c" else "(b*c)"), render (Mod(It 4, a, Mul(It 4, b, c))) target)
+            Assert.Equal(modulo "a" (if language=C99 then inner else "("+inner+")"), render (Mod(It 4, a, Mod(It 4, b, c))) target)
+            Assert.Equal("real/("+inner+")", render (Div(Dt, real, Mod(It 4, b, c))) target)
 
         for language,render in
             [ C99, fun (value:expr) (target:Aqualis) -> value.evalC target
@@ -238,7 +249,7 @@ module NumericFormattingTests =
 
         Assert.Equal("(clog(z)/log(10.0))", Log10(Zt, complexValue).evalC cTarget)
         Assert.Equal("(log(z)/log(10.0d0))", Log10(Zt, complexValue).evalF fortranTarget)
-        Assert.Equal("(double)(a%b)", ToDbl(remainder).evalC cTarget)
+        Assert.Equal("(double)(aqualis_int_mod(a,b))", ToDbl(remainder).evalC cTarget)
         Assert.Equal("(float)(a%b)", ToDbl(remainder).evalPh phpTarget)
 
     [<Fact>]

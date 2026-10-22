@@ -167,6 +167,21 @@ namespace Aqualis
             |Inv(_,Int value) when value <> Int32.MinValue -> Some(-value)
             |_ -> None
 
+        /// Promote before arithmetic, so integer intermediates cannot overflow a real result.
+        let private arithmeticOperand resultType (value:expr) =
+            match resultType,value.etype with
+            |(Dt|Zt),It _ ->
+                match integerLiteral value with
+                |Some number -> Dbl(double number)
+                |None -> ToDbl value
+            |_ -> value
+
+        let private arithmeticResult resultType rebuild (left:expr) (right:expr) (value:expr) =
+            match resultType,realLiteralValue value with
+            |Zt,Some real -> Cpx(real,0.0)
+            |Zt,_ when value.etype<>Zt -> rebuild(left,right)
+            |_ -> preserveNumericType resultType value
+
         type expr with
             
             /// Simplifies negation for literal or symbolic operands.
@@ -331,8 +346,8 @@ namespace Aqualis
             /// Simplifies multiplication for literal or symbolic operands.
             static member simpMul(x:expr,y:expr) =
                 match x,y with
-                |(Int 0|Dbl 0.0|Cpx(0.0,0.0)),other when other.etype=It 4 || isFiniteLiteral other -> Int 0
-                |other,(Int 0|Dbl 0.0|Cpx(0.0,0.0)) when other.etype=It 4 || isFiniteLiteral other -> Int 0
+                |(Int 0|Dbl 0.0|Cpx(0.0,0.0)),other when not other.emitsStatements && (other.etype=It 4 || isFiniteLiteral other) -> Int 0
+                |other,(Int 0|Dbl 0.0|Cpx(0.0,0.0)) when not other.emitsStatements && (other.etype=It 4 || isFiniteLiteral other) -> Int 0
                 |Int 1,_|Dbl 1.0,_|Cpx (1.0,0.0),_ -> y
                 |_,Int 1|_,Dbl 1.0|_,Cpx (1.0,0.0) -> x
                 |Int v1,Int v2 -> Int(v1*v2)
@@ -489,6 +504,9 @@ namespace Aqualis
             /// Simplifies remainder for literal or symbolic operands.
             static member simpMod(x:expr,y:expr) =
                 match x,y with
+                |_,_ when integerLiteral y = Some -1 && Option.isSome (integerLiteral x) -> Int 0
+                |_,_ when Option.isSome (integerLiteral x) && Option.isSome (integerLiteral y) && integerLiteral y <> Some 0 ->
+                    Int((Option.get (integerLiteral x)) % (Option.get (integerLiteral y)))
                 |_,Int 0 -> 
                     reportExpressionError "AQL4001" "Division by zero was detected during modulo simplification." "modulo"
                     NaN
@@ -851,17 +869,17 @@ namespace Aqualis
                 |Cpx(re,0.0) -> 
                     Dbl re
                 |Add(t,x,y) ->
-                    let x = x.simp
-                    let y = y.simp
-                    preserveNumericType t (expr.simpAdd(x,y))
+                    let x = arithmeticOperand t x.simp
+                    let y = arithmeticOperand t y.simp
+                    arithmeticResult t (fun (a,b) -> Add(t,a,b)) x y (expr.simpAdd(x,y))
                 |Sub(t,x,y) ->
-                    let x = x.simp
-                    let y = y.simp
-                    preserveNumericType t (expr.simpSub(x,y))
+                    let x = arithmeticOperand t x.simp
+                    let y = arithmeticOperand t y.simp
+                    arithmeticResult t (fun (a,b) -> Sub(t,a,b)) x y (expr.simpSub(x,y))
                 |Mul(t,x,y) ->
-                    let x = x.simp
-                    let y = y.simp
-                    preserveNumericType t (expr.simpMul(x,y))
+                    let x = arithmeticOperand t x.simp
+                    let y = arithmeticOperand t y.simp
+                    arithmeticResult t (fun (a,b) -> Mul(t,a,b)) x y (expr.simpMul(x,y))
                 |Div(It _, x,y) ->
                     let x = x.simp
                     let y = y.simp
@@ -873,10 +891,12 @@ namespace Aqualis
                 |Inv(t,x) ->
                     let x = x.simp
                     expr.simpInv x
-                |Mod(_, x,y) ->
+                |Mod(t, x,y) ->
                     let x = x.simp
                     let y = y.simp
-                    expr.simpMod(x,y)
+                    match expr.simpMod(x,y) with
+                    |Mod(_,a,b) -> Mod(t,a,b)
+                    |value -> value
                 |Pow(t, x,y) ->
                     let x = x.simp
                     let y = y.simp
