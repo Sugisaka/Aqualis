@@ -7,6 +7,64 @@ open Aqualis
 
 module FunctionSafetyTests =
     [<Fact>]
+    let ``scalar function arguments reject constants and computed expressions`` () =
+        for language in [C99; Fortran; Python; HTML; LaTeX] do
+            for kind in [0..5] do
+                use output = new TemporaryDirectory()
+                let mutable argumentBodyCalled = false
+                let error = Assert.Throws<NotSupportedException>(fun () ->
+                    Compile [language] output.Path "invalid_scalar_argument" "1" (fun c ->
+                        let i = c.var.i0 "integer_value"
+                        let d = c.var.d0 "real_value"
+                        let z = c.var.z0 "complex_value"
+                        c.func "update_value" (fun f ->
+                            let called _ = argumentBodyCalled <- true
+                            match kind with
+                            | 0 -> (I 1).farg f called
+                            | 1 -> (D 1.0).farg f called
+                            | 2 -> (complex0(Cpx(1.0, 2.0))).farg f called
+                            | 3 -> (i + 1).farg f called
+                            | 4 -> (d + 1.0).farg f called
+                            | _ -> (z + 1.0).farg f called)))
+                Assert.Contains("pass a variable or array element", error.Message)
+                Assert.False(argumentBodyCalled)
+                Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``rejected scalar arguments do not consume formal argument slots`` () =
+        use output = new TemporaryDirectory()
+        Compile [Python] output.Path "scalar_recovery" "1" (fun c ->
+            let value = c.var.d0 "value"
+            c.func "update_value" (fun f ->
+                Assert.Throws<NotSupportedException>(fun () -> (value + 1.0).farg f ignore) |> ignore
+                value.farg f (fun v -> v <== 2.0)))
+        let source = File.ReadAllText(Path.Combine(output.Path, "scalar_recovery.py"))
+        Assert.Contains("def update_value(arg01):", source)
+        Assert.Contains("value = update_value(value)", source)
+
+    [<Fact>]
+    let ``scalar variables and array elements remain writable function arguments`` () =
+        for language in [C99; Fortran; Python; HTML; LaTeX] do
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "writable_scalar_arguments" "1" (fun c ->
+                let i = c.var.i0 "integer_value"
+                let d = c.var.d0 "real_value"
+                let z = c.var.z0 "complex_value"
+                let a = c.var.i1("vector", 2)
+                let b = c.var.d2("matrix", 2, 3)
+                let e = c.var.z3("volume", 2, 3, 4)
+                c.func "update_values" (fun f ->
+                    i.farg f (fun v -> v <== 1)
+                    d.farg f (fun v -> v <== 2.0)
+                    z.farg f (fun v -> v <== 3.0)
+                    a[0].farg f (fun v -> v <== 4)
+                    b[0,1].farg f (fun v -> v <== 5.0)
+                    e[0,1,2].farg f (fun v -> v <== 6.0)))
+            if language = Python then
+                let source = File.ReadAllText(Path.Combine(output.Path, "writable_scalar_arguments.py"))
+                Assert.Contains("integer_value, real_value, complex_value, vector[0], matrix[0,1], volume[0,1,2] = update_values(", source)
+
+    [<Fact>]
     let ``nested functions fail before executing their body or publishing files`` () =
         for language in [C99; Fortran; Python; HTML; LaTeX] do
             for hasArgument in [false; true] do

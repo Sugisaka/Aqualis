@@ -156,6 +156,12 @@ namespace Aqualis
     /// Function argument wrappers for scalar and array values.
     [<AutoOpen>]
     module num_farg =
+        let private requireWritableScalar expression =
+            match expression with
+            |Var _ |Idx1 _ |Idx2 _ |Idx3 _ -> ()
+            |_ ->
+                UnsupportedOperation.functionArgument
+                    "non-writable scalar expressions; pass a variable or array element instead"
         // let private argumentContexts
         //     (sourceContext:Aqualis)
         //     (targetEnvironment:Aqualis) =
@@ -167,6 +173,7 @@ namespace Aqualis
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg (targetEnvironment:Aqualis) code =
+                requireWritableScalar this.Expr
                 let sourceContext,targetContext = this.Context, targetEnvironment
                 fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext) <| fun (_,n) ->
                     code(int0(Var(this.etype,n,NaN), context=targetContext))
@@ -175,6 +182,7 @@ namespace Aqualis
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg (targetEnvironment:Aqualis) code =
+                requireWritableScalar this.Expr
                 let sourceContext,targetContext = this.Context, targetEnvironment
                 fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext) <| fun (_,n) ->
                     code(double0(Var(this.etype,n,NaN), context=targetContext))
@@ -183,6 +191,7 @@ namespace Aqualis
             /// この変数を関数内変数に変換
             /// </summary>
             member this.farg (targetEnvironment:Aqualis) code =
+                requireWritableScalar this.Expr
                 let sourceContext,targetContext = this.Context, targetEnvironment
                 fn.addarg (targetContext,this.etype,A0,this.Expr.eval sourceContext) <| fun (_,n) ->
                     code(complex0(Var(this.etype,n,NaN), context=targetContext))
