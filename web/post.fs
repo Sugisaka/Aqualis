@@ -12,6 +12,20 @@ open System.Text
 
 /// Reads a POST field and emits form controls with the same field name.
 type post(context:Aqualis,id:PHPdata) =
+    let attributes (a:list<Atr>) =
+        a |> List.map (fun p -> p.name, PHPdata p.value)
+
+    let fieldAttributes (kind:string) a =
+        ["type", PHPdata kind; "name", id] @ attributes a
+
+    let emitInput kind readOnly (value:PHPdata option) a =
+        context.html.taga(
+            "input",
+            fieldAttributes kind []
+            @ (if readOnly then ["readonly", PHPdata "readonly"] else [])
+            @ (value |> Option.toList |> List.map (fun value -> "value", value))
+            @ attributes a)
+
     new(ctx:Aqualis,x:string) = post(ctx,PHPdata ([RStr x],Aqualis.BlankWriter PHP))
     new(ctx:Aqualis,x:FieldName) = post(ctx,PHPdata (FieldName.value x))
     new(ctx:Aqualis,x:int0) = post(ctx,PHPdata([RNvr(x.Expr,x.Context)], x.Context))
@@ -21,471 +35,170 @@ type post(context:Aqualis,id:PHPdata) =
     member this.get_html with get() = PHPdata.f(context,"htmlspecialchars(" + this.get.code + ",ENT_QUOTES)")
     ///テキストボックス
     member _.input() =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata ""
-            ]
-        )
+        emitInput "text" false (Some (PHPdata "")) []
     /// Emits a text input for this field with the supplied value and attributes.
     member _.input(a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata ""
-            ]@(a |> List.map (fun (p:Atr) -> p.name,PHPdata p.value))
-        )
+        emitInput "text" false (Some (PHPdata "")) a
 
     ///パスワード入力テキストボックス
     member _.password() = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "password"
-                "name", id
-            ]
-        )
+        emitInput "password" false None []
     ///テキストボックス
     member _.input(value:PHPdata) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", value
-            ]
-        )
+        emitInput "text" false (Some value) []
     ///テキストボックス
     member _.input_hidden(value:PHPdata) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", value
-            ]
-        )
+        emitInput "hidden" false (Some value) []
     ///テキストボックス
     member _.input(value:string) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "text" false (Some (PHPdata value)) []
     ///テキストボックス
     member _.input_hidden(value:string) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "hidden" false (Some (PHPdata value)) []
 
     /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:PHPdata,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" false (Some value) a
     /// Emits a hidden text input for this field.
     member _.input_hidden(value:PHPdata,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "hidden" false (Some value) a
 
     /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:string,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" false (Some (PHPdata value)) a
 
     /// Emits a hidden text input for this field.
     member _.input_hidden(value:string,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "hidden" false (Some (PHPdata value)) a
 
     /// Emits a text area for this field.
     member _.textArea() =
         context.html.tagb(
             "textarea",
-            [
-                "type", PHPdata "text"
-                "name", id
-            ]
-        ) <| fun () -> ()
+            fieldAttributes "text" []) <| fun () -> ()
     /// Emits a text area for this field.
     member _.textArea code =
         context.html.tagb(
             "textarea",
-            [
-                "type", PHPdata "text"
-                "name", id
-            ]
-        ) <| fun () -> code()
+            fieldAttributes "text" []) <| fun () -> code()
     /// Emits a text area for this field.
     member _.textArea(a:list<Atr>) = 
         context.html.tagb0(
             "textarea",
-            [
-                "type", PHPdata "text"
-                "name", id
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
+            fieldAttributes "text" a
         ) <| fun () -> ()
     /// Emits a text area around callback content.
     member _.textArea_contents(a:list<Atr>) = fun code ->
         context.html.tagb0(
             "textarea",
-            [
-                "type", PHPdata "text"
-                "name", id
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
+            fieldAttributes "text" a
         ) code
     /// Emits a text area prefilled with the submitted value.
     member this.textArea_copy() =
         context.html.tagb(
             "textarea",
-            [
-                "type", PHPdata "text"
-                "name", id
-            ]
-        ) <| fun () -> context.writein this.get_html.phpcode
+            fieldAttributes "text" []) <| fun () -> context.writein this.get_html.phpcode
     /// Emits a text area prefilled with the submitted value.
     member this.textArea_copy(a:list<Atr>) =
         context.html.tagb(
             "textarea",
-            [
-                "type", PHPdata "text"
-                "name", id
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
+            fieldAttributes "text" a
         ) <| fun () -> context.writein this.get_html.phpcode
     /// Emits a text area for this field.
     member _.textArea(value:string) =
         context.html.tagb(
             "textarea",
-            [
-                "type", PHPdata "text"
-                "name", id
-            ]
-        ) <| fun () -> context.writein value
+            fieldAttributes "text" []) <| fun () -> context.writein value
     /// Emits a read-only text input for this field.
     member _.input_lock(value:PHPdata) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly", PHPdata "readonly"
-                "value", value
-            ]
-        )
+        emitInput "text" true (Some value) []
     /// Emits a read-only text input for this field.
     member _.input_lock(value:string) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly", PHPdata "readonly"
-                "value", PHPdata value
-            ]
-        )
+        emitInput "text" true (Some (PHPdata value)) []
     /// Emits a read-only text input for this field.
     member _.input_lock(value:PHPdata,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly",PHPdata "readonly"
-                "value", value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" true (Some value) a
     /// Emits a read-only text input for this field.
     member _.input_lock(value:string,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly",PHPdata "readonly"
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" true (Some (PHPdata value)) a
 
     ///テキストボックス
     member _.input(value:int0) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "text" false (Some (PHPdata value)) []
     /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:int0,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" false (Some (PHPdata value)) a
 
     ///テキストボックス
     member _.input_hidden(value:int0) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "hidden" false (Some (PHPdata value)) []
     /// Emits a hidden text input for this field.
     member _.input_hidden(value:int0,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "hidden" false (Some (PHPdata value)) a
 
     /// Emits a read-only text input for this field.
     member _.input_lock(value:int0) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly",PHPdata "readonly"
-                "value", PHPdata value
-            ]
-        )
+        emitInput "text" true (Some (PHPdata value)) []
     /// Emits a read-only text input for this field.
     member _.input_lock(value:int0,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly",PHPdata "readonly"
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" true (Some (PHPdata value)) a
         
     ///パスワード入力テキストボックス
     member _.password(value:int0) = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "password"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "password" false (Some (PHPdata value)) []
 
     ///テキストボックス
     member _.input(value:double0) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "text" false (Some (PHPdata value)) []
     /// Emits a text input for this field with the supplied value and attributes.
     member _.input(value:double0,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" false (Some (PHPdata value)) a
 
     ///テキストボックス
     member _.input_hidden(value:double0) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "hidden" false (Some (PHPdata value)) []
     /// Emits a hidden text input for this field.
     member _.input_hidden(value:double0,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "hidden" false (Some (PHPdata value)) a
 
     /// Emits a read-only text input for this field.
     member _.input_lock(value:double0) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly",PHPdata "readonly"
-                "value", PHPdata value
-            ]
-        )
+        emitInput "text" true (Some (PHPdata value)) []
     /// Emits a read-only text input for this field.
     member _.input_lock(value:double0,a:list<Atr>) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly",PHPdata "readonly"
-                "value", PHPdata value
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" true (Some (PHPdata value)) a
 
     ///パスワード入力テキストボックス
     member _.password(value:string) =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "password"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "password" false (Some (PHPdata value)) []
     ///パスワード入力テキストボックス
     member _.password(value:double0) = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "password"
-                "name", id
-                "value", PHPdata value
-            ]
-        )
+        emitInput "password" false (Some (PHPdata value)) []
 
     ///テキストボックス（送信済みのメッセージを表示）
     member this.input_copy() = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", this.get
-            ]
-        )
+        emitInput "text" false (Some this.get) []
     /// Emits a text input prefilled with the submitted value.
     member this.input_copy(a:list<Atr>) = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "value", this.get
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" false (Some this.get) a
     ///テキストボックス（送信済みのメッセージを表示）
     member this.input_copy_hidden() = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", this.get
-            ]
-        )
+        emitInput "hidden" false (Some this.get) []
     /// Emits a hidden input prefilled with the submitted value.
     member this.input_copy_hidden(a:list<Atr>) = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "hidden"
-                "name", id
-                "value", this.get
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "hidden" false (Some this.get) a
     /// Emits a read-only text input prefilled with the submitted value.
     member this.input_copy_lock() = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly", PHPdata "readonly"
-                "value", this.get
-            ]
-        )
+        emitInput "text" true (Some this.get) []
     /// Emits a read-only text input prefilled with the submitted value.
     member this.input_copy_lock(a:list<Atr>) = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "text"
-                "name", id
-                "readonly", PHPdata "readonly"
-                "value", this.get
-            ]@(a |> List.map (fun p -> p.name,PHPdata p.value))
-        )
+        emitInput "text" true (Some this.get) a
     ///パスワード入力テキストボックス（送信済みのメッセージを表示）
     member this.password_copy() = 
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "password"
-                "name",id
-                "value", this.get
-            ]
-        )
+        emitInput "password" false (Some this.get) []
     /// Emits a read-only password input prefilled with the submitted value.
     member this.password_copy_lock() =
-        context.html.taga(
-            "input",
-            [
-                "type", PHPdata "password"
-                "name", id
-                "readonly", PHPdata "readonly"
-                "value", this.get
-            ]
-        )
+        emitInput "password" true (Some this.get) []
     /// Emits a submit button for this field.
     member _.submit(value:string) =
         context.html.taga(

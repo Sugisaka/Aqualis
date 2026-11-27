@@ -56,6 +56,7 @@
     <Compile Include="WebGenerationStateTests.fs" />
     <Compile Include="SecurityGenerationTests.fs" />
     <Compile Include="TypedWebApiTests.fs" />
+    <Compile Include="PostGenerationTests.fs" />
     <Compile Include="PhpResponseGenerationTests.fs" />
     <Compile Include="JsonDataGenerationTests.fs" />
   </ItemGroup>
