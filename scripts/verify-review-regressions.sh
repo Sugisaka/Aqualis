@@ -2,12 +2,18 @@
 set -euo pipefail
 output_root="$(cd "$1" && pwd)"
 regression="${2:-derivatives}"
-for language in c fortran python; do
+languages=(c fortran python)
+if [[ "$regression" == exit-scopes ]]; then languages+=(javascript php); fi
+for language in "${languages[@]}"; do
   directory="$output_root/review-$regression-$language"
   case "$language" in
     c) command=(bash proc_smoke_C.sh) ;;
     fortran) command=(bash proc_smoke_F.sh) ;;
     python) command=("${AQUALIS_SCIPY_PYTHON:-python3}" smoke.py) ;;
+    php) command=(php smoke.php) ;;
+    javascript)
+      if command -v node >/dev/null 2>&1; then command=(node smoke.js)
+      else command=(node.exe "$(wslpath -w "$directory/smoke.js")"); fi ;;
   esac
   if [[ "$regression" == economy ]]; then
     # Bound memory so a regression to full SVD fails instead of exhausting RAM.
@@ -27,6 +33,8 @@ expected = {
     'spline-reset-real': [5,10,15,.6875,.6875],
     'spline-reset-complex': [5,10,10,20,15,30,.6875,1.375,.6875,1.375],
     'intrinsic-names': [1,1,2,3,1,5,4],
+    'early-cleanup': [42,7,42,2,7],
+    'exit-scopes': [7,1,42],
     'derivatives': [9,6,2,0,81,108,108,72,9,6,2,0],
     'svd-scaling': [1]*12+[0]*3+[1]*3,
     'linear-alias': [1,1,1,1,2,1,2,1,4,1,4,1],

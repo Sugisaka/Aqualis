@@ -50,7 +50,10 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let label = "_" + c.GotoLabels.nextGotoLabel()
-                let exit() = c.codewritein("<?php ", "goto "+label+"; ?>")
+                let cleanupDepth = c.RuntimeCleanupDepth
+                let exit() =
+                    c.EmitRuntimeCleanupsSince cleanupDepth
+                    c.codewritein("<?php ", "goto "+label+"; ?>")
                 expr.substPh i (Int 1) c
                 if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                 c.codewritein("<?php ", "for(;;): ?>")
@@ -111,7 +114,10 @@ namespace Aqualis
                         let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                         let i = Var(It 4, iname, NaN)
                         let label = "_" + c.GotoLabels.nextGotoLabel()
-                        let exit() = c.codewritein("<?php ", "goto "+label+"; ?>")
+                        let cleanupDepth = c.RuntimeCleanupDepth
+                        let exit() =
+                            c.EmitRuntimeCleanupsSince cleanupDepth
+                            c.codewritein("<?php ", "goto "+label+"; ?>")
                         if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
                         c.codewritein("<?php ", "for(" + i.evalPh c + "=" + i1.evalPh c + "; " + i.evalPh c + "<=" + i2.evalPh c + "; " + i.evalPh c + "++): ?>")
                         c.indentInc()

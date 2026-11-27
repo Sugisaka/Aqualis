@@ -50,10 +50,14 @@ namespace Aqualis
             static member loopJ (c:Aqualis) code =
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
-                let exit() = c.codewritein "break;"
+                let loopLabel = "_aqualis_loop_" + c.GotoLabels.nextGotoLabel()
+                let cleanupDepth = c.RuntimeCleanupDepth
+                let exit() =
+                    c.EmitRuntimeCleanupsSince cleanupDepth
+                    c.codewritein ("break " + loopLabel + ";")
                 expr.substJ i (Int 1) c
                 if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                c.codewritein "for(;;)"
+                c.codewritein (loopLabel + ": for(;;)")
                 c.codewritein "{"
                 c.indentInc()
                 code(exit,i)
@@ -110,9 +114,13 @@ namespace Aqualis
                     c.withLoopBounds (i1,i2) (fun target value -> expr.substJ target value c) (fun (i1,i2) ->
                         let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                         let i = Var(It 4, iname, NaN)
-                        let exit() = c.codewritein "break;"
+                        let loopLabel = "_aqualis_loop_" + c.GotoLabels.nextGotoLabel()
+                        let cleanupDepth = c.RuntimeCleanupDepth
+                        let exit() =
+                            c.EmitRuntimeCleanupsSince cleanupDepth
+                            c.codewritein ("break " + loopLabel + ";")
                         if c.ParallelMode then c.varPrivate.setVar(It 4,A0,iname,"")
-                        c.codewritein("for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
+                        c.codewritein(loopLabel + ": for(" + i.evalJ c + "=" + i1.evalJ c + "; " + i.evalJ c + "<=" + i2.evalJ c + "; " + i.evalJ c + "++)")
                         c.codewritein "{"
                         c.indentInc()
                         code(exit,i)

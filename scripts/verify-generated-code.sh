@@ -1443,5 +1443,7 @@ bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-instan
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-reset-real
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-reset-complex
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" intrinsic-names
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" early-cleanup
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" exit-scopes
 
 printf '%s\n' 'All generated-code runtime checks passed.'

@@ -3057,6 +3057,59 @@ module Program =
             context.print.t scale
             context.print.t allocated
 
+    let private generateEarlyCleanup outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-early-cleanup-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun c ->
+            c.iter.num_exit (I 1) (fun (exit,_) -> c.ch.d1 1 (fun values -> values[0] <== 1.0; exit()))
+            c.ch.d1 1 (fun values -> values[0] <== 42.0; c.print.t values[0])
+            c.ch.d1 1 <| fun outer ->
+                outer[0] <== 7.0
+                c.iter.num_exit (I 1) (fun (exit,_) -> c.ch.d1 1 (fun _ -> exit()))
+                c.print.t outer[0]
+            c.iter.loop <| fun (exitOuter,_) ->
+                c.ch.i2 (1,1) <| fun outer ->
+                    outer[0,0] <== 1
+                    c.iter.num_exit (I 1) <| fun (_,_) -> c.ch.z3 (1,1,1) (fun _ -> exitOuter())
+            c.ch.i2 (1,1) <| fun values ->
+                c.ch.z3 (1,1,1) <| fun other ->
+                    values[0,0] <== 42
+                    other[0,0,0] <== 0.0
+                    c.print.t values[0,0]
+            let count = c.var.i0 "count"
+            count <== 0
+            c.iter.num_exit (I 3) <| fun (exit,i) ->
+                c.ch.d1 1 <| fun _ ->
+                    count <== count+1
+                    c.br.if1 (i .= 1) exit
+            c.print.t count
+            c.iter.num_exit (I 1) <| fun (exit,_) ->
+                c.io.fileOutput "exit.txt" (fun writer -> writer.t (I 7); exit())
+            let result = c.var.i0 "result"
+            c.io.fileInput "exit.txt" (fun reader -> reader.t result)
+            c.print.t result
+
+    let private generateExitScopes outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-exit-scopes-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun c ->
+            if language = JavaScript then c.writein "globalThis.print = console.log;"
+            c.ch.d1 1 <| fun outer ->
+                outer[0] <== 7.0
+                c.iter.num_exit (I 1) <| fun (exit,_) -> c.ch.d1 1 (fun _ -> exit())
+                c.print.t outer[0]
+                if language = PHP then c.php.echo "\n"
+            let count = c.var.i0 "count"
+            count <== 0
+            c.iter.loop <| fun (exitOuter,_) ->
+                count <== count+1
+                c.iter.num 3 <| fun _ -> c.ch.d1 1 (fun _ -> exitOuter())
+                c.br.if1 (count .>= 3) exitOuter
+            c.print.t count
+            if language = PHP then c.php.echo "\n"
+            c.ch.d1 1 (fun values -> values[0] <== 42.0; c.print.t values[0])
+            if language = PHP then c.php.echo "\n"
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -3072,6 +3125,8 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineInstances outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineReset outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateIntrinsicNames outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateEarlyCleanup outputRoot)
+            generationTargets |> List.iter (generateExitScopes outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)

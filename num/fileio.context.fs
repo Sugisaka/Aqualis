@@ -126,9 +126,9 @@ namespace Aqualis
                             writein("open("+fp+", file=trim("+id+"), access='stream', form='unformatted')"+"\n")
                         else
                             writein("open("+fp+", file=trim("+id+"))"+"\n")
-                        code fp id
-                        writein("close("+fp+")"+"\n")
-                        writein("deallocate(" + id + ")\n")
+                        ctx.WithRuntimeCleanup(
+                            (fun () -> writein("close("+fp+")\n"); writein("deallocate("+id+")\n")),
+                            (fun () -> code fp id))
             |C99 ->
                 ctx.ch.f <| fun fp ->
                     let integerWidth =
@@ -175,10 +175,12 @@ namespace Aqualis
                         else
                             writein(fp+" = "+"fopen("+id+",\""+(if readmode then "rb" else "w")+"\");"+"\n")
                         writein("if (" + fp + " == NULL) { fprintf(stderr, \"Aqualis: failed to open file %s.\\n\", " + id + "); free(" + id + "); " + id + " = NULL; exit(EXIT_FAILURE); }\n")
-                        code fp id
-                        writein("if (fclose(" + fp + ") != 0) { fprintf(stderr, \"Aqualis: failed to close file %s.\\n\", " + id + "); free(" + id + "); " + id + " = NULL; exit(EXIT_FAILURE); }\n")
-                        writein("free(" + id + ");\n")
-                        writein(id + " = NULL;\n")
+                        ctx.WithRuntimeCleanup(
+                            (fun () ->
+                                writein("if (fclose(" + fp + ") != 0) { fprintf(stderr, \"Aqualis: failed to close file %s.\\n\", " + id + "); free(" + id + "); " + id + " = NULL; exit(EXIT_FAILURE); }\n")
+                                writein("free(" + id + ");\n")
+                                writein(id + " = NULL;\n")),
+                            (fun () -> code fp id))
             |LaTeX ->
                 ctx.ch.f <| fun fp ->
                     let s =
@@ -249,8 +251,7 @@ namespace Aqualis
                             writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "wb")+"\")"+"\n")
                         else
                             writein(fp+" = "+"open("+id+",mode=\""+(if readmode then "rb" else "w")+"\")"+"\n")
-                        code fp id
-                        writein(fp+".close()"+"\n")
+                        ctx.WithRuntimeCleanup((fun () -> writein(fp+".close()\n")),(fun () -> code fp id))
             |JavaScript |PHP ->
                 raise (NotSupportedException("File I/O is not supported for " + string ctx.language + "."))
             |_ -> ()

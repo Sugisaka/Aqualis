@@ -12,6 +12,7 @@ namespace Aqualis
    
     /// Generation context that owns output, variables, diagnostics, and target-language state.
     type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool,writerDirectory:string option,diagnostics:DiagnosticBag option) =
+        let runtimeCleanups = ResizeArray<unit -> unit>()
         let contextId = System.Guid.NewGuid()
         let securityGenerationState = SecurityGenerationState()
         let diagnosticBag =
@@ -75,6 +76,18 @@ namespace Aqualis
         /// Creates a generation context with a diagnostic bag.
         static member internal CreateWithDiagnostics(outputdir,pjname,lang,diagnostics) =
             new Aqualis(outputdir,pjname,lang,false,false,None,Some diagnostics)
+        /// Captures the resource boundary of a generated control-flow scope.
+        member internal _.RuntimeCleanupDepth = runtimeCleanups.Count
+        /// Emits cleanup for resources whose lifetime ends at a generated jump.
+        member internal _.EmitRuntimeCleanupsSince(depth:int) =
+            for index in runtimeCleanups.Count-1 .. -1 .. depth do runtimeCleanups[index]()
+        /// Registers cleanup while generating a resource-owning callback.
+        member internal _.WithRuntimeCleanup(cleanup:unit -> unit, code:unit -> 'T) : 'T =
+            runtimeCleanups.Add cleanup
+            try code()
+            finally
+                runtimeCleanups.RemoveAt(runtimeCleanups.Count-1)
+                cleanup()
         /// Gets the three-part assembly version.
         static member Version = typeof<Aqualis>.Assembly.GetName().Version.ToString(3)
         /// Creates a neutral context without an output writer.

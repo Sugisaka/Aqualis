@@ -577,7 +577,7 @@ module NumericFormattingTests =
                 context.close())
 
         let generated = File.ReadAllText path
-        Assert.Contains("break;", generated)
+        Assert.Matches(@"break _aqualis_loop_[0-9]+;", generated)
         Assert.DoesNotContain("goto", generated)
 
     [<Fact>]

@@ -73,7 +73,10 @@ namespace Aqualis
                 let iname,returnVar = c.i0.getVar()
                 let i = Var(It 4, iname, NaN)
                 let exitType = "_AqualisLoopExit" + c.GotoLabels.nextGotoLabel()
-                let exit() = c.codewritein("raise " + exitType + "()")
+                let cleanupDepth = c.RuntimeCleanupDepth
+                let exit() =
+                    c.EmitRuntimeCleanupsSince cleanupDepth
+                    c.codewritein("raise " + exitType + "()")
                 c.codewritein("class " + exitType + "(Exception):")
                 c.indentInc()
                 c.codewritein "pass"
@@ -133,7 +136,10 @@ namespace Aqualis
                     let iname,returnVar = match counter with |None -> c.i0.getVar() |Some s -> c.i0.getVar (s,It 4,A0)
                     let i = Var(It 4, iname, NaN)
                     let exitType = "_AqualisLoopExit" + c.GotoLabels.nextGotoLabel()
-                    let exit() = c.codewritein("raise " + exitType + "()")
+                    let cleanupDepth = c.RuntimeCleanupDepth
+                    let exit() =
+                        c.EmitRuntimeCleanupsSince cleanupDepth
+                        c.codewritein("raise " + exitType + "()")
                     c.codewritein("class " + exitType + "(Exception):")
                     c.indentInc()
                     c.codewritein "pass"

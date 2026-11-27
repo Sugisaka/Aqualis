@@ -36,19 +36,19 @@ module ContextChArrayExtensions =
     member this.i1 (size:int0) = fun code ->
         this.i01 (fun value ->
             value.allocate size
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary real array of rank 1 for the callback and deallocates it afterward.
     member this.d1 (size:int0) = fun code ->
         this.d01 (fun value ->
             value.allocate size
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary complex array of rank 1 for the callback and deallocates it afterward.
     member this.z1 (size:int0) = fun code ->
         this.z01 (fun value ->
             value.allocate size
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary integer array of rank 1 for the callback and deallocates it afterward.
     member this.i1 (size:int) = fun code -> this.i1 (I size) code
@@ -79,19 +79,19 @@ module ContextChArrayExtensions =
     member this.i2 (size1:int0,size2:int0) = fun code ->
         this.i02 (fun value ->
             value.allocate(size1,size2)
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary real array of rank 2 for the callback and deallocates it afterward.
     member this.d2 (size1:int0,size2:int0) = fun code ->
         this.d02 (fun value ->
             value.allocate(size1,size2)
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary complex array of rank 2 for the callback and deallocates it afterward.
     member this.z2 (size1:int0,size2:int0) = fun code ->
         this.z02 (fun value ->
             value.allocate(size1,size2)
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary integer array of rank 2 for the callback and deallocates it afterward.
     member this.i2 (size1:int0,size2:int) = fun code -> this.i2 (size1,I size2) code
@@ -136,19 +136,19 @@ module ContextChArrayExtensions =
     member this.i3 (size1:int0,size2:int0,size3:int0) = fun code ->
         this.i03 (fun value ->
             value.allocate(size1,size2,size3)
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary real array of rank 3 for the callback and deallocates it afterward.
     member this.d3 (size1:int0,size2:int0,size3:int0) = fun code ->
         this.d03 (fun value ->
             value.allocate(size1,size2,size3)
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary complex array of rank 3 for the callback and deallocates it afterward.
     member this.z3 (size1:int0,size2:int0,size3:int0) = fun code ->
         this.z03 (fun value ->
             value.allocate(size1,size2,size3)
-            try code value finally value.deallocate())
+            this.Environment.WithRuntimeCleanup(value.deallocate,fun () -> code value))
 
     /// Allocates a temporary integer array of rank 3 for the callback and deallocates it afterward.
     member this.i3 (size1:int,size2:int0,size3:int0) = fun code -> this.i3 (I size1,size2,size3) code
