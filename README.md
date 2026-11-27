@@ -126,6 +126,12 @@ previously managed files.
 
 ## FFT inputs and generated names
 
+C and Python functions may update array argument elements, but cannot allocate
+or deallocate the argument's storage. Such operations raise `NotSupportedException`
+during generation. Allocate and release the array in the caller; local temporary
+arrays inside functions remain supported. Fortran allocatable arguments retain
+their existing allocation behavior.
+
 FFT operations require named input and output arrays. Array slices and computed
 array expressions raise `NotSupportedException` during generation. Copy a slice
 to a named temporary array before transforming it, then copy the result back if

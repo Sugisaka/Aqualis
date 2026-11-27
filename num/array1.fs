@@ -43,6 +43,13 @@ namespace Aqualis
     /// Shared dimension and value checks for numeric arrays.
     [<RequireQualifiedAccess>]
     module internal NumericArrayValidation =
+        /// Borrowed C/Python array arguments cannot replace their caller's storage.
+        let requireOwnedStorage (context:Aqualis) name =
+            if (context.Language = C99 || context.Language = Python) &&
+               (context.arg.list |> List.exists (fun (_,(_,shape,formal)) -> shape <> A0 && formal = name)) then
+                UnsupportedOperation.codeGeneration (string context.Language)
+                    "allocation or deallocation of array arguments; manage storage in the caller"
+
         /// Reports an array validation failure.
         let fail (context:Aqualis) message =
             let message = "Aqualis: " + message
@@ -209,6 +216,9 @@ namespace Aqualis
         ///<summary>配列のメモリ割り当て</summary>
         member this.allocate(n1:int0) =
                 match x with
+                | Var1(_,name) -> NumericArrayValidation.requireOwnedStorage c name
+                | _ -> ()
+                match x with
                 |Var1(size1,name) ->
                     if c.Debug.debugMode && c.language <> C99 then
                         c.Errors.inc()
@@ -303,6 +313,9 @@ namespace Aqualis
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
+            match x with
+            | Var1(_,name) -> NumericArrayValidation.requireOwnedStorage c name
+            | _ -> ()
             if c.Debug.debugMode && c.language <> C99 then
                 match x with
                 |Var1(_,name) ->

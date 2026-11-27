@@ -853,6 +853,9 @@ namespace Aqualis
         ///<summary>配列のメモリ割り当て</summary>
         member this.allocate(n1:int0,n2:int0,n3:int0) =
                 match x with
+                | Var3(_,name) -> NumericArrayValidation.requireOwnedStorage c name
+                | _ -> ()
+                match x with
                 |Var3(size,name) ->
                     if c.Debug.debugMode && c.language <> C99 then
                         c.Errors.inc()
@@ -978,6 +981,9 @@ namespace Aqualis
 
         ///<summary>配列のメモリ割り当て</summary>
         member this.deallocate() =
+            match x with
+            | Var3(_,name) -> NumericArrayValidation.requireOwnedStorage c name
+            | _ -> ()
             if c.Debug.debugMode && c.language <> C99 then
                 match x with
                 |Var3(_,name) ->
