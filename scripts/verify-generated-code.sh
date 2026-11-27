@@ -1445,5 +1445,6 @@ bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-reset-
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" intrinsic-names
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" early-cleanup
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" exit-scopes
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-function
 
 printf '%s\n' 'All generated-code runtime checks passed.'

@@ -159,20 +159,13 @@ namespace Aqualis
                             code(Y.[lastIndex])
                         NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
 
-        /// Reserves internal array names for the lifetime of this context.
+        /// Reserves storage for an instance and tracks function-local ownership.
         module private SplineStorage =
-            let real (context:Aqualis) =
-                let name,_ = context.d1.getVar()
-                double1(Dt,Var1(A1 0,name),context=context)
-            let complex (context:Aqualis) =
-                let name,_ = context.z1.getVar()
-                complex1(Zt,Var1(A1 0,name),context=context)
-            /// Replaces owned storage, including when loading into an initialized spline.
-            let resize (context:Aqualis) (size:int0) (currentSize:int0) name
-                       (deallocate:unit->unit) (allocate:int0->unit) =
+            let private release (context:Aqualis) (currentSize:int0) name (deallocate:unit->unit) =
                 let allocated =
                     match context.Language with
                     |Fortran -> bool0(Var(Nt,"allocated("+name+")",NaN),context)
+                    |C99 -> bool0(Var(Nt,name+" != NULL",NaN),context)
                     |_ -> currentSize .>= 0
                 match context.Language with
                 |Fortran ->
@@ -183,6 +176,22 @@ namespace Aqualis
                     context.indentDec()
                     context.codewritein "end block"
                 |_ -> context.br.if1 allocated deallocate
+            let real (context:Aqualis) =
+                let name,_ = context.d1.getVar()
+                let value = double1(Dt,Var1(A1 0,name),context=context)
+                if context.GeneratedFunctionName.IsSome then
+                    context.RegisterFunctionCleanup(fun () -> release context value.size1 name value.deallocate)
+                value
+            let complex (context:Aqualis) =
+                let name,_ = context.z1.getVar()
+                let value = complex1(Zt,Var1(A1 0,name),context=context)
+                if context.GeneratedFunctionName.IsSome then
+                    context.RegisterFunctionCleanup(fun () -> release context value.size1 name value.deallocate)
+                value
+            /// Replaces storage, including when loading into an initialized spline.
+            let resize (context:Aqualis) (size:int0) (currentSize:int0) name
+                       (deallocate:unit->unit) (allocate:int0->unit) =
+                release context currentSize name deallocate
                 allocate size
         /// Generates cubic spline interpolation over real-valued samples.
         type splineInterpolateDouble(context:Aqualis) =

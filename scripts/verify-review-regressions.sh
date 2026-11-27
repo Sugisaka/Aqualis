@@ -15,6 +15,10 @@ for language in "${languages[@]}"; do
       if command -v node >/dev/null 2>&1; then command=(node smoke.js)
       else command=(node.exe "$(wslpath -w "$directory/smoke.js")"); fi ;;
   esac
+  if [[ "$regression" == spline-function && "$language" == c ]]; then
+    gcc -std=c99 -g -fsanitize=address "$directory/smoke.c" -lm -o "$directory/checked.exe"
+    command=(env ASAN_OPTIONS=detect_leaks=1 "$directory/checked.exe")
+  fi
   if [[ "$regression" == economy ]]; then
     # Bound memory so a regression to full SVD fails instead of exhausting RAM.
     actual="$(export OPENBLAS_NUM_THREADS=1; ulimit -v 1048576; cd "$directory" && "${command[@]}")"
@@ -35,6 +39,7 @@ expected = {
     'intrinsic-names': [1,1,2,3,1,5,4],
     'early-cleanup': [42,7,42,2,7],
     'exit-scopes': [7,1,42],
+    'spline-function': [5]*7,
     'derivatives': [9,6,2,0,81,108,108,72,9,6,2,0],
     'svd-scaling': [1]*12+[0]*3+[1]*3,
     'linear-alias': [1,1,1,1,2,1,2,1,4,1,4,1],

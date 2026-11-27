@@ -3110,6 +3110,43 @@ module Program =
             c.ch.d1 1 (fun values -> values[0] <== 42.0; c.print.t values[0])
             if language = PHP then c.php.echo "\n"
 
+    let private generateSplineFunctionLifetime outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-spline-function-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun c ->
+            for manual in [false;true] do
+                c.iter.num 3 <| fun _ ->
+                    c.func (if manual then "evaluate_manual" else "evaluate_auto") <| fun child ->
+                        let spline = child.interpolate.splineDouble()
+                        spline.X.allocate 2
+                        spline.Y.allocate 2
+                        spline.X[0] <== 0.0
+                        spline.X[1] <== 1.0
+                        spline.Y[0] <== 0.0
+                        spline.Y[1] <== 10.0
+                        spline.set()
+                        let result = child.var.d0 "result"
+                        spline.p result (D 0.5)
+                        child.print.t result
+                        if manual then
+                            spline.X.deallocate()
+                            spline.Y.deallocate()
+            c.iter.range(0,1) <| fun flag ->
+                c.func "evaluate_conditional" <| fun child ->
+                    flag.farg child <| fun enabled ->
+                        child.br.if1 (enabled .> 0) <| fun () ->
+                            let spline = child.interpolate.splineComplex(true)
+                            spline.X.allocate 2
+                            spline.Y.allocate 2
+                            spline.X[0] <== 0.0
+                            spline.X[1] <== 1.0
+                            spline.Y[0] <== 0.0
+                            spline.Y[1] <== complex0(Cpx(10.0,20.0))
+                            spline.set()
+                            let result = child.var.z0 "result"
+                            spline.p result (D 0.5)
+                            child.print.t result.re
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -3127,6 +3164,7 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateIntrinsicNames outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateEarlyCleanup outputRoot)
             generationTargets |> List.iter (generateExitScopes outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineFunctionLifetime outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)

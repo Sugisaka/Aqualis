@@ -115,6 +115,7 @@ namespace Aqualis
             let generateBody (childContext:Aqualis) =
                 childContext.GeneratedFunctionName <- Some projectname
                 code childContext
+                childContext.EmitFunctionCleanups()
                 childContext.validateGeneratedVariableNames()
             match context.language with
             |Fortran|C99|LaTeX|HTML|Python ->

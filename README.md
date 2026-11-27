@@ -186,3 +186,5 @@ coefficient layout and saved-file format are unchanged. Setup rejects
 non-finite interval widths, elimination pivots, and coefficients.
 Each spline instance owns separate internal arrays. `set()` supports repeated
 calls after sample updates, and `load()` replaces existing spline storage.
+Spline storage created inside a generated function is released automatically before
+that function returns, including when sample arrays were already released explicitly.

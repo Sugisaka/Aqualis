@@ -13,6 +13,7 @@ namespace Aqualis
     /// Generation context that owns output, variables, diagnostics, and target-language state.
     type Aqualis private (outputdir:string option,pjname:string option,lang:Language,isNeutral:bool,publishAtomically:bool,writerDirectory:string option,diagnostics:DiagnosticBag option) =
         let runtimeCleanups = ResizeArray<unit -> unit>()
+        let functionCleanups = ResizeArray<unit -> unit>()
         let contextId = System.Guid.NewGuid()
         let securityGenerationState = SecurityGenerationState()
         let diagnosticBag =
@@ -76,6 +77,13 @@ namespace Aqualis
         /// Creates a generation context with a diagnostic bag.
         static member internal CreateWithDiagnostics(outputdir,pjname,lang,diagnostics) =
             new Aqualis(outputdir,pjname,lang,false,false,None,Some diagnostics)
+        /// Registers storage owned by the generated function rather than its caller.
+        member internal _.RegisterFunctionCleanup(cleanup:unit -> unit) = functionCleanups.Add cleanup
+        /// Releases function-owned storage before the generated function returns.
+        member internal _.EmitFunctionCleanups() =
+            let cleanups = functionCleanups.ToArray()
+            functionCleanups.Clear()
+            for cleanup in Array.rev cleanups do cleanup()
         /// Captures the resource boundary of a generated control-flow scope.
         member internal _.RuntimeCleanupDepth = runtimeCleanups.Count
         /// Emits cleanup for resources whose lifetime ends at a generated jump.
