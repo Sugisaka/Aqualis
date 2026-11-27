@@ -1393,4 +1393,42 @@ done
 actual="$(php "$output_root/php-random/smoke.php")"
 [[ "$actual" == ok ]] || { printf 'Unexpected PHP random output: %s\n' "$actual" >&2; exit 1; }
 
+for language in c fortran python; do
+  case "$language" in
+    c) command=(bash proc_smoke_C.sh) ;;
+    fortran) command=(bash proc_smoke_F.sh) ;;
+    python) command=(python3 smoke.py) ;;
+  esac
+  for kind in real complex large; do
+    directory="$output_root/spline-tridiagonal-$kind-$language"
+    (cd "$directory" && "${command[@]}") > "$directory/actual.txt"
+    "$scipy_python" - "$directory" "$kind" <<'PY'
+import pathlib, sys
+import numpy as np
+from scipy.interpolate import CubicSpline
+directory, kind = pathlib.Path(sys.argv[1]), sys.argv[2]
+actual = np.loadtxt(directory / 'actual.txt').reshape(-1)
+if kind == 'large':
+    np.testing.assert_allclose(actual, [10001.5, 2.0], rtol=1e-12, atol=1e-12)
+else:
+    x = [0, 0.5, 2, 4]
+    y = np.array([0, 1, -1, 2], dtype=float)
+    if kind == 'complex':
+        y = y + 1j * np.array([2, -1, 3, 0])
+    spline = CubicSpline(x, y, bc_type='natural')
+    expected = []
+    for q in [0, 0.25, 0.5, 1, 2, 3, 4]:
+        for value in [spline(q), spline(q, 1)]:
+            expected.extend([value.real, value.imag] if kind == 'complex' else [float(value)])
+    np.testing.assert_allclose(actual, expected, rtol=1e-11, atol=1e-11)
+    saved = list(map(float, (directory / 'spline_g.dat').read_text().replace('D', 'E').split()))
+    assert saved[0] == 9, saved
+    coefficients = spline.c[:3].T.reshape(-1)
+    if kind == 'complex':
+        coefficients = np.column_stack([coefficients.real, coefficients.imag]).reshape(-1)
+    np.testing.assert_allclose(saved[1:], coefficients, rtol=1e-11, atol=1e-11)
+PY
+  done
+done
+
 printf '%s\n' 'All generated-code runtime checks passed.'

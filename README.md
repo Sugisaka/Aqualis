@@ -172,3 +172,10 @@ pseudoinverse, discarding singular values at or below
 `machine epsilon * (rows + columns) * largest singular value`.
 The current implementation uses full SVD matrices, so its temporary storage
 includes `rows * rows` and `columns * columns` elements.
+
+## Spline setup
+
+Real and complex natural cubic splines use a tridiagonal solver with linear
+time and storage in the number of sample points. The existing per-interval
+coefficient layout and saved-file format are unchanged. Setup rejects
+non-finite interval widths, elimination pivots, and coefficients.

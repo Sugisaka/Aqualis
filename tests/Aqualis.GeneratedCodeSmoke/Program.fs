@@ -2623,6 +2623,57 @@ module Program =
                 realMatrix.farg child (fun a -> realRhs.farg child (fun b -> child.la.solve_simuleq(a,b))))
             c.writein "assert numpy.allclose(realRhs, [2, 3])")
 
+    let private generateTridiagonalSplines outputRoot (directoryName, language) =
+        let generate name body =
+            let directory = Path.Combine(outputRoot,name+"-"+directoryName)
+            Directory.CreateDirectory(directory) |> ignore
+            Compile [language] directory "smoke" "1.0" body
+        generate "spline-tridiagonal-real" <| fun context ->
+            let spline = context.interpolate.splineDouble()
+            spline.X.allocate 4
+            spline.Y.allocate 4
+            for i, x, y in [0,0.0,0.0; 1,0.5,1.0; 2,2.0,-1.0; 3,4.0,2.0] do
+                spline.X[i] <== x
+                spline.Y[i] <== y
+            spline.set()
+            let result = context.var.d0 "result"
+            for query in [0.0;0.25;0.5;1.0;2.0;3.0;4.0] do
+                spline.p result (D query)
+                context.print.t result
+                spline.dp result (D query)
+                context.print.t result
+            spline.save "spline"
+        generate "spline-tridiagonal-complex" <| fun context ->
+            let spline = context.interpolate.splineComplex(true)
+            spline.X.allocate 4
+            spline.Y.allocate 4
+            for i, x, re, im in [0,0.0,0.0,2.0; 1,0.5,1.0,-1.0; 2,2.0,-1.0,3.0; 3,4.0,2.0,0.0] do
+                spline.X[i] <== x
+                spline.Y[i] <== complex0(Cpx(re,im))
+            spline.set()
+            let result = context.var.z0 "result"
+            for query in [0.0;0.25;0.5;1.0;2.0;3.0;4.0] do
+                spline.p result (D query)
+                context.print.t result.re
+                context.print.t result.im
+                spline.dp result (D query)
+                context.print.t result.re
+                context.print.t result.im
+            spline.save "spline"
+        generate "spline-tridiagonal-large" <| fun context ->
+            let spline = context.interpolate.splineDouble()
+            spline.X.allocate 10000
+            spline.Y.allocate 10000
+            context.iter.num 10000 <| fun i ->
+                spline.X[i] <== i
+                spline.Y[i] <== 2*i+1
+            spline.set()
+            let result = context.var.d0 "result"
+            spline.p result (D 5000.25)
+            context.print.t result
+            spline.dp result (D 5000.25)
+            context.print.t result
+
     let private generatePhpRandom outputRoot =
         let directory = Path.Combine(outputRoot, "php-random")
         Directory.CreateDirectory(directory) |> ignore
@@ -2689,6 +2740,8 @@ module Program =
             generatePhpJsonSchema outputRoot
             generatePhpLoopExit outputRoot
             generatePhpRandom outputRoot
+            ["c", C99; "fortran", Fortran; "python", Python]
+            |> List.iter (generateTridiagonalSplines outputRoot)
             generateFortranIntegerAbsBoundary outputRoot
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot

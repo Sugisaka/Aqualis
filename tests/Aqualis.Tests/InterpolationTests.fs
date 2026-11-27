@@ -155,3 +155,18 @@ module InterpolationTests =
                 [(1.0, 0.0); (2.0, Double.PositiveInfinity)])
             |> ignore)
         |> ignore
+
+    [<Fact>]
+    let ``spline setup uses linear storage without a dense LAPACK solve`` () =
+        for isComplex in [false;true] do
+            let source = generateC (fun context ->
+                if isComplex then
+                    let spline = context.interpolate.splineComplex(true)
+                    spline.set()
+                else
+                    let spline = context.interpolate.splineDouble()
+                    spline.set())
+            Assert.DoesNotContain("gesv",source)
+            Assert.DoesNotContain("f_size",source)
+            Assert.Contains("Spline elimination pivot must be positive",source)
+            Assert.Contains("Spline coefficients must be finite",source)

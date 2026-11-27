@@ -57,8 +57,8 @@ namespace Aqualis
                 require context (x.size1 .< 2) "Spline interpolation has not been initialized."
                 require context (ySize .< x.size1) "Spline x and y lengths must match."
                 require context (ySize .> x.size1) "Spline x and y lengths must match."
-                require context (coefficientSize .< 3*x.size1-3) "Spline interpolation has not been initialized."
-                require context (coefficientSize .> 3*x.size1-3) "Spline coefficient count is invalid."
+                require context (coefficientSize .< 3*(x.size1-1)) "Spline interpolation has not been initialized."
+                require context (coefficientSize .> 3*(x.size1-1)) "Spline coefficient count is invalid."
                 requireFinite context value "Spline query must be finite."
                 require context (value .< x[0]) "Spline query is out of range."
                 require context (value .> x[x.size1-1]) "Spline query is out of range."
@@ -154,7 +154,6 @@ namespace Aqualis
         /// Generates cubic spline interpolation over real-valued samples.
         type splineInterpolateDouble(context:Aqualis) =
 
-            let f = context.var.d2 "f"
             let g = context.var.d1 "g"
             let x = context.var.d1 "x"
             let y = context.var.d1 "y"
@@ -182,50 +181,38 @@ namespace Aqualis
                 SplineValidation.data context x y.size1
                 context.iter.num y.size1 <| fun (i:int0) ->
                     SplineValidation.requireFinite context y[i] "Spline y values must be finite."
-                context.ch.i <| fun N ->
-                    N <== x.size1
-                    f.allocate(3*N-3,3*N-3)
-                    g.allocate(3*N-3)
-                    f.clear()
-                    g.clear()
-                    context.group.comment "interpolation constraint"
-                    f.[1-1,a _1-1] <== 0.0
-                    f.[1-1,b _1-1] <== 2
-                    g.[1-1] <== 0
-                    context.iter.range (_1, N-2) <| fun n ->
-                        context.ch.d <| fun dx ->
-                            dx <== x.[n+1-1]-x.[n+1-1-1]
-                            context.group.comment "interpolation constraint"
-                            f.[3*(n+1)-4-1,a(n+1-1)-1] <== asm.pow(dx,3)
-                            f.[3*(n+1)-4-1,b(n+1-1)-1] <== asm.pow(dx,2)
-                            f.[3*(n+1)-4-1,c(n+1-1)-1] <== dx
-                            g.[3*(n+1)-4-1] <== y.[(n+1)-1] - y.[(n+1)-1-1]
-                            context.group.comment "interpolation constraint"
-                            f.[3*(n+1)-3-1,a(n+1-1)-1] <== 3*asm.pow(dx,2)
-                            f.[3*(n+1)-3-1,b(n+1-1)-1] <== 2*dx
-                            f.[3*(n+1)-3-1,c(n+1-1)-1] <== 1
-                            f.[3*(n+1)-3-1,a(n+1)-1] <== 0.0
-                            f.[3*(n+1)-3-1,b(n+1)-1] <== 0.0
-                            f.[3*(n+1)-3-1,c(n+1)-1] <== -1
-                            g.[3*(n+1)-3-1] <== 0.0
-                            context.group.comment "interpolation constraint"
-                            f.[3*(n+1)-2-1,a(n+1-1)-1] <== 6*dx
-                            f.[3*(n+1)-2-1,b(n+1-1)-1] <== 2
-                            f.[3*(n+1)-2-1,a(n+1)-1] <== 0.0
-                            f.[3*(n+1)-2-1,b(n+1)-1] <== -2
-                            g.[3*(n+1)-2-1] <== 0.0
-                    context.ch.d <| fun dx ->
-                        dx <== x.[N-1]-x.[N-1-1]
-                        context.group.comment "interpolation constraint"
-                        f.[3*N-4-1,a(N-1)-1] <== asm.pow(dx,3)
-                        f.[3*N-4-1,b(N-1)-1] <== asm.pow(dx,2)
-                        f.[3*N-4-1,c(N-1)-1] <== dx
-                        g.[3*N-4-1] <== y.[N-1] - y.[N-1-1]
-                        context.group.comment "interpolation constraint"
-                        f.[3*N-3-1,a(N-1)-1] <== 6*dx
-                        f.[3*N-3-1,b(N-1)-1] <== 2
-                        g.[3*N-3-1] <== 0
-                    context.la.solve_simuleq(f,g)
+                LapackValidation.requireBackend context "Spline interpolation"
+                SplineValidation.require context (x.size1 .> 715827883) "Spline point count is too large."
+                context.ch.i <| fun count ->
+                    count <== x.size1
+                    g.allocate(3*(count-1))
+                    context.ch.d1 (count-1) <| fun widths ->
+                    context.ch.d1 count <| fun upper ->
+                    context.ch.d1 count <| fun second ->
+                        upper.clear()
+                        second.clear()
+                        context.iter.num (count-1) <| fun i ->
+                            widths[i] <== x[i+1]-x[i]
+                            SplineValidation.requireFinite context widths[i] "Spline interval width must be finite."
+                        // Natural boundary conditions: second[0] = second[count-1] = 0.
+                        // Eliminate the tridiagonal system in a single forward pass.
+                        context.iter.range (1,count-2) <| fun i ->
+                            context.ch.d <| fun pivot ->
+                                pivot <== 2.0*(widths[i-1]+widths[i])-widths[i-1]*upper[i-1]
+                                SplineValidation.requireFinite context pivot "Spline elimination pivot must be finite."
+                                SplineValidation.require context (pivot .<= 0.0) "Spline elimination pivot must be positive."
+                                upper[i] <== widths[i]/pivot
+                                second[i] <== (6.0*((y[i+1]-y[i])/widths[i]-(y[i]-y[i-1])/widths[i-1])-widths[i-1]*second[i-1])/pivot
+                        // Generate descending indices using an ascending loop.
+                        context.iter.num (count-2) <| fun offset ->
+                            let i = count-2-offset
+                            second[i] <== second[i]-upper[i]*second[i+1]
+                        // Retain the existing per-interval [cubic, quadratic, linear] layout.
+                        context.iter.num (count-1) <| fun i ->
+                            g[3*i] <== (second[i+1]-second[i])/widths[i]/6.0
+                            g[3*i+1] <== second[i]/2.0
+                            g[3*i+2] <== (y[i+1]-y[i])/widths[i]-widths[i]*(second[i]/3.0+second[i+1]/6.0)
+                        context.iter.num g.size1 <| fun i -> SplineValidation.requireFinite context g[i] "Spline coefficients must be finite."
 
             /// <summary>
             /// 補間データをファイルに保存
@@ -269,14 +256,14 @@ namespace Aqualis
                 context.io.fileInput (filename+"_g.dat") <| fun wr ->
                     context.ch.id <| fun (n,t) ->
                         wr.t n
-                        SplineValidation.loadedCount context wr n (3*x.size1-3) "Spline coefficient count is invalid."
+                        SplineValidation.loadedCount context wr n (3*(x.size1-1)) "Spline coefficient count is invalid."
                         g.allocate n
                         context.iter.num g.size1 <| fun i ->
                             wr.t t
                             g.[i] <== t
                 SplineValidation.data context x y.size1
-                SplineValidation.require context (g.size1 .< 3*x.size1-3) "Spline coefficient count is invalid."
-                SplineValidation.require context (g.size1 .> 3*x.size1-3) "Spline coefficient count is invalid."
+                SplineValidation.require context (g.size1 .< 3*(x.size1-1)) "Spline coefficient count is invalid."
+                SplineValidation.require context (g.size1 .> 3*(x.size1-1)) "Spline coefficient count is invalid."
                 context.iter.num y.size1 <| fun (i:int0) ->
                     SplineValidation.requireFinite context y[i] "Spline y values must be finite."
                 context.iter.num g.size1 <| fun (i:int0) ->
@@ -321,7 +308,6 @@ namespace Aqualis
         /// Generates cubic spline interpolation over complex-valued samples.
         type splineInterpolateComplex(context:Aqualis,iscpx:bool) =
 
-            let f = context.var.z2 "f"
             let g = context.var.z1 "g"
             let x = context.var.d1 "x"
             let y = context.var.z1 "y"
@@ -350,50 +336,40 @@ namespace Aqualis
                 context.iter.num y.size1 <| fun (i:int0) ->
                     SplineValidation.requireFinite context y[i].re "Spline y values must be finite."
                     SplineValidation.requireFinite context y[i].im "Spline y values must be finite."
-                context.ch.i <| fun N ->
-                    N <== x.size1
-                    f.allocate(3*N-3,3*N-3)
-                    g.allocate(3*N-3)
-                    f.clear()
-                    g.clear()
-                    context.group.comment "interpolation constraint"
-                    f.[1-1,a _1-1] <== 0.0
-                    f.[1-1,b _1-1] <== 2
-                    g.[1-1] <== 0
-                    context.iter.range (_1, N-2) <| fun n ->
-                        context.ch.d <| fun dx ->
-                            dx <== x.[n+1-1]-x.[n+1-1-1]
-                            context.group.comment "interpolation constraint"
-                            f.[3*(n+1)-4-1,a(n+1-1)-1] <== asm.pow(dx,3)
-                            f.[3*(n+1)-4-1,b(n+1-1)-1] <== asm.pow(dx,2)
-                            f.[3*(n+1)-4-1,c(n+1-1)-1] <== dx
-                            g.[3*(n+1)-4-1] <== y.[(n+1)-1] - y.[(n+1)-1-1]
-                            context.group.comment "interpolation constraint"
-                            f.[3*(n+1)-3-1,a(n+1-1)-1] <== 3*asm.pow(dx,2)
-                            f.[3*(n+1)-3-1,b(n+1-1)-1] <== 2*dx
-                            f.[3*(n+1)-3-1,c(n+1-1)-1] <== 1
-                            f.[3*(n+1)-3-1,a(n+1)-1] <== 0.0
-                            f.[3*(n+1)-3-1,b(n+1)-1] <== 0.0
-                            f.[3*(n+1)-3-1,c(n+1)-1] <== -1
-                            g.[3*(n+1)-3-1] <== 0.0
-                            context.group.comment "interpolation constraint"
-                            f.[3*(n+1)-2-1,a(n+1-1)-1] <== 6*dx
-                            f.[3*(n+1)-2-1,b(n+1-1)-1] <== 2
-                            f.[3*(n+1)-2-1,a(n+1)-1] <== 0.0
-                            f.[3*(n+1)-2-1,b(n+1)-1] <== -2
-                            g.[3*(n+1)-2-1] <== 0.0
-                    context.ch.d <| fun dx ->
-                        dx <== x.[N-1]-x.[N-1-1]
-                        context.group.comment "interpolation constraint"
-                        f.[3*N-4-1,a(N-1)-1] <== asm.pow(dx,3)
-                        f.[3*N-4-1,b(N-1)-1] <== asm.pow(dx,2)
-                        f.[3*N-4-1,c(N-1)-1] <== dx
-                        g.[3*N-4-1] <== y.[N-1] - y.[N-1-1]
-                        context.group.comment "interpolation constraint"
-                        f.[3*N-3-1,a(N-1)-1] <== 6*dx
-                        f.[3*N-3-1,b(N-1)-1] <== 2
-                        g.[3*N-3-1] <== 0
-                    context.la.solve_simuleq(f,g)
+                LapackValidation.requireBackend context "Spline interpolation"
+                SplineValidation.require context (x.size1 .> 715827883) "Spline point count is too large."
+                context.ch.i <| fun count ->
+                    count <== x.size1
+                    g.allocate(3*(count-1))
+                    context.ch.d1 (count-1) <| fun widths ->
+                    context.ch.d1 count <| fun upper ->
+                    context.ch.z1 count <| fun second ->
+                        upper.clear()
+                        second.clear()
+                        context.iter.num (count-1) <| fun i ->
+                            widths[i] <== x[i+1]-x[i]
+                            SplineValidation.requireFinite context widths[i] "Spline interval width must be finite."
+                        // Natural boundary conditions: second[0] = second[count-1] = 0.
+                        // Eliminate the tridiagonal system in a single forward pass.
+                        context.iter.range (1,count-2) <| fun i ->
+                            context.ch.d <| fun pivot ->
+                                pivot <== 2.0*(widths[i-1]+widths[i])-widths[i-1]*upper[i-1]
+                                SplineValidation.requireFinite context pivot "Spline elimination pivot must be finite."
+                                SplineValidation.require context (pivot .<= 0.0) "Spline elimination pivot must be positive."
+                                upper[i] <== widths[i]/pivot
+                                second[i] <== (6.0*((y[i+1]-y[i])/widths[i]-(y[i]-y[i-1])/widths[i-1])-widths[i-1]*second[i-1])/pivot
+                        // Generate descending indices using an ascending loop.
+                        context.iter.num (count-2) <| fun offset ->
+                            let i = count-2-offset
+                            second[i] <== second[i]-upper[i]*second[i+1]
+                        // Retain the existing per-interval [cubic, quadratic, linear] layout.
+                        context.iter.num (count-1) <| fun i ->
+                            g[3*i] <== (second[i+1]-second[i])/widths[i]/6.0
+                            g[3*i+1] <== second[i]/2.0
+                            g[3*i+2] <== (y[i+1]-y[i])/widths[i]-widths[i]*(second[i]/3.0+second[i+1]/6.0)
+                        context.iter.num g.size1 <| fun i ->
+                            SplineValidation.requireFinite context g[i].re "Spline coefficients must be finite."
+                            SplineValidation.requireFinite context g[i].im "Spline coefficients must be finite."
 
             /// <summary>
             /// 補間データをファイルに保存
@@ -438,7 +414,7 @@ namespace Aqualis
                     context.io.fileInput (filename+"_g.dat") <| fun rd ->
                         context.ch.idd <| fun (n,s,t) ->
                             rd.t n
-                            SplineValidation.loadedCount context rd n (3*x.size1-3) "Spline coefficient count is invalid."
+                            SplineValidation.loadedCount context rd n (3*(x.size1-1)) "Spline coefficient count is invalid."
                             g.allocate n
                             context.iter.num g.size1 <| fun i ->
                                 rd.tt <| s++t
@@ -463,14 +439,14 @@ namespace Aqualis
                     context.io.fileInput (filename+"_g.dat") <| fun rd ->
                         context.ch.id <| fun (n,t) ->
                             rd.t n
-                            SplineValidation.loadedCount context rd n (3*x.size1-3) "Spline coefficient count is invalid."
+                            SplineValidation.loadedCount context rd n (3*(x.size1-1)) "Spline coefficient count is invalid."
                             g.allocate n
                             context.iter.num g.size1 <| fun i ->
                                 rd.t t
                                 g.[i] <== t
                 SplineValidation.data context x y.size1
-                SplineValidation.require context (g.size1 .< 3*x.size1-3) "Spline coefficient count is invalid."
-                SplineValidation.require context (g.size1 .> 3*x.size1-3) "Spline coefficient count is invalid."
+                SplineValidation.require context (g.size1 .< 3*(x.size1-1)) "Spline coefficient count is invalid."
+                SplineValidation.require context (g.size1 .> 3*(x.size1-1)) "Spline coefficient count is invalid."
                 context.iter.num y.size1 <| fun (i:int0) ->
                     SplineValidation.requireFinite context y[i].re "Spline y values must be finite."
                     SplineValidation.requireFinite context y[i].im "Spline y values must be finite."
