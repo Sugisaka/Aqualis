@@ -167,6 +167,15 @@ namespace Aqualis
             let complex (context:Aqualis) =
                 let name,_ = context.z1.getVar()
                 complex1(Zt,Var1(A1 0,name),context=context)
+            /// Replaces owned storage, including when loading into an initialized spline.
+            let resize (context:Aqualis) (size:int0) (currentSize:int0) name
+                       (deallocate:unit->unit) (allocate:int0->unit) =
+                let allocated =
+                    match context.Language with
+                    |Fortran -> bool0(Var(Nt,"allocated("+name+")",NaN),context)
+                    |_ -> currentSize .>= 0
+                context.br.if1 allocated deallocate
+                allocate size
         /// Generates cubic spline interpolation over real-valued samples.
         type splineInterpolateDouble(context:Aqualis) =
 
@@ -201,7 +210,7 @@ namespace Aqualis
                 SplineValidation.require context (x.size1 .> 715827883) "Spline point count is too large."
                 context.ch.i <| fun count ->
                     count <== x.size1
-                    g.allocate(3*(count-1))
+                    SplineStorage.resize context (3*(count-1)) g.size1 g.code g.deallocate g.allocate
                     context.ch.d1 (count-1) <| fun widths ->
                     context.ch.d1 count <| fun upper ->
                     context.ch.d1 count <| fun second ->
@@ -257,7 +266,7 @@ namespace Aqualis
                     context.ch.id <| fun (n,t) ->
                         wr.t n
                         SplineValidation.loadedXCount context wr n
-                        x.allocate n
+                        SplineStorage.resize context n x.size1 x.code x.deallocate x.allocate
                         context.iter.num x.size1 <| fun i ->
                             wr.t t
                             x.[i] <== t
@@ -265,7 +274,7 @@ namespace Aqualis
                     context.ch.id <| fun (n,t) ->
                         wr.t n
                         SplineValidation.loadedCount context wr n x.size1 "Spline x and y lengths must match."
-                        y.allocate n
+                        SplineStorage.resize context n y.size1 y.code y.deallocate y.allocate
                         context.iter.num y.size1 <| fun i ->
                             wr.t t
                             y.[i] <== t
@@ -273,7 +282,7 @@ namespace Aqualis
                     context.ch.id <| fun (n,t) ->
                         wr.t n
                         SplineValidation.loadedCount context wr n (3*(x.size1-1)) "Spline coefficient count is invalid."
-                        g.allocate n
+                        SplineStorage.resize context n g.size1 g.code g.deallocate g.allocate
                         context.iter.num g.size1 <| fun i ->
                             wr.t t
                             g.[i] <== t
@@ -362,7 +371,7 @@ namespace Aqualis
                 SplineValidation.require context (x.size1 .> 715827883) "Spline point count is too large."
                 context.ch.i <| fun count ->
                     count <== x.size1
-                    g.allocate(3*(count-1))
+                    SplineStorage.resize context (3*(count-1)) g.size1 g.code g.deallocate g.allocate
                     context.ch.d1 (count-1) <| fun widths ->
                     context.ch.d1 count <| fun upper ->
                     context.ch.z1 count <| fun second ->
@@ -421,7 +430,7 @@ namespace Aqualis
                         context.ch.id <| fun (n,t) ->
                             rd.t n
                             SplineValidation.loadedXCount context rd n
-                            x.allocate n
+                            SplineStorage.resize context n x.size1 x.code x.deallocate x.allocate
                             context.iter.num x.size1 <| fun i ->
                                 rd.t t
                                 x.[i] <== t
@@ -429,7 +438,7 @@ namespace Aqualis
                         context.ch.idd <| fun (n,s,t) ->
                             rd.t n
                             SplineValidation.loadedCount context rd n x.size1 "Spline x and y lengths must match."
-                            y.allocate n
+                            SplineStorage.resize context n y.size1 y.code y.deallocate y.allocate
                             context.iter.num y.size1 <| fun i ->
                                 rd.tt <| s++t
                                 y.[i] <== s+asm.uj*t
@@ -437,7 +446,7 @@ namespace Aqualis
                         context.ch.idd <| fun (n,s,t) ->
                             rd.t n
                             SplineValidation.loadedCount context rd n (3*(x.size1-1)) "Spline coefficient count is invalid."
-                            g.allocate n
+                            SplineStorage.resize context n g.size1 g.code g.deallocate g.allocate
                             context.iter.num g.size1 <| fun i ->
                                 rd.tt <| s++t
                                 g.[i] <== s+asm.uj*t
@@ -446,7 +455,7 @@ namespace Aqualis
                         context.ch.id <| fun (n,t) ->
                             rd.t n
                             SplineValidation.loadedXCount context rd n
-                            x.allocate n
+                            SplineStorage.resize context n x.size1 x.code x.deallocate x.allocate
                             context.iter.num x.size1 <| fun i ->
                                 rd.t t
                                 x.[i] <== t
@@ -454,7 +463,7 @@ namespace Aqualis
                         context.ch.id <| fun (n,t) ->
                             rd.t n
                             SplineValidation.loadedCount context rd n x.size1 "Spline x and y lengths must match."
-                            y.allocate n
+                            SplineStorage.resize context n y.size1 y.code y.deallocate y.allocate
                             context.iter.num y.size1 <| fun i ->
                                 rd.t t
                                 y.[i] <== t
@@ -462,7 +471,7 @@ namespace Aqualis
                         context.ch.id <| fun (n,t) ->
                             rd.t n
                             SplineValidation.loadedCount context rd n (3*(x.size1-1)) "Spline coefficient count is invalid."
-                            g.allocate n
+                            SplineStorage.resize context n g.size1 g.code g.deallocate g.allocate
                             context.iter.num g.size1 <| fun i ->
                                 rd.t t
                                 g.[i] <== t

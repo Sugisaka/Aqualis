@@ -1440,5 +1440,7 @@ bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" reduced-svd
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" economy
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" rhs-range
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-instances
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-reset-real
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-reset-complex
 
 printf '%s\n' 'All generated-code runtime checks passed.'

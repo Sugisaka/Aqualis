@@ -2942,6 +2942,76 @@ module Program =
                 context.print.t z.im
             context.print.t user[0]
 
+    let private generateSplineReset outputRoot (directoryName, language) =
+        for isComplex in [false;true] do
+            let kind = if isComplex then "complex" else "real"
+            let directory = Path.Combine(outputRoot,"review-spline-reset-"+kind+"-"+directoryName)
+            Directory.CreateDirectory(directory) |> ignore
+            Compile [language] directory "smoke" "1" <| fun context ->
+                if isComplex then
+                    let spline = context.interpolate.splineComplex(true)
+                    let result = context.var.z0 "result"
+                    spline.X.allocate 2
+                    spline.Y.allocate 2
+                    spline.X[0] <== 0.0
+                    spline.X[1] <== 1.0
+                    spline.Y[0] <== 0.0
+                    context.iter.num 3 <| fun i ->
+                        spline.Y[1] <== complex0(Cpx(10.0,20.0))*(i+1)
+                        spline.set()
+                        spline.p result (D 0.5)
+                        context.print.t result.re
+                        context.print.t result.im
+                    spline.X.deallocate()
+                    spline.Y.deallocate()
+                    spline.X.allocate 3
+                    spline.Y.allocate 3
+                    for i,y in [0,0.0;1,1.0;2,0.0] do
+                        spline.X[i] <== i
+                        spline.Y[i] <== complex0(Cpx(y,2.0*y))
+                    spline.set()
+                    spline.p result (D 0.5)
+                    context.print.t result.re
+                    context.print.t result.im
+                    spline.save "saved"
+                    spline.Y[1] <== 99.0
+                    spline.set()
+                    spline.load "saved"
+                    spline.load "saved"
+                    spline.p result (D 0.5)
+                    context.print.t result.re
+                    context.print.t result.im
+                else
+                    let spline = context.interpolate.splineDouble()
+                    let result = context.var.d0 "result"
+                    spline.X.allocate 2
+                    spline.Y.allocate 2
+                    spline.X[0] <== 0.0
+                    spline.X[1] <== 1.0
+                    spline.Y[0] <== 0.0
+                    context.iter.num 3 <| fun i ->
+                        spline.Y[1] <== 10*(i+1)
+                        spline.set()
+                        spline.p result (D 0.5)
+                        context.print.t result
+                    spline.X.deallocate()
+                    spline.Y.deallocate()
+                    spline.X.allocate 3
+                    spline.Y.allocate 3
+                    for i,y in [0,0.0;1,1.0;2,0.0] do
+                        spline.X[i] <== i
+                        spline.Y[i] <== y
+                    spline.set()
+                    spline.p result (D 0.5)
+                    context.print.t result
+                    spline.save "saved"
+                    spline.Y[1] <== 99.0
+                    spline.set()
+                    spline.load "saved"
+                    spline.load "saved"
+                    spline.p result (D 0.5)
+                    context.print.t result
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2955,6 +3025,7 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateReducedSvd outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateRhsRange outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineInstances outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineReset outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
