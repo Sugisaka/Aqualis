@@ -105,7 +105,12 @@ namespace Aqualis
 
         /// Generates a function definition for the selected language.
         let private generateFunction (context:Aqualis) (projectname:string) (code:Aqualis->unit) =
+            if context.GeneratedFunctionName.IsSome then
+                UnsupportedOperation.codeGeneration (string context.language) "nested function definitions"
             let projectname = validateFunctionName context.language projectname
+            let generateBody (childContext:Aqualis) =
+                childContext.GeneratedFunctionName <- Some projectname
+                code childContext
             match context.language with
             |Fortran|C99|LaTeX|HTML|Python ->
                 if not (context.flist.tryAdd projectname) then
@@ -139,7 +144,7 @@ namespace Aqualis
             match context.language with
             |Fortran ->
                 let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,Fortran) intermediateDirectory <| fun childContext ->
-                    code childContext
+                    generateBody childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
                     use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
@@ -172,7 +177,7 @@ namespace Aqualis
                 context.writein ("call" + " " + projectname + "(" + args + ")\n")
             |C99 ->
                 let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,C99) intermediateDirectory <| fun childContext ->
-                    code childContext
+                    generateBody childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
                     use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
@@ -211,7 +216,7 @@ namespace Aqualis
                 context.writein (projectname + "(" + args + ");\n")
             |LaTeX ->
                 let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,LaTeX) intermediateDirectory <| fun childContext ->
-                    code childContext
+                    generateBody childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
                     use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
@@ -245,7 +250,7 @@ namespace Aqualis
             |HTML ->
                 let args = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,HTML) intermediateDirectory <| fun childContext ->
                     let encodedProjectName = HtmlEncoding.textContent projectname
-                    code childContext
+                    generateBody childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
                     use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)
@@ -280,7 +285,7 @@ namespace Aqualis
                 context.writein (HtmlEncoding.textContent ("\\(" + projectname + "(" + args + ")\\)") + "<br/>\n")
             |Python ->
                 let writeBackActualNames,actualNames = Aqualis.makeIntermediateProgramInDirectoryWithContext (dir,projectname,Python) intermediateDirectory <| fun childContext ->
-                    code childContext
+                    generateBody childContext
                     inheritDependencies context childContext
                     //ソースファイル(関数部分)出力
                     use writer = new codeWriter(Path.Combine(intermediateDirectory, projectname + "_main"), 2, childContext.language)

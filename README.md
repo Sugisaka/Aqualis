@@ -126,6 +126,10 @@ previously managed files.
 
 ## FFT inputs and generated names
 
+Nested function definitions are unsupported. Calling `func` on a function-body
+context raises `NotSupportedException` during generation, including for functions
+without arguments. Define functions on the top-level generation context instead.
+
 C and Python functions may update array argument elements, but cannot allocate
 or deallocate the argument's storage. Such operations raise `NotSupportedException`
 during generation. Allocate and release the array in the caller; local temporary

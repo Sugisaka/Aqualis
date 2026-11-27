@@ -6,6 +6,38 @@ open Xunit
 open Aqualis
 
 module FunctionSafetyTests =
+    [<Fact>]
+    let ``nested functions fail before executing their body or publishing files`` () =
+        for language in [C99; Fortran; Python; HTML; LaTeX] do
+            for hasArgument in [false; true] do
+                use output = new TemporaryDirectory()
+                let mutable nestedBodyCalled = false
+                let error = Assert.Throws<NotSupportedException>(fun () ->
+                    Compile [language] output.Path "nested_functions" "1" (fun c ->
+                        let value = c.var.d0 "value"
+                        c.func "outer_fn" (fun f ->
+                            let nested () =
+                                f.func "inner_fn" (fun _ -> nestedBodyCalled <- true)
+                            if hasArgument then value.farg f (fun _ -> nested())
+                            else nested())))
+                Assert.Contains("nested function definitions", error.Message)
+                Assert.False(nestedBodyCalled)
+                Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``rejecting a nested function leaves ordinary sibling functions usable`` () =
+        for language, extension in [C99, ".c"; Fortran, ".f90"; Python, ".py"; HTML, ".html"; LaTeX, ".tex"] do
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "sibling_functions" "1" (fun c ->
+                c.func "first_fn" (fun f ->
+                    Assert.Throws<NotSupportedException>(fun () ->
+                        f.func "second_fn" (fun _ -> failwith "Nested body must not run")) |> ignore
+                    f.print.s "first")
+                c.func "second_fn" (fun f -> f.print.s "second"))
+            let source = File.ReadAllText(Path.Combine(output.Path, "sibling_functions" + extension))
+            Assert.Contains("first_fn", source)
+            Assert.Contains("second_fn", source)
+
     [<Theory>]
     [<InlineData(1)>]
     [<InlineData(2)>]

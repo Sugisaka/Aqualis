@@ -85,6 +85,8 @@ namespace Aqualis
         member internal _.GeneratedOutputDirectory = writerDirectory |> Option.orElse outputdir
         /// Gets the configured project name, if any.
         member _.ProjectName with get() = pjname
+        /// Identifies a function body so unsupported nested definitions can be rejected.
+        member val internal GeneratedFunctionName : string option = None with get, set
         /// Gets the output file path when directory and project name are known.
         member _.CodeFile with get() = match outputdir,pjname with |Some dir,Some src -> Some(Path.Combine(dir, src)) |_ -> None
         /// Gets the unique identity of this generation context.
