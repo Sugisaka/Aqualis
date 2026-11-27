@@ -33,6 +33,7 @@
     <Compile Include="program\varControl.fs" />
     <Compile Include="program\shellScriptWriter.fs" />
     <Compile Include="program\structure.fs" />
+    <Compile Include="program\sequenceDiagramState.fs" />
     <Compile Include="program\programManager.fs" />
     <Compile Include="program\varControl2.fs" />
     <Compile Include="program\url.fs" />

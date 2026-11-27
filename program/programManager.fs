@@ -55,23 +55,20 @@ namespace Aqualis
         let mutable isOpenAccUsed = false
         let mutable parallelMode = false
         let mutable parallelLoopSetup : ResizeArray<string> option = None
-        let mutable terminalLifeLine = 100.0
-        let mutable sequenceVariables : (string*int*float) list = []
-        let mutable sequenceFrames : (float*float*float*float) list = []
-        let mutable sequenceBranches : ((string*float) list) list = []
+        let sequenceDiagramState = SequenceDiagramState()
         let mutable phpFileScopeCounter = 0
         /// Gets or sets the endpoint of the terminal lifeline in sequence diagrams.
-        member _.TerminalLifeLine with get() = terminalLifeLine and set(v) = terminalLifeLine <- v
+        member _.TerminalLifeLine with get() = sequenceDiagramState.TerminalLifeLine and set(v) = sequenceDiagramState.TerminalLifeLine <- v
         /// シーケンス図に描画済み変数リスト
-        member _.SequenceVariables with get() = sequenceVariables and set(v) = sequenceVariables <- v
+        member _.SequenceVariables with get() = sequenceDiagramState.Variables and set(v) = sequenceDiagramState.Variables <- v
         /// Gets or sets sequence-diagram frame bounds.
-        member _.SequenceFrames with get() = sequenceFrames and set(v) = sequenceFrames <- v
+        member _.SequenceFrames with get() = sequenceDiagramState.Frames and set(v) = sequenceDiagramState.Frames <- v
         /// Gets or sets sequence-diagram branch labels.
-        member _.SequenceBranches with get() = sequenceBranches and set(v) = sequenceBranches <- v
+        member _.SequenceBranches with get() = sequenceDiagramState.Branches and set(v) = sequenceDiagramState.Branches <- v
         /// フレーム枠座標スタックリスト
-        member _.FrameStack with get() = sequenceFrames and set(v) = sequenceFrames <- v
+        member _.FrameStack with get() = sequenceDiagramState.Frames and set(v) = sequenceDiagramState.Frames <- v
         /// 条件分岐枠スタックリスト
-        member _.BranchStack with get() = sequenceBranches and set(v) = sequenceBranches <- v 
+        member _.BranchStack with get() = sequenceDiagramState.Branches and set(v) = sequenceDiagramState.Branches <- v
         new(outputdir:string option,pjname:string option,lang:Language) =
             new Aqualis(outputdir,pjname,lang,false,false,None,None)
         /// Creates a generation context with a diagnostic bag.

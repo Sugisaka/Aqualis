@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja" >
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<title>
+nested-sequence
+</title>
+</head>
+<body style="background-color: #ffffff" >
+<div style="width: 50px; height: 20px; font-family: &#39;Noto Sans Mono&#39;,monospace; margin-left: 40px; margin-top: 40px; position: absolute; overflow-wrap: break-word; border-width: 2px; border-style: solid; border-color: #000000; font-size: 12px; color: black; font-weight: normal; background-color: #ffffff; line-height: 14px; padding-top: 5px; padding-bottom: 5px; text-align: center" >
+\(value\)
+<br>
+</div>
+<svg viewBox="0 0 20 46" width="20px" height="46px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 64px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="36" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 90px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 90px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460505" width="52.5px" height="26.211657082460505px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 96.89417145876975px; position: absolute;">
+<line x1="42.5" y1="13.105828541230252" x2="12" y2="13.105828541230252" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230252 21.59110991546882,16.211657082460505" style="stroke: black" />
+</svg>
+<div style="margin-left: 102.5px; margin-top: 90px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(1\)
+</div>
+<div style="width: 50px; height: 20px; font-family: &#39;Noto Sans Mono&#39;,monospace; margin-left: 190px; margin-top: 40px; position: absolute; overflow-wrap: break-word; border-width: 2px; border-style: solid; border-color: #000000; font-size: 12px; color: black; font-weight: normal; background-color: #ffffff; line-height: 14px; padding-top: 5px; padding-bottom: 5px; text-align: center" >
+\(result\)
+<br>
+</div>
+<svg viewBox="0 0 20 76" width="20px" height="76px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 64px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="66" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 120px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 120px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 120px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 110px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 130px; position: absolute;">
+<line x1="10" y1="10" x2="117.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 167.5px; margin-top: 130px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460476" width="52.5px" height="26.211657082460476px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 167.5px; margin-top: 136.89417145876976px; position: absolute;">
+<line x1="10" y1="13.105828541230238" x2="40.5" y2="13.105828541230238" style="stroke: black; stroke-width: 2px" />
+<polyline points="30.90889008453118,16.211657082460476 42.5,13.105828541230238 30.90889008453118,10" style="stroke: black" />
+</svg>
+<div style="margin-left: 177.5px; margin-top: 120px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(value+2\)
+</div>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 160px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 160px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 180px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 180px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<div style="width: 50px; height: 20px; font-family: &#39;Noto Sans Mono&#39;,monospace; margin-left: 340px; margin-top: 40px; position: absolute; overflow-wrap: break-word; border-width: 2px; border-style: solid; border-color: #000000; font-size: 12px; color: black; font-weight: normal; background-color: #ffffff; line-height: 14px; padding-top: 5px; padding-bottom: 5px; text-align: center" >
+\(i^{(1)}\)
+<br>
+</div>
+<svg viewBox="0 0 20 156" width="20px" height="156px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 64px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="146" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 190px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: rgb(255, 0, 0); stroke-width: 10px" />
+</svg>
+<div style="margin-left: 375px; margin-top: 185px; position: absolute; font-size: 12px; color: rgb(255, 0, 0); font-weight: normal" >
+\(0 \rightarrow 2\)
+</div>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 200px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 200px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 200px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 230px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 230px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 230px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<div style="width: 50px; height: 20px; font-family: &#39;Noto Sans Mono&#39;,monospace; margin-left: 490px; margin-top: 40px; position: absolute; overflow-wrap: break-word; border-width: 2px; border-style: solid; border-color: #000000; font-size: 12px; color: black; font-weight: normal; background-color: #ffffff; line-height: 14px; padding-top: 5px; padding-bottom: 5px; text-align: center" >
+\(i^{(2)}\)
+<br>
+</div>
+<svg viewBox="0 0 20 206" width="20px" height="206px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 64px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="196" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 240px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: rgb(255, 0, 0); stroke-width: 10px" />
+</svg>
+<div style="margin-left: 525px; margin-top: 235px; position: absolute; font-size: 12px; color: rgb(255, 0, 0); font-weight: normal" >
+\(0 \rightarrow 1\)
+</div>
+<svg viewBox="0 0 20 80" width="20px" height="80px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 250px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="70" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 80" width="20px" height="80px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 250px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="70" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 80" width="20px" height="80px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 250px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="70" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 80" width="20px" height="80px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 250px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="70" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 250px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 170" width="20px" height="170px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 150px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="160" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 120" width="20px" height="120px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 200px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="110" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 250px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 202.5 20" width="202.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 260px; position: absolute;">
+<line x1="10" y1="10" x2="192.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 270px; position: absolute;">
+<line x1="117.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 277.5 20" width="277.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 280px; position: absolute;">
+<line x1="267.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 260px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 210px; margin-top: 286.89417145876973px; position: absolute;">
+<line x1="42.5" y1="13.105828541230267" x2="12" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230267 21.59110991546882,16.211657082460533" style="stroke: black" />
+</svg>
+<div style="margin-left: 252.5px; margin-top: 250px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(value+i^{(1)}+i^{(2)}\)
+</div>
+<svg viewBox="0 0 510 20" width="510px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 35px; margin-top: 245px; position: absolute;">
+<line x1="10" y1="10" x2="500" y2="10" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 80" width="20px" height="80px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 525px; margin-top: 245px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="70" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 510 20" width="510px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 35px; margin-top: 305px; position: absolute;">
+<line x1="500" y1="10" x2="10" y2="10" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 80" width="20px" height="80px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 35px; margin-top: 245px; position: absolute;">
+<line x1="10" y1="70" x2="10" y2="10" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<div style="margin-left: 45px; margin-top: 240px; position: absolute; font-size: 12px; color: rgb(255, 0, 0); font-weight: normal" >
+\(\mathrm{For}\)
+</div>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 310px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 310px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 310px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 310px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 340px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 340px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 340px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 340px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 340px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 100" width="20px" height="100px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 300px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="90" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 100" width="20px" height="100px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 300px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="90" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 202.5 20" width="202.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 350px; position: absolute;">
+<line x1="10" y1="10" x2="192.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 360px; position: absolute;">
+<line x1="117.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 350px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 210px; margin-top: 366.89417145876973px; position: absolute;">
+<line x1="42.5" y1="13.105828541230267" x2="12" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230267 21.59110991546882,16.211657082460533" style="stroke: black" />
+</svg>
+<div style="margin-left: 252.5px; margin-top: 340px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(value-i^{(1)}\)
+</div>
+<svg viewBox="0 0 530 20" width="530px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 205px; position: absolute;">
+<line x1="10" y1="10" x2="520" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 200" width="20px" height="200px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 535px; margin-top: 205px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="190" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 530 20" width="530px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 385px; position: absolute;">
+<line x1="520" y1="10" x2="10" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 200" width="20px" height="200px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 205px; position: absolute;">
+<line x1="10" y1="190" x2="10" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<div style="margin-left: 40px; margin-top: 215px; position: absolute; font-size: 12px; color: rgb(0, 180, 0); font-weight: normal" >
+\(value > 0\)
+</div>
+<div style="margin-left: 40px; margin-top: 325px; position: absolute; font-size: 12px; color: rgb(0, 180, 0); font-weight: normal" >
+\(\mathrm{Else}\)
+</div>
+<svg viewBox="0 0 530 20" width="530px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 315px; position: absolute;">
+<line x1="10" y1="10" x2="520" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px; stroke-dasharray: 2" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 390px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 390px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 390px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 390px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 550 20" width="550px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 15px; margin-top: 195px; position: absolute;">
+<line x1="10" y1="10" x2="540" y2="10" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 220" width="20px" height="220px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 545px; margin-top: 195px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="210" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 550 20" width="550px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 15px; margin-top: 395px; position: absolute;">
+<line x1="540" y1="10" x2="10" y2="10" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 220" width="20px" height="220px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 15px; margin-top: 195px; position: absolute;">
+<line x1="10" y1="210" x2="10" y2="10" style="stroke: rgb(255, 0, 0); stroke-width: 2px" />
+</svg>
+<div style="margin-left: 25px; margin-top: 190px; position: absolute; font-size: 12px; color: rgb(255, 0, 0); font-weight: normal" >
+\(\mathrm{For}\)
+</div>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 400px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 400px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 400px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 400px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 570 20" width="570px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 175px; position: absolute;">
+<line x1="10" y1="10" x2="560" y2="10" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 250" width="20px" height="250px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 555px; margin-top: 175px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="240" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 570 20" width="570px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 405px; position: absolute;">
+<line x1="560" y1="10" x2="10" y2="10" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 250" width="20px" height="250px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 175px; position: absolute;">
+<line x1="10" y1="240" x2="10" y2="10" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<div style="margin-left: 15px; margin-top: 170px; position: absolute; font-size: 12px; color: rgb(127,0,255); font-weight: normal" >
+nested section
+</div>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 410px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 410px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 410px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 410px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 420px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 420px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 420px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 505px; margin-top: 420px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 420px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 90" width="20px" height="90px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 380px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="80" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 430px; position: absolute;">
+<line x1="117.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 430px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 436.89417145876973px; position: absolute;">
+<line x1="42.5" y1="13.105828541230267" x2="12" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230267 21.59110991546882,16.211657082460533" style="stroke: black" />
+</svg>
+<div style="margin-left: 102.5px; margin-top: 420px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(result\)
+</div>
+</body>
+</html>
+
+--- state ---
+(470.0,
+ [("value", 0, 460.0); ("result", 1, 460.0); ("i^{(1)}", 2, 390.0);
+  ("i^{(2)}", 3, 310.0)], [], [])
+--- API ---
+Aqualis.Aqualis BlankWriter(Aqualis.Language)
+Aqualis.Aqualis merge(Aqualis.Aqualis, Aqualis.Aqualis)
+Aqualis.Aqualis mergeMany(System.Collections.Generic.IEnumerable`1[Aqualis.Aqualis])
+Aqualis.DiagnosticBag Diagnostics
+Aqualis.DiagnosticBag get_Diagnostics()
+Aqualis.Language Language
+Aqualis.Language get_Language()
+Aqualis.structure cstr
+Aqualis.structure get_cstr()
+Aqualis.varCollector cvar
+Aqualis.varCollector get_cvar()
+Aqualis.varCollector get_varCopyIn()
+Aqualis.varCollector get_varCopyOut()
+Aqualis.varCollector get_varPrivate()
+Aqualis.varCollector varCopyIn
+Aqualis.varCollector varCopyOut
+Aqualis.varCollector varPrivate
+Boolean DisplaySection
+Boolean IsOpenAccUsed
+Boolean IsOpenMpUsed
+Boolean get_DisplaySection()
+Boolean get_IsOpenAccUsed()
+Boolean get_IsOpenMpUsed()
+Boolean sameTarget(Aqualis.Aqualis, Aqualis.Aqualis)
+Double TerminalLifeLine
+Double get_TerminalLifeLine()
+Int32 Active
+Int32 get_Active()
+Microsoft.FSharp.Collections.FSharpList`1[Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`2[System.String,System.Double]]] BranchStack
+Microsoft.FSharp.Collections.FSharpList`1[Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`2[System.String,System.Double]]] SequenceBranches
+Microsoft.FSharp.Collections.FSharpList`1[Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`2[System.String,System.Double]]] get_BranchStack()
+Microsoft.FSharp.Collections.FSharpList`1[Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`2[System.String,System.Double]]] get_SequenceBranches()
+Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`3[System.String,System.Int32,System.Double]] SequenceVariables
+Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`3[System.String,System.Int32,System.Double]] get_SequenceVariables()
+Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`4[System.Double,System.Double,System.Double,System.Double]] FrameStack
+Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`4[System.Double,System.Double,System.Double,System.Double]] SequenceFrames
+Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`4[System.Double,System.Double,System.Double,System.Double]] get_FrameStack()
+Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`4[System.Double,System.Double,System.Double,System.Double]] get_SequenceFrames()
+Microsoft.FSharp.Core.FSharpOption`1[System.String] CodeFile
+Microsoft.FSharp.Core.FSharpOption`1[System.String] Dir
+Microsoft.FSharp.Core.FSharpOption`1[System.String] ProjectName
+Microsoft.FSharp.Core.FSharpOption`1[System.String] allCodes
+Microsoft.FSharp.Core.FSharpOption`1[System.String] get_CodeFile()
+Microsoft.FSharp.Core.FSharpOption`1[System.String] get_Dir()
+Microsoft.FSharp.Core.FSharpOption`1[System.String] get_ProjectName()
+Microsoft.FSharp.Core.FSharpOption`1[System.String] get_allCodes()
+System.Guid ContextId
+System.Guid get_ContextId()
+System.String Version
+System.String get_Version()
+T WithParallelMode[T](Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.Aqualis,T])
+T makeProgramWithContext[T](System.Tuple`3[System.String,System.String,Aqualis.Language], Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.Aqualis,T])
+Void .ctor(Microsoft.FSharp.Core.FSharpOption`1[System.String], Microsoft.FSharp.Core.FSharpOption`1[System.String], Aqualis.Language)
+Void appendOpen()
+Void close()
+Void codewrite(System.String)
+Void codewritei(System.String)
+Void codewritein(System.String)
+Void codewritein(System.String, System.String)
+Void codewriten(System.String)
+Void comment(System.String)
+Void delete()
+Void indentDec()
+Void indentInc()
+Void set_BranchStack(Microsoft.FSharp.Collections.FSharpList`1[Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`2[System.String,System.Double]]])
+Void set_DisplaySection(Boolean)
+Void set_FrameStack(Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`4[System.Double,System.Double,System.Double,System.Double]])
+Void set_IsOpenAccUsed(Boolean)
+Void set_IsOpenMpUsed(Boolean)
+Void set_SequenceBranches(Microsoft.FSharp.Collections.FSharpList`1[Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`2[System.String,System.Double]]])
+Void set_SequenceFrames(Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`4[System.Double,System.Double,System.Double,System.Double]])
+Void set_SequenceVariables(Microsoft.FSharp.Collections.FSharpList`1[System.Tuple`3[System.String,System.Int32,System.Double]])
+Void set_TerminalLifeLine(Double)
+Void write(System.String)
+Void writei(System.String)
+Void writein(System.String)
+Void writen(System.String)
+b requireTarget[b](Microsoft.FSharp.Core.FSharpOption`1[b])
