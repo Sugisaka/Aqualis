@@ -153,6 +153,8 @@ conflict with functions in the same scope, regardless of definition order.
 Fortran comparisons ignore case, and a subroutine's own name is reserved in its
 local scope as well.
 Python function names also reject names reserved for runtime modules and helpers.
+Variables, functions, and named loop counters additionally reject Python builtins
+used by generated code, including `range`, `int`, `float`, `open`, and `print`.
 Fortran numeric helpers isolate intrinsic names such as `scale`, `fraction`, and
 `exponent`, so those names remain available for user variables.
 Fortran keywords are allowed as identifiers, and PHP variable names are validated

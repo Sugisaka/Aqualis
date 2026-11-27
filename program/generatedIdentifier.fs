@@ -47,6 +47,11 @@ module internal GeneratedIdentifier =
         if Set.contains name keywords then
             invalidArg argumentName $"'{name}' is a reserved {language} keyword."
 
+    /// Builtins referenced without qualification by generated Python code.
+    let private pythonRuntimeBuiltins =
+        set [ "abs"; "complex"; "float"; "format"; "int"; "len"; "open"; "print"; "range"
+              "ArithmeticError"; "AssertionError"; "Exception"; "OverflowError"; "ValueError" ]
+
     /// Names used by generated runtime code, shared by variable and function checks.
     let conflictsWithRuntime language (name:string) =
         let comparison = if language = Fortran then StringComparison.OrdinalIgnoreCase else StringComparison.Ordinal
@@ -56,7 +61,10 @@ module internal GeneratedIdentifier =
             Regex.IsMatch(name, @"\Aarg[0-9]+(?:_size)?\z", RegexOptions.IgnoreCase)
         let runtimeName =
             match language with
-            | Python -> Set.contains name (set ["numpy"; "math"; "cmath"; "copy"; "re"; "struct"; "sys"; "random_seed"; "solve"; "eig"; "svd"; "jv"; "yn"])
+            | Python ->
+                Set.contains name pythonRuntimeBuiltins ||
+                name.StartsWith("_AqualisLoopExit", StringComparison.Ordinal) ||
+                Set.contains name (set ["numpy"; "math"; "cmath"; "copy"; "re"; "struct"; "sys"; "random_seed"; "solve"; "eig"; "svd"; "jv"; "yn"])
             | JavaScript -> Set.contains name (set ["Math"; "Number"; "Array"; "Error"; "Infinity"; "NaN"; "undefined"])
             | PHP -> Set.contains name (set ["this"; "GLOBALS"; "_SERVER"; "_GET"; "_POST"; "_FILES"; "_COOKIE"; "_SESSION"; "_REQUEST"; "_ENV"])
             | C99 -> name.StartsWith("_", StringComparison.Ordinal) || Set.contains name (set ["main"; "I"; "NULL"; "stdin"; "stdout"; "stderr"])

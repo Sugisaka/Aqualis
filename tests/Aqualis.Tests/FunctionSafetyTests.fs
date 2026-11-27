@@ -249,3 +249,33 @@ module FunctionSafetyTests =
                 Compile [Fortran] output.Path "reserved_function" "1" (fun context -> context.func name ignore))
             Assert.Equal("functionName", error.ParamName)
             Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``Python builtin and loop exception names cannot shadow generated runtime calls`` () =
+        for name in ["range";"int";"float";"complex";"abs";"format";"len";"open";"print";"ArithmeticError";"AssertionError";"Exception";"OverflowError";"ValueError";"_AqualisLoopExit11"] do
+            for role in [0..4] do
+                use output = new TemporaryDirectory()
+                let mutable bodyCalled = false
+                let error = Assert.Throws<ArgumentException>(fun () ->
+                    Compile [Python] output.Path "builtin_collision" "1" (fun context ->
+                        match role with
+                        |0 -> context.var.i0 name |> ignore
+                        |1 -> context.var.d1 name |> ignore
+                        |2 -> context.func name (fun _ -> bodyCalled <- true)
+                        |3 -> context.iter.range(name,I 0,I 1) (fun _ -> bodyCalled <- true)
+                        |_ -> context.iter.range_exit(name,I 0,I 1) (fun _ -> bodyCalled <- true)))
+                Assert.Contains("reserved",error.Message)
+                Assert.False(bodyCalled)
+                Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``Python names not used as runtime builtins remain available`` () =
+        use output = new TemporaryDirectory()
+        Compile [Python] output.Path "valid_builtin_neighbors" "1" (fun context ->
+            let total = context.var.i0 "sum"
+            let input = context.var.d0 "input"
+            total <== 0
+            input <== 1.0
+            context.func "range_values" (fun child -> child.print.t (I 1))
+            context.iter.range("sample_index",I 0,I 1) (fun _ -> total <== total+1))
+        Assert.NotEmpty(Directory.GetFileSystemEntries output.Path)
