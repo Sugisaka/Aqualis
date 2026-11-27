@@ -724,7 +724,7 @@ namespace Aqualis
                 match context.language with
                 |Fortran|LaTeX->writein(left+"="+right)
                 |HTML|HTMLSequenceDiagram->writein(left+" \\leftarrow "+right)
-                |Python->writein(left+" = copy.deepcopy("+right+")")
+                |Python->writein(left+"[...] = copy.deepcopy("+right+")")
                 |C99|JavaScript|PHP->elementwise()
                 |Numeric->()
             |_ when not (NumericArrayTemporaries.executable context) -> elementwise()

@@ -6,6 +6,38 @@ open Xunit
 open Aqualis
 
 module FunctionSafetyTests =
+    [<Theory>]
+    [<InlineData(1)>]
+    [<InlineData(2)>]
+    [<InlineData(3)>]
+    let ``Python whole array copies preserve destination storage`` rank =
+        use output = new TemporaryDirectory()
+        Compile [Python] output.Path "array_copy" "1" (fun c ->
+            match rank with
+            | 1 ->
+                let src = c.var.d1("src", 2)
+                let dst = c.var.d1("dst", 2)
+                dst <== src
+                c.func "copy_array" (fun f -> src.farg f (fun s -> dst.farg f (fun d -> d <== s; d <== d)))
+            | 2 ->
+                let src = c.var.z2("src", 2, 3)
+                let dst = c.var.z2("dst", 2, 3)
+                dst <== src
+                c.func "copy_array" (fun f -> src.farg f (fun s -> dst.farg f (fun d -> d <== s; d <== d)))
+            | _ ->
+                let src = c.var.i3("src", 2, 3, 4)
+                let dst = c.var.i3("dst", 2, 3, 4)
+                dst <== src
+                c.func "copy_array" (fun f -> src.farg f (fun s -> dst.farg f (fun d -> d <== s; d <== d))))
+        let source = File.ReadAllText(Path.Combine(output.Path, "array_copy.py"))
+        Assert.Contains("dst[...] = copy.deepcopy(src)", source)
+        Assert.Contains("arg03[...] = copy.deepcopy(arg01)", source)
+        Assert.Contains("arg03[...] = copy.deepcopy(arg03)", source)
+        Assert.DoesNotContain("arg03 = copy.deepcopy(", source)
+        Assert.Contains("Array size (first dimension) mismatch", source)
+        if rank >= 2 then Assert.Contains("Array size (second dimension) mismatch", source)
+        if rank >= 3 then Assert.Contains("Array size (third dimension) mismatch", source)
+
     [<Fact>]
     let ``borrowed C and Python arrays reject storage changes in every rank`` () =
         for language in [C99; Python] do

@@ -619,7 +619,7 @@ namespace Aqualis
                 match context.language with
                 |Fortran|LaTeX -> writein(left+"="+right)
                 |HTML|HTMLSequenceDiagram -> writein(left+" \\leftarrow "+right)
-                |Python -> writein(left+" = copy.deepcopy("+right+")")
+                |Python -> writein(left+"[...] = copy.deepcopy("+right+")")
                 |C99|JavaScript|PHP -> context.iter.num this.size1 <| fun i -> this.AssignAt(i,(other[i] :> INum0).Expr)
                 |Numeric -> ()
             |_ when not (NumericArrayTemporaries.executable context) ->
