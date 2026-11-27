@@ -109,21 +109,25 @@ namespace Aqualis
             let Y = context.var.dp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
             member _.y (x:double0) code =
-                let lastIndex = X.size1 - 1
-                context.ch.i <| fun flag ->
-                    flag<==0
-                    context.iter.range (_0, lastIndex-1) <| fun i ->
-                        context.br.if1 (X.[i] .<= x .< X.[i+1]) <| fun () ->
+                context.ch.d <| fun query ->
+                    query <== x
+                    let x = query
+                    let lastIndex = X.size1 - 1
+                    context.ch.i <| fun flag ->
+                        flag<==0
+                        context.iter.range_exit (_0, lastIndex-1) <| fun (exit,i) ->
+                            context.br.if1 (X.[i] .<= x .< X.[i+1]) <| fun () ->
+                                flag<==1
+                                context.ch.d <| fun z ->
+                                    linearWeight context x X.[i] X.[i+1] <| fun weight ->
+                                        z <== Y.[i]*(1.0-weight)+Y.[i+1]*weight
+                                        NumericArrayValidation.requireFinite context z "Linear interpolation result must be finite."
+                                        code(z)
+                                    exit()
+                        context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                             flag<==1
-                            context.ch.d <| fun z ->
-                                linearWeight context x X.[i] X.[i+1] <| fun weight ->
-                                    z <== Y.[i]*(1.0-weight)+Y.[i+1]*weight
-                                    NumericArrayValidation.requireFinite context z "Linear interpolation result must be finite."
-                                    code(z)
-                    context.br.if1 (x.=X.[lastIndex]) <| fun () ->
-                        flag<==1
-                        code(Y.[lastIndex])
-                    NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
+                            code(Y.[lastIndex])
+                        NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
 
         ///<summary>倍精度浮動小数点型の１次元線形補間データ</summary>
         type LinearInterpolate1z(context:Aqualis,id:string,data_x:double list,data_y:(double*double) list) =
@@ -134,22 +138,26 @@ namespace Aqualis
             let Y = context.var.zp1(id+"_y",data_y)
             ///<summary>元データを補間し、任意のxに対する値yを求めてcodeを実行</summary>
             member this.y (x:double0) code =
-                let lastIndex = X.size1 - 1
-                context.ch.i <| fun flag ->
-                    flag<==0
-                    context.iter.range (_0, lastIndex-1) <| fun i ->
-                        context.br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
+                context.ch.d <| fun query ->
+                    query <== x
+                    let x = query
+                    let lastIndex = X.size1 - 1
+                    context.ch.i <| fun flag ->
+                        flag<==0
+                        context.iter.range_exit (_0, lastIndex-1) <| fun (exit,i) ->
+                            context.br.if1 (X.[i].<=x.<X.[i+1]) <| fun () ->
+                                flag<==1
+                                context.ch.z <| fun z ->
+                                    linearWeight context x X.[i] X.[i+1] <| fun weight ->
+                                        z <== Y.[i]*(1.0-weight)+Y.[i+1]*weight
+                                        NumericArrayValidation.requireFinite context z.re "Linear interpolation result must be finite."
+                                        NumericArrayValidation.requireFinite context z.im "Linear interpolation result must be finite."
+                                        code(z)
+                                    exit()
+                        context.br.if1 (x.=X.[lastIndex]) <| fun () ->
                             flag<==1
-                            context.ch.z <| fun z ->
-                                linearWeight context x X.[i] X.[i+1] <| fun weight ->
-                                    z <== Y.[i]*(1.0-weight)+Y.[i+1]*weight
-                                    NumericArrayValidation.requireFinite context z.re "Linear interpolation result must be finite."
-                                    NumericArrayValidation.requireFinite context z.im "Linear interpolation result must be finite."
-                                    code(z)
-                    context.br.if1 (x.=X.[lastIndex]) <| fun () ->
-                        flag<==1
-                        code(Y.[lastIndex])
-                    NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
+                            code(Y.[lastIndex])
+                        NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
 
         /// Generates cubic spline interpolation over real-valued samples.
         type splineInterpolateDouble(context:Aqualis) =

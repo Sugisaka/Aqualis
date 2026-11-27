@@ -1433,5 +1433,6 @@ done
 
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" derivatives
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" svd-scaling
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" linear-alias
 
 printf '%s\n' 'All generated-code runtime checks passed.'

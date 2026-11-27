@@ -14,7 +14,7 @@ for language in c fortran python; do
 import sys
 import numpy as np
 case, output = sys.argv[1:]
-expected = {'derivatives': [9,6,2,0,81,108,108,72,9,6,2,0], 'svd-scaling': [1]*12+[0]*3+[1]*3}[case]
+expected = {'derivatives': [9,6,2,0,81,108,108,72,9,6,2,0], 'svd-scaling': [1]*12+[0]*3+[1]*3, 'linear-alias': [1,1,1,1,2,1,2,1,4,1,4,1]}[case]
 np.testing.assert_allclose(list(map(float, output.split())), expected, rtol=1e-12, atol=1e-12)
 PY
   printf '%s %s regression: passed\n' "$language" "$regression"

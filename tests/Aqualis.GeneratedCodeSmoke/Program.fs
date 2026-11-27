@@ -2734,6 +2734,26 @@ module Program =
                         context.print.t (solution[0].re/D normalization)
                         context.print.t (solution[0].im/D normalization)
 
+    let private generateLinearAliasing outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-linear-alias-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun context ->
+            let real = context.interpolate.linearDouble("realSample",[0.0;1.0;2.0],[0.0;2.0;4.0])
+            let complex = context.interpolate.linearComplex("complexSample",[0.0;1.0;2.0],[(0.0,0.0);(2.0,1.0);(4.0,2.0)])
+            let query = context.var.d0 "query"
+            let calls = context.var.i0 "calls"
+            for value in [0.5;1.0;2.0] do
+                query <== value
+                calls <== 0
+                real.y query (fun result -> query <== result; calls <== calls+1)
+                context.print.t query
+                context.print.t calls
+                query <== value
+                calls <== 0
+                complex.y query (fun result -> query <== result.re; calls <== calls+1)
+                context.print.t query
+                context.print.t calls
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2742,6 +2762,7 @@ module Program =
             Directory.CreateDirectory(outputRoot) |> ignore
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLetDerivatives outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateScaledTikhonov outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLinearAliasing outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
