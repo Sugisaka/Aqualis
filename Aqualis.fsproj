@@ -58,6 +58,7 @@
     <Compile Include="num\openmp.fs" />
     <Compile Include="num\openacc.fs" />
     <Compile Include="num\print1.fs" />
+    <Compile Include="num\arraySize.fs" />
     <Compile Include="num\array1.fs" />
     <Compile Include="num\array1d.fs" />
     <Compile Include="num\array1z.fs" />

@@ -37,6 +37,7 @@
     <Compile Include="NumericFormattingTests.fs" />
     <Compile Include="ControlFlowGenerationTests.fs" />
     <Compile Include="NumericArrayGenericTests.fs" />
+    <Compile Include="ArraySizeGenerationTests.fs" />
     <Compile Include="GeometryCrtpTests.fs" />
     <Compile Include="InterpolationTests.fs" />
     <Compile Include="OptimizationTests.fs" />

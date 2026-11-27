@@ -1,0 +1,594 @@
+Fortran
+Var (It 4, "vector_size(1)", NaN) | vector_size(1)
+Var (It 4, "matrix_size(1)", NaN) | matrix_size(1)
+Var (It 4, "matrix_size(2)", NaN) | matrix_size(2)
+Var (It 4, "tensor_size(1)", NaN) | tensor_size(1)
+Var (It 4, "tensor_size(2)", NaN) | tensor_size(2)
+Var (It 4, "tensor_size(3)", NaN) | tensor_size(3)
+Var (It 4, "vector_size(1)", NaN) | vector_size(1)
+Var (It 4, "matrix_size(1)", NaN) | matrix_size(1)
+Var (It 4, "matrix_size(2)", NaN) | matrix_size(2)
+Var (It 4, "tensor_size(1)", NaN) | tensor_size(1)
+Var (It 4, "tensor_size(2)", NaN) | tensor_size(2)
+Var (It 4, "tensor_size(3)", NaN) | tensor_size(3)
+--- language ---
+C99
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+--- language ---
+Python
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+--- language ---
+JavaScript
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+--- language ---
+PHP
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+Var (It 4, "vector_size[0]", NaN) | vector_size[0]
+Var (It 4, "matrix_size[0]", NaN) | matrix_size[0]
+Var (It 4, "matrix_size[1]", NaN) | matrix_size[1]
+Var (It 4, "tensor_size[0]", NaN) | tensor_size[0]
+Var (It 4, "tensor_size[1]", NaN) | tensor_size[1]
+Var (It 4, "tensor_size[2]", NaN) | tensor_size[2]
+--- language ---
+LaTeX
+Var (It 4, "\mathcal{S}_1[vector]", NaN) | \mathcal{S}_1[vector]
+Var (It 4, "\mathcal{S}_1[matrix]", NaN) | \mathcal{S}_1[matrix]
+Var (It 4, "\mathcal{S}_2[matrix]", NaN) | \mathcal{S}_2[matrix]
+Var (It 4, "\mathcal{S}_1[tensor]", NaN) | \mathcal{S}_1[tensor]
+Var (It 4, "\mathcal{S}_2[tensor]", NaN) | \mathcal{S}_2[tensor]
+Var (It 4, "\mathcal{S}_3[tensor]", NaN) | \mathcal{S}_3[tensor]
+Var (It 4, "\mathcal{S}_1[vector]", NaN) | \mathcal{S}_1[vector]
+Var (It 4, "\mathcal{S}_1[matrix]", NaN) | \mathcal{S}_1[matrix]
+Var (It 4, "\mathcal{S}_2[matrix]", NaN) | \mathcal{S}_2[matrix]
+Var (It 4, "\mathcal{S}_1[tensor]", NaN) | \mathcal{S}_1[tensor]
+Var (It 4, "\mathcal{S}_2[tensor]", NaN) | \mathcal{S}_2[tensor]
+Var (It 4, "\mathcal{S}_3[tensor]", NaN) | \mathcal{S}_3[tensor]
+--- language ---
+HTML
+Var (It 4, "\mathcal{S}_1[vector]", NaN) | \mathcal{S}_1[vector]
+Var (It 4, "\mathcal{S}_1[matrix]", NaN) | \mathcal{S}_1[matrix]
+Var (It 4, "\mathcal{S}_2[matrix]", NaN) | \mathcal{S}_2[matrix]
+Var (It 4, "\mathcal{S}_1[tensor]", NaN) | \mathcal{S}_1[tensor]
+Var (It 4, "\mathcal{S}_2[tensor]", NaN) | \mathcal{S}_2[tensor]
+Var (It 4, "\mathcal{S}_3[tensor]", NaN) | \mathcal{S}_3[tensor]
+Var (It 4, "\mathcal{S}_1[vector]", NaN) | \mathcal{S}_1[vector]
+Var (It 4, "\mathcal{S}_1[matrix]", NaN) | \mathcal{S}_1[matrix]
+Var (It 4, "\mathcal{S}_2[matrix]", NaN) | \mathcal{S}_2[matrix]
+Var (It 4, "\mathcal{S}_1[tensor]", NaN) | \mathcal{S}_1[tensor]
+Var (It 4, "\mathcal{S}_2[tensor]", NaN) | \mathcal{S}_2[tensor]
+Var (It 4, "\mathcal{S}_3[tensor]", NaN) | \mathcal{S}_3[tensor]
+--- language ---
+HTMLSequenceDiagram
+Var (It 4, "\mathcal{S}_1[vector]", NaN) | \mathcal{S}_1[vector]
+Var (It 4, "\mathcal{S}_1[matrix]", NaN) | \mathcal{S}_1[matrix]
+Var (It 4, "\mathcal{S}_2[matrix]", NaN) | \mathcal{S}_2[matrix]
+Var (It 4, "\mathcal{S}_1[tensor]", NaN) | \mathcal{S}_1[tensor]
+Var (It 4, "\mathcal{S}_2[tensor]", NaN) | \mathcal{S}_2[tensor]
+Var (It 4, "\mathcal{S}_3[tensor]", NaN) | \mathcal{S}_3[tensor]
+Var (It 4, "\mathcal{S}_1[vector]", NaN) | \mathcal{S}_1[vector]
+Var (It 4, "\mathcal{S}_1[matrix]", NaN) | \mathcal{S}_1[matrix]
+Var (It 4, "\mathcal{S}_2[matrix]", NaN) | \mathcal{S}_2[matrix]
+Var (It 4, "\mathcal{S}_1[tensor]", NaN) | \mathcal{S}_1[tensor]
+Var (It 4, "\mathcal{S}_2[tensor]", NaN) | \mathcal{S}_2[tensor]
+Var (It 4, "\mathcal{S}_3[tensor]", NaN) | \mathcal{S}_3[tensor]
+--- language ---
+Numeric
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+NaN | 
+--- API ---
+base1: Aqualis.Etype Etype
+base1: Aqualis.Etype get_Etype()
+base1: Aqualis.Expr1 Expr
+base1: Aqualis.Expr1 Idx1(System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base1: Aqualis.Expr1 Idx1(System.Tuple`2[Aqualis.int0,System.Int32])
+base1: Aqualis.Expr1 Idx1(System.Tuple`2[System.Int32,Aqualis.int0])
+base1: Aqualis.Expr1 Idx1(System.Tuple`2[System.Int32,System.Int32])
+base1: Aqualis.Expr1 get_Expr()
+base1: Aqualis.expr Idx1(Aqualis.int0)
+base1: Aqualis.expr Idx1(Int32)
+base1: Aqualis.int0 get_size1()
+base1: Aqualis.int0 size1
+base1: System.String code
+base1: System.String get_code()
+base1: Void .ctor(Aqualis.Aqualis, Aqualis.Etype, Aqualis.VarType, System.String, System.String)
+base1: Void .ctor(Aqualis.Aqualis, System.String, Aqualis.VarType, System.String)
+base1: Void .ctor(Aqualis.Etype, Aqualis.Expr1, Aqualis.Aqualis)
+base1: Void Foreach(System.String, Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.int0,Microsoft.FSharp.Core.Unit])
+base1: Void Foreach_exit(System.String, Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`2[Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base1: Void allocate(Aqualis.int0)
+base1: Void allocate(Int32)
+base1: Void clear()
+base1: Void deallocate()
+base1: Void foreach(Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.int0,Microsoft.FSharp.Core.Unit])
+base1: Void foreach_exit(Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`2[Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base1: Void sizeinit()
+base2: Aqualis.Etype Etype
+base2: Aqualis.Etype get_Etype()
+base2: Aqualis.Expr1 Idx2(Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base2: Aqualis.Expr1 Idx2(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base2: Aqualis.Expr1 Idx2(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base2: Aqualis.Expr1 Idx2(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base2: Aqualis.Expr1 Idx2(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base2: Aqualis.Expr1 Idx2(Int32, Microsoft.FSharp.Core.Unit)
+base2: Aqualis.Expr1 Idx2(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base2: Aqualis.Expr1 Idx2(Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base2: Aqualis.Expr1 Idx2(Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base2: Aqualis.Expr1 Idx2(Int32, System.Tuple`2[System.Int32,System.Int32])
+base2: Aqualis.Expr1 Idx2(Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base2: Aqualis.Expr1 Idx2(Microsoft.FSharp.Core.Unit, Int32)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base2: Aqualis.Expr1 Idx2(System.Tuple`2[System.Int32,System.Int32], Int32)
+base2: Aqualis.Expr2 Expr
+base2: Aqualis.Expr2 Idx2(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base2: Aqualis.Expr2 Idx2(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base2: Aqualis.Expr2 Idx2(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base2: Aqualis.Expr2 get_Expr()
+base2: Aqualis.expr Idx2(Aqualis.int0, Aqualis.int0)
+base2: Aqualis.expr Idx2(Aqualis.int0, Int32)
+base2: Aqualis.expr Idx2(Int32, Aqualis.int0)
+base2: Aqualis.expr Idx2(Int32, Int32)
+base2: Aqualis.int0 get_size1()
+base2: Aqualis.int0 get_size2()
+base2: Aqualis.int0 size1
+base2: Aqualis.int0 size2
+base2: System.String code
+base2: System.String get_code()
+base2: Void .ctor(Aqualis.Aqualis, Aqualis.Etype, Aqualis.VarType, System.String, System.String)
+base2: Void .ctor(Aqualis.Aqualis, System.String, Aqualis.VarType, System.String)
+base2: Void .ctor(Aqualis.Etype, Aqualis.Expr2, Aqualis.Aqualis)
+base2: Void Foreach(System.String, System.String, Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`2[Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base2: Void Foreach_exit(System.String, System.String, Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`4[Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base2: Void allocate(Aqualis.int0, Aqualis.int0)
+base2: Void allocate(Aqualis.int0, Int32)
+base2: Void allocate(Int32, Aqualis.int0)
+base2: Void allocate(Int32, Int32)
+base2: Void clear()
+base2: Void deallocate()
+base2: Void foreach(Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`2[Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base2: Void foreach_exit(Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`4[Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base2: Void sizeinit()
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Int32, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Int32, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, Microsoft.FSharp.Core.Unit, Int32)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32], Int32)
+base3: Aqualis.Expr1 Idx3(Int32, Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr1 Idx3(Int32, Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Int32, Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr1 Idx3(Int32, Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Int32, Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr1 Idx3(Int32, Int32, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr1 Idx3(Int32, Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Int32, Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr1 Idx3(Int32, Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr1 Idx3(Int32, Int32, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr1 Idx3(Int32, Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Int32, Microsoft.FSharp.Core.Unit, Int32)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Int32, System.Tuple`2[System.Int32,System.Int32], Int32)
+base3: Aqualis.Expr1 Idx3(Microsoft.FSharp.Core.Unit, Aqualis.int0, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Microsoft.FSharp.Core.Unit, Aqualis.int0, Int32)
+base3: Aqualis.Expr1 Idx3(Microsoft.FSharp.Core.Unit, Int32, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(Microsoft.FSharp.Core.Unit, Int32, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Int32, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Int32, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Int32, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Int32, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0, Int32)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,System.Int32], Int32, Aqualis.int0)
+base3: Aqualis.Expr1 Idx3(System.Tuple`2[System.Int32,System.Int32], Int32, Int32)
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Aqualis.int0, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Int32, Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Int32, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Int32, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Int32, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit, Int32)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit, Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Int32, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Int32, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit, Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Int32, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Int32, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit, Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Aqualis.int0, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Int32, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Int32, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Int32, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Int32, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Int32, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit, Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit, Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], Int32)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32], Aqualis.int0)
+base3: Aqualis.Expr2 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32], Int32)
+base3: Aqualis.Expr3 Expr
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit, Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit, System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32], Microsoft.FSharp.Core.Unit)
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[Aqualis.int0,System.Int32])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,Aqualis.int0])
+base3: Aqualis.Expr3 Idx3(System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32], System.Tuple`2[System.Int32,System.Int32])
+base3: Aqualis.Expr3 get_Expr()
+base3: Aqualis.expr Idx3(Aqualis.int0, Aqualis.int0, Aqualis.int0)
+base3: Aqualis.expr Idx3(Aqualis.int0, Aqualis.int0, Int32)
+base3: Aqualis.expr Idx3(Aqualis.int0, Int32, Aqualis.int0)
+base3: Aqualis.expr Idx3(Aqualis.int0, Int32, Int32)
+base3: Aqualis.expr Idx3(Int32, Aqualis.int0, Aqualis.int0)
+base3: Aqualis.expr Idx3(Int32, Aqualis.int0, Int32)
+base3: Aqualis.expr Idx3(Int32, Int32, Aqualis.int0)
+base3: Aqualis.expr Idx3(Int32, Int32, Int32)
+base3: Aqualis.int0 get_size1()
+base3: Aqualis.int0 get_size2()
+base3: Aqualis.int0 get_size3()
+base3: Aqualis.int0 size1
+base3: Aqualis.int0 size2
+base3: Aqualis.int0 size3
+base3: System.String code
+base3: System.String get_code()
+base3: Void .ctor(Aqualis.Aqualis, Aqualis.Etype, Aqualis.VarType, System.String, System.String)
+base3: Void .ctor(Aqualis.Aqualis, System.String, Aqualis.VarType, System.String)
+base3: Void .ctor(Aqualis.Etype, Aqualis.Expr3, Aqualis.Aqualis)
+base3: Void Foreach(System.String, System.String, System.String, Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`3[Aqualis.int0,Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base3: Void Foreach_exit(System.String, System.String, System.String, Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`6[Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Aqualis.int0,Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base3: Void allocate(Aqualis.int0, Aqualis.int0, Aqualis.int0)
+base3: Void allocate(Aqualis.int0, Aqualis.int0, Int32)
+base3: Void allocate(Aqualis.int0, Int32, Aqualis.int0)
+base3: Void allocate(Aqualis.int0, Int32, Int32)
+base3: Void allocate(Int32, Aqualis.int0, Aqualis.int0)
+base3: Void allocate(Int32, Aqualis.int0, Int32)
+base3: Void allocate(Int32, Int32, Aqualis.int0)
+base3: Void allocate(Int32, Int32, Int32)
+base3: Void clear()
+base3: Void deallocate()
+base3: Void foreach(Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`3[Aqualis.int0,Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base3: Void foreach_exit(Microsoft.FSharp.Core.FSharpFunc`2[System.Tuple`6[Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.Unit,Microsoft.FSharp.Core.Unit],Aqualis.int0,Aqualis.int0,Aqualis.int0],Microsoft.FSharp.Core.Unit])
+base3: Void sizeinit()

@@ -121,7 +121,6 @@ namespace Aqualis
     type base1 (typ:Etype,x:Expr1, c:Aqualis) =
         let writein text = c.codewritein text
         let comment text = c.comment text
-        let sizeValue value = int0(value, c)
         ///<summary>変数を作成しリストに追加</summary>
         new (context:Aqualis,typ,size,name,para) =
             context.cvar.setVar(typ,size,name,para)
@@ -146,25 +145,7 @@ namespace Aqualis
           with get() =
             match x with
             |Var1(_,name) ->
-                match c.language with
-                |Fortran ->
-                    sizeValue(Var(It 4,name+"_size(1)",NaN))
-                |C99 ->
-                    sizeValue(Var(It 4,name+"_size[0]",NaN))
-                |LaTeX ->
-                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
-                |HTML ->
-                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
-                |HTMLSequenceDiagram ->
-                    sizeValue(Var(It 4,"\\mathcal{S}_1["+name+"]",NaN))
-                |Python ->
-                    sizeValue(Var(It 4,name+"_size[0]",NaN))
-                |JavaScript ->
-                    sizeValue(Var(It 4,name+"_size[0]",NaN))
-                |PHP ->
-                    sizeValue(Var(It 4,name+"_size[0]",NaN))
-                |Numeric ->
-                    sizeValue NaN
+                ArraySize.named c name 1
             |Arx1(s,_) -> s
         ///<summary>インデクサ</summary>
         member this.Idx1(i:int0) =
