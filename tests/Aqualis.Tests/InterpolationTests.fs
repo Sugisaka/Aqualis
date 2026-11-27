@@ -14,16 +14,16 @@ module InterpolationTests =
 
     let private assertSplineUsesLeftEndpointOrigin (source:string) =
         Assert.Matches(
-            Regex(@"query\s*-\s*x\[i0\d+\]"),
+            Regex(@"(?:query|d0\d+)\s*-\s*x\[i0\d+\]"),
             source)
         Assert.DoesNotMatch(
-            Regex(@"query\s*-\s*x\[i0\d+\s*\+\s*1\]"),
+            Regex(@"(?:query|d0\d+)\s*-\s*x\[i0\d+\s*\+\s*1\]"),
             source)
         Assert.Matches(
-            Regex(@"query\s*==\s*x\[x_size\[0\]\s*-\s*1\]"),
+            Regex(@"(?:query|d0\d+)\s*==\s*x\[x_size\[0\]\s*-\s*1\]"),
             source)
         Assert.Matches(
-            Regex(@"query\s*-\s*x\[x_size\[0\]\s*-\s*2\]"),
+            Regex(@"(?:query|d0\d+)\s*-\s*x\[x_size\[0\]\s*-\s*2\]"),
             source)
 
     [<Fact>]

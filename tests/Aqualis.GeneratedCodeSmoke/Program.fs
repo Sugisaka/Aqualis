@@ -2754,6 +2754,47 @@ module Program =
                 context.print.t query
                 context.print.t calls
 
+    let private generateSplineAliasing outputRoot (directoryName, language) =
+        for complex in [false;true] do
+            let name = if complex then "complex" else "real"
+            let directory = Path.Combine(outputRoot,"review-spline-alias-"+name+"-"+directoryName)
+            Directory.CreateDirectory(directory) |> ignore
+            Compile [language] directory "smoke" "1" <| fun context ->
+                if complex then
+                    let spline = context.interpolate.splineComplex(true)
+                    spline.X.allocate 3
+                    spline.Y.allocate 3
+                    for i, x, re, im in [0,0.0,0.0,0.0;1,1.0,1.0,2.0;2,2.0,0.0,0.0] do
+                        spline.X[i] <== x
+                        spline.Y[i] <== complex0(Cpx(re,im))
+                    spline.set()
+                    let value = context.var.z0 "value"
+                    for query in [0.0;0.5;1.0;1.5;2.0] do
+                        value <== complex0(Cpx(query,99.0))
+                        spline.p value value.re
+                        context.print.t value.re
+                        context.print.t value.im
+                        value <== complex0(Cpx(query,99.0))
+                        spline.dp value value.re
+                        context.print.t value.re
+                        context.print.t value.im
+                else
+                    let spline = context.interpolate.splineDouble()
+                    spline.X.allocate 3
+                    spline.Y.allocate 3
+                    for i, x, y in [0,0.0,0.0;1,1.0,1.0;2,2.0,0.0] do
+                        spline.X[i] <== x
+                        spline.Y[i] <== y
+                    spline.set()
+                    let value = context.var.d0 "value"
+                    for query in [0.0;0.5;1.0;1.5;2.0] do
+                        value <== query
+                        spline.p value value
+                        context.print.t value
+                        value <== query
+                        spline.dp value value
+                        context.print.t value
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2763,6 +2804,7 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLetDerivatives outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateScaledTikhonov outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLinearAliasing outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineAliasing outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
