@@ -1373,4 +1373,6 @@ PY
   done
 done
 
+"$scipy_python" "$output_root/python-function-array-results/smoke.py"
+
 printf '%s\n' 'All generated-code runtime checks passed.'

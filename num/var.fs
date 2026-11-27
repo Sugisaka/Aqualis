@@ -11,6 +11,7 @@ namespace Aqualis
     ///<summary>変数宣言</summary>
     type ContextVar internal (ctx:Aqualis) =
         let nameFor (ctx:Aqualis) name =
+            GeneratedIdentifier.validateVariable ctx.language name
             match ctx.language with
             |PHP -> "$" + name
             |_ -> name

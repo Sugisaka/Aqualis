@@ -49,7 +49,7 @@ namespace Aqualis
                     |Python ->
                         this.RequirePythonLinalg "svd"
                         //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                        this.GenerationContext.codewritein(u.code+","+s.code+","+vt.code+" = svd("+source.code+")"+"\n")
+                        this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
                     |_ ->
                         this.GenerationContext.group.section "非対称複素行列の特異値分解" <| fun () ->
                             s.clear()
@@ -172,7 +172,7 @@ namespace Aqualis
                             |Python ->
                                 this.RequirePythonLinalg "svd"
                                 //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                                this.GenerationContext.codewritein(u.code+","+s.code+","+vt.code+" = svd("+source.code+")"+"\n")
+                                this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
                             |_ ->
                                 ()
     
@@ -203,7 +203,7 @@ namespace Aqualis
                     |Python ->
                         this.RequirePythonLinalg "svd"
                         //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                        this.GenerationContext.codewritein(u.code+","+s.code+","+vt.code+" = svd("+source.code+")"+"\n")
+                        this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
                     |_ ->
                         this.GenerationContext.group.section "非対称実行列の特異値分解" <| fun () ->
                             s.clear()
@@ -317,7 +317,7 @@ namespace Aqualis
                             |Python ->
                                 this.RequirePythonLinalg "svd"
                                 //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                                this.GenerationContext.codewritein(u.code+","+s.code+","+vt.code+" = svd("+source.code+")"+"\n")
+                                this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
                             |_ ->
                                 ()
                 match this.GenerationContext.language with

@@ -116,7 +116,26 @@ point satisfying the gradient tolerance stops before the Hessian is solved.
 
 ## Generated output ownership
 
-Successful `Compile` runs create a per-project `.aqualis-generated-<project>.json` manifest in the output directory. On later runs for the same project, files listed in the previous manifest but not generated again are removed transactionally. Unrelated files are left alone; if a previously generated file was edited after the previous run, compilation stops rather than deleting or replacing that edit. Existing outputs from before a manifest is first created are not automatically claimed or removed. Do not run multiple generator processes against the same output directory concurrently.
+Successful `Compile` runs create a per-project `.aqualis-generated-<project>.json` manifest in the output directory. On later runs for the same project, files listed in the previous manifest but not generated again are removed transactionally. Unrelated files are left alone; if a previously generated file was edited after the previous run, compilation stops rather than deleting or replacing that edit. An existing unmanaged file with the same path as a new output also stops compilation before any files are replaced. Do not run multiple generator processes against the same output directory concurrently.
+
+To explicitly replace and take ownership of unmanaged output files, use
+`CompileWithOutputPolicy { OverwriteUnmanagedFiles = true }` with the same
+remaining arguments as `Compile`. It returns generated paths and diagnostics,
+like `CompileWithDiagnostics`. This option does not allow overwriting edits to
+previously managed files.
+
+## FFT inputs and generated names
+
+FFT operations require named input and output arrays. Array slices and computed
+array expressions raise `NotSupportedException` during generation. Copy a slice
+to a named temporary array before transforming it, then copy the result back if
+needed.
+
+Named numeric variables must use portable ASCII identifiers for executable
+targets. Reserved words and Aqualis temporary names are rejected during generation;
+names such as `numpy` that collide with required runtime symbols are also rejected.
+Fortran keywords are allowed as identifiers, and PHP variable names are validated
+separately from PHP keywords. Markup-only names retain their existing behavior.
 
 ## License
 [MIT License](https://github.com/Sugisaka/Aqualis/blob/master/LICENSE.txt)

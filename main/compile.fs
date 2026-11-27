@@ -13,6 +13,15 @@ namespace Aqualis
     open System.Text
     open System.Text.Json
 
+    /// Controls replacement of files not owned by the current generated project.
+    type CompilationOutputPolicy = {
+        OverwriteUnmanagedFiles: bool
+    }
+
+    [<RequireQualifiedAccess>]
+    module CompilationOutputPolicy =
+        let defaults = { OverwriteUnmanagedFiles = false }
+
     /// Coordinates compilation and publication of generated project files.
     [<AutoOpen>]
     module Aqualis_main =
@@ -96,7 +105,7 @@ namespace Aqualis
             result.ToString()
 
         /// Stages generated files and publishes them as one transaction.
-        type private CompilationOutputTransaction(outputDirectory:string,projectName:string) =
+        type private CompilationOutputTransaction(outputDirectory:string,projectName:string,outputPolicy:CompilationOutputPolicy) =
             let outputDirectory = Path.GetFullPath outputDirectory
             let transactionId = Guid.NewGuid().ToString("N")
             let manifestName = ".aqualis-generated-" + projectName + ".json"
@@ -194,6 +203,12 @@ namespace Aqualis
 
                 AtomicOutputFile.synchronize (fun () ->
                     let previous = previousFiles ()
+                    // Check all collisions before moving any existing output.
+                    for relativePath in generatedFiles do
+                        let targetPath = checkedPath outputDirectory relativePath
+                        if File.Exists targetPath && not (previous.ContainsKey relativePath) &&
+                           not outputPolicy.OverwriteUnmanagedFiles then
+                            raise (IOException($"Refusing to overwrite an unmanaged file: '{targetPath}'. Use CompilationOutputPolicy.OverwriteUnmanagedFiles to explicitly allow replacement."))
                     let staleFiles =
                         previous.Keys
                         |> Seq.filter (fun relativePath -> not (current.ContainsKey relativePath))
@@ -279,13 +294,13 @@ namespace Aqualis
                         if not preserveRollback then removeDirectory rollbackDirectory
 
         /// Builds and publishes the selected generated outputs.
-        let private compileCore (policy:DiagnosticPolicy) (diagnostics:DiagnosticBag) langgList dir projectname (codever:string) code =
+        let private compileCore outputPolicy (policy:DiagnosticPolicy) (diagnostics:DiagnosticBag) langgList dir projectname (codever:string) code =
             let languages = langgList |> Seq.toList
             validateLanguageSelection languages
             let projectname = validateProjectName projectname
             let codever = singleLineMetadata (nameof codever) codever
             let fortranProgramName = fortranProgramIdentifier projectname
-            use transaction = new CompilationOutputTransaction(dir, projectname)
+            use transaction = new CompilationOutputTransaction(dir, projectname, outputPolicy)
             let outputDirectory = transaction.StagingDirectory
             for lang in languages do
                 match lang with
@@ -871,7 +886,7 @@ namespace Aqualis
         let CompileWithDiagnosticPolicy policy langgList dir projectname (codever:string) code =
             let diagnostics = DiagnosticBag(maxDiagnostics = policy.MaxDiagnostics)
             use _scope = DiagnosticScope.push diagnostics
-            let outputFiles = compileCore policy diagnostics langgList dir projectname codever code
+            let outputFiles = compileCore CompilationOutputPolicy.defaults policy diagnostics langgList dir projectname codever code
             {
                 OutputFiles = outputFiles
                 Diagnostics = diagnostics.Snapshot()
@@ -882,6 +897,15 @@ namespace Aqualis
             CompileWithDiagnosticPolicy
                 DiagnosticPolicy.defaults
                 langgList dir projectname codever code
+
+        /// Compiles with an explicit unmanaged-file replacement policy and returns diagnostics.
+        /// Previously managed files modified by the user remain protected under every policy.
+        let CompileWithOutputPolicy outputPolicy langgList dir projectname (codever:string) code =
+            let policy = DiagnosticPolicy.defaults
+            let diagnostics = DiagnosticBag(maxDiagnostics = policy.MaxDiagnostics)
+            use _scope = DiagnosticScope.push diagnostics
+            let outputFiles = compileCore outputPolicy policy diagnostics langgList dir projectname codever code
+            { OutputFiles = outputFiles; Diagnostics = diagnostics.Snapshot() }
 
         ///<summary>コンパイル</summary>
         let Compile langgList dir projectname (codever:string) code =

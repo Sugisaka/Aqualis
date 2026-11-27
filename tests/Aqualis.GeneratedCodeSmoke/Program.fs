@@ -2522,6 +2522,55 @@ module Program =
             value <== Int32.MinValue
             context.print.t (asm.abs value)
 
+    let private generatePythonFunctionArrayResults outputRoot =
+        let outputDirectory = Path.Combine(outputRoot, "python-function-array-results")
+        Directory.CreateDirectory(outputDirectory) |> ignore
+        Compile [Python] outputDirectory "smoke" "1" (fun c ->
+            let matrix = c.var.z2("matrix", 2, 2)
+            matrix.clear()
+            matrix[0,0] <== 2.0
+            matrix[1,1] <== 4.0
+            let rhs = c.var.z1("rhs", 2)
+            rhs[0] <== 4.0
+            rhs[1] <== 12.0
+            let inverse = c.var.z2("inverse", 2, 2)
+            let u = c.var.z2("u", 2, 2)
+            let singular = c.var.d1("singular", 2)
+            let vt = c.var.z2("vt", 2, 2)
+            let eigenvalues = c.var.z1("eigenvalues", 2)
+            let denominators = c.var.z1("denominators", 2)
+            let vectors = c.var.z2("vectors", 2, 2)
+            c.func "solve_system" (fun child ->
+                matrix.farg child (fun a -> rhs.farg child (fun b -> child.la.solve_simuleq(a,b))))
+            c.func "invert_matrix" (fun child ->
+                matrix.farg child (fun a -> inverse.farg child (fun b -> child.la.inverse_matrix(b,a))))
+            c.func "decompose_matrix" (fun child ->
+                matrix.farg child (fun a -> u.farg child (fun fu -> singular.farg child (fun fs -> vt.farg child (fun fv ->
+                    child.la.svd a (fu,fs,fv))))))
+            c.func "find_eigenvectors" (fun child ->
+                matrix.farg child (fun a -> eigenvalues.farg child (fun w -> vectors.farg child (fun v ->
+                    child.la.eigen_matrix (w,v) a))))
+            c.writein "assert numpy.allclose(rhs, [2, 3])"
+            c.writein "assert numpy.allclose(matrix @ inverse, numpy.eye(2))"
+            c.writein "assert numpy.allclose(u @ numpy.diag(singular) @ vt, matrix)"
+            c.writein "assert numpy.allclose(numpy.sort(eigenvalues), [2, 4])"
+            c.writein "assert numpy.allclose(matrix @ vectors, vectors * eigenvalues)"
+            c.func "find_generalized_eigenvectors" (fun child ->
+                matrix.farg child (fun a -> eigenvalues.farg child (fun w -> denominators.farg child (fun d -> vectors.farg child (fun v ->
+                    child.la.eigen_matrix2 (w,d,v) a a)))))
+            c.writein "assert numpy.allclose(eigenvalues / denominators, [1, 1])"
+            c.writein "assert numpy.allclose(numpy.linalg.norm(vectors, axis=0), [1, 1])"
+            let realMatrix = c.var.d2("realMatrix", 2, 2)
+            realMatrix.clear()
+            realMatrix[0,0] <== 2.0
+            realMatrix[1,1] <== 4.0
+            let realRhs = c.var.d1("realRhs", 2)
+            realRhs[0] <== 4.0
+            realRhs[1] <== 12.0
+            c.func "solve_real_system" (fun child ->
+                realMatrix.farg child (fun a -> realRhs.farg child (fun b -> child.la.solve_simuleq(a,b))))
+            c.writein "assert numpy.allclose(realRhs, [2, 3])")
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2548,6 +2597,7 @@ module Program =
             |> List.iter (generateComplexMathRegression outputRoot)
             generationTargets |> List.iter (generateIntegerQuotientRegression outputRoot)
             generatePythonSciPy outputRoot
+            generatePythonFunctionArrayResults outputRoot
             generateCBessel outputRoot
             generateDistributedC outputRoot
             generateLeadingHyphenC outputRoot

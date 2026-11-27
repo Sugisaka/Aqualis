@@ -17,26 +17,8 @@ namespace Aqualis
         [<Literal>]
         let private MaximumPortableFunctionNameLength = 128
 
-        /// Reserved C99 words rejected as generated function names.
-        let private c99Keywords =
-            set [
-                "_Bool"; "_Complex"; "_Imaginary"
-                "auto"; "break"; "case"; "char"; "const"; "continue"
-                "default"; "do"; "double"; "else"; "enum"; "extern"
-                "float"; "for"; "goto"; "if"; "inline"; "int"; "long"
-                "register"; "restrict"; "return"; "short"; "signed"
-                "sizeof"; "static"; "struct"; "switch"; "typedef"
-                "union"; "unsigned"; "void"; "volatile"; "while" ]
-
-        /// Reserved Python words rejected as generated function names.
-        let private pythonKeywords =
-            set [
-                "False"; "None"; "True"; "and"; "as"; "assert"; "async"
-                "await"; "break"; "class"; "continue"; "def"; "del"
-                "elif"; "else"; "except"; "finally"; "for"; "from"
-                "global"; "if"; "import"; "in"; "is"; "lambda"
-                "nonlocal"; "not"; "or"; "pass"; "raise"; "return"
-                "try"; "while"; "with"; "yield" ]
+        let private c99Keywords = GeneratedIdentifier.c99Keywords
+        let private pythonKeywords = GeneratedIdentifier.pythonKeywords
 
         /// Validates a generated function name for its target language.
         let private validateFunctionName language (functionName:string) =

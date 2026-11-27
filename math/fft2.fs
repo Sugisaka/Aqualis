@@ -55,6 +55,11 @@ namespace Aqualis
 
         /// Generates a two-dimensional FFT or inverse FFT.
         let private transform (context:Aqualis) (planname:string,data1:complex2,data2:complex2,fftdir:int) =
+            match data1.Expr, data2.Expr with
+            | Var2 _, Var2 _ -> ()
+            | _ ->
+                UnsupportedOperation.codeGeneration (string context.Language)
+                    "FFT array slices or computed arrays; copy to a named array first"
             match context.Language with
             |Fortran|C99|LaTeX|HTML|Python -> ()
             |language ->

@@ -75,7 +75,7 @@ namespace Aqualis
                         this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
                         this.RequirePythonLinalg "solve"
-                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        this.GenerationContext.codewritein(y.code+"[...] = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                     
             ///<summary>連立方程式の求解</summary>
@@ -110,7 +110,7 @@ namespace Aqualis
                         this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
                         this.RequirePythonLinalg "solve"
-                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        this.GenerationContext.codewritein(y.code+"[...] = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                     
             ///<summary>連立方程式の求解</summary>
@@ -148,7 +148,7 @@ namespace Aqualis
                         this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
                         this.RequirePythonLinalg "solve"
-                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        this.GenerationContext.codewritein(y.code+"[...] = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                     
             ///<summary>連立方程式の求解</summary>
@@ -186,7 +186,7 @@ namespace Aqualis
                         this.GenerationContext.codewritein("\\("+y.code+" \\leftarrow "+matrix.code+"^{-1}"+y.code+"\\)<br/>\n")
                     |Python ->
                         this.RequirePythonLinalg "solve"
-                        this.GenerationContext.codewritein(y.code+" = solve("+matrix.code+", "+y.code+")"+"\n")
+                        this.GenerationContext.codewritein(y.code+"[...] = solve("+matrix.code+", "+y.code+")"+"\n")
                     |_ -> ()
                     
             ///<summary>逆行列の計算</summary>
@@ -224,7 +224,7 @@ namespace Aqualis
                         |HTML ->
                             this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+source.code+"^{-1}"+"\\)"+"<br/>\n")
                         |Python ->
-                            this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+source.code+")"+"\n")
+                            this.GenerationContext.codewritein(mat2.code+"[...] = numpy.linalg.inv("+source.code+")"+"\n")
                         |_ -> ()
                         
                     if mat2.code = mat1.code then
@@ -267,7 +267,7 @@ namespace Aqualis
                         |HTML ->
                             this.GenerationContext.codewritein("\\("+mat2.code+" \\leftarrow "+source.code+"^{-1}"+"\\)"+"<br/>\n")
                         |Python ->
-                            this.GenerationContext.codewritein(mat2.code+" = numpy.linalg.inv("+source.code+")"+"\n")
+                            this.GenerationContext.codewritein(mat2.code+"[...] = numpy.linalg.inv("+source.code+")"+"\n")
                         |_ -> ()
                     if mat2.code = mat1.code then
                         this.GenerationContext.ch.z2 (mat1.size1, mat1.size2) <| fun source ->

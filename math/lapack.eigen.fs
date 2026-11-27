@@ -101,7 +101,7 @@ namespace Aqualis
                         this.GenerationContext.codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+eigenvalues.code+eigenvectors.code+"\\)"+"<br/>\n")
                     |Python ->
                         this.RequirePythonLinalg "eig"
-                        this.GenerationContext.codewritein(eigenvalues.code+","+eigenvectors.code+" = eig("+mat1.code+")"+"\n")
+                        this.GenerationContext.codewritein(eigenvalues.code+"[...],"+eigenvectors.code+"[...] = eig("+mat1.code+")"+"\n")
                     |_ -> ()
                     
             /// <summary>Computes generalized right eigenvectors satisfying A*x = lambda*B*x.</summary>
@@ -192,5 +192,5 @@ namespace Aqualis
                                                 this.GenerationContext.codewritein("Solve: \\("+mat1.code+eigenvectors.code+" = "+"\\frac{"+eigenvalues1.code+"}{"+eigenvalues2.code+"}"+mat2.code+eigenvectors.code+"\\)<br/>\n")
                                             |Python ->
                                                 this.RequirePythonLinalg "eig"
-                                                this.GenerationContext.codewritein("("+eigenvalues1.code+", "+eigenvalues2.code+"), "+eigenvectors.code+" = eig("+mat1.code+", "+mat2.code+", homogeneous_eigvals=True)\n")
+                                                this.GenerationContext.codewritein("("+eigenvalues1.code+"[...], "+eigenvalues2.code+"[...]), "+eigenvectors.code+"[...] = eig("+mat1.code+", "+mat2.code+", homogeneous_eigvals=True)\n")
                                             |_ -> ()
