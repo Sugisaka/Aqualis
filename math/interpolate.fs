@@ -159,12 +159,20 @@ namespace Aqualis
                             code(Y.[lastIndex])
                         NumericArrayValidation.require context (flag .= 0) "Linear interpolation query is out of range."
 
+        /// Reserves internal array names for the lifetime of this context.
+        module private SplineStorage =
+            let real (context:Aqualis) =
+                let name,_ = context.d1.getVar()
+                double1(Dt,Var1(A1 0,name),context=context)
+            let complex (context:Aqualis) =
+                let name,_ = context.z1.getVar()
+                complex1(Zt,Var1(A1 0,name),context=context)
         /// Generates cubic spline interpolation over real-valued samples.
         type splineInterpolateDouble(context:Aqualis) =
 
-            let g = context.var.d1 "g"
-            let x = context.var.d1 "x"
-            let y = context.var.d1 "y"
+            let g = SplineStorage.real context
+            let x = SplineStorage.real context
+            let y = SplineStorage.real context
 
             let a(n:int0) = 3*n-2
 
@@ -322,9 +330,9 @@ namespace Aqualis
         /// Generates cubic spline interpolation over complex-valued samples.
         type splineInterpolateComplex(context:Aqualis,iscpx:bool) =
 
-            let g = context.var.z1 "g"
-            let x = context.var.d1 "x"
-            let y = context.var.z1 "y"
+            let g = SplineStorage.complex context
+            let x = SplineStorage.real context
+            let y = SplineStorage.complex context
 
             let a(n:int0) = 3*n-2
 

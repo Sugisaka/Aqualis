@@ -2904,6 +2904,44 @@ module Program =
                     context.print.t (result[0]/D 1.7e308)
                     context.print.t (result[1]/D 1.7e308)
 
+    let private generateSplineInstances outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-spline-instances-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun context ->
+            // These ordinary user variables must not alias spline storage either.
+            let user = context.var.d1 "x"
+            user.allocate 1
+            user[0] <== 99.0
+            let first = context.interpolate.splineDouble()
+            let second = context.interpolate.splineDouble()
+            let complex = context.interpolate.splineComplex(true)
+            for spline,height in [first,10.0;second,20.0] do
+                spline.X.allocate 2
+                spline.Y.allocate 2
+                spline.X[0] <== 0.0
+                spline.X[1] <== 1.0
+                spline.Y[0] <== 0.0
+                spline.Y[1] <== height
+                spline.set()
+            complex.X.allocate 2
+            complex.Y.allocate 2
+            complex.X[0] <== 0.0
+            complex.X[1] <== 1.0
+            complex.Y[0] <== 0.0
+            complex.Y[1] <== complex0(Cpx(30.0,40.0))
+            complex.set()
+            let result = context.var.d0 "result"
+            let z = context.var.z0 "z"
+            for query in [0.25;0.5;0.75] do
+                first.p result (D query)
+                context.print.t result
+                second.p result (D query)
+                context.print.t result
+                complex.p z (D query)
+                context.print.t z.re
+                context.print.t z.im
+            context.print.t user[0]
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2916,6 +2954,7 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineAliasing outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateReducedSvd outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateRhsRange outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineInstances outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)

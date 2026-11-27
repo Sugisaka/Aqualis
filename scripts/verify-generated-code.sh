@@ -1439,5 +1439,6 @@ bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-alias-
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" reduced-svd
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" economy
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" rhs-range
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-instances
 
 printf '%s\n' 'All generated-code runtime checks passed.'

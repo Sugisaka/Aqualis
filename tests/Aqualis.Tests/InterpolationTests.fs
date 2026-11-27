@@ -12,7 +12,8 @@ module InterpolationTests =
         Compile [C99] output.Path "interpolation" "1.0" code
         File.ReadAllText(Path.Combine(output.Path, "interpolation.c"))
 
-    let private assertSplineUsesLeftEndpointOrigin (source:string) =
+    let private assertSplineUsesLeftEndpointOrigin arrayName (source:string) =
+        let source = source.Replace(arrayName, "x")
         Assert.Matches(
             Regex(@"(?:query|d0\d+)\s*-\s*x\[i0\d+\]"),
             source)
@@ -28,9 +29,11 @@ module InterpolationTests =
 
     [<Fact>]
     let ``real spline value and derivative use the interval left endpoint`` () =
+        let mutable arrayName = ""
         let source =
             generateC (fun context ->
                 let interpolation = context.interpolate.splineDouble()
+                arrayName <- interpolation.X.code
                 let query = context.var.d0 "query"
                 let value = context.var.d0 "value"
                 let derivative = context.var.d0 "derivative"
@@ -38,13 +41,15 @@ module InterpolationTests =
                 interpolation.p value query
                 interpolation.dp derivative query)
 
-        assertSplineUsesLeftEndpointOrigin source
+        assertSplineUsesLeftEndpointOrigin arrayName source
 
     [<Fact>]
     let ``complex spline value and derivative use the interval left endpoint`` () =
+        let mutable arrayName = ""
         let source =
             generateC (fun context ->
                 let interpolation = context.interpolate.splineComplex(true)
+                arrayName <- interpolation.X.code
                 let query = context.var.d0 "query"
                 let value = context.var.z0 "value"
                 let derivative = context.var.z0 "derivative"
@@ -52,7 +57,7 @@ module InterpolationTests =
                 interpolation.p value query
                 interpolation.dp derivative query)
 
-        assertSplineUsesLeftEndpointOrigin source
+        assertSplineUsesLeftEndpointOrigin arrayName source
 
     [<Fact>]
     let ``linear interpolation uses the last valid real array index`` () =
