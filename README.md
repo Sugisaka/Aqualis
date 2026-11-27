@@ -152,6 +152,9 @@ Variable names (including generated array-size and temporary names) must not
 conflict with functions in the same scope, regardless of definition order.
 Fortran comparisons ignore case, and a subroutine's own name is reserved in its
 local scope as well.
+Python function names also reject names reserved for runtime modules and helpers.
+Fortran numeric helpers isolate intrinsic names such as `scale`, `fraction`, and
+`exponent`, so those names remain available for user variables.
 Fortran keywords are allowed as identifiers, and PHP variable names are validated
 separately from PHP keywords. Markup-only names retain their existing behavior.
 
@@ -181,3 +184,5 @@ Real and complex natural cubic splines use a tridiagonal solver with linear
 time and storage in the number of sample points. The existing per-interval
 coefficient layout and saved-file format are unchanged. Setup rejects
 non-finite interval widths, elimination pivots, and coefficients.
+Each spline instance owns separate internal arrays. `set()` supports repeated
+calls after sample updates, and `load()` replaces existing spline storage.

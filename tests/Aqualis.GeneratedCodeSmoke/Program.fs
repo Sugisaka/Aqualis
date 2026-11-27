@@ -3012,6 +3012,51 @@ module Program =
                     spline.p result (D 0.5)
                     context.print.t result
 
+    let private generateIntrinsicNames outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-intrinsic-names-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun context ->
+            let scale = context.var.d0 "scale"
+            let fraction = context.var.d0 "fraction"
+            let exponent = context.var.d0 "exponent"
+            scale <== 1.0
+            fraction <== 2.0
+            exponent <== 3.0
+            let matrix = context.var.d2("matrix",1,1)
+            let rhs = context.var.d1("rhs",1)
+            matrix[0,0] <== 1.0
+            rhs[0] <== fraction
+            context.la.solve_simuleq_tt(matrix,rhs,scale) <| fun result -> context.print.t result[0]
+            context.print.t scale
+            context.print.t fraction
+            context.print.t exponent
+            context.func "perform_solve" <| fun child ->
+                matrix.farg child <| fun a ->
+                rhs.farg child <| fun b ->
+                    let scale = child.var.d0 "scale"
+                    let fraction = child.var.d0 "fraction"
+                    let exponent = child.var.d0 "exponent"
+                    scale <== 1.0
+                    fraction <== 2.0
+                    exponent <== 3.0
+                    b[0] <== fraction
+                    child.la.solve_simuleq_tt(a,b,scale) <| fun result -> b[0] <== result[0]
+            context.print.t rhs[0]
+            let allocated = context.var.d0 "allocated"
+            allocated <== 4.0
+            let spline = context.interpolate.splineDouble()
+            spline.X.allocate 2
+            spline.Y.allocate 2
+            spline.X[0] <== 0.0
+            spline.X[1] <== 1.0
+            spline.Y[0] <== 0.0
+            spline.Y[1] <== 10.0
+            spline.set()
+            spline.set()
+            spline.p scale (D 0.5)
+            context.print.t scale
+            context.print.t allocated
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -3026,6 +3071,7 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateRhsRange outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineInstances outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineReset outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateIntrinsicNames outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)

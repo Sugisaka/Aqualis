@@ -62,6 +62,8 @@ namespace Aqualis
                 invalidArg (nameof functionName) "A function name cannot be a Python keyword."
             |Python when GeneratedIdentifier.conflictsWithRuntime Python functionName ->
                 invalidArg (nameof functionName) "The function name is reserved by Aqualis or the Python runtime."
+            |Fortran when GeneratedIdentifier.conflictsWithRuntime Fortran functionName ->
+                invalidArg (nameof functionName) "The function name is reserved by Aqualis or the Fortran runtime."
             |_ -> ()
             functionName
 

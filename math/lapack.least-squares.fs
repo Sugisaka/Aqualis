@@ -43,8 +43,8 @@ namespace Aqualis
                 match context.Language with
                 |C99 -> context.codewritein(fraction.code+" = frexp("+expression+", &"+exponent.code+");")
                 |Fortran ->
-                    context.codewritein(fraction.code+" = fraction("+expression+")")
-                    context.codewritein(exponent.code+" = exponent("+expression+")")
+                    context.codewritein(fraction.code+" = aqualis_fp_fraction("+expression+")")
+                    context.codewritein(exponent.code+" = aqualis_fp_exponent("+expression+")")
                 |Python -> context.codewritein(fraction.code+", "+exponent.code+" = math.frexp("+expression+")")
                 |_ -> fraction <== value; exponent <== 0
                 code (fraction,exponent)
@@ -55,7 +55,7 @@ namespace Aqualis
             let e = power.Expr.eval context
             match context.Language with
             |C99 -> context.codewritein(result.code+" = scalbn("+m+", "+e+");")
-            |Fortran -> context.codewritein(result.code+" = scale("+m+", "+e+")")
+            |Fortran -> context.codewritein(result.code+" = aqualis_fp_scale("+m+", "+e+")")
             |Python -> context.codewritein(result.code+" = numpy.ldexp("+m+", "+e+")")
             |_ -> result <== mantissa
 

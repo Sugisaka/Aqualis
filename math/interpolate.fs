@@ -174,7 +174,15 @@ namespace Aqualis
                     match context.Language with
                     |Fortran -> bool0(Var(Nt,"allocated("+name+")",NaN),context)
                     |_ -> currentSize .>= 0
-                context.br.if1 allocated deallocate
+                match context.Language with
+                |Fortran ->
+                    context.codewritein "block"
+                    context.indentInc()
+                    context.codewritein "intrinsic :: allocated"
+                    context.br.if1 allocated deallocate
+                    context.indentDec()
+                    context.codewritein "end block"
+                |_ -> context.br.if1 allocated deallocate
                 allocate size
         /// Generates cubic spline interpolation over real-valued samples.
         type splineInterpolateDouble(context:Aqualis) =

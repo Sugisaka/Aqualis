@@ -337,6 +337,27 @@ namespace Aqualis
                         //サブルーチン
                         writer.codewritein "\n"
                         writer.codewritein "contains\n"
+                        writer.codewritein """
+double precision function aqualis_fp_fraction(value) result(part)
+  implicit none
+  double precision, intent(in) :: value
+  intrinsic :: fraction
+  part = fraction(value)
+end function aqualis_fp_fraction
+integer function aqualis_fp_exponent(value) result(power)
+  implicit none
+  double precision, intent(in) :: value
+  intrinsic :: exponent
+  power = exponent(value)
+end function aqualis_fp_exponent
+double precision function aqualis_fp_scale(value, power) result(scaled)
+  implicit none
+  double precision, intent(in) :: value
+  integer, intent(in) :: power
+  intrinsic :: scale
+  scaled = scale(value, power)
+end function aqualis_fp_scale
+"""
                         writer.codewritein "integer function aqualis_int_div(a,b) result(quotient)\n"
                         writer.codewritein "  integer, intent(in) :: a,b\n"
                         writer.codewritein "  if (b == 0) error stop 'Aqualis: integer division by zero.'\n"

@@ -240,3 +240,12 @@ module FunctionSafetyTests =
             Assert.Contains("reserved", error.Message)
             Assert.False(bodyCalled)
             Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``Fortran functions cannot replace internal numeric helpers`` () =
+        for name in ["aqualis_fp_fraction";"AQUALIS_FP_EXPONENT";"aqualis_fp_scale"] do
+            use output = new TemporaryDirectory()
+            let error = Assert.Throws<ArgumentException>(fun () ->
+                Compile [Fortran] output.Path "reserved_function" "1" (fun context -> context.func name ignore))
+            Assert.Equal("functionName", error.ParamName)
+            Assert.Empty(Directory.GetFileSystemEntries output.Path)
