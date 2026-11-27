@@ -2707,6 +2707,33 @@ module Program =
                 context.print.t second
                 context.print.t third
 
+    let private generateScaledTikhonov outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-svd-scaling-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun context ->
+            for rows, a, b, lambda, normalization in
+                [1,1e-310,1e-310,0.0,1.0
+                 2,1.0,1.7e308,0.0,1.7e308
+                 1,1e-300,1e308,1e100,1e-192
+                 1,1e-308,1e308,1e10,1e-20
+                 1,1e-310,0.0,1.0,1.0
+                 1,1e200,1.0,1.0,1e-200] do
+                context.ch.d2 (I rows,I 1) <| fun matrix ->
+                context.ch.d1 (I rows) <| fun rhs ->
+                    context.iter.num rows <| fun i ->
+                        matrix[i,0] <== a
+                        rhs[i] <== b
+                    context.la.solve_simuleq_tt(matrix,rhs,lambda) <| fun solution ->
+                        context.print.t (solution[0]/D normalization)
+                context.ch.z2 (I rows,I 1) <| fun matrix ->
+                context.ch.z1 (I rows) <| fun rhs ->
+                    context.iter.num rows <| fun i ->
+                        matrix[i,0] <== a
+                        rhs[i] <== complex0(Cpx(b,b))
+                    context.la.solve_simuleq_tt(matrix,rhs,lambda) <| fun solution ->
+                        context.print.t (solution[0].re/D normalization)
+                        context.print.t (solution[0].im/D normalization)
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2714,6 +2741,7 @@ module Program =
             let outputRoot = Path.GetFullPath(outputRoot)
             Directory.CreateDirectory(outputRoot) |> ignore
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLetDerivatives outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateScaledTikhonov outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)

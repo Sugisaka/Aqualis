@@ -35,15 +35,50 @@ namespace Aqualis
                     (bool0(Var(Nt, expression, NaN), context))
                     "LAPACK Tikhonov calculation overflowed or produced a non-finite value.")
 
+        /// Combines factors by their binary exponents, avoiding an overflowing
+        /// reciprocal or an underflowing singular-value/regularizer ratio.
+        let private filteredProjection (context:Aqualis) (result:double0)
+                                       (projected:double0) (singular:double0)
+                                       (rhsScale:double0) (scale:double0) (denominator:double0) =
+            let rec split values parts =
+                match values with
+                |(value:double0,divide)::rest ->
+                    context.ch.d <| fun fraction ->
+                    context.ch.i <| fun exponent ->
+                        let expression = value.Expr.eval context
+                        match context.Language with
+                        |C99 -> context.codewritein(fraction.code+" = frexp("+expression+", &"+exponent.code+");")
+                        |Fortran ->
+                            context.codewritein(fraction.code+" = fraction("+expression+")")
+                            context.codewritein(exponent.code+" = exponent("+expression+")")
+                        |Python -> context.codewritein(fraction.code+", "+exponent.code+" = math.frexp("+expression+")")
+                        |_ -> fraction <== value; exponent <== 0
+                        split rest ((fraction,exponent,divide)::parts)
+                |[] ->
+                    let parts = List.rev parts
+                    let mantissa = parts |> List.fold (fun value (fraction,_,divide) -> if divide then value/fraction else value*fraction) (D 1.0)
+                    let power = parts |> List.fold (fun value (_,exponent,divide) -> if divide then value-exponent else value+exponent) (I 0)
+                    let m = mantissa.Expr.eval context
+                    let e = power.Expr.eval context
+                    match context.Language with
+                    |C99 -> context.codewritein(result.code+" = scalbn("+m+", "+e+");")
+                    |Fortran -> context.codewritein(result.code+" = scale("+m+", "+e+")")
+                    |Python -> context.codewritein(result.code+" = numpy.ldexp("+m+", "+e+")")
+                    |_ -> result <== mantissa
+            split [projected,false;singular,false;rhsScale,false;scale,true;scale,true;denominator,true] []
         /// Solves Tikhonov least squares without forming the normal equations.
         let private solve_real (la:ContextLa) (context:Aqualis) (matrix:double2) (rhs:double1) (regularization:double0) code =
             requireTikhonovVectorShapes context matrix.size1 matrix.size2 rhs.size1
-            context.ch.d <| fun lambda ->
+            context.ch.dd <| fun (lambda,rhsScale) ->
                 lambda <== regularization
                 requireFiniteTikhonovValue context lambda
                 LapackValidation.require context (lambda .< 0.0) "LAPACK Tikhonov regularization must be nonnegative."
                 matrix.foreach <| fun (i,j) -> requireFiniteTikhonovValue context matrix[i,j]
                 rhs.foreach <| fun i -> requireFiniteTikhonovValue context rhs[i]
+                rhsScale <== 0.0
+                rhs.foreach <| fun i ->
+                    context.br.if1 (asm.abs(rhs[i]) .> rhsScale) <| fun () -> rhsScale <== asm.abs(rhs[i])
+                context.br.if1 (rhsScale .= 0.0) <| fun () -> rhsScale <== 1.0
                 context.ch.i <| fun count ->
                     context.br.if2 (matrix.size1 .< matrix.size2)
                         (fun () -> count <== matrix.size1)
@@ -59,34 +94,37 @@ namespace Aqualis
                         solution.clear()
                         context.iter.num count <| fun k ->
                             requireFiniteTikhonovValue context singular[k]
-                            context.ch.ddd <| fun (scale,weight,cutoff) ->
-                                weight <== 0.0
-                                // A zero regularizer selects the numerical pseudoinverse.
+                            context.ch.ddd <| fun (scale,denominator,cutoff) ->
                                 cutoff <== 2.220446049250313e-16 * (matrix.size1 + matrix.size2) * singular[0]
                                 context.br.if1 (And [singular[k] .> 0.0; Or [lambda .> 0.0; singular[k] .> cutoff]]) <| fun () ->
                                     context.br.if2 (singular[k] .> lambda)
                                         (fun () -> scale <== singular[k])
                                         (fun () -> scale <== lambda)
-                                    weight <== ((singular[k]/scale) / ((singular[k]/scale)*(singular[k]/scale) + (lambda/scale)*(lambda/scale))) / scale
-                                context.ch.d <| fun projected ->
-                                    projected.clear()
-                                    context.iter.num matrix.size1 <| fun i ->
-                                        projected <== projected + u[i,k] * rhs[i]
-                                    projected <== projected * weight
-                                    context.iter.num matrix.size2 <| fun j ->
-                                        solution[j] <== solution[j] + vt[k,j] * projected
+                                    denominator <== (singular[k]/scale)*(singular[k]/scale) + (lambda/scale)*(lambda/scale)
+                                    context.ch.d <| fun projected ->
+                                        projected.clear()
+                                        context.iter.num matrix.size1 <| fun i ->
+                                            projected <== projected + u[i,k] * (rhs[i]/rhsScale)
+                                        filteredProjection context projected projected singular[k] rhsScale scale denominator
+                                        context.iter.num matrix.size2 <| fun j ->
+                                            solution[j] <== solution[j] + vt[k,j] * projected
                         solution.foreach <| fun i -> requireFiniteTikhonovValue context solution[i]
                         code solution
 
         /// Solves Tikhonov least squares without forming the normal equations.
         let private solve_complex (la:ContextLa) (context:Aqualis) (matrix:complex2) (rhs:complex1) (regularization:double0) code =
             requireTikhonovVectorShapes context matrix.size1 matrix.size2 rhs.size1
-            context.ch.d <| fun lambda ->
+            context.ch.dd <| fun (lambda,rhsScale) ->
                 lambda <== regularization
                 requireFiniteTikhonovValue context lambda
                 LapackValidation.require context (lambda .< 0.0) "LAPACK Tikhonov regularization must be nonnegative."
                 matrix.foreach <| fun (i,j) -> requireFiniteTikhonovValue context matrix[i,j].re; requireFiniteTikhonovValue context matrix[i,j].im
                 rhs.foreach <| fun i -> requireFiniteTikhonovValue context rhs[i].re; requireFiniteTikhonovValue context rhs[i].im
+                rhsScale <== 0.0
+                rhs.foreach <| fun i ->
+                    context.br.if1 (asm.abs(rhs[i].re) .> rhsScale) <| fun () -> rhsScale <== asm.abs(rhs[i].re)
+                    context.br.if1 (asm.abs(rhs[i].im) .> rhsScale) <| fun () -> rhsScale <== asm.abs(rhs[i].im)
+                context.br.if1 (rhsScale .= 0.0) <| fun () -> rhsScale <== 1.0
                 context.ch.i <| fun count ->
                     context.br.if2 (matrix.size1 .< matrix.size2)
                         (fun () -> count <== matrix.size1)
@@ -102,22 +140,23 @@ namespace Aqualis
                         solution.clear()
                         context.iter.num count <| fun k ->
                             requireFiniteTikhonovValue context singular[k]
-                            context.ch.ddd <| fun (scale,weight,cutoff) ->
-                                weight <== 0.0
-                                // A zero regularizer selects the numerical pseudoinverse.
+                            context.ch.ddd <| fun (scale,denominator,cutoff) ->
                                 cutoff <== 2.220446049250313e-16 * (matrix.size1 + matrix.size2) * singular[0]
                                 context.br.if1 (And [singular[k] .> 0.0; Or [lambda .> 0.0; singular[k] .> cutoff]]) <| fun () ->
                                     context.br.if2 (singular[k] .> lambda)
                                         (fun () -> scale <== singular[k])
                                         (fun () -> scale <== lambda)
-                                    weight <== ((singular[k]/scale) / ((singular[k]/scale)*(singular[k]/scale) + (lambda/scale)*(lambda/scale))) / scale
-                                context.ch.z <| fun projected ->
-                                    projected.clear()
-                                    context.iter.num matrix.size1 <| fun i ->
-                                        projected <== projected + asm.conj(u[i,k]) * rhs[i]
-                                    projected <== projected * weight
-                                    context.iter.num matrix.size2 <| fun j ->
-                                        solution[j] <== solution[j] + asm.conj(vt[k,j]) * projected
+                                    denominator <== (singular[k]/scale)*(singular[k]/scale) + (lambda/scale)*(lambda/scale)
+                                    context.ch.z <| fun projected ->
+                                        projected.clear()
+                                        context.iter.num matrix.size1 <| fun i ->
+                                            projected <== projected + asm.conj(u[i,k]) * (rhs[i].re/rhsScale + asm.uj*(rhs[i].im/rhsScale))
+                                        context.ch.dd <| fun (re,im) ->
+                                            filteredProjection context re projected.re singular[k] rhsScale scale denominator
+                                            filteredProjection context im projected.im singular[k] rhsScale scale denominator
+                                            projected <== re + asm.uj*im
+                                        context.iter.num matrix.size2 <| fun j ->
+                                            solution[j] <== solution[j] + asm.conj(vt[k,j]) * projected
                         solution.foreach <| fun i -> requireFiniteTikhonovValue context solution[i].re; requireFiniteTikhonovValue context solution[i].im
                         code solution
 
