@@ -7,6 +7,61 @@ open Aqualis
 
 module FunctionSafetyTests =
     [<Fact>]
+    let ``function and variable collisions fail in either definition order`` () =
+        for language in [C99; Fortran; Python] do
+            for functionFirst in [false; true] do
+                for arraySize in [false; true] do
+                    use output = new TemporaryDirectory()
+                    let error = Assert.Throws<ArgumentException>(fun () ->
+                        Compile [language] output.Path "name_collision" "1" (fun c ->
+                            let functionName = if arraySize then "values_size" else "values"
+                            let defineFunction () = c.func functionName ignore
+                            if functionFirst then defineFunction()
+                            if arraySize then c.var.d1("values", 2) |> ignore
+                            else c.var.d0 "values" |> ignore
+                            if not functionFirst then defineFunction()))
+                    Assert.Contains("generated function name", error.Message)
+                    Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``Fortran function name checks ignore case and include local scope`` () =
+        for kind in [0..3] do
+            use output = new TemporaryDirectory()
+            Assert.Throws<ArgumentException>(fun () ->
+                Compile [Fortran] output.Path "fortran_names" "1" (fun c ->
+                    match kind with
+                    | 0 ->
+                        c.var.d0 "Evaluate" |> ignore
+                        c.func "evaluate" ignore
+                    | 1 ->
+                        c.func "Evaluate" ignore
+                        c.func "evaluate" ignore
+                    | 2 -> c.func "evaluate" (fun f -> f.var.d0 "Evaluate" |> ignore)
+                    | _ ->
+                        let value = c.var.d0 "value"
+                        c.func "arg01" (fun f -> value.farg f ignore))) |> ignore
+            Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``function names cannot shadow generated temporaries`` () =
+        for language in [C99; Fortran; Python] do
+            use output = new TemporaryDirectory()
+            Assert.Throws<ArgumentException>(fun () ->
+                Compile [language] output.Path "temporary_name_collision" "1" (fun c ->
+                    c.ch.d (fun temporary -> temporary <== 1.0)
+                    c.func "d0001" ignore)) |> ignore
+            Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``case sensitive and distinct local names remain valid`` () =
+        for language in [C99; Python] do
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "distinct_names" "1" (fun c ->
+                c.var.d0 "Evaluate" |> ignore
+                c.func "evaluate" (fun f -> f.var.d0 "evaluate" |> ignore)
+                c.func "other_function" (fun f -> f.var.d0 "Evaluate" |> ignore))
+
+    [<Fact>]
     let ``scalar function arguments reject constants and computed expressions`` () =
         for language in [C99; Fortran; Python; HTML; LaTeX] do
             for kind in [0..5] do

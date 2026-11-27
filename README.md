@@ -148,6 +148,10 @@ needed.
 Named numeric variables must use portable ASCII identifiers for executable
 targets. Reserved words and Aqualis temporary names are rejected during generation;
 names such as `numpy` that collide with required runtime symbols are also rejected.
+Variable names (including generated array-size and temporary names) must not
+conflict with functions in the same scope, regardless of definition order.
+Fortran comparisons ignore case, and a subroutine's own name is reserved in its
+local scope as well.
 Fortran keywords are allowed as identifiers, and PHP variable names are validated
 separately from PHP keywords. Markup-only names retain their existing behavior.
 

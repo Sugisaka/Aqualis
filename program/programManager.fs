@@ -439,18 +439,28 @@ namespace Aqualis
         member val cvar = varCollector(lang, diagnosticBag) with get
 
         /// Validates names of generated variables.
-        member private this.validateGeneratedVariableNames() =
+        member internal this.validateGeneratedVariableNames() =
             if lang <> Numeric && lang <> LaTeX && lang <> HTML && lang <> HTMLSequenceDiagram then
                 let comparer =
                     if lang = Fortran then StringComparer.OrdinalIgnoreCase
                     else StringComparer.Ordinal
                 let names = System.Collections.Generic.HashSet<string>(comparer)
+                let functionNames = System.Collections.Generic.HashSet<string>(comparer)
+                for name in this.flist.list do
+                    if not (functionNames.Add name) then
+                        invalidArg "functionName" ("Function '" + name + "' conflicts with another generated function name.")
+                // Fortran also reserves a subroutine's own name in its local scope.
+                if lang = Fortran then
+                    this.GeneratedFunctionName |> Option.iter (fun name -> functionNames.Add name |> ignore)
                 let add name =
+                    if functionNames.Contains name then
+                        invalidArg "name" ("Variable '" + name + "' conflicts with a generated function name.")
                     if not (names.Add name) then
                         invalidArg "name" ("Variable '" + name + "' conflicts with a generated variable name.")
                 let addArray name =
                     add name
                     add (name + "_size")
+                for _,(_,_,name) in this.arg.list do add name
                 for _,shape,name,_ in this.cvar.list do
                     match shape with
                     |A0 -> add name
