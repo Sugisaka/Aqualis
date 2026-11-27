@@ -22,6 +22,7 @@ case, output = sys.argv[1:]
 expected = {
     'reduced-svd': [0]*20,
     'economy': [1]*6+[1,1,0]*2,
+    'rhs-range': [1,.5,1,-1,.5,.5]*4+[1,1],
     'derivatives': [9,6,2,0,81,108,108,72,9,6,2,0],
     'svd-scaling': [1]*12+[0]*3+[1]*3,
     'linear-alias': [1,1,1,1,2,1,2,1,4,1,4,1],

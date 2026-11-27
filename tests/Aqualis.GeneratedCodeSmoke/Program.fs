@@ -2862,6 +2862,48 @@ module Program =
                         context.print.t solution[9].im
                         context.print.t solution[columns-1].re
 
+    let private generateRhsRange outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-rhs-range-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun context ->
+            for large,small in [1e200,1e-200;1e300,1e-300] do
+                for flip in [false;true] do
+                    let big = if flip then 1 else 0
+                    let tiny = 1-big
+                    context.ch.d2 (I 2,I 2) <| fun matrix ->
+                    context.ch.d1 (I 2) <| fun rhs ->
+                        matrix.clear()
+                        matrix[big,big] <== 1.0
+                        matrix[tiny,tiny] <== small
+                        rhs[big] <== large
+                        rhs[tiny] <== small
+                        context.la.solve_simuleq_tt(matrix,rhs,small) <| fun result ->
+                            context.print.t (result[big]/D large)
+                            context.print.t result[tiny]
+                    context.ch.z2 (I 2,I 2) <| fun matrix ->
+                    context.ch.z1 (I 2) <| fun rhs ->
+                        matrix.clear()
+                        matrix[big,big] <== 1.0
+                        matrix[tiny,tiny] <== complex0(Cpx(0.0,small))
+                        rhs[big] <== complex0(Cpx(large,-large))
+                        rhs[tiny] <== complex0(Cpx(-small,small))
+                        context.la.solve_simuleq_tt(matrix,rhs,small) <| fun result ->
+                            context.print.t (result[big].re/D large)
+                            context.print.t (result[big].im/D large)
+                            context.print.t result[tiny].re
+                            context.print.t result[tiny].im
+            context.ch.d2 (I 2,I 2) <| fun matrix ->
+            context.ch.d1 (I 2) <| fun rhs ->
+                matrix[0,0] <== 1.05
+                matrix[1,1] <== 1.05
+                matrix[0,1] <== -0.05
+                matrix[1,0] <== -0.05
+                rhs[0] <== 1.7e308
+                rhs[1] <== 1.7e308
+                context.la.solve_simuleq_tt(matrix,rhs,0.0) <| fun result ->
+                    context.print.t (result[0]/D 1.7e308)
+                    context.print.t (result[1]/D 1.7e308)
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2873,6 +2915,7 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLinearAliasing outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineAliasing outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateReducedSvd outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateRhsRange outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
