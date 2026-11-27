@@ -79,6 +79,9 @@
     <Compile Include="num\str.fs" />
     <Compile Include="num\fileio.readers.fs" />
     <Compile Include="num\fileio.writers.fs" />
+    <Compile Include="num\fileio.filename.fs" />
+    <Compile Include="num\fileio.access.fs" />
+    <Compile Include="num\fileio.record-reader.fs" />
     <Compile Include="num\fileio.context.fs" />
     <Compile Include="num\fileio.persistence.save.fs" />
     <Compile Include="num\fileio.persistence.load.fs" />

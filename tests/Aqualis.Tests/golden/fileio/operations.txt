@@ -1,0 +1,727 @@
+Fortran
+allocate(character(len=len('quote''"%日本_') + 12 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.12,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001))
+write(f0000,"(A,A1,I12,A1,E27.17e3)") 'row=',achar(9),value,achar(9),realValue
+write(f0000,"(I0)") value
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 11 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.5,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001))
+write(f0000,"(I12)") value
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('plain.txt')) :: t0001)
+write(t0001,"(A)") 'plain.txt'
+open(f0000, file=trim(t0001))
+allocate(character(len=len('nested.txt')) :: t0002)
+write(t0002,"(A)") 'nested.txt'
+open(f0001, file=trim(t0002))
+write(f0001,"(A)") 'nested'
+close(f0001)
+deallocate(t0002)
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 12 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.12,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001), access='stream', form='unformatted')
+write(f0000) value
+write(f0000) realValue
+write(f0000) real(complexValue,kind=kind(0.0d0))
+write(f0000) aimag(complexValue)
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 11 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.3,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001), access='stream', form='unformatted')
+write(f0000) 42
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('plain.bin')) :: t0001)
+write(t0001,"(A)") 'plain.bin'
+open(f0000, file=trim(t0001), access='stream', form='unformatted')
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 12 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.12,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001))
+read(f0000,"(I12,A1,E27.17e3)",iostat=i0001) value,i0002,realValue
+if (i0001 /= 0) error stop 'Aqualis: invalid text input record.'
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 11 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.4,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001))
+read(f0000,"(I12)",iostat=i0001) value
+if (i0001 /= 0) error stop 'Aqualis: invalid text input record.'
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('plain.txt')) :: t0001)
+write(t0001,"(A)") 'plain.txt'
+open(f0000, file=trim(t0001))
+read(f0000,"(E27.17e3)",iostat=i0001) realValue
+if (i0001 /= 0) error stop 'Aqualis: invalid text input record.'
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('complex.txt')) :: t0001)
+write(t0001,"(A)") 'complex.txt'
+open(f0000, file=trim(t0001))
+read(f0000,"(E27.17e3,A1,E27.17e3)",iostat=i0001) d0001,i0002,d0002
+if (i0001 /= 0) error stop 'Aqualis: invalid text input record.'
+complexValue = d0001+(0d0,1d0)*d0002
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('byte.txt')) :: t0001)
+write(t0001,"(A)") 'byte.txt'
+open(f0000, file=trim(t0001))
+open(f0001,file=trim(t0001),access='stream',form='unformatted',status='old',action='read',iostat=i0001)
+if (i0001 /= 0) error stop 'Aqualis: failed to open byte input.'
+read(f0001,iostat=i0001) byte_tmp
+if (i0001 /= 0) error stop 'Aqualis: invalid byte input record.'
+value = iand(int(byte_tmp),255)
+close(f0001)
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 12 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.12,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001), access='stream', form='unformatted')
+read(f0000,iostat=i0001) value
+if (i0001 /= 0) error stop 'Aqualis: invalid binary input record.'
+read(f0000,iostat=i0001) realValue
+if (i0001 /= 0) error stop 'Aqualis: invalid binary input record.'
+read(f0000,iostat=i0001) d0001
+if (i0001 /= 0) error stop 'Aqualis: invalid binary input record.'
+read(f0000,iostat=i0001) d0002
+if (i0001 /= 0) error stop 'Aqualis: invalid binary input record.'
+complexValue = d0001+(0d0,1d0)*d0002
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 11 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.6,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001), access='stream', form='unformatted')
+read(f0000,iostat=i0001) value
+if (i0001 /= 0) error stop 'Aqualis: invalid binary input record.'
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('plain.bin')) :: t0001)
+write(t0001,"(A)") 'plain.bin'
+open(f0000, file=trim(t0001), access='stream', form='unformatted')
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 12 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.12,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001))
+i0002 = 1
+do
+  read(f0000,"(I12,A1,E27.17e3)",iostat=i0001) value,i0003,realValue
+  if (i0001 > 0) error stop 'Aqualis: invalid text input record.'
+  if(i0001 < 0) then
+    goto 11
+  else
+    !record
+  endif
+  i0002 = i0002+1
+end do
+11 continue
+close(f0000)
+deallocate(t0001)
+allocate(character(len=len('quote''"%日本_') + 11 + len('.dat')) :: t0001)
+write(t0001,"(A,I0.2,A)") 'quote''"%日本_',value,'.dat'
+open(f0000, file=trim(t0001))
+i0002 = 1
+do
+  read(f0000,"(I12)",iostat=i0001) value
+  if (i0001 > 0) error stop 'Aqualis: invalid text input record.'
+  if(i0001 < 0) then
+    goto 12
+  else
+    !record with width
+  endif
+  i0002 = i0002+1
+end do
+12 continue
+close(f0000)
+deallocate(t0001)
+
+--- language ---
+C99
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%012d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%012d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"w");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+fprintf(f0000,"row=\t%12d\t%27.17e\n",value,realValue);
+fprintf(f0000,"%d\n",value);
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%05d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%05d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"w");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+fprintf(f0000,"%12d\n",value);
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"plain.txt");
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"plain.txt") != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"w");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+t0002_length = snprintf(NULL,0,"nested.txt");
+if (t0002_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0002 = (char *)malloc((size_t)t0002_length + 1U);
+if (t0002 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0002,(size_t)t0002_length + 1U,"nested.txt") != t0002_length) { free(t0002); t0002 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0001 = fopen(t0002,"w");
+if (f0001 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0002); free(t0002); t0002 = NULL; exit(EXIT_FAILURE); }
+fprintf(f0001,"nested\n");
+if (fclose(f0001) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0002); free(t0002); t0002 = NULL; exit(EXIT_FAILURE); }
+free(t0002);
+t0002 = NULL;
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%012d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%012d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"wb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+i0001 = value;
+fwrite(&i0001,sizeof(i0001),1,f0000);
+d0001 = realValue;
+fwrite(&d0001,sizeof(d0001),1,f0000);
+d0001 = creal(complexValue);
+d0002 = cimag(complexValue);
+fwrite(&d0001,sizeof(d0001),1,f0000);
+fwrite(&d0002,sizeof(d0002),1,f0000);
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%03d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%03d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"wb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+i0001 = 42;
+fwrite(&i0001,sizeof(i0001),1,f0000);
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"plain.bin");
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"plain.bin") != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"wb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%012d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%012d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fscanf(f0000,"%d%lf",&value,&realValue) != 2) { fprintf(stderr, "Aqualis: invalid text input record.\n"); exit(EXIT_FAILURE); }
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%04d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%04d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fscanf(f0000,"%d",&value) != 1) { fprintf(stderr, "Aqualis: invalid text input record.\n"); exit(EXIT_FAILURE); }
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"plain.txt");
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"plain.txt") != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fscanf(f0000,"%lf",&realValue) != 1) { fprintf(stderr, "Aqualis: invalid text input record.\n"); exit(EXIT_FAILURE); }
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"complex.txt");
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"complex.txt") != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fscanf(f0000,"%lf%lf",&d0001,&d0002) != 2) { fprintf(stderr, "Aqualis: invalid text input record.\n"); exit(EXIT_FAILURE); }
+complexValue = d0001+uj*d0002;
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"byte.txt");
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"byte.txt") != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+i0002 = fgetc(f0000);
+if (i0002 == EOF) { fprintf(stderr, "Aqualis: invalid byte input record.\n"); exit(EXIT_FAILURE); }
+value = i0002;
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%012d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%012d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fread(&value,sizeof(value),1,f0000) != 1) { fprintf(stderr, "Aqualis: invalid binary input record.\n"); exit(EXIT_FAILURE); }
+if (fread(&realValue,sizeof(realValue),1,f0000) != 1) { fprintf(stderr, "Aqualis: invalid binary input record.\n"); exit(EXIT_FAILURE); }
+if (fread(&d0001,sizeof(d0001),1,f0000) != 1) { fprintf(stderr, "Aqualis: invalid binary input record.\n"); exit(EXIT_FAILURE); }
+if (fread(&d0002,sizeof(d0002),1,f0000) != 1) { fprintf(stderr, "Aqualis: invalid binary input record.\n"); exit(EXIT_FAILURE); }
+complexValue = d0001+uj*d0002;
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%06d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%06d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fread(&value,sizeof(value),1,f0000) != 1) { fprintf(stderr, "Aqualis: invalid binary input record.\n"); exit(EXIT_FAILURE); }
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"plain.bin");
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"plain.bin") != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%012d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%012d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+i0002 = 1;
+for(;;)
+{
+  i0001 = fscanf(f0000,"%d%lf",&value,&realValue);
+  if (i0001 != EOF && i0001 != 2) { fprintf(stderr, "Aqualis: invalid text input record.\n"); exit(EXIT_FAILURE); }
+  if(i0001 == 2)
+  {
+  }
+  if(i0001 < 0)
+  {
+    goto _11;
+  }
+  else
+  {
+    /*record*/
+  }
+  i0002 = i0002+1;
+}
+_11:;
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+t0001_length = snprintf(NULL,0,"quote'\"%%日本_%02d.dat",value);
+if (t0001_length < 0) { fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+t0001 = (char *)malloc((size_t)t0001_length + 1U);
+if (t0001 == NULL) { fprintf(stderr, "Aqualis: failed to allocate a file name.\n"); exit(EXIT_FAILURE); }
+if (snprintf(t0001,(size_t)t0001_length + 1U,"quote'\"%%日本_%02d.dat",value) != t0001_length) { free(t0001); t0001 = NULL; fprintf(stderr, "Aqualis: failed to format a file name.\n"); exit(EXIT_FAILURE); }
+f0000 = fopen(t0001,"rb");
+if (f0000 == NULL) { fprintf(stderr, "Aqualis: failed to open file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+i0002 = 1;
+for(;;)
+{
+  i0001 = fscanf(f0000,"%d",&value);
+  if (i0001 != EOF && i0001 != 1) { fprintf(stderr, "Aqualis: invalid text input record.\n"); exit(EXIT_FAILURE); }
+  if(i0001 == 1)
+  {
+  }
+  if(i0001 < 0)
+  {
+    goto _12;
+  }
+  else
+  {
+    /*record with width*/
+  }
+  i0002 = i0002+1;
+}
+_12:;
+if (fclose(f0000) != 0) { fprintf(stderr, "Aqualis: failed to close file %s.\n", t0001); free(t0001); t0001 = NULL; exit(EXIT_FAILURE); }
+free(t0001);
+t0001 = NULL;
+
+--- language ---
+Python
+t0001 = "quote'\"%日本_" + format(value, "012d") + ".dat"
+f0000 = open(t0001,mode="w")
+f0000.write("row=\t%12d\t%27.17e\n" %(value,realValue))
+f0000.write("%d\n" %(value))
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "05d") + ".dat"
+f0000 = open(t0001,mode="w")
+f0000.write("%12d\n" %(value))
+f0000.close()
+t0001 = "plain.txt"
+f0000 = open(t0001,mode="w")
+t0002 = "nested.txt"
+f0001 = open(t0002,mode="w")
+f0001.write("nested\n")
+f0001.close()
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "012d") + ".dat"
+f0000 = open(t0001,mode="wb")
+i0001 = value
+f0000.write(struct.pack('i', i0001))
+d0001 = realValue
+f0000.write(struct.pack('d', d0001))
+d0001 = (complexValue).real
+d0002 = (complexValue).imag
+f0000.write(struct.pack('d', d0001))
+f0000.write(struct.pack('d', d0002))
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "03d") + ".dat"
+f0000 = open(t0001,mode="wb")
+i0001 = 42
+f0000.write(struct.pack('i', i0001))
+f0000.close()
+t0001 = "plain.bin"
+f0000 = open(t0001,mode="wb")
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "012d") + ".dat"
+f0000 = open(t0001,mode="rb")
+word_list = f0000.readline().split()
+if len(word_list) != 2: raise ValueError('Aqualis: invalid text input record.')
+value = int(word_list[0])
+realValue = float(word_list[1])
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "04d") + ".dat"
+f0000 = open(t0001,mode="rb")
+word_list = f0000.readline().split()
+if len(word_list) != 1: raise ValueError('Aqualis: invalid text input record.')
+value = int(word_list[0])
+f0000.close()
+t0001 = "plain.txt"
+f0000 = open(t0001,mode="rb")
+word_list = f0000.readline().split()
+if len(word_list) != 1: raise ValueError('Aqualis: invalid text input record.')
+realValue = float(word_list[0])
+f0000.close()
+t0001 = "complex.txt"
+f0000 = open(t0001,mode="rb")
+word_list = f0000.readline().split()
+if len(word_list) != 2: raise ValueError('Aqualis: invalid text input record.')
+complexValue = complex(float(word_list[0]),float(word_list[1]))
+f0000.close()
+t0001 = "byte.txt"
+f0000 = open(t0001,mode="rb")
+t0002 = f0000.read(1)
+if len(t0002) != 1: raise ValueError('Aqualis: invalid byte input record.')
+value = t0002[0]
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "012d") + ".dat"
+f0000 = open(t0001,mode="rb")
+value = struct.unpack('i', f0000.read(4))[0]
+realValue = struct.unpack('d', f0000.read(8))[0]
+d0001 = struct.unpack('d', f0000.read(8))[0]
+d0002 = struct.unpack('d', f0000.read(8))[0]
+complexValue = d0001+1j*d0002
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "06d") + ".dat"
+f0000 = open(t0001,mode="rb")
+value = struct.unpack('i', f0000.read(4))[0]
+f0000.close()
+t0001 = "plain.bin"
+f0000 = open(t0001,mode="rb")
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "012d") + ".dat"
+f0000 = open(t0001,mode="rb")
+class _AqualisLoopExit11(Exception):
+  pass
+i0002 = 1
+try:
+  while True:
+    lines = f0000.readline()
+    if lines == b'':
+      i0001 = -1
+    else:
+      word_list = lines.split()
+      if len(word_list) != 2: raise ValueError('Aqualis: invalid text input record.')
+      i0001 = 0
+      value = int(word_list[0])
+      realValue= float(word_list[1])
+    if i0001 < 0:
+      raise _AqualisLoopExit11()
+    else:
+      #record
+    i0002 = i0002+1
+except _AqualisLoopExit11:
+  pass
+f0000.close()
+t0001 = "quote'\"%日本_" + format(value, "02d") + ".dat"
+f0000 = open(t0001,mode="rb")
+class _AqualisLoopExit12(Exception):
+  pass
+i0002 = 1
+try:
+  while True:
+    lines = f0000.readline()
+    if lines == b'':
+      i0001 = -1
+    else:
+      word_list = lines.split()
+      if len(word_list) != 1: raise ValueError('Aqualis: invalid text input record.')
+      i0001 = 0
+      value = int(word_list[0])
+    if i0001 < 0:
+      raise _AqualisLoopExit12()
+    else:
+      #record with width
+    i0002 = i0002+1
+except _AqualisLoopExit12:
+  pass
+f0000.close()
+
+--- language ---
+LaTeX
+f^{(0)} = open text file(t^{(1)},"w");
+Write(text): \(f^{(0)} \leftarrow ,value,realValue\)
+Write(text): \(f^{(0)} \leftarrow value\)
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"w");
+Write(text): \(f^{(0)} \leftarrow value\)
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"w");
+f^{(1)} = open text file(t^{(2)},"w");
+Write(text): \(f^{(1)} \leftarrow \)
+close(f^{(1)});
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"wb");
+write(f^{(0)}) value
+write(f^{(0)}) realValue
+write(f^{(0)}) \mathrm{Re}\left(complexValue\right)
+write(f^{(0)}) \mathrm{Im}\left(complexValue\right)
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"wb");
+write(f^{(0)}) 42
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"wb");
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+Read(text): \(value,realValue \leftarrow f^{(0)}\)
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+Read(text): \(value \leftarrow f^{(0)}\)
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+Read(text): \(realValue \leftarrow f^{(0)}\)
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"rb");
+read(f^{(0)},iostat=i^{(1)}) value
+read(f^{(0)},iostat=i^{(1)}) realValue
+read(f^{(0)},iostat=i^{(1)}) d^{(1)}
+read(f^{(0)},iostat=i^{(1)}) d^{(2)}
+\begin{align}
+complexValue \leftarrow d^{(1)}+uj d^{(2)}
+\end{align}
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"rb");
+read(f^{(0)},iostat=i^{(1)}) value
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"rb");
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+\begin{align}
+i^{(2)} \leftarrow 1
+\end{align}
+do
+  read(f^{(0)},"(I12,E27.17e3)",iostat=i^{(1)}) value,realValue
+  if i^{(1)} < 0
+    goto 11
+  else
+    %record
+  endif
+  \begin{align}
+  i^{(2)} \leftarrow i^{(2)}+1
+  \end{align}
+end do
+11 continue
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+\begin{align}
+i^{(2)} \leftarrow 1
+\end{align}
+do
+  read(f^{(0)},"(I12)",iostat=i^{(1)}) value
+  if i^{(1)} < 0
+    goto 12
+  else
+    %record with width
+  endif
+  \begin{align}
+  i^{(2)} \leftarrow i^{(2)}+1
+  \end{align}
+end do
+12 continue
+close(f^{(0)});
+
+--- language ---
+HTML
+f^{(0)} = open text file(t^{(1)},"w");
+Write(text): \(f^{(0)} \leftarrow ,value,realValue\)<br/>
+Write(text): \(f^{(0)} \leftarrow value\)<br/>
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"w");
+Write(text): \(f^{(0)} \leftarrow value\)<br/>
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"w");
+f^{(1)} = open text file(t^{(2)},"w");
+Write(text): \(f^{(1)} \leftarrow \)<br/>
+close(f^{(1)});
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"wb");
+Write(binary): \(f^{(0)} \leftarrow value\)<br/>
+Write(binary): \(f^{(0)} \leftarrow realValue\)<br/>
+Write(binary): \(f^{(0)} \leftarrow \mathrm{Re}\left(complexValue\right)\)<br/>
+Write(binary): \(f^{(0)} \leftarrow \mathrm{Im}\left(complexValue\right)\)<br/>
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"wb");
+Write(binary): \(f^{(0)} \leftarrow 42\)<br/>
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"wb");
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+Read(text): \(value<mo>,</mo>realValue \leftarrow f^{(0)}\)<br/>
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+Read(text): \(value \leftarrow f^{(0)}\)<br/>
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+Read(text): \(realValue \leftarrow f^{(0)}\)<br/>
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"rb");
+Read(binary): \(value \leftarrow f^{(0)}\)<br/>
+Read(binary): \(realValue \leftarrow f^{(0)}\)<br/>
+Read(binary): \(complexValue \leftarrow f^{(0)}\)<br/>
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"rb");
+Read(binary): \(value \leftarrow f^{(0)}\)<br/>
+close(f^{(0)});
+f^{(0)} = open binary file(t^{(1)},"rb");
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+\[
+\begin{align}
+i^{(2)} \leftarrow 1
+\end{align}
+\]
+<div class="codeblock">
+<details open>
+<summary><span class="op-loop">repeat</span></summary>
+<div class="insidecode-loop">
+  Read(text): \(value<mo>,</mo>realValue \leftarrow f^{(0)}\)<br/>
+  <div class="codeblock">
+  <details open>
+  <summary><span class="op-if">if</span> \(i^{(1)} < 0\)</summary>
+  <div class="insidecode-if">
+    goto 11
+  </div>
+  <summary><span class="op-if">else</span></summary>
+  <div class="insidecode-if">
+    <span class="comment">record</span><br/>
+  </div>
+  </details>
+  </div>
+  \[
+  \begin{align}
+  i^{(2)} \leftarrow i^{(2)}+1
+  \end{align}
+  \]
+</div>
+<span class="continue"><span id="11">11 continue</span></span>
+<br>
+</details>
+</div>
+close(f^{(0)});
+f^{(0)} = open text file(t^{(1)},"r");
+\[
+\begin{align}
+i^{(2)} \leftarrow 1
+\end{align}
+\]
+<div class="codeblock">
+<details open>
+<summary><span class="op-loop">repeat</span></summary>
+<div class="insidecode-loop">
+  Read(text): \(value \leftarrow f^{(0)}\)<br/>
+  <div class="codeblock">
+  <details open>
+  <summary><span class="op-if">if</span> \(i^{(1)} < 0\)</summary>
+  <div class="insidecode-if">
+    goto 12
+  </div>
+  <summary><span class="op-if">else</span></summary>
+  <div class="insidecode-if">
+    <span class="comment">record with width</span><br/>
+  </div>
+  </details>
+  </div>
+  \[
+  \begin{align}
+  i^{(2)} \leftarrow i^{(2)}+1
+  \end{align}
+  \]
+</div>
+<span class="continue"><span id="12">12 continue</span></span>
+<br>
+</details>
+</div>
+close(f^{(0)});
+
+--- API ---
+Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.exprString,Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.int0,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit]] file_Read(Aqualis.exprString)
+Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.exprString,Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.int0,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit]] file_Read(Aqualis.exprString, Int32)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.BinReader,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] binfileInput(Aqualis.exprString)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.BinReader,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] binfileInput(Aqualis.exprString, Int32)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.BinReader,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] binfileInput(System.String)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.BinWriter,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] binfileOutput(Aqualis.exprString)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.BinWriter,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] binfileOutput(Aqualis.exprString, Int32)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.BinWriter,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] binfileOutput(System.String)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.TextReader,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] fileInput(Aqualis.exprString)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.TextReader,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] fileInput(Aqualis.exprString, Int32)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.TextReader,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] fileInput(System.String)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.TextWriter,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] fileOutput(Aqualis.exprString)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.TextWriter,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] fileOutput(Aqualis.exprString, Int32)
+Microsoft.FSharp.Core.FSharpFunc`2[Microsoft.FSharp.Core.FSharpFunc`2[Aqualis.TextWriter,Microsoft.FSharp.Core.Unit],Microsoft.FSharp.Core.Unit] fileOutput(System.String)
