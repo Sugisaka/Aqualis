@@ -159,3 +159,16 @@ separately from PHP keywords. Markup-only names retain their existing behavior.
 [MIT License](https://github.com/Sugisaka/Aqualis/blob/master/LICENSE.txt)
 
 Copyright (c) 2023 Jun-ichiro Sugisaka
+
+## Tikhonov least squares
+
+`solve_simuleq_t` and `solve_simuleq_tt` use SVD directly, avoiding the loss of
+accuracy caused by forming normal equations. The input matrix and right-hand
+side are preserved. The compatibility default is an absolute regularization
+parameter of `1e-6`; use `solve_simuleq_tt(matrix, rhs, lambda)` to choose a
+constant or runtime `double0` parameter appropriate for the data scale.
+The parameter must be finite and nonnegative. Zero selects the numerical
+pseudoinverse, discarding singular values at or below
+`machine epsilon * (rows + columns) * largest singular value`.
+The current implementation uses full SVD matrices, so its temporary storage
+includes `rows * rows` and `columns * columns` elements.

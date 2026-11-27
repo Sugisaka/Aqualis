@@ -84,3 +84,18 @@ module LapackBackendGenerationTests =
                 Assert.Equal(
                     $"{language} code generation does not support {operationName}.",
                     error.Message)
+
+    [<Fact>]
+    let ``Tikhonov uses SVD and validates runtime regularization`` () =
+        for language, extension, symbol in [C99,".c","dgesvd_"; Fortran,".f90","dgesvd"; Python,".py","svd("] do
+            use output = new TemporaryDirectory()
+            Compile [language] output.Path "tikhonov" "1" <| fun context ->
+                let matrix = context.var.d2("matrix",2,2)
+                let rhs = context.var.d1("rhs",2)
+                let lambda = context.var.d0 "regularization"
+                context.la.solve_simuleq_tt(matrix,rhs,lambda) ignore
+            let source = File.ReadAllText(Path.Combine(output.Path,"tikhonov"+extension))
+            Assert.Contains(symbol,source)
+            Assert.DoesNotContain("dgesv(",source)
+            Assert.DoesNotContain("dgesv_(",source)
+            Assert.Contains("regularization must be nonnegative",source)

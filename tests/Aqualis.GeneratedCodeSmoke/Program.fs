@@ -2084,7 +2084,7 @@ module Program =
             rhs.allocate 1
             matrix[0,0] <== 1e200
             rhs[0] <== 1.0
-            context.la.solve_simuleq_tt(matrix, rhs, 1.0) ignore
+            context.la.solve_simuleq_tt(matrix, rhs, 1.0) <| fun solution -> context.print.t (solution[0]*D 1e200)
 
         generate "tikhonov-overflow-complex" <| fun context ->
             let matrix = context.var.z2 "matrix"
@@ -2093,7 +2093,59 @@ module Program =
             rhs.allocate 1
             matrix[0,0] <== complex0(Cpx(1e200, 0.0))
             rhs[0] <== complex0(Cpx(1.0, 0.0))
-            context.la.solve_simuleq_tt(matrix, rhs, 1.0) ignore
+            context.la.solve_simuleq_tt(matrix, rhs, 1.0) <| fun solution -> context.print.t (solution[0].re*D 1e200)
+
+        for complex in [false; true] do
+            generate (if complex then "tikhonov-conditioned-complex" else "tikhonov-conditioned-real") <| fun context ->
+                if complex then
+                    let matrix = context.var.z2("matrix",2,2)
+                    let rhs = context.var.z1("rhs",2)
+                    matrix.clear()
+                    rhs.clear()
+                    matrix[0,0] <== 1.0
+                    matrix[0,1] <== 1.0
+                    matrix[1,1] <== 1e-10
+                    rhs[1] <== complex0(Cpx(0.0,1e-10))
+                    context.la.solve_simuleq_tt(matrix,rhs,1e-14) <| fun solution ->
+                        context.print.t solution[0].im
+                        context.print.t solution[1].im
+                    context.print.t matrix[1,1].re
+                else
+                    let matrix = context.var.d2("matrix",2,2)
+                    let rhs = context.var.d1("rhs",2)
+                    matrix.clear()
+                    rhs.clear()
+                    matrix[0,0] <== 1.0
+                    matrix[0,1] <== 1.0
+                    matrix[1,1] <== 1e-10
+                    rhs[1] <== 1e-10
+                    context.la.solve_simuleq_tt(matrix,rhs,1e-14) <| fun solution ->
+                        context.print.t solution[0]
+                        context.print.t solution[1]
+                    context.print.t matrix[1,1]
+
+        generate "tikhonov-zero-regularization" <| fun context ->
+            let matrix = context.var.d2("matrix",1,2)
+            let rhs = context.var.d1("rhs",1)
+            matrix[0,0] <== 1.0
+            matrix[0,1] <== 1.0
+            rhs[0] <== 2.0
+            context.la.solve_simuleq_tt(matrix,rhs,0.0) <| fun solution ->
+                context.print.t (solution[0]+solution[1])
+        generate "tikhonov-zero-matrix" <| fun context ->
+            let matrix = context.var.z2("matrix",2,1)
+            let rhs = context.var.z1("rhs",2)
+            matrix.clear()
+            rhs.clear()
+            context.la.solve_simuleq_tt(matrix,rhs,0.0) <| fun solution ->
+                context.print.t (asm.abs solution[0])
+        for caseName, value in ["negative",-1.0; "nan",Double.NaN; "infinite",Double.PositiveInfinity] do
+            generate ("tikhonov-lambda-"+caseName) <| fun context ->
+                let matrix = context.var.d2("matrix",1,1)
+                let rhs = context.var.d1("rhs",1)
+                let regularization = context.var.d0 "regularization"
+                regularization <== value
+                context.la.solve_simuleq_tt(matrix,rhs,regularization) ignore
 
         let generateEigenStandard caseName (rows:int) (columns:int) (valueCount:int) (vectorOrder:int) =
             generate caseName <| fun context ->

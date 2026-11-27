@@ -745,8 +745,23 @@ for language in c fortran python; do
   fi
   expect_generated_failure "$language short Tikhonov RHS" "$output_root/tikhonov-short-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side length must match matrix rows.' "${run_command[@]}"
   expect_generated_failure "$language wide Tikhonov RHS" "$output_root/tikhonov-wide-rhs-$language" 'Aqualis: LAPACK Tikhonov right-hand side must have one column.' "${run_command[@]}"
-  expect_generated_failure "$language real Tikhonov overflow" "$output_root/tikhonov-overflow-real-$language" 'Aqualis: LAPACK Tikhonov calculation overflowed or produced a non-finite value.' "${run_command[@]}"
-  expect_generated_failure "$language complex Tikhonov overflow" "$output_root/tikhonov-overflow-complex-$language" 'Aqualis: LAPACK Tikhonov calculation overflowed or produced a non-finite value.' "${run_command[@]}"
+  run_and_verify_number "$language real Tikhonov scaling" "$output_root/tikhonov-overflow-real-$language" '1' "${run_command[@]}"
+  run_and_verify_number "$language complex Tikhonov scaling" "$output_root/tikhonov-overflow-complex-$language" '1' "${run_command[@]}"
+  run_and_verify_number "$language unregularized wide solve" "$output_root/tikhonov-zero-regularization-$language" '2' "${run_command[@]}"
+  run_and_verify_number "$language zero matrix solve" "$output_root/tikhonov-zero-matrix-$language" '0' "${run_command[@]}"
+  expect_generated_failure "$language negative regularizer" "$output_root/tikhonov-lambda-negative-$language" 'regularization must be nonnegative' "${run_command[@]}"
+  for value in nan infinite; do
+    expect_generated_failure "$language nonfinite regularizer" "$output_root/tikhonov-lambda-$value-$language" 'Tikhonov calculation overflowed or produced a non-finite value' "${run_command[@]}"
+  done
+  for kind in real complex; do
+    actual="$(cd "$output_root/tikhonov-conditioned-$kind-$language" && "${run_command[@]}")"
+    python3 - "$actual" <<'PY'
+import math, sys
+values = list(map(float, sys.argv[1].split()))
+assert len(values) == 3 and math.isclose(values[0], -1, abs_tol=1e-6) and math.isclose(values[1], 1, abs_tol=1e-6), values
+assert math.isclose(values[2], 1e-10, rel_tol=1e-12), values
+PY
+  done
   run_and_verify_number "$language aliased real SVD" "$output_root/svd-alias-real-$language" '4' "${run_command[@]}"
   run_and_verify_number "$language aliased complex SVD" "$output_root/svd-alias-complex-$language" '4' "${run_command[@]}"
   run_and_verify_number "$language aliased real SVD VT" "$output_root/svd-alias-vt-real-$language" '4' "${run_command[@]}"
