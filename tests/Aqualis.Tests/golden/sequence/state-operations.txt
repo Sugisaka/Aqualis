@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ja" >
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<title>
+state-operations
+</title>
+</head>
+<body style="background-color: #ffffff" >
+<svg viewBox="0 0 20 20" width="20px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 15px; margin-top: 50px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: -5px; margin-top: 40px; position: absolute;">
+<line x1="10" y1="40" x2="10" y2="10" style="stroke: black; stroke-width: 10px" />
+</svg>
+<div style="width: 50px; height: 20px; font-family: &#39;Noto Sans Mono&#39;,monospace; margin-left: 40px; margin-top: 40px; position: absolute; overflow-wrap: break-word; border-width: 2px; border-style: solid; border-color: #000000; font-size: 12px; color: black; font-weight: normal; background-color: #ffffff; line-height: 14px; padding-top: 5px; padding-bottom: 5px; text-align: center" >
+\(left\)
+<br>
+</div>
+<svg viewBox="0 0 20 46" width="20px" height="46px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 64px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="36" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 90px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 90px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460505" width="52.5px" height="26.211657082460505px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 96.89417145876975px; position: absolute;">
+<line x1="42.5" y1="13.105828541230252" x2="12" y2="13.105828541230252" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230252 21.59110991546882,16.211657082460505" style="stroke: black" />
+</svg>
+<div style="margin-left: 102.5px; margin-top: 90px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(1\)
+</div>
+<div style="width: 50px; height: 20px; font-family: &#39;Noto Sans Mono&#39;,monospace; margin-left: 190px; margin-top: 40px; position: absolute; overflow-wrap: break-word; border-width: 2px; border-style: solid; border-color: #000000; font-size: 12px; color: black; font-weight: normal; background-color: #ffffff; line-height: 14px; padding-top: 5px; padding-bottom: 5px; text-align: center" >
+\(middle\)
+<br>
+</div>
+<svg viewBox="0 0 20 76" width="20px" height="76px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 64px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="66" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 120px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 120px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 120px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460476" width="52.5px" height="26.211657082460476px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 210px; margin-top: 126.89417145876976px; position: absolute;">
+<line x1="42.5" y1="13.105828541230238" x2="12" y2="13.105828541230238" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230238 21.59110991546882,16.211657082460476" style="stroke: black" />
+</svg>
+<div style="margin-left: 252.5px; margin-top: 120px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(2\)
+</div>
+<div style="width: 50px; height: 20px; font-family: &#39;Noto Sans Mono&#39;,monospace; margin-left: 340px; margin-top: 40px; position: absolute; overflow-wrap: break-word; border-width: 2px; border-style: solid; border-color: #000000; font-size: 12px; color: black; font-weight: normal; background-color: #ffffff; line-height: 14px; padding-top: 5px; padding-bottom: 5px; text-align: center" >
+\(right\)
+<br>
+</div>
+<svg viewBox="0 0 20 106" width="20px" height="106px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 64px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="96" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 150px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 150px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 150px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 150px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460476" width="52.5px" height="26.211657082460476px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 360px; margin-top: 156.89417145876976px; position: absolute;">
+<line x1="42.5" y1="13.105828541230238" x2="12" y2="13.105828541230238" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546879,10 10,13.105828541230238 21.59110991546879,16.211657082460476" style="stroke: black" />
+</svg>
+<div style="margin-left: 402.5px; margin-top: 150px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(3\)
+</div>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 180px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 180px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 180px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 100" width="20px" height="100px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 110px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="90" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 200px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 52.5 20" width="52.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 190px; position: absolute;">
+<line x1="10" y1="10" x2="42.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 190px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460476" width="52.5px" height="26.211657082460476px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 196.89417145876976px; position: absolute;">
+<line x1="42.5" y1="13.105828541230238" x2="12" y2="13.105828541230238" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230238 21.59110991546882,16.211657082460476" style="stroke: black" />
+</svg>
+<div style="margin-left: 102.5px; margin-top: 180px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(left+1\)
+</div>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 220px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 220px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 220px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 220px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 210px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 140" width="20px" height="140px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 140px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="130" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 277.5 20" width="277.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 230px; position: absolute;">
+<line x1="10" y1="10" x2="267.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 210px; margin-top: 240px; position: absolute;">
+<line x1="10" y1="10" x2="117.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 230px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 246.89417145876973px; position: absolute;">
+<line x1="10" y1="13.105828541230267" x2="40.5" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="30.90889008453121,16.211657082460533 42.5,13.105828541230267 30.90889008453121,10" style="stroke: black" />
+</svg>
+<div style="margin-left: 327.5px; margin-top: 220px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(left+middle\)
+</div>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 270px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 270px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 270px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 270px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 260px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 260px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 280px; position: absolute;">
+<line x1="117.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 277.5 20" width="277.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 290px; position: absolute;">
+<line x1="267.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 280px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 296.89417145876973px; position: absolute;">
+<line x1="42.5" y1="13.105828541230267" x2="12" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230267 21.59110991546882,16.211657082460533" style="stroke: black" />
+</svg>
+<div style="margin-left: 102.5px; margin-top: 270px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(middle+right\)
+</div>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 320px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 310px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 70" width="20px" height="70px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 310px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="60" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 202.5 20" width="202.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 330px; position: absolute;">
+<line x1="10" y1="10" x2="192.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 340px; position: absolute;">
+<line x1="117.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 330px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 210px; margin-top: 346.89417145876973px; position: absolute;">
+<line x1="42.5" y1="13.105828541230267" x2="12" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230267 21.59110991546882,16.211657082460533" style="stroke: black" />
+</svg>
+<div style="margin-left: 252.5px; margin-top: 320px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(left+right\)
+</div>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 370px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 370px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 370px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 370px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 360px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 277.5 20" width="277.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 380px; position: absolute;">
+<line x1="10" y1="10" x2="267.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 380px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 386.89417145876973px; position: absolute;">
+<line x1="10" y1="13.105828541230267" x2="40.5" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="30.90889008453121,16.211657082460533 42.5,13.105828541230267 30.90889008453121,10" style="stroke: black" />
+</svg>
+<div style="margin-left: 327.5px; margin-top: 370px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(left+left\)
+</div>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 410px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 410px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 410px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 440px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 440px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 440px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 460px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 460px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 460px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 490px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 490px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 490px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 490px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 180" width="20px" height="180px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 360px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="170" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 210px; margin-top: 500px; position: absolute;">
+<line x1="10" y1="10" x2="117.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 500px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 506.89417145876973px; position: absolute;">
+<line x1="10" y1="13.105828541230267" x2="40.5" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="30.90889008453121,16.211657082460533 42.5,13.105828541230267 30.90889008453121,10" style="stroke: black" />
+</svg>
+<div style="margin-left: 327.5px; margin-top: 490px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(middle\)
+</div>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 530px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 530px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 530px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 550px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 550px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 550px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 550px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 80" width="20px" height="80px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 520px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="70" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 277.5 20" width="277.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 560px; position: absolute;">
+<line x1="267.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 92.5px; margin-top: 560px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 566.8941714587697px; position: absolute;">
+<line x1="42.5" y1="13.105828541230267" x2="12" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230267 21.59110991546882,16.211657082460533" style="stroke: black" />
+</svg>
+<div style="margin-left: 102.5px; margin-top: 550px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(right\)
+</div>
+<svg viewBox="0 0 380 20" width="380px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 465px; position: absolute;">
+<line x1="10" y1="10" x2="370" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 140" width="20px" height="140px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 385px; margin-top: 465px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="130" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 380 20" width="380px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 585px; position: absolute;">
+<line x1="370" y1="10" x2="10" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 140" width="20px" height="140px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 465px; position: absolute;">
+<line x1="10" y1="130" x2="10" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<div style="margin-left: 40px; margin-top: 475px; position: absolute; font-size: 12px; color: rgb(0, 180, 0); font-weight: normal" >
+\(middle > 0\)
+</div>
+<div style="margin-left: 40px; margin-top: 535px; position: absolute; font-size: 12px; color: rgb(0, 180, 0); font-weight: normal" >
+\(\mathrm{Else}\)
+</div>
+<svg viewBox="0 0 380 20" width="380px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 25px; margin-top: 525px; position: absolute;">
+<line x1="10" y1="10" x2="370" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px; stroke-dasharray: 2" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 590px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 590px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 590px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 400 20" width="400px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 15px; margin-top: 455px; position: absolute;">
+<line x1="10" y1="10" x2="390" y2="10" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 160" width="20px" height="160px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 395px; margin-top: 455px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="150" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 400 20" width="400px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 15px; margin-top: 595px; position: absolute;">
+<line x1="390" y1="10" x2="10" y2="10" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 160" width="20px" height="160px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 15px; margin-top: 455px; position: absolute;">
+<line x1="10" y1="150" x2="10" y2="10" style="stroke: rgb(127,0,255); stroke-width: 2px" />
+</svg>
+<div style="margin-left: 25px; margin-top: 450px; position: absolute; font-size: 12px; color: rgb(127,0,255); font-weight: normal" >
+inside if
+</div>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 600px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 600px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 600px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 610px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 610px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 610px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 630px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 630px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 40" width="20px" height="40px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 630px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="30" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 650px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 650px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 650px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 650px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 120" width="20px" height="120px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 580px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="110" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 127.5 20" width="127.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 660px; position: absolute;">
+<line x1="117.5" y1="10" x2="10" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 242.5px; margin-top: 660px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 210px; margin-top: 666.8941714587697px; position: absolute;">
+<line x1="42.5" y1="13.105828541230267" x2="12" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="21.59110991546882,10 10,13.105828541230267 21.59110991546882,16.211657082460533" style="stroke: black" />
+</svg>
+<div style="margin-left: 252.5px; margin-top: 650px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(right\)
+</div>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 690px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 690px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 60" width="20px" height="60px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 690px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="50" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 50" width="20px" height="50px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 690px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="40" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 20 160" width="20px" height="160px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 580px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="150" style="stroke: rgba(0, 191, 255, 0.5); stroke-width: 10px" />
+</svg>
+<svg viewBox="0 0 277.5 20" width="277.5px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 60px; margin-top: 700px; position: absolute;">
+<line x1="10" y1="10" x2="267.5" y2="10" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 700px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 52.5 26.211657082460533" width="52.5px" height="26.211657082460533px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 317.5px; margin-top: 706.8941714587697px; position: absolute;">
+<line x1="10" y1="13.105828541230267" x2="40.5" y2="13.105828541230267" style="stroke: black; stroke-width: 2px" />
+<polyline points="30.90889008453121,16.211657082460533 42.5,13.105828541230267 30.90889008453121,10" style="stroke: black" />
+</svg>
+<div style="margin-left: 327.5px; margin-top: 690px; position: absolute; font-size: 12px; color: black; font-weight: normal" >
+\(left\)
+</div>
+<svg viewBox="0 0 420 20" width="420px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 415px; position: absolute;">
+<line x1="10" y1="10" x2="410" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 330" width="20px" height="330px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 405px; margin-top: 415px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="320" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 420 20" width="420px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 725px; position: absolute;">
+<line x1="410" y1="10" x2="10" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<svg viewBox="0 0 20 330" width="20px" height="330px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 415px; position: absolute;">
+<line x1="10" y1="320" x2="10" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px" />
+</svg>
+<div style="margin-left: 20px; margin-top: 425px; position: absolute; font-size: 12px; color: rgb(0, 180, 0); font-weight: normal" >
+\(left > 0\)
+</div>
+<div style="margin-left: 20px; margin-top: 635px; position: absolute; font-size: 12px; color: rgb(0, 180, 0); font-weight: normal" >
+\(right > 0\)
+</div>
+<div style="margin-left: 20px; margin-top: 675px; position: absolute; font-size: 12px; color: rgb(0, 180, 0); font-weight: normal" >
+\(\mathrm{Else}\)
+</div>
+<svg viewBox="0 0 420 20" width="420px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 625px; position: absolute;">
+<line x1="10" y1="10" x2="410" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px; stroke-dasharray: 2" />
+</svg>
+<svg viewBox="0 0 420 20" width="420px" height="20px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; margin-top: 665px; position: absolute;">
+<line x1="10" y1="10" x2="410" y2="10" style="stroke: rgb(0, 180, 0); stroke-width: 2px; stroke-dasharray: 2" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 730px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 730px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 30" width="20px" height="30px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 730px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="20" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 27.5" width="20px" height="27.5px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 55px; margin-top: 740px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="17.5" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 27.5" width="20px" height="27.5px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 205px; margin-top: 740px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="17.5" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+<svg viewBox="0 0 20 27.5" width="20px" height="27.5px" xmlns="http://www.w3.org/2000/svg" style="margin-left: 355px; margin-top: 740px; position: absolute;">
+<line x1="10" y1="10" x2="10" y2="17.5" style="stroke: black; stroke-width: 1px; stroke-dasharray: 5 3" />
+</svg>
+</body>
+</html>
+
+--- states ---
+(100.0, [], [(25.0, 25.0, 0.0, 60.0); (10.0, 25.0, 30.0, 40.0)], [])
+(100.0, [], [(5.0, 25.0, 0.0, 80.0); (5.0, 25.0, 30.0, 80.0)], [])
+(757.5, [("left", 0, 730.0); ("middle", 1, 690.0); ("right", 2, 730.0)], [], [])

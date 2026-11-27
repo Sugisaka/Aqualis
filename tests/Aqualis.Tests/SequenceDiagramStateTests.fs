@@ -72,3 +72,43 @@ module SequenceDiagramStateTests =
         let actual = generated + "\n--- state ---\n" + finalState + "\n--- API ---\n" + api
         let golden = TestHelpers.goldenPath "sequence" "nested-diagram.txt"
         Assert.Equal(File.ReadAllText(golden).Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"))
+
+    [<Fact>]
+    let ``assignment paths elseif groups and legacy frame updates preserve output and state`` () =
+        use output = new TemporaryDirectory()
+        let mutable snapshots = []
+        Compile [HTMLSequenceDiagram] output.Path "state-operations" "1.0" (fun context ->
+            let snapshot () =
+                snapshots <- snapshots @ [sprintf "%A" (context.TerminalLifeLine, context.SequenceVariables, context.SequenceFrames, context.SequenceBranches)]
+            context.FrameStack <- [0.0,0.0,0.0,0.0; 10.0,20.0,30.0,40.0]
+            expr.drawActiveLine(context, 25.0, 60.0, 60.0, "black")
+            snapshot()
+            expr.drawActiveLine(context, 5.0, 80.0, 50.0, "black")
+            snapshot()
+            context.SequenceFrames <- []
+            let left = context.var.i0 "left"
+            let middle = context.var.i0 "middle"
+            let right = context.var.i0 "right"
+            left <== 1
+            middle <== 2
+            right <== 3
+            left <== left + 1
+            right <== left + middle
+            left <== middle + right
+            middle <== left + right
+            right <== left + left
+            expr.branchHS context (fun (ifCode, elseifCode, elseCode) ->
+                ifCode (left .> 0).Expr (fun () ->
+                    expr.sectionHS(context, "inside if") (fun () ->
+                        context.br.branch (fun branch ->
+                            branch.IF (middle .> 0) (fun () -> right <== middle)
+                            branch.EL (fun () -> left <== right))))
+                elseifCode (right .> 0).Expr (fun () -> middle <== right)
+                elseCode (fun () -> right <== left))
+            expr.extendLifeLine context 7.5
+            snapshot())
+        let actual =
+            File.ReadAllText(Path.Combine(output.Path, "state-operations.html"))
+            + "\n--- states ---\n" + String.concat "\n" snapshots
+        let golden = TestHelpers.goldenPath "sequence" "state-operations.txt"
+        Assert.Equal(File.ReadAllText(golden).Replace("\r\n", "\n"), actual.Replace("\r\n", "\n"))

@@ -57,6 +57,8 @@ namespace Aqualis
         let mutable parallelLoopSetup : ResizeArray<string> option = None
         let sequenceDiagramState = SequenceDiagramState()
         let mutable phpFileScopeCounter = 0
+        /// Gets the sequence-diagram state owned by this context.
+        member internal _.SequenceDiagramState = sequenceDiagramState
         /// Gets or sets the endpoint of the terminal lifeline in sequence diagrams.
         member _.TerminalLifeLine with get() = sequenceDiagramState.TerminalLifeLine and set(v) = sequenceDiagramState.TerminalLifeLine <- v
         /// シーケンス図に描画済み変数リスト
