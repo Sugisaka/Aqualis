@@ -121,11 +121,14 @@ namespace Aqualis
                     |Sum(t, n1, n2, f),_ ->
                         Sum(t, n1, n2, fun n -> expr.diff (f n) x g)
                     |Let(t,eq,v,f),_ ->
-                        // 直接計算の場合でも変数を生成し、その変数に対し微分を行う
-                        // let vname,_ = g.d0.getVar()
-                        // let v = Var(Dt,vname,NaN)
-                        // expr.subst v eq g
-                        expr.diff (f v) x g + expr.diff (f v) v g * expr.diff eq x g
+                        match v with
+                        |Var _ ->
+                            // Keep the binding so subsequent derivatives also see
+                            // the dependence of the local variable on eq.
+                            Let(t,eq,v,fun bound ->
+                                expr.diff (f bound) x g +
+                                expr.diff (f bound) bound g * expr.diff eq x g)
+                        |_ -> expr.diff (f eq) x g
                     |NaN,_ ->
                         UnsupportedOperation.symbolicDifferentiation "NaN expressions"
                     |_ ->

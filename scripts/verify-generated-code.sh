@@ -1431,4 +1431,6 @@ PY
   done
 done
 
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" derivatives
+
 printf '%s\n' 'All generated-code runtime checks passed.'

@@ -2689,12 +2689,31 @@ module Program =
                     c.writein "if (!is_finite($sample)) { throw new RuntimeException('Invalid normal sample'); }"
             c.php.echo "ok"
 
+    let private generateLetDerivatives outputRoot (directoryName, language) =
+        let directory = Path.Combine(outputRoot,"review-derivatives-"+directoryName)
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [language] directory "smoke" "1" <| fun context ->
+            let x = context.var.d0 "query"
+            x <== 3.0
+            let square = context.ch.xLet x (fun v -> v*v)
+            let nested = context.ch.xLet (x*x) (fun v -> context.ch.xLet v (fun w -> w*w))
+            let mixed = context.ch.xLet x (fun v -> x*v)
+            for expression in [square;nested;mixed] do
+                let first = asm.diff(expression,x)
+                let second = asm.diff(first,x)
+                let third = asm.diff(second,x)
+                context.print.t expression
+                context.print.t first
+                context.print.t second
+                context.print.t third
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
         |[| outputRoot |] ->
             let outputRoot = Path.GetFullPath(outputRoot)
             Directory.CreateDirectory(outputRoot) |> ignore
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLetDerivatives outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)
