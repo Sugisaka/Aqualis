@@ -7,7 +7,10 @@ module asm_random =
         /// Provides seed-setting and uniform random-number callbacks for generated code.
         member this.random (code:(((int1 -> unit) -> unit) * (double0 -> unit) -> unit)) =
             let context = this.Environment
-            let write line = context.codewritein(line + "\n")
+            let write line =
+                match context.Language with
+                | PHP -> context.codewritein("<?php ", line + " ?>")
+                | _ -> context.codewritein(line + "\n")
             let runWithSeed (seed:int1) initialize setSeedText randomText =
                 initialize()
                 let setseed seedCode =

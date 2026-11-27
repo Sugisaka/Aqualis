@@ -2571,6 +2571,21 @@ module Program =
                 realMatrix.farg child (fun a -> realRhs.farg child (fun b -> child.la.solve_simuleq(a,b))))
             c.writein "assert numpy.allclose(realRhs, [2, 3])")
 
+    let private generatePhpRandom outputRoot =
+        let directory = Path.Combine(outputRoot, "php-random")
+        Directory.CreateDirectory(directory) |> ignore
+        Compile [PHP] directory "smoke" "1.0" <| fun c ->
+            let sample = c.var.d0 "sample"
+            c.asm.random <| fun (_, getRandom) ->
+                getRandom sample
+                c.php.phpcode <| fun () ->
+                    c.writein "if (!isset($sample) || !is_finite($sample) || $sample < 0 || $sample > 1) { throw new RuntimeException('Invalid uniform sample'); }"
+            c.asm.random_normaldistribution <| fun (_, getNormal) ->
+                getNormal (D 3.0, D 2.0, sample)
+                c.php.phpcode <| fun () ->
+                    c.writein "if (!is_finite($sample)) { throw new RuntimeException('Invalid normal sample'); }"
+            c.php.echo "ok"
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2621,6 +2636,7 @@ module Program =
             generatePhpInitializedArrays outputRoot
             generatePhpJsonSchema outputRoot
             generatePhpLoopExit outputRoot
+            generatePhpRandom outputRoot
             generateFortranIntegerAbsBoundary outputRoot
             generateSplineValidation outputRoot ("c", C99) "non-finite-y"
             generateComplexSplineNonFinite outputRoot

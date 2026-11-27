@@ -1375,4 +1375,7 @@ done
 
 "$scipy_python" "$output_root/python-function-array-results/smoke.py"
 
+actual="$(php "$output_root/php-random/smoke.php")"
+[[ "$actual" == ok ]] || { printf 'Unexpected PHP random output: %s\n' "$actual" >&2; exit 1; }
+
 printf '%s\n' 'All generated-code runtime checks passed.'

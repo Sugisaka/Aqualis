@@ -275,6 +275,11 @@ module NumericFormattingTests =
             Assert.Contains("sqrt(-2", generated)
             Assert.DoesNotContain("sqrt(-log", generated)
             Assert.Equal(3, Regex.Matches(generated, Regex.Escape(randomCall)).Count)
+            if language = PHP then
+                for line in generated.Split('\n') do
+                    if line.Contains(randomCall) then
+                        Assert.StartsWith("<?php ", line.Trim())
+                        Assert.EndsWith(" ?>", line.Trim())
             let loopIndex = generated.IndexOf("while(", StringComparison.Ordinal)
             let logarithmIndex = generated.IndexOf("log(", StringComparison.Ordinal)
             Assert.True(loopIndex >= 0)
