@@ -40,3 +40,26 @@ inspection; use a dedicated directory rather than one containing other data.
 
 The existing `test` directory remains available for samples and manual
 verification. Automated assertions belong under `tests/`.
+
+## PHP version compatibility
+
+Generate the current smoke programs, then run the PHP-only checks on Linux
+(or WSL) with each PHP CLI executable:
+
+```bash
+dotnet run --project tests/Aqualis.GeneratedCodeSmoke/Aqualis.GeneratedCodeSmoke.fsproj --configuration Release -- /tmp/aqualis-generated
+python3 scripts/verify-php-compatibility.py /tmp/aqualis-generated --php /path/to/php
+```
+
+The checks require Python 3, Bash, curl, and PHP with JSON, PCRE, session,
+filter, and fileinfo support. They lint all generated PHP files, check numeric,
+array, control-flow and text results against expected values, and run the
+existing JSON schema and HTTP upload integration checks. PHP runs without
+`php.ini`, with all error levels enabled; warnings, notices and deprecations
+fail verification, including those logged by the HTTP server. Expected
+Aqualis exceptions in the five invalid-input cases are checked separately.
+Use ordinary Python execution, without `-O`, because the verifier uses assertions.
+
+See [PHP compatibility results](../docs/php-compatibility.md) for the tested
+versions and scope. Generated fixtures are modified by the JSON tests; use a
+dedicated output directory and run versions sequentially.
