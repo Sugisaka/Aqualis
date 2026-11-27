@@ -133,3 +133,36 @@ module ControlFlowGenerationTests =
 
         Assert.Contains("<?php print($value); ?>", generated)
         Assert.Contains("<?php print(\"a\\\"b\"); ?>", generated)
+
+    [<Fact>]
+    let ``named loop counters reject invalid and runtime names before their bodies`` () =
+        for language in [C99;Fortran;Python;JavaScript;PHP] do
+            let specific =
+                match language with
+                |Python -> ["numpy";"math";"class"]
+                |C99 -> ["for";"_private"]
+                |JavaScript -> ["Math";"for"]
+                |PHP -> ["GLOBALS";"$GLOBALS";"this"]
+                |_ -> []
+            for name in ["1invalid";"with space";"aqualis_reserved";"d0001";"arg01"] @ specific do
+                for empty in [false;true] do
+                    for earlyExit in [false;true] do
+                        use output = new TemporaryDirectory()
+                        let mutable bodyCalled = false
+                        Assert.Throws<System.ArgumentException>(fun () ->
+                            Compile [language] output.Path "invalid_counter" "1" (fun context ->
+                                let last = if empty then I -1 else I 1
+                                if earlyExit then context.iter.range_exit(name,I 0,last) (fun _ -> bodyCalled <- true)
+                                else context.iter.range(name,I 0,last) (fun _ -> bodyCalled <- true))) |> ignore
+                        Assert.False(bodyCalled)
+                        Assert.Empty(Directory.GetFileSystemEntries output.Path)
+
+    [<Fact>]
+    let ``valid named counters retain target specific identifier behavior`` () =
+        for language,names in [C99,["index"];Fortran,["index";"do"];Python,["index";"NumPy"];JavaScript,["index"];PHP,["index";"$index";"for"]] do
+            for name in names do
+                use output = new TemporaryDirectory()
+                Compile [language] output.Path "valid_counter" "1" (fun context ->
+                    context.iter.range(name,I 0,I 1) (fun i -> context.print.t i)
+                    context.iter.range_exit(name,I 0,I 1) (fun (exit,_) -> exit()))
+                Assert.NotEmpty(Directory.GetFileSystemEntries output.Path)

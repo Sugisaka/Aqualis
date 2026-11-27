@@ -9,6 +9,13 @@ namespace Aqualis
     /// Expression output operations for the selected output language.
     [<AutoOpen>]
     module exprEval =
+        /// Applies the same portable/runtime name rules as named numeric variables.
+        let private validateCounter (context:Aqualis) (counter:string option) =
+            counter |> Option.iter (fun name ->
+                let candidate =
+                    if context.Language = PHP && not (isNull name) && name.StartsWith("$") then name.Substring(1)
+                    else name
+                GeneratedIdentifier.validateVariable context.Language candidate)
         
         type expr with
             
@@ -105,6 +112,7 @@ namespace Aqualis
                 
             /// Emits an inclusive range loop for the selected output language.
             static member range (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                    validateCounter c counter
                     match c.language with
                     |Fortran -> expr.rangeF c counter i1 i2 code
                     |C99 -> expr.rangeC c counter i1 i2 code
@@ -119,6 +127,7 @@ namespace Aqualis
                 
             /// Emits an inclusive range loop with an exit action for the selected output language.
             static member range_exit (c:Aqualis) (counter:option<string>) (i1:expr) = fun (i2:expr) -> fun code ->
+                    validateCounter c counter
                     match c.language with
                     |Fortran -> expr.range_exitF c counter i1 i2 code
                     |C99 -> expr.range_exitC c counter i1 i2 code
