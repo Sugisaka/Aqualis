@@ -227,3 +227,16 @@ module FunctionSafetyTests =
         let source = File.ReadAllText(Path.Combine(output.Path,"fortran_allocate.f90"))
         Assert.Contains("allocatable :: arg01(:)", source)
         Assert.Contains("allocate(arg01", source)
+
+    [<Fact>]
+    let ``Python functions cannot replace imported modules or runtime helpers`` () =
+        for name in ["numpy";"math";"cmath";"copy";"re";"struct";"sys";"random_seed";"solve";"eig";"svd";"jv";"yn";"_aqualis_int_div";"_aqualis_int_power"] do
+            use output = new TemporaryDirectory()
+            let mutable bodyCalled = false
+            let error = Assert.Throws<ArgumentException>(fun () ->
+                Compile [Python] output.Path "reserved_function" "1" (fun context ->
+                    context.func name (fun _ -> bodyCalled <- true)))
+            Assert.Equal("functionName", error.ParamName)
+            Assert.Contains("reserved", error.Message)
+            Assert.False(bodyCalled)
+            Assert.Empty(Directory.GetFileSystemEntries output.Path)

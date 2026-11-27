@@ -47,22 +47,26 @@ module internal GeneratedIdentifier =
         if Set.contains name keywords then
             invalidArg argumentName $"'{name}' is a reserved {language} keyword."
 
+    /// Names used by generated runtime code, shared by variable and function checks.
+    let conflictsWithRuntime language (name:string) =
+        let comparison = if language = Fortran then StringComparison.OrdinalIgnoreCase else StringComparison.Ordinal
+        let internalName =
+            name.StartsWith("aqualis", comparison) || name.StartsWith("_aqualis", comparison) ||
+            Regex.IsMatch(name, @"\A(?:[idz][0-3]|[ctf]0)[0-9]{3,}\z", RegexOptions.IgnoreCase) ||
+            Regex.IsMatch(name, @"\Aarg[0-9]+(?:_size)?\z", RegexOptions.IgnoreCase)
+        let runtimeName =
+            match language with
+            | Python -> Set.contains name (set ["numpy"; "math"; "cmath"; "copy"; "re"; "struct"; "sys"; "random_seed"; "solve"; "eig"; "svd"; "jv"; "yn"])
+            | JavaScript -> Set.contains name (set ["Math"; "Number"; "Array"; "Error"; "Infinity"; "NaN"; "undefined"])
+            | PHP -> Set.contains name (set ["this"; "GLOBALS"; "_SERVER"; "_GET"; "_POST"; "_FILES"; "_COOKIE"; "_SESSION"; "_REQUEST"; "_ENV"])
+            | C99 -> name.StartsWith("_", StringComparison.Ordinal) || Set.contains name (set ["main"; "I"; "NULL"; "stdin"; "stdout"; "stderr"])
+            | _ -> false
+        internalName || runtimeName
+
     let validateVariable language (name:string) =
         match language with
         | C99 | Fortran | Python | JavaScript | PHP ->
             validate language "name" name
-            let comparison = if language = Fortran then StringComparison.OrdinalIgnoreCase else StringComparison.Ordinal
-            let internalName =
-                name.StartsWith("aqualis", comparison) || name.StartsWith("_aqualis", comparison) ||
-                Regex.IsMatch(name, @"\A(?:[idz][0-3]|[ctf]0)[0-9]{3,}\z", RegexOptions.IgnoreCase) ||
-                Regex.IsMatch(name, @"\Aarg[0-9]+(?:_size)?\z", RegexOptions.IgnoreCase)
-            let runtimeName =
-                match language with
-                | Python -> Set.contains name (set ["numpy"; "math"; "cmath"; "copy"; "re"; "struct"; "sys"; "random_seed"; "solve"; "eig"; "svd"; "jv"; "yn"])
-                | JavaScript -> Set.contains name (set ["Math"; "Number"; "Array"; "Error"; "Infinity"; "NaN"; "undefined"])
-                | PHP -> Set.contains name (set ["this"; "GLOBALS"; "_SERVER"; "_GET"; "_POST"; "_FILES"; "_COOKIE"; "_SESSION"; "_REQUEST"; "_ENV"])
-                | C99 -> name.StartsWith("_", StringComparison.Ordinal) || Set.contains name (set ["main"; "I"; "NULL"; "stdin"; "stdout"; "stderr"])
-                | _ -> false
-            if internalName || runtimeName then
+            if conflictsWithRuntime language name then
                 invalidArg "name" $"'{name}' conflicts with a name reserved by Aqualis or the target runtime."
         | _ -> ()
