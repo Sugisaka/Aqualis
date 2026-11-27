@@ -2795,6 +2795,73 @@ module Program =
                         spline.dp value value
                         context.print.t value
 
+    let private generateReducedSvd outputRoot (directoryName, language) =
+        let generate name body =
+            let directory = Path.Combine(outputRoot,"review-"+name+"-"+directoryName)
+            Directory.CreateDirectory(directory) |> ignore
+            Compile [language] directory "smoke" "1" body
+        generate "reduced-svd" <| fun context ->
+            for rows, columns in [3,2;2,3;2,2;1,3;3,1] do
+                let k = min rows columns
+                for alias in [false;true] do
+                    context.ch.d2 (I rows,I columns) <| fun matrix ->
+                    context.ch.d2 (I rows,I columns) <| fun original ->
+                    context.ch.d2 (I rows,I k) <| fun u ->
+                    context.ch.d2 (I k,I columns) <| fun vt ->
+                    context.ch.d1 (I k) <| fun singular ->
+                        for i in 0..rows-1 do
+                            for j in 0..columns-1 do matrix[i,j] <== double(1+i+2*j)
+                        original <== matrix
+                        let u = if alias && rows >= columns then matrix else u
+                        let vt = if alias && rows < columns then matrix else vt
+                        context.la.svdReduced matrix (u,singular,vt)
+                        context.ch.dd <| fun (error,value) ->
+                            error.clear()
+                            original.foreach <| fun (i,j) ->
+                                value.clear()
+                                context.iter.num k <| fun n -> value <== value+u[i,n]*singular[n]*vt[n,j]
+                                error <== error+asm.abs(value-original[i,j])
+                            context.print.t error
+                    context.ch.z2 (I rows,I columns) <| fun matrix ->
+                    context.ch.z2 (I rows,I columns) <| fun original ->
+                    context.ch.z2 (I rows,I k) <| fun u ->
+                    context.ch.z2 (I k,I columns) <| fun vt ->
+                    context.ch.d1 (I k) <| fun singular ->
+                        for i in 0..rows-1 do
+                            for j in 0..columns-1 do matrix[i,j] <== complex0(Cpx(double(1+i+2*j),double(i-j)))
+                        original <== matrix
+                        let u = if alias && rows >= columns then matrix else u
+                        let vt = if alias && rows < columns then matrix else vt
+                        context.la.svdReduced matrix (u,singular,vt)
+                        context.ch.d <| fun error ->
+                        context.ch.z <| fun value ->
+                            error.clear()
+                            original.foreach <| fun (i,j) ->
+                                value.clear()
+                                context.iter.num k <| fun n -> value <== value+u[i,n]*singular[n]*vt[n,j]
+                                error <== error+asm.abs(value-original[i,j])
+                            context.print.t error
+        generate "economy" <| fun context ->
+            for rows,columns in [100000,10;10,100000] do
+                context.ch.d2 (I rows,I columns) <| fun matrix ->
+                context.ch.d1 (I rows) <| fun rhs ->
+                    matrix.clear()
+                    rhs.clear()
+                    context.iter.num 10 <| fun i -> matrix[i,i] <== 1.0; rhs[i] <== 1.0
+                    context.la.solve_simuleq_tt(matrix,rhs,0.0) <| fun solution ->
+                        context.print.t solution[0]
+                        context.print.t solution[9]
+                        context.print.t solution[columns-1]
+                context.ch.z2 (I rows,I columns) <| fun matrix ->
+                context.ch.z1 (I rows) <| fun rhs ->
+                    matrix.clear()
+                    rhs.clear()
+                    context.iter.num 10 <| fun i -> matrix[i,i] <== 1.0; rhs[i] <== complex0(Cpx(1.0,1.0))
+                    context.la.solve_simuleq_tt(matrix,rhs,0.0) <| fun solution ->
+                        context.print.t solution[0].re
+                        context.print.t solution[9].im
+                        context.print.t solution[columns-1].re
+
     [<EntryPoint>]
     let main arguments =
         match arguments with
@@ -2805,6 +2872,7 @@ module Program =
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateScaledTikhonov outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateLinearAliasing outputRoot)
             ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateSplineAliasing outputRoot)
+            ["c", C99; "fortran", Fortran; "python", Python] |> List.iter (generateReducedSvd outputRoot)
             generationTargets |> List.iter (generate outputRoot)
             generationTargets |> List.iter (generateLogicalRegressionCases outputRoot)
             generationTargets |> List.iter (generateFrozenLoopBounds outputRoot)

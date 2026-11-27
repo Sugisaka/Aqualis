@@ -10,36 +10,37 @@ namespace Aqualis
     [<AutoOpen>]
     module ContextLaSvdExtensions =
         /// Validates input and output shapes for singular-value decomposition.
-        let private requireSvdShapes (context:Aqualis) (rows:int0) (columns:int0)
+        let private requireSvdShapes (context:Aqualis) economy (rows:int0) (columns:int0)
                                      (uRows:int0) (uColumns:int0) (singularCount:int0)
                                      (vtRows:int0) (vtColumns:int0) =
             match context.language with
             | C99 | Fortran | Python ->
                 LapackValidation.require context (rows .<= 0) "LAPACK SVD matrix rows must be positive."
                 LapackValidation.require context (columns .<= 0) "LAPACK SVD matrix columns must be positive."
-                LapackValidation.require context (uRows .=/ rows) "LAPACK SVD U shape is invalid."
-                LapackValidation.require context (uColumns .=/ rows) "LAPACK SVD U shape is invalid."
-                LapackValidation.require context (vtRows .=/ columns) "LAPACK SVD VT shape is invalid."
-                LapackValidation.require context (vtColumns .=/ columns) "LAPACK SVD VT shape is invalid."
                 context.ch.i <| fun expected ->
                     context.br.if2 (rows .< columns) (fun () -> expected <== rows) (fun () -> expected <== columns)
+                    LapackValidation.require context (uRows .=/ rows) "LAPACK SVD U shape is invalid."
+                    LapackValidation.require context (uColumns .=/ (if economy then expected else rows)) "LAPACK SVD U shape is invalid."
+                    LapackValidation.require context (vtRows .=/ (if economy then expected else columns)) "LAPACK SVD VT shape is invalid."
+                    LapackValidation.require context (vtColumns .=/ columns) "LAPACK SVD VT shape is invalid."
                     LapackValidation.require context (singularCount .=/ expected) "LAPACK SVD singular-value count is invalid."
             | _ -> ()
 
         /// LAPACK-backed linear algebra operations for an Aqualis context.
         type ContextLa with
-            /// <summary>Computes the full SVD of a complex matrix: A = U * S * V^H.</summary>
+            /// <summary>Computes a full or reduced SVD of a complex matrix: A = U * S * V^H.</summary>
             /// <param name="mat1">Complex input matrix.</param>
             /// <param name="u">Output matrix of left singular vectors.</param>
             /// <param name="s">Output vector of singular values.</param>
             /// <param name="vt">Output conjugate-transpose of the right singular vectors.</param>
-            member this.svd (mat1:complex2) = fun (u:complex2,s:double1,vt:complex2) ->
+            member private this.svdCore (mat1:complex2,economy:bool) = fun (u:complex2,s:double1,vt:complex2) ->
+                let job = if economy then "S" else "A"
                 LapackValidation.requireBackend this.GenerationContext "LAPACK SVD"
                 if u.code = vt.code then
                     invalidArg (nameof vt) "LAPACK SVD U and VT must be different matrices."
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
-                requireSvdShapes this.GenerationContext mat1.size1 mat1.size2 u.size1 u.size2 s.size1 vt.size1 vt.size2
+                requireSvdShapes this.GenerationContext economy mat1.size1 mat1.size2 u.size1 u.size2 s.size1 vt.size1 vt.size2
                 let calculate (source:complex2) =
                     match this.GenerationContext.language with
                     |LaTeX ->
@@ -49,7 +50,7 @@ namespace Aqualis
                     |Python ->
                         this.RequirePythonLinalg "svd"
                         //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                        this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
+                        this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+(if economy then ", full_matrices=False" else "")+")"+"\n")
                     |_ ->
                         this.GenerationContext.group.section "非対称複素行列の特異値分解" <| fun () ->
                             s.clear()
@@ -68,12 +69,12 @@ namespace Aqualis
                                         this.GenerationContext.ch.d1 (5*ns) <| fun rwork ->
                                             lda <== m
                                             ldu <== u.size1
-                                            ldvt <== vt.size2
+                                            ldvt <== vt.size1
                                             lwork <== -1
                                             work.allocate 1
                                             this.GenerationContext.codewritein("call zgesvd("+
-                                                "'A', "+
-                                                "'A', " +
+                                                ("'"+job+"', ")+
+                                                ("'"+job+"', ") +
                                                 m.code + ", " +
                                                 n.code + ", " +
                                                 source.code + ", " +
@@ -92,8 +93,8 @@ namespace Aqualis
                                             work.deallocate()
                                             work.allocate lwork
                                             this.GenerationContext.codewritein("call zgesvd("+
-                                                "'A', "+
-                                                "'A', " +
+                                                ("'"+job+"', ")+
+                                                ("'"+job+"', ") +
                                                 m.code + ", " +
                                                 n.code + ", " +
                                                 source.code + ", " +
@@ -126,11 +127,11 @@ namespace Aqualis
                                             |Var(_,jobu,_),Var(_,jobv,_) ->
                                                 lda <== m
                                                 ldu <== u.size1
-                                                ldvt <== vt.size2
+                                                ldvt <== vt.size1
                                                 lwork <== -1
                                                 this.GenerationContext.elist.add "void zgesvd_(char *, char *, int *, int *, double complex *, int *, double *, double complex *, int *, double complex *, int *, double complex *, int *, double *, int *)"
-                                                this.GenerationContext.codewritein(jobu + " = 'A';")
-                                                this.GenerationContext.codewritein(jobv + " = 'A';")
+                                                this.GenerationContext.codewritein(jobu + " = '"+job+"';")
+                                                this.GenerationContext.codewritein(jobv + " = '"+job+"';")
                                                 this.GenerationContext.codewritein("zgesvd_(" +
                                                     "&" + jobu + ", " +
                                                     "&" + jobv + ", " +
@@ -172,7 +173,7 @@ namespace Aqualis
                             |Python ->
                                 this.RequirePythonLinalg "svd"
                                 //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                                this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
+                                this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+(if economy then ", full_matrices=False" else "")+")"+"\n")
                             |_ ->
                                 ()
     
@@ -182,18 +183,19 @@ namespace Aqualis
                         source <== mat1
                         calculate source
                 | _ -> calculate mat1
-            /// <summary>Computes the full SVD of a real matrix: A = U * S * V^T.</summary>
+            /// <summary>Computes a full or reduced SVD of a real matrix: A = U * S * V^T.</summary>
             /// <param name="mat1">Real input matrix.</param>
             /// <param name="u">Output matrix of left singular vectors.</param>
             /// <param name="s">Output vector of singular values.</param>
             /// <param name="vt">Output transpose of the right singular vectors.</param>
-            member this.svd (mat1:double2) = fun (u:double2,s:double1,vt:double2) ->
+            member private this.svdCore (mat1:double2,economy:bool) = fun (u:double2,s:double1,vt:double2) ->
+                let job = if economy then "S" else "A"
                 LapackValidation.requireBackend this.GenerationContext "LAPACK SVD"
                 if u.code = vt.code then
                     invalidArg (nameof vt) "LAPACK SVD U and VT must be different matrices."
                 this.GenerationContext.olist.add "-llapack"
                 this.GenerationContext.olist.add "-lblas"
-                requireSvdShapes this.GenerationContext mat1.size1 mat1.size2 u.size1 u.size2 s.size1 vt.size1 vt.size2
+                requireSvdShapes this.GenerationContext economy mat1.size1 mat1.size2 u.size1 u.size2 s.size1 vt.size1 vt.size2
                 let calculate (source:double2) =
                     match this.GenerationContext.language with
                     |LaTeX ->
@@ -203,7 +205,7 @@ namespace Aqualis
                     |Python ->
                         this.RequirePythonLinalg "svd"
                         //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                        this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
+                        this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+(if economy then ", full_matrices=False" else "")+")"+"\n")
                     |_ ->
                         this.GenerationContext.group.section "非対称実行列の特異値分解" <| fun () ->
                             s.clear()
@@ -219,12 +221,12 @@ namespace Aqualis
                                         this.GenerationContext.ch.d01 <| fun work ->
                                             lda <== m
                                             ldu <== u.size1
-                                            ldvt <== vt.size2
+                                            ldvt <== vt.size1
                                             lwork <== -1
                                             work.allocate 1
                                             this.GenerationContext.codewritein("call dgesvd("+
-                                                "'A', "+
-                                                "'A', " +
+                                                ("'"+job+"', ")+
+                                                ("'"+job+"', ") +
                                                 m.code + ", " +
                                                 n.code + ", " +
                                                 source.code + ", " +
@@ -242,8 +244,8 @@ namespace Aqualis
                                             work.deallocate()
                                             work.allocate lwork
                                             this.GenerationContext.codewritein("call dgesvd("+
-                                                "'A', "+
-                                                "'A', " +
+                                                ("'"+job+"', ")+
+                                                ("'"+job+"', ") +
                                                 m.code + ", " +
                                                 n.code + ", " +
                                                 source.code + ", " +
@@ -271,10 +273,10 @@ namespace Aqualis
                                             |Var(_,jobu,_),Var(_,jobv,_) ->
                                                 lda <== m
                                                 ldu <== u.size1
-                                                ldvt <== vt.size2
+                                                ldvt <== vt.size1
                                                 this.GenerationContext.elist.add "void dgesvd_(char *, char *, int *, int *, double *, int *, double *, double *, int *, double *, int *, double *, int *, int *)"
-                                                this.GenerationContext.codewritein(jobu + " = 'A';")
-                                                this.GenerationContext.codewritein(jobv + " = 'A';")
+                                                this.GenerationContext.codewritein(jobu + " = '"+job+"';")
+                                                this.GenerationContext.codewritein(jobv + " = '"+job+"';")
                                                 lwork <== -1
                                                 work.allocate 1
                                                 this.GenerationContext.codewritein("dgesvd_(" +
@@ -317,7 +319,7 @@ namespace Aqualis
                             |Python ->
                                 this.RequirePythonLinalg "svd"
                                 //左特異ベクトルu.code、特異値s.code、右特異ベクトルvt.codeを求める
-                                this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+")"+"\n")
+                                this.GenerationContext.codewritein(u.code+"[...],"+s.code+"[...],"+vt.code+"[...] = svd("+source.code+(if economy then ", full_matrices=False" else "")+")"+"\n")
                             |_ ->
                                 ()
                 match this.GenerationContext.language with
@@ -326,3 +328,15 @@ namespace Aqualis
                         source <== mat1
                         calculate source
                 | _ -> calculate mat1
+            /// Computes full complex SVD; U is m by m and VT is n by n.
+            member this.svd (matrix:complex2) = fun (u:complex2,s:double1,vt:complex2) ->
+                this.svdCore(matrix,false) (u,s,vt)
+            /// Computes full real SVD; U is m by m and VT is n by n.
+            member this.svd (matrix:double2) = fun (u:double2,s:double1,vt:double2) ->
+                this.svdCore(matrix,false) (u,s,vt)
+            /// Computes reduced complex SVD with k=min(m,n): U is m by k and VT is k by n.
+            member this.svdReduced (matrix:complex2) = fun (u:complex2,s:double1,vt:complex2) ->
+                this.svdCore(matrix,true) (u,s,vt)
+            /// Computes reduced real SVD with k=min(m,n): U is m by k and VT is k by n.
+            member this.svdReduced (matrix:double2) = fun (u:double2,s:double1,vt:double2) ->
+                this.svdCore(matrix,true) (u,s,vt)

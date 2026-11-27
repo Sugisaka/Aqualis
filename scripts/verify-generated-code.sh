@@ -1436,5 +1436,7 @@ bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" svd-scaling
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" linear-alias
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-alias-real
 bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" spline-alias-complex
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" reduced-svd
+bash "$(dirname "$0")/verify-review-regressions.sh" "$output_root" economy
 
 printf '%s\n' 'All generated-code runtime checks passed.'

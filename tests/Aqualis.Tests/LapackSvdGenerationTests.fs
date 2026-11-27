@@ -20,6 +20,8 @@ module LapackSvdGenerationTests =
                     Assert.Throws<ArgumentException>(fun () ->
                         context.la.svd realInput (realOutput, realSingular, realOutput))
                 Assert.Contains("U and VT must be different matrices", realError.Message)
+                let reducedRealError = Assert.Throws<ArgumentException>(fun () -> context.la.svdReduced realInput (realOutput,realSingular,realOutput))
+                Assert.Contains("U and VT must be different matrices", reducedRealError.Message)
 
                 let complexInput = context.var.z2 "complexInput"
                 let complexOutput = context.var.z2 "complexOutput"
@@ -31,3 +33,5 @@ module LapackSvdGenerationTests =
                     Assert.Throws<ArgumentException>(fun () ->
                         context.la.svd complexInput (complexOutput, complexSingular, complexOutput))
                 Assert.Contains("U and VT must be different matrices", complexError.Message)
+                let reducedComplexError = Assert.Throws<ArgumentException>(fun () -> context.la.svdReduced complexInput (complexOutput,complexSingular,complexOutput))
+                Assert.Contains("U and VT must be different matrices", reducedComplexError.Message)

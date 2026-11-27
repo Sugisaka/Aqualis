@@ -7,14 +7,21 @@ for language in c fortran python; do
   case "$language" in
     c) command=(bash proc_smoke_C.sh) ;;
     fortran) command=(bash proc_smoke_F.sh) ;;
-    python) command=(python3 smoke.py) ;;
+    python) command=("${AQUALIS_SCIPY_PYTHON:-python3}" smoke.py) ;;
   esac
-  actual="$(cd "$directory" && "${command[@]}")"
+  if [[ "$regression" == economy ]]; then
+    # Bound memory so a regression to full SVD fails instead of exhausting RAM.
+    actual="$(export OPENBLAS_NUM_THREADS=1; ulimit -v 1048576; cd "$directory" && "${command[@]}")"
+  else
+    actual="$(cd "$directory" && "${command[@]}")"
+  fi
   python3 - "$regression" "$actual" <<'PY'
 import sys
 import numpy as np
 case, output = sys.argv[1:]
 expected = {
+    'reduced-svd': [0]*20,
+    'economy': [1]*6+[1,1,0]*2,
     'derivatives': [9,6,2,0,81,108,108,72,9,6,2,0],
     'svd-scaling': [1]*12+[0]*3+[1]*3,
     'linear-alias': [1,1,1,1,2,1,2,1,4,1,4,1],

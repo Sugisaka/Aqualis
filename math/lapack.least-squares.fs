@@ -84,13 +84,13 @@ namespace Aqualis
                         (fun () -> count <== matrix.size1)
                         (fun () -> count <== matrix.size2)
                     context.ch.d2 (matrix.size1,matrix.size2) <| fun source ->
-                    context.ch.d2 (matrix.size1,matrix.size1) <| fun u ->
-                    context.ch.d2 (matrix.size2,matrix.size2) <| fun vt ->
+                    context.ch.d2 (matrix.size1,count) <| fun u ->
+                    context.ch.d2 (count,matrix.size2) <| fun vt ->
                     context.ch.d1 count <| fun singular ->
                     context.ch.d1 matrix.size2 <| fun solution ->
                         // Native SVD overwrites its input; preserve the caller's matrix.
                         source <== matrix
-                        la.svd source (u,singular,vt)
+                        la.svdReduced source (u,singular,vt)
                         solution.clear()
                         context.iter.num count <| fun k ->
                             requireFiniteTikhonovValue context singular[k]
@@ -130,13 +130,13 @@ namespace Aqualis
                         (fun () -> count <== matrix.size1)
                         (fun () -> count <== matrix.size2)
                     context.ch.z2 (matrix.size1,matrix.size2) <| fun source ->
-                    context.ch.z2 (matrix.size1,matrix.size1) <| fun u ->
-                    context.ch.z2 (matrix.size2,matrix.size2) <| fun vt ->
+                    context.ch.z2 (matrix.size1,count) <| fun u ->
+                    context.ch.z2 (count,matrix.size2) <| fun vt ->
                     context.ch.d1 count <| fun singular ->
                     context.ch.z1 matrix.size2 <| fun solution ->
                         // Native SVD overwrites its input; preserve the caller's matrix.
                         source <== matrix
-                        la.svd source (u,singular,vt)
+                        la.svdReduced source (u,singular,vt)
                         solution.clear()
                         context.iter.num count <| fun k ->
                             requireFiniteTikhonovValue context singular[k]

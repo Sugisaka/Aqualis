@@ -170,8 +170,10 @@ constant or runtime `double0` parameter appropriate for the data scale.
 The parameter must be finite and nonnegative. Zero selects the numerical
 pseudoinverse, discarding singular values at or below
 `machine epsilon * (rows + columns) * largest singular value`.
-The current implementation uses full SVD matrices, so its temporary storage
-includes `rows * rows` and `columns * columns` elements.
+The implementation uses reduced SVD matrices. With `k = min(rows, columns)`, their
+sizes are `rows * k` and `k * columns`; it does not allocate the full square
+singular-vector matrices. `svdReduced` exposes the same reduced decomposition;
+the existing `svd` method continues to return full matrices.
 
 ## Spline setup
 
